@@ -390,8 +390,35 @@ wss.on('connection', (visitorWs) => {
           broadcast({ type: 'player.move', id: visitorId, x: v.x, y: v.y, dir: v.dir, floor: v.floor, name: v.name, skin: v.skin }, visitorId);
         }
       }
-      else if (msg.type === 'player.interact') {
-        // Future: broadcast interactions
+      else if (msg.type === 'player.swing') {
+        // Broadcast swing to all other players
+        const v = visitors.get(visitorId);
+        if (!v) return;
+        broadcast({ type: 'player.swing', id: visitorId, saber: msg.saber, x: v.x, y: v.y, dir: msg.dir, floor: v.floor }, visitorId);
+        
+        // Check for clash: any other player swinging nearby on same floor?
+        for (const [otherId, other] of visitors) {
+          if (otherId === visitorId) continue;
+          if (other.floor !== v.floor) continue;
+          if (!other.saber) continue;
+          const dist = Math.hypot(v.x - other.x, v.y - other.y);
+          if (dist < 60 && other.lastSwing && Date.now() - other.lastSwing < 800) {
+            // CLASH! Broadcast to everyone
+            const cx = (v.x + other.x) / 2, cy = (v.y + other.y) / 2;
+            const clashMsg = { type: 'saber.clash', x: cx, y: cy, floor: v.floor, players: [visitorId, otherId], sabers: [msg.saber, other.saber] };
+            for (const [id2, v2] of visitors) {
+              if (v2.ws.readyState === WebSocket.OPEN) v2.ws.send(JSON.stringify(clashMsg));
+            }
+          }
+        }
+        v.saber = msg.saber;
+        v.lastSwing = Date.now();
+      }
+      else if (msg.type === 'player.saber') {
+        // Track which saber a player is holding
+        const v = visitors.get(visitorId);
+        if (v) { v.saber = msg.saber || null; }
+        broadcast({ type: 'player.saber', id: visitorId, saber: msg.saber }, visitorId);
       }
     } catch {}
   });
