@@ -1573,6 +1573,15 @@ function drawSprite(cx,x,y,grid,scale=3){
   for(let r=0;r<grid.length;r++){const row=grid[r];for(let c=0;c<row.length;c++){if(row[c]){cx.fillStyle=row[c];cx.fillRect(x+c*scale,y+r*scale,scale,scale)}}}
 }
 
+// HD Accessory attachment points for 16×24 sprites
+const HD_ATTACH = {
+  hat: {x: 8, y: 0},
+  watch: {x: 2, y: 14},
+  shoes: {x: 4, y: 21},
+  chain: {x: 5, y: 10},
+  back: {x: 8, y: 8},
+};
+
 function getEchoSprite(skin,dir,frame){
   const sk=SKINS.find(s=>s.id===skin)||SKINS[0];
   const bc=sk.color,ac=sk.accent,_='#f0c8a0',E='#222',P=bc,A=ac,B='#2a2a4a',SH='#4a3020',T=0;
@@ -1585,18 +1594,109 @@ function getEchoSprite(skin,dir,frame){
   if(skin==='hulk'){head='#30a040';body='#30a040';gem='#208030';belt='#5a2a6a';pants='#5a2a6a';shoe='#3a2a1a';hi='#50c060';sh='#1a6020'}
   if(skin==='ironsuit'){head='#cc2020';body='#cc8800';gem='#00ddff';belt='#cc8800';pants='#cc2020';shoe='#cc2020';hi='#eea020';sh='#885500'}
   let grid;
+  const N='#c07060'; // nose color
   if(dir===0){
-    grid=[[T,T,hi,hi,hi,hi,T,T],[T,hi,body,body,body,body,sh,T],[T,head,head,head,head,head,head,T],[T,head,eyeL,head,head,eyeR,head,T],[T,head,head,'#c07060',head,head,head,T],[T,T,head,head,head,head,T,T],[T,hi,body,gem,gem,body,sh,T],[hi,body,body,body,body,body,body,sh],[body,body,body,belt,belt,body,body,body],[T,T,pants,pants,T,pants,pants,T],[T,T,pants,pants,T,pants,pants,T],[T,shoe,shoe,shoe,T,shoe,shoe,shoe]];
-    if(skin==='spider'){grid[3]=[T,'#c02020','#fff','#fff','#fff','#fff','#c02020',T];grid[4]=[T,'#c02020','#fff','#222','#222','#fff','#c02020',T]}
-    if(skin==='darkknight'){grid[0]=[T,body,T,body,body,T,body,T]}
+    grid=[
+      [T,T,T,T,hi,hi,hi,hi,hi,hi,T,T,T,T,T,T],
+      [T,T,T,hi,hi,body,body,body,body,hi,sh,T,T,T,T,T],
+      [T,T,hi,body,body,body,body,body,body,body,sh,T,T,T,T,T],
+      [T,T,T,head,head,head,head,head,head,head,head,T,T,T,T,T],
+      [T,T,head,head,head,head,head,head,head,head,head,head,T,T,T,T],
+      [T,T,head,head,head,head,head,head,head,head,head,head,T,T,T,T],
+      [T,T,head,head,eyeL,eyeL,head,head,eyeR,eyeR,head,head,T,T,T,T],
+      [T,T,head,head,head,head,head,head,head,head,head,head,T,T,T,T],
+      [T,T,T,head,head,head,N,N,head,head,head,T,T,T,T,T],
+      [T,T,T,T,head,head,head,head,head,head,T,T,T,T,T,T],
+      [T,T,T,hi,body,body,gem,gem,body,body,sh,T,T,T,T,T],
+      [T,T,hi,body,body,body,gem,gem,body,body,body,sh,T,T,T,T],
+      [T,hi,body,body,body,body,body,body,body,body,body,body,sh,T,T,T],
+      [T,hi,body,body,body,body,body,body,body,body,body,body,sh,T,T,T],
+      [T,T,body,body,body,body,belt,belt,body,body,body,body,T,T,T,T],
+      [T,T,body,body,body,belt,belt,belt,belt,body,body,body,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,pants,pants,pants,T,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,pants,pants,pants,T,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,pants,pants,pants,T,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,pants,pants,pants,T,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,pants,pants,pants,T,T,T,T,T],
+      [T,T,T,shoe,shoe,shoe,shoe,T,shoe,shoe,shoe,shoe,T,T,T,T],
+      [T,T,T,shoe,shoe,shoe,shoe,T,shoe,shoe,shoe,shoe,T,T,T,T],
+      [T,T,T,shoe,shoe,shoe,shoe,T,shoe,shoe,shoe,shoe,T,T,T,T],
+    ];
+    if(skin==='spider'){grid[6]=[T,T,head,head,'#fff','#fff','#fff','#fff','#fff','#fff',head,head,T,T,T,T];grid[7]=[T,T,head,'#fff','#fff',E,E,'#fff','#fff',E,E,head,T,T,T,T]}
+    if(skin==='darkknight'){grid[0]=[T,T,T,body,T,body,body,body,body,T,body,T,T,T,T,T];grid[1]=[T,T,body,body,hi,body,body,body,body,hi,body,body,T,T,T,T]}
   }else if(dir===3){
-    grid=[[T,T,body,body,body,body,T,T],[T,body,body,body,body,body,body,T],[T,body,body,body,body,body,body,T],[T,body,body,body,body,body,body,T],[T,body,body,body,body,body,body,T],[T,T,body,body,body,body,T,T],[T,body,body,body,body,body,body,T],[body,body,body,body,body,body,body,body],[body,body,body,belt,belt,body,body,body],[T,T,pants,pants,T,pants,pants,T],[T,T,pants,pants,T,pants,pants,T],[T,shoe,shoe,shoe,T,shoe,shoe,shoe]];
-    if(skin==='classic'||skin==='darkknight'){const cape=skin==='darkknight'?'#222':'#6a2a8a';grid[6]=[T,cape,cape,cape,cape,cape,cape,T];grid[7]=[cape,cape,cape,cape,cape,cape,cape,cape]}
+    grid=[
+      [T,T,T,T,body,body,body,body,body,body,T,T,T,T,T,T],
+      [T,T,T,body,body,body,body,body,body,body,body,T,T,T,T,T],
+      [T,T,body,body,body,body,body,body,body,body,body,body,T,T,T,T],
+      [T,T,T,body,body,body,body,body,body,body,body,T,T,T,T,T],
+      [T,T,body,body,body,body,body,body,body,body,body,body,T,T,T,T],
+      [T,T,body,body,body,body,body,body,body,body,body,body,T,T,T,T],
+      [T,T,body,body,body,body,body,body,body,body,body,body,T,T,T,T],
+      [T,T,body,body,body,body,body,body,body,body,body,body,T,T,T,T],
+      [T,T,T,body,body,body,body,body,body,body,body,T,T,T,T,T],
+      [T,T,T,T,body,body,body,body,body,body,T,T,T,T,T,T],
+      [T,T,T,body,body,body,body,body,body,body,body,T,T,T,T,T],
+      [T,T,body,body,body,body,body,body,body,body,body,body,T,T,T,T],
+      [T,body,body,body,body,body,body,body,body,body,body,body,body,T,T,T],
+      [T,body,body,body,body,body,body,body,body,body,body,body,body,T,T,T],
+      [T,T,body,body,body,body,belt,belt,body,body,body,body,T,T,T,T],
+      [T,T,body,body,body,belt,belt,belt,belt,body,body,body,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,pants,pants,pants,T,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,pants,pants,pants,T,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,pants,pants,pants,T,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,pants,pants,pants,T,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,pants,pants,pants,T,T,T,T,T],
+      [T,T,T,shoe,shoe,shoe,shoe,T,shoe,shoe,shoe,shoe,T,T,T,T],
+      [T,T,T,shoe,shoe,shoe,shoe,T,shoe,shoe,shoe,shoe,T,T,T,T],
+      [T,T,T,shoe,shoe,shoe,shoe,T,shoe,shoe,shoe,shoe,T,T,T,T],
+    ];
+    if(skin==='classic'||skin==='darkknight'){const cape=skin==='darkknight'?'#222':'#6a2a8a';grid[11]=[T,cape,cape,body,body,body,body,body,body,body,body,cape,cape,T,T,T];grid[12]=[cape,cape,cape,body,body,body,body,body,body,body,body,cape,cape,cape,T,T];grid[13]=[cape,cape,cape,body,body,body,body,body,body,body,body,cape,cape,cape,T,T]}
   }else{
-    grid=[[T,T,body,body,body,T,T,T],[T,body,body,body,body,body,T,T],[T,head,head,head,head,T,T,T],[T,head,eyeL,head,head,T,T,T],[T,head,'#c07060',head,T,T,T,T],[T,T,head,head,T,T,T,T],[T,body,body,gem,body,T,T,T],[body,body,body,body,body,body,T,T],[T,body,body,belt,body,T,T,T],[T,T,pants,pants,T,T,T,T],[T,T,pants,pants,T,T,T,T],[T,shoe,shoe,shoe,T,T,T,T]];
+    grid=[
+      [T,T,T,T,body,body,body,body,T,T,T,T,T,T,T,T],
+      [T,T,T,body,body,body,body,body,body,T,T,T,T,T,T,T],
+      [T,T,body,body,body,body,body,body,body,T,T,T,T,T,T,T],
+      [T,T,T,head,head,head,head,head,T,T,T,T,T,T,T,T],
+      [T,T,head,head,head,head,head,head,T,T,T,T,T,T,T,T],
+      [T,T,head,head,head,head,head,head,T,T,T,T,T,T,T,T],
+      [T,T,head,head,eyeL,eyeL,head,head,T,T,T,T,T,T,T,T],
+      [T,T,head,head,head,head,head,T,T,T,T,T,T,T,T,T],
+      [T,T,T,head,head,N,head,T,T,T,T,T,T,T,T,T],
+      [T,T,T,T,head,head,head,T,T,T,T,T,T,T,T,T],
+      [T,T,T,body,body,gem,body,body,T,T,T,T,T,T,T,T],
+      [T,T,body,body,body,body,body,body,body,T,T,T,T,T,T,T],
+      [T,body,body,body,body,body,body,body,body,T,T,T,T,T,T,T],
+      [T,body,body,body,body,body,body,body,T,T,T,T,T,T,T,T],
+      [T,T,body,body,body,belt,body,T,T,T,T,T,T,T,T,T],
+      [T,T,body,body,belt,belt,body,T,T,T,T,T,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,T,T,T,T,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,T,T,T,T,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,T,T,T,T,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,T,T,T,T,T,T,T,T],
+      [T,T,T,T,pants,pants,pants,T,T,T,T,T,T,T,T,T],
+      [T,T,T,shoe,shoe,shoe,shoe,T,T,T,T,T,T,T,T,T],
+      [T,T,T,shoe,shoe,shoe,shoe,T,T,T,T,T,T,T,T,T],
+      [T,T,T,shoe,shoe,shoe,shoe,T,T,T,T,T,T,T,T,T],
+    ];
     if(dir===2)grid=grid.map(r=>[...r].reverse());
   }
-  if(frame===1&&grid.length>=12){if(dir===0||dir===3){grid[10]=[T,pants,pants,T,T,T,pants,pants];grid[11]=[shoe,shoe,T,T,T,T,shoe,shoe]}else{grid[10]=[T,pants,T,pants,T,T,T,T];grid[11]=[shoe,T,T,shoe,T,T,T,T];if(dir===2){grid[10]=[...grid[10]].reverse();grid[11]=[...grid[11]].reverse()}}}
+  if(frame===1&&grid.length>=24){
+    if(dir===0||dir===3){
+      grid[19]=[T,T,T,T,pants,pants,T,T,T,T,pants,pants,T,T,T,T];
+      grid[20]=[T,T,T,pants,pants,T,T,T,T,T,T,pants,pants,T,T,T];
+      grid[21]=[T,T,shoe,shoe,shoe,T,T,T,T,T,shoe,shoe,shoe,T,T,T];
+      grid[22]=[T,T,shoe,shoe,T,T,T,T,T,T,T,shoe,shoe,T,T,T];
+      grid[23]=[T,T,shoe,shoe,T,T,T,T,T,T,T,shoe,shoe,T,T,T];
+    }else{
+      grid[19]=[T,T,T,T,pants,T,pants,T,T,T,T,T,T,T,T,T];
+      grid[20]=[T,T,T,pants,T,T,T,pants,T,T,T,T,T,T,T,T];
+      grid[21]=[T,T,shoe,shoe,T,T,shoe,shoe,T,T,T,T,T,T,T,T];
+      grid[22]=[T,T,shoe,T,T,T,T,shoe,T,T,T,T,T,T,T,T];
+      grid[23]=[T,T,shoe,T,T,T,T,shoe,T,T,T,T,T,T,T,T];
+      if(dir===2){grid[19]=[...grid[19]].reverse();grid[20]=[...grid[20]].reverse();grid[21]=[...grid[21]].reverse();grid[22]=[...grid[22]].reverse();grid[23]=[...grid[23]].reverse()}
+    }
+  }
   return grid;
 }
 
