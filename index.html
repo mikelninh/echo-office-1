@@ -2089,7 +2089,20 @@ function swingSaber(){
       // Smug — Pixel just sits there, maybe purrs
       for(let i=0;i<5;i++)S.floatTexts.push({text:'😼',x:S.pixel.x-5+Math.random()*10,y:S.pixel.y-20-Math.random()*15,color:'#c080ff',life:40});
     }
-    addChatMsg('Pixel','You DARE swing that thing near me?! 😾','#c080ff');
+    // Pixel fights back — FORCE PUSH the player!
+    const pushDist=80+Math.random()*60;
+    const dx=S.visitor.x-S.pixel.x,dy=S.visitor.y-S.pixel.y;
+    const dist=Math.hypot(dx,dy)||1;
+    const pushX=S.visitor.x+(dx/dist)*pushDist,pushY=S.visitor.y+(dy/dist)*pushDist;
+    S.visitor.x=Math.max(30,Math.min(W-30,pushX));
+    S.visitor.y=Math.max(80,Math.min(H-30,pushY));
+    S.screenShake=5;
+    // Force push wave effect
+    for(let i=0;i<20;i++){const a=Math.atan2(dy,dx)+((Math.random()-.5)*.8);const sp=3+Math.random()*5;S.particles.push({x:S.pixel.x+(dx/dist)*15,y:S.pixel.y-5+(dy/dist)*15,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:20,color:'#c080ff',size:2+Math.random()*3})}
+    // Shockwave ring
+    for(let i=0;i<12;i++){const a=i/12*Math.PI*2;S.particles.push({x:S.pixel.x+Math.cos(a)*8,y:S.pixel.y-5+Math.sin(a)*8,vx:Math.cos(a)*4,vy:Math.sin(a)*4,life:15,color:'#ffd700',size:1.5})}
+    const chatLines=["You DARE swing that thing near me?! 😾","*FORCE PUSH* Get back, human! 🐱‍👤","I didn't survive 9 lives to be threatened by a glow stick! 😼","*activates crystal collar* You have NO idea what I am. ✨","Foolish mortal. I AM the Force. 🔮"];
+    addChatMsg('Pixel',chatLines[Math.random()*chatLines.length|0],'#c080ff');
   }
   Coins.earn(1,'swing');
 }
