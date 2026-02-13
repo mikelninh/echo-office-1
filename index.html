@@ -57,7 +57,9 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 #elevator-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:7000;align-items:center;justify-content:center}
 #elevator-overlay.show{display:flex}
 .floor-btn{display:block;width:220px;padding:12px 18px;margin:6px auto;background:#1a1a2e;border:2px solid #555;border-radius:8px;color:#ddd;cursor:pointer;font-family:inherit;font-size:13px;text-align:left;transition:all .2s}
-.floor-btn:hover{border-color:#00fff7;background:#2a2a4e}
+.floor-btn:hover,.floor-btn.kbd-selected{border-color:#00fff7;background:#2a2a4e;box-shadow:0 0 12px rgba(0,255,247,.3)}
+.drink-btn.kbd-selected{border-color:#ff6ec7;background:#3a3a5a;box-shadow:0 0 10px rgba(255,110,199,.3)}
+.skin-card.kbd-selected{border-color:#00fff7;box-shadow:0 0 12px rgba(0,255,247,.4)}
 .floor-btn.current{border-color:#ff6ec7;background:rgba(255,110,199,.15)}
 .floor-btn.locked{opacity:.4;cursor:not-allowed}
 #arcade-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:6000;flex-direction:column;align-items:center;justify-content:center}
@@ -1185,13 +1187,56 @@ function getEchoSprite(skin,dir,frame){
 }
 
 function getPixelSprite(dir,frame,state){
-  const B='#222',Bh='#333',G='#30ee50',C='#6a2a8a',CC='#c080ff',PK='#ffaaaa',T=0;
-  if(state==='sleep')return[[B,T,T,T,T,T,T,T],[B,Bh,Bh,Bh,Bh,Bh,T,T],[T,Bh,B,B,B,Bh,B,T],[T,B,B,B,B,B,B,T],[T,T,B,C,C,B,B,B]];
+  // Anime/Jiji-style Pixel — big round head, huge green eyes, chibi proportions
+  const B='#1a1a2e',Bh='#2a2a3e',Bs='#28254a',G='#30ee50',Gd='#20cc40',Gh='#ffffff',C='#7a2aaa',CC='#c080ff',PK='#ffaaaa',T=0;
+  if(state==='sleep')return[[T,B,T,T,T,T,T,T,T,T],[B,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T,T],[T,Bh,B,B,B,B,B,Bh,B,T],[T,B,B,B,B,B,B,B,B,T],[T,T,B,C,CC,CC,C,B,B,B]];
   let grid;
-  if(dir===0){grid=[[T,B,T,T,T,T,B,T],[T,B,Bh,Bh,Bh,Bh,B,T],[T,B,G,Bh,Bh,G,B,T],[T,Bh,Bh,PK,Bh,Bh,Bh,T],[T,T,C,CC,CC,C,T,T],[T,T,B,B,B,B,T,T],[T,T,B,T,T,B,T,T]]}
-  else if(dir===3){grid=[[T,B,T,T,T,T,B,T],[T,B,Bh,Bh,Bh,Bh,B,T],[T,Bh,Bh,Bh,Bh,Bh,Bh,T],[T,Bh,Bh,Bh,Bh,Bh,Bh,T],[T,T,B,B,B,B,T,T],[T,T,B,B,B,B,T,T],[T,T,B,T,T,B,T,T]]}
-  else{grid=[[B,T,T,T,T,T],[B,Bh,Bh,Bh,T,T],[Bh,G,Bh,Bh,T,T],[Bh,Bh,PK,Bh,T,T],[T,C,CC,B,B,T],[T,B,B,B,B,B],[T,B,T,B,T,T]];if(dir===2)grid=grid.map(r=>[...r].reverse())}
-  if(frame===1&&grid.length>=7){if(dir===0||dir===3)grid[6]=[T,B,T,T,T,T,B,T];else{grid[6]=dir===1?[B,T,T,B,T,T]:[T,T,B,T,T,B]}}
+  if(dir===0){
+    // Front — big round head, huge anime eyes, tiny body
+    grid=[
+      [T,B, T, T, T, T, T, T, B, T],  // pointy ears
+      [T,B, Bh,Bh,Bh,Bh,Bh,Bh,B, T],  // head top
+      [T,Bh,Bs,Bh,Bh,Bh,Bh,Bh,Bh,T],  // head with sheen
+      [T,B, G, G, Bh,Bh,G, G, B, T],  // BIG eyes row 1
+      [T,B, Gd,Gh,Bh,Bh,Gd,Gh,B, T],  // eyes row 2 (dark+highlight)
+      [T,Bh,Bh,Bh,PK,Bh,Bh,Bh,Bh,T],  // nose/mouth
+      [T,T, C, CC,CC,CC,CC,C, T, T],  // crystal collar
+      [T,T, T, B, Bh,B, T, T, T, T],  // tiny body
+      [T,T, T, B, T, B, T, T, T, T],  // tiny legs
+    ];
+  } else if(dir===3){
+    // Back view — big head, tiny body
+    grid=[
+      [T,B, T, T, T, T, T, T, B, T],
+      [T,B, Bh,Bh,Bh,Bh,Bh,Bh,B, T],
+      [T,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T],
+      [T,Bh,Bs,Bh,Bh,Bh,Bh,Bs,Bh,T],
+      [T,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T],
+      [T,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T],
+      [T,T, C, CC,CC,CC,CC,C, T, T],
+      [T,T, T, B, Bh,B, T, T, T, T],
+      [T,T, T, B, T, B, T, T, T, T],
+    ];
+  } else {
+    // Side view — big round head, one big eye, tiny body
+    grid=[
+      [B, T, T, T, T, T, T, T],  // pointy ear
+      [B, Bh,Bh,Bh,Bh,Bh,T, T],  // head top
+      [Bh,Bs,Bh,Bh,Bh,Bh,T, T],  // head sheen
+      [Bh,G, G, Bh,Bh,Bh,T, T],  // BIG eye row 1
+      [Bh,Gd,Gh,Bh,Bh,Bh,T, T],  // eye row 2
+      [Bh,Bh,Bh,PK,Bh,Bh,T, T],  // nose
+      [T, C, CC,CC,C, T, T, T],  // collar
+      [T, T, B, Bh,B, T, T, T],  // tiny body
+      [T, T, B, T, B, T, T, T],  // tiny legs
+    ];
+    if(dir===2)grid=grid.map(r=>[...r].reverse());
+  }
+  // Walk animation — alternate legs
+  if(frame===1&&grid.length>=9){
+    if(dir===0||dir===3)grid[8]=[T,T,T,B,T,T,B,T,T,T];
+    else{grid[8]=dir===1?[T,T,B,T,T,B,T,T]:[T,T,B,T,T,B,T,T]}
+  }
   return grid;
 }
 
@@ -1274,10 +1319,52 @@ function renderPixel(){
   const p=S.pixel;if(p.floor!==S.floor)return;
   const grid=getPixelSprite(p.dir,p.frame,p.state);const scale=3;
   const sprW=grid[0].length*scale,sprH=grid.length*scale;
-  ctx.fillStyle='rgba(0,0,0,.2)';ctx.beginPath();ctx.ellipse(p.x,p.y+2,sprW/3,3,0,0,Math.PI*2);ctx.fill();
+  
+  // Shadow
+  ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(p.x,p.y+2,sprW/3,4,0,0,Math.PI*2);ctx.fill();
+  
+  // Purple crystal collar glow (pulsing)
+  const collarGlow=.3+Math.sin(S.time*2.5)*.2;
+  const collarY=p.y-sprH+6*scale;
+  const cg=ctx.createRadialGradient(p.x,collarY,0,p.x,collarY,scale*4);
+  cg.addColorStop(0,`rgba(192,128,255,${collarGlow})`);
+  cg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=cg;ctx.beginPath();ctx.arc(p.x,collarY,scale*4,0,Math.PI*2);ctx.fill();
+  
+  // Draw the sprite
   drawSprite(ctx,p.x-sprW/2,p.y-sprH,grid,scale);
-  if(p.state!=='sleep'){ctx.shadowColor='#30ee50';ctx.shadowBlur=6;ctx.fillStyle='rgba(48,238,80,.3)';ctx.fillRect(p.x-sprW/2+2*scale,p.y-sprH+2*scale,scale,scale);ctx.shadowBlur=0}
-  ctx.fillStyle='rgba(30,25,45,.7)';ctx.font='8px monospace';const tw=ctx.measureText('Pixel 🐱').width;ctx.fillRect(p.x-tw/2-3,p.y-sprH-12,tw+6,11);ctx.fillStyle='#c080ff';ctx.textAlign='center';ctx.fillText('Pixel 🐱',p.x,p.y-sprH-4);ctx.textAlign='left';
+  
+  // Subtle purple/blue sheen overlay on the body
+  if(p.state!=='sleep'){
+    const sheenPhase=Math.sin(S.time*1.5+p.x*.1);
+    ctx.globalAlpha=.08+sheenPhase*.04;
+    ctx.fillStyle='#6040c0';
+    ctx.fillRect(p.x-sprW/2,p.y-sprH,sprW,sprH);
+    ctx.globalAlpha=1;
+  }
+  
+  // Anime eye glow — big bright green eyes with shine
+  if(p.state!=='sleep'){
+    ctx.shadowColor='#30ee50';ctx.shadowBlur=8;
+    // Eye glow positions depend on direction
+    if(p.dir===0){
+      // Front: two big eyes
+      const eyeL=p.x-sprW/2+2*scale,eyeR=p.x-sprW/2+6*scale,eyeY=p.y-sprH+3*scale;
+      ctx.fillStyle='rgba(48,238,80,.4)';
+      ctx.fillRect(eyeL,eyeY,2*scale,2*scale);
+      ctx.fillRect(eyeR,eyeY,2*scale,2*scale);
+    } else if(p.dir===1||p.dir===2){
+      // Side: one big eye
+      const eyeX=p.dir===1?p.x-sprW/2+1*scale:p.x-sprW/2+5*scale;
+      const eyeY=p.y-sprH+3*scale;
+      ctx.fillStyle='rgba(48,238,80,.4)';
+      ctx.fillRect(eyeX,eyeY,2*scale,2*scale);
+    }
+    ctx.shadowBlur=0;
+  }
+  
+  // Name tag
+  ctx.fillStyle='rgba(30,25,45,.7)';ctx.font='8px monospace';const tw=ctx.measureText('Pixel 🐱').width;ctx.fillRect(p.x-tw/2-3,p.y-sprH-14,tw+6,11);ctx.fillStyle='#c080ff';ctx.textAlign='center';ctx.fillText('Pixel 🐱',p.x,p.y-sprH-6);ctx.textAlign='left';
 }
 
 function renderThought(){
@@ -3104,8 +3191,8 @@ function updateSeasonalEffects(dt){
         break;
         
       case'winter':
-        // White snow particles drift down on floors with windows (F1,F2,F4)
-        if([1,2,4].includes(S.floor)||Math.random()<.3){
+        // Snow only during EVA spacewalk — it's a space station, no snow indoors!
+        if(S.spacewalk.active){
           newParticle={
             x:Math.random()*W,y:-10,
             vx:Math.sin(S.time+Math.random()*4)*.8,
@@ -3477,7 +3564,7 @@ function renderSpacewalk(){
   
   // Instructions
   ctx.fillStyle='rgba(255,255,255,.8)';ctx.font='9px monospace';ctx.textAlign='center';
-  ctx.fillText('WASD: Thrusters • 🚀: Return to station',W/2,H-20);
+  ctx.fillText('WASD: Thrusters • ESC or 🚀: Return to station',W/2,H-20);
   if(Math.hypot(sw.x-asteroidX,sw.y-asteroidY)<asteroidR+15){
     ctx.fillText('SPACE: Plant flag on asteroid',W/2,H-35);
   }
@@ -3702,8 +3789,31 @@ function playSaberSound(type){
 function createPopup(html){
   const ov=document.createElement('div');ov.className='popup-overlay';
   const p=document.createElement('div');p.className='popup';p.innerHTML='<span class="close-btn">&times;</span>'+html;
-  p.querySelector('.close-btn').onclick=()=>ov.remove();ov.onclick=e=>{if(e.target===ov)ov.remove()};
-  ov.appendChild(p);document.body.appendChild(ov);return{ov,p};
+  function closePopup(){ov.remove();document.removeEventListener('keydown',popupKeyNav)}
+  p.querySelector('.close-btn').onclick=closePopup;
+  ov.onclick=e=>{if(e.target===ov)closePopup()};
+  ov.appendChild(p);document.body.appendChild(ov);
+  
+  // Arrow key navigation for buttons inside popups
+  let popupIdx=-1;
+  function getNavBtns(){return[...p.querySelectorAll('.drink-btn,.skin-card,.floor-btn,button')]}
+  function updatePopupSel(newIdx){
+    const btns=getNavBtns();if(!btns.length)return;
+    if(popupIdx>=0&&popupIdx<btns.length)btns[popupIdx].classList.remove('kbd-selected');
+    popupIdx=((newIdx%btns.length)+btns.length)%btns.length;
+    btns[popupIdx].classList.add('kbd-selected');
+    btns[popupIdx].scrollIntoView({block:'nearest'});
+  }
+  function popupKeyNav(e){
+    const btns=getNavBtns();if(!btns.length)return;
+    if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();e.stopPropagation();updatePopupSel(popupIdx<=0?btns.length-1:popupIdx-1)}
+    else if(e.key==='ArrowDown'||e.key==='ArrowRight'){e.preventDefault();e.stopPropagation();updatePopupSel(popupIdx+1)}
+    else if(e.key==='Enter'){e.preventDefault();e.stopPropagation();if(popupIdx>=0&&popupIdx<btns.length)btns[popupIdx].click()}
+    else if(e.key==='Escape'){e.preventDefault();closePopup()}
+  }
+  document.addEventListener('keydown',popupKeyNav);
+  
+  return{ov,p};
 }
 function showNotification(text){const n=document.createElement('div');n.className='notif';n.textContent=text;document.body.appendChild(n);setTimeout(()=>n.remove(),3000)}
 function updateCaffeineHUD(){$('#caffeine-hud').textContent=S.caffeine>0?`☕×${S.caffeine}`:''}
@@ -4375,25 +4485,51 @@ function openElevator(){
   html+=`<button class="floor-btn" data-action="visit">🏠 Visit Rooms</button>`;
   
   html+='</div>';ov.innerHTML=html;
-  ov.querySelector('.close-btn').onclick=()=>ov.className='';
-  ov.onclick=e=>{if(e.target===ov)ov.className=''};
-  ov.querySelectorAll('.floor-btn').forEach(btn=>{btn.onclick=()=>{
-    if(btn.dataset.action==='visit'){
-      RoomSystem.showRoomList();
-      ov.className='';
-      return;
-    }
-    
-    const f=parseInt(btn.dataset.floor);
-    if(f===5&&Coins.lifetime<500){showNotification('Need 500◈ lifetime to unlock!');return}
-    if(f===8){
-      RoomSystem.showBuilder();
-      ov.className='';
-      return;
-    }
-    if(f===S.floor){ov.className='';return}
-    changeFloor(f);ov.className='';
-  }});
+  ov.querySelector('.close-btn').onclick=()=>{ov.className='';removeElevatorKeyNav()};
+  ov.onclick=e=>{if(e.target===ov){ov.className='';removeElevatorKeyNav()}};
+  
+  const allBtns=[...ov.querySelectorAll('.floor-btn')];
+  let menuIdx=Math.min(S.floor-1,allBtns.length-1);
+  allBtns[menuIdx].classList.add('kbd-selected');
+  
+  function updateSelection(newIdx){
+    allBtns[menuIdx].classList.remove('kbd-selected');
+    menuIdx=((newIdx%allBtns.length)+allBtns.length)%allBtns.length;
+    allBtns[menuIdx].classList.add('kbd-selected');
+    allBtns[menuIdx].scrollIntoView({block:'nearest'});
+  }
+  
+  function elevatorKeyHandler(e){
+    if(e.key==='ArrowUp'||e.key==='w'||e.key==='W'){e.preventDefault();updateSelection(menuIdx-1)}
+    else if(e.key==='ArrowDown'||e.key==='s'||e.key==='S'){e.preventDefault();updateSelection(menuIdx+1)}
+    else if(e.key==='Enter'||e.key===' '){e.preventDefault();allBtns[menuIdx].click()}
+    else if(e.key==='Escape'){e.preventDefault();ov.className='';removeElevatorKeyNav()}
+  }
+  
+  function removeElevatorKeyNav(){document.removeEventListener('keydown',elevatorKeyHandler)}
+  document.addEventListener('keydown',elevatorKeyHandler);
+  
+  allBtns.forEach((btn,i)=>{
+    btn.onmouseenter=()=>updateSelection(i);
+    btn.onclick=()=>{
+      removeElevatorKeyNav();
+      if(btn.dataset.action==='visit'){
+        RoomSystem.showRoomList();
+        ov.className='';
+        return;
+      }
+      
+      const f=parseInt(btn.dataset.floor);
+      if(f===5&&Coins.lifetime<500){showNotification('Need 500◈ lifetime to unlock!');return}
+      if(f===8){
+        RoomSystem.showBuilder();
+        ov.className='';
+        return;
+      }
+      if(f===S.floor){ov.className='';return}
+      changeFloor(f);ov.className='';
+    };
+  });
 }
 
 function changeFloor(f){
@@ -4835,6 +4971,7 @@ function initInput(){
     if(k==='ArrowDown'||k==='s'||k==='S')S.keys.down=true;
     if(k==='ArrowLeft'||k==='a'||k==='A')S.keys.left=true;
     if(k==='ArrowRight'||k==='d'||k==='D')S.keys.right=true;
+    if(k==='Escape'){e.preventDefault();if(S.spacewalk.active)toggleSpacewalk();if(document.querySelector('.popup-overlay'))document.querySelector('.popup-overlay').remove()}
     if(k===' '){e.preventDefault();visitorInteract()}
     if((k==='e'||k==='E')){
       e.preventDefault();
