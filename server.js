@@ -76,6 +76,54 @@ function saveVisitorMemory(memory) {
   fs.writeFileSync(VISITOR_MEMORY_PATH, JSON.stringify(memory));
 }
 
+// Station Stats - Persistent world metrics
+const STATION_STATS_PATH = path.join(__dirname, 'station-stats.json');
+function loadStationStats() {
+  try { 
+    return JSON.parse(fs.readFileSync(STATION_STATS_PATH, 'utf8')); 
+  } catch { 
+    return {
+      totalVisitors: 0,
+      totalVisits: 0,
+      totalDuels: 0,
+      totalClashes: 0,
+      stationLevel: 1,
+      milestones: [],
+      createdAt: Date.now(),
+      uniqueVisitors: new Set()
+    }; 
+  }
+}
+function saveStationStats(stats) {
+  // Convert Set to Array for JSON serialization
+  const statsToSave = {
+    ...stats,
+    uniqueVisitors: Array.from(stats.uniqueVisitors || [])
+  };
+  fs.writeFileSync(STATION_STATS_PATH, JSON.stringify(statsToSave));
+}
+function checkMilestones(stats) {
+  const newMilestones = [];
+  const milestones = [
+    { id: 'first_crew', threshold: 10, name: 'First Crew' },
+    { id: 'pixel_talks', threshold: 25, name: 'Pixel Talks' },
+    { id: 'garden_bloom', threshold: 50, name: 'Garden Bloom' },
+    { id: 'golden_hull', threshold: 100, name: 'Golden Hull' },
+    { id: 'echo_band', threshold: 250, name: 'Echo Band' },
+    { id: 'portal_open', threshold: 500, name: 'Portal Open' },
+    { id: 'pixel_kittens', threshold: 1000, name: 'Pixel Kittens' }
+  ];
+  
+  milestones.forEach(milestone => {
+    if (stats.totalVisitors >= milestone.threshold && !stats.milestones.includes(milestone.id)) {
+      stats.milestones.push(milestone.id);
+      newMilestones.push(milestone);
+    }
+  });
+  
+  return newMilestones;
+}
+
 // MIME types
 const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
@@ -150,6 +198,82 @@ const server = http.createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true }));
       } catch { res.writeHead(400); res.end('Bad request'); }
+    });
+    return;
+  }
+
+  // Station Stats API
+  if (req.url === '/api/station-stats' && req.method === 'GET') {
+    const stats = loadStationStats();
+    // Convert unique visitors Set back to proper Set if it was loaded as Array
+    if (Array.isArray(stats.uniqueVisitors)) {
+      stats.uniqueVisitors = new Set(stats.uniqueVisitors);
+    }
+    // Return public stats without internal data
+    const publicStats = {
+      totalVisitors: stats.totalVisitors,
+      totalVisits: stats.totalVisits,
+      totalDuels: stats.totalDuels,
+      totalClashes: stats.totalClashes,
+      stationLevel: stats.stationLevel,
+      milestones: stats.milestones,
+      createdAt: stats.createdAt
+    };
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(publicStats));
+    return;
+  }
+  if (req.url === '/api/station-stats/visit' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { visitorName } = JSON.parse(body);
+        if (!visitorName || visitorName === 'Visitor') {
+          res.writeHead(400); 
+          res.end('Bad request'); 
+          return;
+        }
+        
+        const stats = loadStationStats();
+        // Convert array to Set if needed
+        if (Array.isArray(stats.uniqueVisitors)) {
+          stats.uniqueVisitors = new Set(stats.uniqueVisitors);
+        }
+        
+        // Check if new visitor
+        const isNewVisitor = !stats.uniqueVisitors.has(visitorName);
+        if (isNewVisitor) {
+          stats.uniqueVisitors.add(visitorName);
+          stats.totalVisitors++;
+        }
+        stats.totalVisits++;
+        
+        // Check for new milestones
+        const newMilestones = checkMilestones(stats);
+        
+        saveStationStats(stats);
+        
+        // Broadcast milestone unlocks to all connected visitors
+        if (newMilestones.length > 0) {
+          newMilestones.forEach(milestone => {
+            broadcast({
+              type: 'milestone.unlocked',
+              milestone: milestone
+            });
+          });
+        }
+        
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+          ok: true, 
+          isNewVisitor, 
+          newMilestones: newMilestones.map(m => m.id)
+        }));
+      } catch { 
+        res.writeHead(400); 
+        res.end('Bad request'); 
+      }
     });
     return;
   }
@@ -408,6 +532,18 @@ wss.on('connection', (visitorWs) => {
             const clashMsg = { type: 'saber.clash', x: cx, y: cy, floor: v.floor, players: [visitorId, otherId], sabers: [msg.saber, other.saber] };
             for (const [id2, v2] of visitors) {
               if (v2.ws.readyState === WebSocket.OPEN) v2.ws.send(JSON.stringify(clashMsg));
+            }
+            
+            // Update station stats
+            try {
+              const stats = loadStationStats();
+              if (Array.isArray(stats.uniqueVisitors)) {
+                stats.uniqueVisitors = new Set(stats.uniqueVisitors);
+              }
+              stats.totalClashes++;
+              saveStationStats(stats);
+            } catch (e) {
+              console.error('Failed to update clash stats:', e);
             }
           }
         }

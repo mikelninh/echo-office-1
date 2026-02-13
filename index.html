@@ -83,18 +83,41 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 @keyframes notifOut{to{opacity:0;transform:translateX(-50%) translateY(-20px)}}
 .coin-float{position:fixed;font-family:monospace;font-size:14px;font-weight:bold;color:#ffd700;pointer-events:none;z-index:700;animation:coinFloat 1.5s ease forwards}
 @keyframes coinFloat{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-40px)}}
-#dpad{display:none}
-#dpad button{position:absolute;width:54px;height:54px;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.35);border-radius:10px;color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:none;user-select:none;-webkit-user-select:none}
-#dpad button:active{background:rgba(255,255,255,.35)}
-#dp-up{left:58px;top:0}#dp-down{left:58px;top:112px}#dp-left{left:0;top:56px}#dp-right{left:116px;top:56px}
-#dp-action{left:170px;top:48px;width:52px;height:52px;border-radius:50%;font-size:12px;font-weight:bold;background:rgba(255,180,80,.2);border-color:rgba(255,180,80,.4)}
+/* Virtual Joystick for Mobile */
+#virtual-joystick{position:fixed;bottom:20px;left:20px;width:80px;height:80px;z-index:9000;touch-action:none;display:none}
+#joystick-base{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.3);position:relative}
+#joystick-knob{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.6);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);transition:all .1s ease}
+
+/* Action Buttons for Mobile */
+#action-buttons{position:fixed;bottom:20px;right:20px;z-index:9000;display:none;flex-direction:column;gap:10px}
+.action-btn{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;touch-action:none;-webkit-tap-highlight-color:transparent}
+.action-btn:active{background:rgba(255,255,255,.4);transform:scale(.95)}
+
+/* Mobile Chat Drawer */
+#chat-drawer-toggle{display:none;position:fixed;bottom:0;left:0;right:0;height:30px;background:rgba(10,10,20,.95);border-top:2px solid #333;color:#00fff7;z-index:100;cursor:pointer;align-items:center;justify-content:center}
+#chat-drawer-toggle::before{content:'💬 Echo\'s Chat - Tap to expand'}
+
 #scanlines{position:fixed;inset:0;pointer-events:none;z-index:9998;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.015) 2px,rgba(0,0,0,.015) 4px)}
+
+/* Responsive Layout */
 @media(max-width:900px){
-  #game-wrap{flex-direction:column}
-  #chat-panel{width:100%;height:180px;border-left:none;border-top:2px solid #333}
-  #dpad{display:block}
+  #game-wrap{flex-direction:column;height:100vh}
+  canvas{width:100%!important;height:calc(100vh - 200px)!important}
+  #chat-panel{width:100%;height:170px;border-left:none;border-top:2px solid #333;transform:translateY(100%);transition:transform .3s ease}
+  #chat-panel.expanded{transform:translateY(0)}
+  #chat-drawer-toggle{display:flex}
+  #virtual-joystick,#action-buttons{display:flex}
+  #hud{flex-wrap:wrap;max-width:200px}
+  #elevator-overlay{padding:10px}
+  .floor-btn{width:90%;max-width:320px}
+  .popup{max-width:95vw;max-height:80vh}
+  #chat-panel.expanded{height:40vh}
 }
-@media(pointer:coarse){#dpad{display:block}}
+
+/* Touch Device Detection */
+@media(pointer:coarse){
+  #virtual-joystick,#action-buttons{display:flex}
+}
 </style>
 </head>
 <body>
@@ -118,14 +141,24 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
     <div id="interact-prompt">Press SPACE to interact</div>
     <div id="mood-hud">😊 Happy</div>
     <div id="speech-bubble"></div>
-    <div id="dpad" style="display:none!important">
-      <button id="dp-up">▲</button>
-      <button id="dp-down">▼</button>
-      <button id="dp-left">◀</button>
-      <button id="dp-right">▶</button>
-      <button id="dp-action">ACT</button>
+    <!-- Virtual Joystick for Mobile -->
+    <div id="virtual-joystick">
+      <div id="joystick-base">
+        <div id="joystick-knob"></div>
+      </div>
+    </div>
+    
+    <!-- Action Buttons for Mobile -->
+    <div id="action-buttons">
+      <div class="action-btn" id="btn-saber-switch" style="display:none">🔄</div>
+      <div class="action-btn" id="btn-saber-swing" style="display:none">🗡️</div>
+      <div class="action-btn" id="btn-interact">⚡</div>
     </div>
   </div>
+  
+  <!-- Mobile Chat Drawer Toggle -->
+  <div id="chat-drawer-toggle"></div>
+  
   <div id="chat-panel">
     <div id="chat-title">💬 Echo's Chat</div>
     <div id="chat-log"></div>
@@ -178,6 +211,10 @@ const S={
   prizeItems:LS.get('prizeItems',[]),// bought prize items
   hotChocCount:LS.get('hotChocCount',0),
   auroraActive:false,auroraTimer:0,
+  // Station stats & milestones
+  stationStats:{totalVisitors:0,totalVisits:0,totalDuels:0,totalClashes:0,stationLevel:1,milestones:[],createdAt:Date.now()},
+  kittens:[],// Station kittens for 1000+ milestone
+  seasonalParticles:[],// Seasonal effects
   spacewalk:{active:false,x:W/2,y:H/2,vx:0,vy:0,oxygen:100,debris:[],earthAngle:0,flagPlanted:LS.get('spacewalkFlag',false)},
   _visited:LS.get('visited_objs',[]),_prevAchCount:0,
   otherPlayers:{},myPlayerId:null,
@@ -593,6 +630,18 @@ function renderWalls(floorColor,wallColor){
   ctx.fillStyle=grd;ctx.fillRect(0,0,W,wallH);
   ctx.strokeStyle='rgba(80,70,100,.3)';ctx.lineWidth=1;for(let px=0;px<W;px+=120){ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px,wallH);ctx.stroke()}
   ctx.fillStyle='#4a3830';ctx.fillRect(0,wallH-4,W,4);
+  
+  // Golden Hull milestone effect
+  if(S.stationStats.milestones.includes('golden_hull')){
+    const goldenGlow=.6+Math.sin(S.time*2)*.3;
+    ctx.strokeStyle=`rgba(255,215,0,${goldenGlow})`;
+    ctx.lineWidth=3;
+    ctx.strokeRect(0,0,W,wallH);
+    // Golden trim at top
+    ctx.fillStyle=`rgba(255,215,0,${goldenGlow*.5})`;
+    ctx.fillRect(0,0,W,6);
+  }
+  
   ctx.fillStyle='#2a2040';ctx.fillRect(0,0,12,H);ctx.fillRect(W-12,0,12,H);ctx.fillRect(0,H-12,W,12);
 }
 
@@ -904,8 +953,21 @@ function renderFloor4(){
   const fn=getObjects().find(o=>o.id==='fountain');ctx.fillStyle='#556';ctx.fillRect(fn.x+10,fn.y+10,fn.w-20,fn.h-10);ctx.fillStyle='#667';ctx.fillRect(fn.x+5,fn.y+fn.h-10,fn.w-10,10);ctx.fillStyle='rgba(100,180,255,.3)';ctx.fillRect(fn.x+15,fn.y+20,fn.w-30,fn.h-30);
   // Water particles
   for(let i=0;i<3;i++){const fy=fn.y+10-(S.time*30+i*10)%40;ctx.fillStyle=`rgba(150,200,255,${.3+Math.sin(S.time*4+i)*.2})`;ctx.fillRect(fn.x+fn.w/2-1+Math.sin(S.time*3+i)*5,fy,3,3)}
-  // Butterflies
-  for(let i=0;i<4;i++){const bx=200+Math.sin(S.time*.7+i*2)*150,by=200+Math.cos(S.time*.5+i*1.5)*80;ctx.fillStyle=['#ff88cc','#ffaa44','#88ccff','#aaddff'][i];const wing=Math.sin(S.time*8+i)*3;ctx.fillRect(bx-wing,by,3,2);ctx.fillRect(bx+wing,by,3,2);ctx.fillStyle='#333';ctx.fillRect(bx,by,2,3)}
+  // Butterflies (3x more if garden_bloom milestone)
+  const butterflyCount=S.stationStats.milestones.includes('garden_bloom')?12:4;
+  for(let i=0;i<butterflyCount;i++){const bx=200+Math.sin(S.time*.7+i*2)*150,by=200+Math.cos(S.time*.5+i*1.5)*80;ctx.fillStyle=['#ff88cc','#ffaa44','#88ccff','#aaddff','#ff6ec7','#00fff7'][i%6];const wing=Math.sin(S.time*8+i)*3;ctx.fillRect(bx-wing,by,3,2);ctx.fillRect(bx+wing,by,3,2);ctx.fillStyle='#333';ctx.fillRect(bx,by,2,3)}
+  
+  // Rainbow arc across dome (garden_bloom milestone)
+  if(S.stationStats.milestones.includes('garden_bloom')){
+    const rainbowColors=['#ff0000','#ff8800','#ffff00','#00ff00','#0088ff','#4400ff','#8800ff'];
+    for(let i=0;i<7;i++){
+      ctx.strokeStyle=`rgba(${parseInt(rainbowColors[i].slice(1,3),16)},${parseInt(rainbowColors[i].slice(3,5),16)},${parseInt(rainbowColors[i].slice(5,7),16)},.3)`;
+      ctx.lineWidth=3;
+      ctx.beginPath();
+      ctx.arc(W/2,120,100+i*5,0,Math.PI);
+      ctx.stroke();
+    }
+  }
   // Pond
   const pd=getObjects().find(o=>o.id==='pond');ctx.fillStyle='rgba(40,80,120,.4)';ctx.beginPath();ctx.ellipse(pd.x+pd.w/2,pd.y+pd.h/2,pd.w/2,pd.h/2,0,0,Math.PI*2);ctx.fill();
   // Lily pads
@@ -927,8 +989,22 @@ function renderFloor5(){
   // Portal
   const pt=getObjects().find(o=>o.id==='portal');
   for(let i=0;i<12;i++){const a=S.time*2+i*Math.PI/6,r=35+Math.sin(S.time*3+i)*10;ctx.fillStyle=`rgba(${100+i*10},${50+i*15},${200-i*5},.15)`;ctx.beginPath();ctx.arc(pt.x+pt.w/2+Math.cos(a)*r,pt.y+pt.h/2+Math.sin(a)*r,4+Math.sin(S.time+i)*2,0,Math.PI*2);ctx.fill()}
-  ctx.fillStyle=`rgba(0,200,255,${.1+Math.sin(S.time*2)*.05})`;ctx.beginPath();ctx.arc(pt.x+pt.w/2,pt.y+pt.h/2,30,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle=`rgba(0,200,255,${.3+Math.sin(S.time*3)*.2})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(pt.x+pt.w/2,pt.y+pt.h/2,35,0,Math.PI*2);ctx.stroke();
+  const portalGlow=S.stationStats.milestones.includes('portal_open')?(.3+Math.sin(S.time*2)*.2):(.1+Math.sin(S.time*2)*.05);
+  ctx.fillStyle=`rgba(0,200,255,${portalGlow})`;ctx.beginPath();ctx.arc(pt.x+pt.w/2,pt.y+pt.h/2,30,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=`rgba(0,200,255,${portalGlow*2})`;ctx.lineWidth=S.stationStats.milestones.includes('portal_open')?4:2;ctx.beginPath();ctx.arc(pt.x+pt.w/2,pt.y+pt.h/2,35,0,Math.PI*2);ctx.stroke();
+  
+  // Portal Open milestone: brighter glow and extra effects
+  if(S.stationStats.milestones.includes('portal_open')){
+    // Additional energy rings
+    for(let i=0;i<3;i++){
+      const ringGlow=(.4+Math.sin(S.time*4+i*2)*.3);
+      ctx.strokeStyle=`rgba(150,255,255,${ringGlow})`;
+      ctx.lineWidth=2;
+      ctx.beginPath();
+      ctx.arc(pt.x+pt.w/2,pt.y+pt.h/2,45+i*8,0,Math.PI*2);
+      ctx.stroke();
+    }
+  }
   // Workbench
   const wb=getObjects().find(o=>o.id==='workbench');ctx.fillStyle='#3a3a4a';ctx.fillRect(wb.x,wb.y,wb.w,wb.h);ctx.fillStyle='#555';ctx.fillRect(wb.x+10,wb.y+5,20,15);ctx.fillRect(wb.x+40,wb.y+8,15,12);ctx.fillStyle='#888';ctx.fillRect(wb.x+70,wb.y+5,30,10);
   // Lab monitors
@@ -1043,6 +1119,36 @@ function renderFloor6(){
   ctx.fillText('♪ QUEUE',mq.x+10,mq.y+15);
   ctx.fillText('Now: Lofi Hip Hop',mq.x+5,mq.y+28);
   ctx.fillText('Next: Chill Jazz',mq.x+5,mq.y+38);
+
+  // Echo Band milestone: 3 holographic band member silhouettes near jukebox
+  if(S.stationStats.milestones.includes('echo_band')){
+    const jb=getObjects().find(o=>o.id==='jukebox');
+    if(jb){
+      const bandMembers=[
+        {x:jb.x+80,y:jb.y+20,instrument:'🎸'},
+        {x:jb.x+120,y:jb.y+30,instrument:'🥁'},
+        {x:jb.x+160,y:jb.y+25,instrument:'🎹'}
+      ];
+      
+      bandMembers.forEach((member,i)=>{
+        const alpha=.3+Math.sin(S.time*2+i)*.2;
+        ctx.globalAlpha=alpha;
+        ctx.fillStyle='#00fff7';
+        
+        // Simple humanoid silhouette
+        ctx.fillRect(member.x-4,member.y-15,8,15); // body
+        ctx.beginPath();
+        ctx.arc(member.x,member.y-20,5,0,Math.PI*2);
+        ctx.fill(); // head
+        
+        // Instrument
+        ctx.font='16px sans-serif';
+        ctx.fillText(member.instrument,member.x-8,member.y+10);
+        
+        ctx.globalAlpha=1;
+      });
+    }
+  }
 
   // Warm lighting particles
   for(let i=0;i<8;i++){
@@ -1206,8 +1312,10 @@ function render(){
   // Other multiplayer players
   for(const id in S.otherPlayers){const op=S.otherPlayers[id];if(op.floor===S.floor)chars.push({y:op.y,r:()=>renderRemotePlayer(ctx,id,op)})}
   chars.sort((a,b)=>a.y-b.y);chars.forEach(c=>c.r());
+  renderKittens();renderSeasonalEffects();
   renderParticles();renderThought();renderFloatTexts();
   ctx.restore();
+  renderSeasonalOverlay();
   if(S.screenFlash){ctx.fillStyle=S.screenFlash;ctx.globalAlpha=.3;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;S.screenFlash=null}
   renderHoverHighlight();
   // Saber HUD
@@ -1341,6 +1449,48 @@ function updatePixel(dt){
     const spd=60*dt;p.x+=dx/dist*spd;p.y+=dy/dist*spd;
     if(Math.abs(dx)>Math.abs(dy))p.dir=dx<0?1:2;else p.dir=dy<0?3:0;
     p.frameTimer+=dt;if(p.frameTimer>.2){p.frame=(p.frame+1)%2;p.frameTimer=0}}
+}
+
+function updatePixelTalks(dt){
+  if(!S.stationStats.milestones.includes('pixel_talks'))return;
+  
+  if(!S._pixelTalkTimer)S._pixelTalkTimer=0;
+  S._pixelTalkTimer+=dt;
+  
+  // Pixel talks every 30 seconds
+  if(S._pixelTalkTimer>=30){
+    S._pixelTalkTimer=0;
+    
+    const sassyLines=[
+      'Another visitor? I suppose they can stay. 🐱',
+      'The treats better are good here...',
+      '*judges you silently*',
+      'This is MY station, by the way.',
+      'Echo feeds me, so I tolerate Echo.',
+      'You have decent petting technique.',
+      'I\'ve seen bigger fish tanks.',
+      'The red dot is eternal. I will catch it.',
+      '*knocks something off a shelf*',
+      'I demand belly rubs. Now.',
+      'The gravity here is acceptable.',
+      'Echo\'s coding improves when I sit on the keyboard.',
+      'Birds would be a welcome addition to this station.',
+      'I am judging your life choices.',
+      'The vacuum robot fears me. Good.'
+    ];
+    
+    const randomLine=sassyLines[Math.random()*sassyLines.length|0];
+    
+    if(S.pixel.floor===S.floor){
+      S.floatTexts.push({
+        text:randomLine,
+        x:S.pixel.x,y:S.pixel.y-30,
+        color:'#c080ff',life:120
+      });
+    }
+    
+    addChatMsg('Pixel 🐱',randomLine,'#c080ff');
+  }
 }
 
 // ═══════════════════════════════════════
@@ -1530,7 +1680,618 @@ function adjustBrightness(hex,percent){
 }
 
 // ═══════════════════════════════════════
-// §26b. ECHO MEMORY SYSTEM
+// §26a. VIRTUAL JOYSTICK & MOBILE CONTROLS
+// ═══════════════════════════════════════
+const VirtualJoystick = {
+  active: false,
+  centerX: 0,
+  centerY: 0,
+  currentX: 0,
+  currentY: 0,
+  touchId: null,
+  
+  init() {
+    const base = $('#joystick-base');
+    const knob = $('#joystick-knob');
+    
+    if (!base || !knob) return;
+    
+    const rect = base.getBoundingClientRect();
+    this.centerX = rect.left + rect.width / 2;
+    this.centerY = rect.top + rect.height / 2;
+    
+    // Touch events for joystick
+    base.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (this.touchId !== null) return;
+      
+      const touch = e.touches[0];
+      this.touchId = touch.identifier;
+      this.active = true;
+      this.updateKnob(touch.clientX, touch.clientY);
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', (e) => {
+      if (!this.active || this.touchId === null) return;
+      
+      const touch = Array.from(e.touches).find(t => t.identifier === this.touchId);
+      if (!touch) return;
+      
+      e.preventDefault();
+      this.updateKnob(touch.clientX, touch.clientY);
+    }, { passive: false });
+    
+    document.addEventListener('touchend', (e) => {
+      if (!this.active || this.touchId === null) return;
+      
+      const touch = Array.from(e.changedTouches).find(t => t.identifier === this.touchId);
+      if (!touch) return;
+      
+      this.active = false;
+      this.touchId = null;
+      knob.style.transform = 'translate(-50%, -50%)';
+      // Clear movement
+      S.keys.up = S.keys.down = S.keys.left = S.keys.right = false;
+    });
+  },
+  
+  updateKnob(touchX, touchY) {
+    const knob = $('#joystick-knob');
+    const dx = touchX - this.centerX;
+    const dy = touchY - this.centerY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const maxDistance = 25; // Half of base radius
+    
+    let knobX = dx;
+    let knobY = dy;
+    
+    if (distance > maxDistance) {
+      knobX = (dx / distance) * maxDistance;
+      knobY = (dy / distance) * maxDistance;
+    }
+    
+    knob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
+    
+    // Convert to 8-direction movement
+    const deadzone = 8;
+    if (distance > deadzone) {
+      const angle = Math.atan2(dy, dx) + Math.PI;
+      const octant = Math.round(angle / (Math.PI / 4)) % 8;
+      
+      // Clear all directions first
+      S.keys.up = S.keys.down = S.keys.left = S.keys.right = false;
+      
+      // Set directions based on octant
+      if (octant === 0 || octant === 1) S.keys.right = true;
+      if (octant === 1 || octant === 2) S.keys.down = true;
+      if (octant === 2 || octant === 3) S.keys.down = true;
+      if (octant === 3 || octant === 4) S.keys.left = true;
+      if (octant === 4 || octant === 5) S.keys.left = true;
+      if (octant === 5 || octant === 6) S.keys.up = true;
+      if (octant === 6 || octant === 7) S.keys.up = true;
+      if (octant === 7 || octant === 0) S.keys.right = true;
+    } else {
+      S.keys.up = S.keys.down = S.keys.left = S.keys.right = false;
+    }
+  }
+};
+
+const MobileControls = {
+  init() {
+    // Initialize virtual joystick
+    VirtualJoystick.init();
+    
+    // Mobile chat drawer
+    const chatToggle = $('#chat-drawer-toggle');
+    const chatPanel = $('#chat-panel');
+    
+    if (chatToggle && chatPanel) {
+      chatToggle.addEventListener('click', () => {
+        chatPanel.classList.toggle('expanded');
+      });
+    }
+    
+    // Action buttons
+    const btnInteract = $('#btn-interact');
+    const btnSaberSwing = $('#btn-saber-swing');
+    const btnSaberSwitch = $('#btn-saber-switch');
+    
+    if (btnInteract) {
+      btnInteract.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (S.useVisitor) visitorInteract();
+        else interact();
+      });
+    }
+    
+    if (btnSaberSwing) {
+      btnSaberSwing.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        swingSaber();
+      });
+    }
+    
+    if (btnSaberSwitch) {
+      btnSaberSwitch.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        toggleSabers();
+      });
+    }
+    
+    // Update action button visibility
+    this.updateActionButtons();
+  },
+  
+  updateActionButtons() {
+    const btnSaberSwing = $('#btn-saber-swing');
+    const btnSaberSwitch = $('#btn-saber-switch');
+    
+    if (btnSaberSwing && btnSaberSwitch) {
+      const hasSaber = S._visitorSaber;
+      btnSaberSwing.style.display = hasSaber ? 'flex' : 'none';
+      btnSaberSwitch.style.display = hasSaber ? 'flex' : 'none';
+    }
+  }
+};
+
+// Initialize mobile controls when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  MobileControls.init();
+});
+
+// ═══════════════════════════════════════
+// §26b. STATION STATS & MILESTONES SYSTEM
+// ═══════════════════════════════════════
+async function loadStationStats(){
+  try{
+    const r=await fetch('/api/station-stats');
+    S.stationStats=await r.json();
+    initMilestones();
+  }catch(e){
+    console.log('Station stats not available:',e.message);
+  }
+}
+
+async function recordStationVisit(){
+  const name=LS.get('visitorName','Visitor');
+  if(name==='Visitor')return;
+  
+  try{
+    const r=await fetch('/api/station-stats/visit',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({visitorName:name})
+    });
+    const result=await r.json();
+    if(result.newMilestones?.length>0){
+      result.newMilestones.forEach(milestoneId=>{
+        triggerMilestone(milestoneId);
+      });
+    }
+  }catch(e){
+    console.log('Failed to record visit:',e.message);
+  }
+}
+
+function initMilestones(){
+  // Initialize milestone-specific systems
+  if(S.stationStats.milestones.includes('pixel_kittens')){
+    initKittens();
+  }
+}
+
+function triggerMilestone(milestoneId){
+  const milestones={
+    first_crew:{
+      name:'First Crew',
+      effect:()=>{
+        // Confetti rain for 10 seconds
+        const confettiEnd=Date.now()+10000;
+        const confettiInterval=setInterval(()=>{
+          if(Date.now()>confettiEnd){
+            clearInterval(confettiInterval);
+            return;
+          }
+          for(let i=0;i<3;i++){
+            S.particles.push({
+              x:Math.random()*W,y:-10,
+              vx:(Math.random()-.5)*2,vy:2+Math.random()*3,
+              life:60,color:['#ffd700','#ff6ec7','#00fff7','#ff4444','#44ff44'][Math.random()*5|0],
+              size:3+Math.random()*2
+            });
+          }
+        },100);
+        showNotification('🎉 MILESTONE: First Crew! Station feels more alive!');
+        addChatMsg('Echo','🎉 Amazing! We\'ve reached our first crew milestone! The station feels more alive with 10+ visitors!');
+      }
+    },
+    pixel_talks:{
+      name:'Pixel Talks',
+      effect:()=>{
+        // Pixel gets random speech bubbles every 30s
+        if(!S._pixelTalkTimer)S._pixelTalkTimer=0;
+        showNotification('🐱 MILESTONE: Pixel Talks! Pixel has become more chatty!');
+        addChatMsg('Echo','🐱 Whoa! Pixel seems to have found her voice! She\'s getting sassy with all these visitors around.');
+      }
+    },
+    garden_bloom:{
+      name:'Garden Bloom',
+      effect:()=>{
+        showNotification('🌸 MILESTONE: Garden Bloom! The biodome is flourishing!');
+        addChatMsg('Echo','🌸 The garden is absolutely flourishing! So many visitors have brought life to the biodome.');
+      }
+    },
+    golden_hull:{
+      name:'Golden Hull',
+      effect:()=>{
+        showNotification('✨ MILESTONE: Golden Hull! Station walls now shimmer with golden trim!');
+        addChatMsg('Echo','✨ Incredible! The station\'s hull is resonating with all this positive energy. Look at that golden glow!');
+      }
+    },
+    echo_band:{
+      name:'Echo Band',
+      effect:()=>{
+        showNotification('🎵 MILESTONE: Echo Band! Holographic musicians have appeared in the record room!');
+        addChatMsg('Echo','🎵 Music fills the station! The record room has manifested its own holographic band. This place truly is alive!');
+      }
+    },
+    portal_open:{
+      name:'Portal Open',
+      effect:()=>{
+        showNotification('🌀 MILESTONE: Portal Open! The lab portal glows brighter with new dimensions!');
+        addChatMsg('Echo','🌀 The portal is responding to our collective consciousness! It\'s showing glimpses of other dimensions...');
+      }
+    },
+    pixel_kittens:{
+      name:'Pixel Kittens',
+      effect:()=>{
+        initKittens();
+        showNotification('🐱🐱🐱 MILESTONE: Pixel Kittens! Three adorable kittens have appeared!');
+        addChatMsg('Echo','🐱🐱🐱 OH MY GOSH! Pixel has made friends! Three little kittens just materialized. Byte, Glitch, and Nova welcome you!');
+      }
+    }
+  };
+  
+  if(milestones[milestoneId]){
+    milestones[milestoneId].effect();
+  }
+}
+
+function initKittens(){
+  if(S.kittens.length>0)return; // Already initialized
+  
+  S.kittens=[
+    {name:'Byte',color:'#ff8800',x:450,y:480,floor:1,state:'wander',stateTimer:0,targetX:450,targetY:480,dir:0,frame:0,frameTimer:0},
+    {name:'Glitch',color:'#888888',x:400,y:300,floor:2,state:'sleep',stateTimer:0,targetX:400,targetY:300,dir:0,frame:0,frameTimer:0},
+    {name:'Nova',color:'#ffffff',x:380,y:250,floor:4,state:'follow',stateTimer:0,targetX:380,targetY:250,dir:0,frame:0,frameTimer:0}
+  ];
+}
+
+function updateKittens(dt){
+  if(!S.stationStats.milestones.includes('pixel_kittens'))return;
+  if(S.kittens.length===0)initKittens();
+  
+  S.kittens.forEach(kitten=>{
+    kitten.stateTimer+=dt;
+    kitten.frameTimer+=dt;
+    
+    // Animation
+    if(kitten.frameTimer>.3){
+      kitten.frame=(kitten.frame+1)%2;
+      kitten.frameTimer=0;
+    }
+    
+    // AI State machine
+    if(kitten.state==='wander'){
+      if(kitten.stateTimer>3+Math.random()*5){
+        if(Math.random()<.3){
+          kitten.state='sleep';
+          kitten.stateTimer=0;
+        }else{
+          kitten.targetX=100+Math.random()*600;
+          kitten.targetY=100+Math.random()*400;
+          kitten.state='walking';
+          kitten.stateTimer=0;
+        }
+      }
+    }else if(kitten.state==='walking'){
+      const dx=kitten.targetX-kitten.x;
+      const dy=kitten.targetY-kitten.y;
+      const dist=Math.hypot(dx,dy);
+      
+      if(dist<8){
+        kitten.state='wander';
+        kitten.stateTimer=0;
+      }else{
+        const spd=kitten.name==='Byte'?80:kitten.name==='Glitch'?40:60; // Different speeds
+        kitten.x+=dx/dist*spd*dt;
+        kitten.y+=dy/dist*spd*dt;
+        
+        if(Math.abs(dx)>Math.abs(dy)){
+          kitten.dir=dx>0?2:1;
+        }else{
+          kitten.dir=dy>0?0:3;
+        }
+      }
+    }else if(kitten.state==='sleep'){
+      if(kitten.stateTimer>8+Math.random()*10){
+        kitten.state='wander';
+        kitten.stateTimer=0;
+      }
+    }else if(kitten.state==='follow'){
+      // Nova follows visitors
+      if(S.useVisitor&&S.visitor.floor===kitten.floor){
+        kitten.targetX=S.visitor.x+30;
+        kitten.targetY=S.visitor.y+10;
+        
+        const dx=kitten.targetX-kitten.x;
+        const dy=kitten.targetY-kitten.y;
+        const dist=Math.hypot(dx,dy);
+        
+        if(dist>20){
+          const spd=60;
+          kitten.x+=dx/dist*spd*dt;
+          kitten.y+=dy/dist*spd*dt;
+          
+          if(Math.abs(dx)>Math.abs(dy)){
+            kitten.dir=dx>0?2:1;
+          }else{
+            kitten.dir=dy>0?0:3;
+          }
+        }
+        
+        if(kitten.stateTimer>15){
+          kitten.state='wander';
+          kitten.stateTimer=0;
+        }
+      }else{
+        kitten.state='wander';
+        kitten.stateTimer=0;
+      }
+    }
+  });
+}
+
+function renderKittens(){
+  if(!S.stationStats.milestones.includes('pixel_kittens'))return;
+  
+  S.kittens.filter(k=>k.floor===S.floor).forEach(kitten=>{
+    const scale=2; // Smaller than Pixel
+    const sprW=8*scale,sprH=7*scale;
+    
+    // Shadow
+    ctx.fillStyle='rgba(0,0,0,.2)';
+    ctx.beginPath();
+    ctx.ellipse(kitten.x,kitten.y+2,sprW/3,3,0,0,Math.PI*2);
+    ctx.fill();
+    
+    // Kitten sprite (simplified version of Pixel)
+    ctx.fillStyle=kitten.color;
+    ctx.fillRect(kitten.x-sprW/2+2*scale,kitten.y-sprH+scale,4*scale,5*scale); // body
+    ctx.fillRect(kitten.x-sprW/2+scale,kitten.y-sprH,6*scale,3*scale); // head
+    
+    // Ears
+    ctx.fillRect(kitten.x-sprW/2+scale,kitten.y-sprH-scale,scale,2*scale);
+    ctx.fillRect(kitten.x-sprW/2+4*scale,kitten.y-sprH-scale,scale,2*scale);
+    
+    // Eyes
+    ctx.fillStyle='#30ee50';
+    ctx.fillRect(kitten.x-sprW/2+2*scale,kitten.y-sprH+scale,scale,scale);
+    ctx.fillRect(kitten.x-sprW/2+4*scale,kitten.y-sprH+scale,scale,scale);
+    
+    // Name label
+    ctx.fillStyle=kitten.color;
+    ctx.font='bold 8px monospace';
+    ctx.textAlign='center';
+    ctx.fillText(kitten.name,kitten.x,kitten.y-sprH-8);
+    ctx.textAlign='left';
+    
+    // State indicator
+    if(kitten.state==='sleep'){
+      ctx.font='10px sans-serif';
+      ctx.fillText('💤',kitten.x+8,kitten.y-sprH-5);
+    }
+  });
+}
+
+function petKitten(kitten){
+  const speeches={
+    Byte:'Mrrp!',
+    Glitch:'*snore*...huh?',
+    Nova:'*follows you curiously*'
+  };
+  
+  Coins.earn(2,'kitten');
+  S.floatTexts.push({
+    text:speeches[kitten.name],
+    x:kitten.x,y:kitten.y-20,
+    color:kitten.color,life:60
+  });
+  
+  // Particle hearts
+  for(let i=0;i<5;i++){
+    S.particles.push({
+      x:kitten.x+Math.random()*10-5,
+      y:kitten.y-15,
+      vx:(Math.random()-.5)*2,
+      vy:-1-Math.random(),
+      life:30,color:'#ff6688',size:2
+    });
+  }
+}
+
+// ═══════════════════════════════════════
+// §26c. SEASONS SYSTEM
+// ═══════════════════════════════════════
+function getSeason(){
+  const m=new Date().getMonth();
+  if(m>=2&&m<=4)return'spring';
+  if(m>=5&&m<=7)return'summer';
+  if(m>=8&&m<=10)return'autumn';
+  return'winter';
+}
+
+function updateSeasonalEffects(dt){
+  const season=getSeason();
+  
+  // Spawn seasonal particles
+  if(Math.random()<.3){
+    let newParticle=null;
+    
+    switch(season){
+      case'spring':
+        // Green particles drift up in Garden, flower colors brighter
+        if(S.floor===4||Math.random()<.1){
+          newParticle={
+            x:Math.random()*W,y:H+10,
+            vx:(Math.random()-.5)*1,vy:-1-Math.random()*.5,
+            life:60+Math.random()*40,
+            color:['#60ee60','#90ff90','#ffb6c1'][Math.random()*3|0],
+            size:2+Math.random()*2,
+            type:'spring'
+          };
+        }
+        break;
+        
+      case'summer':
+        // Fireflies on F4 (tiny yellow dots that pulse)
+        if(S.floor===4&&Math.random()<.2){
+          newParticle={
+            x:200+Math.random()*400,y:200+Math.random()*300,
+            vx:(Math.random()-.5)*.5,vy:(Math.random()-.5)*.5,
+            life:120+Math.random()*80,
+            color:'#ffff80',size:1,
+            type:'firefly',pulse:Math.random()*Math.PI*2
+          };
+        }
+        break;
+        
+      case'autumn':
+        // Orange/red leaf particles fall slowly on all floors
+        newParticle={
+          x:Math.random()*W,y:-10,
+          vx:Math.sin(S.time*2+Math.random()*4)*.5,
+          vy:1+Math.random()*2,
+          life:80+Math.random()*40,
+          color:['#ff6600','#ff4400','#cc3300','#ffaa00','#dd5500'][Math.random()*5|0],
+          size:3+Math.random()*3,
+          type:'leaf',wobble:Math.random()*Math.PI*2
+        };
+        break;
+        
+      case'winter':
+        // White snow particles drift down on floors with windows (F1,F2,F4)
+        if([1,2,4].includes(S.floor)||Math.random()<.3){
+          newParticle={
+            x:Math.random()*W,y:-10,
+            vx:Math.sin(S.time+Math.random()*4)*.8,
+            vy:.5+Math.random()*1.5,
+            life:100+Math.random()*60,
+            color:'#ffffff',size:2+Math.random()*2,
+            type:'snow'
+          };
+        }
+        break;
+    }
+    
+    if(newParticle){
+      S.seasonalParticles.push(newParticle);
+    }
+  }
+  
+  // Update seasonal particles
+  for(let i=S.seasonalParticles.length-1;i>=0;i--){
+    const p=S.seasonalParticles[i];
+    p.x+=p.vx;
+    p.y+=p.vy;
+    p.life--;
+    
+    // Special movement for different types
+    if(p.type==='leaf'){
+      p.wobble+=dt*3;
+      p.x+=Math.sin(p.wobble)*.5;
+    }else if(p.type==='firefly'){
+      p.pulse+=dt*4;
+    }
+    
+    if(p.life<=0||p.y>H+20||p.x<-20||p.x>W+20){
+      S.seasonalParticles.splice(i,1);
+      continue;
+    }
+  }
+  
+  // Cap seasonal particles at 20
+  if(S.seasonalParticles.length>20){
+    S.seasonalParticles=S.seasonalParticles.slice(-20);
+  }
+}
+
+function renderSeasonalEffects(){
+  S.seasonalParticles.forEach(p=>{
+    if(p.type==='firefly'){
+      // Pulsing yellow dots
+      const alpha=.5+Math.sin(p.pulse)*.4;
+      ctx.globalAlpha=alpha;
+      ctx.fillStyle=p.color;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha=1;
+    }else{
+      // Regular particles
+      ctx.globalAlpha=Math.min(1,p.life/30);
+      ctx.fillStyle=p.color;
+      
+      if(p.type==='leaf'){
+        // Rectangular leaves
+        ctx.save();
+        ctx.translate(p.x,p.y);
+        ctx.rotate(p.wobble*.5);
+        ctx.fillRect(-p.size/2,-p.size/3,p.size,p.size*.6);
+        ctx.restore();
+      }else{
+        // Circular particles (spring, snow)
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+        ctx.fill();
+      }
+      
+      ctx.globalAlpha=1;
+    }
+  });
+}
+
+function renderSeasonalOverlay(){
+  const season=getSeason();
+  
+  switch(season){
+    case'summer':
+      // Warm orange tint overlay
+      ctx.fillStyle='rgba(255,150,50,.03)';
+      ctx.fillRect(0,0,W,H);
+      break;
+      
+    case'autumn':
+      // Warm amber tint
+      ctx.fillStyle='rgba(255,120,40,.04)';
+      ctx.fillRect(0,0,W,H);
+      break;
+      
+    case'winter':
+      // Frost on window edges (F1, F2, F4)
+      if([1,2,4].includes(S.floor)){
+        ctx.strokeStyle='rgba(200,230,255,.3)';
+        ctx.lineWidth=2;
+        ctx.setLineDash([3,2]);
+        ctx.strokeRect(5,5,W-10,H-10);
+        ctx.setLineDash([]);
+      }
+      break;
+  }
+}
+
+// ═══════════════════════════════════════
+// §26d. ECHO MEMORY SYSTEM
 // ═══════════════════════════════════════
 async function loadVisitorMemory(){
   const name=LS.get('visitorName','Visitor');
@@ -1807,6 +2568,9 @@ function update(dt){
   // Track visited
   if(S.nearObject&&!S._visited.includes(S.nearObject.id)){S._visited.push(S.nearObject.id);LS.set('visited_objs',S._visited);Coins.earn(2,'explore');checkAchievements()}
   updatePixel(dt);
+  updateKittens(dt);
+  updateSeasonalEffects(dt);
+  updatePixelTalks(dt);
   if(S.thoughtTimer>0)S.thoughtTimer-=dt;
   S.idleThoughtTimer+=dt;
   if(!S.echo.moving&&S.idleThoughtTimer>20+Math.random()*10){S.idleThoughtTimer=0;const pool=[...BASE_THOUGHTS,...(FLOOR_THOUGHTS[S.floor]||[])];showThought(pool[Math.random()*pool.length|0])}
@@ -1818,6 +2582,8 @@ function update(dt){
   DATA_FRAGMENTS.filter(f=>f.floor===S.floor&&!S.dataFragments.includes(f.id)).forEach(f=>{if(Math.hypot(S.echo.x-f.x,S.echo.y-f.y)<25){S.dataFragments.push(f.id);LS.set('dataFragments',S.dataFragments);Coins.earn(50,'fragment');showNotification('💾 Data Fragment Found! ('+S.dataFragments.length+'/5)');checkAchievements()}});
   // Track floor visits
   const fv=LS.get('floorsVisited',[]);if(!fv.includes(S.floor)){fv.push(S.floor);LS.set('floorsVisited',fv);checkAchievements()}
+  // Update mobile controls
+  if(typeof MobileControls!=='undefined')MobileControls.updateActionButtons();
   // Multiplayer: send position & lerp others
   EchoWS.sendPosition();
   for(const id in S.otherPlayers){const op=S.otherPlayers[id];op.x+=(op.tx-op.x)*.2;op.y+=(op.ty-op.y)*.2;if(op.swingTimer>0){op.swingTimer-=dt*3;if(op.swingTimer<0)op.swingTimer=0}}
@@ -1859,7 +2625,13 @@ function interact(){
     case'fountain':showThought("The water is so soothing...");Coins.earn(1,'fountain');break;
     case'pond':showThought("Look at those lily pads...");break;
     case'waterstation':showWateringMenu();break;
-    case'portal':showThought("It hums at 432Hz...");break;
+    case'portal':
+      if(S.stationStats.milestones.includes('portal_open')){
+        showPortalDimension();
+      } else {
+        showThought("It hums at 432Hz...");
+      }
+      break;
     case'vault':showVault();break;
     case'artifacts':showThought("Ancient and mysterious...");Coins.earn(2,'artifacts');break;
     case'journal':showJournal();break;
@@ -1895,6 +2667,90 @@ function petPixel(){
 }
 
 function showThought(text,dur=6){S.thoughtText=text;S.thoughtTimer=dur}
+
+// ═══════════════════════════════════════
+// §18b. LIGHTSABER FUNCTIONS
+// ═══════════════════════════════════════
+function toggleSabers(){
+  if(!S._visitorSaber){
+    S._visitorSaber='green';
+    S._saberGreen=0;S._saberBlue=0;
+    const target=S._visitorSaber==='green'?'_saberGreen':'_saberBlue';
+    const iv=setInterval(()=>{
+      S[target]+=0.1;
+      if(S[target]>=1){S[target]=1;clearInterval(iv)}
+    },50);
+    playSaberSound('ignite');
+    showThought('Green saber ignited! ⚔️');
+  } else {
+    // Switch saber
+    S._visitorSaber=S._visitorSaber==='green'?'blue':'green';
+    S._saberGreen=0;S._saberBlue=0;
+    const target=S._visitorSaber==='green'?'_saberGreen':'_saberBlue';
+    const iv=setInterval(()=>{
+      S[target]+=0.1;
+      if(S[target]>=1){S[target]=1;clearInterval(iv)}
+    },50);
+    playSaberSound('ignite');
+    showThought(`Switched to ${S._visitorSaber} saber! ⚔️`);
+  }
+  
+  if(ws?.readyState===1){
+    ws.send(JSON.stringify({type:'player.saber',saber:S._visitorSaber}));
+  }
+  
+  if(typeof MobileControls!=='undefined')MobileControls.updateActionButtons();
+}
+
+function swingSaber(){
+  if(!S._visitorSaber)return;
+  S._saberSwing=1;
+  setTimeout(()=>S._saberSwing=0,600);
+  // Send swing to multiplayer
+  if(S.useVisitor&&ws?.readyState===1){
+    ws.send(JSON.stringify({type:'player.swing',saber:S._visitorSaber,dir:S.visitor.dir}));
+  }
+  playSaberSound('swing');
+}
+
+function updateSabers(dt){
+  // Animate saber ignition
+  if(S._saberSwing>0){
+    S._saberSwing-=dt*1.67; // 600ms duration
+    if(S._saberSwing<=0)S._saberSwing=0;
+  }
+}
+
+function playSaberSound(type){
+  if(!S.audioCtx)return;
+  const c=S.audioCtx,n=c.currentTime,v=S.volume*.2;
+  const o=c.createOscillator(),g=c.createGain();
+  o.connect(g);g.connect(S.masterGain);
+  
+  if(type==='ignite'){
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(80,n);
+    o.frequency.exponentialRampToValueAtTime(800,n+.6);
+    g.gain.setValueAtTime(v,n);
+    g.gain.exponentialRampToValueAtTime(.001,n+.8);
+    o.start(n);o.stop(n+.8);
+  } else if(type==='swing'){
+    o.type='sine';
+    o.frequency.setValueAtTime(400,n);
+    o.frequency.exponentialRampToValueAtTime(200,n+.4);
+    g.gain.setValueAtTime(v*.5,n);
+    g.gain.exponentialRampToValueAtTime(.001,n+.5);
+    o.start(n);o.stop(n+.5);
+  } else if(type==='clash'){
+    o.type='square';
+    o.frequency.setValueAtTime(800,n);
+    o.frequency.setValueAtTime(1200,n+.1);
+    o.frequency.exponentialRampToValueAtTime(300,n+.8);
+    g.gain.setValueAtTime(v*1.5,n);
+    g.gain.exponentialRampToValueAtTime(.001,n+.8);
+    o.start(n);o.stop(n+.8);
+  }
+}
 
 // ═══════════════════════════════════════
 // §19. POPUPS & MENUS
@@ -1949,6 +2805,98 @@ function showGardenMenu(){
   const{p:el}=createPopup(html);
   el.querySelectorAll('.water-btn').forEach(btn=>btn.onclick=()=>{waterPlant(parseInt(btn.dataset.idx));el.closest('.popup-overlay').remove();showGardenMenu()});
   el.querySelectorAll('.harvest-btn').forEach(btn=>btn.onclick=()=>{harvestPlant(parseInt(btn.dataset.idx));el.closest('.popup-overlay').remove();showGardenMenu()});
+}
+
+function showPortalDimension(){
+  const {p}=createPopup(`
+    <h3 style="color:#00fff7">🌀 Portal Dimension</h3>
+    <div style="background:#000008;height:200px;position:relative;overflow:hidden;border-radius:8px;margin:10px 0">
+      <canvas id="portal-canvas" width="380" height="200" style="display:block"></canvas>
+    </div>
+    <p style="color:#aaa;font-size:11px;text-align:center">A glimpse into infinite possibilities...</p>
+  `);
+  
+  // Render mini starfield with floating islands
+  const portalCanvas=p.querySelector('#portal-canvas');
+  const portalCtx=portalCanvas.getContext('2d');
+  
+  let portalTime=0;
+  const portalAnim=()=>{
+    portalTime+=0.016;
+    
+    // Deep space background
+    portalCtx.fillStyle='#000008';
+    portalCtx.fillRect(0,0,380,200);
+    
+    // Swirling starfield
+    for(let i=0;i<150;i++){
+      const angle=portalTime*0.5+i*0.1;
+      const radius=50+i*1.2;
+      const x=190+Math.cos(angle)*radius*(0.5+Math.sin(portalTime+i)*0.3);
+      const y=100+Math.sin(angle)*radius*0.3;
+      
+      if(x>0&&x<380&&y>0&&y<200){
+        const brightness=0.3+Math.sin(portalTime*2+i)*0.4;
+        portalCtx.fillStyle=`rgba(255,255,255,${brightness})`;
+        portalCtx.fillRect(x,y,1,1);
+      }
+    }
+    
+    // Floating islands
+    const islands=[
+      {x:100,y:80,size:20,color:'#4a8a4a'},
+      {x:280,y:60,size:25,color:'#8a6a4a'},
+      {x:200,y:140,size:30,color:'#6a4a8a'}
+    ];
+    
+    islands.forEach((island,i)=>{
+      const float=Math.sin(portalTime*1.5+i*2)*8;
+      const ix=island.x+Math.cos(portalTime*0.3+i)*10;
+      const iy=island.y+float;
+      
+      // Island glow
+      const glow=portalCtx.createRadialGradient(ix,iy,0,ix,iy,island.size*1.5);
+      glow.addColorStop(0,island.color+'80');
+      glow.addColorStop(1,'rgba(0,0,0,0)');
+      portalCtx.fillStyle=glow;
+      portalCtx.beginPath();
+      portalCtx.arc(ix,iy,island.size*1.5,0,Math.PI*2);
+      portalCtx.fill();
+      
+      // Island solid
+      portalCtx.fillStyle=island.color;
+      portalCtx.beginPath();
+      portalCtx.arc(ix,iy,island.size,0,Math.PI*2);
+      portalCtx.fill();
+      
+      // Island details
+      portalCtx.fillStyle='#2a4a2a';
+      portalCtx.fillRect(ix-island.size*0.3,iy-island.size*0.1,island.size*0.6,island.size*0.2);
+    });
+    
+    // Portal energy swirls
+    portalCtx.strokeStyle='rgba(0,255,200,0.6)';
+    portalCtx.lineWidth=2;
+    for(let i=0;i<5;i++){
+      const spiralAngle=portalTime*3+i*1.2;
+      const spiralRadius=30+i*8;
+      portalCtx.beginPath();
+      for(let a=0;a<Math.PI*4;a+=0.2){
+        const sx=190+Math.cos(spiralAngle+a)*spiralRadius*(1-a/(Math.PI*4));
+        const sy=100+Math.sin(spiralAngle+a)*spiralRadius*0.5*(1-a/(Math.PI*4));
+        if(a===0)portalCtx.moveTo(sx,sy);
+        else portalCtx.lineTo(sx,sy);
+      }
+      portalCtx.stroke();
+    }
+    
+    if(p.closest('.popup-overlay')){
+      requestAnimationFrame(portalAnim);
+    }
+  };
+  
+  requestAnimationFrame(portalAnim);
+  showThought("Infinite dimensions unfold before me... 🌀");
 }
 
 function showGardenPlotMenu(idx){
@@ -2417,6 +3365,10 @@ const EchoWS={ws:null,connected:false,
           showNotification('⚔️ SABER CLASH!');
         }
       }
+      else if(msg.type==='milestone.unlocked'){
+        // Milestone unlocked by someone!
+        triggerMilestone(msg.milestone.id);
+      }
       }catch{}};
     this.ws.onclose=()=>{this.connected=false;this.updateIndicator();setTimeout(()=>this.connect(),5000)};
     this.ws.onerror=()=>{this.connected=false;this.updateIndicator()}}catch{}},
@@ -2603,6 +3555,14 @@ function initInput(){
     // Click Pixel — walk to her then pet
     if(S.pixel.floor===S.floor&&Math.hypot(S.pixel.x-cx,S.pixel.y-10-cy)<20){
       if(S.useVisitor){S.visitor.walkTarget={x:S.pixel.x,y:S.pixel.y+15,action:()=>petPixel()}}else petPixel();return}
+    
+    // Click kittens — pet them!
+    for(const kitten of S.kittens.filter(k=>k.floor===S.floor)){
+      if(Math.hypot(kitten.x-cx,kitten.y-10-cy)<20){
+        if(S.useVisitor){S.visitor.walkTarget={x:kitten.x,y:kitten.y+15,action:()=>petKitten(kitten)}}else petKitten(kitten);
+        return;
+      }
+    }
     // Click Echo — walk to then interact
     if(S.echo.floor===S.floor&&Math.hypot(S.echo.x-cx,S.echo.y-20-cy)<30){
       if(S.useVisitor){S.visitor.walkTarget={x:S.echo.x,y:S.echo.y+15,action:()=>EchoAI.visitorClickEcho()}}else EchoAI.visitorClickEcho();return}
@@ -2659,7 +3619,7 @@ function initInput(){
     if(k==='ArrowRight'||k==='d'||k==='D')S.keys.right=true;
     if(k===' '){e.preventDefault();visitorInteract()}
     if((k==='e'||k==='E')&&S._visitorSaber&&S._saberSwing<=0){e.preventDefault();swingSaber()}
-    if((k==='q'||k==='Q')&&S._visitorSaber){e.preventDefault();S._visitorSaber=S._visitorSaber==='green'?'blue':'green';S._saberState=S._visitorSaber;playSaberSound('ignite');showThought(S._visitorSaber==='green'?'Switched to green!':'Switched to blue!')}
+    if((k==='q'||k==='Q')&&S._visitorSaber){e.preventDefault();toggleSabers()}
   });
   document.addEventListener('keyup',e=>{
     const k=e.key;
@@ -2706,12 +3666,18 @@ function init(){
   S._prevAchCount=S.achievements.length;
   showSuggestions();runWelcome();
   EchoWS.connect();
-  // Load visitor memory for Echo
+  // Load station stats and visitor memory
+  loadStationStats();
   loadVisitorMemory();
   // Visitor name prompt on first visit
   if(!LS.get('visitorName')){
     const name=prompt('Welcome to Echo\'s Station! 🔮\nEnter your name:','Visitor');
     LS.set('visitorName',name||'Visitor');
+    // Record visit after name is set
+    setTimeout(recordStationVisit,1000);
+  } else {
+    // Record visit for returning visitor
+    setTimeout(recordStationVisit,1000);
   }
   S.visitor.x=350;S.visitor.y=480;S.useVisitor=true;
   // Save visitor memory on page unload
