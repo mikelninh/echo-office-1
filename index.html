@@ -916,14 +916,14 @@ const SKINS=[
 // -- Visitor Skins --
 const VISITOR_SKINS=[
   {id:'hooded',label:'Hooded',icon:'🧑‍💻',color:'#44ccbb',cost:0,desc:'Classic teal hooded figure'},
-  {id:'astronaut',label:'Astronaut',icon:'👨‍🚀',color:'#ffffff',cost:0,desc:'White space suit'},
-  {id:'catsuit',label:'Cat Suit',icon:'🐱',color:'#222222',cost:0,desc:'Black with cat ears'},
-  {id:'alien',label:'Alien',icon:'👽',color:'#60ff60',cost:0,desc:'Green with antennae'},
-  {id:'robot',label:'Robot',icon:'🤖',color:'#c0c0c0',cost:0,desc:'Silver metallic'},
+  {id:'astronaut',label:'Astronaut',icon:'👨‍🚀',color:'#ffffff',cost:10,desc:'White space suit'},
+  {id:'catsuit',label:'Cat Suit',icon:'🐱',color:'#222222',cost:10,desc:'Black with cat ears'},
+  {id:'alien',label:'Alien',icon:'👽',color:'#60ff60',cost:10,desc:'Green with antennae'},
+  {id:'robot',label:'Robot',icon:'🤖',color:'#c0c0c0',cost:10,desc:'Silver metallic'},
   {id:'ghost',label:'Ghost',icon:'👻',color:'#f0f0f0',cost:15,desc:'Translucent white'},
   {id:'star',label:'Star',icon:'⭐',color:'#ffd700',cost:25,desc:'Golden sparkle'},
-  {id:'pirate',label:'Pirate',icon:'🏴‍☠️',color:'#8b4513',cost:0,desc:'Yarr! Space pirate'},
-  {id:'ninja',label:'Ninja',icon:'🥷',color:'#2a2a2a',cost:0,desc:'Silent and deadly'},
+  {id:'pirate',label:'Pirate',icon:'🏴‍☠️',color:'#8b4513',cost:15,desc:'Yarr! Space pirate'},
+  {id:'ninja',label:'Ninja',icon:'🥷',color:'#2a2a2a',cost:15,desc:'Silent and deadly'},
   {id:'wizard',label:'Wizard',icon:'🧙',color:'#6a3aaa',cost:20,desc:'Mystical robes'},
   {id:'angel',label:'Angel',icon:'😇',color:'#ffe0f0',cost:30,desc:'Heavenly glow'},
   {id:'demon',label:'Demon',icon:'😈',color:'#cc2244',cost:30,desc:'Dark and fiery'},
@@ -1318,60 +1318,79 @@ function getEchoSprite(skin,dir,frame){
 }
 
 function getPixelSprite(dir,frame,state){
-  // Anime/Jiji-style Pixel — big round head, huge green eyes, chibi proportions
-  const B='#1a1a2e',Bh='#2a2a3e',Bs='#28254a',G='#30ee50',Gd='#20cc40',Gh='#ffffff',C='#7a2aaa',CC='#c080ff',PK='#ffaaaa',T=0;
-  if(state==='sleep')return[[T,B,T,T,T,T,T,T,T,T],[B,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T,T],[T,Bh,B,B,B,B,B,Bh,B,T],[T,B,B,B,B,B,B,B,B,T],[T,T,B,C,CC,CC,C,B,B,B]];
+  // Jiji-style black cat — round head, HUGE sparkly green eyes, tiny pink nose, fluffy tail
+  const B='#111122',Bh='#1e1e30',Bs='#252540',G='#22ff55',Gd='#18cc44',Gh='#ffffff',Gs='#aaffcc',C='#8833cc',CC='#bb77ff',PK='#ff8899',W2='#cccccc',T=0;
+  if(state==='sleep'){
+    // Sleeping Jiji — curled up ball with tail
+    return[
+      [T, T, B, B, B, B, B, T, T, T, T, T],
+      [T, B, Bh,Bh,Bh,Bh,Bh,B, T, T, T, T],
+      [T, Bh,B, B, Bh,B, B, Bh,T, T, T, T],
+      [T, B, Bh,Bh,PK,Bh,Bh,B, T, T, T, T],
+      [T, T, B, C, CC,CC,C, B, B, B, B, T],
+      [T, T, T, B, Bh,B, Bh,Bh,Bh,Bh,B, T],
+      [T, T, T, T, B, B, B, B, B, B, Bs,B],
+    ];
+  }
   let grid;
   if(dir===0){
-    // Front — big round head, huge anime eyes, tiny body
+    // Front — round fluffy head, HUGE anime eyes with double highlight, tiny body, tail curls right
     grid=[
-      [T,B, T, T, T, T, T, T, B, T],  // pointy ears
-      [T,B, Bh,Bh,Bh,Bh,Bh,Bh,B, T],  // head top
-      [T,Bh,Bs,Bh,Bh,Bh,Bh,Bh,Bh,T],  // head with sheen
-      [T,B, G, G, Bh,Bh,G, G, B, T],  // BIG eyes row 1
-      [T,B, Gd,Gh,Bh,Bh,Gd,Gh,B, T],  // eyes row 2 (dark+highlight)
-      [T,Bh,Bh,Bh,PK,Bh,Bh,Bh,Bh,T],  // nose/mouth
-      [T,T, C, CC,CC,CC,CC,C, T, T],  // crystal collar
-      [T,T, T, B, Bh,B, T, T, T, T],  // tiny body
-      [T,T, T, B, T, B, T, T, T, T],  // tiny legs
+      [T, B, T, T, T, T, T, T, T, B, T, T],
+      [T, B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T, T],
+      [B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T],
+      [B, Bh,G, G, Bh,Bh,Bh,G, G, Bh,B, T],
+      [B, Bh,Gd,Gh,Bh,Bh,Bh,Gd,Gh,Bh,B, T],
+      [B, Bh,Gd,Gs,Bh,Bh,Bh,Gd,Gs,Bh,B, T],
+      [T, Bh,Bh,Bh,Bh,PK,Bh,Bh,Bh,Bh,T, T],
+      [T, T, Bh,W2,Bh,Bh,Bh,W2,Bh,T, T, T],
+      [T, T, C, CC,CC,CC,CC,CC,C, T, T, T],
+      [T, T, T, T, B, Bh,B, T, T, T, T, T],
+      [T, T, T, T, B, T, B, T, T, T, T, T],
+      [T, T, T, T, T, T, T, T, T, B, Bs,T],
     ];
   } else if(dir===3){
-    // Back view — big head, tiny body
+    // Back — round head, tail up
     grid=[
-      [T,B, T, T, T, T, T, T, B, T],
-      [T,B, Bh,Bh,Bh,Bh,Bh,Bh,B, T],
-      [T,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T],
-      [T,Bh,Bs,Bh,Bh,Bh,Bh,Bs,Bh,T],
-      [T,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T],
-      [T,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T],
-      [T,T, C, CC,CC,CC,CC,C, T, T],
-      [T,T, T, B, Bh,B, T, T, T, T],
-      [T,T, T, B, T, B, T, T, T, T],
+      [T, B, T, T, T, T, T, T, T, B, T, T],
+      [T, B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T, T],
+      [B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T],
+      [B, Bh,Bs,Bh,Bh,Bh,Bh,Bh,Bs,Bh,B, T],
+      [B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T],
+      [B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T],
+      [T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T, T],
+      [T, T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,T, T, T],
+      [T, T, C, CC,CC,CC,CC,CC,C, T, T, T],
+      [T, T, T, T, B, Bh,B, T, T, T, T, B],
+      [T, T, T, T, B, T, B, T, T, T, B, Bs],
+      [T, T, T, T, T, T, T, T, T, B, T, T],
     ];
   } else {
-    // Side view — big round head, one big eye, tiny body
+    // Side — round head, one HUGE eye, tail behind
     grid=[
-      [B, T, T, T, T, T, T, T],  // pointy ear
-      [B, Bh,Bh,Bh,Bh,Bh,T, T],  // head top
-      [Bh,Bs,Bh,Bh,Bh,Bh,T, T],  // head sheen
-      [Bh,G, G, Bh,Bh,Bh,T, T],  // BIG eye row 1
-      [Bh,Gd,Gh,Bh,Bh,Bh,T, T],  // eye row 2
-      [Bh,Bh,Bh,PK,Bh,Bh,T, T],  // nose
-      [T, C, CC,CC,C, T, T, T],  // collar
-      [T, T, B, Bh,B, T, T, T],  // tiny body
-      [T, T, B, T, B, T, T, T],  // tiny legs
+      [B, T, T, T, T, T, T, T, T, T],
+      [B, Bh,Bh,Bh,Bh,Bh,Bh,T, T, T],
+      [Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T, T],
+      [Bh,Bh,G, G, Bh,Bh,Bh,Bh,T, T],
+      [Bh,Bh,Gd,Gh,Bh,Bh,Bh,Bh,T, T],
+      [Bh,Bh,Gd,Gs,Bh,Bh,Bh,Bh,T, T],
+      [T, Bh,Bh,Bh,PK,Bh,Bh,T, T, T],
+      [T, T, Bh,W2,Bh,Bh,T, T, T, T],
+      [T, C, CC,CC,CC,C, T, T, T, T],
+      [T, T, B, Bh,B, T, T, T, T, T],
+      [T, T, B, T, B, T, T, T, T, T],
+      [T, T, T, T, T, T, T, B, Bs,B],
     ];
     if(dir===2)grid=grid.map(r=>[...r].reverse());
   }
-  // Walk animation — alternate legs
-  if(frame===1&&grid.length>=9){
-    if(dir===0||dir===3)grid[8]=[T,T,T,B,T,T,B,T,T,T];
-    else{grid[8]=dir===1?[T,T,B,T,T,B,T,T]:[T,T,B,T,T,B,T,T]}
+  // Walk animation
+  if(frame===1&&grid.length>=11){
+    if(dir===0||dir===3){grid[10]=[T,T,T,B,T,T,T,B,T,T,T,T]}
+    else{grid[10]=dir===1?[T,T,B,T,T,B,T,T,T,T]:[T,T,T,T,B,T,T,B,T,T];if(dir===2)grid[10]=[...grid[10]].reverse()}
   }
   return grid;
 }
 
-// ═══════════════════════════════════════
 // §11. RENDERING — SHARED
 // ═══════════════════════════════════════
 function renderWalls(floorColor,wallColor){
@@ -1448,7 +1467,7 @@ function renderTransformation(){
 
 function renderPixel(){
   const p=S.pixel;if(p.floor!==S.floor)return;
-  const grid=getPixelSprite(p.dir,p.frame,p.state);const scale=3;
+  const grid=getPixelSprite(p.dir,p.frame,p.state);const scale=4;
   const sprW=grid[0].length*scale,sprH=grid.length*scale;
   
   // Shadow
@@ -3702,6 +3721,9 @@ function renderSpacewalk(){
   // Instructions
   ctx.fillStyle='rgba(255,255,255,.8)';ctx.font='9px monospace';ctx.textAlign='center';
   ctx.fillText('WASD: Thrusters • ESC or 🚀: Return to station',W/2,H-20);
+  // Draw EXIT button on canvas (clickable)
+  ctx.fillStyle='rgba(255,60,60,.9)';ctx.fillRect(W-110,10,100,32);ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.strokeRect(W-110,10,100,32);
+  ctx.fillStyle='#fff';ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.fillText('EXIT EVA',W-60,31);ctx.textAlign='left';
   if(Math.hypot(sw.x-asteroidX,sw.y-asteroidY)<asteroidR+15){
     ctx.fillText('SPACE: Plant flag on asteroid',W/2,H-35);
   }
@@ -5074,6 +5096,8 @@ async function fetchWeather(){try{const r=await fetch('https://wttr.in/Berlin?fo
 function initInput(){
   canvas.addEventListener('click',e=>{
     const rect=canvas.getBoundingClientRect(),cx=(e.clientX-rect.left)/rect.width*W,cy=(e.clientY-rect.top)/rect.height*H;
+    // EXIT EVA button click
+    if(S.spacewalk.active&&cx>=W-110&&cx<=W-10&&cy>=10&&cy<=42){toggleSpacewalk();return}
     for(let i=0;i<6;i++)S.particles.push({x:cx,y:cy,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,life:15,color:'#00fff7',size:2});
     // Click Pixel — walk to her then pet
     if(S.pixel.floor===S.floor&&Math.hypot(S.pixel.x-cx,S.pixel.y-10-cy)<20){
@@ -5254,7 +5278,7 @@ function gameLoop(time){const dt=Math.min((time-lastTime)/1000,.05);lastTime=tim
 // §26. WELCOME & INIT
 // ═══════════════════════════════════════
 function showWelcomeWardrobe(){
-  const freeSkins=VISITOR_SKINS.filter(s=>s.cost===0);
+  const freeSkins=[{id:'explorer',label:'Explorer',icon:'🧑‍🚀',color:'#44ccbb'},{id:'hooded',label:'Hooded',icon:'🧑‍💻',color:'#44ccbb'},{id:'cadet',label:'Cadet',icon:'👮',color:'#3366cc'}];
   const ov=document.createElement('div');ov.id='welcome-overlay';
   ov.innerHTML=`
     <div id="welcome-popup">
