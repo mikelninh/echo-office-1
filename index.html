@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a14">
-<title>Echo's Station v16 🛸</title>
+<title>Echo's Station v17 🛸</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🛸</text></svg>">
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRWNobydzIFN0YXRpb24iLCJzaG9ydF9uYW1lIjoiRWNobyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTE0IiwidGhlbWVfY29sb3IiOiIjMGEwYTE0IiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnPjx0ZXh0IHk9JzgwJyBmb250LXNpemU9JzgwJz7wn5uoPC90ZXh0Pjwvc3ZnPiIsInNpemVzIjoiYW55IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
 <style>
@@ -23,7 +23,8 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 .hud-btn{width:32px;height:32px;background:rgba(10,10,20,.85);border:2px solid #444;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:border-color .2s}
 .hud-btn:hover{border-color:#00fff7}
 .hud-btn.active{border-color:#ff6ec7;background:rgba(255,110,199,.15)}
-#coin-hud{position:absolute;top:8px;left:8px;z-index:50;display:flex;align-items:center;gap:5px;background:rgba(10,10,20,.85);border:2px solid #554400;border-radius:8px;padding:5px 12px;font-size:15px;color:#ffd700;font-weight:bold}
+#coin-hud{position:absolute;top:8px;left:8px;z-index:50;display:flex;align-items:center;gap:5px;background:rgba(10,10,20,.85);border:2px solid #554400;border-radius:8px;padding:5px 12px;font-size:15px;color:#ffd700;font-weight:bold;cursor:pointer;transition:border-color .2s}
+#coin-hud:hover{border-color:#ffd700}
 #floor-hud{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:50;background:rgba(10,10,20,.85);border:2px solid #9b59b6;border-radius:8px;padding:5px 14px;font-size:13px;color:#c080ff;font-weight:bold}
 #interact-prompt{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);z-index:50;background:rgba(10,10,20,.9);border:2px solid #ffd080;border-radius:8px;padding:6px 14px;font-size:12px;color:#ffd080;display:none;white-space:nowrap;pointer-events:none}
 #volume-ctrl{position:absolute;top:44px;left:8px;z-index:50;display:flex;align-items:center;gap:4px}
@@ -120,6 +121,26 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 .tip-slider{width:80%;margin:8px auto;display:block;-webkit-appearance:none;background:#333;height:6px;border-radius:3px;outline:none}
 .tip-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:#ffd700;border-radius:50%;cursor:pointer}
 #scanlines{position:fixed;inset:0;pointer-events:none;z-index:9998;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.015) 2px,rgba(0,0,0,.015) 4px)}
+/* Shop tabs */
+.shop-tabs{display:flex;gap:2px;margin-bottom:10px;border-bottom:2px solid #333}
+.shop-tab{flex:1;padding:6px 4px;text-align:center;cursor:pointer;font-size:10px;font-family:inherit;color:#888;background:rgba(30,30,50,.5);border:1px solid #333;border-bottom:none;border-radius:6px 6px 0 0;transition:all .2s}
+.shop-tab:hover{color:#ddd;background:rgba(50,50,80,.5)}
+.shop-tab.active{color:#00fff7;background:rgba(0,255,247,.1);border-color:#00fff7}
+.shop-content{min-height:160px;max-height:300px;overflow-y:auto}
+.acc-card{display:inline-flex;flex-direction:column;align-items:center;width:80px;height:90px;margin:3px;cursor:pointer;border:2px solid #333;border-radius:8px;padding:4px;font-size:9px;color:#aaa;transition:border-color .2s;background:rgba(20,20,40,.5)}
+.acc-card:hover{border-color:#ff6ec7}
+.acc-card.owned{border-color:#4a4a6a}
+.acc-card.equipped{border-color:#00fff7;background:rgba(0,255,247,.08)}
+.acc-card .acc-icon{font-size:22px;margin-bottom:2px}
+.acc-card .acc-price{font-size:8px;color:#ffd700}
+.inv-section{margin:8px 0;padding:8px;background:rgba(20,20,40,.5);border-radius:6px;border:1px solid #333}
+.inv-section h4{color:#c080ff;font-size:11px;margin-bottom:6px}
+.inv-item{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;margin:2px;background:rgba(30,30,50,.5);border:1px solid #444;border-radius:4px;font-size:10px;cursor:pointer;transition:border-color .2s}
+.inv-item:hover{border-color:#00fff7}
+.inv-item.equipped{border-color:#ff6ec7;background:rgba(255,110,199,.1)}
+.daily-reward{text-align:center;padding:16px}
+.daily-reward .reward-amount{font-size:32px;color:#ffd700;font-weight:bold;animation:rewardPulse 1s ease infinite}
+@keyframes rewardPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 
 /* Responsive Layout */
 @media(max-width:900px){
@@ -149,6 +170,8 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
   <div style="position:relative;flex-shrink:0">
     <canvas id="game" width="800" height="600"></canvas>
     <div id="hud">
+      <div class="hud-btn" id="btn-shop" title="Item Shop">🛒</div>
+      <div class="hud-btn" id="btn-inventory" title="Inventory">🎒</div>
       <div class="hud-btn" id="btn-spacewalk" title="Spacewalk EVA">🚀</div>
       <div class="hud-btn" id="btn-visitor-skin" title="Visitor Wardrobe">👔</div>
       <div class="hud-btn" id="btn-skin" title="Echo Wardrobe">🔮</div>
@@ -992,6 +1015,26 @@ const PRIZE_ITEMS=[
   {id:'hat_space',name:'Space Helmet',icon:'🪖',cost:45},
 ];
 
+// -- Accessories (hats, trails, auras, pets) --
+const ACCESSORY_ITEMS=[
+  // Hats
+  {id:'hat_crown',name:'Crown',icon:'👑',type:'hat',cost:50,desc:'A golden crown for royalty',render:(cx,x,y)=>{cx.fillStyle='#ffd700';cx.fillRect(x-6,y-4,12,4);cx.fillRect(x-8,y-8,3,5);cx.fillRect(x-2,y-10,4,6);cx.fillRect(x+5,y-8,3,5);cx.fillStyle='#ff4444';cx.fillRect(x-1,y-5,2,2)}},
+  {id:'hat_tophat',name:'Top Hat',icon:'🎩',type:'hat',cost:20,desc:'A classy top hat',render:(cx,x,y)=>{cx.fillStyle='#1a1a2a';cx.fillRect(x-8,y-2,16,3);cx.fillRect(x-5,y-14,10,12);cx.fillStyle='#9b59b6';cx.fillRect(x-5,y-5,10,2)}},
+  {id:'hat_catears',name:'Cat Ears',icon:'😺',type:'hat',cost:15,desc:'Adorable cat ears',render:(cx,x,y)=>{cx.fillStyle='#ff69b4';cx.beginPath();cx.moveTo(x-8,y);cx.lineTo(x-4,y-10);cx.lineTo(x,y);cx.fill();cx.beginPath();cx.moveTo(x,y);cx.lineTo(x+4,y-10);cx.lineTo(x+8,y);cx.fill()}},
+  {id:'hat_halo',name:'Halo',icon:'😇',type:'hat',cost:30,desc:'A glowing angelic halo',render:(cx,x,y,t)=>{const g=.6+Math.sin(t*3)*.3;cx.strokeStyle=`rgba(255,215,0,${g})`;cx.lineWidth=2;cx.beginPath();cx.ellipse(x,y-6,8,3,0,0,Math.PI*2);cx.stroke();cx.shadowColor='#ffd700';cx.shadowBlur=8;cx.stroke();cx.shadowBlur=0}},
+  {id:'hat_devilhorns',name:'Devil Horns',icon:'😈',type:'hat',cost:25,desc:'Fiery devil horns',render:(cx,x,y)=>{cx.fillStyle='#cc2244';cx.beginPath();cx.moveTo(x-7,y);cx.lineTo(x-3,y-12);cx.lineTo(x-1,y-2);cx.fill();cx.beginPath();cx.moveTo(x+7,y);cx.lineTo(x+3,y-12);cx.lineTo(x+1,y-2);cx.fill()}},
+  // Trails
+  {id:'trail_sparkle',name:'Sparkle Trail',icon:'✨',type:'trail',cost:40,desc:'Sparkling particles follow you',trailColor:['#ffd700','#fff','#ff6ec7'],trailSize:2},
+  {id:'trail_fire',name:'Fire Trail',icon:'🔥',type:'trail',cost:60,desc:'Blazing fire trail',trailColor:['#ff4400','#ff8800','#ffcc00'],trailSize:3},
+  {id:'trail_rainbow',name:'Rainbow Trail',icon:'🌈',type:'trail',cost:80,desc:'A rainbow follows your steps',trailColor:['#ff0000','#ff8800','#ffff00','#00ff00','#0088ff','#8800ff'],trailSize:2},
+  // Auras
+  {id:'aura_purple',name:'Purple Glow',icon:'🟣',type:'aura',cost:30,desc:'A mystical purple aura',auraColor:'rgba(155,89,182,',auraSize:20},
+  {id:'aura_golden',name:'Golden Shimmer',icon:'🌟',type:'aura',cost:50,desc:'A shimmering golden aura',auraColor:'rgba(255,215,0,',auraSize:22},
+  // Mini Pets
+  {id:'pet_robot',name:'Mini Robot',icon:'🤖',type:'pet',cost:100,desc:'A tiny robot companion',petColor:'#c0c0c0',petAccent:'#ff0000'},
+  {id:'pet_fairy',name:'Fairy',icon:'🧚',type:'pet',cost:75,desc:'A magical fairy friend',petColor:'#ff69b4',petAccent:'#ffd700'},
+];
+
 // -- Furniture types for user rooms --
 const FURNITURE_TYPES = {
   // Free furniture
@@ -1067,6 +1110,7 @@ const FLOOR_OBJECTS={
     {id:'neon',x:200,y:15,w:90,h:25,label:'"DREAM"',interact:false,collide:false},
     {id:'sabers',x:305,y:64,w:120,h:50,label:'⚔️ Lightsabers',interact:true,collide:false},
     {id:'growlab',x:620,y:320,w:80,h:70,label:'Grow Lab',interact:true,collide:true},
+    {id:'shop_terminal',x:440,y:480,w:60,h:50,label:'🛒 Item Shop',interact:true,collide:true},
   ],
   2:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
@@ -1767,6 +1811,16 @@ function renderFloor1(){
   // Wall glow when ignited
   if(gIgnite>0||bIgnite>0){const mixR=gIgnite*.1,mixB=bIgnite*.15;const sg=ctx.createRadialGradient(lsX+55,lsY+12,0,lsX+55,lsY+12,50);sg.addColorStop(0,`rgba(${30+bIgnite*40},${100+gIgnite*100},${50+bIgnite*150},${Math.max(mixR,mixB)})`);sg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=sg;ctx.fillRect(lsX-30,lsY-20,170,70)}
 
+  // Shop terminal
+  const st=getObjects().find(o=>o.id==='shop_terminal');if(st){
+    ctx.fillStyle='#2a2a3a';ctx.fillRect(st.x,st.y,st.w,st.h);
+    ctx.fillStyle='#1a1a2e';ctx.fillRect(st.x+4,st.y+4,st.w-8,st.h-16);
+    const shopGlow=.5+Math.sin(S.time*2)*.3;
+    ctx.fillStyle=`rgba(0,255,247,${shopGlow*.15})`;ctx.fillRect(st.x+4,st.y+4,st.w-8,st.h-16);
+    ctx.fillStyle='#00fff7';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText('SHOP',st.x+st.w/2,st.y+st.h/2-2);
+    ctx.fillStyle=`rgba(0,255,247,${shopGlow})`;ctx.font='16px sans-serif';ctx.fillText('🛒',st.x+st.w/2,st.y+st.h/2+14);ctx.textAlign='left';
+    ctx.strokeStyle=`rgba(0,255,247,${shopGlow*.5})`;ctx.lineWidth=1;ctx.strokeRect(st.x+2,st.y+2,st.w-4,st.h-4);
+  }
   // Ambient lighting
   const lg=ctx.createRadialGradient(620,120,10,620,120,140);lg.addColorStop(0,'rgba(255,180,80,.08)');lg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=lg;ctx.fillRect(0,0,W,H);
 }
@@ -2732,6 +2786,10 @@ function renderVisitor(ctx){
   const skin=VISITOR_SKINS.find(s=>s.id===v.skin)||VISITOR_SKINS[0];
   const c=skin.color,d=adjustBrightness(c,-20),l=adjustBrightness(c,20);
   
+  // Render aura behind avatar
+  const eqAcc=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+  if(eqAcc.aura){const auraItem=ACCESSORY_ITEMS.find(a=>a.id===eqAcc.aura);if(auraItem){const pulse=.15+Math.sin(S.time*2)*.08;const g=ctx.createRadialGradient(v.x,v.y-sz*sc/2,2,v.x,v.y-sz*sc/2,auraItem.auraSize);g.addColorStop(0,auraItem.auraColor+pulse+')');g.addColorStop(1,auraItem.auraColor+'0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(v.x,v.y-sz*sc/2,auraItem.auraSize,0,Math.PI*2);ctx.fill()}}
+
   ctx.save();ctx.translate(v.x-sz*sc/2,v.y-sz*sc);
   
   // Skin-specific rendering
@@ -2811,6 +2869,9 @@ function renderVisitor(ctx){
   // Shadow
   ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(1*sc,9*sc,8*sc,sc);
   ctx.restore();
+  
+  // Accessories (hat, trail, pet — aura rendered before avatar via renderVisitorAccessories)
+  renderVisitorAccessories(ctx,v);
   
   // Name label
   ctx.fillStyle=skin.color;ctx.font='bold 9px monospace';ctx.textAlign='center';
@@ -3785,6 +3846,7 @@ function interact(){
     case'window':case'domewindow':fetchWeather();showThought("Earth is beautiful...");break;
     case'server':showThought(`Uptime: ${Math.floor(S.time/60)}m | Vibes: 100%`);break;
     case'wardrobe':showVisitorSkinPanel();break;
+    case'shop_terminal':showItemShop();break;
     case'coffeetable':showGuestbook();break;
     case'growlab':showGardenMenu();break;
     case'tv':TV.nextChannel();showThought('📺 '+TV.channels[TV.channel]);break;
@@ -4251,6 +4313,341 @@ function showJournal(){
   let html='<h3>📔 Echo\'s Journal</h3>';
   JOURNAL_ENTRIES.forEach((e,i)=>{html+=`<div style="padding:6px;margin:4px 0;background:rgba(30,30,50,.5);border-left:2px solid #c0a060;font-size:10px;color:#ccc">${e}</div>`});
   createPopup(html);Coins.earn(2,'journal');
+}
+
+// ═══════════════════════════════════════
+// §19b. ITEM SHOP & ACCESSORIES (v17)
+// ═══════════════════════════════════════
+
+function showItemShop(initialTab){
+  const tab=initialTab||'skins';
+  const ownedSkins=LS.get('visitorSkinsOwned',[]);
+  const ownedAcc=LS.get('visitorAccessories',[]);
+  const equipped=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+  const ownedFurniture=LS.get('ownedFurniture',[]);
+
+  let html='<h3>🛒 Item Shop</h3><p style="font-size:10px;color:#888;margin-bottom:6px">Balance: <span style="color:#ffd700">' + Coins.count + '◈</span></p>';
+  html+='<div class="shop-tabs">';
+  html+='<div class="shop-tab'+(tab==='skins'?' active':'')+'" data-tab="skins">👔 Skins</div>';
+  html+='<div class="shop-tab'+(tab==='furniture'?' active':'')+'" data-tab="furniture">🪑 Furniture</div>';
+  html+='<div class="shop-tab'+(tab==='accessories'?' active':'')+'" data-tab="accessories">✨ Accessories</div>';
+  html+='<div class="shop-tab'+(tab==='special'?' active':'')+'" data-tab="special">⭐ Special</div>';
+  html+='</div>';
+
+  // Skins tab
+  html+='<div class="shop-content" data-content="skins" style="'+(tab!=='skins'?'display:none':'')+'">';
+  html+='<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px">';
+  VISITOR_SKINS.forEach(sk=>{
+    const owned=sk.cost===0||ownedSkins.includes(sk.id);
+    const current=S.visitor.skin===sk.id;
+    html+='<div class="skin-card'+(current?' active':'')+'" data-action="buy-skin" data-id="'+sk.id+'" data-cost="'+sk.cost+'">';
+    html+='<div class="icon">'+sk.icon+'</div><div style="font-size:9px">'+sk.label+'</div>';
+    html+='<div class="lock" style="font-size:8px;color:'+(owned?'#0f0':'#ffd700')+'">'+(current?'WORN':owned?'OWNED':sk.cost+'◈')+'</div></div>';
+  });
+  html+='</div></div>';
+
+  // Furniture tab
+  html+='<div class="shop-content" data-content="furniture" style="'+(tab!=='furniture'?'display:none':'')+'">';
+  html+='<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px">';
+  Object.entries(FURNITURE_TYPES).forEach(([key,ft])=>{
+    if(ft.requirement)return;
+    const owned=ownedFurniture.includes(key);
+    html+='<div class="acc-card'+(owned?' owned':'')+'" data-action="buy-furn" data-id="'+key+'" data-cost="'+ft.cost+'">';
+    html+='<div class="acc-icon">'+ft.icon+'</div><div style="font-size:9px">'+ft.name+'</div>';
+    html+='<div class="acc-price">'+(ft.cost===0?'FREE':ft.cost+'◈')+'</div></div>';
+  });
+  html+='</div></div>';
+
+  // Accessories tab
+  html+='<div class="shop-content" data-content="accessories" style="'+(tab!=='accessories'?'display:none':'')+'">';
+  const accTypes=[{label:'🎩 Hats',type:'hat'},{label:'✨ Trails',type:'trail'},{label:'🟣 Auras',type:'aura'},{label:'🤖 Mini Pets',type:'pet'}];
+  accTypes.forEach(at=>{
+    html+='<div style="margin:6px 0"><div style="font-size:10px;color:#c080ff;margin-bottom:4px">'+at.label+'</div><div style="display:flex;flex-wrap:wrap;gap:3px">';
+    ACCESSORY_ITEMS.filter(a=>a.type===at.type).forEach(acc=>{
+      const owned=ownedAcc.includes(acc.id);
+      const isEquipped=equipped[acc.type]===acc.id;
+      html+='<div class="acc-card'+(owned?' owned':'')+(isEquipped?' equipped':'')+'" data-action="buy-acc" data-id="'+acc.id+'" data-cost="'+acc.cost+'" data-type="'+acc.type+'">';
+      html+='<div class="acc-icon">'+acc.icon+'</div><div style="font-size:9px">'+acc.name+'</div>';
+      html+='<div class="acc-price">'+(isEquipped?'EQUIPPED':owned?'OWNED':acc.cost+'◈')+'</div></div>';
+    });
+    html+='</div></div>';
+  });
+  html+='</div>';
+
+  // Special tab
+  html+='<div class="shop-content" data-content="special" style="'+(tab!=='special'?'display:none':'')+'">';
+  html+='<div style="text-align:center;padding:30px 10px"><div style="font-size:32px;margin-bottom:8px">🚧</div>';
+  html+='<div style="color:#c080ff;font-size:13px;font-weight:bold">Coming Soon!</div>';
+  html+='<div style="color:#888;font-size:10px;margin-top:6px">Limited edition & seasonal items will appear here.<br>Check back often!</div></div>';
+  html+='</div>';
+
+  const{p}=createPopup(html);
+
+  // Tab switching
+  p.querySelectorAll('.shop-tab').forEach(t=>{
+    t.onclick=()=>{
+      p.querySelectorAll('.shop-tab').forEach(tt=>tt.classList.remove('active'));
+      t.classList.add('active');
+      p.querySelectorAll('.shop-content').forEach(c=>c.style.display='none');
+      const content=p.querySelector('[data-content="'+t.dataset.tab+'"]');
+      if(content)content.style.display='';
+    };
+  });
+
+  // Buy skin
+  p.querySelectorAll('[data-action="buy-skin"]').forEach(card=>{
+    card.onclick=()=>{
+      const id=card.dataset.id,cost=parseInt(card.dataset.cost)||0;
+      const owned=cost===0||LS.get('visitorSkinsOwned',[]).includes(id);
+      if(!owned){
+        if(!Coins.canAfford(cost)){showNotification('Need more ◈!');return}
+        Coins.spend(cost,'skin');
+        const skins=LS.get('visitorSkinsOwned',[]);skins.push(id);LS.set('visitorSkinsOwned',skins);
+        showNotification('Purchased '+VISITOR_SKINS.find(s=>s.id===id).label+'!');
+      }
+      S.visitor.skin=id;LS.set('visitorSkin',id);
+      p.closest('.popup-overlay').remove();showItemShop('skins');
+    };
+  });
+
+  // Buy furniture
+  p.querySelectorAll('[data-action="buy-furn"]').forEach(card=>{
+    card.onclick=()=>{
+      const id=card.dataset.id,cost=parseInt(card.dataset.cost)||0;
+      const inv=LS.get('ownedFurniture',[]);
+      if(inv.includes(id)){showNotification('Already in inventory!');return}
+      if(cost>0&&!Coins.canAfford(cost)){showNotification('Need more ◈!');return}
+      if(cost>0)Coins.spend(cost,'furniture');
+      inv.push(id);LS.set('ownedFurniture',inv);
+      showNotification('Added '+FURNITURE_TYPES[id].name+' to inventory! 🎒');
+      p.closest('.popup-overlay').remove();showItemShop('furniture');
+    };
+  });
+
+  // Buy/equip accessories
+  p.querySelectorAll('[data-action="buy-acc"]').forEach(card=>{
+    card.onclick=()=>{
+      const id=card.dataset.id,cost=parseInt(card.dataset.cost)||0,type=card.dataset.type;
+      const owned=LS.get('visitorAccessories',[]);
+      const eq=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+      if(!owned.includes(id)){
+        if(!Coins.canAfford(cost)){showNotification('Need more ◈!');return}
+        Coins.spend(cost,'accessory');
+        owned.push(id);LS.set('visitorAccessories',owned);
+        showNotification('Purchased '+ACCESSORY_ITEMS.find(a=>a.id===id).name+'!');
+      }
+      // Equip/unequip
+      if(eq[type]===id){eq[type]=null;showNotification('Unequipped!')}
+      else{eq[type]=id;showNotification('Equipped '+ACCESSORY_ITEMS.find(a=>a.id===id).name+'!')}
+      LS.set('equippedAccessories',eq);
+      p.closest('.popup-overlay').remove();showItemShop('accessories');
+    };
+  });
+}
+
+function showInventory(){
+  const ownedSkins=LS.get('visitorSkinsOwned',[]);
+  const ownedAcc=LS.get('visitorAccessories',[]);
+  const equipped=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+  const ownedFurniture=LS.get('ownedFurniture',[]);
+
+  let html='<h3>🎒 Inventory</h3>';
+
+  // Skins section
+  html+='<div class="inv-section"><h4>👔 Skins</h4>';
+  const allSkins=VISITOR_SKINS.filter(s=>s.cost===0||ownedSkins.includes(s.id));
+  if(allSkins.length===0)html+='<div style="font-size:10px;color:#666">No skins yet</div>';
+  else allSkins.forEach(sk=>{
+    const worn=S.visitor.skin===sk.id;
+    html+='<div class="inv-item'+(worn?' equipped':'')+'" data-action="equip-skin" data-id="'+sk.id+'">'+sk.icon+' '+sk.label+(worn?' ✓':'')+'</div>';
+  });
+  html+='</div>';
+
+  // Accessories section
+  const accTypes=[{label:'🎩 Hats',type:'hat'},{label:'✨ Trails',type:'trail'},{label:'🟣 Auras',type:'aura'},{label:'🤖 Mini Pets',type:'pet'}];
+  accTypes.forEach(at=>{
+    const items=ACCESSORY_ITEMS.filter(a=>a.type===at.type&&ownedAcc.includes(a.id));
+    if(items.length===0)return;
+    html+='<div class="inv-section"><h4>'+at.label+'</h4>';
+    items.forEach(acc=>{
+      const isEq=equipped[acc.type]===acc.id;
+      html+='<div class="inv-item'+(isEq?' equipped':'')+'" data-action="equip-acc" data-id="'+acc.id+'" data-type="'+acc.type+'">'+acc.icon+' '+acc.name+(isEq?' ✓':'')+'</div>';
+    });
+    html+='</div>';
+  });
+
+  // Furniture section
+  if(ownedFurniture.length>0){
+    html+='<div class="inv-section"><h4>🪑 Furniture</h4>';
+    ownedFurniture.forEach(fid=>{
+      const ft=FURNITURE_TYPES[fid];if(!ft)return;
+      html+='<div class="inv-item">'+ft.icon+' '+ft.name+'</div>';
+    });
+    html+='</div>';
+  }
+
+  if(ownedAcc.length===0&&ownedFurniture.length===0)
+    html+='<p style="font-size:10px;color:#666;text-align:center;margin-top:12px">Visit the 🛒 Item Shop to buy accessories!</p>';
+
+  const{p}=createPopup(html);
+
+  // Equip skin
+  p.querySelectorAll('[data-action="equip-skin"]').forEach(el=>{
+    el.onclick=()=>{
+      S.visitor.skin=el.dataset.id;LS.set('visitorSkin',el.dataset.id);
+      showNotification('Equipped '+VISITOR_SKINS.find(s=>s.id===el.dataset.id).label+'!');
+      p.closest('.popup-overlay').remove();showInventory();
+    };
+  });
+
+  // Equip/unequip accessory
+  p.querySelectorAll('[data-action="equip-acc"]').forEach(el=>{
+    el.onclick=()=>{
+      const eq=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+      const type=el.dataset.type,id=el.dataset.id;
+      if(eq[type]===id){eq[type]=null;showNotification('Unequipped!')}
+      else{eq[type]=id;showNotification('Equipped '+ACCESSORY_ITEMS.find(a=>a.id===id).name+'!')}
+      LS.set('equippedAccessories',eq);
+      p.closest('.popup-overlay').remove();showInventory();
+    };
+  });
+}
+
+function showEarnInfo(){
+  createPopup('<h3>💰 How to Earn ◈</h3>'+
+    '<div style="font-size:11px;line-height:1.8;color:#ddd">'+
+    '<div style="padding:4px 0;border-bottom:1px solid #222">📅 <b style="color:#ffd700">Daily Login</b> — 5-75◈ (7-day streak)</div>'+
+    '<div style="padding:4px 0;border-bottom:1px solid #222">🚶 <b style="color:#ffd700">Explore Rooms</b> — 1◈ per room visit</div>'+
+    '<div style="padding:4px 0;border-bottom:1px solid #222">🕹️ <b style="color:#ffd700">Play Arcade</b> — win bonus ◈</div>'+
+    '<div style="padding:4px 0;border-bottom:1px solid #222">🐱 <b style="color:#ffd700">Pet Pixel</b> — 3◈ every 5 pets</div>'+
+    '<div style="padding:4px 0;border-bottom:1px solid #222">💾 <b style="color:#ffd700">Find Data Fragments</b> — 50◈ each</div>'+
+    '<div style="padding:4px 0;border-bottom:1px solid #222">⚔️ <b style="color:#ffd700">Win Duels</b> — 10-25◈</div>'+
+    '<div style="padding:4px 0;border-bottom:1px solid #222">🚀 <b style="color:#ffd700">EVA Debris Collection</b> — 2-7◈ per piece</div>'+
+    '<div style="padding:4px 0;border-bottom:1px solid #222">💰 <b style="color:#ffd700">Get Tips</b> — visitors can tip your room</div>'+
+    '<div style="padding:4px 0;border-bottom:1px solid #222">🌱 <b style="color:#ffd700">Harvest Plants</b> — 5-15◈</div>'+
+    '<div style="padding:4px 0">📗 <b style="color:#ffd700">Read Books</b> — bonus ◈ for all 12</div>'+
+    '</div><p style="text-align:center;margin-top:10px;color:#ffd700;font-size:12px">Current: '+Coins.count+'◈ · Lifetime: '+Coins.lifetime+'◈</p>');
+}
+
+// Daily Login Reward System
+const DailyReward={
+  REWARDS:[5,10,15,20,30,40,75],
+  check(){
+    const today=new Date().toISOString().slice(0,10);
+    const lastDay=LS.get('lastLoginDay',null);
+    if(lastDay===today)return;// Already claimed today
+
+    let streak=LS.get('loginStreak',0);
+    const lastDate=lastDay?new Date(lastDay):null;
+    const todayDate=new Date(today);
+
+    // Check if consecutive day
+    if(lastDate){
+      const diff=Math.floor((todayDate-lastDate)/(1000*60*60*24));
+      if(diff===1){streak++}
+      else if(diff>1){streak=0}// Streak broken
+    }
+    if(streak>=7)streak=0;// Reset after day 7
+
+    const reward=this.REWARDS[streak]||5;
+    LS.set('lastLoginDay',today);
+    LS.set('loginStreak',streak+1);
+
+    // Show reward popup after short delay
+    setTimeout(()=>this.showPopup(streak+1,reward),1500);
+  },
+  showPopup(day,amount){
+    Coins.earn(amount,'daily_login');
+    const streakDots=this.REWARDS.map((r,i)=>{
+      const done=i<day;const current=i===day-1;
+      return '<div style="display:inline-flex;flex-direction:column;align-items:center;margin:0 3px;opacity:'+(done?'1':'0.4')+'">'+
+        '<div style="width:24px;height:24px;border-radius:50%;border:2px solid '+(current?'#ffd700':done?'#00fff7':'#555')+';background:'+(current?'rgba(255,215,0,.2)':done?'rgba(0,255,247,.1)':'transparent')+';display:flex;align-items:center;justify-content:center;font-size:10px">'+(done?'✓':i+1)+'</div>'+
+        '<div style="font-size:8px;color:#ffd700;margin-top:2px">'+r+'◈</div></div>';
+    }).join('');
+
+    const{p}=createPopup(
+      '<div class="daily-reward">'+
+      '<div style="font-size:14px;color:#c080ff;margin-bottom:4px">📅 Daily Login Reward</div>'+
+      '<div style="font-size:11px;color:#888;margin-bottom:12px">Day '+day+' of 7</div>'+
+      '<div class="reward-amount">+'+amount+'◈</div>'+
+      '<div style="margin:16px 0;display:flex;justify-content:center;align-items:center">'+streakDots+'</div>'+
+      '<div style="font-size:10px;color:#888">'+(day<7?'Come back tomorrow for '+(this.REWARDS[day]||5)+'◈!':'Streak complete! 🎉 Resets tomorrow.')+'</div>'+
+      '</div>'
+    );
+
+    // Reward particles
+    for(let i=0;i<25;i++){
+      S.particles.push({x:W/2+(Math.random()-.5)*200,y:H/2+(Math.random()-.5)*100,vx:(Math.random()-.5)*4,vy:-Math.random()*3-1,life:50+Math.random()*30,color:['#ffd700','#ff6ec7','#00fff7'][Math.floor(Math.random()*3)],size:2+Math.random()*2});
+    }
+  }
+};
+
+// Accessory rendering on visitor (aura rendered separately before avatar)
+function renderVisitorAccessories(cx,v){
+  const eq=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+  const sc=3,sz=10;
+  const headX=v.x,headY=v.y-sz*sc;
+
+  // Hat (render above head)
+  if(eq.hat){
+    const hatItem=ACCESSORY_ITEMS.find(a=>a.id===eq.hat);
+    if(hatItem&&hatItem.render){
+      cx.save();
+      hatItem.render(cx,headX,headY+2,S.time);
+      cx.restore();
+    }
+  }
+
+  // Trail (render particles when moving)
+  if(eq.trail&&v.moving){
+    const trailItem=ACCESSORY_ITEMS.find(a=>a.id===eq.trail);
+    if(trailItem&&Math.random()<.4){
+      const colors=trailItem.trailColor;
+      S.particles.push({
+        x:v.x+(Math.random()-.5)*8,
+        y:v.y+(Math.random()-.5)*4,
+        vx:(Math.random()-.5)*1.5,
+        vy:-Math.random()*1.5-.5,
+        life:15+Math.random()*10,
+        color:colors[Math.floor(Math.random()*colors.length)],
+        size:trailItem.trailSize||2
+      });
+    }
+  }
+
+  // Mini Pet (follows at offset)
+  if(eq.pet){
+    const petItem=ACCESSORY_ITEMS.find(a=>a.id===eq.pet);
+    if(petItem){
+      // Pet follows with a bobbing motion
+      const petState=S._petState||(S._petState={x:v.x+18,y:v.y+5});
+      const tgtX=v.x+18,tgtY=v.y+5;
+      petState.x+=(tgtX-petState.x)*.08;
+      petState.y+=(tgtY-petState.y)*.08;
+      const bob=Math.sin(S.time*3)*2;
+      const px=petState.x,py=petState.y+bob;
+
+      if(eq.pet==='pet_robot'){
+        // Tiny robot
+        cx.fillStyle='#c0c0c0';cx.fillRect(px-4,py-8,8,6);// head
+        cx.fillStyle='#ff0000';cx.fillRect(px-1,py-7,2,1);cx.fillRect(px+1,py-7,2,1);// eyes
+        cx.fillStyle='#a0a0a0';cx.fillRect(px-5,py-2,10,6);// body
+        cx.fillStyle='#808080';cx.fillRect(px-3,py+4,2,3);cx.fillRect(px+1,py+4,2,3);// legs
+        // Antenna
+        cx.fillStyle='#ffd700';cx.fillRect(px,py-11,1,3);
+        cx.fillStyle=`rgba(255,215,0,${.5+Math.sin(S.time*6)*.3})`;cx.fillRect(px-1,py-12,3,2);
+      }else if(eq.pet==='pet_fairy'){
+        // Tiny fairy
+        cx.fillStyle='#ff69b4';cx.beginPath();cx.arc(px,py-4,3,0,Math.PI*2);cx.fill();// body
+        cx.fillStyle=`rgba(255,215,0,${.4+Math.sin(S.time*4)*.3})`;
+        // Wings
+        cx.beginPath();cx.ellipse(px-4,py-5,3,5,-.3,0,Math.PI*2);cx.fill();
+        cx.beginPath();cx.ellipse(px+4,py-5,3,5,.3,0,Math.PI*2);cx.fill();
+        // Sparkle trail
+        if(Math.random()<.3)S.particles.push({x:px+(Math.random()-.5)*6,y:py-4,vx:(Math.random()-.5),vy:Math.random()*.5,life:12,color:'#ffd700',size:1});
+      }
+    }
+  }
 }
 
 // Lightsaber system
@@ -5164,11 +5561,14 @@ function initInput(){
   $('#chat-send').onclick=()=>{const inp=$('#chat-input'),msg=inp.value.trim();if(msg){handleChat(msg);inp.value=''}};
   $('#chat-input').onkeydown=e=>{if(e.key==='Enter')$('#chat-send').click()};
   // HUD buttons
+  $('#btn-shop').onclick=showItemShop;
+  $('#btn-inventory').onclick=showInventory;
   $('#btn-spacewalk').onclick=toggleSpacewalk;
   $('#btn-visitor-skin').onclick=showVisitorSkinPanel;
   $('#btn-skin').onclick=showSkinPanel;
   $('#btn-trophy').onclick=showAchievements;
   $('#btn-music').onclick=()=>{if(!S.audioCtx)initAudio();toggleMusic()};
+  $('#coin-hud').onclick=showEarnInfo;
   $('#vol-slider').oninput=e=>{S.volume=e.target.value/100;LS.set('volume',e.target.value);if(S.masterGain)S.masterGain.gain.value=S.volume};
   $('#arcade-close').onclick=closeArcade;
   // Mobile D-pad for visitor
@@ -5349,7 +5749,7 @@ function init(){
   EchoAI.currentActivity=startAct;EchoAI.state='activity';EchoAI.activityTimer=0;
   $('#floor-hud').textContent=`F${S.floor} · ${FLOOR_NAMES[S.floor]}`;
   initInput();resizeCanvas();window.addEventListener('resize',resizeCanvas);
-  Coins.initVisitRewards();updateCaffeineHUD();initGarden();
+  Coins.initVisitRewards();updateCaffeineHUD();initGarden();DailyReward.check();
   S._prevAchCount=S.achievements.length;
   showSuggestions();runWelcome();
   EchoWS.connect();
