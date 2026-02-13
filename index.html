@@ -3784,7 +3784,7 @@ function interact(){
     case'fishtank':showThought("Here, fishies! 🐟");Coins.earn(1,'fish');break;
     case'window':case'domewindow':fetchWeather();showThought("Earth is beautiful...");break;
     case'server':showThought(`Uptime: ${Math.floor(S.time/60)}m | Vibes: 100%`);break;
-    case'wardrobe':showSkinPanel();break;
+    case'wardrobe':showVisitorSkinPanel();break;
     case'coffeetable':showGuestbook();break;
     case'growlab':showGardenMenu();break;
     case'tv':TV.nextChannel();showThought('📺 '+TV.channels[TV.channel]);break;
@@ -4198,7 +4198,7 @@ function showVisitorSkinPanel(){
   p.querySelectorAll('.skin-card').forEach(card=>{
     card.onclick=()=>{
       const id=card.dataset.id,cost=parseInt(card.dataset.cost)||0;
-      const owned=cost===0||LS.get('visitorSkinsOwned',[]).includes(id);
+      const owned=cost===0||LS.get('visitorSkinsOwned',[]).includes(id)||id===S.visitor.skin;
       
       if(!owned){
         if(!Coins.canAfford(cost)){showNotification('Need more ◈!');return}
