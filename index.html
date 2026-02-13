@@ -6081,8 +6081,8 @@ const WeaponSystem = {
       }
     } else if (wpn.style === 'ranged') {
       // Projectile
-      const tx = dir === 2 ? 1 : dir === 3 ? -1 : 0;
-      const ty = dir === 0 ? -1 : dir === 1 ? 1 : 0;
+      const tx = dir === 2 ? 1 : dir === 1 ? -1 : 0;
+      const ty = dir === 0 ? 1 : dir === 3 ? -1 : 0;
       this._projectiles.push({
         x: vx + tx * 15, y: vy - 12 + ty * 10,
         vx: tx * 6, vy: ty * 6,
