@@ -175,6 +175,8 @@ function listPublicRooms() {
               name: roomData.name,
               likes: roomData.likes || 0,
               visitors: roomData.visitors || 0,
+              earnings: roomData.earnings || 0,
+              tipTotal: roomData.tipTotal || 0,
               createdAt: roomData.createdAt
             });
           }
@@ -386,6 +388,41 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Room leaderboard endpoint (must be before generic room GET)
+  if (req.url === '/api/rooms/leaderboard' && req.method === 'GET') {
+    try {
+      const files = fs.readdirSync(ROOMS_DIR);
+      const rooms = [];
+      
+      files.forEach(file => {
+        if (file.endsWith('.json')) {
+          try {
+            const roomData = JSON.parse(fs.readFileSync(path.join(ROOMS_DIR, file), 'utf8'));
+            rooms.push({
+              owner: roomData.owner,
+              name: roomData.name,
+              earnings: roomData.earnings || 0,
+              tipTotal: roomData.tipTotal || 0,
+              likes: roomData.likes || 0,
+              visitors: roomData.visitors || 0
+            });
+          } catch (error) {
+            console.error('Error reading room for leaderboard:', file, error);
+          }
+        }
+      });
+      
+      rooms.sort((a, b) => b.earnings - a.earnings);
+      
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(rooms.slice(0, 20)));
+    } catch {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify([]));
+    }
+    return;
+  }
+
   // Rooms API
   if (req.url === '/api/rooms' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -407,7 +444,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (req.url.startsWith('/api/rooms/') && req.method === 'POST' && !req.url.includes('/like') && !req.url.includes('/visit')) {
+  if (req.url.startsWith('/api/rooms/') && req.method === 'POST' && !req.url.includes('/like') && !req.url.includes('/visit') && !req.url.includes('/earn') && !req.url.includes('/tip')) {
     const ownerName = decodeURIComponent(req.url.split('/')[3]);
     let body = '';
     req.on('data', c => body += c);
@@ -428,11 +465,13 @@ const server = http.createServer((req, res) => {
           return;
         }
         
-        // Preserve existing likes and visitor count
+        // Preserve existing likes, visitor count, and earnings
         const existing = loadRoom(ownerName);
         if (existing) {
           roomData.likes = existing.likes || 0;
           roomData.visitors = existing.visitors || 0;
+          roomData.earnings = existing.earnings || 0;
+          roomData.tipTotal = existing.tipTotal || 0;
         }
         
         roomData.createdAt = roomData.createdAt || Date.now();
@@ -521,6 +560,81 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Room earnings endpoint
+  if (req.url.startsWith('/api/rooms/') && req.url.endsWith('/earn') && req.method === 'POST') {
+    const ownerName = decodeURIComponent(req.url.split('/')[3]);
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { amount, source, visitor } = JSON.parse(body);
+        if (typeof amount !== 'number' || amount < 1 || amount > 10) {
+          res.writeHead(400); res.end('Invalid amount'); return;
+        }
+        
+        const room = loadRoom(ownerName);
+        if (!room) { res.writeHead(404); res.end('Room not found'); return; }
+        
+        // Don't earn from own room
+        if (visitor === ownerName) {
+          res.writeHead(400); res.end('Cannot earn from own room'); return;
+        }
+        
+        room.earnings = (room.earnings || 0) + amount;
+        saveRoom(ownerName, room);
+        
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, earnings: room.earnings }));
+      } catch {
+        res.writeHead(400); res.end('Bad request');
+      }
+    });
+    return;
+  }
+
+  // Tip endpoint
+  if (req.url.startsWith('/api/rooms/') && req.url.endsWith('/tip') && req.method === 'POST') {
+    const ownerName = decodeURIComponent(req.url.split('/')[3]);
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { amount, tipper } = JSON.parse(body);
+        if (typeof amount !== 'number' || amount < 1 || amount > 50) {
+          res.writeHead(400); res.end('Invalid tip amount (1-50)'); return;
+        }
+        if (!tipper || tipper === ownerName) {
+          res.writeHead(400); res.end('Cannot tip yourself'); return;
+        }
+        
+        const room = loadRoom(ownerName);
+        if (!room) { res.writeHead(404); res.end('Room not found'); return; }
+        
+        room.earnings = (room.earnings || 0) + amount;
+        room.tipTotal = (room.tipTotal || 0) + amount;
+        if (!room.tips) room.tips = [];
+        room.tips.push({ tipper, amount, time: Date.now() });
+        // Keep last 50 tips
+        if (room.tips.length > 50) room.tips = room.tips.slice(-50);
+        saveRoom(ownerName, room);
+        
+        // Broadcast tip to all connected visitors
+        broadcast({
+          type: 'room.tip',
+          owner: ownerName,
+          tipper,
+          amount
+        });
+        
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, earnings: room.earnings }));
+      } catch {
+        res.writeHead(400); res.end('Bad request');
+      }
+    });
+    return;
+  }
+
   // Visitor Memory API
   if (req.url === '/api/visitor-memory' && req.method === 'GET') {
     const url = new URL(req.url, `http://${req.headers.host}`);
@@ -570,11 +684,17 @@ const server = http.createServer((req, res) => {
   }
 
   // Static files
-  let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
+  const cleanUrl = req.url.split('?')[0]; // Strip query params
+  let filePath = path.join(__dirname, cleanUrl === '/' ? 'index.html' : cleanUrl);
   const ext = path.extname(filePath);
   fs.readFile(filePath, (err, data) => {
     if (err) { res.writeHead(404); res.end('Not found'); return; }
-    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
+    res.writeHead(200, { 
+      'Content-Type': MIME[ext] || 'application/octet-stream',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
     res.end(data);
   });
 });

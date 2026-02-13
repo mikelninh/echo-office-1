@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a14">
-<title>Echo's Station v15 🛸</title>
+<title>Echo's Station v16 🛸</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🛸</text></svg>">
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRWNobydzIFN0YXRpb24iLCJzaG9ydF9uYW1lIjoiRWNobyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTE0IiwidGhlbWVfY29sb3IiOiIjMGEwYTE0IiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnPjx0ZXh0IHk9JzgwJyBmb250LXNpemU9JzgwJz7wn5uoPC90ZXh0Pjwvc3ZnPiIsInNpemVzIjoiYW55IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
 <style>
@@ -99,6 +99,26 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 #chat-drawer-toggle{display:none;position:fixed;bottom:0;left:0;right:0;height:30px;background:rgba(10,10,20,.95);border-top:2px solid #333;color:#00fff7;z-index:100;cursor:pointer;align-items:center;justify-content:center}
 #chat-drawer-toggle::before{content:'💬 Echo\'s Chat - Tap to expand'}
 
+/* Welcome Wardrobe Popup */
+#welcome-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:8000;display:flex;align-items:center;justify-content:center}
+#welcome-popup{background:#1a1a2e;border:3px solid #9b59b6;border-radius:12px;padding:24px;max-width:400px;width:90%;color:#ddd;text-align:center}
+#welcome-popup h2{color:#00fff7;margin-bottom:6px;font-size:20px}
+#welcome-popup .subtitle{color:#c080ff;font-size:11px;margin-bottom:16px}
+#welcome-popup input[type="text"]{width:80%;background:#111;border:2px solid #555;color:#fff;padding:8px 12px;font-family:inherit;font-size:14px;border-radius:6px;text-align:center;outline:none;margin:8px 0}
+#welcome-popup input[type="text"]:focus{border-color:#00fff7}
+.welcome-skins{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:12px 0}
+.welcome-skin{width:60px;height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:2px solid #333;border-radius:8px;padding:4px;transition:all .2s}
+.welcome-skin:hover{border-color:#c080ff}
+.welcome-skin.selected{border-color:#00fff7;background:rgba(0,255,247,.1);box-shadow:0 0 12px rgba(0,255,247,.3)}
+.welcome-skin .ws-icon{font-size:24px}
+.welcome-skin .ws-label{font-size:8px;color:#aaa;margin-top:2px}
+#welcome-go{display:inline-block;padding:10px 32px;margin-top:12px;background:linear-gradient(135deg,#9b59b6,#ff6ec7);border:none;color:#fff;cursor:pointer;font-family:inherit;font-size:14px;font-weight:bold;border-radius:8px;transition:transform .2s,box-shadow .2s}
+#welcome-go:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(255,110,199,.4)}
+/* Room Info HUD */
+#room-info-hud{position:absolute;top:38px;left:50%;transform:translateX(-50%);z-index:50;background:rgba(10,10,20,.9);border:2px solid #c080ff;border-radius:8px;padding:4px 14px;font-size:11px;color:#ddd;display:none;white-space:nowrap;max-width:90%}
+/* Tip popup */
+.tip-slider{width:80%;margin:8px auto;display:block;-webkit-appearance:none;background:#333;height:6px;border-radius:3px;outline:none}
+.tip-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:#ffd700;border-radius:50%;cursor:pointer}
 #scanlines{position:fixed;inset:0;pointer-events:none;z-index:9998;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.015) 2px,rgba(0,0,0,.015) 4px)}
 
 /* Responsive Layout */
@@ -142,6 +162,7 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
     <div id="caffeine-hud"></div>
     <div id="interact-prompt">Press SPACE to interact</div>
     <div id="mood-hud">😊 Happy</div>
+    <div id="room-info-hud"></div>
     <div id="speech-bubble"></div>
     <!-- Virtual Joystick for Mobile -->
     <div id="virtual-joystick">
@@ -600,6 +621,7 @@ const RoomSystem = {
   builderMode: 'view', // 'view', 'place', 'select'
   selectedFurniture: null,
   placingFurniture: false,
+  visitingOwner: null, // who owns the room we're visiting (null = our own)
   
   furniture: LS.get('userRoomFurniture', []),
   wallColor: LS.get('userRoomWallColor', '#2a2a4a'),
@@ -609,13 +631,19 @@ const RoomSystem = {
   showBuilder() {
     this.isInBuilder = true;
     this.builderMode = 'view';
+    this.currentRoom = null;
+    this.visitingOwner = null;
     S.floor = 8; // Special floor for room builder
-    $('#floor-hud').textContent = 'F8 · Room Builder';
+    $('#floor-hud').textContent = '🏠 My Room';
+    $('#room-info-hud').style.display = 'none';
     showNotification('Room Builder - Click catalog to add furniture!');
   },
   
   exitBuilder() {
     this.isInBuilder = false;
+    this.currentRoom = null;
+    this.visitingOwner = null;
+    $('#room-info-hud').style.display = 'none';
     changeFloor(1); // Return to F1
   },
   
@@ -689,15 +717,22 @@ const RoomSystem = {
       const room = await response.json();
       
       this.currentRoom = room;
+      this.visitingOwner = ownerName;
+      this.isInBuilder = false;
       S.floor = 8; // Visit room as custom floor
-      $('#floor-hud').textContent = `${room.name} by ${room.owner}`;
+      $('#floor-hud').textContent = `🏠 ${room.name}`;
       
       // Record visit
-      fetch(`/api/rooms/${encodeURIComponent(ownerName)}/visit`, {
+      const visitRes = await fetch(`/api/rooms/${encodeURIComponent(ownerName)}/visit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ visitor: LS.get('visitorName', 'Anonymous') })
-      }).catch(console.error);
+      });
+      const visitData = await visitRes.json().catch(()=>({}));
+      if (visitData.visitors) room.visitors = visitData.visitors;
+      
+      // Show room info HUD
+      this.updateRoomInfoHUD();
       
       showNotification(`Visiting ${room.name}!`);
     } catch (error) {
@@ -706,24 +741,115 @@ const RoomSystem = {
     }
   },
   
+  updateRoomInfoHUD() {
+    const hud = $('#room-info-hud');
+    if (!this.currentRoom || !this.visitingOwner) {
+      hud.style.display = 'none';
+      return;
+    }
+    const r = this.currentRoom;
+    const isOwnRoom = r.owner === LS.get('visitorName', 'Visitor');
+    hud.style.display = 'block';
+    hud.innerHTML = `🏠 <b style="color:#00fff7">${r.name}</b> by <b style="color:#ff6ec7">${r.owner}</b> · 👁️ ${r.visitors||0} · ❤️ ${r.likes||0} · 💰 ${r.earnings||0}◈` +
+      (!isOwnRoom ? ` <span id="tip-room-btn" style="cursor:pointer;margin-left:6px;padding:2px 8px;background:rgba(255,215,0,.2);border:1px solid #ffd700;border-radius:4px;color:#ffd700">💰 Tip</span> <span id="like-room-btn" style="cursor:pointer;padding:2px 8px;background:rgba(255,110,199,.15);border:1px solid #ff6ec7;border-radius:4px;color:#ff6ec7">❤️ Like</span>` : '');
+    
+    // Attach event handlers
+    const tipBtn = hud.querySelector('#tip-room-btn');
+    if (tipBtn) tipBtn.onclick = () => this.showTipPopup(r.owner);
+    const likeBtn = hud.querySelector('#like-room-btn');
+    if (likeBtn) likeBtn.onclick = () => this.likeRoom(r.owner);
+  },
+  
+  showTipPopup(ownerName) {
+    const myCoins = Coins.count;
+    const maxTip = Math.min(50, myCoins);
+    if (maxTip < 1) { showNotification('Need at least 1◈ to tip!'); return; }
+    const {p} = createPopup(`
+      <h3>💰 Tip ${ownerName}</h3>
+      <p style="font-size:11px;color:#888;margin-bottom:8px">Send ◈ to show appreciation!</p>
+      <p style="text-align:center;font-size:24px;color:#ffd700;margin:12px 0" id="tip-amount-display">5◈</p>
+      <input type="range" class="tip-slider" id="tip-slider" min="1" max="${maxTip}" value="${Math.min(5,maxTip)}">
+      <p style="text-align:center;font-size:10px;color:#666">Your balance: ${myCoins}◈</p>
+      <div style="text-align:center;margin-top:12px">
+        <button class="drink-btn" id="tip-cancel">Cancel</button>
+        <button class="drink-btn" id="tip-send" style="border-color:#ffd700;color:#ffd700">Send Tip 💰</button>
+      </div>
+    `);
+    const slider = p.querySelector('#tip-slider');
+    const display = p.querySelector('#tip-amount-display');
+    slider.oninput = () => { display.textContent = slider.value + '◈'; };
+    p.querySelector('#tip-cancel').onclick = () => p.closest('.popup-overlay').remove();
+    p.querySelector('#tip-send').onclick = async () => {
+      const amount = parseInt(slider.value);
+      if (!Coins.canAfford(amount)) { showNotification('Not enough ◈!'); return; }
+      Coins.spend(amount, 'tip');
+      try {
+        await fetch(`/api/rooms/${encodeURIComponent(ownerName)}/tip`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount, tipper: LS.get('visitorName', 'Anonymous') })
+        });
+        showNotification(`💰 Tipped ${ownerName} ${amount}◈!`);
+        if (this.currentRoom) { this.currentRoom.earnings = (this.currentRoom.earnings || 0) + amount; this.updateRoomInfoHUD(); }
+      } catch { showNotification('Tip failed!'); }
+      p.closest('.popup-overlay').remove();
+    };
+  },
+  
+  async earnForOwner(amount, source) {
+    if (!this.visitingOwner) return;
+    const myName = LS.get('visitorName', 'Visitor');
+    if (myName === this.visitingOwner || myName === 'Visitor') return;
+    try {
+      await fetch(`/api/rooms/${encodeURIComponent(this.visitingOwner)}/earn`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, source, visitor: myName })
+      });
+      if (this.currentRoom) { this.currentRoom.earnings = (this.currentRoom.earnings || 0) + amount; this.updateRoomInfoHUD(); }
+      S.floatTexts.push({text:`+${amount}◈ → ${this.visitingOwner}`,x:W/2,y:60,color:'#ffd700',life:50});
+    } catch {}
+  },
+  
   async showRoomList() {
     try {
-      const response = await fetch('/api/rooms');
-      const rooms = await response.json();
+      const [roomsRes, lbRes] = await Promise.all([
+        fetch('/api/rooms'),
+        fetch('/api/rooms/leaderboard')
+      ]);
+      const rooms = await roomsRes.json();
+      const leaderboard = await lbRes.json().catch(()=>[]);
       
-      let html = '<h3>🏠 Visit Rooms</h3><p style="font-size:10px;color:#888;margin-bottom:8px">Explore user-created rooms!</p>';
+      // Sort rooms by popularity (visitors + likes)
+      rooms.sort((a,b) => ((b.visitors||0)+(b.likes||0)) - ((a.visitors||0)+(a.likes||0)));
+      
+      let html = '<h3>🏘️ Visit Rooms</h3><p style="font-size:10px;color:#888;margin-bottom:8px">Explore rooms created by visitors!</p>';
       
       if (rooms.length === 0) {
-        html += '<p style="color:#666">No public rooms yet. Be the first to create one!</p>';
+        html += '<p style="color:#666">No public rooms yet. Use the elevator to create yours!</p>';
       } else {
-        rooms.forEach(room => {
+        rooms.forEach((room, i) => {
+          const medal = i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
           html += `
-            <div class="drink-btn" style="width:100%;text-align:left;margin:4px 0" data-owner="${room.owner}">
-              <div style="font-weight:bold">${room.name}</div>
-              <div style="font-size:9px;color:#888">by ${room.owner} • ${room.visitors} visitors • ${room.likes} likes</div>
+            <div class="drink-btn" style="width:100%;text-align:left;margin:4px 0;padding:8px 12px" data-owner="${room.owner}">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="font-weight:bold;color:#00fff7">${medal}${room.name}</div>
+                <div style="font-size:9px;color:#ffd700">💰 ${room.earnings||0}◈</div>
+              </div>
+              <div style="font-size:9px;color:#888;margin-top:2px">by <b style="color:#ff6ec7">${room.owner}</b> · 👁️ ${room.visitors||0} · ❤️ ${room.likes||0}</div>
             </div>
           `;
         });
+      }
+      
+      // Earnings leaderboard
+      if (leaderboard.length > 0) {
+        html += '<div style="margin-top:12px;border-top:1px solid #333;padding-top:8px"><h3 style="font-size:12px;color:#ffd700">🏆 Top Earners</h3>';
+        leaderboard.slice(0,5).forEach((r,i) => {
+          const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
+          html += `<div style="font-size:10px;margin:2px 0;color:#ddd">${medal} <b style="color:#ff6ec7">${r.owner}</b> — <span style="color:#ffd700">${r.earnings}◈</span> (${r.visitors} visits, ${r.likes} ❤️)</div>`;
+        });
+        html += '</div>';
       }
       
       const { p } = createPopup(html);
@@ -2116,20 +2242,17 @@ function renderUserRoom(room){
     });
   }
   
-  // Like button for visited rooms
-  if(room.owner!==LS.get('visitorName','Visitor')){
-    ctx.fillStyle='rgba(30,30,50,.9)';
-    ctx.fillRect(W-100,H-40,80,30);
-    ctx.strokeStyle='#ff6ec7';
-    ctx.lineWidth=1;
-    ctx.strokeRect(W-100,H-40,80,30);
-    
-    ctx.fillStyle='#ff6ec7';
-    ctx.font='10px monospace';
-    ctx.textAlign='center';
-    ctx.fillText('❤️ Like Room',W-60,H-22);
-    ctx.textAlign='left';
-  }
+  // Room info bar at top
+  ctx.fillStyle='rgba(10,10,20,.85)';
+  ctx.fillRect(80,74,W-160,22);
+  ctx.strokeStyle='#c080ff';
+  ctx.lineWidth=1;
+  ctx.strokeRect(80,74,W-160,22);
+  ctx.font='9px monospace';ctx.textAlign='center';
+  ctx.fillStyle='#ddd';
+  const infoText=`🏠 ${room.name} by ${room.owner} · 👁️ ${room.visitors||0} · ❤️ ${room.likes||0} · 💰 ${room.earnings||0}◈`;
+  ctx.fillText(infoText,W/2,88);
+  ctx.textAlign='left';
 }
 
 function renderFurniture(furn){
@@ -2533,6 +2656,15 @@ function updateVisitor(dt){
   S.visitorNear=null;
   for(const o of getObjects()){if(!o.interact)continue;
     if(Math.abs(v.x-(o.x+o.w/2))<30&&Math.abs(v.y-(o.y+o.h/2))<30){S.visitorNear=o;break}}
+  // Also check room furniture when visiting someone's room
+  if(!S.visitorNear&&RoomSystem.currentRoom&&RoomSystem.currentRoom.furniture){
+    for(const furn of RoomSystem.currentRoom.furniture){
+      const ft=FURNITURE_TYPES[furn.type];if(!ft)continue;
+      if(Math.abs(v.x-(furn.x+ft.width/2))<30&&Math.abs(v.y-(furn.y+ft.height/2))<30){
+        S.visitorNear={id:'room_furn_'+furn.type,x:furn.x,y:furn.y,w:ft.width,h:ft.height,label:ft.name,interact:true,_furnType:furn.type};break;
+      }
+    }
+  }
 }
 function visitorInteract(){
   if(!S.useVisitor)return;
@@ -3676,7 +3808,7 @@ function interact(){
       }
       break;
     case'duel_leaderboard':showDuelLeaderboard();break;
-    // Floor 8 - Room Builder
+    // Floor 8 - Room Builder / Room Visit
     case'furniture_catalog':showFurnitureCatalog();break;
     case'wall_colors':showWallColorPicker();break;
     case'floor_colors':showFloorColorPicker();break;
@@ -3685,10 +3817,59 @@ function interact(){
     case'visit_rooms':RoomSystem.showRoomList();break;
     default:
       if(id.startsWith('growplot')){const idx=parseInt(id.replace('growplot',''))-1;showGardenPlotMenu(idx);break}
+      // Room furniture interactions (when visiting someone's room)
+      if(id.startsWith('room_furn_')&&RoomSystem.visitingOwner){
+        const furnType=S.nearObject._furnType||id.replace('room_furn_','');
+        handleRoomFurnitureInteract(furnType);
+        break;
+      }
   }
   // Pet Pixel if nearby
   const pdx=Math.abs(S.pixel.x-S.echo.x),pdy=Math.abs(S.pixel.y-S.echo.y);
   if(pdx<30&&pdy<30&&S.pixel.floor===S.floor)petPixel();
+}
+
+function handleRoomFurnitureInteract(furnType){
+  const owner=RoomSystem.visitingOwner;
+  switch(furnType){
+    case'arcade_cabinet':
+      showThought('🕹️ Playing the arcade!');
+      Coins.earn(1,'room_arcade');
+      RoomSystem.earnForOwner(2,'arcade');
+      break;
+    case'jukebox':
+      toggleMusic();showThought('🎵 Nice tunes!');
+      RoomSystem.earnForOwner(1,'jukebox');
+      break;
+    case'crystal_ball':
+      showFortune();
+      RoomSystem.earnForOwner(1,'crystal_ball');
+      break;
+    case'bookshelf':
+      openBookPopup();
+      RoomSystem.earnForOwner(1,'bookshelf');
+      break;
+    case'tv':
+      TV.nextChannel();showThought('📺 '+TV.channels[TV.channel]);
+      RoomSystem.earnForOwner(1,'tv');
+      break;
+    case'fish_tank':
+      showThought('🐟 Pretty fish!');
+      Coins.earn(1,'fish');
+      RoomSystem.earnForOwner(1,'fish_tank');
+      break;
+    case'lightsaber_rack':
+      showThought('⚔️ Cool saber collection!');
+      RoomSystem.earnForOwner(1,'sabers');
+      break;
+    case'neon_sign':
+      showThought('💫 Bright lights!');
+      break;
+    default:
+      const ft=FURNITURE_TYPES[furnType];
+      showThought(ft?`Nice ${ft.name}!`:'Interesting...');
+      break;
+  }
 }
 
 function petPixel(){
@@ -4472,17 +4653,20 @@ function openElevator(){
   // Regular floors 1-7
   for(let f=1;f<=7;f++){
     const locked=f===5&&Coins.lifetime<500;
-    const current=f===S.floor;
+    const current=f===S.floor&&!RoomSystem.currentRoom;
     html+=`<button class="floor-btn${current?' current':''}${locked?' locked':''}" data-floor="${f}">${current?'► ':''}F${f} — ${FLOOR_NAMES[f]}${locked?' (🔒 500◈ lifetime)':''}</button>`;
   }
   
-  // Room Builder (F8) - special access
+  // Divider
+  html+='<div style="border-top:1px solid #444;margin:6px 0"></div>';
+  
+  // My Room
   const hasRoom=RoomSystem.furniture.length>0||LS.get('userRoomName','My Room')!=='My Room';
-  const f8Current=S.floor===8;
-  html+=`<button class="floor-btn${f8Current?' current':''}" data-floor="8">${f8Current?'► ':''}F8 — ${hasRoom?'My Room':'Create Room'}</button>`;
+  const f8Current=S.floor===8&&!RoomSystem.currentRoom;
+  html+=`<button class="floor-btn${f8Current?' current':''}" data-floor="8" style="border-color:#c080ff">${f8Current?'► ':''}🏠 ${hasRoom?'My Room':'Create Room'}</button>`;
   
   // Visit Rooms option
-  html+=`<button class="floor-btn" data-action="visit">🏠 Visit Rooms</button>`;
+  html+=`<button class="floor-btn" data-action="visit" style="border-color:#ffd700">🏘️ Visit Rooms</button>`;
   
   html+='</div>';ov.innerHTML=html;
   ov.querySelector('.close-btn').onclick=()=>{ov.className='';removeElevatorKeyNav()};
@@ -4537,6 +4721,13 @@ function changeFloor(f){
   S.echo.floor=f;S.echo.x=80;S.echo.y=300;S.echo.moving=false;
   S.pixel.floor=f;S.pixel.x=100;S.pixel.y=310;
   S.dustMotes=[];
+  // Clear room visit state when leaving floor 8
+  if(f!==8){
+    RoomSystem.currentRoom=null;
+    RoomSystem.visitingOwner=null;
+    RoomSystem.isInBuilder=false;
+    $('#room-info-hud').style.display='none';
+  }
   $('#floor-hud').textContent=`F${f} · ${FLOOR_NAMES[f]}`;
   showThought(`Arrived at ${FLOOR_NAMES[f]}!`);
   // Change music if playing
@@ -5057,6 +5248,57 @@ function gameLoop(time){const dt=Math.min((time-lastTime)/1000,.05);lastTime=tim
 // ═══════════════════════════════════════
 // §26. WELCOME & INIT
 // ═══════════════════════════════════════
+function showWelcomeWardrobe(){
+  const freeSkins=VISITOR_SKINS.filter(s=>s.cost===0);
+  const ov=document.createElement('div');ov.id='welcome-overlay';
+  ov.innerHTML=`
+    <div id="welcome-popup">
+      <h2>🔮 Welcome to Echo's Station!</h2>
+      <div class="subtitle">A cozy space station 408km above Earth</div>
+      <p style="font-size:11px;color:#aaa;margin-bottom:12px">Choose your name and look. You'll get a free room to customize and earn ◈!</p>
+      <input type="text" id="welcome-name" placeholder="Enter your name..." maxlength="20" autofocus>
+      <p style="font-size:10px;color:#888;margin:8px 0 4px">Pick your starter look:</p>
+      <div class="welcome-skins">
+        ${freeSkins.map((s,i)=>`<div class="welcome-skin${i===0?' selected':''}" data-id="${s.id}"><div class="ws-icon">${s.icon}</div><div class="ws-label">${s.label}</div></div>`).join('')}
+      </div>
+      <button id="welcome-go">Enter the Station 🚀</button>
+    </div>
+  `;
+  document.body.appendChild(ov);
+  
+  let selectedSkin=freeSkins[0]?.id||'hooded';
+  ov.querySelectorAll('.welcome-skin').forEach(el=>{
+    el.onclick=()=>{
+      ov.querySelectorAll('.welcome-skin').forEach(e=>e.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedSkin=el.dataset.id;
+    };
+  });
+  
+  function finishWelcome(){
+    const nameInput=ov.querySelector('#welcome-name');
+    const name=(nameInput.value||'').trim().slice(0,20);
+    if(!name){nameInput.style.borderColor='#ff4444';nameInput.placeholder='Please enter a name!';return}
+    
+    LS.set('visitorName',name);
+    S.visitor.skin=selectedSkin;LS.set('visitorSkin',selectedSkin);
+    
+    // Auto-create their room
+    RoomSystem.roomName=name+"'s Room";
+    LS.set('userRoomName',RoomSystem.roomName);
+    RoomSystem.save();
+    
+    ov.style.opacity='0';ov.style.transition='opacity .5s';
+    setTimeout(()=>{ov.remove();recordStationVisit()},500);
+    
+    showNotification(`Welcome, ${name}! 🔮 Your room is ready on F8!`);
+    addChatMsg('Echo',`Welcome aboard, ${name}! 🔮 Your very own room is set up on F8. Customize it and earn ◈ from visitors!`);
+  }
+  
+  ov.querySelector('#welcome-go').onclick=finishWelcome;
+  ov.querySelector('#welcome-name').addEventListener('keydown',e=>{if(e.key==='Enter')finishWelcome()});
+}
+
 function runWelcome(){
   if(LS.get('welcomeDone13',false))return;LS.set('welcomeDone13',true);
   setTimeout(()=>{const b=$('#speech-bubble');b.style.display='block';b.style.left='280px';b.style.bottom='300px';b.innerHTML="Welcome to my space station! 🔮<br><br>I'm <b>Echo</b>. Click on anything to interact!<br>Use the <b>elevator</b> (left wall) to visit all 5 floors!<br><br>My cat <b>Pixel</b> lives here too 🐱<br>Make yourself at home!";setTimeout(()=>b.style.display='none',8000)},1000);
@@ -5085,12 +5327,9 @@ function init(){
   // Load station stats and visitor memory
   loadStationStats();
   loadVisitorMemory();
-  // Visitor name prompt on first visit
+  // Visitor wardrobe on first visit
   if(!LS.get('visitorName')){
-    const name=prompt('Welcome to Echo\'s Station! 🔮\nEnter your name:','Visitor');
-    LS.set('visitorName',name||'Visitor');
-    // Record visit after name is set
-    setTimeout(recordStationVisit,1000);
+    showWelcomeWardrobe();
   } else {
     // Record visit for returning visitor
     setTimeout(recordStationVisit,1000);
