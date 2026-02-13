@@ -720,11 +720,12 @@ function renderFloor1(){
   // Bookshelf
   const bs=getObjects().find(o=>o.id==='bookshelf');ctx.fillStyle='#2a1a10';ctx.fillRect(bs.x,bs.y,bs.w,bs.h);
   const bkC=['#d4820a','#00c8c8','#2a8a2a','#c42020','#d0d0d0','#c8a020','#6a4a2a','#8a1a1a','#7a3aa0','#2060c0','#a030a0','#20a050'];
-  const bkN=['DUNE','NEURO','HHGTTG','1984','SNOW','GEB','SAPIEN','WAR','MEDIT','CLEAN','SICP','PRGMT'];
+  const bkN=['DUNE','NEURO','HHGG','1984','SNOW','GEB','SAPI','WAR','MEDI','CODE','SICP','PRGM'];
   for(let row=0;row<3;row++){const sy=bs.y+8+row*30;ctx.fillStyle='#3a2820';ctx.fillRect(bs.x+4,sy+22,bs.w-8,3);for(let b=0;b<4;b++){const bx=bs.x+6+b*18,bh=16+((row*4+b)*5%8);ctx.fillStyle=bkC[row*4+b]||'#888';ctx.fillRect(bx,sy+22-bh,14,bh);
-    // Spine label — horizontal, contrasting color on the book face
-    ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(bx+1,sy+22-bh+3,12,7);
-    ctx.fillStyle='#fff';ctx.font='bold 5px monospace';ctx.textAlign='center';ctx.fillText(bkN[row*4+b]||'',bx+7,sy+22-bh+9);ctx.textAlign='left'}}
+    // Vertical spine label
+    ctx.save();ctx.translate(bx+10,sy+20);ctx.rotate(-Math.PI/2);
+    ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 7px monospace';ctx.textAlign='left';
+    ctx.fillText(bkN[row*4+b]||'',1,3);ctx.restore()}}
   // Desk + monitors
   const dk=getObjects().find(o=>o.id==='desk');ctx.fillStyle='#5a4030';ctx.fillRect(dk.x,dk.y+50,dk.w,10);ctx.fillStyle='#4a3020';ctx.fillRect(dk.x+10,dk.y+60,8,40);ctx.fillRect(dk.x+dk.w-18,dk.y+60,8,40);
   for(let m=0;m<2;m++){const mx=dk.x+20+m*80;ctx.fillStyle='#111';ctx.fillRect(mx,dk.y+10,60,38);ctx.fillStyle='#0a2a0a';ctx.fillRect(mx+2,dk.y+12,56,34);ctx.fillStyle='#0a0';ctx.font='6px monospace';ctx.fillText(m===0?'$ npm run dev':'Echo v13',mx+6,dk.y+24)}
@@ -1484,6 +1485,25 @@ function renderVisitor(ctx){
   ctx.fillStyle=skin.color;ctx.font='bold 9px monospace';ctx.textAlign='center';
   ctx.fillText(LS.get('visitorName','Visitor'),v.x,v.y-sz*sc-4);ctx.textAlign='left';
   
+  // Lightsaber held by visitor
+  if(S._visitorSaber){
+    const col=S._visitorSaber==='green'?'#00ff44':'#4488ff';
+    const colGlow=S._visitorSaber==='green'?'rgba(0,255,68,.3)':'rgba(68,136,255,.3)';
+    const swing=S._saberSwing>0?Math.sin(S._saberSwing*Math.PI)*1.2:0;
+    const side=v.dir===1?-1:1;// left or right facing
+    const hx=v.x+side*12,hy=v.y-20;
+    ctx.save();ctx.translate(hx,hy);ctx.rotate(-.8*side+swing*side);
+    // Hilt
+    ctx.fillStyle='#666';ctx.fillRect(-2,-3,4,10);ctx.fillStyle='#888';ctx.fillRect(-1,-1,2,6);
+    // Blade
+    const bladeLen=28+Math.sin(S.time*8)*2;
+    ctx.shadowColor=col;ctx.shadowBlur=10+Math.sin(S.time*6)*3;
+    ctx.fillStyle=col;ctx.fillRect(-1,-3-bladeLen,2,bladeLen);
+    ctx.fillStyle='#fff';ctx.fillRect(0,-3-bladeLen,1,bladeLen);// core
+    ctx.fillStyle=colGlow;ctx.fillRect(-3,-3-bladeLen,6,bladeLen);
+    ctx.shadowBlur=0;
+    ctx.restore();
+  }
   // SPACE prompt when near object
   if(S.visitorNear){ctx.fillStyle='rgba(255,255,200,0.9)';ctx.font='bold 10px monospace';ctx.textAlign='center';
     ctx.fillText('⎵ SPACE',v.x,v.y-sz*sc-16);ctx.textAlign='left'}
@@ -2012,23 +2032,33 @@ function showJournal(){
 // Lightsaber system
 S._saberGreen=0;S._saberBlue=0;S._saberState='off';// off, green, blue, both, duel
 S._saberDuelTimer=0;S._saberClashes=[];
+S._visitorSaber=null;// null, 'green', 'blue'
+S._saberSwing=0;S._saberSwingDir=0;
 function toggleSabers(){
   if(!S.audioCtx)initAudio();
-  const states=['off','green','blue','both','duel'];
-  const idx=states.indexOf(S._saberState);
-  S._saberState=states[(idx+1)%states.length];
-  const quotes={
-    off:["*sabers retract* ...the quiet is deafening.","Powering down. The Force rests."],
-    green:["*VWOOMM* An elegant weapon for a more civilized age.","Green — the color of harmony and really cool lighting.","I found the kyber crystal floating outside the station."],
-    blue:["*BWZZZZ* This one hums at a different frequency.","Blue for wisdom. And because it looks awesome.","Jedi Temple approved. Probably."],
-    both:["Dual wield! Now THAT'S a power move.","Two sabers? Who do I think I am, General Grievous?","VeVe collectors would pay a fortune for these..."],
-    duel:["⚔️ The sabers have a mind of their own!","They're clashing! Stand back!","*epic duel music plays in my head*"]
-  };
-  const q=quotes[S._saberState];
-  showThought(q[Math.random()*q.length|0]);
-  // Ignite/retract sound
-  if(S._saberState!=='off')playSaberSound('ignite');
-  else playSaberSound('retract');
+  // Cycle: pick up green → swing → pick up blue → swing → put back
+  if(!S._visitorSaber){
+    S._visitorSaber='green';S._saberState='green';
+    playSaberSound('ignite');
+    showThought("*picks up green saber* VWOOMM! Click again to swing!");
+  }else if(S._visitorSaber==='green'&&S._saberSwing<=0){
+    S._visitorSaber='blue';S._saberState='blue';
+    playSaberSound('ignite');
+    showThought("*switches to blue* This one hums different. Click to swing!");
+  }else if(S._visitorSaber==='blue'&&S._saberSwing<=0){
+    S._visitorSaber=null;S._saberState='off';
+    playSaberSound('retract');
+    showThought("*places sabers back* The Force rests... for now.");
+  }
+  // Trigger swing if already holding
+  if(S._visitorSaber&&S._saberSwing<=0){
+    S._saberSwing=1;S._saberSwingDir=S.visitor.dir;
+    playSaberSound('clash');
+    S.screenShake=2;
+    // Swing particles
+    const col=S._visitorSaber==='green'?'#00ff44':'#4488ff';
+    for(let i=0;i<8;i++)S.particles.push({x:S.visitor.x+(S._saberSwingDir===2?15:-15),y:S.visitor.y-15,vx:(Math.random()-.5)*4,vy:-Math.random()*3,life:12,color:col,size:2});
+  }
   Coins.earn(1,'sabers');
 }
 function playSaberSound(type){
@@ -2061,6 +2091,8 @@ function updateSabers(dt){
   const tgt={off:[0,0],green:[1,0],blue:[0,1],both:[1,1],duel:[1,1]};
   const t=tgt[S._saberState]||[0,0];
   S._saberGreen+=(t[0]-S._saberGreen)*dt*5;S._saberBlue+=(t[1]-S._saberBlue)*dt*5;
+  // Swing animation decay
+  if(S._saberSwing>0){S._saberSwing-=dt*3;if(S._saberSwing<0)S._saberSwing=0}
   if(S._saberGreen<.01)S._saberGreen=0;if(S._saberBlue<.01)S._saberBlue=0;
   // Duel mode: sabers swing and clash
   if(S._saberState==='duel'){
