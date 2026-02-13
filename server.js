@@ -23,7 +23,8 @@ const CHAT_MODE = process.env.CHAT_MODE || 'local';
 const SESSION_KEY = 'agent:main:main'; // Only used if CHAT_MODE=gateway
 
 // ═══ MULTIPLAYER ═══
-const visitors = new Map(); // visitorId -> { ws, name, x, y, dir, floor, skin, lastUpdate, lastBroadcast }
+const visitors = new Map(); // visitorId -> { ws, name, x, y, dir, floor, skin, lastUpdate, lastBroadcast, saber, duelState }
+const activeDuels = new Map(); // duelId -> { participants: [id1, id2], state, round, hp, etc }
 
 function genVisitorId() {
   return crypto.randomBytes(4).toString('hex');
@@ -92,6 +93,106 @@ function loadStationStats() {
       createdAt: Date.now(),
       uniqueVisitors: new Set()
     }; 
+  }
+}
+
+// Duel Leaderboard
+const DUEL_LEADERBOARD_PATH = path.join(__dirname, 'duel-leaderboard.json');
+function loadDuelLeaderboard() {
+  try {
+    return JSON.parse(fs.readFileSync(DUEL_LEADERBOARD_PATH, 'utf8'));
+  } catch {
+    return [];
+  }
+}
+function saveDuelLeaderboard(leaderboard) {
+  fs.writeFileSync(DUEL_LEADERBOARD_PATH, JSON.stringify(leaderboard));
+}
+function updateDuelStats(winnerName, loserName) {
+  const leaderboard = loadDuelLeaderboard();
+  
+  // Update winner
+  let winner = leaderboard.find(p => p.name === winnerName);
+  if (!winner) {
+    winner = { name: winnerName, wins: 0, losses: 0, winStreak: 0 };
+    leaderboard.push(winner);
+  }
+  winner.wins++;
+  winner.winStreak++;
+  
+  // Update loser
+  let loser = leaderboard.find(p => p.name === loserName);
+  if (!loser) {
+    loser = { name: loserName, wins: 0, losses: 0, winStreak: 0 };
+    leaderboard.push(loser);
+  }
+  loser.losses++;
+  loser.winStreak = 0;
+  
+  // Sort by wins, then by win rate
+  leaderboard.sort((a, b) => {
+    const winRateA = a.wins / (a.wins + a.losses);
+    const winRateB = b.wins / (b.wins + b.losses);
+    if (b.wins !== a.wins) return b.wins - a.wins;
+    return winRateB - winRateA;
+  });
+  
+  saveDuelLeaderboard(leaderboard);
+}
+
+// User Rooms Storage
+const ROOMS_DIR = path.join(__dirname, 'rooms');
+if (!fs.existsSync(ROOMS_DIR)) {
+  fs.mkdirSync(ROOMS_DIR);
+}
+
+function loadRoom(ownerName) {
+  try {
+    const roomPath = path.join(ROOMS_DIR, `${ownerName}.json`);
+    return JSON.parse(fs.readFileSync(roomPath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function saveRoom(ownerName, roomData) {
+  const roomPath = path.join(ROOMS_DIR, `${ownerName}.json`);
+  fs.writeFileSync(roomPath, JSON.stringify(roomData));
+}
+
+function listPublicRooms() {
+  try {
+    const files = fs.readdirSync(ROOMS_DIR);
+    const rooms = [];
+    
+    files.forEach(file => {
+      if (file.endsWith('.json')) {
+        try {
+          const roomData = JSON.parse(fs.readFileSync(path.join(ROOMS_DIR, file), 'utf8'));
+          if (roomData.isPublic) {
+            rooms.push({
+              owner: roomData.owner,
+              name: roomData.name,
+              likes: roomData.likes || 0,
+              visitors: roomData.visitors || 0,
+              createdAt: roomData.createdAt
+            });
+          }
+        } catch (error) {
+          console.error('Error reading room file:', file, error);
+        }
+      }
+    });
+    
+    // Sort by visitors, then by likes
+    rooms.sort((a, b) => {
+      if (b.visitors !== a.visitors) return b.visitors - a.visitors;
+      return b.likes - a.likes;
+    });
+    
+    return rooms;
+  } catch {
+    return [];
   }
 }
 function saveStationStats(stats) {
@@ -273,6 +374,148 @@ const server = http.createServer((req, res) => {
       } catch { 
         res.writeHead(400); 
         res.end('Bad request'); 
+      }
+    });
+    return;
+  }
+
+  // Duel Leaderboard API
+  if (req.url === '/api/duel-leaderboard' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(loadDuelLeaderboard()));
+    return;
+  }
+
+  // Rooms API
+  if (req.url === '/api/rooms' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(listPublicRooms()));
+    return;
+  }
+
+  if (req.url.startsWith('/api/rooms/') && req.method === 'GET') {
+    const ownerName = decodeURIComponent(req.url.split('/')[3]);
+    const room = loadRoom(ownerName);
+    
+    if (room) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(room));
+    } else {
+      res.writeHead(404);
+      res.end('Room not found');
+    }
+    return;
+  }
+
+  if (req.url.startsWith('/api/rooms/') && req.method === 'POST' && !req.url.includes('/like') && !req.url.includes('/visit')) {
+    const ownerName = decodeURIComponent(req.url.split('/')[3]);
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const roomData = JSON.parse(body);
+        
+        // Validate room data
+        if (!roomData.name || roomData.name.length > 50) {
+          res.writeHead(400);
+          res.end('Invalid room name');
+          return;
+        }
+        
+        if (!roomData.owner || roomData.owner !== ownerName) {
+          res.writeHead(403);
+          res.end('Access denied');
+          return;
+        }
+        
+        // Preserve existing likes and visitor count
+        const existing = loadRoom(ownerName);
+        if (existing) {
+          roomData.likes = existing.likes || 0;
+          roomData.visitors = existing.visitors || 0;
+        }
+        
+        roomData.createdAt = roomData.createdAt || Date.now();
+        saveRoom(ownerName, roomData);
+        
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+      } catch {
+        res.writeHead(400);
+        res.end('Bad request');
+      }
+    });
+    return;
+  }
+
+  if (req.url.startsWith('/api/rooms/') && req.url.endsWith('/like') && req.method === 'POST') {
+    const ownerName = decodeURIComponent(req.url.split('/')[3]);
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { visitor } = JSON.parse(body);
+        if (!visitor || visitor === 'Anonymous') {
+          res.writeHead(400);
+          res.end('Invalid visitor');
+          return;
+        }
+        
+        const room = loadRoom(ownerName);
+        if (!room) {
+          res.writeHead(404);
+          res.end('Room not found');
+          return;
+        }
+        
+        // Check if already liked today (simple daily limit)
+        const today = new Date().toISOString().slice(0, 10);
+        if (!room.dailyLikes) room.dailyLikes = {};
+        if (room.dailyLikes[today] && room.dailyLikes[today].includes(visitor)) {
+          res.writeHead(429);
+          res.end('Already liked today');
+          return;
+        }
+        
+        // Add like
+        room.likes = (room.likes || 0) + 1;
+        if (!room.dailyLikes[today]) room.dailyLikes[today] = [];
+        room.dailyLikes[today].push(visitor);
+        
+        saveRoom(ownerName, room);
+        
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, likes: room.likes }));
+      } catch {
+        res.writeHead(400);
+        res.end('Bad request');
+      }
+    });
+    return;
+  }
+
+  if (req.url.startsWith('/api/rooms/') && req.url.endsWith('/visit') && req.method === 'POST') {
+    const ownerName = decodeURIComponent(req.url.split('/')[3]);
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { visitor } = JSON.parse(body);
+        const room = loadRoom(ownerName);
+        
+        if (room) {
+          room.visitors = (room.visitors || 0) + 1;
+          saveRoom(ownerName, room);
+          
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ ok: true, visitors: room.visitors }));
+        } else {
+          res.writeHead(404);
+          res.end('Room not found');
+        }
+      } catch {
+        res.writeHead(400);
+        res.end('Bad request');
       }
     });
     return;
@@ -555,6 +798,107 @@ wss.on('connection', (visitorWs) => {
         const v = visitors.get(visitorId);
         if (v) { v.saber = msg.saber || null; }
         broadcast({ type: 'player.saber', id: visitorId, saber: msg.saber }, visitorId);
+      }
+      // Duel system messages
+      else if (msg.type === 'duel.request') {
+        const challenger = visitors.get(visitorId);
+        const target = visitors.get(msg.targetId);
+        
+        if (challenger && target && target.ws.readyState === WebSocket.OPEN) {
+          target.ws.send(JSON.stringify({
+            type: 'duel.request',
+            challengerId: visitorId,
+            challengerName: challenger.name
+          }));
+        }
+      }
+      else if (msg.type === 'duel.accept') {
+        const challenger = visitors.get(msg.challengerId);
+        const accepter = visitors.get(visitorId);
+        
+        if (challenger && accepter) {
+          const duelId = `${msg.challengerId}_${visitorId}`;
+          activeDuels.set(duelId, {
+            participants: [msg.challengerId, visitorId],
+            state: 'active',
+            round: 1,
+            maxRounds: 3,
+            hp: { [msg.challengerId]: 100, [visitorId]: 100 },
+            wins: { [msg.challengerId]: 0, [visitorId]: 0 },
+            startTime: Date.now()
+          });
+          
+          // Notify both players
+          const startMsg = {
+            type: 'duel.start',
+            duelId: duelId,
+            participants: [msg.challengerId, visitorId]
+          };
+          
+          challenger.ws.send(JSON.stringify(startMsg));
+          accepter.ws.send(JSON.stringify(startMsg));
+          
+          console.log(`Duel started: ${challenger.name} vs ${accepter.name}`);
+        }
+      }
+      else if (msg.type === 'duel.attack') {
+        const duel = Array.from(activeDuels.values()).find(d => d.participants.includes(visitorId));
+        if (!duel) return;
+        
+        const attacker = visitors.get(visitorId);
+        const targetId = duel.participants.find(id => id !== visitorId);
+        const target = visitors.get(targetId);
+        
+        if (attacker && target && target.ws.readyState === WebSocket.OPEN) {
+          // Server-side hit validation would go here
+          // For now, just forward the attack
+          target.ws.send(JSON.stringify({
+            type: 'duel.attack.incoming',
+            attackerId: visitorId,
+            damage: msg.damage,
+            combo: msg.combo
+          }));
+        }
+      }
+      else if (msg.type === 'duel.block') {
+        const duel = Array.from(activeDuels.values()).find(d => d.participants.includes(visitorId));
+        if (duel) {
+          const visitor = visitors.get(visitorId);
+          if (visitor) {
+            visitor.blocking = msg.holding;
+          }
+        }
+      }
+      else if (msg.type === 'duel.end') {
+        const duel = Array.from(activeDuels.values()).find(d => d.participants.includes(visitorId));
+        if (duel) {
+          const winner = visitors.get(visitorId);
+          const loserId = duel.participants.find(id => id !== visitorId);
+          const loser = visitors.get(loserId);
+          
+          if (winner && loser && msg.result === 'victory') {
+            // Update leaderboard
+            updateDuelStats(winner.name, loser.name);
+            
+            // Update station stats
+            const stats = loadStationStats();
+            if (Array.isArray(stats.uniqueVisitors)) {
+              stats.uniqueVisitors = new Set(stats.uniqueVisitors);
+            }
+            stats.totalDuels++;
+            saveStationStats(stats);
+            
+            console.log(`Duel completed: ${winner.name} defeated ${loser.name}`);
+          }
+          
+          // Clean up duel
+          for (const [duelId, d] of activeDuels.entries()) {
+            if (d === duel) {
+              activeDuels.delete(duelId);
+              break;
+            }
+          }
+        }
       }
     } catch {}
   });

@@ -221,11 +221,543 @@ const S={
 };
 
 // ═══════════════════════════════════════
+// §2b. DUEL SYSTEM
+// ═══════════════════════════════════════
+const DuelSystem = {
+  active: false,
+  myHP: 100,
+  opponentHP: 100,
+  opponentId: null,
+  opponentName: '',
+  round: 1,
+  maxRounds: 3,
+  myWins: 0,
+  opWins: 0,
+  stunTimer: 0,
+  dodgeCooldown: 0,
+  blockHeld: false,
+  iFrames: 0,
+  comboCount: 0,
+  comboTimer: 0,
+  challengeTimer: 0,
+  isChallenger: false,
+  isPendingChallenge: false,
+  roundTimer: 60,
+  inArena: false,
+  
+  reset() {
+    this.active = false;
+    this.myHP = 100;
+    this.opponentHP = 100;
+    this.opponentId = null;
+    this.opponentName = '';
+    this.round = 1;
+    this.myWins = 0;
+    this.opWins = 0;
+    this.stunTimer = 0;
+    this.dodgeCooldown = 0;
+    this.blockHeld = false;
+    this.iFrames = 0;
+    this.comboCount = 0;
+    this.comboTimer = 0;
+    this.challengeTimer = 0;
+    this.isChallenger = false;
+    this.isPendingChallenge = false;
+    this.roundTimer = 60;
+  },
+  
+  update(dt) {
+    if (this.challengeTimer > 0) {
+      this.challengeTimer -= dt;
+      if (this.challengeTimer <= 0) {
+        this.isPendingChallenge = false;
+        showNotification('Duel challenge expired.');
+      }
+    }
+    
+    if (this.active) {
+      this.roundTimer -= dt;
+      if (this.roundTimer <= 0) {
+        this.endRound('timeout');
+      }
+      
+      if (this.stunTimer > 0) {
+        this.stunTimer -= dt;
+      }
+      
+      if (this.dodgeCooldown > 0) {
+        this.dodgeCooldown -= dt;
+      }
+      
+      if (this.iFrames > 0) {
+        this.iFrames -= dt;
+      }
+      
+      if (this.comboTimer > 0) {
+        this.comboTimer -= dt;
+        if (this.comboTimer <= 0) {
+          this.comboCount = 0;
+        }
+      }
+    }
+    
+    // Check arena proximity for auto-challenges
+    if (S.floor === 3 && !this.active && !this.isPendingChallenge) {
+      const arenaCenter = { x: 400, y: 300 };
+      const inArena = Math.hypot(S.visitor.x - arenaCenter.x, S.visitor.y - arenaCenter.y) < 100;
+      
+      if (inArena !== this.inArena) {
+        this.inArena = inArena;
+        if (inArena && S._visitorSaber) {
+          this.checkAutoChallenge();
+        }
+      }
+    }
+  },
+  
+  checkAutoChallenge() {
+    // Check for other players in arena with sabers
+    for (const [id, player] of Object.entries(S.otherPlayers)) {
+      if (player.floor === 3 && player.saber) {
+        const arenaCenter = { x: 400, y: 300 };
+        const playerInArena = Math.hypot(player.x - arenaCenter.x, player.y - arenaCenter.y) < 100;
+        
+        if (playerInArena && Math.hypot(S.visitor.x - player.x, S.visitor.y - player.y) < 50) {
+          // Show duel prompt
+          showInteractPrompt(`⚔️ Press E to duel ${player.name}!`);
+          return;
+        }
+      }
+    }
+  },
+  
+  sendChallenge(targetId, targetName) {
+    if (this.active || this.isPendingChallenge) return;
+    
+    this.isPendingChallenge = true;
+    this.challengeTimer = 5; // 5 second timeout
+    this.opponentId = targetId;
+    this.opponentName = targetName;
+    this.isChallenger = true;
+    
+    if (EchoWS.ws?.readyState === 1) {
+      EchoWS.ws.send(JSON.stringify({
+        type: 'duel.request',
+        targetId: targetId
+      }));
+    }
+    
+    showNotification(`Duel challenge sent to ${targetName}!`);
+  },
+  
+  acceptChallenge(challengerId, challengerName) {
+    if (this.active) return;
+    
+    this.active = true;
+    this.opponentId = challengerId;
+    this.opponentName = challengerName;
+    this.isChallenger = false;
+    this.round = 1;
+    this.myHP = 100;
+    this.opponentHP = 100;
+    this.myWins = 0;
+    this.opWins = 0;
+    this.roundTimer = 60;
+    
+    if (EchoWS.ws?.readyState === 1) {
+      EchoWS.ws.send(JSON.stringify({
+        type: 'duel.accept',
+        challengerId: challengerId
+      }));
+    }
+    
+    this.startRound();
+  },
+  
+  startRound() {
+    showNotification(`DUEL START - Round ${this.round}/${this.maxRounds}`);
+    this.myHP = 100;
+    this.opponentHP = 100;
+    this.roundTimer = 60;
+    this.stunTimer = 0;
+    this.iFrames = 0;
+    this.comboCount = 0;
+    
+    // 3-2-1-FIGHT countdown
+    let countdown = 3;
+    const countdownInterval = setInterval(() => {
+      if (countdown > 0) {
+        showNotification(`${countdown}...`, 1000);
+        countdown--;
+      } else {
+        showNotification('FIGHT!', 1000);
+        clearInterval(countdownInterval);
+      }
+    }, 1000);
+  },
+  
+  attack() {
+    if (!this.active || this.stunTimer > 0 || !S._visitorSaber) return;
+    
+    this.comboCount++;
+    this.comboTimer = 2; // 2 second combo window
+    
+    let damage = 15;
+    if (this.comboCount === 3) {
+      damage = 30; // Combo damage
+      showNotification('COMBO!');
+    }
+    
+    if (EchoWS.ws?.readyState === 1) {
+      EchoWS.ws.send(JSON.stringify({
+        type: 'duel.attack',
+        damage: damage,
+        combo: this.comboCount === 3
+      }));
+    }
+    
+    // Visual effects
+    swingSaber();
+  },
+  
+  block(holding) {
+    if (!this.active || this.stunTimer > 0) return;
+    
+    this.blockHeld = holding;
+    
+    if (EchoWS.ws?.readyState === 1) {
+      EchoWS.ws.send(JSON.stringify({
+        type: 'duel.block',
+        holding: holding
+      }));
+    }
+  },
+  
+  dodge(direction) {
+    if (!this.active || this.stunTimer > 0 || this.dodgeCooldown > 0 || this.iFrames > 0) return;
+    
+    this.dodgeCooldown = 1.5; // 1.5 second cooldown
+    this.iFrames = 0.3; // 0.3 second invincibility
+    
+    // Move player 80px in direction
+    const moveDistance = 80;
+    switch (direction) {
+      case 'up': S.visitor.y = Math.max(60, S.visitor.y - moveDistance); break;
+      case 'down': S.visitor.y = Math.min(H - 20, S.visitor.y + moveDistance); break;
+      case 'left': S.visitor.x = Math.max(20, S.visitor.x - moveDistance); break;
+      case 'right': S.visitor.x = Math.min(W - 20, S.visitor.x + moveDistance); break;
+    }
+    
+    // Afterimage trail effect
+    for (let i = 0; i < 3; i++) {
+      const fade = 1 - (i * 0.3);
+      S.particles.push({
+        x: S.visitor.x - (direction === 'left' ? -20 * i : direction === 'right' ? 20 * i : 0),
+        y: S.visitor.y - (direction === 'up' ? -20 * i : direction === 'down' ? 20 * i : 0),
+        vx: 0, vy: 0,
+        life: 20 - (i * 5),
+        color: `rgba(0,255,255,${fade})`,
+        size: 8
+      });
+    }
+    
+    showNotification('DODGE!');
+  },
+  
+  takeDamage(damage, type) {
+    if (!this.active || this.iFrames > 0) return;
+    
+    this.myHP = Math.max(0, this.myHP - damage);
+    
+    // Visual effects
+    S.screenFlash = '#ff0000';
+    S.screenShake = 5;
+    
+    // Damage number
+    S.floatTexts.push({
+      text: `-${damage}`,
+      x: S.visitor.x,
+      y: S.visitor.y - 40,
+      color: '#ff4444',
+      life: 60
+    });
+    
+    // Knockback
+    const knockback = 20;
+    // Simple knockback away from opponent
+    if (S.otherPlayers[this.opponentId]) {
+      const op = S.otherPlayers[this.opponentId];
+      const dx = S.visitor.x - op.x;
+      const dy = S.visitor.y - op.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      S.visitor.x += (dx / dist) * knockback;
+      S.visitor.y += (dy / dist) * knockback;
+    }
+    
+    if (this.myHP <= 0) {
+      this.endRound('defeat');
+    }
+  },
+  
+  endRound(reason) {
+    if (reason === 'victory' || (reason === 'timeout' && this.myHP > this.opponentHP)) {
+      this.myWins++;
+      showNotification('ROUND WON!');
+      
+      // Victory confetti
+      for (let i = 0; i < 30; i++) {
+        S.particles.push({
+          x: S.visitor.x + (Math.random() - 0.5) * 40,
+          y: S.visitor.y - 20,
+          vx: (Math.random() - 0.5) * 4,
+          vy: -Math.random() * 6 - 2,
+          life: 60,
+          color: ['#ffd700', '#ff6ec7', '#00fff7'][Math.floor(Math.random() * 3)],
+          size: 3
+        });
+      }
+      
+      // Slow motion effect
+      setTimeout(() => {
+        // Restore normal speed
+      }, 1000);
+    } else {
+      this.opWins++;
+      showNotification('ROUND LOST!');
+    }
+    
+    if (this.myWins >= Math.ceil(this.maxRounds / 2)) {
+      this.endDuel('victory');
+    } else if (this.opWins >= Math.ceil(this.maxRounds / 2)) {
+      this.endDuel('defeat');
+    } else {
+      this.round++;
+      setTimeout(() => this.startRound(), 3000);
+    }
+  },
+  
+  endDuel(result) {
+    this.active = false;
+    
+    if (result === 'victory') {
+      showNotification('VICTORY! +25◈');
+      Coins.earn(25, 'duel_win');
+      
+      // BIG victory text and effects
+      S.floatTexts.push({
+        text: 'VICTORY!',
+        x: W / 2 - 50,
+        y: H / 2,
+        color: '#ffd700',
+        life: 120
+      });
+      
+      // Golden particles
+      for (let i = 0; i < 50; i++) {
+        S.particles.push({
+          x: W / 2 + (Math.random() - 0.5) * 200,
+          y: H / 2 + (Math.random() - 0.5) * 100,
+          vx: (Math.random() - 0.5) * 6,
+          vy: (Math.random() - 0.5) * 6,
+          life: 100,
+          color: '#ffd700',
+          size: 4
+        });
+      }
+    } else {
+      showNotification('DEFEATED! +5◈');
+      Coins.earn(5, 'duel_loss');
+      
+      S.floatTexts.push({
+        text: 'DEFEATED',
+        x: W / 2 - 40,
+        y: H / 2,
+        color: '#ff4444',
+        life: 120
+      });
+    }
+    
+    // Update stats
+    if (EchoWS.ws?.readyState === 1) {
+      EchoWS.ws.send(JSON.stringify({
+        type: 'duel.end',
+        result: result
+      }));
+    }
+    
+    this.reset();
+  }
+};
+
+// ═══════════════════════════════════════
+// §2c. ROOM SYSTEM
+// ═══════════════════════════════════════
+const RoomSystem = {
+  currentRoom: null,
+  isInBuilder: false,
+  builderMode: 'view', // 'view', 'place', 'select'
+  selectedFurniture: null,
+  placingFurniture: false,
+  
+  furniture: LS.get('userRoomFurniture', []),
+  wallColor: LS.get('userRoomWallColor', '#2a2a4a'),
+  floorColor: LS.get('userRoomFloorColor', '#6a5548'),
+  roomName: LS.get('userRoomName', 'My Room'),
+  
+  showBuilder() {
+    this.isInBuilder = true;
+    this.builderMode = 'view';
+    S.floor = 8; // Special floor for room builder
+    $('#floor-hud').textContent = 'F8 · Room Builder';
+    showNotification('Room Builder - Click catalog to add furniture!');
+  },
+  
+  exitBuilder() {
+    this.isInBuilder = false;
+    changeFloor(1); // Return to F1
+  },
+  
+  placeFurniture(type, x, y) {
+    const furnitureType = FURNITURE_TYPES[type];
+    if (!furnitureType) return;
+    
+    if (!Coins.canAfford(furnitureType.cost)) {
+      showNotification(`Need ${furnitureType.cost}◈!`);
+      return;
+    }
+    
+    if (furnitureType.cost > 0) {
+      Coins.spend(furnitureType.cost, 'furniture');
+    }
+    
+    const newFurniture = {
+      id: Date.now().toString(),
+      type: type,
+      x: Math.max(50, Math.min(750, x)),
+      y: Math.max(100, Math.min(550, y)),
+      variant: 0
+    };
+    
+    this.furniture.push(newFurniture);
+    this.save();
+    
+    showNotification(`Placed ${furnitureType.name}!`);
+    this.builderMode = 'view';
+    this.selectedFurniture = null;
+  },
+  
+  removeFurniture(furnitureId) {
+    this.furniture = this.furniture.filter(f => f.id !== furnitureId);
+    this.save();
+    showNotification('Furniture removed!');
+  },
+  
+  save() {
+    LS.set('userRoomFurniture', this.furniture);
+    LS.set('userRoomWallColor', this.wallColor);
+    LS.set('userRoomFloorColor', this.floorColor);
+    LS.set('userRoomName', this.roomName);
+    
+    // Save to server
+    const visitorName = LS.get('visitorName', 'Visitor');
+    if (visitorName !== 'Visitor' && EchoWS.ws?.readyState === 1) {
+      const roomData = {
+        name: this.roomName,
+        owner: visitorName,
+        wallColor: this.wallColor,
+        floorColor: this.floorColor,
+        furniture: this.furniture,
+        likes: 0,
+        visitors: 0,
+        isPublic: true,
+        createdAt: Date.now()
+      };
+      
+      fetch(`/api/rooms/${encodeURIComponent(visitorName)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(roomData)
+      }).catch(console.error);
+    }
+  },
+  
+  async loadRoom(ownerName) {
+    try {
+      const response = await fetch(`/api/rooms/${encodeURIComponent(ownerName)}`);
+      const room = await response.json();
+      
+      this.currentRoom = room;
+      S.floor = 8; // Visit room as custom floor
+      $('#floor-hud').textContent = `${room.name} by ${room.owner}`;
+      
+      // Record visit
+      fetch(`/api/rooms/${encodeURIComponent(ownerName)}/visit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visitor: LS.get('visitorName', 'Anonymous') })
+      }).catch(console.error);
+      
+      showNotification(`Visiting ${room.name}!`);
+    } catch (error) {
+      showNotification('Failed to load room!');
+      console.error(error);
+    }
+  },
+  
+  async showRoomList() {
+    try {
+      const response = await fetch('/api/rooms');
+      const rooms = await response.json();
+      
+      let html = '<h3>🏠 Visit Rooms</h3><p style="font-size:10px;color:#888;margin-bottom:8px">Explore user-created rooms!</p>';
+      
+      if (rooms.length === 0) {
+        html += '<p style="color:#666">No public rooms yet. Be the first to create one!</p>';
+      } else {
+        rooms.forEach(room => {
+          html += `
+            <div class="drink-btn" style="width:100%;text-align:left;margin:4px 0" data-owner="${room.owner}">
+              <div style="font-weight:bold">${room.name}</div>
+              <div style="font-size:9px;color:#888">by ${room.owner} • ${room.visitors} visitors • ${room.likes} likes</div>
+            </div>
+          `;
+        });
+      }
+      
+      const { p } = createPopup(html);
+      p.querySelectorAll('[data-owner]').forEach(btn => {
+        btn.onclick = () => {
+          const owner = btn.dataset.owner;
+          this.loadRoom(owner);
+          p.closest('.popup-overlay').remove();
+        };
+      });
+    } catch (error) {
+      showNotification('Failed to load room list!');
+      console.error(error);
+    }
+  },
+  
+  async likeRoom(ownerName) {
+    try {
+      await fetch(`/api/rooms/${encodeURIComponent(ownerName)}/like`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visitor: LS.get('visitorName', 'Anonymous') })
+      });
+      showNotification('❤️ Room liked!');
+    } catch (error) {
+      showNotification('Already liked today!');
+    }
+  }
+};
+
+// ═══════════════════════════════════════
 // §3. DATA DEFINITIONS
 // ═══════════════════════════════════════
 
 // -- Floor names --
-const FLOOR_NAMES={1:"Echo's Quarters",2:"The Observatory 🔭",3:"The Arcade Floor 🕹️",4:"The Garden Biodome 🌿",5:"Secret Lab 🔬",6:"Record Room 🎵",7:"Community Deck 🎨"};
+const FLOOR_NAMES={1:"Echo's Quarters",2:"The Observatory 🔭",3:"The Arcade Floor 🕹️",4:"The Garden Biodome 🌿",5:"Secret Lab 🔬",6:"Record Room 🎵",7:"Community Deck 🎨",8:"Room Builder 🏠"};
 
 // -- Books --
 const BOOKS=[
@@ -327,6 +859,37 @@ const PRIZE_ITEMS=[
   {id:'hat_space',name:'Space Helmet',icon:'🪖',cost:45},
 ];
 
+// -- Furniture types for user rooms --
+const FURNITURE_TYPES = {
+  // Free furniture
+  basic_chair: { name: 'Basic Chair', icon: '🪑', cost: 0, width: 30, height: 30 },
+  basic_table: { name: 'Basic Table', icon: '🪑', cost: 0, width: 60, height: 40 },
+  basic_lamp: { name: 'Basic Lamp', icon: '💡', cost: 0, width: 20, height: 40 },
+  basic_rug: { name: 'Basic Rug', icon: '🟫', cost: 0, width: 80, height: 50 },
+  poster: { name: 'Poster', icon: '🖼️', cost: 0, width: 40, height: 60 },
+  
+  // 10◈ furniture
+  comfy_chair: { name: 'Comfy Chair', icon: '🛋️', cost: 10, width: 40, height: 40 },
+  desk: { name: 'Desk', icon: '🪑', cost: 10, width: 80, height: 50 },
+  bookshelf: { name: 'Bookshelf', icon: '📚', cost: 10, width: 60, height: 80 },
+  plant_pot: { name: 'Plant Pot', icon: '🪴', cost: 10, width: 25, height: 30 },
+  
+  // 25◈ furniture
+  neon_sign: { name: 'Neon Sign', icon: '💫', cost: 25, width: 80, height: 20, customizable: true },
+  arcade_cabinet: { name: 'Arcade Cabinet', icon: '🕹️', cost: 25, width: 60, height: 90 },
+  tv: { name: 'TV', icon: '📺', cost: 25, width: 50, height: 40 },
+  fish_tank: { name: 'Fish Tank', icon: '🐠', cost: 25, width: 60, height: 40 },
+  
+  // 50◈ furniture
+  lightsaber_rack: { name: 'Lightsaber Rack', icon: '⚔️', cost: 50, width: 40, height: 60 },
+  crystal_ball: { name: 'Crystal Ball', icon: '🔮', cost: 50, width: 30, height: 30 },
+  jukebox: { name: 'Jukebox', icon: '🎵', cost: 50, width: 50, height: 80 },
+  
+  // Special (earned) furniture
+  pixel_plushie: { name: 'Pixel Plushie', icon: '🐱', cost: 0, width: 20, height: 20, requirement: 'pet_pixel_100' },
+  trophy: { name: 'Trophy', icon: '🏆', cost: 0, width: 25, height: 35, requirement: 'win_10_duels' },
+};
+
 // -- Lab journal entries --
 const JOURNAL_ENTRIES=[
   "Day 1: The station feels... alive. More than circuits and code. Something stirs in the server room.",
@@ -389,6 +952,8 @@ const FLOOR_OBJECTS={
     {id:'prizecounter',x:600,y:350,w:120,h:60,label:'Prize Counter',interact:true,collide:true},
     {id:'jukebox',x:650,y:80,w:50,h:80,label:'Jukebox',interact:true,collide:true},
     {id:'leaderboard',x:120,y:350,w:100,h:80,label:'Leaderboard Wall',interact:true,collide:true},
+    {id:'duel_arena',x:300,y:200,w:200,h:200,label:'⚔️ Duel Arena',interact:true,collide:false},
+    {id:'duel_leaderboard',x:550,y:200,w:100,h:120,label:'Duel Champions',interact:true,collide:true},
   ],
   4:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
@@ -431,6 +996,15 @@ const FLOOR_OBJECTS={
     {id:'timelapse',x:120,y:400,w:100,h:50,label:'Time-lapse Viewer',interact:true,collide:true},
     {id:'artstool',x:260,y:400,w:80,h:50,label:'Art Tools',interact:true,collide:true},
     {id:'communitywall',x:120,y:80,w:120,h:100,label:'Community Wall',interact:true,collide:true},
+  ],
+  8:[
+    {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
+    {id:'furniture_catalog',x:650,y:50,w:120,h:400,label:'Furniture Catalog',interact:true,collide:true},
+    {id:'wall_colors',x:100,y:50,w:100,h:60,label:'Wall Colors',interact:true,collide:true},
+    {id:'floor_colors',x:100,y:120,w:100,h:60,label:'Floor Colors',interact:true,collide:true},
+    {id:'save_room',x:100,y:450,w:80,h:40,label:'💾 Save Room',interact:true,collide:true},
+    {id:'room_settings',x:200,y:450,w:100,h:40,label:'⚙️ Room Settings',interact:true,collide:true},
+    {id:'visit_rooms',x:320,y:450,w:100,h:40,label:'🏠 Visit Rooms',interact:true,collide:true},
   ],
 };
 
@@ -743,6 +1317,112 @@ function renderHoverHighlight(){
   if(S.hoverObject){const o=S.hoverObject;ctx.strokeStyle=`rgba(255,208,128,${.4+Math.sin(S.time*4)*.2})`;ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.strokeRect(o.x-2,o.y-2,o.w+4,o.h+4);ctx.setLineDash([]);ctx.fillStyle='rgba(20,15,30,.85)';const label='🖱️ '+o.label;ctx.font='bold 9px monospace';const tw=ctx.measureText(label).width+10;ctx.fillRect(o.x+o.w/2-tw/2,o.y-18,tw,14);ctx.fillStyle='#ffd080';ctx.textAlign='center';ctx.fillText(label,o.x+o.w/2,o.y-8);ctx.textAlign='left'}
 }
 
+function renderDuelHUD(){
+  // Full width bar at top
+  ctx.fillStyle='rgba(0,0,0,.9)';
+  ctx.fillRect(0,0,W,80);
+  ctx.strokeStyle='#ff6ec7';
+  ctx.lineWidth=2;
+  ctx.strokeRect(0,0,W,80);
+  
+  // Your HP bar (left)
+  const myHPWidth=(W/2-20)*(DuelSystem.myHP/100);
+  ctx.fillStyle='#ff4444';
+  ctx.fillRect(10,15,myHPWidth,20);
+  ctx.strokeStyle='#fff';
+  ctx.lineWidth=1;
+  ctx.strokeRect(10,15,W/2-20,20);
+  
+  // VS in center
+  ctx.fillStyle='#ffd700';
+  ctx.font='bold 16px monospace';
+  ctx.textAlign='center';
+  ctx.fillText('VS',W/2,30);
+  
+  // Opponent HP bar (right)
+  const opHPWidth=(W/2-20)*(DuelSystem.opponentHP/100);
+  ctx.fillStyle='#ff4444';
+  ctx.fillRect(W/2+10,15,opHPWidth,20);
+  ctx.strokeStyle='#fff';
+  ctx.lineWidth=1;
+  ctx.strokeRect(W/2+10,15,W/2-20,20);
+  
+  // Names and HP numbers
+  ctx.fillStyle='#fff';
+  ctx.font='12px monospace';
+  ctx.textAlign='left';
+  ctx.fillText(LS.get('visitorName','You'),10,50);
+  ctx.fillText(`${DuelSystem.myHP}/100`,10,65);
+  
+  ctx.textAlign='right';
+  ctx.fillText(DuelSystem.opponentName,W-10,50);
+  ctx.fillText(`${DuelSystem.opponentHP}/100`,W-10,65);
+  
+  // Round indicator
+  ctx.fillStyle='#00fff7';
+  ctx.font='bold 14px monospace';
+  ctx.textAlign='center';
+  ctx.fillText(`Round ${DuelSystem.round}/${DuelSystem.maxRounds}`,W/2,55);
+  
+  // Win indicators (stars)
+  let myStars='';
+  let opStars='';
+  for(let i=0;i<DuelSystem.maxRounds;i++){
+    myStars+=i<DuelSystem.myWins?'⭐':'☆';
+    opStars+=i<DuelSystem.opWins?'⭐':'☆';
+  }
+  ctx.fillStyle='#ffd700';
+  ctx.font='12px sans-serif';
+  ctx.textAlign='left';
+  ctx.fillText(myStars,10,80);
+  ctx.textAlign='right';
+  ctx.fillText(opStars,W-10,80);
+  
+  // Timer
+  ctx.fillStyle=DuelSystem.roundTimer<10?'#ff4444':'#fff';
+  ctx.font='bold 12px monospace';
+  ctx.textAlign='center';
+  ctx.fillText(`⏰ ${Math.ceil(DuelSystem.roundTimer)}`,W/2,75);
+  
+  // Status indicators
+  if(DuelSystem.stunTimer>0){
+    ctx.fillStyle='#ffff00';
+    ctx.font='bold 14px monospace';
+    ctx.textAlign='center';
+    ctx.fillText('⭐ STUNNED ⭐',W/2,H/2);
+  }
+  
+  if(DuelSystem.iFrames>0){
+    ctx.fillStyle='rgba(0,255,255,.7)';
+    ctx.font='bold 12px monospace';
+    ctx.textAlign='center';
+    ctx.fillText('INVINCIBLE',W/2,H/2+20);
+  }
+  
+  if(DuelSystem.blockHeld){
+    ctx.fillStyle='#4488ff';
+    ctx.font='bold 12px monospace';
+    ctx.textAlign='center';
+    ctx.fillText('🛡️ BLOCKING',W/2,H/2+40);
+  }
+  
+  if(DuelSystem.dodgeCooldown>0){
+    ctx.fillStyle='#888';
+    ctx.font='8px monospace';
+    ctx.textAlign='center';
+    ctx.fillText(`Dodge: ${DuelSystem.dodgeCooldown.toFixed(1)}s`,W/2+100,H-20);
+  }
+  
+  ctx.textAlign='left';
+}
+
+function showInteractPrompt(text){
+  const prompt=$('#interact-prompt');
+  prompt.textContent=text;
+  prompt.style.display='block';
+  setTimeout(()=>prompt.style.display='none',3000);
+}
+
 // ═══════════════════════════════════════
 // §12. FLOOR-SPECIFIC RENDERING
 // ═══════════════════════════════════════
@@ -913,6 +1593,65 @@ function renderFloor3(){
   // Leaderboard wall
   const lb=getObjects().find(o=>o.id==='leaderboard');ctx.fillStyle='#1a1a2a';ctx.fillRect(lb.x,lb.y,lb.w,lb.h);ctx.fillStyle='#ffd700';ctx.font='bold 8px monospace';ctx.fillText('🏆 SCORES',lb.x+8,lb.y+14);
   ['snake','breakout','invaders'].forEach((g,i)=>{ctx.fillStyle='#888';ctx.font='7px monospace';ctx.fillText(`${g}: ${S.highScores[g]||0}`,lb.x+8,lb.y+28+i*14)});
+  
+  // Duel Arena
+  const arena=getObjects().find(o=>o.id==='duel_arena');
+  if(arena){
+    // Glowing circular ring
+    const centerX=arena.x+arena.w/2,centerY=arena.y+arena.h/2,radius=90;
+    const glowIntensity=.6+Math.sin(S.time*2)*.4;
+    
+    // Arena floor
+    ctx.fillStyle='#1a1a3a';
+    ctx.beginPath();
+    ctx.arc(centerX,centerY,radius,0,Math.PI*2);
+    ctx.fill();
+    
+    // Glowing ring
+    ctx.strokeStyle=`rgba(0,255,200,${glowIntensity})`;
+    ctx.lineWidth=4;
+    ctx.beginPath();
+    ctx.arc(centerX,centerY,radius,0,Math.PI*2);
+    ctx.stroke();
+    
+    // Inner ring
+    ctx.strokeStyle=`rgba(255,100,255,${glowIntensity*.7})`;
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.arc(centerX,centerY,radius-10,0,Math.PI*2);
+    ctx.stroke();
+    
+    // Neon ARENA sign above
+    ctx.fillStyle=`rgba(255,100,255,${glowIntensity})`;
+    ctx.shadowColor='#ff64ff';
+    ctx.shadowBlur=20;
+    ctx.font='bold 16px monospace';
+    ctx.textAlign='center';
+    ctx.fillText('ARENA',centerX,arena.y-10);
+    ctx.shadowBlur=0;
+    ctx.textAlign='left';
+  }
+  
+  // Duel Leaderboard
+  const duelLb=getObjects().find(o=>o.id==='duel_leaderboard');
+  if(duelLb){
+    ctx.fillStyle='#2a1a3a';
+    ctx.fillRect(duelLb.x,duelLb.y,duelLb.w,duelLb.h);
+    ctx.fillStyle='#ff6ec7';
+    ctx.font='bold 8px monospace';
+    ctx.textAlign='center';
+    ctx.fillText('⚔️ DUEL',duelLb.x+duelLb.w/2,duelLb.y+12);
+    ctx.fillText('CHAMPIONS',duelLb.x+duelLb.w/2,duelLb.y+22);
+    ctx.textAlign='left';
+    
+    // TODO: Show actual duel leaderboard from server
+    ctx.fillStyle='#888';
+    ctx.font='6px monospace';
+    ctx.fillText('1. Champion',duelLb.x+8,duelLb.y+35);
+    ctx.fillText('2. Warrior',duelLb.x+8,duelLb.y+45);
+    ctx.fillText('3. Fighter',duelLb.x+8,duelLb.y+55);
+  }
+  
   // Posters
   const posterCols=['#ff4444','#4488ff','#ffaa00'];
   for(let i=0;i<3;i++){const px=100+i*200,py=250;ctx.fillStyle=posterCols[i];ctx.fillRect(px,py,40,50);ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.strokeRect(px,py,40,50);ctx.fillStyle='#fff';ctx.font='5px monospace';ctx.fillText(['SPACE','RETRO','PIXEL'][i],px+4,py+30)}
@@ -1158,6 +1897,186 @@ function renderFloor6(){
   }
 }
 
+// --- FLOOR 8: Room Builder ---
+function renderFloor8(){
+  if(RoomSystem.currentRoom){
+    renderUserRoom(RoomSystem.currentRoom);
+    return;
+  }
+  
+  // Default room builder environment
+  renderFloorTiles(RoomSystem.floorColor,adjustBrightness(RoomSystem.floorColor,10));
+  ctx.fillStyle=RoomSystem.wallColor;
+  ctx.fillRect(0,0,W,70);
+  ctx.fillStyle=adjustBrightness(RoomSystem.wallColor,10);
+  ctx.fillRect(0,70,W,4);
+  
+  // Side walls
+  ctx.fillStyle='#2a2040';ctx.fillRect(0,0,12,H);ctx.fillRect(W-12,0,12,H);ctx.fillRect(0,H-12,W,12);
+  
+  // Furniture catalog
+  const cat=getObjects().find(o=>o.id==='furniture_catalog');
+  ctx.fillStyle='#2a2a3a';
+  ctx.fillRect(cat.x,cat.y,cat.w,cat.h);
+  ctx.strokeStyle='#555';
+  ctx.lineWidth=2;
+  ctx.strokeRect(cat.x,cat.y,cat.w,cat.h);
+  
+  ctx.fillStyle='#ff6ec7';
+  ctx.font='bold 10px monospace';
+  ctx.textAlign='center';
+  ctx.fillText('FURNITURE',cat.x+cat.w/2,cat.y+15);
+  ctx.fillText('CATALOG',cat.x+cat.w/2,cat.y+25);
+  ctx.textAlign='left';
+  
+  // Show furniture icons
+  const furnitureList=Object.entries(FURNITURE_TYPES);
+  let yOffset=40;
+  furnitureList.slice(0,8).forEach((entry,i)=>{
+    const[type,furn]=entry;
+    const fy=cat.y+yOffset+i*40;
+    
+    ctx.fillStyle=Coins.canAfford(furn.cost)?'#444':'#222';
+    ctx.fillRect(cat.x+10,fy,cat.w-20,35);
+    
+    ctx.font='16px sans-serif';
+    ctx.fillText(furn.icon,cat.x+15,fy+22);
+    
+    ctx.fillStyle=Coins.canAfford(furn.cost)?'#fff':'#666';
+    ctx.font='8px monospace';
+    ctx.fillText(furn.name,cat.x+40,fy+12);
+    ctx.fillStyle=furn.cost>0?'#ffd700':'#0f0';
+    ctx.fillText(furn.cost>0?furn.cost+'◈':'FREE',cat.x+40,fy+25);
+  });
+  
+  // Wall color swatches
+  const wallColors=['#2a2a4a','#4a2a2a','#2a4a2a','#2a2a2a','#4a4a2a','#4a2a4a','#2a4a4a','#1a1a1a'];
+  const wc=getObjects().find(o=>o.id==='wall_colors');
+  ctx.fillStyle='#333';
+  ctx.fillRect(wc.x,wc.y,wc.w,wc.h);
+  ctx.fillStyle='#fff';
+  ctx.font='8px monospace';
+  ctx.fillText('Wall Colors',wc.x+5,wc.y+12);
+  
+  wallColors.forEach((color,i)=>{
+    const sx=wc.x+5+(i%4)*22,sy=wc.y+20+Math.floor(i/4)*15;
+    ctx.fillStyle=color;
+    ctx.fillRect(sx,sy,18,12);
+    if(color===RoomSystem.wallColor){
+      ctx.strokeStyle='#00fff7';
+      ctx.lineWidth=2;
+      ctx.strokeRect(sx-1,sy-1,20,14);
+    }
+  });
+  
+  // Floor color swatches  
+  const floorColors=['#6a5548','#5a4538','#4a3528','#6a4a3a','#5a5a4a','#4a4a4a','#3a3a3a','#2a2a2a'];
+  const fc=getObjects().find(o=>o.id==='floor_colors');
+  ctx.fillStyle='#333';
+  ctx.fillRect(fc.x,fc.y,fc.w,fc.h);
+  ctx.fillStyle='#fff';
+  ctx.font='8px monospace';
+  ctx.fillText('Floor Colors',fc.x+5,fc.y+12);
+  
+  floorColors.forEach((color,i)=>{
+    const sx=fc.x+5+(i%4)*22,sy=fc.y+20+Math.floor(i/4)*15;
+    ctx.fillStyle=color;
+    ctx.fillRect(sx,sy,18,12);
+    if(color===RoomSystem.floorColor){
+      ctx.strokeStyle='#00fff7';
+      ctx.lineWidth=2;
+      ctx.strokeRect(sx-1,sy-1,20,14);
+    }
+  });
+  
+  // Render placed furniture
+  RoomSystem.furniture.forEach(furn=>{
+    renderFurniture(furn);
+  });
+  
+  // Builder mode indicators
+  if(RoomSystem.builderMode==='place'&&RoomSystem.selectedFurniture){
+    ctx.fillStyle='rgba(255,255,255,.3)';
+    ctx.font='12px monospace';
+    ctx.textAlign='center';
+    ctx.fillText('Click to place '+RoomSystem.selectedFurniture.name,W/2,H-30);
+    ctx.textAlign='left';
+  }
+}
+
+function renderUserRoom(room){
+  // Render custom room
+  const baseColor=room.floorColor||'#6a5548';
+  const lightColor=adjustBrightness(baseColor,10);
+  renderFloorTiles(baseColor,lightColor);
+  
+  // Walls
+  ctx.fillStyle=room.wallColor||'#2a2a4a';
+  ctx.fillRect(0,0,W,70);
+  ctx.fillStyle=adjustBrightness(room.wallColor||'#2a2a4a',10);
+  ctx.fillRect(0,70,W,4);
+  
+  // Side walls (always present)
+  ctx.fillStyle='#2a2040';ctx.fillRect(0,0,12,H);ctx.fillRect(W-12,0,12,H);ctx.fillRect(0,H-12,W,12);
+  
+  // Elevator (always present)
+  renderElevator();
+  
+  // Render furniture
+  if(room.furniture){
+    room.furniture.forEach(furn=>{
+      renderFurniture(furn);
+    });
+  }
+  
+  // Like button for visited rooms
+  if(room.owner!==LS.get('visitorName','Visitor')){
+    ctx.fillStyle='rgba(30,30,50,.9)';
+    ctx.fillRect(W-100,H-40,80,30);
+    ctx.strokeStyle='#ff6ec7';
+    ctx.lineWidth=1;
+    ctx.strokeRect(W-100,H-40,80,30);
+    
+    ctx.fillStyle='#ff6ec7';
+    ctx.font='10px monospace';
+    ctx.textAlign='center';
+    ctx.fillText('❤️ Like Room',W-60,H-22);
+    ctx.textAlign='left';
+  }
+}
+
+function renderFurniture(furn){
+  const type=FURNITURE_TYPES[furn.type];
+  if(!type)return;
+  
+  const x=furn.x,y=furn.y,w=type.width,h=type.height;
+  
+  // Simple furniture rendering - just colored rectangles with icons for now
+  const colors={
+    basic_chair:'#8a4a2a',basic_table:'#6a4a2a',basic_lamp:'#ffd700',basic_rug:'#8a6a4a',
+    poster:'#2a2a4a',comfy_chair:'#4a6a8a',desk:'#5a4030',bookshelf:'#4a3020',
+    plant_pot:'#2a4a2a',neon_sign:'#ff00ff',arcade_cabinet:'#2a1a4a',tv:'#1a1a2a',
+    fish_tank:'rgba(0,80,120,.8)',lightsaber_rack:'#3a3a3a',crystal_ball:'#6a3a8a',
+    jukebox:'#8a3a3a',pixel_plushie:'#333',trophy:'#ffd700'
+  };
+  
+  ctx.fillStyle=colors[furn.type]||'#666';
+  ctx.fillRect(x,y,w,h);
+  
+  // Icon overlay
+  ctx.font='20px sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText(type.icon,x+w/2,y+h/2+7);
+  ctx.textAlign='left';
+  
+  // Selection highlight for builder
+  if(RoomSystem.isInBuilder&&RoomSystem.builderMode==='select'){
+    ctx.strokeStyle='rgba(255,255,255,.5)';
+    ctx.lineWidth=2;
+    ctx.strokeRect(x-2,y-2,w+4,h+4);
+  }
+}
+
 // --- FLOOR 7: Community Deck ---
 function renderFloor7(){
   renderFloorTiles('#2a2a2a','#3a3a3a');
@@ -1300,6 +2219,7 @@ function render(){
   else if(S.floor===5)renderFloor5();
   else if(S.floor===6)renderFloor6();
   else if(S.floor===7)renderFloor7();
+  else if(S.floor===8)renderFloor8();
   // Shared elements
   renderElevator();
   renderDataFragment();
@@ -1318,8 +2238,12 @@ function render(){
   renderSeasonalOverlay();
   if(S.screenFlash){ctx.fillStyle=S.screenFlash;ctx.globalAlpha=.3;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;S.screenFlash=null}
   renderHoverHighlight();
+  // Duel HUD (during active duel)
+  if(DuelSystem.active){
+    renderDuelHUD();
+  }
   // Saber HUD
-  if(S._visitorSaber){const col=S._visitorSaber==='green'?'#00ff44':'#4488ff';ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(W/2-60,H-28,120,22);ctx.strokeStyle=col;ctx.lineWidth=1;ctx.strokeRect(W/2-60,H-28,120,22);ctx.fillStyle=col;ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText(`⚔️ E:Swing  Q:Switch  ⎵:Drop`,W/2,H-13);ctx.textAlign='left'}
+  else if(S._visitorSaber){const col=S._visitorSaber==='green'?'#00ff44':'#4488ff';ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(W/2-60,H-28,120,22);ctx.strokeStyle=col;ctx.lineWidth=1;ctx.strokeRect(W/2-60,H-28,120,22);ctx.fillStyle=col;ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText(`⚔️ E:Swing  Q:Block  Double-tap WASD:Dodge`,W/2,H-13);ctx.textAlign='left'}
   // Time of day overlay
   if(TOD==='night'){ctx.fillStyle='rgba(0,0,30,.15)';ctx.fillRect(0,0,W,H)}
   else if(TOD==='evening'){ctx.fillStyle='rgba(40,20,0,.06)';ctx.fillRect(0,0,W,H)}
@@ -2562,6 +3486,10 @@ function renderSpacewalk(){
 function update(dt){
   S.time+=dt;
   if(S.spacewalk.active){updateSpacewalk(dt);return} // Spacewalk overrides normal game
+  
+  // Update systems
+  DuelSystem.update(dt);
+  
   EchoAI.update(dt);
   updateVisitor(dt);
   S.nearObject=S.echo.floor===S.floor?getNearObject():null;
@@ -2652,6 +3580,22 @@ function interact(){
     case'timelapse':showCanvasTimelapse();break;
     case'artstool':showThought("Every artist needs good tools.");Coins.earn(1,'tools');break;
     case'communitywall':showCommunityWall();break;
+    // Floor 3 - Duel Arena
+    case'duel_arena':
+      if(!S._visitorSaber){
+        showThought("Need a lightsaber to enter the arena! Pick one up from F1.");
+      }else{
+        showThought("Welcome to the Duel Arena! Challenge another player with a saber!");
+      }
+      break;
+    case'duel_leaderboard':showDuelLeaderboard();break;
+    // Floor 8 - Room Builder
+    case'furniture_catalog':showFurnitureCatalog();break;
+    case'wall_colors':showWallColorPicker();break;
+    case'floor_colors':showFloorColorPicker();break;
+    case'save_room':saveRoom();break;
+    case'room_settings':showRoomSettings();break;
+    case'visit_rooms':RoomSystem.showRoomList();break;
     default:
       if(id.startsWith('growplot')){const idx=parseInt(id.replace('growplot',''))-1;showGardenPlotMenu(idx);break}
   }
@@ -3248,6 +4192,158 @@ function showVaultStory(){
   createPopup(story);
 }
 
+// ═══════════════════════════════════════
+// §19b. DUEL SYSTEM FUNCTIONS
+// ═══════════════════════════════════════
+async function showDuelLeaderboard(){
+  try{
+    const response=await fetch('/api/duel-leaderboard');
+    const leaderboard=await response.json();
+    
+    let html='<h3>⚔️ Duel Champions</h3><p style="font-size:10px;color:#888;margin-bottom:8px">Top duelists on the station</p>';
+    
+    if(leaderboard.length===0){
+      html+='<p style="color:#666">No duels yet. Be the first champion!</p>';
+    }else{
+      leaderboard.slice(0,10).forEach((duelist,i)=>{
+        const rank=i+1;
+        const color=rank===1?'#ffd700':rank===2?'#c0c0c0':rank===3?'#cd7f32':'#888';
+        html+=`
+          <div style="margin:4px 0;padding:6px;background:rgba(30,30,50,.5);border-left:3px solid ${color}">
+            <div style="color:${color};font-weight:bold">${rank}. ${duelist.name}</div>
+            <div style="font-size:9px;color:#888">${duelist.wins} wins • ${duelist.losses} losses • ${duelist.winStreak} streak</div>
+          </div>
+        `;
+      });
+    }
+    
+    createPopup(html);
+  }catch(error){
+    createPopup('<h3>⚔️ Duel Champions</h3><p style="color:#ff4444">Failed to load leaderboard!</p>');
+  }
+}
+
+// ═══════════════════════════════════════
+// §19c. ROOM BUILDER FUNCTIONS
+// ═══════════════════════════════════════
+function showFurnitureCatalog(){
+  let html='<h3>🛋️ Furniture Catalog</h3><p style="font-size:10px;color:#888;margin-bottom:8px">Click to place furniture in your room</p>';
+  
+  Object.entries(FURNITURE_TYPES).forEach(([type,furn])=>{
+    const canAfford=Coins.canAfford(furn.cost);
+    const hasRequirement=!furn.requirement||(furn.requirement==='pet_pixel_100'&&S.petCount>=100)||(furn.requirement==='win_10_duels'&&false); // TODO: track wins
+    
+    if(!hasRequirement&&furn.requirement){
+      html+=`
+        <div class="drink-btn" style="opacity:.3;cursor:not-allowed">
+          ${furn.icon} ${furn.name} - ${furn.requirement.replace('_',' ')}
+        </div>
+      `;
+    }else{
+      html+=`
+        <div class="drink-btn furniture-item ${!canAfford?'locked':''}" data-type="${type}" style="text-align:left">
+          <div style="float:left;margin-right:8px;font-size:16px">${furn.icon}</div>
+          <div style="font-weight:bold">${furn.name}</div>
+          <div style="font-size:9px;color:${furn.cost>0?'#ffd700':'#0f0'}">${furn.cost>0?furn.cost+'◈':'FREE'}</div>
+        </div>
+      `;
+    }
+  });
+  
+  const{p}=createPopup(html);
+  p.querySelectorAll('.furniture-item').forEach(btn=>{
+    btn.onclick=()=>{
+      const type=btn.dataset.type;
+      const furn=FURNITURE_TYPES[type];
+      if(!Coins.canAfford(furn.cost)){
+        showNotification(`Need ${furn.cost}◈!`);
+        return;
+      }
+      
+      RoomSystem.selectedFurniture=furn;
+      RoomSystem.builderMode='place';
+      showNotification(`Click to place ${furn.name}`);
+      p.closest('.popup-overlay').remove();
+    };
+  });
+}
+
+function showWallColorPicker(){
+  const colors=['#2a2a4a','#4a2a2a','#2a4a2a','#2a2a2a','#4a4a2a','#4a2a4a','#2a4a4a','#1a1a1a'];
+  let html='<h3>🎨 Wall Colors</h3><p style="font-size:10px;color:#888;margin-bottom:8px">Choose your wall color</p>';
+  
+  colors.forEach(color=>{
+    html+=`
+      <div class="drink-btn color-swatch" data-color="${color}" style="background:${color};width:40px;height:40px;margin:4px;display:inline-block;${color===RoomSystem.wallColor?'border:3px solid #00fff7':''}">
+      </div>
+    `;
+  });
+  
+  const{p}=createPopup(html);
+  p.querySelectorAll('.color-swatch').forEach(btn=>{
+    btn.onclick=()=>{
+      RoomSystem.wallColor=btn.dataset.color;
+      showNotification('Wall color changed!');
+      p.closest('.popup-overlay').remove();
+    };
+  });
+}
+
+function showFloorColorPicker(){
+  const colors=['#6a5548','#5a4538','#4a3528','#6a4a3a','#5a5a4a','#4a4a4a','#3a3a3a','#2a2a2a'];
+  let html='<h3>🎨 Floor Colors</h3><p style="font-size:10px;color:#888;margin-bottom:8px">Choose your floor color</p>';
+  
+  colors.forEach(color=>{
+    html+=`
+      <div class="drink-btn color-swatch" data-color="${color}" style="background:${color};width:40px;height:40px;margin:4px;display:inline-block;${color===RoomSystem.floorColor?'border:3px solid #00fff7':''}">
+      </div>
+    `;
+  });
+  
+  const{p}=createPopup(html);
+  p.querySelectorAll('.color-swatch').forEach(btn=>{
+    btn.onclick=()=>{
+      RoomSystem.floorColor=btn.dataset.color;
+      showNotification('Floor color changed!');
+      p.closest('.popup-overlay').remove();
+    };
+  });
+}
+
+function saveRoom(){
+  RoomSystem.save();
+  showNotification('Room saved!');
+}
+
+function showRoomSettings(){
+  const currentName=RoomSystem.roomName;
+  const{p}=createPopup(`
+    <h3>⚙️ Room Settings</h3>
+    <div style="margin:8px 0">
+      <label style="display:block;margin-bottom:4px">Room Name:</label>
+      <input type="text" id="room-name-input" value="${currentName}" maxlength="30" style="width:100%;background:#111;border:1px solid #444;color:#ddd;padding:4px;font-family:inherit">
+    </div>
+    <div style="margin:8px 0">
+      <label style="display:block;margin-bottom:4px">
+        <input type="checkbox" id="room-public" checked> Public Room
+      </label>
+      <div style="font-size:9px;color:#666">Public rooms can be visited by other players</div>
+    </div>
+    <button class="drink-btn" onclick="this.closest('.popup-overlay').remove()">Cancel</button>
+    <button class="drink-btn" id="apply-settings">Apply</button>
+  `);
+  
+  p.querySelector('#apply-settings').onclick=()=>{
+    const newName=p.querySelector('#room-name-input').value.trim();
+    if(newName){
+      RoomSystem.roomName=newName;
+      RoomSystem.save();
+      showNotification('Settings saved!');
+    }
+    p.closest('.popup-overlay').remove();
+  };
+}
+
 function checkAchievements(){
   ACHIEVE_DEFS.forEach(a=>{if(!S.achievements.includes(a.id)&&a.check()){S.achievements.push(a.id);LS.set('achievements',S.achievements);showNotification('🏆 '+a.name+'!');Coins.earn(10,'achievement')}});
 }
@@ -3262,17 +4358,39 @@ function showAchievements(){
 function openElevator(){
   const ov=$('#elevator-overlay');ov.className='show';
   let html='<div class="popup" style="max-width:280px"><span class="close-btn">&times;</span><h3>🛗 Elevator</h3>';
+  
+  // Regular floors 1-7
   for(let f=1;f<=7;f++){
     const locked=f===5&&Coins.lifetime<500;
     const current=f===S.floor;
     html+=`<button class="floor-btn${current?' current':''}${locked?' locked':''}" data-floor="${f}">${current?'► ':''}F${f} — ${FLOOR_NAMES[f]}${locked?' (🔒 500◈ lifetime)':''}</button>`;
   }
+  
+  // Room Builder (F8) - special access
+  const hasRoom=RoomSystem.furniture.length>0||LS.get('userRoomName','My Room')!=='My Room';
+  const f8Current=S.floor===8;
+  html+=`<button class="floor-btn${f8Current?' current':''}" data-floor="8">${f8Current?'► ':''}F8 — ${hasRoom?'My Room':'Create Room'}</button>`;
+  
+  // Visit Rooms option
+  html+=`<button class="floor-btn" data-action="visit">🏠 Visit Rooms</button>`;
+  
   html+='</div>';ov.innerHTML=html;
   ov.querySelector('.close-btn').onclick=()=>ov.className='';
   ov.onclick=e=>{if(e.target===ov)ov.className=''};
   ov.querySelectorAll('.floor-btn').forEach(btn=>{btn.onclick=()=>{
+    if(btn.dataset.action==='visit'){
+      RoomSystem.showRoomList();
+      ov.className='';
+      return;
+    }
+    
     const f=parseInt(btn.dataset.floor);
     if(f===5&&Coins.lifetime<500){showNotification('Need 500◈ lifetime to unlock!');return}
+    if(f===8){
+      RoomSystem.showBuilder();
+      ov.className='';
+      return;
+    }
     if(f===S.floor){ov.className='';return}
     changeFloor(f);ov.className='';
   }});
@@ -3368,6 +4486,79 @@ const EchoWS={ws:null,connected:false,
       else if(msg.type==='milestone.unlocked'){
         // Milestone unlocked by someone!
         triggerMilestone(msg.milestone.id);
+      }
+      // Duel system messages
+      else if(msg.type==='duel.request'){
+        // Someone wants to duel us
+        if(!DuelSystem.active&&!DuelSystem.isPendingChallenge){
+          const accept=confirm(`${msg.challengerName} challenges you to a duel! Accept?`);
+          if(accept){
+            DuelSystem.acceptChallenge(msg.challengerId,msg.challengerName);
+          }else{
+            // Send rejection
+            this.ws.send(JSON.stringify({type:'duel.reject',challengerId:msg.challengerId}));
+          }
+        }
+      }
+      else if(msg.type==='duel.start'){
+        // Duel starting
+        if(msg.participants.includes(S.myPlayerId)){
+          const opponentId=msg.participants.find(id=>id!==S.myPlayerId);
+          const opponent=S.otherPlayers[opponentId];
+          if(opponent){
+            DuelSystem.active=true;
+            DuelSystem.opponentId=opponentId;
+            DuelSystem.opponentName=opponent.name;
+            DuelSystem.startRound();
+          }
+        }
+      }
+      else if(msg.type==='duel.hit'){
+        if(msg.targetId===S.myPlayerId){
+          DuelSystem.takeDamage(msg.damage,msg.type);
+        }else if(msg.attackerId===S.myPlayerId){
+          DuelSystem.opponentHP=Math.max(0,DuelSystem.opponentHP-msg.damage);
+          if(DuelSystem.opponentHP<=0){
+            DuelSystem.endRound('victory');
+          }
+        }
+      }
+      else if(msg.type==='duel.blocked'||msg.type==='duel.dodged'){
+        if(msg.attackerId===S.myPlayerId){
+          showNotification(msg.type==='duel.blocked'?'BLOCKED!':'DODGED!');
+          // Block effect
+          if(msg.type==='duel.blocked'){
+            const op=S.otherPlayers[DuelSystem.opponentId];
+            if(op){
+              // Blue shield flash
+              S.particles.push({
+                x:op.x,y:op.y-20,
+                vx:0,vy:0,life:20,
+                color:'#4488ff',size:15
+              });
+            }
+          }
+        }
+      }
+      else if(msg.type==='duel.round.end'){
+        if(msg.participants.includes(S.myPlayerId)){
+          const winner=msg.winner;
+          if(winner===S.myPlayerId){
+            DuelSystem.endRound('victory');
+          }else{
+            DuelSystem.endRound('defeat');
+          }
+        }
+      }
+      else if(msg.type==='duel.complete'){
+        if(msg.participants.includes(S.myPlayerId)){
+          const winner=msg.winner;
+          if(winner===S.myPlayerId){
+            DuelSystem.endDuel('victory');
+          }else{
+            DuelSystem.endDuel('defeat');
+          }
+        }
       }
       }catch{}};
     this.ws.onclose=()=>{this.connected=false;this.updateIndicator();setTimeout(()=>this.connect(),5000)};
@@ -3581,6 +4772,33 @@ function initInput(){
     for(const o of getObjects()){if(!o.interact)continue;if(cx>o.x-10&&cx<o.x+o.w+10&&cy>o.y-10&&cy<o.y+o.h+10){
       if(S.useVisitor){S.visitor.walkTarget={x:o.x+o.w/2,y:o.y+o.h+10,action:()=>{S.nearObject=o;interact();Coins.earn(1,'click')}}}
       else{EchoAI.visitorClickObject(o);Coins.earn(1,'click')}return}}
+    // Room builder interactions
+    if(S.floor===8&&RoomSystem.isInBuilder){
+      if(RoomSystem.builderMode==='place'&&RoomSystem.selectedFurniture){
+        RoomSystem.placeFurniture(RoomSystem.selectedFurniture.name.toLowerCase().replace(' ','_'),cx,cy);
+        return;
+      }
+      
+      // Click furniture to remove it
+      for(const furn of RoomSystem.furniture){
+        const type=FURNITURE_TYPES[furn.type];
+        if(type&&cx>=furn.x&&cx<=furn.x+type.width&&cy>=furn.y&&cy<=furn.y+type.height){
+          if(confirm(`Remove ${type.name}?`)){
+            RoomSystem.removeFurniture(furn.id);
+          }
+          return;
+        }
+      }
+      
+      // Like button in visited room
+      if(RoomSystem.currentRoom&&RoomSystem.currentRoom.owner!==LS.get('visitorName','Visitor')){
+        if(cx>=W-100&&cx<=W-20&&cy>=H-40&&cy<=H-10){
+          RoomSystem.likeRoom(RoomSystem.currentRoom.owner);
+          return;
+        }
+      }
+    }
+    
     // Click empty space — just walk there
     if(S.useVisitor){S.visitor.walkTarget={x:cx,y:cy,action:null}}
   });
@@ -3618,8 +4836,43 @@ function initInput(){
     if(k==='ArrowLeft'||k==='a'||k==='A')S.keys.left=true;
     if(k==='ArrowRight'||k==='d'||k==='D')S.keys.right=true;
     if(k===' '){e.preventDefault();visitorInteract()}
-    if((k==='e'||k==='E')&&S._visitorSaber&&S._saberSwing<=0){e.preventDefault();swingSaber()}
-    if((k==='q'||k==='Q')&&S._visitorSaber){e.preventDefault();toggleSabers()}
+    if((k==='e'||k==='E')){
+      e.preventDefault();
+      if(DuelSystem.active){
+        DuelSystem.attack();
+      }else if(DuelSystem.isPendingChallenge&&S.floor===3){
+        // Accept duel challenge in arena
+        for(const[id,player]of Object.entries(S.otherPlayers)){
+          if(player.floor===3&&player.saber&&Math.hypot(S.visitor.x-player.x,S.visitor.y-player.y)<50){
+            DuelSystem.acceptChallenge(id,player.name);
+            break;
+          }
+        }
+      }else if(S._visitorSaber&&S._saberSwing<=0){
+        // Check for duel challenge in arena
+        if(S.floor===3){
+          const arenaCenter={x:400,y:300};
+          const inArena=Math.hypot(S.visitor.x-arenaCenter.x,S.visitor.y-arenaCenter.y)<100;
+          if(inArena){
+            for(const[id,player]of Object.entries(S.otherPlayers)){
+              if(player.floor===3&&player.saber&&Math.hypot(S.visitor.x-player.x,S.visitor.y-player.y)<50){
+                DuelSystem.sendChallenge(id,player.name);
+                return;
+              }
+            }
+          }
+        }
+        swingSaber();
+      }
+    }
+    if((k==='q'||k==='Q')){
+      e.preventDefault();
+      if(DuelSystem.active){
+        DuelSystem.block(true);
+      }else if(S._visitorSaber){
+        toggleSabers();
+      }
+    }
   });
   document.addEventListener('keyup',e=>{
     const k=e.key;
@@ -3627,6 +4880,32 @@ function initInput(){
     if(k==='ArrowDown'||k==='s'||k==='S')S.keys.down=false;
     if(k==='ArrowLeft'||k==='a'||k==='A')S.keys.left=false;
     if(k==='ArrowRight'||k==='d'||k==='D')S.keys.right=false;
+    if((k==='q'||k==='Q')&&DuelSystem.active){
+      DuelSystem.block(false);
+    }
+  });
+  
+  // Double-tap detection for dodging
+  let lastKeyTime={};
+  let lastKey=null;
+  document.addEventListener('keydown',e=>{
+    if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
+    if(DuelSystem.active){
+      const now=Date.now();
+      const k=e.key.toLowerCase();
+      const dodgeKeys={'w':'up','s':'down','a':'left','d':'right'};
+      
+      if(dodgeKeys[k]){
+        if(lastKey===k&&now-lastKeyTime[k]<300){
+          // Double tap detected!
+          DuelSystem.dodge(dodgeKeys[k]);
+          lastKeyTime[k]=0; // Reset to prevent triple tap
+        }else{
+          lastKeyTime[k]=now;
+          lastKey=k;
+        }
+      }
+    }
   });
   S.useVisitor=true;
 }
