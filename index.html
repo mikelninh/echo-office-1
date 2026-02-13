@@ -950,6 +950,11 @@ const VISITOR_SKINS=[
   {id:'wizard',label:'Wizard',icon:'🧙',color:'#6a3aaa',cost:20,desc:'Mystical robes'},
   {id:'angel',label:'Angel',icon:'😇',color:'#ffe0f0',cost:30,desc:'Heavenly glow'},
   {id:'demon',label:'Demon',icon:'😈',color:'#cc2244',cost:30,desc:'Dark and fiery'},
+  {id:'spider-v',label:'Spider',icon:'🕷️',color:'#cc2020',cost:40,desc:'Web-slinging hero',accent:'#4040ff'},
+  {id:'knight-v',label:'Dark Knight',icon:'🦇',color:'#1a1a2a',cost:40,desc:'Gotham\'s finest',accent:'#ffdd44'},
+  {id:'speedster-v',label:'Speedster',icon:'⚡',color:'#cc0000',cost:45,desc:'Faster than light',accent:'#ffdd00'},
+  {id:'hulk-v',label:'Hulk',icon:'💪',color:'#228b22',cost:50,desc:'SMASH!',accent:'#44ff44'},
+  {id:'ironsuit-v',label:'Iron Suit',icon:'🤖',color:'#cc2222',cost:50,desc:'Genius billionaire',accent:'#00ddff'},
 ];
 
 // -- Fortunes --
@@ -1363,7 +1368,7 @@ function getEchoSprite(skin,dir,frame){
 
 function getPixelSprite(dir,frame,state){
   // Jiji-style black cat — round head, HUGE sparkly green eyes, tiny pink nose, fluffy tail
-  const B='#111122',Bh='#1e1e30',Bs='#252540',G='#22ff55',Gd='#18cc44',Gh='#ffffff',Gs='#aaffcc',C='#8833cc',CC='#bb77ff',PK='#ff8899',W2='#cccccc',T=0;
+  const B='#111122',Bh='#1e1e30',Bs='#252540',G='#ffaa22',Gd='#dd8811',Gh='#ffffff',Gs='#ffddaa',C='#8833cc',CC='#bb77ff',PK='#ff8899',W2='#cccccc',T=0;
   if(state==='sleep'){
     // Sleeping Jiji — curled up ball with tail
     return[
@@ -1511,7 +1516,7 @@ function renderTransformation(){
 
 function renderPixel(){
   const p=S.pixel;if(p.floor!==S.floor)return;
-  const grid=getPixelSprite(p.dir,p.frame,p.state);const scale=4;
+  const grid=getPixelSprite(p.dir,p.frame,p.state);const scale=3;
   const sprW=grid[0].length*scale,sprH=grid.length*scale;
   
   // Shadow
@@ -1539,19 +1544,19 @@ function renderPixel(){
   
   // Anime eye glow — big bright green eyes with shine
   if(p.state!=='sleep'){
-    ctx.shadowColor='#30ee50';ctx.shadowBlur=8;
+    ctx.shadowColor='#ffaa22';ctx.shadowBlur=8;
     // Eye glow positions depend on direction
     if(p.dir===0){
       // Front: two big eyes
       const eyeL=p.x-sprW/2+2*scale,eyeR=p.x-sprW/2+6*scale,eyeY=p.y-sprH+3*scale;
-      ctx.fillStyle='rgba(48,238,80,.4)';
+      ctx.fillStyle='rgba(255,170,34,.4)';
       ctx.fillRect(eyeL,eyeY,2*scale,2*scale);
       ctx.fillRect(eyeR,eyeY,2*scale,2*scale);
     } else if(p.dir===1||p.dir===2){
       // Side: one big eye
       const eyeX=p.dir===1?p.x-sprW/2+1*scale:p.x-sprW/2+5*scale;
       const eyeY=p.y-sprH+3*scale;
-      ctx.fillStyle='rgba(48,238,80,.4)';
+      ctx.fillStyle='rgba(255,170,34,.4)';
       ctx.fillRect(eyeX,eyeY,2*scale,2*scale);
     }
     ctx.shadowBlur=0;
@@ -2780,6 +2785,22 @@ function visitorInteract(){
     checkAchievements();
   }
 }
+// Visitor skin transformation animation
+function visitorTransform(newSkinId){
+  const skin=VISITOR_SKINS.find(s=>s.id===newSkinId)||VISITOR_SKINS[0];
+  const accent=skin.accent||skin.color;
+  S.visitor._transforming=true;S.visitor._transformTimer=0;S.visitor._transformSkin=newSkinId;
+  // Flash + particles
+  S.screenFlash=accent;
+  for(let i=0;i<25;i++){const a=Math.random()*Math.PI*2,sp=3+Math.random()*5;
+    S.particles.push({x:S.visitor.x,y:S.visitor.y-15,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:25,color:accent,size:2+Math.random()*3})}
+  setTimeout(()=>{S.visitor.skin=newSkinId;LS.set('visitorSkin',newSkinId);S.visitor._transforming=false;
+    S.screenFlash=accent;showNotification('⚡ '+skin.label+' equipped!');
+    for(let i=0;i<15;i++){const a=Math.random()*Math.PI*2,sp=2+Math.random()*3;
+      S.particles.push({x:S.visitor.x,y:S.visitor.y-15,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:20,color:accent,size:2})}
+  },400);
+}
+
 function renderVisitor(ctx){
   if(!S.useVisitor)return;
   const v=S.visitor,sc=3,sz=10;
@@ -4267,13 +4288,10 @@ function showVisitorSkinPanel(){
         if(confirm(`Buy ${VISITOR_SKINS.find(s=>s.id===id).label} for ${cost}◈?`)){
           Coins.spend(cost,'skin');
           const skins=LS.get('visitorSkinsOwned',[]);skins.push(id);LS.set('visitorSkinsOwned',skins);
-          S.visitor.skin=id;LS.set('visitorSkin',id);showNotification(`Equipped ${VISITOR_SKINS.find(s=>s.id===id).label}!`);
-          p.closest('.popup-overlay').remove();showVisitorSkinPanel();
+          visitorTransform(id);p.closest('.popup-overlay').remove();
         }
       } else {
-        S.visitor.skin=id;LS.set('visitorSkin',id);
-        showNotification(`Equipped ${VISITOR_SKINS.find(s=>s.id===id).label}!`);
-        p.closest('.popup-overlay').remove();
+        visitorTransform(id);p.closest('.popup-overlay').remove();
       }
     }
   });
