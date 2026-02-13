@@ -3601,6 +3601,26 @@ function toggleSpacewalk(){
   S.spacewalk.active=!S.spacewalk.active;
   $('#btn-spacewalk').classList.toggle('active',S.spacewalk.active);
   
+  // Show/hide EXIT button overlay
+  let exitBtn=document.getElementById('eva-exit-btn');
+  if(S.spacewalk.active){
+    if(!exitBtn){
+      exitBtn=document.createElement('button');exitBtn.id='eva-exit-btn';
+      exitBtn.textContent='🚀 EXIT SPACE';
+      exitBtn.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;padding:16px 40px;font-size:18px;font-weight:bold;font-family:inherit;background:linear-gradient(135deg,#ff3333,#cc0000);color:#fff;border:3px solid #fff;border-radius:12px;cursor:pointer;box-shadow:0 0 20px rgba(255,0,0,.5);animation:pulse-exit 1s infinite';
+      exitBtn.onclick=()=>toggleSpacewalk();
+      // Add pulse animation
+      if(!document.getElementById('eva-exit-style')){
+        const style=document.createElement('style');style.id='eva-exit-style';
+        style.textContent='@keyframes pulse-exit{0%,100%{box-shadow:0 0 20px rgba(255,0,0,.5)}50%{box-shadow:0 0 40px rgba(255,0,0,.8)}}';
+        document.head.appendChild(style);
+      }
+      document.body.appendChild(exitBtn);
+    }else exitBtn.style.display='block';
+  }else{
+    if(exitBtn)exitBtn.style.display='none';
+  }
+  
   if(S.spacewalk.active){
     // Initialize spacewalk
     S.spacewalk.x=W/2;S.spacewalk.y=H/2;S.spacewalk.vx=0;S.spacewalk.vy=0;S.spacewalk.oxygen=100;
