@@ -1198,6 +1198,8 @@ function render(){
   ctx.restore();
   if(S.screenFlash){ctx.fillStyle=S.screenFlash;ctx.globalAlpha=.3;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;S.screenFlash=null}
   renderHoverHighlight();
+  // Saber HUD
+  if(S._visitorSaber){const col=S._visitorSaber==='green'?'#00ff44':'#4488ff';ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(W/2-60,H-28,120,22);ctx.strokeStyle=col;ctx.lineWidth=1;ctx.strokeRect(W/2-60,H-28,120,22);ctx.fillStyle=col;ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText(`⚔️ E:Swing  Q:Switch  ⎵:Drop`,W/2,H-13);ctx.textAlign='left'}
   // Time of day overlay
   if(TOD==='night'){ctx.fillStyle='rgba(0,0,30,.15)';ctx.fillRect(0,0,W,H)}
   else if(TOD==='evening'){ctx.fillStyle='rgba(40,20,0,.06)';ctx.fillRect(0,0,W,H)}
@@ -2034,32 +2036,31 @@ S._saberGreen=0;S._saberBlue=0;S._saberState='off';// off, green, blue, both, du
 S._saberDuelTimer=0;S._saberClashes=[];
 S._visitorSaber=null;// null, 'green', 'blue'
 S._saberSwing=0;S._saberSwingDir=0;
+function swingSaber(){
+  if(!S._visitorSaber||S._saberSwing>0)return;
+  if(!S.audioCtx)initAudio();
+  S._saberSwing=1;S._saberSwingDir=S.visitor.dir;
+  playSaberSound('clash');
+  S.screenShake=2;
+  const col=S._visitorSaber==='green'?'#00ff44':'#4488ff';
+  for(let i=0;i<10;i++)S.particles.push({x:S.visitor.x+(S.visitor.dir===2?20:-20),y:S.visitor.y-15,vx:(S.visitor.dir===2?1:-1)*Math.random()*4,vy:(Math.random()-.5)*4,life:15,color:col,size:2+Math.random()*2});
+  Coins.earn(1,'swing');
+}
 function toggleSabers(){
   if(!S.audioCtx)initAudio();
-  // Cycle: pick up green → swing → pick up blue → swing → put back
   if(!S._visitorSaber){
     S._visitorSaber='green';S._saberState='green';
     playSaberSound('ignite');
-    showThought("*picks up green saber* VWOOMM! Click again to swing!");
-  }else if(S._visitorSaber==='green'&&S._saberSwing<=0){
+    showThought("*VWOOMM!* Green saber equipped! Press E to swing, Q to switch, SPACE to put back.");
+  }else if(S._visitorSaber==='green'){
     S._visitorSaber='blue';S._saberState='blue';
     playSaberSound('ignite');
-    showThought("*switches to blue* This one hums different. Click to swing!");
-  }else if(S._visitorSaber==='blue'&&S._saberSwing<=0){
+    showThought("*BWZZZZ!* Blue saber! Press E to swing!");
+  }else{
     S._visitorSaber=null;S._saberState='off';
     playSaberSound('retract');
-    showThought("*places sabers back* The Force rests... for now.");
+    showThought("*sabers retract* Back on the wall they go.");
   }
-  // Trigger swing if already holding
-  if(S._visitorSaber&&S._saberSwing<=0){
-    S._saberSwing=1;S._saberSwingDir=S.visitor.dir;
-    playSaberSound('clash');
-    S.screenShake=2;
-    // Swing particles
-    const col=S._visitorSaber==='green'?'#00ff44':'#4488ff';
-    for(let i=0;i<8;i++)S.particles.push({x:S.visitor.x+(S._saberSwingDir===2?15:-15),y:S.visitor.y-15,vx:(Math.random()-.5)*4,vy:-Math.random()*3,life:12,color:col,size:2});
-  }
-  Coins.earn(1,'sabers');
 }
 function playSaberSound(type){
   if(!S.audioCtx)return;const c=S.audioCtx,n=c.currentTime,v=S.volume*.2;
@@ -2577,6 +2578,8 @@ function initInput(){
     if(k==='ArrowLeft'||k==='a'||k==='A')S.keys.left=true;
     if(k==='ArrowRight'||k==='d'||k==='D')S.keys.right=true;
     if(k===' '){e.preventDefault();visitorInteract()}
+    if((k==='e'||k==='E')&&S._visitorSaber&&S._saberSwing<=0){e.preventDefault();swingSaber()}
+    if((k==='q'||k==='Q')&&S._visitorSaber){e.preventDefault();S._visitorSaber=S._visitorSaber==='green'?'blue':'green';S._saberState=S._visitorSaber;playSaberSound('ignite');showThought(S._visitorSaber==='green'?'Switched to green!':'Switched to blue!')}
   });
   document.addEventListener('keyup',e=>{
     const k=e.key;
