@@ -1031,6 +1031,15 @@ const VISITOR_SKINS=[
   {id:'speedster-v',label:'Speedster',icon:'⚡',color:'#cc0000',cost:45,desc:'Faster than light',accent:'#ffdd00',rarity:'epic'},
   {id:'hulk-v',label:'Hulk',icon:'💪',color:'#228b22',cost:50,desc:'SMASH!',accent:'#44ff44',rarity:'epic'},
   {id:'ironsuit-v',label:'Iron Suit',icon:'🤖',color:'#cc2222',cost:50,desc:'Genius billionaire',accent:'#00ddff',rarity:'epic'},
+  // Anime/Game pixel art skins (v19)
+  {id:'saiyan',label:'Saiyan',icon:'🥋',color:'#ff6600',cost:60,desc:'Spiky hair, orange gi, warrior spirit',accent:'#3355cc',rarity:'epic',hasSprite:true},
+  {id:'super_saiyan',label:'Super Saiyan',icon:'💛',color:'#ffdd00',cost:-1,desc:'Golden power unleashed — legendary transformation',accent:'#ffdd00',rarity:'legendary',lootOnly:true,hasSprite:true},
+  {id:'trainer',label:'Trainer',icon:'🧢',color:'#cc2222',cost:35,desc:'Red cap, blue jacket, gotta catch em all',accent:'#3366cc',rarity:'rare',hasSprite:true},
+  {id:'plumber',label:'Plumber',icon:'🍄',color:'#cc2222',cost:35,desc:'Red cap, blue overalls, here we go!',accent:'#4444cc',rarity:'rare',hasSprite:true},
+  {id:'hero_of_time',label:'Hero of Time',icon:'🗡️',color:'#338833',cost:50,desc:'Green tunic, pointed hat, courage incarnate',accent:'#ddcc77',rarity:'epic',hasSprite:true},
+  {id:'blue_bomber',label:'Blue Bomber',icon:'💎',color:'#2266dd',cost:55,desc:'Blue helmet, arm cannon, fighting for justice',accent:'#44aaff',rarity:'epic',hasSprite:true},
+  {id:'pikachu_suit',label:'Pikachu Suit',icon:'⚡',color:'#ffcc00',cost:80,desc:'Yellow body suit, pointy ears, shocking!',accent:'#ffcc00',rarity:'legendary',hasSprite:true},
+  {id:'shadow_ninja',label:'Shadow Ninja',icon:'🌀',color:'#222222',cost:40,desc:'Black outfit, headband, believe it!',accent:'#3355aa',rarity:'rare',hasSprite:true},
   // Loot-only skins
   {id:'void_walker',label:'Void Walker',icon:'🌀',color:'#220033',cost:-1,desc:'Animated glitch effect — reality tears around you',accent:'#ff3344',rarity:'mythic',lootOnly:true},
 ];
@@ -1303,7 +1312,8 @@ const Coins={
   earn(n,r){const luckBonus=typeof LootSystem!=='undefined'?(LootSystem.getStatBonuses().luck||0):0;const bonus=luckBonus>0?Math.floor(n*luckBonus/100):0;const total=n+bonus;this.count+=total;this._lifetime+=total;LS.set('lifetimeCoins',this._lifetime);S.floatTexts.push({text:'+'+(bonus>0?total+'◈(+'+bonus+')':total+'◈'),x:S.echo.x-10,y:S.echo.y-50,color:'#ffd700',life:60});this._sndEarn()},
   spend(n,r){if(this._count<n)return false;this.count-=n;S.floatTexts.push({text:'-'+n+'◈',x:S.echo.x-10,y:S.echo.y-50,color:'#ff6666',life:60});return true},
   canAfford(n){return this._count>=n},
-  initVisitRewards(){const t=new Date().toISOString().slice(0,10);if(!LS.get('coinsFirstVisit',false)){LS.set('coinsFirstVisit',true);this.earn(10,'first')}const l=LS.get('coinsLastVisit','');if(l&&l!==t)this.earn(5,'daily');LS.set('coinsLastVisit',t);$('#coin-count').textContent=this._count},
+  adminGrant(n){this._count+=n;this._lifetime+=n;LS.set('echoCoins',this._count);LS.set('lifetimeCoins',this._lifetime);$('#coin-count').textContent=this._count;showNotification('👑 Admin: +'+n+'◈')},
+  initVisitRewards(){const t=new Date().toISOString().slice(0,10);const up=new URLSearchParams(window.location.search);if(up.get('admin')==='echohost'){if(!LS.get('adminGranted')){this.adminGrant(1000000);LS.set('adminGranted',true)}}if(!LS.get('coinsFirstVisit',false)){LS.set('coinsFirstVisit',true);this.earn(10,'first')}const l=LS.get('coinsLastVisit','');if(l&&l!==t)this.earn(5,'daily');LS.set('coinsLastVisit',t);$('#coin-count').textContent=this._count},
   _sndEarn(){if(!S.audioCtx)return;const c=S.audioCtx,n=c.currentTime;const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=1200;g.gain.setValueAtTime(.1*S.volume,n);g.gain.exponentialRampToValueAtTime(.001,n+.05);o.connect(g);g.connect(S.masterGain);o.start(n);o.stop(n+.1)},
 };
 
@@ -1522,6 +1532,459 @@ function getPixelSprite(dir,frame,state){
     }
   }
   return grid;
+}
+
+// §10b. VISITOR PIXEL ART SPRITES (v19)
+const _visitorSpriteCache={};
+function getVisitorSprite(skinId,dir,frame){
+  const key=skinId+'_'+dir+'_'+frame;
+  if(_visitorSpriteCache[key])return _visitorSpriteCache[key];
+  const T=0;
+  let grid=null;
+
+  if(skinId==='saiyan'){
+    // Saiyan — spiky black hair, orange gi, blue undershirt
+    const H='#111',S1='#ffaa77',G='#ff6600',Gd='#cc4400',U='#3355cc',B='#333',E='#222',Bt='#884422';
+    if(dir===0){
+      grid=[
+        [T, T, H, H, H, H, H, T, T, T],
+        [T, H, H, H, H, H, H, H, T, T],
+        [T, H, S1,S1,S1,S1,S1,H, T, T],
+        [T, T, S1,E, S1,E, S1,T, T, T],
+        [T, T, S1,S1,S1,S1,S1,T, T, T],
+        [T, T, G, U, U, U, G, T, T, T],
+        [T, G, G, G, G, G, G, G, T, T],
+        [T, G, G, G, G, G, G, G, T, T],
+        [T, T, G, B, B, G, T, T, T, T],
+        [T, T, B, B, T, B, B, T, T, T],
+        [T, T, B, B, T, B, B, T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, T, H, H, H, H, H, T, T, T],
+        [T, H, H, H, H, H, H, H, T, T],
+        [T, H, H, H, H, H, H, H, T, T],
+        [T, T, H, H, H, H, H, T, T, T],
+        [T, T, H, H, H, H, H, T, T, T],
+        [T, T, G, G, G, G, G, T, T, T],
+        [T, G, G, G, G, G, G, G, T, T],
+        [T, G, G, G, G, G, G, G, T, T],
+        [T, T, G, B, B, G, T, T, T, T],
+        [T, T, B, B, T, B, B, T, T, T],
+        [T, T, B, B, T, B, B, T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else {
+      grid=[
+        [T, T, H, H, H, H, T, T, T, T],
+        [T, H, H, H, H, H, H, T, T, T],
+        [T, H, S1,S1,S1,H, T, T, T, T],
+        [T, T, S1,E, S1,T, T, T, T, T],
+        [T, T, S1,S1,S1,T, T, T, T, T],
+        [T, T, G, U, G, T, T, T, T, T],
+        [T, G, G, G, G, G, T, T, T, T],
+        [T, G, G, G, G, G, T, T, T, T],
+        [T, T, G, B, G, T, T, T, T, T],
+        [T, T, B, B, T, T, T, T, T, T],
+        [T, T, B, B, T, T, T, T, T, T],
+        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  else if(skinId==='super_saiyan'){
+    // Super Saiyan — golden spiky hair, orange gi
+    const H='#ffdd00',Hh='#ffee55',S1='#ffaa77',G='#ff6600',Gd='#cc4400',U='#3355cc',B='#333',E='#222',Bt='#884422',Au='#fff4aa';
+    if(dir===0){
+      grid=[
+        [T, H, Hh,H, H, Hh,H, T, T, T],
+        [H, Hh,H, H, H, H, Hh,H, T, T],
+        [T, H, S1,S1,S1,S1,S1,H, T, T],
+        [T, T, S1,E, S1,E, S1,T, T, T],
+        [T, T, S1,S1,S1,S1,S1,T, T, T],
+        [T, T, G, U, U, U, G, T, T, T],
+        [T, G, G, G, G, G, G, G, T, T],
+        [T, G, G, G, G, G, G, G, T, T],
+        [T, T, G, B, B, G, T, T, T, T],
+        [T, T, B, B, T, B, B, T, T, T],
+        [T, T, B, B, T, B, B, T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, H, Hh,H, H, Hh,H, T, T, T],
+        [H, Hh,H, H, H, H, Hh,H, T, T],
+        [T, H, H, H, H, H, H, H, T, T],
+        [T, T, H, H, H, H, H, T, T, T],
+        [T, T, H, H, H, H, H, T, T, T],
+        [T, T, G, G, G, G, G, T, T, T],
+        [T, G, G, G, G, G, G, G, T, T],
+        [T, G, G, G, G, G, G, G, T, T],
+        [T, T, G, B, B, G, T, T, T, T],
+        [T, T, B, B, T, B, B, T, T, T],
+        [T, T, B, B, T, B, B, T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else {
+      grid=[
+        [T, H, Hh,H, H, T, T, T, T, T],
+        [H, Hh,H, H, H, Hh,T, T, T, T],
+        [T, H, S1,S1,S1,H, T, T, T, T],
+        [T, T, S1,E, S1,T, T, T, T, T],
+        [T, T, S1,S1,S1,T, T, T, T, T],
+        [T, T, G, U, G, T, T, T, T, T],
+        [T, G, G, G, G, G, T, T, T, T],
+        [T, G, G, G, G, G, T, T, T, T],
+        [T, T, G, B, G, T, T, T, T, T],
+        [T, T, B, B, T, T, T, T, T, T],
+        [T, T, B, B, T, T, T, T, T, T],
+        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  else if(skinId==='trainer'){
+    // Pokemon Trainer — red cap, black hair, blue jacket, jeans
+    const C='#cc2222',Cd='#991111',H='#111',S1='#ffaa77',J='#3366cc',Jd='#224499',P='#444',E='#222',Bt='#884422',Pk='#cc3333',Pw='#ffffff';
+    if(dir===0){
+      grid=[
+        [T, T, C, C, C, C, C, T, T, T],
+        [T, C, C, C, C, C, C, C, T, T],
+        [T, H, S1,S1,S1,S1,S1,H, T, T],
+        [T, T, S1,E, S1,E, S1,T, T, T],
+        [T, T, S1,S1,S1,S1,S1,T, T, T],
+        [T, T, J, J, J, J, J, T, T, T],
+        [T, J, J, J, J, J, J, J, T, T],
+        [T, S1,J, J, J, J, J, S1,T, T],
+        [T, T, J, Pk,Pw,J, T, T, T, T],
+        [T, T, P, P, T, P, P, T, T, T],
+        [T, T, P, P, T, P, P, T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, T, C, C, C, C, C, T, T, T],
+        [T, C, C, C, C, C, C, C, T, T],
+        [T, H, H, H, H, H, H, H, T, T],
+        [T, T, H, H, H, H, H, T, T, T],
+        [T, T, H, H, H, H, H, T, T, T],
+        [T, T, J, J, J, J, J, T, T, T],
+        [T, J, J, J, J, J, J, J, T, T],
+        [T, J, J, J, J, J, J, J, T, T],
+        [T, T, J, J, J, J, T, T, T, T],
+        [T, T, P, P, T, P, P, T, T, T],
+        [T, T, P, P, T, P, P, T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else {
+      grid=[
+        [T, T, C, C, C, C, T, T, T, T],
+        [T, C, C, C, C, C, C, T, T, T],
+        [T, H, S1,S1,S1,H, T, T, T, T],
+        [T, T, S1,E, S1,T, T, T, T, T],
+        [T, T, S1,S1,S1,T, T, T, T, T],
+        [T, T, J, J, J, T, T, T, T, T],
+        [T, J, J, J, J, J, T, T, T, T],
+        [T, S1,J, J, J, J, T, T, T, T],
+        [T, T, J, J, T, T, T, T, T, T],
+        [T, T, P, P, T, T, T, T, T, T],
+        [T, T, P, P, T, T, T, T, T, T],
+        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  else if(skinId==='plumber'){
+    // Plumber — red cap with M, blue overalls, mustache
+    const C='#cc2222',Cd='#991111',M='#ffffff',S1='#ffaa77',O='#4444cc',Od='#333399',Mu='#553311',E='#222',Bt='#884422';
+    if(dir===0){
+      grid=[
+        [T, T, C, C, C, C, C, T, T, T],
+        [T, C, C, M, C, C, C, C, T, T],
+        [T, T, S1,S1,S1,S1,S1,T, T, T],
+        [T, T, S1,E, S1,E, S1,T, T, T],
+        [T, T, Mu,Mu,S1,Mu,Mu,T, T, T],
+        [T, T, O, O, O, O, O, T, T, T],
+        [T, O, O, O, O, O, O, O, T, T],
+        [T, S1,O, O, O, O, O, S1,T, T],
+        [T, T, O, O, O, O, T, T, T, T],
+        [T, T, O, O, T, O, O, T, T, T],
+        [T, T, O, O, T, O, O, T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, T, C, C, C, C, C, T, T, T],
+        [T, C, C, C, C, C, C, C, T, T],
+        [T, T, S1,S1,S1,S1,S1,T, T, T],
+        [T, T, S1,S1,S1,S1,S1,T, T, T],
+        [T, T, S1,S1,S1,S1,S1,T, T, T],
+        [T, T, O, O, O, O, O, T, T, T],
+        [T, O, O, O, O, O, O, O, T, T],
+        [T, O, O, O, O, O, O, O, T, T],
+        [T, T, O, O, O, O, T, T, T, T],
+        [T, T, O, O, T, O, O, T, T, T],
+        [T, T, O, O, T, O, O, T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else {
+      grid=[
+        [T, T, C, C, C, C, T, T, T, T],
+        [T, C, C, M, C, C, C, T, T, T],
+        [T, T, S1,S1,S1,T, T, T, T, T],
+        [T, T, S1,E, S1,T, T, T, T, T],
+        [T, T, Mu,Mu,S1,T, T, T, T, T],
+        [T, T, O, O, O, T, T, T, T, T],
+        [T, O, O, O, O, O, T, T, T, T],
+        [T, S1,O, O, O, O, T, T, T, T],
+        [T, T, O, O, T, T, T, T, T, T],
+        [T, T, O, O, T, T, T, T, T, T],
+        [T, T, O, O, T, T, T, T, T, T],
+        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  else if(skinId==='hero_of_time'){
+    // Hero of Time — green tunic, pointed hat, blond hair, shield on back
+    const Ht='#338833',Htl='#44aa44',Hd='#226622',Hr='#ddcc77',S1='#ffaa77',E='#222',Bt='#664422',Sh='#664422',Shh='#887744',Bl='#446688';
+    if(dir===0){
+      grid=[
+        [T, T, T, Ht,Htl,T, T, T, T, T],
+        [T, T, Ht,Ht,Ht,Ht,T, T, T, T],
+        [T, T, Hr,Hr,Hr,Hr,Hr,T, T, T],
+        [T, T, S1,E, S1,E, S1,T, T, T],
+        [T, T, S1,S1,S1,S1,S1,T, T, T],
+        [T, T, Ht,Ht,Ht,Ht,Ht,T, T, T],
+        [T, Ht,Ht,Ht,Ht,Ht,Ht,Ht,T, T],
+        [T, S1,Ht,Bt,Bt,Ht,Ht,S1,T, T],
+        [T, T, Ht,Ht,Ht,Ht,T, T, T, T],
+        [T, T, Ht,Ht,T, Ht,Ht,T, T, T],
+        [T, T, Bt,Bt,T, Bt,Bt,T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, T, T, Ht,Htl,T, T, T, T, T],
+        [T, T, Ht,Ht,Ht,Ht,T, T, T, T],
+        [T, T, Hr,Hr,Hr,Hr,Hr,T, T, T],
+        [T, T, Hr,Hr,Hr,Hr,Hr,T, T, T],
+        [T, T, Hr,Hr,Hr,Hr,Hr,T, T, T],
+        [T, Sh,Ht,Ht,Ht,Ht,Ht,T, T, T],
+        [Sh,Shh,Ht,Ht,Ht,Ht,Ht,Ht,T, T],
+        [Sh,Shh,Ht,Ht,Ht,Ht,Ht,Ht,T, T],
+        [T, Sh,Ht,Ht,Ht,Ht,T, T, T, T],
+        [T, T, Ht,Ht,T, Ht,Ht,T, T, T],
+        [T, T, Bt,Bt,T, Bt,Bt,T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else {
+      grid=[
+        [T, T, T, Ht,Htl,T, T, T, T, T],
+        [T, T, Ht,Ht,Ht,Ht,T, T, T, T],
+        [T, T, Hr,Hr,Hr,T, T, T, T, T],
+        [T, T, S1,E, S1,T, T, T, T, T],
+        [T, T, S1,S1,S1,T, T, T, T, T],
+        [T, T, Ht,Ht,Ht,T, T, T, T, T],
+        [T, Ht,Ht,Ht,Ht,Ht,T, T, T, T],
+        [T, S1,Ht,Bt,Ht,Ht,T, T, T, T],
+        [T, T, Ht,Ht,T, T, T, T, T, T],
+        [T, T, Ht,Ht,T, T, T, T, T, T],
+        [T, T, Bt,Bt,T, T, T, T, T, T],
+        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  else if(skinId==='blue_bomber'){
+    // Blue Bomber — blue helmet, arm cannon, sleek
+    const Hm='#2266dd',Hh='#44aaff',S1='#ffaa77',E='#222',Bt='#1a4488',Cn='#44aaff',Cd='#115599';
+    if(dir===0){
+      grid=[
+        [T, T, Hm,Hh,Hh,Hm,T, T, T, T],
+        [T, Hm,Hm,Hm,Hm,Hm,Hm,T, T, T],
+        [T, Hm,S1,S1,S1,S1,Hm,T, T, T],
+        [T, T, S1,E, S1,E, S1,T, T, T],
+        [T, T, S1,S1,S1,S1,S1,T, T, T],
+        [T, T, Hm,Hh,Hh,Hm,T, T, T, T],
+        [T, Hm,Hm,Hm,Hm,Hm,Hm,T, T, T],
+        [Cn,Cn,Hm,Hm,Hm,Hm,Hm,S1,T, T],
+        [Cn,Cd,Hm,Hm,Hm,Hm,T, T, T, T],
+        [T, T, Hm,Hm,T, Hm,Hm,T, T, T],
+        [T, T, Hm,Hm,T, Hm,Hm,T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, T, Hm,Hh,Hh,Hm,T, T, T, T],
+        [T, Hm,Hm,Hm,Hm,Hm,Hm,T, T, T],
+        [T, Hm,Hm,Hm,Hm,Hm,Hm,T, T, T],
+        [T, T, Hm,Hm,Hm,Hm,T, T, T, T],
+        [T, T, Hm,Hm,Hm,Hm,T, T, T, T],
+        [T, T, Hm,Hh,Hh,Hm,T, T, T, T],
+        [T, Hm,Hm,Hm,Hm,Hm,Hm,T, T, T],
+        [T, Hm,Hm,Hm,Hm,Hm,Hm,T, T, T],
+        [T, T, Hm,Hm,Hm,Hm,T, T, T, T],
+        [T, T, Hm,Hm,T, Hm,Hm,T, T, T],
+        [T, T, Hm,Hm,T, Hm,Hm,T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else {
+      grid=[
+        [T, T, Hm,Hh,Hh,T, T, T, T, T],
+        [T, Hm,Hm,Hm,Hm,Hm,T, T, T, T],
+        [T, Hm,S1,S1,S1,Hm,T, T, T, T],
+        [T, T, S1,E, S1,T, T, T, T, T],
+        [T, T, S1,S1,S1,T, T, T, T, T],
+        [T, T, Hm,Hh,Hm,T, T, T, T, T],
+        [T, Hm,Hm,Hm,Hm,Hm,T, T, T, T],
+        [Cn,Cn,Hm,Hm,Hm,Hm,T, T, T, T],
+        [Cn,Cd,Hm,Hm,T, T, T, T, T, T],
+        [T, T, Hm,Hm,T, T, T, T, T, T],
+        [T, T, Hm,Hm,T, T, T, T, T, T],
+        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  else if(skinId==='pikachu_suit'){
+    // Pikachu Suit — yellow body suit, pointy ears, red cheeks, lightning tail
+    const Y='#ffcc00',Yd='#ddaa00',Yl='#ffee55',R='#ff3333',Bk='#111',S1='#ffaa77',E='#222',Bt='#ccaa00',Lt='#ffdd00';
+    if(dir===0){
+      grid=[
+        [Bk,Y, T, T, T, T, T, Y, Bk,T],
+        [T, Y, Y, T, T, T, Y, Y, T, T],
+        [T, T, Y, Y, Y, Y, Y, T, T, T],
+        [T, T, S1,E, S1,E, S1,T, T, T],
+        [T, T, R, S1,S1,S1,R, T, T, T],
+        [T, T, Y, Y, Y, Y, Y, T, T, T],
+        [T, Y, Y, Y, Y, Y, Y, Y, T, T],
+        [T, Y, Y, Y, Y, Y, Y, Y, T, T],
+        [T, T, Y, Y, Y, Y, T, T, T, T],
+        [T, T, Y, Y, T, Y, Y, T, T, T],
+        [T, T, Yd,Yd,T, Yd,Yd,T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [Bk,Y, T, T, T, T, T, Y, Bk,T],
+        [T, Y, Y, T, T, T, Y, Y, T, T],
+        [T, T, Y, Y, Y, Y, Y, T, T, T],
+        [T, T, Y, Y, Y, Y, Y, T, T, T],
+        [T, T, Y, Y, Y, Y, Y, T, T, T],
+        [T, T, Y, Y, Y, Y, Y, T, T, T],
+        [T, Y, Y, Y, Y, Y, Y, Y, T, T],
+        [T, Y, Y, Y, Y, Y, Y, Y, Lt,T],
+        [T, T, Y, Y, Y, Y, T, Lt,Yl,T],
+        [T, T, Y, Y, T, Y, Y, T, Lt,T],
+        [T, T, Yd,Yd,T, Yd,Yd,T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else {
+      grid=[
+        [T, Bk,Y, T, T, T, T, T, T, T],
+        [T, T, Y, Y, T, T, T, T, T, T],
+        [T, T, Y, Y, Y, Y, T, T, T, T],
+        [T, T, S1,E, S1,T, T, T, T, T],
+        [T, T, R, S1,S1,T, T, T, T, T],
+        [T, T, Y, Y, Y, T, T, T, T, T],
+        [T, Y, Y, Y, Y, Y, T, T, T, T],
+        [T, Y, Y, Y, Y, Y, T, T, T, T],
+        [T, T, Y, Y, T, T, T, T, T, T],
+        [T, T, Y, Y, T, T, T, T, T, T],
+        [T, T, Yd,Yd,T, T, T, T, T, T],
+        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  else if(skinId==='shadow_ninja'){
+    // Shadow Ninja — black outfit, headband, spiky hair
+    const Bk='#222',Bd='#333',Hb='#3355aa',S1='#ffaa77',E='#222',Hr='#111',Bt='#333',W='#445566';
+    if(dir===0){
+      grid=[
+        [T, T, Hr,Hr,Hr,Hr,Hr,T, T, T],
+        [T, Hr,Hr,Hr,Hr,Hr,Hr,Hr,T, T],
+        [T, Hb,Hb,Hb,Hb,Hb,Hb,Hb,T, T],
+        [T, T, S1,E, S1,E, S1,T, T, T],
+        [T, T, Bk,S1,S1,S1,Bk,T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
+        [T, S1,Bk,Bk,Bk,Bk,Bk,S1,T, T],
+        [T, T, Bk,W, W, Bk,T, T, T, T],
+        [T, T, Bd,Bd,T, Bd,Bd,T, T, T],
+        [T, T, Bd,Bd,T, Bd,Bd,T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, T, Hr,Hr,Hr,Hr,Hr,T, T, T],
+        [T, Hr,Hr,Hr,Hr,Hr,Hr,Hr,T, T],
+        [T, Hb,Hb,Hb,Hb,Hb,Hb,Hb,T, T],
+        [T, T, Hr,Hr,Hr,Hr,Hr,T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
+        [T, T, Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, Bd,Bd,T, Bd,Bd,T, T, T],
+        [T, T, Bd,Bd,T, Bd,Bd,T, T, T],
+        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+      ];
+    } else {
+      grid=[
+        [T, T, Hr,Hr,Hr,Hr,T, T, T, T],
+        [T, Hr,Hr,Hr,Hr,Hr,Hr,T, T, T],
+        [T, Hb,Hb,Hb,Hb,Hb,T, T, T, T],
+        [T, T, S1,E, S1,T, T, T, T, T],
+        [T, T, Bk,S1,Bk,T, T, T, T, T],
+        [T, T, Bk,Bk,Bk,T, T, T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, S1,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, Bk,W, T, T, T, T, T, T],
+        [T, T, Bd,Bd,T, T, T, T, T, T],
+        [T, T, Bd,Bd,T, T, T, T, T, T],
+        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  // Walk animation
+  if(grid&&frame===1&&grid.length>=12){
+    if(dir===0||dir===3){
+      grid[10]=[T,grid[10][1]||T,grid[10][2],T,T,T,grid[10][5]||grid[10][4],grid[10][6]||T,T,T];
+      grid[11]=[grid[11][0]||T,grid[11][1],T,T,T,T,T,grid[11][7],T,T];
+    } else {
+      const shoe=grid[11][1]||grid[11][2]||'#884422';
+      grid[10]=[T,T,grid[10][2],grid[10][3]||T,T,T,T,T,T,T];
+      grid[11]=[T,shoe,T,shoe,T,T,T,T,T,T];
+      if(dir===2){grid[10]=[...grid[10]].reverse();grid[11]=[...grid[11]].reverse()}
+    }
+  }
+
+  if(grid)_visitorSpriteCache[key]=grid;
+  return grid;
+}
+
+function renderSkinPreview(skinId,canvas){
+  const grid=getVisitorSprite(skinId,0,0);
+  if(!grid){return false}
+  const c=canvas.getContext('2d');
+  const gw=grid[0].length,gh=grid.length;
+  const scale=Math.min(Math.floor(canvas.width/gw),Math.floor(canvas.height/gh));
+  const ox=Math.floor((canvas.width-gw*scale)/2),oy=Math.floor((canvas.height-gh*scale)/2);
+  c.clearRect(0,0,canvas.width,canvas.height);
+  for(let r=0;r<gh;r++)for(let col=0;col<gw;col++){if(grid[r][col]){c.fillStyle=grid[r][col];c.fillRect(ox+col*scale,oy+r*scale,scale,scale)}}
+  return true;
 }
 
 // §11. RENDERING — SHARED
@@ -2895,6 +3358,70 @@ function renderVisitor(ctx){
   // Render aura behind avatar
   const eqAcc=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
   if(eqAcc.aura){const auraItem=ACCESSORY_ITEMS.find(a=>a.id===eqAcc.aura);if(auraItem){const pulse=.15+Math.sin(S.time*2)*.08;const g=ctx.createRadialGradient(v.x,v.y-sz*sc/2,2,v.x,v.y-sz*sc/2,auraItem.auraSize);g.addColorStop(0,auraItem.auraColor+pulse+')');g.addColorStop(1,auraItem.auraColor+'0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(v.x,v.y-sz*sc/2,auraItem.auraSize,0,Math.PI*2);ctx.fill()}}
+
+  // Sprite-based skins (v19)
+  if(skin.hasSprite){
+    const sprGrid=getVisitorSprite(skin.id,v.dir||0,v.frame||0);
+    if(sprGrid){
+      const gw=sprGrid[0].length,gh=sprGrid.length;
+      const sprScale=sc;
+      const sprW=gw*sprScale,sprH=gh*sprScale;
+      const breathe=v.moving?0:Math.sin(S.time*2)*.5;
+      // Shadow
+      ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(v.x,v.y+2,sprW/2.5,4,0,0,Math.PI*2);ctx.fill();
+      drawSprite(ctx,v.x-sprW/2,v.y-sprH+breathe,sprGrid,sprScale);
+      // Skin-specific particle effects
+      if(skin.id==='super_saiyan'){
+        // Golden aura particles
+        if(Math.random()<.5){
+          const ax=v.x+(Math.random()-.5)*20,ay=v.y-sprH/2+(Math.random()-.5)*sprH;
+          S.particles.push({x:ax,y:ay,vx:(Math.random()-.5)*.8,vy:-1-Math.random()*1.5,life:15+Math.random()*10,color:Math.random()>.5?'#ffdd00':'#ffee66',size:1.5+Math.random()*2});
+        }
+        // Golden glow
+        const gp=.15+Math.sin(S.time*4)*.1;
+        const gg=ctx.createRadialGradient(v.x,v.y-sprH/2,2,v.x,v.y-sprH/2,sprW);
+        gg.addColorStop(0,`rgba(255,221,0,${gp})`);gg.addColorStop(1,'rgba(255,221,0,0)');
+        ctx.fillStyle=gg;ctx.beginPath();ctx.arc(v.x,v.y-sprH/2,sprW,0,Math.PI*2);ctx.fill();
+      }
+      if(skin.id==='blue_bomber'&&v.moving){
+        // Arm cannon particle when moving
+        if(Math.random()<.3){
+          const cx2=v.dir===2?v.x+sprW/2:v.x-sprW/2;
+          S.particles.push({x:cx2,y:v.y-sprH*.6,vx:(v.dir===2?1:-1)*2,vy:(Math.random()-.5)*.5,life:8,color:Math.random()>.5?'#44aaff':'#2266dd',size:1.5});
+        }
+      }
+      if(skin.id==='pikachu_suit'){
+        // Occasional lightning spark
+        if(Math.random()<.08){
+          const lx=v.x+(Math.random()-.5)*24,ly=v.y-sprH/2+(Math.random()-.5)*sprH;
+          S.particles.push({x:lx,y:ly,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,life:5+Math.random()*5,color:'#ffee55',size:1+Math.random()*2});
+          S.particles.push({x:lx+2,y:ly-2,vx:(Math.random()-.5)*2,vy:-Math.random()*2,life:4,color:'#ffffff',size:1});
+        }
+      }
+      if(skin.id==='hero_of_time'){
+        // Subtle green fairy particle orbiting
+        const fa=S.time*2,fr=16;
+        const fx=v.x+Math.cos(fa)*fr,fy=v.y-sprH*.6+Math.sin(fa)*fr*.4;
+        ctx.fillStyle=`rgba(100,255,150,${.4+Math.sin(S.time*5)*.3})`;
+        ctx.beginPath();ctx.arc(fx,fy,2,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle=`rgba(200,255,200,${.15+Math.sin(S.time*6)*.1})`;
+        ctx.beginPath();ctx.arc(fx,fy,5,0,Math.PI*2);ctx.fill();
+      }
+      // Accessories + name label
+      renderVisitorAccessories(ctx,v);
+      ctx.fillStyle=skin.color;ctx.font='bold 9px monospace';ctx.textAlign='center';
+      ctx.fillText(LS.get('visitorName','Visitor'),v.x,v.y-sprH-4);ctx.textAlign='left';
+      // Lightsaber (replicated from below)
+      if(S._visitorSaber){
+        const col2=S._visitorSaber==='green'?'#00ff44':'#4488ff';
+        ctx.save();ctx.globalAlpha=.9;ctx.shadowColor=col2;ctx.shadowBlur=8;
+        ctx.fillStyle='#888';ctx.fillRect(v.x+8,v.y-12,2,8);
+        ctx.fillStyle=col2;ctx.fillRect(v.x+8,v.y-12-20,2,20);
+        ctx.restore();
+      }
+      return;
+    }
+  }
 
   ctx.save();ctx.translate(v.x-sz*sc/2,v.y-sz*sc);
   
@@ -4381,11 +4908,13 @@ function showVisitorSkinPanel(){
   VISITOR_SKINS.forEach(sk=>{
     const owned=sk.cost===0||LS.get('visitorSkinsOwned',[]).includes(sk.id);
     const current=S.visitor.skin===sk.id;
+    const iconHtml=sk.hasSprite?`<canvas class="skin-preview" data-skin="${sk.id}" width="48" height="48" style="display:block;margin:0 auto 2px;image-rendering:pixelated"></canvas>`:`<div class="icon">${sk.icon}</div>`;
     html+=`<div class="skin-card${current?' active':''}${!owned?' locked':''}" data-id="${sk.id}" data-cost="${sk.cost}">
-      <div class="icon">${sk.icon}</div><div style="font-size:9px">${sk.label}</div>
+      ${iconHtml}<div style="font-size:9px">${sk.label}</div>
       <div class="lock" style="font-size:8px;color:${owned?'#0f0':'#ffd700'}">${owned?'✓':sk.cost+'◈'}</div></div>`});
   html+='</div>';
   const{p}=createPopup(html);
+  p.querySelectorAll('.skin-preview').forEach(cv=>{renderSkinPreview(cv.dataset.skin,cv)});
   p.querySelectorAll('.skin-card').forEach(card=>{
     card.onclick=()=>{
       const id=card.dataset.id,cost=parseInt(card.dataset.cost)||0;
@@ -4469,7 +4998,9 @@ function showItemShop(initialTab){
     const isLootOnly=sk.lootOnly||sk.cost<0;
     const r=RARITIES[sk.rarity||'common']||RARITIES.common;
     html+='<div class="skin-card'+(current?' active':'')+' rarity-'+(sk.rarity||'common')+'" data-action="buy-skin" data-id="'+sk.id+'" data-cost="'+sk.cost+'" style="border-color:'+r.border+'">';
-    html+='<div class="icon">'+sk.icon+'</div><div style="font-size:9px">'+sk.label+'</div>';
+    if(sk.hasSprite)html+='<canvas class="skin-preview" data-skin="'+sk.id+'" width="48" height="48" style="display:block;margin:0 auto 2px;image-rendering:pixelated"></canvas>';
+    else html+='<div class="icon">'+sk.icon+'</div>';
+    html+='<div style="font-size:9px">'+sk.label+'</div>';
     html+='<span class="rarity-badge '+(sk.rarity||'common')+'" style="font-size:7px">'+r.name+'</span>';
     if(isLootOnly)html+='<span class="loot-only-badge">LOOT ONLY</span>';
     else html+='<div class="lock" style="font-size:8px;color:'+(owned?'#0f0':'#ffd700')+'">'+(current?'WORN':owned?'OWNED':sk.cost+'◈')+'</div>';
@@ -4529,6 +5060,11 @@ function showItemShop(initialTab){
   html+='</div>';
 
   const{p}=createPopup(html);
+
+  // Render skin preview canvases (v19)
+  p.querySelectorAll('.skin-preview').forEach(cv=>{
+    renderSkinPreview(cv.dataset.skin,cv);
+  });
 
   // Open marketplace button
   const mpBtn=p.querySelector('#open-marketplace');
