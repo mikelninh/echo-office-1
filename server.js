@@ -18,7 +18,9 @@ if (!TOKEN) { console.error('No auth token found'); process.exit(1); }
 
 const GATEWAY_URL = 'ws://127.0.0.1:18789';
 const PORT = 8765;
-const SESSION_KEY = 'agent:main:main'; // Use main session for now
+// Chat mode: 'local' = keyword responses only (no gateway), 'gateway' = forward to OpenClaw
+const CHAT_MODE = process.env.CHAT_MODE || 'local';
+const SESSION_KEY = 'agent:main:main'; // Only used if CHAT_MODE=gateway
 
 // ═══ MULTIPLAYER ═══
 const visitors = new Map(); // visitorId -> { ws, name, x, y, dir, floor, skin, lastUpdate, lastBroadcast }
@@ -43,6 +45,35 @@ function loadGuestbook() {
 }
 function saveGuestbook(entries) {
   fs.writeFileSync(GUESTBOOK_PATH, JSON.stringify(entries.slice(-100))); // keep last 100
+}
+
+// Pixel Wall - collaborative canvas
+const PIXELWALL_PATH = path.join(__dirname, 'pixelwall.json');
+function loadPixelWall() {
+  try { 
+    return JSON.parse(fs.readFileSync(PIXELWALL_PATH, 'utf8')); 
+  } catch { 
+    return { 
+      pixels: new Array(64*64).fill(0), // 64x64 canvas, 0 = transparent 
+      history: [] // last 200 actions with timestamps
+    }; 
+  }
+}
+function savePixelWall(data) {
+  // Keep only last 200 history entries
+  if (data.history.length > 200) {
+    data.history = data.history.slice(-200);
+  }
+  fs.writeFileSync(PIXELWALL_PATH, JSON.stringify(data));
+}
+
+// Visitor Memory - Echo remembers visitors
+const VISITOR_MEMORY_PATH = path.join(__dirname, 'visitor-memory.json');
+function loadVisitorMemory() {
+  try { return JSON.parse(fs.readFileSync(VISITOR_MEMORY_PATH, 'utf8')); } catch { return {}; }
+}
+function saveVisitorMemory(memory) {
+  fs.writeFileSync(VISITOR_MEMORY_PATH, JSON.stringify(memory));
 }
 
 // MIME types
@@ -78,6 +109,99 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Pixel Wall API
+  if (req.url === '/api/pixelwall' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(loadPixelWall()));
+    return;
+  }
+  if (req.url === '/api/pixelwall' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { x, y, color, visitorName } = JSON.parse(body);
+        if (typeof x !== 'number' || typeof y !== 'number' || typeof color !== 'number' || 
+            x < 0 || x >= 64 || y < 0 || y >= 64 || color < 0 || color > 15) {
+          res.writeHead(400); res.end('Bad request'); return;
+        }
+        
+        const data = loadPixelWall();
+        const idx = y * 64 + x;
+        const oldColor = data.pixels[idx];
+        data.pixels[idx] = color;
+        
+        // Add to history for time-lapse
+        data.history.push({
+          x, y, color, oldColor,
+          visitor: (visitorName || 'Anonymous').slice(0, 20),
+          timestamp: Date.now()
+        });
+        
+        savePixelWall(data);
+        
+        // Broadcast pixel change to all connected visitors
+        broadcast({
+          type: 'pixelwall.update',
+          x, y, color,
+          visitor: visitorName || 'Anonymous'
+        });
+        
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+      } catch { res.writeHead(400); res.end('Bad request'); }
+    });
+    return;
+  }
+
+  // Visitor Memory API
+  if (req.url === '/api/visitor-memory' && req.method === 'GET') {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const visitorName = url.searchParams.get('name');
+    if (!visitorName) { res.writeHead(400); res.end('Missing name param'); return; }
+    
+    const memory = loadVisitorMemory();
+    const data = memory[visitorName] || {
+      lastVisit: 0,
+      visitCount: 0,
+      highScores: { snake: 0, breakout: 0, invaders: 0 },
+      favFloor: 1,
+      lastWords: '',
+      totalCoins: 0
+    };
+    
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(data));
+    return;
+  }
+  if (req.url === '/api/visitor-memory' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { visitorName, lastWords, highScores, favFloor, totalCoins } = JSON.parse(body);
+        if (!visitorName) { res.writeHead(400); res.end('Missing visitorName'); return; }
+        
+        const memory = loadVisitorMemory();
+        const existing = memory[visitorName] || { visitCount: 0, lastVisit: 0 };
+        
+        memory[visitorName] = {
+          lastVisit: Date.now(),
+          visitCount: existing.visitCount + 1,
+          highScores: highScores || existing.highScores || { snake: 0, breakout: 0, invaders: 0 },
+          favFloor: favFloor || existing.favFloor || 1,
+          lastWords: lastWords || existing.lastWords || '',
+          totalCoins: totalCoins || existing.totalCoins || 0
+        };
+        
+        saveVisitorMemory(memory);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+      } catch { res.writeHead(400); res.end('Bad request'); }
+    });
+    return;
+  }
+
   // Static files
   let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
   const ext = path.extname(filePath);
@@ -94,7 +218,10 @@ const wss = new WebSocket.Server({ server, path: '/ws' });
 wss.on('connection', (visitorWs) => {
   console.log('Visitor connected');
   const visitorId = genVisitorId();
-  visitors.set(visitorId, { ws: visitorWs, name: 'Visitor', x: 350, y: 480, dir: 0, floor: 1, skin: 'classic', lastUpdate: 0, lastBroadcast: 0 });
+  visitors.set(visitorId, { 
+    ws: visitorWs, name: 'Visitor', x: 350, y: 480, dir: 0, floor: 1, skin: 'classic', 
+    lastUpdate: 0, lastBroadcast: 0, connectTime: Date.now() 
+  });
 
   // Send this visitor their ID and all current players
   const playerList = [];
@@ -271,12 +398,39 @@ wss.on('connection', (visitorWs) => {
 
   visitorWs.on('close', () => {
     console.log('Visitor disconnected:', visitorId);
+    
+    // Save visitor memory on disconnect
+    const visitor = visitors.get(visitorId);
+    if (visitor && visitor.name && visitor.name !== 'Visitor') {
+      try {
+        // Update visit stats (this would be sent from client in real implementation)
+        const memory = loadVisitorMemory();
+        const existing = memory[visitor.name] || { visitCount: 0, lastVisit: 0 };
+        
+        memory[visitor.name] = {
+          ...existing,
+          lastVisit: Date.now(),
+          visitCount: existing.visitCount + 1,
+          sessionDuration: Date.now() - visitor.connectTime
+        };
+        
+        saveVisitorMemory(memory);
+      } catch (e) {
+        console.error('Error saving visitor memory:', e);
+      }
+    }
+    
     visitors.delete(visitorId);
     broadcast({ type: 'player.leave', id: visitorId });
     if (gatewayWs) gatewayWs.close();
   });
 
-  connectGateway();
+  if (CHAT_MODE === 'gateway') {
+    connectGateway();
+  } else {
+    // Local mode: tell client we're "connected" so it uses local keyword responses
+    visitorWs.send(JSON.stringify({ type: 'status', connected: false }));
+  }
 });
 
 server.listen(PORT, '0.0.0.0', () => {
