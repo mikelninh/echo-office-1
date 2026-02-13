@@ -3419,7 +3419,18 @@ function renderVisitor(ctx){
   
   // Render aura behind avatar
   const eqAcc=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
-  if(eqAcc.aura){const auraItem=ACCESSORY_ITEMS.find(a=>a.id===eqAcc.aura);if(auraItem){const pulse=.15+Math.sin(S.time*2)*.08;const g=ctx.createRadialGradient(v.x,v.y-sz*sc/2,2,v.x,v.y-sz*sc/2,auraItem.auraSize);g.addColorStop(0,auraItem.auraColor+pulse+')');g.addColorStop(1,auraItem.auraColor+'0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(v.x,v.y-sz*sc/2,auraItem.auraSize,0,Math.PI*2);ctx.fill()}}
+  if(eqAcc.aura){const auraItem=ACCESSORY_ITEMS.find(a=>a.id===eqAcc.aura);if(auraItem){
+    const pulse=.35+Math.sin(S.time*2.5)*.15;const auraR=auraItem.auraSize*2;
+    // Outer glow ring
+    const g=ctx.createRadialGradient(v.x,v.y-sz*sc/2,4,v.x,v.y-sz*sc/2,auraR);
+    g.addColorStop(0,auraItem.auraColor+(pulse*.8)+')');g.addColorStop(.4,auraItem.auraColor+(pulse*.5)+')');g.addColorStop(1,auraItem.auraColor+'0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(v.x,v.y-sz*sc/2,auraR,0,Math.PI*2);ctx.fill();
+    // Inner bright core
+    const g2=ctx.createRadialGradient(v.x,v.y-sz*sc/2,0,v.x,v.y-sz*sc/2,12);
+    g2.addColorStop(0,auraItem.auraColor+(pulse)+')');g2.addColorStop(1,auraItem.auraColor+'0)');
+    ctx.fillStyle=g2;ctx.beginPath();ctx.arc(v.x,v.y-sz*sc/2,12,0,Math.PI*2);ctx.fill();
+    // Floating particles
+    if(Math.random()<.3){S.particles.push({x:v.x+(Math.random()-.5)*auraR,y:v.y-sz*sc/2+(Math.random()-.5)*auraR,vx:(Math.random()-.5)*.5,vy:-Math.random()*.8,life:20,color:auraItem.auraColor+'.6)',size:1+Math.random()*2})}}}
 
   // Sprite-based skins (v19)
   if(skin.hasSprite){
@@ -6685,7 +6696,7 @@ function initSnake(g){const GS=15,CS=Math.floor(Math.min(g.w,g.h-30)/GS);g.gs=GS
     else{if(dy>20&&g.dir.y!==1)g.nextDir={x:0,y:1};else if(dy<-20&&g.dir.y!==-1)g.nextDir={x:0,y:-1}}touchStart=null;e.preventDefault()}}
 function updateSnake(cx,dt){const g=arcadeGame;if(!g?.running)return;g.tick++;
   if(g.spawnFood){const occ=new Set(g.snake.map(s=>s.x+','+s.y));let fx,fy;do{fx=Math.random()*g.gs|0;fy=Math.random()*g.gs|0}while(occ.has(fx+','+fy));const r=Math.random();g.food={x:fx,y:fy,type:r<.05?'star':r<.15?'golden':'apple',pts:r<.05?5:r<.15?3:1,color:r<.05?'#ffd700':r<.15?'#ffaa00':'#ff4444',timer:0};g.spawnFood=false}
-  g.food&&(g.food.timer+=dt);g.speed=Math.max(3,12-Math.floor(g.snake.length/4));
+  g.food&&(g.food.timer+=dt);g.speed=Math.max(3,10-Math.floor(g.snake.length/4));
   if(g.tick%g.speed===0){g.dir=g.nextDir;let h={x:g.snake[0].x+g.dir.x,y:g.snake[0].y+g.dir.y};if(h.x<0||h.x>=g.gs||h.y<0||h.y>=g.gs){g.running=false;triggerGameOver('snake',g.score);return}if(g.snake.some(s=>s.x===h.x&&s.y===h.y)){g.running=false;triggerGameOver('snake',g.score);return}g.snake.unshift(h);if(g.food&&h.x===g.food.x&&h.y===g.food.y){g.score+=g.food.pts;ArcSnd.play(g.food.type==='star'?'powerup':'eat');arcSpawnParticles(g.ox+g.food.x*g.cs+g.cs/2,g.oy+g.food.y*g.cs+g.cs/2,g.food.pts*5,g.food.color);g.spawnFood=true}else g.snake.pop()}
   cx.fillStyle='#0a0a12';cx.fillRect(0,0,g.w,g.h);for(let y=0;y<g.gs;y++)for(let x=0;x<g.gs;x++){cx.fillStyle='#111';cx.fillRect(g.ox+x*g.cs+1,g.oy+y*g.cs+1,g.cs-2,g.cs-2)}
   g.snake.forEach((s,i)=>{ctx.fillStyle=`rgb(0,${255-i/(g.snake.length)*180},${100-i/(g.snake.length)*80})`;cx.fillStyle=ctx.fillStyle;cx.fillRect(g.ox+s.x*g.cs+1,g.oy+s.y*g.cs+1,g.cs-2,g.cs-2)});
