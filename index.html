@@ -332,6 +332,7 @@ const FLOOR_OBJECTS={
     {id:'coffeetable',x:80,y:490,w:80,h:40,label:'Guestbook',interact:true,collide:true},
     {id:'tv',x:185,y:395,w:55,h:50,label:'TV',interact:true,collide:true},
     {id:'neon',x:200,y:15,w:90,h:25,label:'"DREAM"',interact:false,collide:false},
+    {id:'sabers',x:305,y:64,w:90,h:50,label:'Lightsabers',interact:true,collide:false},
     {id:'growlab',x:620,y:320,w:80,h:70,label:'Grow Lab',interact:true,collide:true},
   ],
   2:[
@@ -745,6 +746,31 @@ function renderFloor1(){
   // Grow lab
   const gl=getObjects().find(o=>o.id==='growlab');ctx.fillStyle='#2a3a2a';ctx.fillRect(gl.x,gl.y,gl.w,gl.h);ctx.fillStyle='rgba(170,80,255,.1)';ctx.fillRect(gl.x,gl.y,gl.w,5);// UV light
   if(S.garden)S.garden.slice(0,4).forEach((p,i)=>{const px=gl.x+5+i*19,py=gl.y+15;ctx.fillStyle='#8a5a3a';ctx.fillRect(px,py+20,16,10);ctx.fillStyle=p.stage>=4?PLANT_TYPES.find(t=>t.id===p.type).flowerColor:p.stage>=1?'#3a8a3a':'#5a5a3a';ctx.fillRect(px+5,py+10-p.stage*3,6,p.stage*3+10);if(p.wilting){ctx.fillStyle='rgba(255,200,50,.6)';ctx.font='6px sans-serif';ctx.fillText('💧',px+3,py+6)}});
+  // Lightsaber display (wall-mounted, crossed)
+  const lsX=330,lsY=72;
+  // Mount plaque
+  ctx.fillStyle='#2a1a10';ctx.fillRect(lsX-25,lsY-8,90,50);ctx.fillStyle='#3a2a18';ctx.fillRect(lsX-23,lsY-6,86,46);
+  // Plaque label
+  ctx.fillStyle='#665533';ctx.font='5px monospace';ctx.textAlign='center';ctx.fillText('COLLECTOR\'S EDITION',lsX+20,lsY+38);ctx.textAlign='left';
+  // Green saber (angled left-to-right)
+  ctx.save();ctx.translate(lsX,lsY+18);ctx.rotate(-.4);
+  ctx.fillStyle='#555';ctx.fillRect(0,0,18,6);ctx.fillStyle='#888';ctx.fillRect(2,1,4,4);ctx.fillStyle='#666';ctx.fillRect(8,1,3,4);// hilt details
+  const gg=ctx.createLinearGradient(18,3,70,3);gg.addColorStop(0,'#00ff44');gg.addColorStop(.5,'#88ffaa');gg.addColorStop(1,'rgba(0,255,68,0)');
+  ctx.fillStyle=gg;ctx.fillRect(18,1,52,4);
+  // Green glow
+  ctx.shadowColor='#00ff44';ctx.shadowBlur=8+Math.sin(S.time*3)*3;ctx.fillStyle='rgba(0,255,68,.15)';ctx.fillRect(18,-2,52,10);ctx.shadowBlur=0;
+  ctx.restore();
+  // Blue saber (angled right-to-left, crossed over green)
+  ctx.save();ctx.translate(lsX+58,lsY+8);ctx.rotate(.4);
+  ctx.fillStyle='#555';ctx.fillRect(-18,0,18,6);ctx.fillStyle='#999';ctx.fillRect(-16,1,4,4);ctx.fillStyle='#777';ctx.fillRect(-10,1,3,4);// hilt details
+  const bg=ctx.createLinearGradient(-18,3,-70,3);bg.addColorStop(0,'#4488ff');bg.addColorStop(.5,'#aaccff');bg.addColorStop(1,'rgba(68,136,255,0)');
+  ctx.fillStyle=bg;ctx.fillRect(-70,1,52,4);
+  // Blue glow
+  ctx.shadowColor='#4488ff';ctx.shadowBlur=8+Math.sin(S.time*3+1.5)*3;ctx.fillStyle='rgba(68,136,255,.15)';ctx.fillRect(-70,-2,52,10);ctx.shadowBlur=0;
+  ctx.restore();
+  // Glow on wall behind
+  const sglow=ctx.createRadialGradient(lsX+20,lsY+15,0,lsX+20,lsY+15,35);sglow.addColorStop(0,'rgba(50,200,100,.06)');sglow.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=sglow;ctx.fillRect(lsX-30,lsY-15,100,70);
+
   // Ambient lighting
   const lg=ctx.createRadialGradient(620,120,10,620,120,140);lg.addColorStop(0,'rgba(255,180,80,.08)');lg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=lg;ctx.fillRect(0,0,W,H);
 }
@@ -1760,6 +1786,7 @@ function interact(){
     case'growlab':showGardenMenu();break;
     case'tv':TV.nextChannel();showThought('📺 '+TV.channels[TV.channel]);break;
     case'neon':showThought("DREAM big. ✨");break;
+    case'sabers':const saberQuotes=["An elegant weapon, for a more civilized age.","The green one reminds me of the forests I'll never walk in.","Blue for wisdom, green for harmony. Both for looking incredibly cool.","VeVe collectors would pay a fortune for these...","*hums lightsaber noises* Vwommm.","I built these from spare station parts. Don't tell anyone."];showThought(saberQuotes[Math.random()*saberQuotes.length|0]);Coins.earn(1,'sabers');break;
     case'telescope':showTelescopeView();break;
     case'starmap':showThought("The stars guide us...");break;
     case'hotchoc':showHotChocMenu();break;
