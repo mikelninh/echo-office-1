@@ -2058,6 +2058,39 @@ function swingSaber(){
   for(let i=0;i<10;i++)S.particles.push({x:S.visitor.x+(S.visitor.dir===2?20:-20),y:S.visitor.y-15,vx:(S.visitor.dir===2?1:-1)*Math.random()*4,vy:(Math.random()-.5)*4,life:15,color:col,size:2+Math.random()*2});
   // Broadcast swing to other players
   if(EchoWS.ws?.readyState===1)EchoWS.ws.send(JSON.stringify({type:'player.swing',saber:S._visitorSaber,dir:S.visitor.dir}));
+  // Hit Pixel?!
+  if(S.pixel.floor===S.floor&&Math.hypot(S.visitor.x-S.pixel.x,S.visitor.y-S.pixel.y)<45){
+    const reactions=[
+      {thought:"*Pixel DODGES with lightning reflexes* 😼",pixelState:'flee'},
+      {thought:"*Pixel catches the blade in her teeth?!* HOW?! 🐱",pixelState:'smug'},
+      {thought:"*Pixel phases through the saber like a ghost* ...what IS she? 👻",pixelState:'flee'},
+      {thought:"*Pixel deflects it with her crystal collar!* ✨",pixelState:'deflect'},
+      {thought:"*Pixel sits down and yawns* You can't hurt what doesn't care. 😴",pixelState:'smug'},
+      {thought:"*Pixel backflips over the saber* SHE'S A JEDI?! 🐱‍👤",pixelState:'flee'},
+      {thought:"*The saber passes through Pixel harmlessly. She's made of pure vibes.* 🔮",pixelState:'smug'},
+      {thought:"*Pixel hisses and the saber FLICKERS?!* She has Force powers!! ⚡",pixelState:'deflect'},
+    ];
+    const r=reactions[Math.random()*reactions.length|0];
+    showThought(r.thought);
+    // Pixel reaction
+    if(r.pixelState==='flee'){
+      // Pixel zooms away
+      S.pixel.targetX=S.pixel.x+(Math.random()>.5?200:-200);
+      S.pixel.targetY=S.pixel.y+(Math.random()>.5?150:-150);
+      S.pixel.targetX=Math.max(30,Math.min(W-30,S.pixel.targetX));
+      S.pixel.targetY=Math.max(80,Math.min(H-30,S.pixel.targetY));
+      S.pixel.state='walk';S.pixel.stateTimer=0;
+    }else if(r.pixelState==='deflect'){
+      // Deflect sparks from Pixel's collar
+      S.screenShake=3;
+      for(let i=0;i<15;i++)S.particles.push({x:S.pixel.x,y:S.pixel.y-10,vx:(Math.random()-.5)*6,vy:-Math.random()*4,life:20,color:Math.random()>.5?'#c080ff':'#ffd700',size:2+Math.random()*2});
+      playSaberSound('clash');
+    }else{
+      // Smug — Pixel just sits there, maybe purrs
+      for(let i=0;i<5;i++)S.floatTexts.push({text:'😼',x:S.pixel.x-5+Math.random()*10,y:S.pixel.y-20-Math.random()*15,color:'#c080ff',life:40});
+    }
+    addChatMsg('Pixel','You DARE swing that thing near me?! 😾','#c080ff');
+  }
   Coins.earn(1,'swing');
 }
 function toggleSabers(){
