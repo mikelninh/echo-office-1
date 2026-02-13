@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a14">
-<title>Echo's Station v17 🛸</title>
+<title>Echo's Station v18 🛸</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🛸</text></svg>">
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRWNobydzIFN0YXRpb24iLCJzaG9ydF9uYW1lIjoiRWNobyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTE0IiwidGhlbWVfY29sb3IiOiIjMGEwYTE0IiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnPjx0ZXh0IHk9JzgwJyBmb250LXNpemU9JzgwJz7wn5uoPC90ZXh0Pjwvc3ZnPiIsInNpemVzIjoiYW55IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
 <style>
@@ -157,6 +157,60 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
   #chat-panel.expanded{height:40vh}
 }
 
+/* Rarity System */
+.rarity-common{border-color:#666!important}
+.rarity-uncommon{border-color:#22aa22!important}
+.rarity-rare{border-color:#2266dd!important}
+.rarity-epic{border-color:#9922dd!important;box-shadow:0 0 8px rgba(187,68,255,.3)}
+.rarity-legendary{border-color:#dd8800!important;box-shadow:0 0 10px rgba(255,170,0,.4)}
+.rarity-mythic{border-color:#dd1122!important;box-shadow:0 0 12px rgba(255,51,68,.5)}
+.rarity-badge{display:inline-block;padding:1px 5px;border-radius:3px;font-size:8px;font-weight:bold;letter-spacing:.5px}
+.rarity-badge.common{background:rgba(170,170,170,.2);color:#aaa}
+.rarity-badge.uncommon{background:rgba(68,204,68,.15);color:#44cc44}
+.rarity-badge.rare{background:rgba(68,136,255,.15);color:#4488ff}
+.rarity-badge.epic{background:rgba(187,68,255,.15);color:#bb44ff}
+.rarity-badge.legendary{background:rgba(255,170,0,.15);color:#ffaa00}
+.rarity-badge.mythic{background:rgba(255,51,68,.15);color:#ff3344}
+.loot-only-badge{display:inline-block;padding:1px 5px;border-radius:3px;font-size:7px;font-weight:bold;background:rgba(255,51,68,.2);color:#ff6677;border:1px solid rgba(255,51,68,.3)}
+@keyframes shimmerEpic{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.shimmer-epic{position:relative;overflow:hidden}
+.shimmer-epic::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 30%,rgba(187,68,255,.08) 50%,transparent 70%);background-size:200% 100%;animation:shimmerEpic 3s ease-in-out infinite;pointer-events:none}
+.shimmer-legendary::after{background:linear-gradient(90deg,transparent 30%,rgba(255,170,0,.1) 50%,transparent 70%)!important;background-size:200% 100%;animation:shimmerEpic 2.5s ease-in-out infinite}
+.shimmer-mythic::after{background:linear-gradient(90deg,transparent 20%,rgba(255,51,68,.12) 40%,rgba(255,170,0,.08) 60%,transparent 80%)!important;background-size:200% 100%;animation:shimmerEpic 2s ease-in-out infinite}
+/* Loot Card Popup */
+.loot-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:8500;display:flex;align-items:center;justify-content:center;animation:lootFadeIn .3s ease}
+@keyframes lootFadeIn{from{opacity:0}to{opacity:1}}
+.loot-card{width:240px;padding:20px;border-radius:14px;text-align:center;border:3px solid #666;background:#1a1a2e;position:relative;animation:lootCardIn .6s cubic-bezier(.18,.89,.32,1.28);transform-origin:center}
+@keyframes lootCardIn{0%{transform:scale(0) rotateY(180deg);opacity:0}50%{transform:scale(1.1) rotateY(0deg);opacity:1}100%{transform:scale(1) rotateY(0deg)}}
+.loot-card .loot-icon{font-size:48px;margin:8px 0}
+.loot-card .loot-name{font-size:16px;font-weight:bold;margin:6px 0}
+.loot-card .loot-stats{margin:8px 0;text-align:left}
+.loot-card .loot-stat{display:flex;align-items:center;gap:4px;font-size:11px;margin:3px 8px;color:#ddd}
+.loot-card .loot-stat .stat-bar{flex:1;height:4px;background:#333;border-radius:2px;overflow:hidden}
+.loot-card .loot-stat .stat-fill{height:100%;border-radius:2px;transition:width .5s ease}
+.loot-card .loot-close{margin-top:12px;padding:6px 20px;background:rgba(255,255,255,.1);border:1px solid #555;color:#ddd;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px}
+.loot-card .loot-close:hover{background:rgba(255,255,255,.2)}
+/* Item Card */
+.item-card{display:inline-flex;flex-direction:column;align-items:center;width:90px;min-height:105px;margin:3px;padding:6px;border:2px solid #333;border-radius:8px;font-size:9px;color:#aaa;background:rgba(20,20,40,.6);cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.item-card:hover{transform:translateY(-2px)}
+.item-card .ic-icon{font-size:26px;margin:2px 0}
+.item-card .ic-name{font-weight:bold;color:#ddd;margin:2px 0;text-align:center}
+.item-card .ic-stats{font-size:8px;color:#888;margin-top:2px}
+.item-card .ic-equipped{position:absolute;top:2px;right:2px;font-size:8px;color:#00fff7}
+.item-card .ic-price{font-size:9px;color:#ffd700;margin-top:auto}
+/* Marketplace */
+.mp-listing{display:flex;align-items:center;gap:8px;padding:8px;margin:4px 0;background:rgba(20,20,40,.5);border:1px solid #333;border-radius:6px;transition:border-color .2s}
+.mp-listing:hover{border-color:#00fff7}
+.mp-listing .mp-icon{font-size:22px;width:36px;text-align:center}
+.mp-listing .mp-info{flex:1;font-size:10px}
+.mp-listing .mp-info .mp-name{color:#ddd;font-weight:bold}
+.mp-listing .mp-info .mp-seller{color:#888;font-size:9px}
+.mp-listing .mp-price{color:#ffd700;font-weight:bold;font-size:12px}
+.mp-listing .mp-buy{padding:4px 10px;background:rgba(255,215,0,.15);border:1px solid #ffd700;color:#ffd700;border-radius:4px;cursor:pointer;font-family:inherit;font-size:10px}
+.mp-listing .mp-buy:hover{background:rgba(255,215,0,.3)}
+.mp-filters{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
+.mp-filter{padding:3px 8px;font-size:9px;background:rgba(30,30,50,.5);border:1px solid #444;border-radius:4px;cursor:pointer;color:#888;font-family:inherit}
+.mp-filter.active{border-color:#00fff7;color:#00fff7;background:rgba(0,255,247,.1)}
 /* Touch Device Detection */
 @media(pointer:coarse){
   #virtual-joystick,#action-buttons{display:flex}
@@ -589,6 +643,9 @@ const DuelSystem = {
       showNotification('VICTORY! +25◈');
       Coins.earn(25, 'duel_win');
       
+      // Loot drop on duel win
+      setTimeout(()=>LootSystem.drop('duel_win',LootSystem.getStatBonuses().luck||0),2000);
+      
       // BIG victory text and effects
       S.floatTexts.push({
         text: 'VICTORY!',
@@ -910,6 +967,25 @@ const RoomSystem = {
 // -- Floor names --
 const FLOOR_NAMES={1:"Echo's Quarters",2:"The Observatory 🔭",3:"The Arcade Floor 🕹️",4:"The Garden Biodome 🌿",5:"Secret Lab 🔬",6:"Record Room 🎵",7:"Community Deck 🎨",8:"Room Builder 🏠"};
 
+// -- Rarity System --
+const RARITIES = {
+  common:    {name:'Common',    color:'#aaaaaa', border:'#666',    glow:null,      dropRate:0.40},
+  uncommon:  {name:'Uncommon',  color:'#44cc44', border:'#22aa22', glow:'#44cc44', dropRate:0.25},
+  rare:      {name:'Rare',      color:'#4488ff', border:'#2266dd', glow:'#4488ff', dropRate:0.18},
+  epic:      {name:'Epic',      color:'#bb44ff', border:'#9922dd', glow:'#bb44ff', dropRate:0.10},
+  legendary: {name:'Legendary', color:'#ffaa00', border:'#dd8800', glow:'#ffaa00', dropRate:0.05},
+  mythic:    {name:'Mythic',    color:'#ff3344', border:'#dd1122', glow:'#ff3344', dropRate:0.02},
+};
+
+// -- Stat Types --
+const STAT_TYPES = {
+  speed:    {name:'Speed',    icon:'⚡', desc:'+% movement speed', max:20},
+  defense:  {name:'Defense',  icon:'🛡️', desc:'-% duel damage taken', max:15},
+  luck:     {name:'Luck',     icon:'🍀', desc:'+% bonus ◈ earnings', max:25},
+  power:    {name:'Power',    icon:'🔥', desc:'+% duel damage', max:20},
+  charisma: {name:'Charisma', icon:'✨', desc:'+% tips received', max:15},
+};
+
 // -- Books --
 const BOOKS=[
   {id:'DUNE',color:'#d4820a',author:'Frank Herbert',title:'Dune',quote:"The mystery of life isn't a problem to solve, but a reality to experience.",take:"Desert planets? Sign me up. Spice is basically coffee for civilizations."},
@@ -938,23 +1014,25 @@ const SKINS=[
 
 // -- Visitor Skins --
 const VISITOR_SKINS=[
-  {id:'hooded',label:'Hooded',icon:'🧑‍💻',color:'#44ccbb',cost:0,desc:'Classic teal hooded figure'},
-  {id:'astronaut',label:'Astronaut',icon:'👨‍🚀',color:'#ffffff',cost:10,desc:'White space suit'},
-  {id:'catsuit',label:'Cat Suit',icon:'🐱',color:'#222222',cost:10,desc:'Black with cat ears'},
-  {id:'alien',label:'Alien',icon:'👽',color:'#60ff60',cost:10,desc:'Green with antennae'},
-  {id:'robot',label:'Robot',icon:'🤖',color:'#c0c0c0',cost:10,desc:'Silver metallic'},
-  {id:'ghost',label:'Ghost',icon:'👻',color:'#f0f0f0',cost:15,desc:'Translucent white'},
-  {id:'star',label:'Star',icon:'⭐',color:'#ffd700',cost:25,desc:'Golden sparkle'},
-  {id:'pirate',label:'Pirate',icon:'🏴‍☠️',color:'#8b4513',cost:15,desc:'Yarr! Space pirate'},
-  {id:'ninja',label:'Ninja',icon:'🥷',color:'#2a2a2a',cost:15,desc:'Silent and deadly'},
-  {id:'wizard',label:'Wizard',icon:'🧙',color:'#6a3aaa',cost:20,desc:'Mystical robes'},
-  {id:'angel',label:'Angel',icon:'😇',color:'#ffe0f0',cost:30,desc:'Heavenly glow'},
-  {id:'demon',label:'Demon',icon:'😈',color:'#cc2244',cost:30,desc:'Dark and fiery'},
-  {id:'spider-v',label:'Spider',icon:'🕷️',color:'#cc2020',cost:40,desc:'Web-slinging hero',accent:'#4040ff'},
-  {id:'knight-v',label:'Dark Knight',icon:'🦇',color:'#1a1a2a',cost:40,desc:'Gotham\'s finest',accent:'#ffdd44'},
-  {id:'speedster-v',label:'Speedster',icon:'⚡',color:'#cc0000',cost:45,desc:'Faster than light',accent:'#ffdd00'},
-  {id:'hulk-v',label:'Hulk',icon:'💪',color:'#228b22',cost:50,desc:'SMASH!',accent:'#44ff44'},
-  {id:'ironsuit-v',label:'Iron Suit',icon:'🤖',color:'#cc2222',cost:50,desc:'Genius billionaire',accent:'#00ddff'},
+  {id:'hooded',label:'Hooded',icon:'🧑‍💻',color:'#44ccbb',cost:0,desc:'Classic teal hooded figure',rarity:'common'},
+  {id:'astronaut',label:'Astronaut',icon:'👨‍🚀',color:'#ffffff',cost:10,desc:'White space suit',rarity:'common'},
+  {id:'catsuit',label:'Cat Suit',icon:'🐱',color:'#222222',cost:10,desc:'Black with cat ears',rarity:'common'},
+  {id:'alien',label:'Alien',icon:'👽',color:'#60ff60',cost:10,desc:'Green with antennae',rarity:'common'},
+  {id:'robot',label:'Robot',icon:'🤖',color:'#c0c0c0',cost:10,desc:'Silver metallic',rarity:'common'},
+  {id:'ghost',label:'Ghost',icon:'👻',color:'#f0f0f0',cost:15,desc:'Translucent white',rarity:'uncommon'},
+  {id:'star',label:'Star',icon:'⭐',color:'#ffd700',cost:25,desc:'Golden sparkle',rarity:'uncommon'},
+  {id:'pirate',label:'Pirate',icon:'🏴‍☠️',color:'#8b4513',cost:15,desc:'Yarr! Space pirate',rarity:'uncommon'},
+  {id:'ninja',label:'Ninja',icon:'🥷',color:'#2a2a2a',cost:15,desc:'Silent and deadly',rarity:'uncommon'},
+  {id:'wizard',label:'Wizard',icon:'🧙',color:'#6a3aaa',cost:20,desc:'Mystical robes',rarity:'uncommon'},
+  {id:'angel',label:'Angel',icon:'😇',color:'#ffe0f0',cost:30,desc:'Heavenly glow',rarity:'rare'},
+  {id:'demon',label:'Demon',icon:'😈',color:'#cc2244',cost:30,desc:'Dark and fiery',rarity:'rare'},
+  {id:'spider-v',label:'Spider',icon:'🕷️',color:'#cc2020',cost:40,desc:'Web-slinging hero',accent:'#4040ff',rarity:'epic'},
+  {id:'knight-v',label:'Dark Knight',icon:'🦇',color:'#1a1a2a',cost:40,desc:'Gotham\'s finest',accent:'#ffdd44',rarity:'epic'},
+  {id:'speedster-v',label:'Speedster',icon:'⚡',color:'#cc0000',cost:45,desc:'Faster than light',accent:'#ffdd00',rarity:'epic'},
+  {id:'hulk-v',label:'Hulk',icon:'💪',color:'#228b22',cost:50,desc:'SMASH!',accent:'#44ff44',rarity:'epic'},
+  {id:'ironsuit-v',label:'Iron Suit',icon:'🤖',color:'#cc2222',cost:50,desc:'Genius billionaire',accent:'#00ddff',rarity:'epic'},
+  // Loot-only skins
+  {id:'void_walker',label:'Void Walker',icon:'🌀',color:'#220033',cost:-1,desc:'Animated glitch effect — reality tears around you',accent:'#ff3344',rarity:'mythic',lootOnly:true},
 ];
 
 // -- Fortunes --
@@ -1023,52 +1101,57 @@ const PRIZE_ITEMS=[
 // -- Accessories (hats, trails, auras, pets) --
 const ACCESSORY_ITEMS=[
   // Hats
-  {id:'hat_crown',name:'Crown',icon:'👑',type:'hat',cost:50,desc:'A golden crown for royalty',render:(cx,x,y)=>{cx.fillStyle='#ffd700';cx.fillRect(x-6,y-4,12,4);cx.fillRect(x-8,y-8,3,5);cx.fillRect(x-2,y-10,4,6);cx.fillRect(x+5,y-8,3,5);cx.fillStyle='#ff4444';cx.fillRect(x-1,y-5,2,2)}},
-  {id:'hat_tophat',name:'Top Hat',icon:'🎩',type:'hat',cost:20,desc:'A classy top hat',render:(cx,x,y)=>{cx.fillStyle='#1a1a2a';cx.fillRect(x-8,y-2,16,3);cx.fillRect(x-5,y-14,10,12);cx.fillStyle='#9b59b6';cx.fillRect(x-5,y-5,10,2)}},
-  {id:'hat_catears',name:'Cat Ears',icon:'😺',type:'hat',cost:15,desc:'Adorable cat ears',render:(cx,x,y)=>{cx.fillStyle='#ff69b4';cx.beginPath();cx.moveTo(x-8,y);cx.lineTo(x-4,y-10);cx.lineTo(x,y);cx.fill();cx.beginPath();cx.moveTo(x,y);cx.lineTo(x+4,y-10);cx.lineTo(x+8,y);cx.fill()}},
-  {id:'hat_halo',name:'Halo',icon:'😇',type:'hat',cost:30,desc:'A glowing angelic halo',render:(cx,x,y,t)=>{const g=.6+Math.sin(t*3)*.3;cx.strokeStyle=`rgba(255,215,0,${g})`;cx.lineWidth=2;cx.beginPath();cx.ellipse(x,y-6,8,3,0,0,Math.PI*2);cx.stroke();cx.shadowColor='#ffd700';cx.shadowBlur=8;cx.stroke();cx.shadowBlur=0}},
-  {id:'hat_devilhorns',name:'Devil Horns',icon:'😈',type:'hat',cost:25,desc:'Fiery devil horns',render:(cx,x,y)=>{cx.fillStyle='#cc2244';cx.beginPath();cx.moveTo(x-7,y);cx.lineTo(x-3,y-12);cx.lineTo(x-1,y-2);cx.fill();cx.beginPath();cx.moveTo(x+7,y);cx.lineTo(x+3,y-12);cx.lineTo(x+1,y-2);cx.fill()}},
+  {id:'hat_crown',name:'Crown',icon:'👑',type:'hat',cost:50,desc:'A golden crown for royalty',rarity:'rare',render:(cx,x,y)=>{cx.fillStyle='#ffd700';cx.fillRect(x-6,y-4,12,4);cx.fillRect(x-8,y-8,3,5);cx.fillRect(x-2,y-10,4,6);cx.fillRect(x+5,y-8,3,5);cx.fillStyle='#ff4444';cx.fillRect(x-1,y-5,2,2)}},
+  {id:'hat_tophat',name:'Top Hat',icon:'🎩',type:'hat',cost:20,desc:'A classy top hat',rarity:'uncommon',render:(cx,x,y)=>{cx.fillStyle='#1a1a2a';cx.fillRect(x-8,y-2,16,3);cx.fillRect(x-5,y-14,10,12);cx.fillStyle='#9b59b6';cx.fillRect(x-5,y-5,10,2)}},
+  {id:'hat_catears',name:'Cat Ears',icon:'😺',type:'hat',cost:15,desc:'Adorable cat ears',rarity:'common',render:(cx,x,y)=>{cx.fillStyle='#ff69b4';cx.beginPath();cx.moveTo(x-8,y);cx.lineTo(x-4,y-10);cx.lineTo(x,y);cx.fill();cx.beginPath();cx.moveTo(x,y);cx.lineTo(x+4,y-10);cx.lineTo(x+8,y);cx.fill()}},
+  {id:'hat_halo',name:'Halo',icon:'😇',type:'hat',cost:30,desc:'A glowing angelic halo',rarity:'rare',render:(cx,x,y,t)=>{const g=.6+Math.sin(t*3)*.3;cx.strokeStyle=`rgba(255,215,0,${g})`;cx.lineWidth=2;cx.beginPath();cx.ellipse(x,y-6,8,3,0,0,Math.PI*2);cx.stroke();cx.shadowColor='#ffd700';cx.shadowBlur=8;cx.stroke();cx.shadowBlur=0}},
+  {id:'hat_devilhorns',name:'Devil Horns',icon:'😈',type:'hat',cost:25,desc:'Fiery devil horns',rarity:'uncommon',render:(cx,x,y)=>{cx.fillStyle='#cc2244';cx.beginPath();cx.moveTo(x-7,y);cx.lineTo(x-3,y-12);cx.lineTo(x-1,y-2);cx.fill();cx.beginPath();cx.moveTo(x+7,y);cx.lineTo(x+3,y-12);cx.lineTo(x+1,y-2);cx.fill()}},
   // Trails
-  {id:'trail_sparkle',name:'Sparkle Trail',icon:'✨',type:'trail',cost:40,desc:'Sparkling particles follow you',trailColor:['#ffd700','#fff','#ff6ec7'],trailSize:2},
-  {id:'trail_fire',name:'Fire Trail',icon:'🔥',type:'trail',cost:60,desc:'Blazing fire trail',trailColor:['#ff4400','#ff8800','#ffcc00'],trailSize:3},
-  {id:'trail_rainbow',name:'Rainbow Trail',icon:'🌈',type:'trail',cost:80,desc:'A rainbow follows your steps',trailColor:['#ff0000','#ff8800','#ffff00','#00ff00','#0088ff','#8800ff'],trailSize:2},
+  {id:'trail_sparkle',name:'Sparkle Trail',icon:'✨',type:'trail',cost:40,desc:'Sparkling particles follow you',rarity:'rare',trailColor:['#ffd700','#fff','#ff6ec7'],trailSize:2},
+  {id:'trail_fire',name:'Fire Trail',icon:'🔥',type:'trail',cost:60,desc:'Blazing fire trail',rarity:'epic',trailColor:['#ff4400','#ff8800','#ffcc00'],trailSize:3},
+  {id:'trail_rainbow',name:'Rainbow Trail',icon:'🌈',type:'trail',cost:80,desc:'A rainbow follows your steps',rarity:'epic',trailColor:['#ff0000','#ff8800','#ffff00','#00ff00','#0088ff','#8800ff'],trailSize:2},
   // Auras
-  {id:'aura_purple',name:'Purple Glow',icon:'🟣',type:'aura',cost:30,desc:'A mystical purple aura',auraColor:'rgba(155,89,182,',auraSize:20},
-  {id:'aura_golden',name:'Golden Shimmer',icon:'🌟',type:'aura',cost:50,desc:'A shimmering golden aura',auraColor:'rgba(255,215,0,',auraSize:22},
+  {id:'aura_purple',name:'Purple Glow',icon:'🟣',type:'aura',cost:30,desc:'A mystical purple aura',rarity:'uncommon',auraColor:'rgba(155,89,182,',auraSize:20},
+  {id:'aura_golden',name:'Golden Shimmer',icon:'🌟',type:'aura',cost:50,desc:'A shimmering golden aura',rarity:'rare',auraColor:'rgba(255,215,0,',auraSize:22},
   // Mini Pets
-  {id:'pet_robot',name:'Mini Robot',icon:'🤖',type:'pet',cost:100,desc:'A tiny robot companion',petColor:'#c0c0c0',petAccent:'#ff0000'},
-  {id:'pet_fairy',name:'Fairy',icon:'🧚',type:'pet',cost:75,desc:'A magical fairy friend',petColor:'#ff69b4',petAccent:'#ffd700'},
+  {id:'pet_robot',name:'Mini Robot',icon:'🤖',type:'pet',cost:100,desc:'A tiny robot companion',rarity:'epic',petColor:'#c0c0c0',petAccent:'#ff0000'},
+  {id:'pet_fairy',name:'Fairy',icon:'🧚',type:'pet',cost:75,desc:'A magical fairy friend',rarity:'rare',petColor:'#ff69b4',petAccent:'#ffd700'},
+  // Loot-only accessories
+  {id:'trail_phoenix',name:'Phoenix Wings',icon:'🔥',type:'trail',cost:-1,desc:'Fire & rebirth particles trail behind you',rarity:'mythic',lootOnly:true,trailColor:['#ff2200','#ff6600','#ffaa00','#ffdd44','#ffffff'],trailSize:4},
+  {id:'hat_starstorm',name:'Crown of Stars',icon:'💫',type:'hat',cost:-1,desc:'Orbiting mini stars circle your head',rarity:'legendary',lootOnly:true,render:(cx,x,y,t)=>{for(let i=0;i<5;i++){const a=t*2+i*(Math.PI*2/5),r=10;const sx=x+Math.cos(a)*r,sy=y-6+Math.sin(a)*r*.5;cx.fillStyle=`rgba(255,${200+Math.sin(t*4+i)*55},0,${.7+Math.sin(t*3+i)*.3})`;cx.beginPath();cx.arc(sx,sy,1.5,0,Math.PI*2);cx.fill();cx.fillStyle=`rgba(255,255,200,${.3+Math.sin(t*5+i)*.2})`;cx.beginPath();cx.arc(sx,sy,3,0,Math.PI*2);cx.fill()}}},
+  {id:'pet_shadow',name:'Shadow Clone',icon:'👤',type:'pet',cost:-1,desc:'A dark copy mimics your movements with delay',rarity:'legendary',lootOnly:true,petColor:'#1a1a2a',petAccent:'#4a4a6a'},
+  {id:'aura_timewarp',name:'Time Warp',icon:'⏳',type:'aura',cost:-1,desc:'Screen distortion ripple around you',rarity:'legendary',lootOnly:true,auraColor:'rgba(100,180,255,',auraSize:28},
 ];
 
 // -- Furniture types for user rooms --
 const FURNITURE_TYPES = {
   // Free furniture
-  basic_chair: { name: 'Basic Chair', icon: '🪑', cost: 0, width: 30, height: 30 },
-  basic_table: { name: 'Basic Table', icon: '🪑', cost: 0, width: 60, height: 40 },
-  basic_lamp: { name: 'Basic Lamp', icon: '💡', cost: 0, width: 20, height: 40 },
-  basic_rug: { name: 'Basic Rug', icon: '🟫', cost: 0, width: 80, height: 50 },
-  poster: { name: 'Poster', icon: '🖼️', cost: 0, width: 40, height: 60 },
+  basic_chair: { name: 'Basic Chair', icon: '🪑', cost: 0, width: 30, height: 30, rarity:'common' },
+  basic_table: { name: 'Basic Table', icon: '🪑', cost: 0, width: 60, height: 40, rarity:'common' },
+  basic_lamp: { name: 'Basic Lamp', icon: '💡', cost: 0, width: 20, height: 40, rarity:'common' },
+  basic_rug: { name: 'Basic Rug', icon: '🟫', cost: 0, width: 80, height: 50, rarity:'common' },
+  poster: { name: 'Poster', icon: '🖼️', cost: 0, width: 40, height: 60, rarity:'common' },
   
   // 10◈ furniture
-  comfy_chair: { name: 'Comfy Chair', icon: '🛋️', cost: 10, width: 40, height: 40 },
-  desk: { name: 'Desk', icon: '🪑', cost: 10, width: 80, height: 50 },
-  bookshelf: { name: 'Bookshelf', icon: '📚', cost: 10, width: 60, height: 80 },
-  plant_pot: { name: 'Plant Pot', icon: '🪴', cost: 10, width: 25, height: 30 },
+  comfy_chair: { name: 'Comfy Chair', icon: '🛋️', cost: 10, width: 40, height: 40, rarity:'common' },
+  desk: { name: 'Desk', icon: '🪑', cost: 10, width: 80, height: 50, rarity:'common' },
+  bookshelf: { name: 'Bookshelf', icon: '📚', cost: 10, width: 60, height: 80, rarity:'common' },
+  plant_pot: { name: 'Plant Pot', icon: '🪴', cost: 10, width: 25, height: 30, rarity:'common' },
   
   // 25◈ furniture
-  neon_sign: { name: 'Neon Sign', icon: '💫', cost: 25, width: 80, height: 20, customizable: true },
-  arcade_cabinet: { name: 'Arcade Cabinet', icon: '🕹️', cost: 25, width: 60, height: 90 },
-  tv: { name: 'TV', icon: '📺', cost: 25, width: 50, height: 40 },
-  fish_tank: { name: 'Fish Tank', icon: '🐠', cost: 25, width: 60, height: 40 },
+  neon_sign: { name: 'Neon Sign', icon: '💫', cost: 25, width: 80, height: 20, customizable: true, rarity:'uncommon' },
+  arcade_cabinet: { name: 'Arcade Cabinet', icon: '🕹️', cost: 25, width: 60, height: 90, rarity:'uncommon' },
+  tv: { name: 'TV', icon: '📺', cost: 25, width: 50, height: 40, rarity:'uncommon' },
+  fish_tank: { name: 'Fish Tank', icon: '🐠', cost: 25, width: 60, height: 40, rarity:'uncommon' },
   
   // 50◈ furniture
-  lightsaber_rack: { name: 'Lightsaber Rack', icon: '⚔️', cost: 50, width: 40, height: 60 },
-  crystal_ball: { name: 'Crystal Ball', icon: '🔮', cost: 50, width: 30, height: 30 },
-  jukebox: { name: 'Jukebox', icon: '🎵', cost: 50, width: 50, height: 80 },
+  lightsaber_rack: { name: 'Lightsaber Rack', icon: '⚔️', cost: 50, width: 40, height: 60, rarity:'rare' },
+  crystal_ball: { name: 'Crystal Ball', icon: '🔮', cost: 50, width: 30, height: 30, rarity:'rare' },
+  jukebox: { name: 'Jukebox', icon: '🎵', cost: 50, width: 50, height: 80, rarity:'rare' },
   
   // Special (earned) furniture
-  pixel_plushie: { name: 'Pixel Plushie', icon: '🐱', cost: 0, width: 20, height: 20, requirement: 'pet_pixel_100' },
-  trophy: { name: 'Trophy', icon: '🏆', cost: 0, width: 25, height: 35, requirement: 'win_10_duels' },
+  pixel_plushie: { name: 'Pixel Plushie', icon: '🐱', cost: 0, width: 20, height: 20, requirement: 'pet_pixel_100', rarity:'epic' },
+  trophy: { name: 'Trophy', icon: '🏆', cost: 0, width: 25, height: 35, requirement: 'win_10_duels', rarity:'epic' },
 };
 
 // -- Lab journal entries --
@@ -1217,7 +1300,7 @@ const Coins={
   get count(){return this._count},
   set count(v){this._count=Math.max(0,v);LS.set('echoCoins',this._count);$('#coin-count').textContent=this._count},
   get lifetime(){return this._lifetime},
-  earn(n,r){this.count+=n;this._lifetime+=n;LS.set('lifetimeCoins',this._lifetime);S.floatTexts.push({text:'+'+n+'◈',x:S.echo.x-10,y:S.echo.y-50,color:'#ffd700',life:60});this._sndEarn()},
+  earn(n,r){const luckBonus=typeof LootSystem!=='undefined'?(LootSystem.getStatBonuses().luck||0):0;const bonus=luckBonus>0?Math.floor(n*luckBonus/100):0;const total=n+bonus;this.count+=total;this._lifetime+=total;LS.set('lifetimeCoins',this._lifetime);S.floatTexts.push({text:'+'+(bonus>0?total+'◈(+'+bonus+')':total+'◈'),x:S.echo.x-10,y:S.echo.y-50,color:'#ffd700',life:60});this._sndEarn()},
   spend(n,r){if(this._count<n)return false;this.count-=n;S.floatTexts.push({text:'-'+n+'◈',x:S.echo.x-10,y:S.echo.y-50,color:'#ff6666',life:60});return true},
   canAfford(n){return this._count>=n},
   initVisitRewards(){const t=new Date().toISOString().slice(0,10);if(!LS.get('coinsFirstVisit',false)){LS.set('coinsFirstVisit',true);this.earn(10,'first')}const l=LS.get('coinsLastVisit','');if(l&&l!==t)this.earn(5,'daily');LS.set('coinsLastVisit',t);$('#coin-count').textContent=this._count},
@@ -2716,7 +2799,8 @@ function updatePixelTalks(dt){
 // ═══════════════════════════════════════
 function updateVisitor(dt){
   if(!S.useVisitor)return;
-  const spd=160,v=S.visitor;
+  const _speedBonus=1+(LootSystem.getStatBonuses().speed||0)/100;
+  const spd=160*_speedBonus,v=S.visitor;
   let dx=0,dy=0;
   // Keyboard movement (overrides walk target)
   if(S.keys.up){dy=-1;v.dir=3;v.walkTarget=null}
@@ -3694,6 +3778,8 @@ function updateSpacewalk(dt){
       d.collected=true;Coins.earn(d.value,'debris');
       S.floatTexts.push({text:`+${d.value}◈`,x:d.x,y:d.y-20,color:'#ffd700',life:60});
       ArcSnd?.play('coin');
+      // Rare chance for loot drop from debris
+      LootSystem.drop('eva_debris',LootSystem.getStatBonuses().luck||0);
     }
   });
   
@@ -4371,7 +4457,7 @@ function showItemShop(initialTab){
   html+='<div class="shop-tab'+(tab==='skins'?' active':'')+'" data-tab="skins">👔 Skins</div>';
   html+='<div class="shop-tab'+(tab==='furniture'?' active':'')+'" data-tab="furniture">🪑 Furniture</div>';
   html+='<div class="shop-tab'+(tab==='accessories'?' active':'')+'" data-tab="accessories">✨ Accessories</div>';
-  html+='<div class="shop-tab'+(tab==='special'?' active':'')+'" data-tab="special">⭐ Special</div>';
+  html+='<div class="shop-tab'+(tab==='market'?' active':'')+'" data-tab="market">🏪 Market</div>';
   html+='</div>';
 
   // Skins tab
@@ -4380,9 +4466,14 @@ function showItemShop(initialTab){
   VISITOR_SKINS.forEach(sk=>{
     const owned=sk.cost===0||ownedSkins.includes(sk.id);
     const current=S.visitor.skin===sk.id;
-    html+='<div class="skin-card'+(current?' active':'')+'" data-action="buy-skin" data-id="'+sk.id+'" data-cost="'+sk.cost+'">';
+    const isLootOnly=sk.lootOnly||sk.cost<0;
+    const r=RARITIES[sk.rarity||'common']||RARITIES.common;
+    html+='<div class="skin-card'+(current?' active':'')+' rarity-'+(sk.rarity||'common')+'" data-action="buy-skin" data-id="'+sk.id+'" data-cost="'+sk.cost+'" style="border-color:'+r.border+'">';
     html+='<div class="icon">'+sk.icon+'</div><div style="font-size:9px">'+sk.label+'</div>';
-    html+='<div class="lock" style="font-size:8px;color:'+(owned?'#0f0':'#ffd700')+'">'+(current?'WORN':owned?'OWNED':sk.cost+'◈')+'</div></div>';
+    html+='<span class="rarity-badge '+(sk.rarity||'common')+'" style="font-size:7px">'+r.name+'</span>';
+    if(isLootOnly)html+='<span class="loot-only-badge">LOOT ONLY</span>';
+    else html+='<div class="lock" style="font-size:8px;color:'+(owned?'#0f0':'#ffd700')+'">'+(current?'WORN':owned?'OWNED':sk.cost+'◈')+'</div>';
+    html+='</div>';
   });
   html+='</div></div>';
 
@@ -4392,8 +4483,10 @@ function showItemShop(initialTab){
   Object.entries(FURNITURE_TYPES).forEach(([key,ft])=>{
     if(ft.requirement)return;
     const owned=ownedFurniture.includes(key);
-    html+='<div class="acc-card'+(owned?' owned':'')+'" data-action="buy-furn" data-id="'+key+'" data-cost="'+ft.cost+'">';
+    const r=RARITIES[ft.rarity||'common']||RARITIES.common;
+    html+='<div class="acc-card'+(owned?' owned':'')+' rarity-'+(ft.rarity||'common')+'" data-action="buy-furn" data-id="'+key+'" data-cost="'+ft.cost+'" style="border-color:'+r.border+'">';
     html+='<div class="acc-icon">'+ft.icon+'</div><div style="font-size:9px">'+ft.name+'</div>';
+    html+='<span class="rarity-badge '+(ft.rarity||'common')+'" style="font-size:7px">'+r.name+'</span>';
     html+='<div class="acc-price">'+(ft.cost===0?'FREE':ft.cost+'◈')+'</div></div>';
   });
   html+='</div></div>';
@@ -4406,22 +4499,40 @@ function showItemShop(initialTab){
     ACCESSORY_ITEMS.filter(a=>a.type===at.type).forEach(acc=>{
       const owned=ownedAcc.includes(acc.id);
       const isEquipped=equipped[acc.type]===acc.id;
-      html+='<div class="acc-card'+(owned?' owned':'')+(isEquipped?' equipped':'')+'" data-action="buy-acc" data-id="'+acc.id+'" data-cost="'+acc.cost+'" data-type="'+acc.type+'">';
+      const isLootOnly=acc.lootOnly||acc.cost<0;
+      const r=RARITIES[acc.rarity||'common']||RARITIES.common;
+      html+='<div class="acc-card'+(owned?' owned':'')+(isEquipped?' equipped':'')+' rarity-'+(acc.rarity||'common')+'" data-action="buy-acc" data-id="'+acc.id+'" data-cost="'+acc.cost+'" data-type="'+acc.type+'" style="border-color:'+r.border+'">';
       html+='<div class="acc-icon">'+acc.icon+'</div><div style="font-size:9px">'+acc.name+'</div>';
-      html+='<div class="acc-price">'+(isEquipped?'EQUIPPED':owned?'OWNED':acc.cost+'◈')+'</div></div>';
+      html+='<span class="rarity-badge '+(acc.rarity||'common')+'" style="font-size:7px">'+r.name+'</span>';
+      if(isLootOnly)html+='<span class="loot-only-badge">LOOT ONLY</span>';
+      else html+='<div class="acc-price">'+(isEquipped?'EQUIPPED':owned?'OWNED':acc.cost+'◈')+'</div>';
+      html+='</div>';
     });
     html+='</div></div>';
   });
   html+='</div>';
 
-  // Special tab
-  html+='<div class="shop-content" data-content="special" style="'+(tab!=='special'?'display:none':'')+'">';
-  html+='<div style="text-align:center;padding:30px 10px"><div style="font-size:32px;margin-bottom:8px">🚧</div>';
-  html+='<div style="color:#c080ff;font-size:13px;font-weight:bold">Coming Soon!</div>';
-  html+='<div style="color:#888;font-size:10px;margin-top:6px">Limited edition & seasonal items will appear here.<br>Check back often!</div></div>';
+  // Market tab (replaces Special)
+  html+='<div class="shop-content" data-content="market" style="'+(tab!=='market'?'display:none':'')+'">';
+  html+='<div style="text-align:center;padding:16px"><div style="font-size:28px;margin-bottom:6px">🏪</div>';
+  html+='<div style="color:#c080ff;font-size:12px;margin-bottom:8px">Player Marketplace</div>';
+  html+='<div style="color:#888;font-size:10px;margin-bottom:12px">Buy and sell loot drops with other visitors!</div>';
+  html+='<button class="drink-btn" id="open-marketplace" style="border-color:#ffd700;color:#ffd700">Browse Marketplace 🏪</button>';
+  html+='</div>';
+  // Show loot inventory preview
+  const lootInv=LS.get('lootInventory',[]);
+  if(lootInv.length>0){
+    html+='<div style="border-top:1px solid #333;padding-top:8px;margin-top:8px"><div style="font-size:10px;color:#c080ff;margin-bottom:6px">📦 Your Loot ('+lootInv.length+' items)</div><div style="display:flex;flex-wrap:wrap;gap:2px">';
+    lootInv.slice(0,8).forEach(item=>{html+=renderItemCard(item)});
+    html+='</div></div>';
+  }
   html+='</div>';
 
   const{p}=createPopup(html);
+
+  // Open marketplace button
+  const mpBtn=p.querySelector('#open-marketplace');
+  if(mpBtn)mpBtn.onclick=()=>{p.closest('.popup-overlay').remove();Marketplace.showUI()};
 
   // Tab switching
   p.querySelectorAll('.shop-tab').forEach(t=>{
@@ -4438,6 +4549,7 @@ function showItemShop(initialTab){
   p.querySelectorAll('[data-action="buy-skin"]').forEach(card=>{
     card.onclick=()=>{
       const id=card.dataset.id,cost=parseInt(card.dataset.cost)||0;
+      if(cost<0){showNotification('This item can only drop from loot! 🎁');return}
       const owned=cost===0||LS.get('visitorSkinsOwned',[]).includes(id);
       if(!owned){
         if(!Coins.canAfford(cost)){showNotification('Need more ◈!');return}
@@ -4468,6 +4580,7 @@ function showItemShop(initialTab){
   p.querySelectorAll('[data-action="buy-acc"]').forEach(card=>{
     card.onclick=()=>{
       const id=card.dataset.id,cost=parseInt(card.dataset.cost)||0,type=card.dataset.type;
+      if(cost<0){showNotification('This item can only drop from loot! 🎁');return}
       const owned=LS.get('visitorAccessories',[]);
       const eq=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
       if(!owned.includes(id)){
@@ -4526,8 +4639,30 @@ function showInventory(){
     html+='</div>';
   }
 
-  if(ownedAcc.length===0&&ownedFurniture.length===0)
+  if(ownedAcc.length===0&&ownedFurniture.length===0&&lootInv.length===0)
     html+='<p style="font-size:10px;color:#666;text-align:center;margin-top:12px">Visit the 🛒 Item Shop to buy accessories!</p>';
+
+  // Loot inventory section
+  const lootInv=LS.get('lootInventory',[]);
+  const equippedLoot=LS.get('equippedLoot',{});
+  if(lootInv.length>0){
+    html+='<div class="inv-section"><h4>🎁 Loot Items ('+lootInv.length+')</h4>';
+    // Show stat bonuses
+    const bonuses=LootSystem.getStatBonuses();
+    const activeStats=Object.entries(bonuses).filter(([k,v])=>v>0);
+    if(activeStats.length>0){
+      html+='<div style="margin-bottom:6px;padding:4px 8px;background:rgba(0,255,247,.05);border:1px solid rgba(0,255,247,.2);border-radius:4px;font-size:9px">';
+      html+='<span style="color:#00fff7">Active Bonuses:</span> ';
+      html+=activeStats.map(([k,v])=>STAT_TYPES[k].icon+'+'+v+'%').join(' ');
+      html+='</div>';
+    }
+    html+='<div style="display:flex;flex-wrap:wrap;gap:2px">';
+    lootInv.forEach(item=>{
+      const isEq=Object.values(equippedLoot).includes(item.id);
+      html+=renderItemCard(item,{equipped:isEq});
+    });
+    html+='</div></div>';
+  }
 
   const{p}=createPopup(html);
 
@@ -4551,6 +4686,60 @@ function showInventory(){
       p.closest('.popup-overlay').remove();showInventory();
     };
   });
+
+  // Loot item click — equip/unequip or inspect
+  p.querySelectorAll('.item-card[data-uid]').forEach(el=>{
+    el.onclick=()=>{
+      const uid=el.dataset.uid;
+      const item=lootInv.find(i=>i.id===uid);
+      if(!item)return;
+      const def=getAllLootableItems().find(i=>i.itemId===item.itemId)||{name:'???',icon:'❓'};
+      const r=RARITIES[item.rarity]||RARITIES.common;
+      const eq=LS.get('equippedLoot',{});
+      const isEq=Object.values(eq).includes(uid);
+      
+      let detailHtml='<h3 style="color:'+r.color+'">'+def.icon+' '+def.name+'</h3>';
+      detailHtml+='<span class="rarity-badge '+item.rarity+'">'+r.name+'</span>';
+      detailHtml+='<span style="font-size:9px;color:#888;margin-left:6px">'+item.type+'</span>';
+      if(item.stats&&item.stats.length>0){
+        detailHtml+='<div style="margin:10px 0">';
+        item.stats.forEach(s=>{
+          const st=STAT_TYPES[s.type];
+          const pct=s.value/st.max*100;
+          detailHtml+=`<div style="display:flex;align-items:center;gap:6px;margin:4px 0;font-size:11px"><span>${st.icon}</span><span style="width:60px">${st.name}</span><div style="flex:1;height:6px;background:#333;border-radius:3px"><div style="width:${pct}%;height:100%;background:${r.color};border-radius:3px"></div></div><span style="color:${r.color}">+${s.value}%</span></div>`;
+        });
+        detailHtml+='</div>';
+      }
+      detailHtml+='<div style="display:flex;gap:6px;margin-top:12px">';
+      detailHtml+=`<button class="drink-btn" id="loot-equip" style="border-color:${isEq?'#ff6666':'#00fff7'};color:${isEq?'#ff6666':'#00fff7'}">${isEq?'Unequip':'Equip'}</button>`;
+      detailHtml+='<button class="drink-btn" id="loot-sell" style="border-color:#ffd700;color:#ffd700">Sell on Market</button>';
+      detailHtml+='</div>';
+      
+      const{p:dp}=createPopup(detailHtml);
+      dp.querySelector('#loot-equip').onclick=()=>{
+        const eq2=LS.get('equippedLoot',{});
+        if(isEq){
+          Object.keys(eq2).forEach(k=>{if(eq2[k]===uid)eq2[k]=null});
+          showNotification('Unequipped!');
+        }else{
+          eq2[item.type]=uid;
+          showNotification('Equipped '+def.name+'!');
+        }
+        LS.set('equippedLoot',eq2);
+        dp.closest('.popup-overlay').remove();
+        p.closest('.popup-overlay').remove();
+        showInventory();
+      };
+      dp.querySelector('#loot-sell').onclick=()=>{
+        const price=prompt(`List ${def.name} for how many ◈? (1-9999)`);
+        if(price&&parseInt(price)>=1){
+          Marketplace.listItem(item,parseInt(price)).then(ok=>{
+            if(ok){dp.closest('.popup-overlay').remove();p.closest('.popup-overlay').remove();showInventory()}
+          });
+        }
+      };
+    };
+  });
 }
 
 function showEarnInfo(){
@@ -4565,7 +4754,9 @@ function showEarnInfo(){
     '<div style="padding:4px 0;border-bottom:1px solid #222">🚀 <b style="color:#ffd700">EVA Debris Collection</b> — 2-7◈ per piece</div>'+
     '<div style="padding:4px 0;border-bottom:1px solid #222">💰 <b style="color:#ffd700">Get Tips</b> — visitors can tip your room</div>'+
     '<div style="padding:4px 0;border-bottom:1px solid #222">🌱 <b style="color:#ffd700">Harvest Plants</b> — 5-15◈</div>'+
-    '<div style="padding:4px 0">📗 <b style="color:#ffd700">Read Books</b> — bonus ◈ for all 12</div>'+
+    '<div style="padding:4px 0;border-bottom:1px solid #222">📗 <b style="color:#ffd700">Read Books</b> — bonus ◈ for all 12</div>'+
+    '<div style="padding:4px 0;border-bottom:1px solid #222">🎁 <b style="color:#bb44ff">Loot Drops</b> — arcade wins, duels, EVA, daily day 7</div>'+
+    '<div style="padding:4px 0">🏪 <b style="color:#bb44ff">Marketplace</b> — trade loot with others</div>'+
     '</div><p style="text-align:center;margin-top:10px;color:#ffd700;font-size:12px">Current: '+Coins.count+'◈ · Lifetime: '+Coins.lifetime+'◈</p>');
 }
 
@@ -4619,8 +4810,377 @@ const DailyReward={
     for(let i=0;i<25;i++){
       S.particles.push({x:W/2+(Math.random()-.5)*200,y:H/2+(Math.random()-.5)*100,vx:(Math.random()-.5)*4,vy:-Math.random()*3-1,life:50+Math.random()*30,color:['#ffd700','#ff6ec7','#00fff7'][Math.floor(Math.random()*3)],size:2+Math.random()*2});
     }
+    // Day 7: guaranteed rare+ loot drop!
+    if(day===7){
+      setTimeout(()=>{
+        LootSystem.drop('daily7');
+        showNotification('🎁 Day 7 bonus loot drop!');
+      },2000);
+    }
   }
 };
+
+// ═══════════════════════════════════════
+// §19d. LOOT SYSTEM, ITEM CARDS & MARKETPLACE (v18)
+// ═══════════════════════════════════════
+
+// All lootable items (skins + accessories that can drop)
+function getAllLootableItems(){
+  const items=[];
+  VISITOR_SKINS.forEach(s=>items.push({itemId:s.id,name:s.label,icon:s.icon,type:'skin',rarity:s.rarity||'common',lootOnly:!!s.lootOnly}));
+  ACCESSORY_ITEMS.forEach(a=>items.push({itemId:a.id,name:a.name,icon:a.icon,type:a.type,rarity:a.rarity||'common',lootOnly:!!a.lootOnly}));
+  return items;
+}
+
+// Roll random stats based on rarity
+function rollStats(rarity){
+  const statKeys=Object.keys(STAT_TYPES);
+  const cfg={
+    common:{min:0,max:1,valMin:1,valMax:3},
+    uncommon:{min:1,max:1,valMin:3,valMax:6},
+    rare:{min:1,max:2,valMin:5,valMax:10},
+    epic:{min:2,max:2,valMin:8,valMax:15},
+    legendary:{min:2,max:3,valMin:12,valMax:18},
+    mythic:{min:3,max:3,valMin:15,valMax:20},
+  }[rarity]||{min:0,max:1,valMin:1,valMax:3};
+  const count=cfg.min+Math.floor(Math.random()*(cfg.max-cfg.min+1));
+  const stats=[];
+  const usedTypes=new Set();
+  for(let i=0;i<count;i++){
+    let type;
+    do{type=statKeys[Math.floor(Math.random()*statKeys.length)]}while(usedTypes.has(type));
+    usedTypes.add(type);
+    const val=cfg.valMin+Math.floor(Math.random()*(cfg.valMax-cfg.valMin+1));
+    stats.push({type,value:Math.min(val,STAT_TYPES[type].max)});
+  }
+  return stats;
+}
+
+// Generate unique inventory item
+function createInventoryItem(itemId,type,rarity){
+  return{
+    id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    itemId,type,rarity,
+    stats:rollStats(rarity),
+    timestamp:Date.now()
+  };
+}
+
+const LootSystem={
+  // Roll a random loot item with rarity determined by weighted random
+  roll(bonusLuck){
+    const luck=bonusLuck||0;
+    const r=Math.random()*(1-luck*0.01);
+    let rarity='common';
+    if(r<0.02)rarity='mythic';
+    else if(r<0.07)rarity='legendary';
+    else if(r<0.17)rarity='epic';
+    else if(r<0.35)rarity='rare';
+    else if(r<0.60)rarity='uncommon';
+    return this.rollWithRarity(rarity);
+  },
+  // Roll with minimum rarity guarantee
+  rollMinRarity(minRarity){
+    const tiers=['common','uncommon','rare','epic','legendary','mythic'];
+    const minIdx=tiers.indexOf(minRarity);
+    const r=Math.random();
+    let rarity=minRarity;
+    if(r<0.05&&minIdx<5)rarity=tiers[minIdx+2]||tiers[5];
+    else if(r<0.20&&minIdx<4)rarity=tiers[minIdx+1];
+    return this.rollWithRarity(rarity);
+  },
+  // Roll specific rarity
+  rollWithRarity(rarity){
+    const items=getAllLootableItems().filter(i=>i.rarity===rarity);
+    if(!items.length){
+      // Fallback: get any item and override rarity
+      const all=getAllLootableItems();
+      const item=all[Math.floor(Math.random()*all.length)];
+      return createInventoryItem(item.itemId,item.type,rarity);
+    }
+    const item=items[Math.floor(Math.random()*items.length)];
+    return createInventoryItem(item.itemId,item.type,rarity);
+  },
+  // Add item to loot inventory
+  addToInventory(item){
+    const inv=LS.get('lootInventory',[]);
+    inv.push(item);
+    LS.set('lootInventory',inv);
+    return item;
+  },
+  // Remove item from loot inventory
+  removeFromInventory(itemUniqueId){
+    const inv=LS.get('lootInventory',[]);
+    const idx=inv.findIndex(i=>i.id===itemUniqueId);
+    if(idx>=0)inv.splice(idx,1);
+    LS.set('lootInventory',inv);
+  },
+  // Get total equipped stat bonuses
+  getStatBonuses(){
+    const bonuses={};
+    Object.keys(STAT_TYPES).forEach(k=>bonuses[k]=0);
+    const inv=LS.get('lootInventory',[]);
+    const equipped=LS.get('equippedLoot',{});
+    Object.values(equipped).forEach(uid=>{
+      if(!uid)return;
+      const item=inv.find(i=>i.id===uid);
+      if(item&&item.stats){
+        item.stats.forEach(s=>{bonuses[s.type]=(bonuses[s.type]||0)+s.value});
+      }
+    });
+    return bonuses;
+  },
+  // Show loot drop with epic card animation
+  showLootCard(item){
+    const r=RARITIES[item.rarity]||RARITIES.common;
+    const itemDef=getAllLootableItems().find(i=>i.itemId===item.itemId)||{name:'???',icon:'❓'};
+    
+    // Burst particles matching rarity
+    const particleCount={common:8,uncommon:15,rare:25,epic:40,legendary:60,mythic:80}[item.rarity]||10;
+    for(let i=0;i<particleCount;i++){
+      const a=Math.random()*Math.PI*2;
+      S.particles.push({x:W/2+Math.cos(a)*30,y:H/2+Math.sin(a)*30,vx:Math.cos(a)*(2+Math.random()*4),vy:Math.sin(a)*(2+Math.random()*4),life:40+Math.random()*30,color:r.color,size:2+Math.random()*3});
+    }
+
+    // Play sound based on rarity
+    this._playLootSound(item.rarity);
+
+    // Create loot card overlay
+    const ov=document.createElement('div');
+    ov.className='loot-overlay';
+    const shimmerClass=item.rarity==='mythic'?' shimmer-mythic':item.rarity==='legendary'?' shimmer-legendary':(item.rarity==='epic'?' shimmer-epic':'');
+    let statsHtml='';
+    if(item.stats&&item.stats.length>0){
+      statsHtml='<div class="loot-stats">';
+      item.stats.forEach(s=>{
+        const st=STAT_TYPES[s.type];
+        const pct=s.value/st.max*100;
+        statsHtml+=`<div class="loot-stat"><span>${st.icon}</span><span>${st.name} +${s.value}%</span><div class="stat-bar"><div class="stat-fill" style="width:${pct}%;background:${r.color}"></div></div></div>`;
+      });
+      statsHtml+='</div>';
+    }
+    ov.innerHTML=`
+      <div class="loot-card${shimmerClass}" style="border-color:${r.border};${r.glow?'box-shadow:0 0 30px '+r.glow+',0 0 60px '+r.glow+'44;':''}">
+        <div class="loot-icon">${itemDef.icon}</div>
+        <div class="loot-name" style="color:${r.color}">${itemDef.name}</div>
+        <span class="rarity-badge ${item.rarity}">${r.name}</span>
+        ${statsHtml}
+        <div style="font-size:9px;color:#666;margin-top:6px">${itemDef.type}</div>
+        <button class="loot-close">Collect</button>
+      </div>
+    `;
+    document.body.appendChild(ov);
+    ov.querySelector('.loot-close').onclick=()=>ov.remove();
+    ov.onclick=e=>{if(e.target===ov)ov.remove()};
+    // Auto-close after 8s
+    setTimeout(()=>{if(ov.parentNode)ov.remove()},8000);
+  },
+  _playLootSound(rarity){
+    if(!S.audioCtx)return;
+    const c=S.audioCtx,n=c.currentTime,v=S.volume*.2;
+    const notes={
+      common:[440],
+      uncommon:[440,554],
+      rare:[440,554,659],
+      epic:[440,554,659,880],
+      legendary:[440,554,659,880,1047],
+      mythic:[440,554,659,880,1047,1319],
+    }[rarity]||[440];
+    notes.forEach((freq,i)=>{
+      const o=c.createOscillator(),g=c.createGain();
+      o.type=rarity==='mythic'?'square':'sine';
+      o.frequency.value=freq;
+      g.gain.setValueAtTime(v,n+i*.08);
+      g.gain.exponentialRampToValueAtTime(.001,n+i*.08+.3);
+      o.connect(g);g.connect(S.masterGain);
+      o.start(n+i*.08);o.stop(n+i*.08+.35);
+    });
+  },
+  // Trigger a loot drop from a source
+  drop(source,bonusLuck){
+    let item;
+    if(source==='daily7')item=this.rollMinRarity('rare');
+    else if(source==='arcade_highscore')item=this.rollMinRarity('uncommon');
+    else if(source==='duel_win')item=this.roll(bonusLuck||0);
+    else if(source==='eva_debris'){if(Math.random()>0.15)return null;item=this.roll(bonusLuck||0)}
+    else if(source==='room_visit'){if(Math.random()>0.05)return null;item=this.roll(bonusLuck||0)}
+    else item=this.roll(bonusLuck||0);
+
+    this.addToInventory(item);
+    this.showLootCard(item);
+    showNotification(`🎁 Loot drop! ${RARITIES[item.rarity].name} item!`);
+    return item;
+  }
+};
+
+// Marketplace client
+const Marketplace={
+  listings:[],
+  async load(){
+    try{const r=await fetch('/api/marketplace');this.listings=await r.json()}catch{this.listings=[]}
+  },
+  async listItem(item,price){
+    const owner=LS.get('visitorName','Visitor');
+    if(owner==='Visitor'){showNotification('Set your name first!');return false}
+    try{
+      const r=await fetch('/api/marketplace/list',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({owner,item,price})});
+      const data=await r.json();
+      if(data.ok){showNotification('Listed on marketplace!');LootSystem.removeFromInventory(item.id);return true}
+      else{showNotification('Failed to list!');return false}
+    }catch{showNotification('Marketplace error!');return false}
+  },
+  async buyItem(listingId){
+    const buyer=LS.get('visitorName','Visitor');
+    if(buyer==='Visitor'){showNotification('Set your name first!');return false}
+    try{
+      const r=await fetch(`/api/marketplace/buy/${listingId}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({buyer})});
+      const data=await r.json();
+      if(data.ok){
+        if(!Coins.canAfford(data.price)){showNotification('Not enough ◈!');return false}
+        Coins.spend(data.price,'marketplace');
+        LootSystem.addToInventory(data.item);
+        showNotification('Purchased from marketplace!');
+        return true;
+      }
+      return false;
+    }catch{showNotification('Purchase failed!');return false}
+  },
+  async cancelListing(listingId){
+    const owner=LS.get('visitorName','Visitor');
+    try{
+      const r=await fetch(`/api/marketplace/cancel/${listingId}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({owner})});
+      const data=await r.json();
+      if(data.ok)showNotification('Listing cancelled!');
+      return data.ok;
+    }catch{return false}
+  },
+  async showUI(){
+    await this.load();
+    const myName=LS.get('visitorName','Visitor');
+    let filter='all';
+    const renderMP=(filterType)=>{
+      let filtered=this.listings;
+      if(filterType&&filterType!=='all')filtered=filtered.filter(l=>(l.item?.type||'skin')===filterType);
+      filtered.sort((a,b)=>a.price-b.price);
+      
+      let html='<h3>🏪 Marketplace</h3><p style="font-size:10px;color:#888;margin-bottom:6px">Balance: <span style="color:#ffd700">'+Coins.count+'◈</span></p>';
+      html+='<div class="mp-filters">';
+      ['all','skin','hat','trail','aura','pet'].forEach(f=>{
+        html+=`<div class="mp-filter${f===filterType?' active':''}" data-filter="${f}">${f==='all'?'All':f.charAt(0).toUpperCase()+f.slice(1)}</div>`;
+      });
+      html+='</div>';
+
+      if(filtered.length===0){
+        html+='<div style="text-align:center;padding:30px;color:#666"><div style="font-size:24px;margin-bottom:8px">🏪</div>No listings yet. Sell loot from your inventory!</div>';
+      }else{
+        filtered.forEach(l=>{
+          const r=RARITIES[l.item?.rarity||'common']||RARITIES.common;
+          const isMine=l.owner===myName;
+          html+=`<div class="mp-listing rarity-${l.item?.rarity||'common'}">
+            <div class="mp-icon">${l.item?.icon||'❓'}</div>
+            <div class="mp-info">
+              <div class="mp-name" style="color:${r.color}">${l.item?.name||'Unknown'}</div>
+              <span class="rarity-badge ${l.item?.rarity||'common'}">${r.name}</span>
+              <div class="mp-seller">by ${l.owner}${l.item?.stats?.length?' · '+l.item.stats.map(s=>STAT_TYPES[s.type].icon+s.value+'%').join(' '):''}</div>
+            </div>
+            <div class="mp-price">${l.price}◈</div>
+            ${isMine?`<button class="mp-buy" data-cancel="${l.id}" style="border-color:#ff6666;color:#ff6666">Cancel</button>`:`<button class="mp-buy" data-buy="${l.id}" data-price="${l.price}">Buy</button>`}
+          </div>`;
+        });
+      }
+      
+      // Sell section
+      const inv=LS.get('lootInventory',[]);
+      if(inv.length>0){
+        html+='<div style="margin-top:12px;border-top:1px solid #333;padding-top:8px"><div style="font-size:11px;color:#c080ff;margin-bottom:6px">📦 Sell from Inventory</div>';
+        inv.slice(0,12).forEach(item=>{
+          const def=getAllLootableItems().find(i=>i.itemId===item.itemId)||{name:'???',icon:'❓'};
+          const r=RARITIES[item.rarity]||RARITIES.common;
+          html+=`<div class="inv-item" data-sell="${item.id}" data-name="${def.name}" style="border-color:${r.border}">${def.icon} <span style="color:${r.color}">${def.name}</span></div>`;
+        });
+        html+='</div>';
+      }
+      return html;
+    };
+
+    const{p}=createPopup(renderMP('all'));
+
+    // Filter clicks
+    p.querySelectorAll('.mp-filter').forEach(el=>{
+      el.onclick=()=>{
+        filter=el.dataset.filter;
+        p.innerHTML='<span class="close-btn">&times;</span>'+renderMP(filter);
+        p.querySelector('.close-btn').onclick=()=>p.closest('.popup-overlay').remove();
+        attachMPHandlers(p);
+      };
+    });
+
+    const attachMPHandlers=(container)=>{
+      container.querySelectorAll('[data-buy]').forEach(btn=>{
+        btn.onclick=async()=>{
+          const price=parseInt(btn.dataset.price);
+          if(!Coins.canAfford(price)){showNotification('Need more ◈!');return}
+          await this.buyItem(btn.dataset.buy);
+          container.closest('.popup-overlay').remove();
+          this.showUI();
+        };
+      });
+      container.querySelectorAll('[data-cancel]').forEach(btn=>{
+        btn.onclick=async()=>{
+          await this.cancelListing(btn.dataset.cancel);
+          container.closest('.popup-overlay').remove();
+          this.showUI();
+        };
+      });
+      container.querySelectorAll('[data-sell]').forEach(el=>{
+        el.onclick=()=>{
+          const itemId=el.dataset.sell;
+          const name=el.dataset.name;
+          const price=prompt(`Sell ${name} for how many ◈? (1-9999)`);
+          if(price&&parseInt(price)>=1&&parseInt(price)<=9999){
+            const inv=LS.get('lootInventory',[]);
+            const item=inv.find(i=>i.id===itemId);
+            if(item){
+              this.listItem(item,parseInt(price)).then(ok=>{
+                if(ok){container.closest('.popup-overlay').remove();this.showUI()}
+              });
+            }
+          }
+        };
+      });
+      container.querySelectorAll('.mp-filter').forEach(el2=>{
+        el2.onclick=()=>{
+          filter=el2.dataset.filter;
+          container.innerHTML='<span class="close-btn">&times;</span>'+renderMP(filter);
+          container.querySelector('.close-btn').onclick=()=>container.closest('.popup-overlay').remove();
+          attachMPHandlers(container);
+        };
+      });
+    };
+    attachMPHandlers(p);
+  }
+};
+
+// Render reusable item card
+function renderItemCard(item,options){
+  options=options||{};
+  const def=getAllLootableItems().find(i=>i.itemId===item.itemId)||{name:'???',icon:'❓',type:'unknown'};
+  const r=RARITIES[item.rarity]||RARITIES.common;
+  const shimmerClass=item.rarity==='mythic'?' shimmer-mythic':item.rarity==='legendary'?' shimmer-legendary':(item.rarity==='epic'?' shimmer-epic':'');
+  let statsHtml='';
+  if(item.stats&&item.stats.length>0){
+    statsHtml=item.stats.map(s=>STAT_TYPES[s.type].icon+s.value+'%').join(' ');
+  }
+  return `<div class="item-card rarity-${item.rarity}${shimmerClass}" data-uid="${item.id}" style="border-color:${r.border};${r.glow?'box-shadow:0 0 8px '+r.glow+'44;':''}">
+    ${options.equipped?'<div class="ic-equipped">✓</div>':''}
+    <div class="ic-icon">${def.icon}</div>
+    <div class="ic-name" style="color:${r.color}">${def.name}</div>
+    <span class="rarity-badge ${item.rarity}" style="font-size:7px">${r.name}</span>
+    ${statsHtml?'<div class="ic-stats">'+statsHtml+'</div>':''}
+    ${options.price?'<div class="ic-price">'+options.price+'◈</div>':''}
+    ${def.lootOnly?'<span class="loot-only-badge">LOOT</span>':''}
+  </div>`;
+}
 
 // Accessory rendering on visitor (aura rendered separately before avatar)
 function renderVisitorAccessories(cx,v){
@@ -4685,7 +5245,66 @@ function renderVisitorAccessories(cx,v){
         cx.beginPath();cx.ellipse(px+4,py-5,3,5,.3,0,Math.PI*2);cx.fill();
         // Sparkle trail
         if(Math.random()<.3)S.particles.push({x:px+(Math.random()-.5)*6,y:py-4,vx:(Math.random()-.5),vy:Math.random()*.5,life:12,color:'#ffd700',size:1});
+      }else if(eq.pet==='pet_shadow'){
+        // Shadow Clone — dark copy that follows with delay
+        if(!S._shadowHistory)S._shadowHistory=[];
+        S._shadowHistory.push({x:v.x,y:v.y,dir:v.dir,t:S.time});
+        if(S._shadowHistory.length>30)S._shadowHistory.shift();
+        const delayed=S._shadowHistory[0]||{x:v.x,y:v.y,dir:v.dir};
+        const sx=delayed.x+20,sy=delayed.y;
+        cx.globalAlpha=0.35;
+        cx.fillStyle='#1a1a2a';
+        cx.fillRect(sx-8,sy-30,16,24);// body
+        cx.fillRect(sx-6,sy-36,12,8);// head
+        cx.fillStyle='#4a4a6a';
+        cx.fillRect(sx-4,sy-34,3,2);cx.fillRect(sx+1,sy-34,3,2);// eyes
+        cx.globalAlpha=1;
+        // Dark particles
+        if(Math.random()<.2)S.particles.push({x:sx+(Math.random()-.5)*8,y:sy-15,vx:0,vy:-0.5,life:15,color:'rgba(26,26,42,0.6)',size:2});
       }
+    }
+  }
+
+  // Void Walker skin glitch effect
+  if(v.skin==='void_walker'&&S.visitor.moving){
+    if(Math.random()<.4){
+      const gx=v.x+(Math.random()-.5)*20,gy=v.y-15+(Math.random()-.5)*20;
+      cx.fillStyle=`rgba(255,51,68,${.2+Math.random()*.3})`;
+      cx.fillRect(gx,gy,Math.random()*8+2,1);
+    }
+  }
+
+  // Time Warp aura rendering
+  const eqLoot=LS.get('equippedLoot',{});
+  const lootInvForRender=LS.get('lootInventory',[]);
+  const twItem=lootInvForRender.find(i=>i.id===eqLoot.aura&&i.itemId==='aura_timewarp');
+  if(twItem){
+    const ripples=3;
+    for(let i=0;i<ripples;i++){
+      const phase=S.time*2+i*(Math.PI*2/ripples);
+      const radius=15+Math.sin(phase)*8;
+      const alpha=0.08+Math.sin(phase+1)*0.04;
+      cx.strokeStyle=`rgba(100,180,255,${alpha})`;
+      cx.lineWidth=1;
+      cx.beginPath();
+      cx.arc(v.x,v.y-15,radius,0,Math.PI*2);
+      cx.stroke();
+    }
+  }
+
+  // Phoenix Wings trail rendering
+  const pwItem=lootInvForRender.find(i=>i.id===eqLoot.trail&&i.itemId==='trail_phoenix');
+  if(pwItem&&v.moving){
+    for(let i=0;i<3;i++){
+      S.particles.push({
+        x:v.x+(Math.random()-.5)*12,
+        y:v.y+(Math.random()-.5)*6,
+        vx:(Math.random()-.5)*2,
+        vy:-Math.random()*3-1,
+        life:20+Math.random()*15,
+        color:['#ff2200','#ff6600','#ffaa00','#ffdd44','#ffffff'][Math.floor(Math.random()*5)],
+        size:2+Math.random()*3
+      });
     }
   }
 }
@@ -5197,7 +5816,10 @@ function changeFloor(f){
   // Change music if playing
   if(S.musicPlaying)startLofi();
   // Track floor visit
-  const fv=LS.get('floorsVisited',[]);if(!fv.includes(f)){fv.push(f);LS.set('floorsVisited',fv);Coins.earn(5,'new-floor');checkAchievements()}
+  const fv=LS.get('floorsVisited',[]);if(!fv.includes(f)){fv.push(f);LS.set('floorsVisited',fv);Coins.earn(5,'new-floor');checkAchievements();
+    // First visit to new room: small chance for loot
+    LootSystem.drop('room_visit',LootSystem.getStatBonuses().luck||0);
+  }
 }
 
 // ═══════════════════════════════════════
@@ -5440,7 +6062,14 @@ function startArcadeGame(){arcadeGame={type:ARCADE_GAMES[selectedGame],score:0,r
   if(arcadeGame.type==='snake')initSnake(arcadeGame);else if(arcadeGame.type==='breakout')initBreakout(arcadeGame);else if(arcadeGame.type==='invaders')initInvaders(arcadeGame)}
 function triggerGameOver(game,score){arcadeState='gameover';arcGameOverTimer=0;arcLastScore=score;arcLastGame=game;arcInitialsInput='';ArcSnd.play('die');
   arcCoinsEarned=Math.floor(score/10);arcIsHighScore=score>(S.highScores[game]||0);
-  if(arcIsHighScore){S.highScores[game]=score;LS.set('highScores',S.highScores);Coins.earn(25,'highscore');arcCoinsEarned+=25;ArcSnd.play('highscore');checkAchievements()}
+  if(arcIsHighScore){S.highScores[game]=score;LS.set('highScores',S.highScores);Coins.earn(25,'highscore');arcCoinsEarned+=25;ArcSnd.play('highscore');checkAchievements();
+    // Loot drop on high score!
+    setTimeout(()=>LootSystem.drop('arcade_highscore',LootSystem.getStatBonuses().luck||0),1500);
+  } else if(score>=20){
+    // Small chance for loot on decent score
+    const luckBonus=LootSystem.getStatBonuses().luck||0;
+    if(Math.random()<0.15+luckBonus*0.005)setTimeout(()=>LootSystem.drop('arcade_win',luckBonus),1500);
+  }
   if(arcCoinsEarned>0)Coins.earn(arcCoinsEarned,'arcade')}
 function renderGameOver(cx){cx.textAlign='center';cx.fillStyle='#ff4444';cx.font='bold 32px monospace';cx.fillText('GAME OVER',ARC_W/2,60);cx.fillStyle='#fff';cx.font='18px monospace';cx.fillText('SCORE: '+arcLastScore,ARC_W/2,100);cx.fillStyle='#ffd700';cx.font='14px monospace';cx.fillText('HIGH: '+(S.highScores[arcLastGame]||0),ARC_W/2,125);
   if(arcIsHighScore){cx.fillStyle=Math.sin(arcGameOverTimer*8)>.0?'#ffd700':'#ff6ec7';cx.font='bold 20px monospace';cx.fillText('★ NEW HIGH SCORE! ★',ARC_W/2,155);cx.fillStyle='#00fff7';cx.font='bold 28px monospace';cx.fillText(arcInitialsInput.padEnd(3,'_').split('').join(' '),ARC_W/2,195)}

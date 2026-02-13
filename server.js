@@ -140,6 +140,15 @@ function updateDuelStats(winnerName, loserName) {
   saveDuelLeaderboard(leaderboard);
 }
 
+// Marketplace Storage
+const MARKETPLACE_PATH = path.join(__dirname, 'marketplace.json');
+function loadMarketplace() {
+  try { return JSON.parse(fs.readFileSync(MARKETPLACE_PATH, 'utf8')); } catch { return []; }
+}
+function saveMarketplace(listings) {
+  fs.writeFileSync(MARKETPLACE_PATH, JSON.stringify(listings));
+}
+
 // User Rooms Storage
 const ROOMS_DIR = path.join(__dirname, 'rooms');
 if (!fs.existsSync(ROOMS_DIR)) {
@@ -676,6 +685,91 @@ const server = http.createServer((req, res) => {
         };
         
         saveVisitorMemory(memory);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+      } catch { res.writeHead(400); res.end('Bad request'); }
+    });
+    return;
+  }
+
+  // Marketplace API
+  if (req.url === '/api/marketplace' && req.method === 'GET') {
+    const listings = loadMarketplace().filter(l => l.active);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(listings));
+    return;
+  }
+  if (req.url === '/api/marketplace/list' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { owner, item, price } = JSON.parse(body);
+        if (!owner || !item || typeof price !== 'number' || price < 1 || price > 9999) {
+          res.writeHead(400); res.end('Bad request'); return;
+        }
+        const listings = loadMarketplace();
+        // Max 5 active listings per user
+        const userActive = listings.filter(l => l.owner === owner && l.active);
+        if (userActive.length >= 5) {
+          res.writeHead(429); res.end('Too many active listings'); return;
+        }
+        const listing = {
+          id: crypto.randomBytes(8).toString('hex'),
+          owner,
+          item, // full item object with id, itemId, rarity, stats, type
+          price,
+          active: true,
+          createdAt: Date.now()
+        };
+        listings.push(listing);
+        saveMarketplace(listings);
+        // Broadcast new listing
+        broadcast({ type: 'marketplace.new', listing: { id: listing.id, owner, price, item } });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, id: listing.id }));
+      } catch { res.writeHead(400); res.end('Bad request'); }
+    });
+    return;
+  }
+  if (req.url.match(/^\/api\/marketplace\/buy\//) && req.method === 'POST') {
+    const listingId = req.url.split('/').pop();
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { buyer } = JSON.parse(body);
+        if (!buyer) { res.writeHead(400); res.end('Bad request'); return; }
+        const listings = loadMarketplace();
+        const listing = listings.find(l => l.id === listingId && l.active);
+        if (!listing) { res.writeHead(404); res.end('Listing not found'); return; }
+        if (listing.owner === buyer) { res.writeHead(400); res.end('Cannot buy own listing'); return; }
+        listing.active = false;
+        listing.buyer = buyer;
+        listing.soldAt = Date.now();
+        saveMarketplace(listings);
+        // Broadcast sale
+        broadcast({ type: 'marketplace.sold', listingId, buyer, seller: listing.owner, price: listing.price });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, item: listing.item, price: listing.price }));
+      } catch { res.writeHead(400); res.end('Bad request'); }
+    });
+    return;
+  }
+  if (req.url.match(/^\/api\/marketplace\/cancel\//) && req.method === 'POST') {
+    const listingId = req.url.split('/').pop();
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { owner } = JSON.parse(body);
+        if (!owner) { res.writeHead(400); res.end('Bad request'); return; }
+        const listings = loadMarketplace();
+        const listing = listings.find(l => l.id === listingId && l.active && l.owner === owner);
+        if (!listing) { res.writeHead(404); res.end('Listing not found'); return; }
+        listing.active = false;
+        listing.cancelledAt = Date.now();
+        saveMarketplace(listings);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true }));
       } catch { res.writeHead(400); res.end('Bad request'); }
