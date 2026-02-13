@@ -1367,75 +1367,76 @@ function getEchoSprite(skin,dir,frame){
 }
 
 function getPixelSprite(dir,frame,state){
-  // Jiji-style black cat — round head, HUGE sparkly green eyes, tiny pink nose, fluffy tail
-  const B='#111122',Bh='#1e1e30',Bs='#252540',G='#ffaa22',Gd='#dd8811',Gh='#ffffff',Gs='#ffddaa',C='#8833cc',CC='#bb77ff',PK='#ff8899',W2='#cccccc',T=0;
+  // Jiji from Kiki's Delivery Service — elegant black cat, amber eyes, 4 legs, tail
+  const B='#111122',Bh='#1e1e30',Bs='#252540',E='#ffaa22',Ed='#dd8811',Eh='#ffffff',C='#8833cc',CC='#bb77ff',PK='#ff8899',T=0;
   if(state==='sleep'){
-    // Sleeping Jiji — curled up ball with tail
     return[
-      [T, T, B, B, B, B, B, T, T, T, T, T],
-      [T, B, Bh,Bh,Bh,Bh,Bh,B, T, T, T, T],
-      [T, Bh,B, B, Bh,B, B, Bh,T, T, T, T],
-      [T, B, Bh,Bh,PK,Bh,Bh,B, T, T, T, T],
-      [T, T, B, C, CC,CC,C, B, B, B, B, T],
-      [T, T, T, B, Bh,B, Bh,Bh,Bh,Bh,B, T],
-      [T, T, T, T, B, B, B, B, B, B, Bs,B],
+      [T, T, B, B, B, B, T, T, T, T],
+      [T, B, Bh,Bh,Bh,Bh,B, T, T, T],
+      [T, Bh,Bh,Bh,Bh,Bh,Bh,B, T, T],
+      [T, T, B, C, CC,C, B, Bh,B, T],
+      [T, T, T, B, Bh,Bh,Bh,Bh,Bh,B],
+      [T, T, T, T, B, B, B, B, B, Bs],
     ];
   }
   let grid;
   if(dir===0){
-    // Front — round fluffy head, HUGE anime eyes with double highlight, tiny body, tail curls right
+    // Front — elegant cat face, 4 legs standing
     grid=[
-      [T, B, T, T, T, T, T, T, T, B, T, T],
-      [T, B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T, T],
-      [B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T],
-      [B, Bh,G, G, Bh,Bh,Bh,G, G, Bh,B, T],
-      [B, Bh,Gd,Gh,Bh,Bh,Bh,Gd,Gh,Bh,B, T],
-      [B, Bh,Gd,Gs,Bh,Bh,Bh,Gd,Gs,Bh,B, T],
-      [T, Bh,Bh,Bh,Bh,PK,Bh,Bh,Bh,Bh,T, T],
-      [T, T, Bh,W2,Bh,Bh,Bh,W2,Bh,T, T, T],
-      [T, T, C, CC,CC,CC,CC,CC,C, T, T, T],
-      [T, T, T, T, B, Bh,B, T, T, T, T, T],
-      [T, T, T, T, B, T, B, T, T, T, T, T],
-      [T, T, T, T, T, T, T, T, T, B, Bs,T],
+      [T, B, T, T, T, T, T, B, T],
+      [T, B, Bh,Bh,Bh,Bh,Bh,B, T],
+      [B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,B],
+      [B, Bh,E, Eh,Bh,E, Eh,Bh,B],
+      [B, Bh,Ed,E, Bh,Ed,E, Bh,B],
+      [T, Bh,Bh,Bh,PK,Bh,Bh,Bh,T],
+      [T, T, C, CC,CC,CC,C, T, T],
+      [T, T, Bh,Bh,Bh,Bh,Bh,T, T],
+      [T, T, Bh,Bh,Bh,Bh,Bh,T, T],
+      [T, T, B, T, T, T, B, T, T],
+      [T, T, B, T, T, T, B, T, T],
     ];
   } else if(dir===3){
-    // Back — round head, tail up
+    // Back — tail up
     grid=[
-      [T, B, T, T, T, T, T, T, T, B, T, T],
-      [T, B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T, T],
-      [B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T],
-      [B, Bh,Bs,Bh,Bh,Bh,Bh,Bh,Bs,Bh,B, T],
-      [B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T],
-      [B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T],
-      [T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T, T],
-      [T, T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,T, T, T],
-      [T, T, C, CC,CC,CC,CC,CC,C, T, T, T],
-      [T, T, T, T, B, Bh,B, T, T, T, T, B],
-      [T, T, T, T, B, T, B, T, T, T, B, Bs],
-      [T, T, T, T, T, T, T, T, T, B, T, T],
+      [T, B, T, T, T, T, T, B, T],
+      [T, B, Bh,Bh,Bh,Bh,Bh,B, T],
+      [B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,B],
+      [B, Bh,Bs,Bh,Bh,Bh,Bs,Bh,B],
+      [T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,T],
+      [T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,T],
+      [T, T, C, CC,CC,CC,C, T, T],
+      [T, T, Bh,Bh,Bh,Bh,Bh,T, T],
+      [T, T, Bh,Bh,Bh,Bh,Bh,T, B],
+      [T, T, B, T, T, T, B, T, Bs],
+      [T, T, B, T, T, T, B, T, T],
     ];
   } else {
-    // Side — round head, one HUGE eye, tail behind
+    // Side — walking cat, 4 legs, tail behind
     grid=[
-      [B, T, T, T, T, T, T, T, T, T],
-      [B, Bh,Bh,Bh,Bh,Bh,Bh,T, T, T],
-      [Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T, T],
-      [Bh,Bh,G, G, Bh,Bh,Bh,Bh,T, T],
-      [Bh,Bh,Gd,Gh,Bh,Bh,Bh,Bh,T, T],
-      [Bh,Bh,Gd,Gs,Bh,Bh,Bh,Bh,T, T],
-      [T, Bh,Bh,Bh,PK,Bh,Bh,T, T, T],
-      [T, T, Bh,W2,Bh,Bh,T, T, T, T],
-      [T, C, CC,CC,CC,C, T, T, T, T],
-      [T, T, B, Bh,B, T, T, T, T, T],
-      [T, T, B, T, B, T, T, T, T, T],
-      [T, T, T, T, T, T, T, B, Bs,B],
+      [T, B, T, T, T, T, T, T, T],
+      [T, B, Bh,Bh,Bh,Bh,T, T, T],
+      [B, Bh,Bh,Bh,Bh,Bh,Bh,T, T],
+      [B, Bh,E, Eh,Bh,Bh,Bh,T, T],
+      [B, Bh,Ed,E, Bh,Bh,Bh,T, T],
+      [T, Bh,Bh,PK,Bh,Bh,T, T, T],
+      [T, C, CC,CC,CC,Bh,T, T, T],
+      [T, Bh,Bh,Bh,Bh,Bh,Bh,T, T],
+      [T, B, T, T, B, T, Bh,B, T],
+      [T, B, T, T, B, T, T, Bs,B],
+      [T, T, T, T, T, T, T, T, T],
     ];
     if(dir===2)grid=grid.map(r=>[...r].reverse());
   }
-  // Walk animation
-  if(frame===1&&grid.length>=11){
-    if(dir===0||dir===3){grid[10]=[T,T,T,B,T,T,T,B,T,T,T,T]}
-    else{grid[10]=dir===1?[T,T,B,T,T,B,T,T,T,T]:[T,T,T,T,B,T,T,B,T,T];if(dir===2)grid[10]=[...grid[10]].reverse()}
+  // Walk animation — 4-leg walk cycle
+  if(frame===1&&grid.length>=10){
+    if(dir===0||dir===3){
+      grid[9]=[T,T,T,B,T,B,T,T,T];
+      grid[10]=[T,T,B,T,T,T,B,T,T];
+    } else {
+      grid[8]=dir===1?[T,T,B,T,T,B,T,T,T]:[T,T,T,B,T,T,B,T,T];
+      grid[9]=dir===1?[T,B,T,T,B,T,T,B,T]:[T,B,T,T,B,T,T,Bs,T];
+      if(dir===2){grid[8]=[...grid[8]].reverse();grid[9]=[...grid[9]].reverse()}
+    }
   }
   return grid;
 }
@@ -3598,6 +3599,7 @@ async function saveVisitorMemory(){
 // §27. SPACEWALK MODE (EVA)
 // ═══════════════════════════════════════
 function toggleSpacewalk(){
+  console.log('toggleSpacewalk called, was:',S.spacewalk.active);
   S.spacewalk.active=!S.spacewalk.active;
   $('#btn-spacewalk').classList.toggle('active',S.spacewalk.active);
   
@@ -3608,7 +3610,7 @@ function toggleSpacewalk(){
       exitBtn=document.createElement('button');exitBtn.id='eva-exit-btn';
       exitBtn.textContent='🚀 EXIT SPACE';
       exitBtn.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;padding:16px 40px;font-size:18px;font-weight:bold;font-family:inherit;background:linear-gradient(135deg,#ff3333,#cc0000);color:#fff;border:3px solid #fff;border-radius:12px;cursor:pointer;box-shadow:0 0 20px rgba(255,0,0,.5);animation:pulse-exit 1s infinite';
-      exitBtn.onclick=()=>toggleSpacewalk();
+      exitBtn.onclick=()=>{console.log('EXIT clicked');S.spacewalk.active=false;document.getElementById('btn-spacewalk')?.classList.remove('active');exitBtn.style.display='none';showThought('Back inside the station. 🛸')};
       // Add pulse animation
       if(!document.getElementById('eva-exit-style')){
         const style=document.createElement('style');style.id='eva-exit-style';
@@ -5601,7 +5603,7 @@ function initInput(){
   // HUD buttons
   $('#btn-shop').onclick=showItemShop;
   $('#btn-inventory').onclick=showInventory;
-  $('#btn-spacewalk').onclick=toggleSpacewalk;
+  $('#btn-spacewalk').onclick=()=>{if(S.spacewalk.active){S.spacewalk.active=false;$('#btn-spacewalk').classList.remove('active');const eb=document.getElementById('eva-exit-btn');if(eb)eb.style.display='none';showThought('Back inside the station. 🛸')}else{toggleSpacewalk()}};
   $('#btn-visitor-skin').onclick=showVisitorSkinPanel;
   $('#btn-skin').onclick=showSkinPanel;
   $('#btn-trophy').onclick=showAchievements;
