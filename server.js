@@ -149,6 +149,31 @@ function saveMarketplace(listings) {
   fs.writeFileSync(MARKETPLACE_PATH, JSON.stringify(listings));
 }
 
+// ═══ ACCOUNT SYSTEM (Station Pass) ═══
+const ACCOUNTS_DIR = path.join(__dirname, 'accounts');
+if (!fs.existsSync(ACCOUNTS_DIR)) {
+  fs.mkdirSync(ACCOUNTS_DIR);
+}
+
+function generatePassCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no I/O/0/1 for clarity
+  let code = '';
+  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return 'ECHO-' + code.slice(0,4) + code.slice(4);
+}
+
+function loadAccount(passCode) {
+  try {
+    const fp = path.join(ACCOUNTS_DIR, `${passCode}.json`);
+    return JSON.parse(fs.readFileSync(fp, 'utf8'));
+  } catch { return null; }
+}
+
+function saveAccount(passCode, data) {
+  const fp = path.join(ACCOUNTS_DIR, `${passCode}.json`);
+  fs.writeFileSync(fp, JSON.stringify(data));
+}
+
 // User Rooms Storage
 const ROOMS_DIR = path.join(__dirname, 'rooms');
 if (!fs.existsSync(ROOMS_DIR)) {
@@ -246,6 +271,114 @@ const MIME = {
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   
+  // ═══ Account (Station Pass) API ═══
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
+
+  if (req.url === '/api/account/create' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { name, skin } = JSON.parse(body);
+        if (!name || name.length > 20) { res.writeHead(400); res.end('Invalid name'); return; }
+        // Generate unique pass code
+        let passCode;
+        let attempts = 0;
+        do { passCode = generatePassCode(); attempts++; } while (loadAccount(passCode) && attempts < 100);
+        if (attempts >= 100) { res.writeHead(500); res.end('Could not generate unique code'); return; }
+        const now = new Date().toISOString();
+        const account = {
+          passCode,
+          name: name.slice(0, 20),
+          skin: skin || 'hooded',
+          coins: 0,
+          lifetimeCoins: 0,
+          inventory: [],
+          accessories: {},
+          equippedAccessories: { hat: null, trail: null, aura: null, pet: null },
+          equippedWeapon: null,
+          weapons: [],
+          lootInventory: [],
+          equippedLoot: {},
+          visitorSkinsOwned: [],
+          ownedFurniture: [],
+          highScores: { snake: 0, breakout: 0, invaders: 0 },
+          roomData: {},
+          stats: { duelsWon: 0, duelsLost: 0, totalDamage: 0, winStreak: 0 },
+          loginStreak: 0,
+          lastLoginDay: null,
+          createdAt: now,
+          lastLogin: now
+        };
+        saveAccount(passCode, account);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, passCode, accountId: passCode }));
+      } catch (e) { res.writeHead(400); res.end('Bad request'); }
+    });
+    return;
+  }
+
+  if (req.url === '/api/account/login' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { passCode } = JSON.parse(body);
+        if (!passCode) { res.writeHead(400); res.end('Missing passCode'); return; }
+        const account = loadAccount(passCode.toUpperCase());
+        if (!account) { res.writeHead(404); res.end('Account not found'); return; }
+        // Update login info
+        const today = new Date().toISOString().slice(0, 10);
+        const lastDay = account.lastLoginDay;
+        if (lastDay && lastDay !== today) {
+          const diff = Math.floor((new Date(today) - new Date(lastDay)) / (1000*60*60*24));
+          if (diff === 1) account.loginStreak = (account.loginStreak || 0) + 1;
+          else if (diff > 1) account.loginStreak = 0;
+        }
+        account.lastLogin = new Date().toISOString();
+        account.lastLoginDay = today;
+        saveAccount(passCode.toUpperCase(), account);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, account }));
+      } catch { res.writeHead(400); res.end('Bad request'); }
+    });
+    return;
+  }
+
+  if (req.url === '/api/account/save' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { passCode, data } = JSON.parse(body);
+        if (!passCode || !data) { res.writeHead(400); res.end('Missing fields'); return; }
+        const existing = loadAccount(passCode.toUpperCase());
+        if (!existing) { res.writeHead(404); res.end('Account not found'); return; }
+        // Merge saveable fields (don't allow changing passCode or createdAt)
+        const safeFields = ['coins','lifetimeCoins','inventory','accessories','equippedAccessories',
+          'equippedWeapon','weapons','lootInventory','equippedLoot','visitorSkinsOwned','ownedFurniture',
+          'highScores','roomData','stats','loginStreak','lastLoginDay','skin','name'];
+        safeFields.forEach(f => { if (data[f] !== undefined) existing[f] = data[f]; });
+        existing.lastLogin = new Date().toISOString();
+        saveAccount(passCode.toUpperCase(), existing);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+      } catch { res.writeHead(400); res.end('Bad request'); }
+    });
+    return;
+  }
+
+  if (req.url.match(/^\/api\/account\/[A-Z0-9-]+$/) && req.method === 'GET') {
+    const passCode = decodeURIComponent(req.url.split('/').pop()).toUpperCase();
+    const account = loadAccount(passCode);
+    if (!account) { res.writeHead(404); res.end('Not found'); return; }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(account));
+    return;
+  }
+
   // Guestbook API
   if (req.url === '/api/guestbook' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });

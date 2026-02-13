@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a14">
-<title>Echo's Station v18 🛸</title>
+<title>Echo's Station v20 🛸</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🛸</text></svg>">
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRWNobydzIFN0YXRpb24iLCJzaG9ydF9uYW1lIjoiRWNobyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTE0IiwidGhlbWVfY29sb3IiOiIjMGEwYTE0IiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnPjx0ZXh0IHk9JzgwJyBmb250LXNpemU9JzgwJz7wn5uoPC90ZXh0Pjwvc3ZnPiIsInNpemVzIjoiYW55IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
 <style>
@@ -121,6 +121,21 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 .tip-slider{width:80%;margin:8px auto;display:block;-webkit-appearance:none;background:#333;height:6px;border-radius:3px;outline:none}
 .tip-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:#ffd700;border-radius:50%;cursor:pointer}
 #scanlines{position:fixed;inset:0;pointer-events:none;z-index:9998;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.015) 2px,rgba(0,0,0,.015) 4px)}
+/* Weapon card styles */
+.wpn-card{display:inline-flex;flex-direction:column;align-items:center;width:90px;min-height:105px;margin:3px;padding:6px;border:2px solid #333;border-radius:8px;font-size:9px;color:#aaa;background:rgba(20,20,40,.6);cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.wpn-card:hover{transform:translateY(-2px);border-color:#ff6ec7}
+.wpn-card.equipped{border-color:#00fff7;background:rgba(0,255,247,.08)}
+.wpn-card .wpn-icon{font-size:26px;margin:2px 0}
+.wpn-card .wpn-name{font-weight:bold;color:#ddd;margin:2px 0;text-align:center;font-size:9px}
+.wpn-card .wpn-stats{font-size:8px;color:#888;margin-top:2px}
+.wpn-card .wpn-price{font-size:9px;color:#ffd700;margin-top:auto}
+.wpn-card .wpn-special{font-size:7px;color:#ff6ec7;margin-top:2px;text-align:center}
+.combo-display{position:absolute;z-index:300;font-weight:bold;font-family:monospace;pointer-events:none;text-shadow:0 0 10px currentColor}
+/* Station Pass popup */
+.pass-card{background:linear-gradient(135deg,#1a1a2e,#2a1a3e);border:3px solid #9b59b6;border-radius:12px;padding:20px;text-align:center;position:relative}
+.pass-code{font-size:24px;font-weight:bold;color:#00fff7;letter-spacing:3px;margin:12px 0;padding:10px;background:rgba(0,0,0,.3);border-radius:8px;border:1px solid #00fff7}
+.pass-copy{padding:8px 20px;background:rgba(0,255,247,.15);border:1px solid #00fff7;color:#00fff7;cursor:pointer;font-family:inherit;font-size:12px;border-radius:6px;margin-top:8px}
+.pass-copy:hover{background:rgba(0,255,247,.3)}
 /* Shop tabs */
 .shop-tabs{display:flex;gap:2px;margin-bottom:10px;border-bottom:2px solid #333}
 .shop-tab{flex:1;padding:6px 4px;text-align:center;cursor:pointer;font-size:10px;font-family:inherit;color:#888;background:rgba(30,30,50,.5);border:1px solid #333;border-bottom:none;border-radius:6px 6px 0 0;transition:all .2s}
@@ -231,6 +246,7 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
       <div class="hud-btn" id="btn-skin" title="Echo Wardrobe">🔮</div>
       <div class="hud-btn" id="btn-trophy" title="Achievements">🏆</div>
       <div class="hud-btn" id="btn-music" title="Music">🎵</div>
+      <div class="hud-btn" id="btn-pass" title="Station Pass">🔑</div>
     </div>
     <div id="coin-hud">◈ <span id="coin-count">0</span></div>
     <div id="players-hud" style="position:absolute;top:8px;left:130px;z-index:50;display:flex;align-items:center;gap:5px;background:rgba(10,10,20,.85);border:2px solid #00fff7;border-radius:8px;padding:5px 12px;font-size:13px;color:#00fff7;font-weight:bold">👥 <span id="player-count">1</span></div>
@@ -408,7 +424,7 @@ const DuelSystem = {
       
       if (inArena !== this.inArena) {
         this.inArena = inArena;
-        if (inArena && S._visitorSaber) {
+        if (inArena && (S._visitorSaber || WeaponSystem.equipped)) {
           this.checkAutoChallenge();
         }
       }
@@ -497,14 +513,26 @@ const DuelSystem = {
   },
   
   attack() {
-    if (!this.active || this.stunTimer > 0 || !S._visitorSaber) return;
+    if (!this.active || this.stunTimer > 0) return;
+    if (!S._visitorSaber && !(typeof WeaponSystem !== 'undefined' && WeaponSystem.equipped)) return;
     
+    // If weapon equipped, use weapon system
+    if (WeaponSystem.equipped) {
+      const dmg = WeaponSystem.attack();
+      if (dmg) {
+        this.comboCount = WeaponSystem._comboCount;
+        this.comboTimer = WeaponSystem._comboTimer;
+      }
+      return;
+    }
+    
+    // Fallback: saber attack
     this.comboCount++;
-    this.comboTimer = 2; // 2 second combo window
+    this.comboTimer = 2;
     
     let damage = 15;
     if (this.comboCount === 3) {
-      damage = 30; // Combo damage
+      damage = 30;
       showNotification('COMBO!');
     }
     
@@ -516,7 +544,6 @@ const DuelSystem = {
       }));
     }
     
-    // Visual effects
     swingSaber();
   },
   
@@ -638,54 +665,66 @@ const DuelSystem = {
   
   endDuel(result) {
     this.active = false;
+    const stats = LS.get('duelStats', {duelsWon:0, duelsLost:0, totalDamage:0, winStreak:0});
+    const comboScore = this.comboCount;
+    const perfectWin = result === 'victory' && this.myHP >= 100;
     
     if (result === 'victory') {
-      showNotification('VICTORY! +25◈');
-      Coins.earn(25, 'duel_win');
+      stats.duelsWon++;
+      stats.winStreak = (stats.winStreak || 0) + 1;
+      const coinReward = 25 + Math.min(comboScore * 2, 20);
+      showNotification('VICTORY! +' + coinReward + '\u25C8');
+      Coins.earn(coinReward, 'duel_win');
       
-      // Loot drop on duel win
-      setTimeout(()=>LootSystem.drop('duel_win',LootSystem.getStatBonuses().luck||0),2000);
+      // Loot: combo score & perfect win affect rarity
+      setTimeout(() => {
+        if (perfectWin) {
+          // Perfect win: epic+ guaranteed
+          const item = LootSystem.rollMinRarity('epic');
+          LootSystem.addToInventory(item);
+          LootSystem.showLootCard(item);
+          showNotification('\u{1F396}\uFE0F PERFECT WIN! Epic+ loot!');
+        } else if (stats.winStreak >= 10 && Math.random() < 0.25) {
+          // 10-win streak: 25% legendary
+          const item = LootSystem.rollMinRarity('legendary');
+          LootSystem.addToInventory(item);
+          LootSystem.showLootCard(item);
+          showNotification('\u{1F525} 10-WIN STREAK! Legendary chance!');
+        } else {
+          // Normal: combo affects rarity odds
+          const bonusLuck = (LootSystem.getStatBonuses().luck || 0) + Math.min(comboScore * 2, 20);
+          LootSystem.drop('duel_win', bonusLuck);
+        }
+        // Chance to drop a weapon on duel win
+        if (Math.random() < 0.08 + (perfectWin ? 0.12 : 0) + (stats.winStreak >= 5 ? 0.05 : 0)) {
+          const droppable = WEAPONS.filter(w => {
+            if (w.skinLock && S.visitor.skin !== w.skinLock) return false;
+            if (!w.lootOnly && w.cost > 0) return false; // only drop loot-only or purchasable
+            return true;
+          });
+          if (droppable.length > 0) {
+            const pick = droppable[Math.floor(Math.random() * droppable.length)];
+            WeaponSystem.awardWeapon(pick.id);
+          }
+        }
+      }, 2000);
       
-      // BIG victory text and effects
-      S.floatTexts.push({
-        text: 'VICTORY!',
-        x: W / 2 - 50,
-        y: H / 2,
-        color: '#ffd700',
-        life: 120
-      });
-      
-      // Golden particles
+      S.floatTexts.push({text:'VICTORY!', x:W/2-50, y:H/2, color:'#ffd700', life:120});
       for (let i = 0; i < 50; i++) {
-        S.particles.push({
-          x: W / 2 + (Math.random() - 0.5) * 200,
-          y: H / 2 + (Math.random() - 0.5) * 100,
-          vx: (Math.random() - 0.5) * 6,
-          vy: (Math.random() - 0.5) * 6,
-          life: 100,
-          color: '#ffd700',
-          size: 4
-        });
+        S.particles.push({x:W/2+(Math.random()-.5)*200, y:H/2+(Math.random()-.5)*100, vx:(Math.random()-.5)*6, vy:(Math.random()-.5)*6, life:100, color:'#ffd700', size:4});
       }
     } else {
-      showNotification('DEFEATED! +5◈');
+      stats.duelsLost++;
+      stats.winStreak = 0;
+      showNotification('DEFEATED! +5\u25C8');
       Coins.earn(5, 'duel_loss');
-      
-      S.floatTexts.push({
-        text: 'DEFEATED',
-        x: W / 2 - 40,
-        y: H / 2,
-        color: '#ff4444',
-        life: 120
-      });
+      S.floatTexts.push({text:'DEFEATED', x:W/2-40, y:H/2, color:'#ff4444', life:120});
     }
     
-    // Update stats
+    LS.set('duelStats', stats);
+    
     if (EchoWS.ws?.readyState === 1) {
-      EchoWS.ws.send(JSON.stringify({
-        type: 'duel.end',
-        result: result
-      }));
+      EchoWS.ws.send(JSON.stringify({type:'duel.end', result:result}));
     }
     
     this.reset();
@@ -1130,6 +1169,32 @@ const ACCESSORY_ITEMS=[
   {id:'hat_starstorm',name:'Crown of Stars',icon:'💫',type:'hat',cost:-1,desc:'Orbiting mini stars circle your head',rarity:'legendary',lootOnly:true,render:(cx,x,y,t)=>{for(let i=0;i<5;i++){const a=t*2+i*(Math.PI*2/5),r=10;const sx=x+Math.cos(a)*r,sy=y-6+Math.sin(a)*r*.5;cx.fillStyle=`rgba(255,${200+Math.sin(t*4+i)*55},0,${.7+Math.sin(t*3+i)*.3})`;cx.beginPath();cx.arc(sx,sy,1.5,0,Math.PI*2);cx.fill();cx.fillStyle=`rgba(255,255,200,${.3+Math.sin(t*5+i)*.2})`;cx.beginPath();cx.arc(sx,sy,3,0,Math.PI*2);cx.fill()}}},
   {id:'pet_shadow',name:'Shadow Clone',icon:'👤',type:'pet',cost:-1,desc:'A dark copy mimics your movements with delay',rarity:'legendary',lootOnly:true,petColor:'#1a1a2a',petAccent:'#4a4a6a'},
   {id:'aura_timewarp',name:'Time Warp',icon:'⏳',type:'aura',cost:-1,desc:'Screen distortion ripple around you',rarity:'legendary',lootOnly:true,auraColor:'rgba(100,180,255,',auraSize:28},
+];
+
+// -- Weapon Types --
+const WEAPON_TYPES = {
+  sword:    {name:'Sword',    icon:'\u{1F5E1}\uFE0F', range:45, speed:1.0, baseDmg:8,  combo:3, style:'slash'},
+  hammer:   {name:'Hammer',   icon:'\u{1F528}', range:40, speed:0.6, baseDmg:15, combo:2, style:'smash'},
+  bow:      {name:'Bow',      icon:'\u{1F3F9}', range:120,speed:0.8, baseDmg:6,  combo:1, style:'ranged'},
+  staff:    {name:'Staff',    icon:'\u{1FA84}', range:60, speed:0.7, baseDmg:10, combo:2, style:'magic'},
+  gauntlet: {name:'Gauntlet', icon:'\u26A1',    range:30, speed:1.4, baseDmg:5,  combo:5, style:'punch'},
+  blaster:  {name:'Blaster',  icon:'\u{1F52B}', range:100,speed:0.9, baseDmg:7,  combo:1, style:'ranged'},
+};
+
+const WEAPONS = [
+  {id:'iron_sword',     name:'Iron Sword',      type:'sword',    rarity:'common',    cost:20,  icon:'\u{1F5E1}\uFE0F'},
+  {id:'flame_blade',    name:'Flame Blade',     type:'sword',    rarity:'rare',      cost:80,  icon:'\u{1F5E1}\uFE0F', element:'fire'},
+  {id:'crystal_hammer', name:'Crystal Hammer',  type:'hammer',   rarity:'epic',      cost:150, icon:'\u{1F528}', element:'ice'},
+  {id:'elven_bow',      name:'Elven Bow',       type:'bow',      rarity:'rare',      cost:90,  icon:'\u{1F3F9}'},
+  {id:'arcane_staff',   name:'Arcane Staff',    type:'staff',    rarity:'epic',      cost:160, icon:'\u{1FA84}', element:'lightning'},
+  {id:'power_gauntlet', name:'Power Gauntlet',  type:'gauntlet', rarity:'uncommon',  cost:50,  icon:'\u26A1'},
+  {id:'plasma_blaster', name:'Plasma Blaster',  type:'blaster',  rarity:'rare',      cost:100, icon:'\u{1F52B}'},
+  // Signature weapons (skin-locked, loot only)
+  {id:'kamehameha',   name:'Ki Gauntlets',  type:'gauntlet', rarity:'legendary', cost:-1, skinLock:'saiyan',       lootOnly:true, icon:'\u{1F525}',  element:'energy',    special:'Kamehameha: hold E for charged beam'},
+  {id:'master_sword', name:'Master Sword',  type:'sword',    rarity:'legendary', cost:-1, skinLock:'hero_of_time', lootOnly:true, icon:'\u2694\uFE0F',element:'light',     special:'Spin Attack: E+Q for 360 slash'},
+  {id:'arm_cannon',   name:'Mega Buster',   type:'blaster',  rarity:'legendary', cost:-1, skinLock:'blue_bomber',  lootOnly:true, icon:'\u{1F48E}',  element:'energy',    special:'Charge Shot: hold E for big blast'},
+  {id:'thunder_fist', name:'Thunder Fists',  type:'gauntlet', rarity:'legendary', cost:-1, skinLock:'pikachu_suit', lootOnly:true, icon:'\u26A1',     element:'lightning',  special:'Chain Lightning: hits spread to nearby'},
+  {id:'shadow_kunai', name:'Shadow Kunai',   type:'bow',      rarity:'epic',      cost:-1, skinLock:'shadow_ninja', lootOnly:true, icon:'\u{1F319}',                       special:'Shadow Clone: triple throw'},
 ];
 
 // -- Furniture types for user rooms --
@@ -3083,7 +3148,17 @@ function render(){
     renderDuelHUD();
   }
   // Saber HUD
-  else if(S._visitorSaber){const col=S._visitorSaber==='green'?'#00ff44':'#4488ff';ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(W/2-60,H-28,120,22);ctx.strokeStyle=col;ctx.lineWidth=1;ctx.strokeRect(W/2-60,H-28,120,22);ctx.fillStyle=col;ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText(`⚔️ E:Swing  Q:Block  Double-tap WASD:Dodge`,W/2,H-13);ctx.textAlign='left'}
+  else if(WeaponSystem.equipped&&!S._visitorSaber){
+    const wpn=WeaponSystem.equipped;
+    const r=RARITIES[wpn.rarity]||RARITIES.common;
+    ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(W/2-80,H-28,160,22);
+    ctx.strokeStyle=r.color;ctx.lineWidth=1;ctx.strokeRect(W/2-80,H-28,160,22);
+    ctx.fillStyle=r.color;ctx.font='bold 10px monospace';ctx.textAlign='center';
+    const comboTxt=WeaponSystem._comboCount>1?' x'+WeaponSystem._comboCount:'';
+    ctx.fillText(wpn.icon+' '+wpn.name+comboTxt+'  E:Attack  Q:Block',W/2,H-13);
+    ctx.textAlign='left';
+  }
+  else if(S._visitorSaber){const col=S._visitorSaber==='green'?'#00ff44':'#4488ff';ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(W/2-60,H-28,120,22);ctx.strokeStyle=col;ctx.lineWidth=1;ctx.strokeRect(W/2-60,H-28,120,22);ctx.fillStyle=col;ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText('\u2694\uFE0F E:Swing  Q:Block  Double-tap WASD:Dodge',W/2,H-13);ctx.textAlign='left'}
   // Time of day overlay
   if(TOD==='night'){ctx.fillStyle='rgba(0,0,30,.15)';ctx.fillRect(0,0,W,H)}
   else if(TOD==='evening'){ctx.fillStyle='rgba(40,20,0,.06)';ctx.fillRect(0,0,W,H)}
@@ -3492,6 +3567,16 @@ function renderVisitor(ctx){
         ctx.fillStyle=col2;ctx.fillRect(v.x+8,v.y-12-20,2,20);
         ctx.restore();
       }
+      // Weapon rendering for sprite skins (v20)
+      if(WeaponSystem.equipped && !S._visitorSaber){
+        WeaponSystem.renderWeapon(ctx, v.x, v.y, v.dir, S.time);
+      }
+      if(WeaponSystem.equipped){
+        const _wi=WeaponSystem.equipped.icon||'';
+        ctx.font='10px serif';ctx.textAlign='left';
+        ctx.fillText(_wi, v.x+ctx.measureText(LS.get('visitorName','Visitor')).width/2+4, v.y-sprH-4);
+        ctx.textAlign='left';
+      }
       return;
     }
   }
@@ -3602,9 +3687,20 @@ function renderVisitor(ctx){
     ctx.shadowBlur=0;
     ctx.restore();
   }
+  // Weapon rendering (v20)
+  if(WeaponSystem.equipped && !S._visitorSaber){
+    WeaponSystem.renderWeapon(ctx, v.x, v.y, v.dir, S.time);
+  }
+  // Weapon icon badge next to name
+  if(WeaponSystem.equipped){
+    const wi=WeaponSystem.equipped.icon||'';
+    ctx.font='10px serif';ctx.textAlign='left';
+    ctx.fillText(wi, v.x+ctx.measureText(LS.get('visitorName','Visitor')).width/2+4, v.y-sz*sc-4);
+    ctx.textAlign='left';
+  }
   // SPACE prompt when near object
   if(S.visitorNear){ctx.fillStyle='rgba(255,255,200,0.9)';ctx.font='bold 10px monospace';ctx.textAlign='center';
-    ctx.fillText('⎵ SPACE',v.x,v.y-sz*sc-16);ctx.textAlign='left'}
+    ctx.fillText('\u23B5 SPACE',v.x,v.y-sz*sc-16);ctx.textAlign='left'}
 }
 
 function adjustBrightness(hex,percent){
@@ -4525,6 +4621,7 @@ function update(dt){
   
   // Update systems
   DuelSystem.update(dt);
+  WeaponSystem.update(dt);
   
   EchoAI.update(dt);
   updateVisitor(dt);
@@ -5056,10 +5153,11 @@ function showItemShop(initialTab){
 
   let html='<h3>🛒 Item Shop</h3><p style="font-size:10px;color:#888;margin-bottom:6px">Balance: <span style="color:#ffd700">' + Coins.count + '◈</span></p>';
   html+='<div class="shop-tabs">';
-  html+='<div class="shop-tab'+(tab==='skins'?' active':'')+'" data-tab="skins">👔 Skins</div>';
-  html+='<div class="shop-tab'+(tab==='furniture'?' active':'')+'" data-tab="furniture">🪑 Furniture</div>';
-  html+='<div class="shop-tab'+(tab==='accessories'?' active':'')+'" data-tab="accessories">✨ Accessories</div>';
-  html+='<div class="shop-tab'+(tab==='market'?' active':'')+'" data-tab="market">🏪 Market</div>';
+  html+='<div class="shop-tab'+(tab==='skins'?' active':'')+'" data-tab="skins">\u{1F454} Skins</div>';
+  html+='<div class="shop-tab'+(tab==='weapons'?' active':'')+'" data-tab="weapons">\u2694\uFE0F Weapons</div>';
+  html+='<div class="shop-tab'+(tab==='furniture'?' active':'')+'" data-tab="furniture">\u{1FA91} Furniture</div>';
+  html+='<div class="shop-tab'+(tab==='accessories'?' active':'')+'" data-tab="accessories">\u2728 Accessories</div>';
+  html+='<div class="shop-tab'+(tab==='market'?' active':'')+'" data-tab="market">\u{1F3EA} Market</div>';
   html+='</div>';
 
   // Skins tab
@@ -5080,6 +5178,37 @@ function showItemShop(initialTab){
     html+='</div>';
   });
   html+='</div></div>';
+
+  // Weapons tab (v20)
+  html+='<div class="shop-content" data-content="weapons" style="'+(tab!=='weapons'?'display:none':'')+'">';
+  const _ownedWpns=LS.get('ownedWeapons',[]);
+  const _eqWpn=WeaponSystem.equipped?WeaponSystem.equipped._id:null;
+  Object.keys(WEAPON_TYPES).forEach(typeKey=>{
+    const wt=WEAPON_TYPES[typeKey];
+    const wpns=WEAPONS.filter(w=>w.type===typeKey);
+    html+='<div style="margin:6px 0"><div style="font-size:10px;color:#c080ff;margin-bottom:4px">'+wt.icon+' '+wt.name+'s <span style="color:#666;font-size:8px">DMG:'+wt.baseDmg+' SPD:'+wt.speed+' COMBO:'+wt.combo+'</span></div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:3px">';
+    wpns.forEach(wpn=>{
+      const isOwned=_ownedWpns.includes(wpn.id);
+      const isEq=_eqWpn===wpn.id;
+      const isLoot=wpn.lootOnly||wpn.cost<0;
+      const locked=wpn.skinLock&&S.visitor.skin!==wpn.skinLock;
+      const r=RARITIES[wpn.rarity]||RARITIES.common;
+      html+='<div class="wpn-card'+(isEq?' equipped':'')+' rarity-'+wpn.rarity+'" data-action="shop-wpn" data-id="'+wpn.id+'" style="border-color:'+r.border+'">';
+      html+='<div class="wpn-icon">'+wpn.icon+'</div>';
+      html+='<div class="wpn-name">'+wpn.name+'</div>';
+      html+='<span class="rarity-badge '+wpn.rarity+'" style="font-size:7px">'+r.name+'</span>';
+      if(wpn.element)html+='<div style="font-size:7px;color:'+({fire:'#ff6600',ice:'#4488ff',lightning:'#ffdd00',energy:'#00ddff',light:'#ffd700'}[wpn.element]||'#aaa')+'">'+wpn.element+'</div>';
+      if(wpn.special)html+='<div class="wpn-special">'+wpn.special+'</div>';
+      if(isLoot)html+='<span class="loot-only-badge">LOOT ONLY</span>';
+      else if(locked)html+='<div style="font-size:8px;color:#ff4444">\u{1F512} '+wpn.skinLock+'</div>';
+      else html+='<div class="wpn-price">'+(isEq?'EQUIPPED':isOwned?'OWNED':wpn.cost+'\u25C8')+'</div>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+  });
+  if(_eqWpn)html+='<div style="text-align:center;margin-top:8px"><button class="drink-btn" data-action="unequip-wpn" style="border-color:#ff4444;color:#ff4444">Unequip Weapon</button></div>';
+  html+='</div>';
 
   // Furniture tab
   html+='<div class="shop-content" data-content="furniture" style="'+(tab!=='furniture'?'display:none':'')+'">';
@@ -5204,6 +5333,28 @@ function showItemShop(initialTab){
       p.closest('.popup-overlay').remove();showItemShop('accessories');
     };
   });
+
+  // Buy/equip weapons (v20)
+  p.querySelectorAll('[data-action="shop-wpn"]').forEach(card=>{
+    card.onclick=()=>{
+      const id=card.dataset.id;
+      const wpn=WEAPONS.find(w=>w.id===id);
+      if(!wpn)return;
+      if(wpn.lootOnly||wpn.cost<0){showNotification('This weapon drops from loot only!');return}
+      if(wpn.skinLock&&S.visitor.skin!==wpn.skinLock){showNotification('Requires '+wpn.skinLock+' skin!');return}
+      const ownedW=LS.get('ownedWeapons',[]);
+      if(ownedW.includes(id)){
+        if(WeaponSystem.equipped&&WeaponSystem.equipped._id===id){WeaponSystem.unequip();showNotification('Unequipped!')}
+        else{WeaponSystem.equip(id);showNotification('Equipped '+wpn.name+'!')}
+        p.closest('.popup-overlay').remove();showItemShop('weapons');
+        return;
+      }
+      WeaponSystem.buy(id);
+      p.closest('.popup-overlay').remove();showItemShop('weapons');
+    };
+  });
+  const _uneqW=p.querySelector('[data-action="unequip-wpn"]');
+  if(_uneqW)_uneqW.onclick=()=>{WeaponSystem.unequip();showNotification('Weapon unequipped!');p.closest('.popup-overlay').remove()};
 }
 
 function showInventory(){
@@ -5237,9 +5388,22 @@ function showInventory(){
     html+='</div>';
   });
 
+  // Weapons section (v20)
+  const ownedWpnIds=LS.get('ownedWeapons',[]);
+  if(ownedWpnIds.length>0){
+    html+='<div class="inv-section"><h4>\u2694\uFE0F Weapons</h4>';
+    ownedWpnIds.forEach(wid=>{
+      const wpn=WEAPONS.find(w=>w.id===wid);if(!wpn)return;
+      const isEqW=WeaponSystem.equipped&&WeaponSystem.equipped._id===wid;
+      const r=RARITIES[wpn.rarity]||RARITIES.common;
+      html+='<div class="inv-item'+(isEqW?' equipped':'')+'" data-action="equip-wpn" data-id="'+wid+'" style="border-color:'+r.border+'">'+wpn.icon+' <span style="color:'+r.color+'">'+wpn.name+'</span>'+(isEqW?' \u2713':'')+'</div>';
+    });
+    html+='</div>';
+  }
+
   // Furniture section
   if(ownedFurniture.length>0){
-    html+='<div class="inv-section"><h4>🪑 Furniture</h4>';
+    html+='<div class="inv-section"><h4>\u{1FA91} Furniture</h4>';
     ownedFurniture.forEach(fid=>{
       const ft=FURNITURE_TYPES[fid];if(!ft)return;
       html+='<div class="inv-item">'+ft.icon+' '+ft.name+'</div>';
@@ -5291,6 +5455,16 @@ function showInventory(){
       if(eq[type]===id){eq[type]=null;showNotification('Unequipped!')}
       else{eq[type]=id;showNotification('Equipped '+ACCESSORY_ITEMS.find(a=>a.id===id).name+'!')}
       LS.set('equippedAccessories',eq);
+      p.closest('.popup-overlay').remove();showInventory();
+    };
+  });
+
+  // Equip/unequip weapon in inventory (v20)
+  p.querySelectorAll('[data-action="equip-wpn"]').forEach(el=>{
+    el.onclick=()=>{
+      const wid=el.dataset.id;
+      if(WeaponSystem.equipped&&WeaponSystem.equipped._id===wid){WeaponSystem.unequip();showNotification('Weapon unequipped!')}
+      else{WeaponSystem.equip(wid);const w=WEAPONS.find(w2=>w2.id===wid);showNotification('Equipped '+((w&&w.name)||'weapon')+'!')}
       p.closest('.popup-overlay').remove();showInventory();
     };
   });
@@ -5437,6 +5611,7 @@ function getAllLootableItems(){
   const items=[];
   VISITOR_SKINS.forEach(s=>items.push({itemId:s.id,name:s.label,icon:s.icon,type:'skin',rarity:s.rarity||'common',lootOnly:!!s.lootOnly}));
   ACCESSORY_ITEMS.forEach(a=>items.push({itemId:a.id,name:a.name,icon:a.icon,type:a.type,rarity:a.rarity||'common',lootOnly:!!a.lootOnly}));
+  WEAPONS.forEach(w=>items.push({itemId:w.id,name:w.name,icon:w.icon,type:'weapon',rarity:w.rarity||'common',lootOnly:!!w.lootOnly,skinLock:w.skinLock}));
   return items;
 }
 
@@ -5618,6 +5793,542 @@ const LootSystem={
     this.showLootCard(item);
     showNotification(`🎁 Loot drop! ${RARITIES[item.rarity].name} item!`);
     return item;
+  }
+};
+
+// ═══════════════════════════════════════
+// §19e. STATION PASS (Account System) — v20
+// ═══════════════════════════════════════
+const StationPass = {
+  passCode: LS.get('stationPassCode', null),
+  _saveTimer: null,
+  _lastSave: 0,
+
+  hasAccount() { return !!this.passCode; },
+
+  async create(name, skin) {
+    try {
+      const r = await fetch('/api/account/create', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({name, skin})
+      });
+      const data = await r.json();
+      if (data.ok) {
+        this.passCode = data.passCode;
+        LS.set('stationPassCode', data.passCode);
+        this.showPassPopup(data.passCode, true);
+        this.startAutoSave();
+        return data.passCode;
+      }
+    } catch(e) { console.error('StationPass create error:', e); }
+    return null;
+  },
+
+  async login(code) {
+    try {
+      const r = await fetch('/api/account/login', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({passCode: code.toUpperCase()})
+      });
+      if (r.status === 404) { showNotification('Station Pass not found!'); return false; }
+      const data = await r.json();
+      if (data.ok && data.account) {
+        this.passCode = data.account.passCode;
+        LS.set('stationPassCode', data.account.passCode);
+        this.restoreFromAccount(data.account);
+        this.startAutoSave();
+        showNotification('Welcome back, ' + data.account.name + '! \u{1F510}');
+        return true;
+      }
+    } catch(e) { console.error('StationPass login error:', e); }
+    showNotification('Login failed!');
+    return false;
+  },
+
+  restoreFromAccount(acct) {
+    // Restore all saved state from server account
+    LS.set('visitorName', acct.name);
+    LS.set('visitorSkin', acct.skin); S.visitor.skin = acct.skin;
+    LS.set('echoCoins', acct.coins); Coins.count = acct.coins;
+    LS.set('lifetimeCoins', acct.lifetimeCoins); Coins._lifetime = acct.lifetimeCoins;
+    if (acct.lootInventory) LS.set('lootInventory', acct.lootInventory);
+    if (acct.equippedLoot) LS.set('equippedLoot', acct.equippedLoot);
+    if (acct.equippedAccessories) LS.set('equippedAccessories', acct.equippedAccessories);
+    if (acct.visitorSkinsOwned) LS.set('visitorSkinsOwned', acct.visitorSkinsOwned);
+    if (acct.ownedFurniture) LS.set('ownedFurniture', acct.ownedFurniture);
+    if (acct.accessories) LS.set('visitorAccessories', acct.accessories);
+    if (acct.highScores) { LS.set('highScores', acct.highScores); Object.assign(S.highScores, acct.highScores); }
+    if (acct.weapons) LS.set('ownedWeapons', acct.weapons);
+    if (acct.equippedWeapon) { LS.set('equippedWeapon', acct.equippedWeapon); WeaponSystem.equip(acct.equippedWeapon); }
+    if (acct.loginStreak) LS.set('loginStreak', acct.loginStreak);
+    if (acct.lastLoginDay) LS.set('lastLoginDay', acct.lastLoginDay);
+    if (acct.stats) LS.set('duelStats', acct.stats);
+  },
+
+  gatherSaveData() {
+    return {
+      name: LS.get('visitorName', 'Visitor'),
+      skin: S.visitor.skin,
+      coins: Coins.count,
+      lifetimeCoins: Coins.lifetime,
+      lootInventory: LS.get('lootInventory', []),
+      equippedLoot: LS.get('equippedLoot', {}),
+      equippedAccessories: LS.get('equippedAccessories', {}),
+      visitorSkinsOwned: LS.get('visitorSkinsOwned', []),
+      ownedFurniture: LS.get('ownedFurniture', []),
+      accessories: LS.get('visitorAccessories', []),
+      highScores: S.highScores,
+      weapons: LS.get('ownedWeapons', []),
+      equippedWeapon: LS.get('equippedWeapon', null),
+      stats: LS.get('duelStats', {duelsWon:0, duelsLost:0, totalDamage:0, winStreak:0}),
+      loginStreak: LS.get('loginStreak', 0),
+      lastLoginDay: LS.get('lastLoginDay', null),
+    };
+  },
+
+  async save() {
+    if (!this.passCode) return;
+    const now = Date.now();
+    if (now - this._lastSave < 5000) return; // debounce 5s
+    this._lastSave = now;
+    try {
+      await fetch('/api/account/save', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({passCode: this.passCode, data: this.gatherSaveData()})
+      });
+    } catch(e) { /* silent */ }
+  },
+
+  startAutoSave() {
+    if (this._saveTimer) clearInterval(this._saveTimer);
+    this._saveTimer = setInterval(() => this.save(), 60000); // every 60s
+    window.addEventListener('beforeunload', () => this.save());
+  },
+
+  showPassPopup(code, isNew) {
+    const {p} = createPopup(
+      '<div class="pass-card">' +
+      '<h3 style="color:#00fff7;margin-bottom:4px">\u{1F510} Station Pass</h3>' +
+      (isNew ? '<p style="font-size:10px;color:#ffd080;margin-bottom:12px">Your account has been created! Save this code to log in from any device.</p>' : '') +
+      '<div class="pass-code" id="pass-code-display">' + code + '</div>' +
+      '<button class="pass-copy" id="pass-copy-btn">\u{1F4CB} Copy Pass Code</button>' +
+      '<p style="font-size:9px;color:#888;margin-top:12px">Your progress auto-saves every 60 seconds.</p>' +
+      '</div>'
+    );
+    p.querySelector('#pass-copy-btn').onclick = () => {
+      navigator.clipboard.writeText(code).then(() => {
+        showNotification('Pass code copied! \u{1F510}');
+        p.querySelector('#pass-copy-btn').textContent = '\u2705 Copied!';
+      }).catch(() => {
+        // Fallback: select text
+        const el = p.querySelector('#pass-code-display');
+        const range = document.createRange(); range.selectNodeContents(el);
+        const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        showNotification('Select and copy your pass code!');
+      });
+    };
+  },
+
+  showLoginPopup() {
+    const {p} = createPopup(
+      '<div class="pass-card">' +
+      '<h3 style="color:#00fff7">\u{1F511} Login with Station Pass</h3>' +
+      '<p style="font-size:10px;color:#aaa;margin:8px 0">Enter your pass code to restore your progress.</p>' +
+      '<input type="text" id="login-code-input" placeholder="ECHO-XXXXXXXX" maxlength="13" style="width:80%;background:#111;border:2px solid #555;color:#00fff7;padding:10px;font-family:monospace;font-size:16px;border-radius:6px;text-align:center;text-transform:uppercase;outline:none;letter-spacing:2px">' +
+      '<br><button class="pass-copy" id="login-submit-btn" style="margin-top:12px;background:rgba(155,89,182,.2);border-color:#9b59b6;color:#9b59b6">Login \u{1F680}</button>' +
+      '</div>'
+    );
+    const input = p.querySelector('#login-code-input');
+    input.focus();
+    const doLogin = async () => {
+      const code = input.value.trim();
+      if (!code) { input.style.borderColor = '#ff4444'; return; }
+      const ok = await this.login(code);
+      if (ok) p.closest('.popup-overlay').remove();
+    };
+    p.querySelector('#login-submit-btn').onclick = doLogin;
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  },
+
+  async autoLogin() {
+    if (!this.passCode) return false;
+    try {
+      const r = await fetch('/api/account/login', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({passCode: this.passCode})
+      });
+      if (r.ok) {
+        const data = await r.json();
+        if (data.ok) {
+          this.restoreFromAccount(data.account);
+          this.startAutoSave();
+          return true;
+        }
+      }
+    } catch(e) { /* silent */ }
+    return false;
+  }
+};
+
+// ═══════════════════════════════════════
+// §19f. WEAPON SYSTEM — v20
+// ═══════════════════════════════════════
+const WeaponSystem = {
+  equipped: null, // full weapon def object
+  _attackTimer: 0,
+  _attackCooldown: 0,
+  _comboCount: 0,
+  _comboTimer: 0,
+  _comboMax: 0,
+  _projectiles: [], // for ranged weapons
+  _chargeTimer: 0,
+  _charging: false,
+
+  init() {
+    const eqId = LS.get('equippedWeapon', null);
+    if (eqId) this.equip(eqId);
+  },
+
+  equip(weaponId) {
+    if (!weaponId) { this.equipped = null; LS.set('equippedWeapon', null); S.visitor.weapon = null; return; }
+    const wpn = WEAPONS.find(w => w.id === weaponId);
+    if (!wpn) return;
+    const wtype = WEAPON_TYPES[wpn.type];
+    this.equipped = {...wpn, ...wtype, _id: wpn.id};
+    this._comboCount = 0;
+    this._comboTimer = 0;
+    this._comboMax = wtype.combo;
+    S.visitor.weapon = this.equipped;
+    LS.set('equippedWeapon', weaponId);
+  },
+
+  unequip() {
+    this.equipped = null;
+    S.visitor.weapon = null;
+    LS.set('equippedWeapon', null);
+  },
+
+  owns(weaponId) {
+    return LS.get('ownedWeapons', []).includes(weaponId);
+  },
+
+  buy(weaponId) {
+    const wpn = WEAPONS.find(w => w.id === weaponId);
+    if (!wpn) return false;
+    if (wpn.cost < 0 || wpn.lootOnly) { showNotification('Loot only!'); return false; }
+    if (wpn.skinLock && S.visitor.skin !== wpn.skinLock) { showNotification('Wrong skin!'); return false; }
+    if (!Coins.canAfford(wpn.cost)) { showNotification('Need more \u25C8!'); return false; }
+    Coins.spend(wpn.cost, 'weapon');
+    const owned = LS.get('ownedWeapons', []);
+    if (!owned.includes(weaponId)) { owned.push(weaponId); LS.set('ownedWeapons', owned); }
+    this.equip(weaponId);
+    showNotification('Equipped ' + wpn.name + '!');
+    return true;
+  },
+
+  canAttack() {
+    return this.equipped && this._attackCooldown <= 0;
+  },
+
+  attack() {
+    if (!this.canAttack()) return;
+    const wpn = this.equipped;
+    const spd = wpn.speed || 1;
+    this._attackCooldown = 0.4 / spd;
+    this._attackTimer = 0.3;
+
+    // Combo tracking
+    if (this._comboTimer > 0 && this._comboCount < this._comboMax) {
+      this._comboCount++;
+    } else {
+      this._comboCount = 1;
+    }
+    this._comboTimer = 1.0; // 1 second combo window
+
+    // Calculate damage with combo multiplier
+    let dmg = wpn.baseDmg;
+    const mult = this.getComboMultiplier();
+    dmg = Math.round(dmg * mult);
+
+    // Sound
+    if (!S.audioCtx) initAudio();
+    this._playAttackSound(wpn.style);
+
+    // Particles & effects per weapon style
+    const vx = S.visitor.x, vy = S.visitor.y;
+    const dir = S.visitor.dir; // 0=up 1=down 2=right 3=left
+    const facing = dir === 2 ? 1 : dir === 3 ? -1 : (Math.random() > 0.5 ? 1 : -1);
+    const elemColors = {fire:['#ff4400','#ff8800','#ffcc00'],ice:['#4488ff','#88ccff','#ffffff'],lightning:['#ffdd00','#ffff88','#ffffff'],energy:['#ffffff','#aaddff','#6699ff'],light:['#ffd700','#ffffaa','#ffffff']};
+    const cols = elemColors[wpn.element] || ['#cccccc','#ffffff','#888888'];
+
+    if (wpn.style === 'slash') {
+      // Arc swing trail
+      S.screenShake = 2;
+      for (let i = 0; i < 8; i++) {
+        const a = (facing > 0 ? -0.5 : 2.5) + Math.random() * 1.2;
+        S.particles.push({x:vx+facing*15, y:vy-15, vx:Math.cos(a)*4*facing, vy:Math.sin(a)*3-1, life:15, color:cols[i%cols.length], size:2+Math.random()*2});
+      }
+    } else if (wpn.style === 'smash') {
+      // Ground slam
+      S.screenShake = 5;
+      for (let i = 0; i < 12; i++) {
+        const a = Math.random() * Math.PI;
+        S.particles.push({x:vx+(Math.random()-.5)*30, y:vy, vx:Math.cos(a)*(2+Math.random()*3), vy:-Math.random()*4, life:20, color:cols[i%cols.length], size:3+Math.random()*2});
+      }
+      // Ground crack particles
+      for (let i = 0; i < 6; i++) {
+        S.particles.push({x:vx+(Math.random()-.5)*40, y:vy+2, vx:(Math.random()-.5)*2, vy:0, life:25, color:'#666', size:2});
+      }
+    } else if (wpn.style === 'ranged') {
+      // Projectile
+      const tx = dir === 2 ? 1 : dir === 3 ? -1 : 0;
+      const ty = dir === 0 ? -1 : dir === 1 ? 1 : 0;
+      this._projectiles.push({
+        x: vx + tx * 15, y: vy - 12 + ty * 10,
+        vx: tx * 6, vy: ty * 6,
+        life: 40, damage: dmg, color: cols[0], size: 4,
+        trail: cols
+      });
+    } else if (wpn.style === 'magic') {
+      // AoE burst circle
+      for (let i = 0; i < 16; i++) {
+        const a = i / 16 * Math.PI * 2;
+        const r = 20 + Math.random() * 20;
+        S.particles.push({x:vx+Math.cos(a)*8, y:vy-12+Math.sin(a)*8, vx:Math.cos(a)*3, vy:Math.sin(a)*3, life:20, color:cols[i%cols.length], size:2+Math.random()*2});
+      }
+      S.screenShake = 3;
+    } else if (wpn.style === 'punch') {
+      // Rapid jabs
+      for (let i = 0; i < 5; i++) {
+        S.particles.push({x:vx+facing*12+Math.random()*8, y:vy-15+Math.random()*10-5, vx:facing*(3+Math.random()*2), vy:(Math.random()-.5)*2, life:10, color:cols[i%cols.length], size:2+Math.random()});
+      }
+    }
+
+    // Combo display
+    if (this._comboCount >= 2) {
+      const sz = Math.min(20, 12 + this._comboCount * 2);
+      S.floatTexts.push({
+        text: 'HIT x' + this._comboCount + '!',
+        x: vx - 20, y: vy - 50,
+        color: this._comboCount >= 7 ? '#ff3344' : this._comboCount >= 4 ? '#ffaa00' : '#00fff7',
+        life: 40
+      });
+    }
+
+    // In duel mode, send damage
+    if (DuelSystem.active) {
+      if (EchoWS.ws && EchoWS.ws.readyState === 1) {
+        EchoWS.ws.send(JSON.stringify({
+          type: 'duel.attack', damage: dmg, combo: this._comboCount >= this._comboMax
+        }));
+      }
+    }
+
+    return dmg;
+  },
+
+  getComboMultiplier() {
+    if (this._comboCount >= 7) return 2.0;
+    if (this._comboCount >= 4) return 1.5;
+    return 1.0;
+  },
+
+  update(dt) {
+    if (this._attackCooldown > 0) this._attackCooldown -= dt;
+    if (this._attackTimer > 0) this._attackTimer -= dt;
+    if (this._comboTimer > 0) {
+      this._comboTimer -= dt;
+      if (this._comboTimer <= 0) this._comboCount = 0;
+    }
+    // Update projectiles
+    for (let i = this._projectiles.length - 1; i >= 0; i--) {
+      const p = this._projectiles[i];
+      p.x += p.vx; p.y += p.vy; p.life--;
+      // Trail particles
+      if (Math.random() < 0.5) {
+        S.particles.push({x:p.x, y:p.y, vx:(Math.random()-.5), vy:(Math.random()-.5), life:8, color:p.trail[Math.floor(Math.random()*p.trail.length)], size:2});
+      }
+      if (p.life <= 0 || p.x < 0 || p.x > W || p.y < 0 || p.y > H) {
+        this._projectiles.splice(i, 1);
+      }
+    }
+  },
+
+  renderWeapon(ctx, x, y, dir, time) {
+    if (!this.equipped) return;
+    const wpn = this.equipped;
+    const facing = dir === 2 ? 1 : dir === 3 ? -1 : (dir === 0 ? 0 : 0);
+    const swingAnim = this._attackTimer > 0 ? Math.sin(this._attackTimer * 20) * 0.5 : 0;
+    const ox = facing !== 0 ? facing * 10 : 4;
+    const oy = -12;
+
+    ctx.save();
+    ctx.translate(x + ox, y + oy);
+    if (swingAnim) ctx.rotate(swingAnim * (facing || 1));
+
+    if (wpn.style === 'slash') {
+      // Sword blade
+      const col = wpn.element ? (wpn.element === 'fire' ? '#ff6600' : wpn.element === 'light' ? '#ffd700' : '#aaaaff') : '#cccccc';
+      ctx.fillStyle = '#888'; ctx.fillRect(-1, -2, 2, 4); // handle
+      ctx.fillStyle = col; ctx.fillRect(-1, -14, 2, 12); // blade
+      ctx.fillStyle = '#fff'; ctx.fillRect(-1, -14, 2, 2); // tip
+    } else if (wpn.style === 'smash') {
+      // Hammer
+      ctx.fillStyle = '#8B4513'; ctx.fillRect(-1, -2, 2, 10); // handle
+      ctx.fillStyle = wpn.element === 'ice' ? '#4488ff' : '#888';
+      ctx.fillRect(-4, -6, 8, 5); // head
+    } else if (wpn.style === 'ranged' && wpn.type === 'bow') {
+      // Bow
+      ctx.strokeStyle = '#8B4513'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(0, -6, 8, -1.2, 1.2); ctx.stroke();
+      ctx.strokeStyle = '#ddd'; ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(0, 2); ctx.stroke();
+    } else if (wpn.style === 'ranged' && wpn.type === 'blaster') {
+      // Blaster barrel
+      ctx.fillStyle = '#555'; ctx.fillRect(-1, -2, 6, 3);
+      ctx.fillStyle = wpn.element === 'energy' ? '#00ddff' : '#ff4444';
+      ctx.fillRect(4, -1, 3, 1);
+    } else if (wpn.style === 'magic') {
+      // Staff
+      ctx.fillStyle = '#6a3aaa'; ctx.fillRect(-1, -2, 2, 14);
+      const glow = 0.5 + Math.sin(time * 4) * 0.3;
+      ctx.fillStyle = wpn.element === 'lightning' ? `rgba(255,255,0,${glow})` : `rgba(200,128,255,${glow})`;
+      ctx.beginPath(); ctx.arc(0, -5, 3, 0, Math.PI * 2); ctx.fill();
+    } else if (wpn.style === 'punch') {
+      // Gauntlet glow on fists
+      const glow = 0.4 + Math.sin(time * 6) * 0.3;
+      const col = wpn.element === 'energy' ? '#ff8800' : wpn.element === 'lightning' ? '#ffdd00' : '#00fff7';
+      ctx.fillStyle = col; ctx.globalAlpha = glow;
+      ctx.beginPath(); ctx.arc(facing * 3, 0, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    ctx.restore();
+
+    // Render projectiles
+    for (const p of this._projectiles) {
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = Math.min(1, p.life / 10);
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  },
+
+  _playAttackSound(style) {
+    if (!S.audioCtx) return;
+    const c = S.audioCtx, n = c.currentTime, v = S.volume * 0.15;
+    if (style === 'slash') {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(600, n); o.frequency.exponentialRampToValueAtTime(200, n + 0.1);
+      g.gain.setValueAtTime(v, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.12);
+      o.connect(g); g.connect(S.masterGain); o.start(n); o.stop(n + 0.15);
+    } else if (style === 'smash') {
+      const buf = c.createBuffer(1, c.sampleRate * 0.15, c.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / d.length * 4);
+      const s = c.createBufferSource(), g = c.createGain();
+      s.buffer = buf; g.gain.value = v * 2; s.connect(g); g.connect(S.masterGain); s.start(n);
+    } else if (style === 'ranged') {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(1200, n); o.frequency.exponentialRampToValueAtTime(800, n + 0.08);
+      g.gain.setValueAtTime(v, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.1);
+      o.connect(g); g.connect(S.masterGain); o.start(n); o.stop(n + 0.12);
+    } else if (style === 'magic') {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(300, n); o.frequency.exponentialRampToValueAtTime(900, n + 0.15);
+      g.gain.setValueAtTime(v, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.2);
+      o.connect(g); g.connect(S.masterGain); o.start(n); o.stop(n + 0.25);
+    } else if (style === 'punch') {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'square'; o.frequency.setValueAtTime(200, n); o.frequency.exponentialRampToValueAtTime(80, n + 0.05);
+      g.gain.setValueAtTime(v * 0.8, n); g.gain.exponentialRampToValueAtTime(0.001, n + 0.06);
+      o.connect(g); g.connect(S.masterGain); o.start(n); o.stop(n + 0.08);
+    }
+  },
+
+  showWeaponShop() {
+    const owned = LS.get('ownedWeapons', []);
+    const eqId = this.equipped ? this.equipped._id : null;
+    let html = '<h3>\u2694\uFE0F Weapons</h3><p style="font-size:10px;color:#888;margin-bottom:8px">Balance: <span style="color:#ffd700">' + Coins.count + '\u25C8</span></p>';
+
+    // Weapon type categories
+    const types = Object.keys(WEAPON_TYPES);
+    types.forEach(typeKey => {
+      const wt = WEAPON_TYPES[typeKey];
+      const wpns = WEAPONS.filter(w => w.type === typeKey);
+      html += '<div style="margin:8px 0"><div style="font-size:10px;color:#c080ff;margin-bottom:4px">' + wt.icon + ' ' + wt.name + 's <span style="color:#666;font-size:8px">DMG:' + wt.baseDmg + ' SPD:' + wt.speed + ' RNG:' + wt.range + ' COMBO:' + wt.combo + '</span></div>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:3px">';
+      wpns.forEach(wpn => {
+        const isOwned = owned.includes(wpn.id);
+        const isEquipped = eqId === wpn.id;
+        const isLoot = wpn.lootOnly || wpn.cost < 0;
+        const locked = wpn.skinLock && S.visitor.skin !== wpn.skinLock;
+        const r = RARITIES[wpn.rarity] || RARITIES.common;
+        html += '<div class="wpn-card' + (isEquipped ? ' equipped' : '') + ' rarity-' + wpn.rarity + '" data-action="buy-wpn" data-id="' + wpn.id + '" style="border-color:' + r.border + '">';
+        html += '<div class="wpn-icon">' + wpn.icon + '</div>';
+        html += '<div class="wpn-name">' + wpn.name + '</div>';
+        html += '<span class="rarity-badge ' + wpn.rarity + '" style="font-size:7px">' + r.name + '</span>';
+        if (wpn.element) html += '<div style="font-size:7px;color:' + ({fire:'#ff6600',ice:'#4488ff',lightning:'#ffdd00',energy:'#00ddff',light:'#ffd700'}[wpn.element] || '#aaa') + '">' + wpn.element + '</div>';
+        if (wpn.special) html += '<div class="wpn-special">' + wpn.special + '</div>';
+        if (isLoot) html += '<span class="loot-only-badge">LOOT ONLY</span>';
+        else if (locked) html += '<div style="font-size:8px;color:#ff4444">\u{1F512} ' + wpn.skinLock + '</div>';
+        else html += '<div class="wpn-price">' + (isEquipped ? 'EQUIPPED' : isOwned ? 'OWNED' : wpn.cost + '\u25C8') + '</div>';
+        html += '</div>';
+      });
+      html += '</div></div>';
+    });
+
+    // Unequip button
+    if (this.equipped) {
+      html += '<div style="text-align:center;margin-top:10px"><button class="drink-btn" id="unequip-wpn" style="border-color:#ff4444;color:#ff4444">Unequip Weapon</button></div>';
+    }
+
+    const {p} = createPopup(html);
+
+    // Wire up buy/equip
+    p.querySelectorAll('[data-action="buy-wpn"]').forEach(card => {
+      card.onclick = () => {
+        const id = card.dataset.id;
+        const wpn = WEAPONS.find(w => w.id === id);
+        if (!wpn) return;
+        if (wpn.lootOnly || wpn.cost < 0) { showNotification('This weapon drops from loot only!'); return; }
+        if (wpn.skinLock && S.visitor.skin !== wpn.skinLock) { showNotification('Requires ' + wpn.skinLock + ' skin!'); return; }
+        const ownedList = LS.get('ownedWeapons', []);
+        if (ownedList.includes(id)) {
+          // Toggle equip
+          if (this.equipped && this.equipped._id === id) { this.unequip(); showNotification('Unequipped!'); }
+          else { this.equip(id); showNotification('Equipped ' + wpn.name + '!'); }
+          p.closest('.popup-overlay').remove();
+          this.showWeaponShop();
+          return;
+        }
+        this.buy(id);
+        p.closest('.popup-overlay').remove();
+        this.showWeaponShop();
+      };
+    });
+
+    const uneq = p.querySelector('#unequip-wpn');
+    if (uneq) uneq.onclick = () => { this.unequip(); showNotification('Weapon unequipped!'); p.closest('.popup-overlay').remove(); };
+  },
+
+  // Award weapon from loot
+  awardWeapon(weaponId) {
+    const owned = LS.get('ownedWeapons', []);
+    if (!owned.includes(weaponId)) {
+      owned.push(weaponId);
+      LS.set('ownedWeapons', owned);
+    }
+    const wpn = WEAPONS.find(w => w.id === weaponId);
+    if (wpn) {
+      const r = RARITIES[wpn.rarity] || RARITIES.common;
+      showNotification(wpn.icon + ' ' + wpn.name + ' obtained!');
+      // Fancy effects
+      for (let i = 0; i < 30; i++) {
+        const a = Math.random() * Math.PI * 2;
+        S.particles.push({x:W/2+Math.cos(a)*20, y:H/2+Math.sin(a)*20, vx:Math.cos(a)*4, vy:Math.sin(a)*4, life:30, color:r.color, size:2+Math.random()*2});
+      }
+    }
   }
 };
 
@@ -6845,6 +7556,10 @@ function initInput(){
   $('#btn-skin').onclick=showSkinPanel;
   $('#btn-trophy').onclick=showAchievements;
   $('#btn-music').onclick=()=>{if(!S.audioCtx)initAudio();toggleMusic()};
+  $('#btn-pass').onclick=()=>{
+    if(StationPass.hasAccount()){StationPass.showPassPopup(StationPass.passCode,false)}
+    else{StationPass.showLoginPopup()}
+  };
   $('#coin-hud').onclick=showEarnInfo;
   $('#vol-slider').oninput=e=>{S.volume=e.target.value/100;LS.set('volume',e.target.value);if(S.masterGain)S.masterGain.gain.value=S.volume};
   $('#arcade-close').onclick=closeArcade;
@@ -6875,15 +7590,28 @@ function initInput(){
       if(DuelSystem.active){
         DuelSystem.attack();
       }else if(DuelSystem.isPendingChallenge&&S.floor===3){
-        // Accept duel challenge in arena
         for(const[id,player]of Object.entries(S.otherPlayers)){
           if(player.floor===3&&player.saber&&Math.hypot(S.visitor.x-player.x,S.visitor.y-player.y)<50){
             DuelSystem.acceptChallenge(id,player.name);
             break;
           }
         }
+      }else if(WeaponSystem.equipped&&WeaponSystem.canAttack()){
+        // Weapon attack (v20)
+        if(S.floor===3){
+          const arenaCenter={x:400,y:300};
+          const inArena=Math.hypot(S.visitor.x-arenaCenter.x,S.visitor.y-arenaCenter.y)<100;
+          if(inArena){
+            for(const[id,player]of Object.entries(S.otherPlayers)){
+              if(player.floor===3&&Math.hypot(S.visitor.x-player.x,S.visitor.y-player.y)<50){
+                DuelSystem.sendChallenge(id,player.name);
+                return;
+              }
+            }
+          }
+        }
+        WeaponSystem.attack();
       }else if(S._visitorSaber&&S._saberSwing<=0){
-        // Check for duel challenge in arena
         if(S.floor===3){
           const arenaCenter={x:400,y:300};
           const inArena=Math.hypot(S.visitor.x-arenaCenter.x,S.visitor.y-arenaCenter.y)<100;
@@ -6955,19 +7683,22 @@ function gameLoop(time){const dt=Math.min((time-lastTime)/1000,.05);lastTime=tim
 // §26. WELCOME & INIT
 // ═══════════════════════════════════════
 function showWelcomeWardrobe(){
-  const freeSkins=[{id:'explorer',label:'Explorer',icon:'🧑‍🚀',color:'#44ccbb'},{id:'hooded',label:'Hooded',icon:'🧑‍💻',color:'#44ccbb'},{id:'cadet',label:'Cadet',icon:'👮',color:'#3366cc'}];
+  const freeSkins=[{id:'explorer',label:'Explorer',icon:'\u{1F9D1}\u200D\u{1F680}',color:'#44ccbb'},{id:'hooded',label:'Hooded',icon:'\u{1F9D1}\u200D\u{1F4BB}',color:'#44ccbb'},{id:'cadet',label:'Cadet',icon:'\u{1F46E}',color:'#3366cc'}];
   const ov=document.createElement('div');ov.id='welcome-overlay';
   ov.innerHTML=`
     <div id="welcome-popup">
-      <h2>🔮 Welcome to Echo's Station!</h2>
+      <h2>\u{1F52E} Welcome to Echo's Station!</h2>
       <div class="subtitle">A cozy space station 408km above Earth</div>
-      <p style="font-size:11px;color:#aaa;margin-bottom:12px">Choose your name and look. You'll get a free room to customize and earn ◈!</p>
+      <p style="font-size:11px;color:#aaa;margin-bottom:12px">Choose your name and look. You'll get a free room to customize and earn \u25C8!</p>
       <input type="text" id="welcome-name" placeholder="Enter your name..." maxlength="20" autofocus>
       <p style="font-size:10px;color:#888;margin:8px 0 4px">Pick your starter look:</p>
       <div class="welcome-skins">
         ${freeSkins.map((s,i)=>`<div class="welcome-skin${i===0?' selected':''}" data-id="${s.id}"><div class="ws-icon">${s.icon}</div><div class="ws-label">${s.label}</div></div>`).join('')}
       </div>
-      <button id="welcome-go">Enter the Station 🚀</button>
+      <div style="text-align:center;margin-top:12px">
+        <button id="welcome-go">Enter the Station \u{1F680}</button>
+        <div style="margin-top:10px"><button id="welcome-login" style="background:none;border:1px solid #555;color:#888;padding:6px 16px;font-family:inherit;font-size:11px;cursor:pointer;border-radius:6px">\u{1F511} Already have a Station Pass? Login</button></div>
+      </div>
     </div>
   `;
   document.body.appendChild(ov);
@@ -6981,13 +7712,22 @@ function showWelcomeWardrobe(){
     };
   });
   
-  function finishWelcome(){
+  // Login button for returning players
+  ov.querySelector('#welcome-login').onclick=()=>{
+    ov.remove();
+    StationPass.showLoginPopup();
+  };
+  
+  async function finishWelcome(){
     const nameInput=ov.querySelector('#welcome-name');
     const name=(nameInput.value||'').trim().slice(0,20);
     if(!name){nameInput.style.borderColor='#ff4444';nameInput.placeholder='Please enter a name!';return}
     
     LS.set('visitorName',name);
     S.visitor.skin=selectedSkin;LS.set('visitorSkin',selectedSkin);
+    
+    // Create Station Pass account
+    const passCode = await StationPass.create(name, selectedSkin);
     
     // Auto-create their room
     RoomSystem.roomName=name+"'s Room";
@@ -6997,8 +7737,8 @@ function showWelcomeWardrobe(){
     ov.style.opacity='0';ov.style.transition='opacity .5s';
     setTimeout(()=>{ov.remove();recordStationVisit()},500);
     
-    showNotification(`Welcome, ${name}! 🔮 Your room is ready on F8!`);
-    addChatMsg('Echo',`Welcome aboard, ${name}! 🔮 Your very own room is set up on F8. Customize it and earn ◈ from visitors!`);
+    showNotification('Welcome, '+name+'! \u{1F52E} Your room is ready on F8!');
+    addChatMsg('Echo','Welcome aboard, '+name+'! \u{1F52E} Your very own room is set up on F8. Customize it and earn \u25C8 from visitors!');
   }
   
   ov.querySelector('#welcome-go').onclick=finishWelcome;
@@ -7033,6 +7773,16 @@ function init(){
   // Load station stats and visitor memory
   loadStationStats();
   loadVisitorMemory();
+  // Initialize weapon system (v20)
+  WeaponSystem.init();
+  
+  // Auto-login with Station Pass if available
+  if(StationPass.passCode){
+    StationPass.autoLogin().then(ok=>{
+      if(ok)console.log('Station Pass auto-login OK');
+    });
+  }
+  
   // Visitor wardrobe on first visit
   if(!LS.get('visitorName')){
     showWelcomeWardrobe();
