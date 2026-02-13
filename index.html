@@ -3337,21 +3337,83 @@ function visitorInteract(){
 function visitorTransform(newSkinId){
   const skin=VISITOR_SKINS.find(s=>s.id===newSkinId)||VISITOR_SKINS[0];
   const accent=skin.accent||skin.color;
-  S.visitor._transforming=true;S.visitor._transformTimer=0;S.visitor._transformSkin=newSkinId;
-  // Flash + particles
-  S.screenFlash=accent;
-  for(let i=0;i<25;i++){const a=Math.random()*Math.PI*2,sp=3+Math.random()*5;
-    S.particles.push({x:S.visitor.x,y:S.visitor.y-15,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:25,color:accent,size:2+Math.random()*3})}
-  setTimeout(()=>{S.visitor.skin=newSkinId;LS.set('visitorSkin',newSkinId);S.visitor._transforming=false;
-    S.screenFlash=accent;showNotification('⚡ '+skin.label+' equipped!');
-    for(let i=0;i<15;i++){const a=Math.random()*Math.PI*2,sp=2+Math.random()*3;
-      S.particles.push({x:S.visitor.x,y:S.visitor.y-15,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:20,color:accent,size:2})}
-  },400);
+  const rarity=RARITIES[skin.rarity]||RARITIES.common;
+  const vx=S.visitor.x,vy=S.visitor.y;
+  
+  // Phase 1: Gathering energy (0-600ms) — pull particles inward, screen darkens
+  S.visitor._transforming=true;S.visitor._transformPhase=1;S.visitor._transformTimer=0;S.visitor._transformSkin=newSkinId;
+  S.visitor._transformAccent=accent;
+  
+  // Inward spiral particles
+  for(let i=0;i<30;i++){
+    const a=Math.random()*Math.PI*2,r=60+Math.random()*40;
+    S.particles.push({x:vx+Math.cos(a)*r,y:vy-15+Math.sin(a)*r,vx:-Math.cos(a)*4,vy:-Math.sin(a)*4,life:35,color:accent,size:2+Math.random()*2});
+  }
+  // Sound: rising tone
+  if(S.audioCtx){const c=S.audioCtx,n=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type='sawtooth';o.frequency.setValueAtTime(200,n);o.frequency.exponentialRampToValueAtTime(800,n+.6);g.gain.setValueAtTime(.08*S.volume,n);g.gain.exponentialRampToValueAtTime(.001,n+.6);o.connect(g);g.connect(S.masterGain);o.start(n);o.stop(n+.7)}
+  
+  // Phase 2: Flash + white silhouette (600ms)
+  setTimeout(()=>{
+    S.visitor._transformPhase=2;
+    S.screenFlash='#ffffff';S.screenShake=8;
+    // Burst sound
+    if(S.audioCtx){const c=S.audioCtx,n=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type='square';o.frequency.value=600;g.gain.setValueAtTime(.12*S.volume,n);g.gain.exponentialRampToValueAtTime(.001,n+.3);o.connect(g);g.connect(S.masterGain);o.start(n);o.stop(n+.4)}
+  },600);
+  
+  // Phase 3: Reveal new skin + explosion (1000ms)
+  setTimeout(()=>{
+    S.visitor.skin=newSkinId;LS.set('visitorSkin',newSkinId);
+    S.visitor._transformPhase=3;
+    S.screenFlash=accent;S.screenShake=4;
+    // Massive outward particle explosion
+    for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,sp=4+Math.random()*8;
+      S.particles.push({x:vx,y:vy-15,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:35,color:i%3===0?'#ffffff':accent,size:2+Math.random()*4})}
+    // Rising text
+    S.floatTexts.push({text:'⚡ '+skin.label+' ⚡',x:vx-30,y:vy-60,color:rarity.color,life:90});
+    // Fanfare sound
+    if(S.audioCtx){const c=S.audioCtx,n=c.currentTime;[600,800,1000,1200].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.1*S.volume,n+i*.08);g.gain.exponentialRampToValueAtTime(.001,n+i*.08+.2);o.connect(g);g.connect(S.masterGain);o.start(n+i*.08);o.stop(n+i*.08+.3)})}
+  },1000);
+  
+  // Phase 4: Done (1500ms)
+  setTimeout(()=>{
+    S.visitor._transforming=false;S.visitor._transformPhase=0;
+    showNotification('⚡ '+skin.label+' equipped!');
+  },1500);
 }
 
 function renderVisitor(ctx){
   if(!S.useVisitor)return;
   const v=S.visitor,sc=3,sz=10;
+  
+  // Transform animation rendering
+  if(v._transforming){
+    const accent=v._transformAccent||'#fff';
+    if(v._transformPhase===1){
+      // Gathering: pulsing glow circle shrinking inward
+      const pulse=.3+Math.sin(S.time*8)*.2;
+      const grd=ctx.createRadialGradient(v.x,v.y-15,0,v.x,v.y-15,50);
+      grd.addColorStop(0,accent);grd.addColorStop(.5,`rgba(255,255,255,${pulse})`);grd.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=grd;ctx.beginPath();ctx.arc(v.x,v.y-15,50,0,Math.PI*2);ctx.fill();
+      // White silhouette of current skin
+      ctx.fillStyle=`rgba(255,255,255,${.5+Math.sin(S.time*12)*.3})`;
+      ctx.fillRect(v.x-12,v.y-36,24,36);
+    } else if(v._transformPhase===2){
+      // White flash silhouette — bright column of light
+      ctx.fillStyle='rgba(255,255,255,.9)';ctx.fillRect(v.x-15,v.y-50,30,55);
+      const grd=ctx.createRadialGradient(v.x,v.y-20,0,v.x,v.y-20,60);
+      grd.addColorStop(0,'rgba(255,255,255,.8)');grd.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle=grd;ctx.beginPath();ctx.arc(v.x,v.y-20,60,0,Math.PI*2);ctx.fill();
+    } else if(v._transformPhase===3){
+      // Show new skin with rarity-colored aura ring
+      const rarity=RARITIES[(VISITOR_SKINS.find(s=>s.id===v._transformSkin)||{}).rarity]||RARITIES.common;
+      const grd=ctx.createRadialGradient(v.x,v.y-15,10,v.x,v.y-15,45);
+      grd.addColorStop(0,rarity.color);grd.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.globalAlpha=.4;ctx.fillStyle=grd;ctx.beginPath();ctx.arc(v.x,v.y-15,45,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+      // Fall through to render the new skin below
+    }
+    if(v._transformPhase<3)return; // Don't render avatar during phase 1-2
+  }
+  
   const skin=VISITOR_SKINS.find(s=>s.id===v.skin)||VISITOR_SKINS[0];
   const c=skin.color,d=adjustBrightness(c,-20),l=adjustBrightness(c,20);
   
@@ -4925,10 +4987,10 @@ function showVisitorSkinPanel(){
         if(confirm(`Buy ${VISITOR_SKINS.find(s=>s.id===id).label} for ${cost}◈?`)){
           Coins.spend(cost,'skin');
           const skins=LS.get('visitorSkinsOwned',[]);skins.push(id);LS.set('visitorSkinsOwned',skins);
-          visitorTransform(id);p.closest('.popup-overlay').remove();
+          p.closest('.popup-overlay').remove();setTimeout(()=>visitorTransform(id),200);
         }
       } else {
-        visitorTransform(id);p.closest('.popup-overlay').remove();
+        p.closest('.popup-overlay').remove();setTimeout(()=>visitorTransform(id),200);
       }
     }
   });
@@ -5093,8 +5155,7 @@ function showItemShop(initialTab){
         const skins=LS.get('visitorSkinsOwned',[]);skins.push(id);LS.set('visitorSkinsOwned',skins);
         showNotification('Purchased '+VISITOR_SKINS.find(s=>s.id===id).label+'!');
       }
-      S.visitor.skin=id;LS.set('visitorSkin',id);
-      p.closest('.popup-overlay').remove();showItemShop('skins');
+      p.closest('.popup-overlay').remove();setTimeout(()=>visitorTransform(id),200);
     };
   });
 
