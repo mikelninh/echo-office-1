@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a14">
-<title>Echo's Station v20 🛸</title>
+<title>Echo's Station v21 🛸</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🛸</text></svg>">
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRWNobydzIFN0YXRpb24iLCJzaG9ydF9uYW1lIjoiRWNobyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTE0IiwidGhlbWVfY29sb3IiOiIjMGEwYTE0IiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnPjx0ZXh0IHk9JzgwJyBmb250LXNpemU9JzgwJz7wn5uoPC90ZXh0Pjwvc3ZnPiIsInNpemVzIjoiYW55IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
 <style>
@@ -230,6 +230,73 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 @media(pointer:coarse){
   #virtual-joystick,#action-buttons{display:flex}
 }
+/* ═══ RPG Inventory Panel ═══ */
+#rpg-inventory{position:fixed;right:0;top:0;width:320px;height:100%;background:rgba(26,26,46,.96);border-left:3px solid #9b59b6;z-index:4000;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;font-size:11px;display:flex;flex-direction:column}
+#rpg-inventory.open{transform:translateX(0)}
+#rpg-inventory::-webkit-scrollbar{width:4px}
+#rpg-inventory::-webkit-scrollbar-thumb{background:#9b59b6;border-radius:2px}
+.rpg-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(135deg,rgba(155,89,182,.25),rgba(26,26,46,.9));border-bottom:2px solid #333}
+.rpg-header h3{color:#ffd080;font-size:15px;letter-spacing:1px;text-shadow:0 0 10px rgba(255,208,128,.3)}
+.rpg-close{cursor:pointer;font-size:20px;color:#888;transition:color .2s}
+.rpg-close:hover{color:#ff6ec7}
+.rpg-section{border-bottom:1px solid #2a2a4a}
+.rpg-section-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;color:#c080ff;font-size:12px;font-weight:bold;transition:background .2s;user-select:none}
+.rpg-section-header:hover{background:rgba(155,89,182,.1)}
+.rpg-section-header .toggle{transition:transform .2s;font-size:10px}
+.rpg-section-header.collapsed .toggle{transform:rotate(-90deg)}
+.rpg-section-body{padding:8px 12px;display:block}
+.rpg-section-body.hidden{display:none}
+/* Equipment Grid */
+.equip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.equip-slot{position:relative;width:100%;aspect-ratio:1;background:rgba(10,10,20,.6);border:2px solid #333;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;overflow:hidden}
+.equip-slot:hover{border-color:#ff6ec7;background:rgba(255,110,199,.05)}
+.equip-slot .slot-label{font-size:7px;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.equip-slot .slot-icon{font-size:22px}
+.equip-slot .slot-empty{font-size:18px;opacity:.2}
+.equip-slot .slot-name{font-size:7px;color:#ddd;margin-top:1px;text-align:center;max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.equip-slot.has-item{border-color:var(--rarity-border,#444)}
+.equip-slot.has-item::after{content:'×';position:absolute;top:2px;right:5px;font-size:10px;color:#666;opacity:0;transition:opacity .2s}
+.equip-slot.has-item:hover::after{opacity:1}
+/* Stat Bars */
+.stat-bars{display:flex;flex-direction:column;gap:4px}
+.stat-row{display:flex;align-items:center;gap:6px}
+.stat-icon{font-size:12px;width:18px;text-align:center}
+.stat-label{font-size:9px;color:#aaa;width:55px}
+.stat-bar-wrap{flex:1;height:6px;background:rgba(10,10,20,.6);border-radius:3px;overflow:hidden}
+.stat-bar{height:100%;border-radius:3px;transition:width .4s ease;min-width:0}
+.stat-val{font-size:9px;color:#ddd;width:28px;text-align:right}
+/* Backpack Grid */
+.bp-filters{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap}
+.bp-filter{padding:3px 8px;font-size:9px;background:rgba(30,30,50,.5);border:1px solid #444;border-radius:12px;cursor:pointer;color:#888;font-family:inherit;transition:all .2s}
+.bp-filter.active{border-color:#ffd080;color:#ffd080;background:rgba(255,208,128,.1)}
+.bp-filter:hover{border-color:#c080ff}
+.bp-grid{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-start}
+.bp-item{width:60px;height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,10,20,.5);border:2px solid #333;border-radius:6px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;padding:2px}
+.bp-item:hover{transform:translateY(-2px);z-index:1}
+.bp-item .bp-icon{font-size:20px;margin-bottom:1px}
+.bp-item .bp-name{font-size:7px;color:#aaa;text-align:center;line-height:1.1;max-height:16px;overflow:hidden}
+.bp-item .bp-equip{font-size:7px;color:#0f0;background:rgba(0,255,0,.1);border:1px solid rgba(0,255,0,.3);border-radius:3px;padding:1px 4px;margin-top:1px;opacity:0;transition:opacity .2s}
+.bp-item:hover .bp-equip{opacity:1}
+.bp-item.equipped-bp{border-color:#00fff7;background:rgba(0,255,247,.05)}
+.bp-item.equipped-bp .bp-equip{opacity:1;color:#00fff7;background:rgba(0,255,247,.1);border-color:rgba(0,255,247,.3)}
+/* Rarity glow pulse on epic+ */
+@keyframes rarityPulse{0%,100%{box-shadow:0 0 4px var(--rarity-glow,transparent)}50%{box-shadow:0 0 12px var(--rarity-glow,transparent)}}
+.bp-item.rarity-epic,.bp-item.rarity-legendary,.bp-item.rarity-mythic,.equip-slot.rarity-epic,.equip-slot.rarity-legendary,.equip-slot.rarity-mythic{animation:rarityPulse 2s ease-in-out infinite}
+/* ═══ Premium Shop Styles ═══ */
+.shop-featured{display:flex;gap:6px;margin-bottom:10px;padding:8px;background:linear-gradient(135deg,rgba(255,170,0,.08),rgba(155,89,182,.08));border:1px solid rgba(255,170,0,.2);border-radius:8px}
+.shop-featured-title{font-size:10px;color:#ffd080;margin-bottom:6px;text-align:center}
+.shop-feat-card{flex:1;display:flex;flex-direction:column;align-items:center;padding:6px;background:rgba(10,10,20,.5);border:2px solid #444;border-radius:8px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.shop-feat-card:hover{border-color:#ffd080;transform:translateY(-2px)}
+.shop-feat-card .feat-icon{font-size:28px;margin:4px 0}
+.shop-feat-card .feat-name{font-size:9px;color:#ddd;text-align:center;font-weight:bold}
+.shop-feat-card .feat-cost{font-size:8px;color:#ffd700;margin-top:2px}
+.shop-new-badge{position:absolute;top:2px;right:2px;font-size:7px;background:rgba(0,255,0,.2);color:#0f0;padding:1px 4px;border-radius:3px;border:1px solid rgba(0,255,0,.3)}
+.shop-loot-badge{display:inline-block;padding:2px 6px;font-size:8px;font-weight:bold;background:linear-gradient(135deg,rgba(255,51,68,.2),rgba(255,170,0,.2));color:#ff6677;border:1px solid rgba(255,51,68,.3);border-radius:4px;letter-spacing:.5px}
+/* Shop card hover glow */
+.acc-card:hover,.wpn-card:hover,.skin-card:hover{box-shadow:0 0 12px var(--rarity-glow,rgba(255,110,199,.3))}
+@media(max-width:600px){
+  #rpg-inventory{width:100%}
+}
 </style>
 </head>
 <body>
@@ -257,6 +324,8 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
     <div id="mood-hud">😊 Happy</div>
     <div id="room-info-hud"></div>
     <div id="speech-bubble"></div>
+    <!-- RPG Inventory Panel -->
+    <div id="rpg-inventory"></div>
     <!-- Virtual Joystick for Mobile -->
     <div id="virtual-joystick">
       <div id="joystick-base">
@@ -1164,6 +1233,13 @@ const ACCESSORY_ITEMS=[
   // Mini Pets
   {id:'pet_robot',name:'Mini Robot',icon:'🤖',type:'pet',cost:100,desc:'A tiny robot companion',rarity:'epic',petColor:'#c0c0c0',petAccent:'#ff0000'},
   {id:'pet_fairy',name:'Fairy',icon:'🧚',type:'pet',cost:75,desc:'A magical fairy friend',rarity:'rare',petColor:'#ff69b4',petAccent:'#ffd700'},
+  // Fairy Collection
+  {id:'pet_ember_fairy',name:'Ember Fairy',icon:'🔥',type:'pet',cost:60,desc:'A fire fairy trailing tiny flames',rarity:'rare',petColor:'#ff6600',petAccent:'#ff2200',fairyElement:'fire',fairyColors:['#ff4400','#ff8800','#ffcc00','#ff2200']},
+  {id:'pet_frost_fairy',name:'Frost Fairy',icon:'❄️',type:'pet',cost:60,desc:'An ice fairy leaving snowflake trails',rarity:'rare',petColor:'#88ccff',petAccent:'#ffffff',fairyElement:'ice',fairyColors:['#aaddff','#ffffff','#88ccff','#ccf0ff']},
+  {id:'pet_nature_fairy',name:'Nature Fairy',icon:'🌿',type:'pet',cost:60,desc:'An earth fairy with swirling leaves',rarity:'rare',petColor:'#44cc44',petAccent:'#88ff44',fairyElement:'earth',fairyColors:['#44cc44','#88ff44','#228822','#66dd66']},
+  {id:'pet_storm_fairy',name:'Storm Fairy',icon:'⚡',type:'pet',cost:90,desc:'A lightning fairy crackling with sparks',rarity:'epic',petColor:'#ffdd00',petAccent:'#ffffff',fairyElement:'lightning',fairyColors:['#ffdd00','#ffffff','#ffff88','#ffaa00']},
+  {id:'pet_shadow_fairy',name:'Shadow Fairy',icon:'🌑',type:'pet',cost:90,desc:'A dark fairy wreathed in shadow smoke',rarity:'epic',petColor:'#8844cc',petAccent:'#220044',fairyElement:'dark',fairyColors:['#6622aa','#8844cc','#220044','#440066']},
+  {id:'pet_celestial_fairy',name:'Celestial Fairy',icon:'✨',type:'pet',cost:150,desc:'A radiant fairy of pure starlight',rarity:'legendary',lootOnly:true,petColor:'#ffd700',petAccent:'#ffffff',fairyElement:'light',fairyColors:['#ffffff','#ffd700','#fffacd','#fff8dc']},
   // Loot-only accessories
   {id:'trail_phoenix',name:'Phoenix Wings',icon:'🔥',type:'trail',cost:-1,desc:'Fire & rebirth particles trail behind you',rarity:'mythic',lootOnly:true,trailColor:['#ff2200','#ff6600','#ffaa00','#ffdd44','#ffffff'],trailSize:4},
   {id:'hat_starstorm',name:'Crown of Stars',icon:'💫',type:'hat',cost:-1,desc:'Orbiting mini stars circle your head',rarity:'legendary',lootOnly:true,render:(cx,x,y,t)=>{for(let i=0;i<5;i++){const a=t*2+i*(Math.PI*2/5),r=10;const sx=x+Math.cos(a)*r,sy=y-6+Math.sin(a)*r*.5;cx.fillStyle=`rgba(255,${200+Math.sin(t*4+i)*55},0,${.7+Math.sin(t*3+i)*.3})`;cx.beginPath();cx.arc(sx,sy,1.5,0,Math.PI*2);cx.fill();cx.fillStyle=`rgba(255,255,200,${.3+Math.sin(t*5+i)*.2})`;cx.beginPath();cx.arc(sx,sy,3,0,Math.PI*2);cx.fill()}}},
@@ -5204,13 +5280,39 @@ function showItemShop(initialTab){
   const equipped=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
   const ownedFurniture=LS.get('ownedFurniture',[]);
 
+  // Featured items — rotates daily based on date
+  const dayHash=Math.floor(Date.now()/(24*60*60*1000));
+  const allShopItems=[].concat(
+    VISITOR_SKINS.filter(function(s){return s.cost>0&&!s.lootOnly}).map(function(s){return{id:s.id,icon:s.icon,name:s.label,cost:s.cost,rarity:s.rarity||'common',kind:'skin'}}),
+    WEAPONS.filter(function(w){return w.cost>0&&!w.lootOnly}).map(function(w){return{id:w.id,icon:w.icon,name:w.name,cost:w.cost,rarity:w.rarity||'common',kind:'weapon'}}),
+    ACCESSORY_ITEMS.filter(function(a){return a.cost>0&&!a.lootOnly}).map(function(a){return{id:a.id,icon:a.icon,name:a.name,cost:a.cost,rarity:a.rarity||'common',kind:a.type}})
+  );
+  const featured=[];
+  for(var fi=0;fi<3;fi++){featured.push(allShopItems[(dayHash*7+fi*13)%allShopItems.length])}
+  // New items: fairies added in v21
+  const newItemIds=['pet_ember_fairy','pet_frost_fairy','pet_nature_fairy','pet_storm_fairy','pet_shadow_fairy','pet_celestial_fairy'];
+
   let html='<h3>🛒 Item Shop</h3><p style="font-size:10px;color:#888;margin-bottom:6px">Balance: <span style="color:#ffd700">' + Coins.count + '◈</span></p>';
+
+  // ✨ Featured section
+  html+='<div class="shop-featured-title">✨ Today\'s Featured</div><div class="shop-featured">';
+  featured.forEach(function(fi2){
+    var r=RARITIES[fi2.rarity]||RARITIES.common;
+    var shimCls=fi2.rarity==='mythic'?' shimmer-mythic':fi2.rarity==='legendary'?' shimmer-legendary':fi2.rarity==='epic'?' shimmer-epic':'';
+    html+='<div class="shop-feat-card'+shimCls+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">'
+      +'<div class="feat-icon">'+fi2.icon+'</div>'
+      +'<div class="feat-name" style="color:'+r.color+'">'+fi2.name+'</div>'
+      +'<span class="rarity-badge '+fi2.rarity+'" style="font-size:7px">'+r.name+'</span>'
+      +'<div class="feat-cost">'+fi2.cost+'◈</div></div>';
+  });
+  html+='</div>';
+
   html+='<div class="shop-tabs">';
-  html+='<div class="shop-tab'+(tab==='skins'?' active':'')+'" data-tab="skins">\u{1F454} Skins</div>';
+  html+='<div class="shop-tab'+(tab==='skins'?' active':'')+'" data-tab="skins">👔 Skins</div>';
   html+='<div class="shop-tab'+(tab==='weapons'?' active':'')+'" data-tab="weapons">\u2694\uFE0F Weapons</div>';
-  html+='<div class="shop-tab'+(tab==='furniture'?' active':'')+'" data-tab="furniture">\u{1FA91} Furniture</div>';
-  html+='<div class="shop-tab'+(tab==='accessories'?' active':'')+'" data-tab="accessories">\u2728 Accessories</div>';
-  html+='<div class="shop-tab'+(tab==='market'?' active':'')+'" data-tab="market">\u{1F3EA} Market</div>';
+  html+='<div class="shop-tab'+(tab==='furniture'?' active':'')+'" data-tab="furniture">🪑 Furniture</div>';
+  html+='<div class="shop-tab'+(tab==='accessories'?' active':'')+'" data-tab="accessories">✨ Accessories</div>';
+  html+='<div class="shop-tab'+(tab==='market'?' active':'')+'" data-tab="market">🏪 Market</div>';
   html+='</div>';
 
   // Skins tab
@@ -5221,12 +5323,13 @@ function showItemShop(initialTab){
     const current=S.visitor.skin===sk.id;
     const isLootOnly=sk.lootOnly||sk.cost<0;
     const r=RARITIES[sk.rarity||'common']||RARITIES.common;
-    html+='<div class="skin-card'+(current?' active':'')+' rarity-'+(sk.rarity||'common')+'" data-action="buy-skin" data-id="'+sk.id+'" data-cost="'+sk.cost+'" style="border-color:'+r.border+'">';
+    const shimCls2=sk.rarity==='mythic'?' shimmer-mythic':sk.rarity==='legendary'?' shimmer-legendary':sk.rarity==='epic'?' shimmer-epic':'';
+    html+='<div class="skin-card'+(current?' active':'')+shimCls2+' rarity-'+(sk.rarity||'common')+'" data-action="buy-skin" data-id="'+sk.id+'" data-cost="'+sk.cost+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">';
     if(sk.hasSprite)html+='<canvas class="skin-preview" data-skin="'+sk.id+'" width="48" height="48" style="display:block;margin:0 auto 2px;image-rendering:pixelated"></canvas>';
     else html+='<div class="icon">'+sk.icon+'</div>';
-    html+='<div style="font-size:9px">'+sk.label+'</div>';
-    html+='<span class="rarity-badge '+(sk.rarity||'common')+'" style="font-size:7px">'+r.name+'</span>';
-    if(isLootOnly)html+='<span class="loot-only-badge">LOOT ONLY</span>';
+    html+='<div style="font-size:9px;color:'+r.color+'">'+sk.label+'</div>';
+    html+='<span class="rarity-badge '+(sk.rarity||'common')+'" style="font-size:7px"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:'+r.color+';margin-right:2px;vertical-align:middle"></span>'+r.name+'</span>';
+    if(isLootOnly)html+='<span class="shop-loot-badge">LOOT ONLY</span>';
     else html+='<div class="lock" style="font-size:8px;color:'+(owned?'#0f0':'#ffd700')+'">'+(current?'WORN':owned?'OWNED':sk.cost+'◈')+'</div>';
     html+='</div>';
   });
@@ -5247,13 +5350,14 @@ function showItemShop(initialTab){
       const isLoot=wpn.lootOnly||wpn.cost<0;
       const locked=wpn.skinLock&&S.visitor.skin!==wpn.skinLock;
       const r=RARITIES[wpn.rarity]||RARITIES.common;
-      html+='<div class="wpn-card'+(isEq?' equipped':'')+' rarity-'+wpn.rarity+'" data-action="shop-wpn" data-id="'+wpn.id+'" style="border-color:'+r.border+'">';
+      const wShim=wpn.rarity==='mythic'?' shimmer-mythic':wpn.rarity==='legendary'?' shimmer-legendary':wpn.rarity==='epic'?' shimmer-epic':'';
+      html+='<div class="wpn-card'+(isEq?' equipped':'')+wShim+' rarity-'+wpn.rarity+'" data-action="shop-wpn" data-id="'+wpn.id+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">';
       html+='<div class="wpn-icon">'+wpn.icon+'</div>';
-      html+='<div class="wpn-name">'+wpn.name+'</div>';
-      html+='<span class="rarity-badge '+wpn.rarity+'" style="font-size:7px">'+r.name+'</span>';
+      html+='<div class="wpn-name" style="color:'+r.color+'">'+wpn.name+'</div>';
+      html+='<span class="rarity-badge '+wpn.rarity+'" style="font-size:7px"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:'+r.color+';margin-right:2px;vertical-align:middle"></span>'+r.name+'</span>';
       if(wpn.element)html+='<div style="font-size:7px;color:'+({fire:'#ff6600',ice:'#4488ff',lightning:'#ffdd00',energy:'#00ddff',light:'#ffd700'}[wpn.element]||'#aaa')+'">'+wpn.element+'</div>';
       if(wpn.special)html+='<div class="wpn-special">'+wpn.special+'</div>';
-      if(isLoot)html+='<span class="loot-only-badge">LOOT ONLY</span>';
+      if(isLoot)html+='<span class="shop-loot-badge">LOOT ONLY</span>';
       else if(locked)html+='<div style="font-size:8px;color:#ff4444">\u{1F512} '+wpn.skinLock+'</div>';
       else html+='<div class="wpn-price">'+(isEq?'EQUIPPED':isOwned?'OWNED':wpn.cost+'\u25C8')+'</div>';
       html+='</div>';
@@ -5279,7 +5383,7 @@ function showItemShop(initialTab){
 
   // Accessories tab
   html+='<div class="shop-content" data-content="accessories" style="'+(tab!=='accessories'?'display:none':'')+'">';
-  const accTypes=[{label:'🎩 Hats',type:'hat'},{label:'✨ Trails',type:'trail'},{label:'🟣 Auras',type:'aura'},{label:'🤖 Mini Pets',type:'pet'}];
+  const accTypes=[{label:'🎩 Hats',type:'hat'},{label:'✨ Trails',type:'trail'},{label:'🟣 Auras',type:'aura'},{label:'🐾 Mini Pets & Fairies',type:'pet'}];
   accTypes.forEach(at=>{
     html+='<div style="margin:6px 0"><div style="font-size:10px;color:#c080ff;margin-bottom:4px">'+at.label+'</div><div style="display:flex;flex-wrap:wrap;gap:3px">';
     ACCESSORY_ITEMS.filter(a=>a.type===at.type).forEach(acc=>{
@@ -5287,10 +5391,14 @@ function showItemShop(initialTab){
       const isEquipped=equipped[acc.type]===acc.id;
       const isLootOnly=acc.lootOnly||acc.cost<0;
       const r=RARITIES[acc.rarity||'common']||RARITIES.common;
-      html+='<div class="acc-card'+(owned?' owned':'')+(isEquipped?' equipped':'')+' rarity-'+(acc.rarity||'common')+'" data-action="buy-acc" data-id="'+acc.id+'" data-cost="'+acc.cost+'" data-type="'+acc.type+'" style="border-color:'+r.border+'">';
-      html+='<div class="acc-icon">'+acc.icon+'</div><div style="font-size:9px">'+acc.name+'</div>';
-      html+='<span class="rarity-badge '+(acc.rarity||'common')+'" style="font-size:7px">'+r.name+'</span>';
-      if(isLootOnly)html+='<span class="loot-only-badge">LOOT ONLY</span>';
+      const isNew=newItemIds.includes(acc.id);
+      const shimCls3=acc.rarity==='mythic'?' shimmer-mythic':acc.rarity==='legendary'?' shimmer-legendary':acc.rarity==='epic'?' shimmer-epic':'';
+      html+='<div class="acc-card'+(owned?' owned':'')+(isEquipped?' equipped':'')+shimCls3+' rarity-'+(acc.rarity||'common')+'" data-action="buy-acc" data-id="'+acc.id+'" data-cost="'+acc.cost+'" data-type="'+acc.type+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+';position:relative">';
+      if(isNew)html+='<span class="shop-new-badge">\u{1F195}</span>';
+      html+='<div class="acc-icon">'+acc.icon+'</div><div style="font-size:9px;color:'+r.color+'">'+acc.name+'</div>';
+      html+='<span class="rarity-badge '+(acc.rarity||'common')+'" style="font-size:7px"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:'+r.color+';margin-right:2px;vertical-align:middle"></span>'+r.name+'</span>';
+      if(acc.fairyElement)html+='<div style="font-size:7px;color:'+r.color+'">'+acc.fairyElement+'</div>';
+      if(isLootOnly)html+='<span class="shop-loot-badge">LOOT ONLY</span>';
       else html+='<div class="acc-price">'+(isEquipped?'EQUIPPED':owned?'OWNED':acc.cost+'◈')+'</div>';
       html+='</div>';
     });
@@ -5410,172 +5518,254 @@ function showItemShop(initialTab){
   if(_uneqW)_uneqW.onclick=()=>{WeaponSystem.unequip();showNotification('Weapon unequipped!');p.closest('.popup-overlay').remove()};
 }
 
-function showInventory(){
+// ═══ RPG Inventory Panel ═══
+function toggleInventoryPanel(){
+  const panel=document.getElementById('rpg-inventory');
+  if(panel.classList.contains('open')){closeInventoryPanel();return}
+  renderInventoryPanel();
+  panel.classList.add('open');
+  document.getElementById('btn-inventory').classList.add('active');
+}
+function closeInventoryPanel(){
+  const panel=document.getElementById('rpg-inventory');
+  panel.classList.remove('open');
+  document.getElementById('btn-inventory').classList.remove('active');
+}
+function renderInventoryPanel(){
+  const panel=document.getElementById('rpg-inventory');
   const ownedSkins=LS.get('visitorSkinsOwned',[]);
   const ownedAcc=LS.get('visitorAccessories',[]);
   const equipped=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
-  const ownedFurniture=LS.get('ownedFurniture',[]);
-
-  let html='<h3>🎒 Inventory</h3>';
-
-  // Skins section
-  html+='<div class="inv-section"><h4>👔 Skins</h4>';
-  const allSkins=VISITOR_SKINS.filter(s=>s.cost===0||ownedSkins.includes(s.id));
-  if(allSkins.length===0)html+='<div style="font-size:10px;color:#666">No skins yet</div>';
-  else allSkins.forEach(sk=>{
-    const worn=S.visitor.skin===sk.id;
-    html+='<div class="inv-item'+(worn?' equipped':'')+'" data-action="equip-skin" data-id="'+sk.id+'">'+sk.icon+' '+sk.label+(worn?' ✓':'')+'</div>';
-  });
-  html+='</div>';
-
-  // Accessories section
-  const accTypes=[{label:'🎩 Hats',type:'hat'},{label:'✨ Trails',type:'trail'},{label:'🟣 Auras',type:'aura'},{label:'🤖 Mini Pets',type:'pet'}];
-  accTypes.forEach(at=>{
-    const items=ACCESSORY_ITEMS.filter(a=>a.type===at.type&&ownedAcc.includes(a.id));
-    if(items.length===0)return;
-    html+='<div class="inv-section"><h4>'+at.label+'</h4>';
-    items.forEach(acc=>{
-      const isEq=equipped[acc.type]===acc.id;
-      html+='<div class="inv-item'+(isEq?' equipped':'')+'" data-action="equip-acc" data-id="'+acc.id+'" data-type="'+acc.type+'">'+acc.icon+' '+acc.name+(isEq?' ✓':'')+'</div>';
-    });
-    html+='</div>';
-  });
-
-  // Weapons section (v20)
   const ownedWpnIds=LS.get('ownedWeapons',[]);
-  if(ownedWpnIds.length>0){
-    html+='<div class="inv-section"><h4>\u2694\uFE0F Weapons</h4>';
-    ownedWpnIds.forEach(wid=>{
-      const wpn=WEAPONS.find(w=>w.id===wid);if(!wpn)return;
-      const isEqW=WeaponSystem.equipped&&WeaponSystem.equipped._id===wid;
-      const r=RARITIES[wpn.rarity]||RARITIES.common;
-      html+='<div class="inv-item'+(isEqW?' equipped':'')+'" data-action="equip-wpn" data-id="'+wid+'" style="border-color:'+r.border+'">'+wpn.icon+' <span style="color:'+r.color+'">'+wpn.name+'</span>'+(isEqW?' \u2713':'')+'</div>';
-    });
-    html+='</div>';
-  }
-
-  // Furniture section
-  if(ownedFurniture.length>0){
-    html+='<div class="inv-section"><h4>\u{1FA91} Furniture</h4>';
-    ownedFurniture.forEach(fid=>{
-      const ft=FURNITURE_TYPES[fid];if(!ft)return;
-      html+='<div class="inv-item">'+ft.icon+' '+ft.name+'</div>';
-    });
-    html+='</div>';
-  }
-
-  if(ownedAcc.length===0&&ownedFurniture.length===0&&lootInv.length===0)
-    html+='<p style="font-size:10px;color:#666;text-align:center;margin-top:12px">Visit the 🛒 Item Shop to buy accessories!</p>';
-
-  // Loot inventory section
   const lootInv=LS.get('lootInventory',[]);
   const equippedLoot=LS.get('equippedLoot',{});
-  if(lootInv.length>0){
-    html+='<div class="inv-section"><h4>🎁 Loot Items ('+lootInv.length+')</h4>';
-    // Show stat bonuses
-    const bonuses=LootSystem.getStatBonuses();
-    const activeStats=Object.entries(bonuses).filter(([k,v])=>v>0);
-    if(activeStats.length>0){
-      html+='<div style="margin-bottom:6px;padding:4px 8px;background:rgba(0,255,247,.05);border:1px solid rgba(0,255,247,.2);border-radius:4px;font-size:9px">';
-      html+='<span style="color:#00fff7">Active Bonuses:</span> ';
-      html+=activeStats.map(([k,v])=>STAT_TYPES[k].icon+'+'+v+'%').join(' ');
-      html+='</div>';
+  const bonuses=LootSystem.getStatBonuses();
+
+  // Helper: get item info for equip slots
+  function slotInfo(type){
+    if(type==='skin'){
+      const sk=VISITOR_SKINS.find(s=>s.id===S.visitor.skin)||VISITOR_SKINS[0];
+      const r=RARITIES[sk.rarity||'common']||RARITIES.common;
+      return{icon:sk.icon,name:sk.label,r:r,id:sk.id};
     }
-    html+='<div style="display:flex;flex-wrap:wrap;gap:2px">';
-    lootInv.forEach(item=>{
-      const isEq=Object.values(equippedLoot).includes(item.id);
-      html+=renderItemCard(item,{equipped:isEq});
-    });
-    html+='</div></div>';
+    if(type==='weapon'){
+      if(!WeaponSystem.equipped)return null;
+      const w=WEAPONS.find(w2=>w2.id===WeaponSystem.equipped._id);
+      if(!w)return null;
+      const r=RARITIES[w.rarity]||RARITIES.common;
+      return{icon:w.icon,name:w.name,r:r,id:w.id};
+    }
+    const accId=equipped[type];
+    if(!accId)return null;
+    const acc=ACCESSORY_ITEMS.find(a=>a.id===accId);
+    if(!acc)return null;
+    const r=RARITIES[acc.rarity||'common']||RARITIES.common;
+    return{icon:acc.icon,name:acc.name,r:r,id:acc.id};
+  }
+  function renderSlot(type,label,emptyIcon){
+    const info=slotInfo(type);
+    const hasItem=!!info;
+    const rarCls=info?('rarity-'+(Object.entries(RARITIES).find(function(e){return e[1]===info.r})||['common'])[0]):'';
+    const borderCol=info?info.r.border:'#333';
+    const glowCol=info&&info.r.glow?info.r.glow:null;
+    return '<div class="equip-slot'+(hasItem?' has-item ':' ')+rarCls+'" data-unequip="'+type+'" style="--rarity-border:'+borderCol+';--rarity-glow:'+(glowCol||'transparent')+';border-color:'+borderCol+'">'
+      +(hasItem?'<div class="slot-icon">'+info.icon+'</div><div class="slot-name">'+info.name+'</div>':'<div class="slot-empty">'+emptyIcon+'</div>')
+      +'<div class="slot-label">'+label+'</div></div>';
   }
 
-  const{p}=createPopup(html);
+  let html='<div class="rpg-header"><h3>🎒 Inventory</h3><span class="rpg-close">&times;</span></div>';
 
-  // Equip skin
-  p.querySelectorAll('[data-action="equip-skin"]').forEach(el=>{
-    el.onclick=()=>{
-      S.visitor.skin=el.dataset.id;LS.set('visitorSkin',el.dataset.id);
-      showNotification('Equipped '+VISITOR_SKINS.find(s=>s.id===el.dataset.id).label+'!');
-      p.closest('.popup-overlay').remove();showInventory();
+  // ⚔️ Equipped section
+  html+='<div class="rpg-section"><div class="rpg-section-header" data-section="equipped">\u2694\uFE0F Equipped <span class="toggle">▾</span></div>';
+  html+='<div class="rpg-section-body" data-body="equipped"><div class="equip-grid">';
+  html+=renderSlot('skin','Skin','👤');
+  html+=renderSlot('weapon','Weapon','⚔️');
+  html+=renderSlot('hat','Hat','🎩');
+  html+=renderSlot('trail','Trail','✨');
+  html+=renderSlot('aura','Aura','🟣');
+  html+=renderSlot('pet','Pet','🐾');
+  html+='</div></div></div>';
+
+  // 📊 Stats section
+  html+='<div class="rpg-section"><div class="rpg-section-header" data-section="stats">\u{1F4CA} Stats <span class="toggle">▾</span></div>';
+  html+='<div class="rpg-section-body" data-body="stats"><div class="stat-bars">';
+  const statColors={speed:'#00fff7',defense:'#4488ff',luck:'#ffd700',power:'#ff4444',charisma:'#ff6ec7'};
+  Object.entries(STAT_TYPES).forEach(function(e){
+    var k=e[0],st=e[1];
+    const val=bonuses[k]||0;
+    const pct=Math.min(val/st.max*100,100);
+    html+='<div class="stat-row"><span class="stat-icon">'+st.icon+'</span><span class="stat-label">'+st.name+'</span>'
+      +'<div class="stat-bar-wrap"><div class="stat-bar" style="width:'+pct+'%;background:'+(statColors[k]||'#888')+'"></div></div>'
+      +'<span class="stat-val"'+(val>0?' style="color:'+(statColors[k]||'#888')+'"':'')+'>'+val+'%</span></div>';
+  });
+  html+='</div></div></div>';
+
+  // 🎒 Backpack section
+  html+='<div class="rpg-section" style="flex:1"><div class="rpg-section-header" data-section="backpack">\u{1F392} Backpack <span class="toggle">▾</span></div>';
+  html+='<div class="rpg-section-body" data-body="backpack">';
+  html+='<div class="bp-filters">';
+  var filterTypes=['All','Skins','Weapons','Hats','Trails','Auras','Pets'];
+  filterTypes.forEach(function(ft){html+='<span class="bp-filter'+(ft==='All'?' active':'')+'" data-bpf="'+ft+'">'+ft+'</span>';});
+  html+='</div><div class="bp-grid" id="bp-grid">';
+  html+=renderBackpackItems('All',ownedSkins,ownedAcc,equipped,ownedWpnIds,lootInv,equippedLoot);
+  html+='</div></div></div>';
+
+  panel.innerHTML=html;
+
+  // Attach handlers
+  panel.querySelector('.rpg-close').onclick=closeInventoryPanel;
+  // Collapsible sections
+  panel.querySelectorAll('.rpg-section-header').forEach(function(hdr){
+    hdr.onclick=function(){
+      hdr.classList.toggle('collapsed');
+      var body=panel.querySelector('[data-body="'+hdr.dataset.section+'"]');
+      if(body)body.classList.toggle('hidden');
     };
   });
-
-  // Equip/unequip accessory
-  p.querySelectorAll('[data-action="equip-acc"]').forEach(el=>{
-    el.onclick=()=>{
-      const eq=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
-      const type=el.dataset.type,id=el.dataset.id;
-      if(eq[type]===id){eq[type]=null;showNotification('Unequipped!')}
-      else{eq[type]=id;showNotification('Equipped '+ACCESSORY_ITEMS.find(a=>a.id===id).name+'!')}
-      LS.set('equippedAccessories',eq);
-      p.closest('.popup-overlay').remove();showInventory();
+  // Filter tabs
+  panel.querySelectorAll('.bp-filter').forEach(function(f){
+    f.onclick=function(){
+      panel.querySelectorAll('.bp-filter').forEach(function(ff){ff.classList.remove('active')});
+      f.classList.add('active');
+      document.getElementById('bp-grid').innerHTML=renderBackpackItems(f.dataset.bpf,ownedSkins,ownedAcc,equipped,ownedWpnIds,lootInv,equippedLoot);
+      attachBackpackHandlers(panel);
     };
   });
-
-  // Equip/unequip weapon in inventory (v20)
-  p.querySelectorAll('[data-action="equip-wpn"]').forEach(el=>{
-    el.onclick=()=>{
-      const wid=el.dataset.id;
-      if(WeaponSystem.equipped&&WeaponSystem.equipped._id===wid){WeaponSystem.unequip();showNotification('Weapon unequipped!')}
-      else{WeaponSystem.equip(wid);const w=WEAPONS.find(w2=>w2.id===wid);showNotification('Equipped '+((w&&w.name)||'weapon')+'!')}
-      p.closest('.popup-overlay').remove();showInventory();
+  // Unequip from equip slots
+  panel.querySelectorAll('[data-unequip]').forEach(function(el){
+    el.onclick=function(){
+      var type=el.dataset.unequip;
+      if(type==='skin')return;// Can't unequip skin
+      if(type==='weapon'){if(WeaponSystem.equipped){WeaponSystem.unequip();showNotification('Weapon unequipped!');renderInventoryPanel()}return}
+      var eq2=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+      if(eq2[type]){eq2[type]=null;LS.set('equippedAccessories',eq2);showNotification('Unequipped!');renderInventoryPanel()}
     };
   });
-
-  // Loot item click — equip/unequip or inspect
-  p.querySelectorAll('.item-card[data-uid]').forEach(el=>{
-    el.onclick=()=>{
-      const uid=el.dataset.uid;
-      const item=lootInv.find(i=>i.id===uid);
-      if(!item)return;
-      const def=getAllLootableItems().find(i=>i.itemId===item.itemId)||{name:'???',icon:'❓'};
-      const r=RARITIES[item.rarity]||RARITIES.common;
-      const eq=LS.get('equippedLoot',{});
-      const isEq=Object.values(eq).includes(uid);
-      
-      let detailHtml='<h3 style="color:'+r.color+'">'+def.icon+' '+def.name+'</h3>';
-      detailHtml+='<span class="rarity-badge '+item.rarity+'">'+r.name+'</span>';
-      detailHtml+='<span style="font-size:9px;color:#888;margin-left:6px">'+item.type+'</span>';
-      if(item.stats&&item.stats.length>0){
-        detailHtml+='<div style="margin:10px 0">';
-        item.stats.forEach(s=>{
-          const st=STAT_TYPES[s.type];
-          const pct=s.value/st.max*100;
-          detailHtml+=`<div style="display:flex;align-items:center;gap:6px;margin:4px 0;font-size:11px"><span>${st.icon}</span><span style="width:60px">${st.name}</span><div style="flex:1;height:6px;background:#333;border-radius:3px"><div style="width:${pct}%;height:100%;background:${r.color};border-radius:3px"></div></div><span style="color:${r.color}">+${s.value}%</span></div>`;
-        });
-        detailHtml+='</div>';
+  attachBackpackHandlers(panel);
+}
+function renderBackpackItems(filter,ownedSkins,ownedAcc,equipped,ownedWpnIds,lootInv,equippedLoot){
+  var html='';
+  // Skins
+  if(filter==='All'||filter==='Skins'){
+    VISITOR_SKINS.filter(function(s){return s.cost===0||ownedSkins.includes(s.id)}).forEach(function(sk){
+      var worn=S.visitor.skin===sk.id;
+      var r=RARITIES[sk.rarity||'common']||RARITIES.common;
+      var rarCls='rarity-'+(sk.rarity||'common');
+      html+='<div class="bp-item '+rarCls+(worn?' equipped-bp':'')+'" data-bp-action="skin" data-id="'+sk.id+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">'
+        +'<div class="bp-icon">'+sk.icon+'</div><div class="bp-name">'+sk.label+'</div>'
+        +'<div class="bp-equip">'+(worn?'WORN':'EQUIP')+'</div></div>';
+    });
+  }
+  // Weapons
+  if(filter==='All'||filter==='Weapons'){
+    ownedWpnIds.forEach(function(wid){
+      var wpn=WEAPONS.find(function(w){return w.id===wid});if(!wpn)return;
+      var isEq=WeaponSystem.equipped&&WeaponSystem.equipped._id===wid;
+      var r=RARITIES[wpn.rarity]||RARITIES.common;
+      html+='<div class="bp-item rarity-'+wpn.rarity+(isEq?' equipped-bp':'')+'" data-bp-action="weapon" data-id="'+wid+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">'
+        +'<div class="bp-icon">'+wpn.icon+'</div><div class="bp-name">'+wpn.name+'</div>'
+        +'<div class="bp-equip">'+(isEq?'ON':'EQUIP')+'</div></div>';
+    });
+  }
+  // Accessories by type
+  var accFilterMap={Hats:'hat',Trails:'trail',Auras:'aura',Pets:'pet'};
+  var accFilter=filter==='All'?null:accFilterMap[filter];
+  ACCESSORY_ITEMS.forEach(function(acc){
+    if(!ownedAcc.includes(acc.id))return;
+    if(accFilter&&acc.type!==accFilter)return;
+    if(filter!=='All'&&!accFilter)return;
+    var isEq=equipped[acc.type]===acc.id;
+    var r=RARITIES[acc.rarity||'common']||RARITIES.common;
+    html+='<div class="bp-item rarity-'+(acc.rarity||'common')+(isEq?' equipped-bp':'')+'" data-bp-action="acc" data-id="'+acc.id+'" data-type="'+acc.type+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">'
+      +'<div class="bp-icon">'+acc.icon+'</div><div class="bp-name">'+acc.name+'</div>'
+      +'<div class="bp-equip">'+(isEq?'ON':'EQUIP')+'</div></div>';
+  });
+  // Loot items
+  if(filter==='All'){
+    lootInv.forEach(function(item){
+      var def=getAllLootableItems().find(function(i){return i.itemId===item.itemId})||{name:'???',icon:'❓'};
+      var r=RARITIES[item.rarity]||RARITIES.common;
+      var isEq=Object.values(equippedLoot).includes(item.id);
+      html+='<div class="bp-item rarity-'+item.rarity+(isEq?' equipped-bp':'')+'" data-bp-action="loot" data-uid="'+item.id+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">'
+        +'<div class="bp-icon">'+def.icon+'</div><div class="bp-name" style="color:'+r.color+'">'+def.name+'</div>'
+        +'<div class="bp-equip">'+(isEq?'ON':'EQUIP')+'</div></div>';
+    });
+  }
+  if(!html)html='<div style="font-size:10px;color:#666;padding:12px;text-align:center">No items. Visit the 🛒 Shop!</div>';
+  return html;
+}
+function attachBackpackHandlers(panel){
+  panel.querySelectorAll('[data-bp-action="skin"]').forEach(function(el){
+    el.onclick=function(){
+      var id=el.dataset.id;
+      closeInventoryPanel();
+      setTimeout(function(){visitorTransform(id)},200);
+    };
+  });
+  panel.querySelectorAll('[data-bp-action="weapon"]').forEach(function(el){
+    el.onclick=function(){
+      var wid=el.dataset.id;
+      if(WeaponSystem.equipped&&WeaponSystem.equipped._id===wid){WeaponSystem.unequip();showNotification('Unequipped!')}
+      else{
+        WeaponSystem.equip(wid);
+        var w=WEAPONS.find(function(w2){return w2.id===wid});
+        showNotification('Equipped '+(w?w.name:'weapon')+'!');
+        closeInventoryPanel();
+        var r=RARITIES[w?w.rarity:'common']||RARITIES.common;
+        setTimeout(function(){equipItemAnimation('weapon',r.color)},150);
       }
-      detailHtml+='<div style="display:flex;gap:6px;margin-top:12px">';
-      detailHtml+=`<button class="drink-btn" id="loot-equip" style="border-color:${isEq?'#ff6666':'#00fff7'};color:${isEq?'#ff6666':'#00fff7'}">${isEq?'Unequip':'Equip'}</button>`;
-      detailHtml+='<button class="drink-btn" id="loot-sell" style="border-color:#ffd700;color:#ffd700">Sell on Market</button>';
-      detailHtml+='</div>';
-      
-      const{p:dp}=createPopup(detailHtml);
-      dp.querySelector('#loot-equip').onclick=()=>{
-        const eq2=LS.get('equippedLoot',{});
-        if(isEq){
-          Object.keys(eq2).forEach(k=>{if(eq2[k]===uid)eq2[k]=null});
-          showNotification('Unequipped!');
-        }else{
-          eq2[item.type]=uid;
-          showNotification('Equipped '+def.name+'!');
-        }
-        LS.set('equippedLoot',eq2);
-        dp.closest('.popup-overlay').remove();
-        p.closest('.popup-overlay').remove();
-        showInventory();
-      };
-      dp.querySelector('#loot-sell').onclick=()=>{
-        const price=prompt(`List ${def.name} for how many ◈? (1-9999)`);
-        if(price&&parseInt(price)>=1){
-          Marketplace.listItem(item,parseInt(price)).then(ok=>{
-            if(ok){dp.closest('.popup-overlay').remove();p.closest('.popup-overlay').remove();showInventory()}
-          });
-        }
-      };
+      renderInventoryPanel();
+    };
+  });
+  panel.querySelectorAll('[data-bp-action="acc"]').forEach(function(el){
+    el.onclick=function(){
+      var eq2=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+      var type=el.dataset.type,id=el.dataset.id;
+      if(eq2[type]===id){eq2[type]=null;LS.set('equippedAccessories',eq2);showNotification('Unequipped!');renderInventoryPanel();return}
+      eq2[type]=id;LS.set('equippedAccessories',eq2);
+      var acc=ACCESSORY_ITEMS.find(function(a){return a.id===id});
+      showNotification('Equipped '+(acc?acc.name:id)+'!');
+      var r=RARITIES[(acc?acc.rarity:'common')]||RARITIES.common;
+      closeInventoryPanel();
+      setTimeout(function(){equipItemAnimation(type,r.color)},150);
+    };
+  });
+  panel.querySelectorAll('[data-bp-action="loot"]').forEach(function(el){
+    el.onclick=function(){
+      var uid=el.dataset.uid;
+      var inv=LS.get('lootInventory',[]);
+      var item=inv.find(function(i){return i.id===uid});if(!item)return;
+      var eq2=LS.get('equippedLoot',{});
+      var isEq=Object.values(eq2).includes(uid);
+      if(isEq){Object.keys(eq2).forEach(function(k){if(eq2[k]===uid)eq2[k]=null});showNotification('Unequipped!')}
+      else{eq2[item.type]=uid;var def=getAllLootableItems().find(function(i){return i.itemId===item.itemId})||{name:'item'};showNotification('Equipped '+def.name+'!')}
+      LS.set('equippedLoot',eq2);renderInventoryPanel();
     };
   });
 }
+// Equip animations for non-skin items
+function equipItemAnimation(itemType,accent){
+  var vx=S.visitor.x,vy=S.visitor.y-15;
+  var col=accent||'#ffd700';
+  if(itemType==='weapon'){
+    // Weapon-swing particle burst
+    for(var i=0;i<16;i++){var a=Math.random()*Math.PI*2;S.particles.push({x:vx+Math.cos(a)*5,y:vy+Math.sin(a)*5,vx:Math.cos(a)*(2+Math.random()*3),vy:Math.sin(a)*(2+Math.random()*3),life:15+Math.random()*10,color:col,size:2+Math.random()*2})}
+  }else if(itemType==='hat'){
+    // Sparkle rain from above
+    for(var i2=0;i2<20;i2++){S.particles.push({x:vx+(Math.random()-.5)*30,y:vy-30,vx:(Math.random()-.5)*.5,vy:Math.random()*2+1,life:25+Math.random()*15,color:i2%2===0?col:'#ffffff',size:1+Math.random()})}
+  }else if(itemType==='trail'){
+    // Trail particles burst outward
+    for(var i3=0;i3<14;i3++){var a3=Math.random()*Math.PI*2;S.particles.push({x:vx,y:vy+15,vx:Math.cos(a3)*(3+Math.random()*2),vy:Math.sin(a3)*1.5,life:18+Math.random()*10,color:col,size:2+Math.random()})}
+  }else if(itemType==='aura'){
+    // Expanding ring
+    for(var i4=0;i4<24;i4++){var a4=i4/24*Math.PI*2;S.particles.push({x:vx+Math.cos(a4)*4,y:vy+Math.sin(a4)*4,vx:Math.cos(a4)*2.5,vy:Math.sin(a4)*2.5,life:20,color:col,size:2})}
+  }else if(itemType==='pet'){
+    // Pop of particles + bright flash
+    for(var i5=0;i5<18;i5++){var a5=Math.random()*Math.PI*2;var r5=Math.random()*3;S.particles.push({x:vx+18+Math.cos(a5)*r5,y:vy+5+Math.sin(a5)*r5,vx:Math.cos(a5)*(1.5+Math.random()*2),vy:Math.sin(a5)*(1.5+Math.random()*2)-.5,life:20+Math.random()*10,color:i5%3===0?'#ffffff':col,size:1.5+Math.random()*1.5})}
+  }
+}
+// Legacy showInventory fallback — opens RPG panel
+function showInventory(){toggleInventoryPanel()}
 
 function showEarnInfo(){
   createPopup('<h3>💰 How to Earn ◈</h3>'+
@@ -6593,48 +6783,79 @@ function renderVisitorAccessories(cx,v){
   if(eq.pet){
     const petItem=ACCESSORY_ITEMS.find(a=>a.id===eq.pet);
     if(petItem){
-      // Pet follows with a bobbing motion
-      const petState=S._petState||(S._petState={x:v.x+18,y:v.y+5});
-      const tgtX=v.x+18,tgtY=v.y+5;
-      petState.x+=(tgtX-petState.x)*.08;
-      petState.y+=(tgtY-petState.y)*.08;
-      const bob=Math.sin(S.time*3)*2;
-      const px=petState.x,py=petState.y+bob;
-
-      if(eq.pet==='pet_robot'){
-        // Tiny robot
-        cx.fillStyle='#c0c0c0';cx.fillRect(px-4,py-8,8,6);// head
-        cx.fillStyle='#ff0000';cx.fillRect(px-1,py-7,2,1);cx.fillRect(px+1,py-7,2,1);// eyes
-        cx.fillStyle='#a0a0a0';cx.fillRect(px-5,py-2,10,6);// body
-        cx.fillStyle='#808080';cx.fillRect(px-3,py+4,2,3);cx.fillRect(px+1,py+4,2,3);// legs
-        // Antenna
-        cx.fillStyle='#ffd700';cx.fillRect(px,py-11,1,3);
-        cx.fillStyle=`rgba(255,215,0,${.5+Math.sin(S.time*6)*.3})`;cx.fillRect(px-1,py-12,3,2);
-      }else if(eq.pet==='pet_fairy'){
-        // Tiny fairy
-        cx.fillStyle='#ff69b4';cx.beginPath();cx.arc(px,py-4,3,0,Math.PI*2);cx.fill();// body
-        cx.fillStyle=`rgba(255,215,0,${.4+Math.sin(S.time*4)*.3})`;
-        // Wings
-        cx.beginPath();cx.ellipse(px-4,py-5,3,5,-.3,0,Math.PI*2);cx.fill();
-        cx.beginPath();cx.ellipse(px+4,py-5,3,5,.3,0,Math.PI*2);cx.fill();
-        // Sparkle trail
-        if(Math.random()<.3)S.particles.push({x:px+(Math.random()-.5)*6,y:py-4,vx:(Math.random()-.5),vy:Math.random()*.5,life:12,color:'#ffd700',size:1});
-      }else if(eq.pet==='pet_shadow'){
-        // Shadow Clone — dark copy that follows with delay
-        if(!S._shadowHistory)S._shadowHistory=[];
-        S._shadowHistory.push({x:v.x,y:v.y,dir:v.dir,t:S.time});
-        if(S._shadowHistory.length>30)S._shadowHistory.shift();
-        const delayed=S._shadowHistory[0]||{x:v.x,y:v.y,dir:v.dir};
-        const sx=delayed.x+20,sy=delayed.y;
-        cx.globalAlpha=0.35;
-        cx.fillStyle='#1a1a2a';
-        cx.fillRect(sx-8,sy-30,16,24);// body
-        cx.fillRect(sx-6,sy-36,12,8);// head
-        cx.fillStyle='#4a4a6a';
-        cx.fillRect(sx-4,sy-34,3,2);cx.fillRect(sx+1,sy-34,3,2);// eyes
+      // Fairy pets orbit the player; standard pets follow at offset
+      const isFairy=!!petItem.fairyElement||eq.pet==='pet_fairy';
+      if(isFairy){
+        // Orbiting fairy pet
+        const orbitR=25,orbitSpeed=1.2;
+        const angle=S.time*orbitSpeed;
+        const bobY=Math.sin(S.time*3.5)*3;
+        const fx=v.x+Math.cos(angle)*orbitR;
+        const fy=v.y-15+Math.sin(angle)*orbitR*0.4+bobY;
+        const fCol=petItem.petColor||'#ff69b4';
+        const fAccent=petItem.petAccent||'#ffd700';
+        const fColors=petItem.fairyColors||['#ffd700','#ff69b4'];
+        const wingFlutter=Math.sin(S.time*8)>0;
+        // Glow
+        cx.save();
+        const grd=cx.createRadialGradient(fx,fy-2,0,fx,fy-2,10);
+        grd.addColorStop(0,fCol+'88');grd.addColorStop(1,fCol+'00');
+        cx.fillStyle=grd;cx.beginPath();cx.arc(fx,fy-2,10,0,Math.PI*2);cx.fill();
+        // Body (orb)
+        cx.fillStyle=fCol;cx.beginPath();cx.arc(fx,fy-2,3,0,Math.PI*2);cx.fill();
+        // Inner bright core
+        cx.fillStyle=fAccent;cx.globalAlpha=.6+Math.sin(S.time*4)*.3;
+        cx.beginPath();cx.arc(fx,fy-2,1.5,0,Math.PI*2);cx.fill();
         cx.globalAlpha=1;
-        // Dark particles
-        if(Math.random()<.2)S.particles.push({x:sx+(Math.random()-.5)*8,y:sy-15,vx:0,vy:-0.5,life:15,color:'rgba(26,26,42,0.6)',size:2});
+        // Wings (2 small triangles, flutter)
+        const wSize=wingFlutter?4:3;const wAngle=wingFlutter?0.4:0.25;
+        cx.fillStyle=fCol+'88';
+        cx.beginPath();cx.moveTo(fx-2,fy-3);cx.lineTo(fx-2-wSize,fy-3-wSize);cx.lineTo(fx-2,fy-3+1);cx.closePath();cx.fill();
+        cx.beginPath();cx.moveTo(fx+2,fy-3);cx.lineTo(fx+2+wSize,fy-3-wSize);cx.lineTo(fx+2,fy-3+1);cx.closePath();cx.fill();
+        cx.restore();
+        // Element-colored particle trail
+        if(Math.random()<.35){
+          const pc=fColors[Math.floor(Math.random()*fColors.length)];
+          let pvx=(Math.random()-.5)*.8,pvy=0,plife=14+Math.random()*8,psz=1+Math.random();
+          const elem=petItem.fairyElement||'';
+          if(elem==='fire'){pvy=-Math.random()*1.2-.3;psz=1.5+Math.random();}
+          else if(elem==='ice'){pvx=(Math.random()-.5)*.4;pvy=Math.random()*.3;plife=18+Math.random()*10;psz=1;}
+          else if(elem==='earth'){pvx=(Math.random()-.5)*1.2;pvy=-Math.random()*.5;plife=20;}
+          else if(elem==='lightning'){pvx=(Math.random()-.5)*2;pvy=(Math.random()-.5)*2;plife=6+Math.random()*6;psz=1+Math.random()*1.5;}
+          else if(elem==='dark'){pvx=(Math.random()-.5)*.5;pvy=Math.random()*.4;plife=18;psz=1.5;}
+          else if(elem==='light'){pvx=(Math.random()-.5)*1;pvy=-Math.random()*.8;plife=16;psz=1+Math.random();}
+          S.particles.push({x:fx+(Math.random()-.5)*4,y:fy-2,vx:pvx,vy:pvy,life:plife,color:pc,size:psz});
+        }
+      }else{
+        // Standard pet follow behavior
+        const petState=S._petState||(S._petState={x:v.x+18,y:v.y+5});
+        const tgtX=v.x+18,tgtY=v.y+5;
+        petState.x+=(tgtX-petState.x)*.08;
+        petState.y+=(tgtY-petState.y)*.08;
+        const bob=Math.sin(S.time*3)*2;
+        const px=petState.x,py=petState.y+bob;
+
+        if(eq.pet==='pet_robot'){
+          cx.fillStyle='#c0c0c0';cx.fillRect(px-4,py-8,8,6);
+          cx.fillStyle='#ff0000';cx.fillRect(px-1,py-7,2,1);cx.fillRect(px+1,py-7,2,1);
+          cx.fillStyle='#a0a0a0';cx.fillRect(px-5,py-2,10,6);
+          cx.fillStyle='#808080';cx.fillRect(px-3,py+4,2,3);cx.fillRect(px+1,py+4,2,3);
+          cx.fillStyle='#ffd700';cx.fillRect(px,py-11,1,3);
+          cx.fillStyle=`rgba(255,215,0,${.5+Math.sin(S.time*6)*.3})`;cx.fillRect(px-1,py-12,3,2);
+        }else if(eq.pet==='pet_shadow'){
+          if(!S._shadowHistory)S._shadowHistory=[];
+          S._shadowHistory.push({x:v.x,y:v.y,dir:v.dir,t:S.time});
+          if(S._shadowHistory.length>30)S._shadowHistory.shift();
+          const delayed=S._shadowHistory[0]||{x:v.x,y:v.y,dir:v.dir};
+          const sx=delayed.x+20,sy=delayed.y;
+          cx.globalAlpha=0.35;
+          cx.fillStyle='#1a1a2a';
+          cx.fillRect(sx-8,sy-30,16,24);cx.fillRect(sx-6,sy-36,12,8);
+          cx.fillStyle='#4a4a6a';
+          cx.fillRect(sx-4,sy-34,3,2);cx.fillRect(sx+1,sy-34,3,2);
+          cx.globalAlpha=1;
+          if(Math.random()<.2)S.particles.push({x:sx+(Math.random()-.5)*8,y:sy-15,vx:0,vy:-0.5,life:15,color:'rgba(26,26,42,0.6)',size:2});
+        }
       }
     }
   }
@@ -7605,7 +7826,7 @@ function initInput(){
   $('#chat-input').onkeydown=e=>{if(e.key==='Enter')$('#chat-send').click()};
   // HUD buttons
   $('#btn-shop').onclick=showItemShop;
-  $('#btn-inventory').onclick=showInventory;
+  $('#btn-inventory').onclick=toggleInventoryPanel;
   $('#btn-spacewalk').onclick=()=>{if(S.spacewalk.active){S.spacewalk.active=false;$('#btn-spacewalk').classList.remove('active');const eb=document.getElementById('eva-exit-btn');if(eb)eb.style.display='none';showThought('Back inside the station. 🛸')}else{toggleSpacewalk()}};
   $('#btn-visitor-skin').onclick=showVisitorSkinPanel;
   $('#btn-skin').onclick=showSkinPanel;
@@ -7638,7 +7859,7 @@ function initInput(){
     if(k==='ArrowDown'||k==='s'||k==='S')S.keys.down=true;
     if(k==='ArrowLeft'||k==='a'||k==='A')S.keys.left=true;
     if(k==='ArrowRight'||k==='d'||k==='D')S.keys.right=true;
-    if(k==='Escape'){e.preventDefault();if(S.spacewalk.active)toggleSpacewalk();if(document.querySelector('.popup-overlay'))document.querySelector('.popup-overlay').remove()}
+    if(k==='Escape'){e.preventDefault();if(document.getElementById('rpg-inventory').classList.contains('open')){closeInventoryPanel();return}if(S.spacewalk.active)toggleSpacewalk();if(document.querySelector('.popup-overlay'))document.querySelector('.popup-overlay').remove()}
     if(k===' '){e.preventDefault();visitorInteract()}
     if((k==='e'||k==='E')){
       e.preventDefault();
@@ -7682,6 +7903,7 @@ function initInput(){
         swingSaber();
       }
     }
+    if(k==='i'||k==='I'){e.preventDefault();toggleInventoryPanel()}
     if((k==='q'||k==='Q')){
       e.preventDefault();
       if(DuelSystem.active){
