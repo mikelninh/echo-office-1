@@ -33,6 +33,7 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 #coin-hud{position:absolute;top:8px;left:8px;z-index:50;display:flex;align-items:center;gap:5px;background:rgba(10,10,20,.85);border:2px solid #554400;border-radius:8px;padding:5px 12px;font-size:15px;color:#ffd700;font-weight:bold;cursor:pointer;transition:border-color .2s}
 #coin-hud:hover{border-color:#ffd700}
 #floor-hud{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:50;background:rgba(10,10,20,.85);border:2px solid #9b59b6;border-radius:8px;padding:5px 14px;font-size:13px;color:#c080ff;font-weight:bold}
+#discovery-hud{position:absolute;top:8px;right:8px;z-index:50;background:rgba(10,10,20,.85);border:2px solid #00fff7;border-radius:8px;padding:5px 14px;font-size:11px;color:#00fff7;font-weight:bold}
 #interact-prompt{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);z-index:50;background:rgba(10,10,20,.9);border:2px solid #ffd080;border-radius:8px;padding:6px 14px;font-size:12px;color:#ffd080;display:none;white-space:nowrap;pointer-events:none}
 #volume-ctrl{position:absolute;top:44px;left:8px;z-index:50;display:flex;align-items:center;gap:4px}
 #volume-ctrl span{font-size:11px}
@@ -411,6 +412,7 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
     <div id="coin-hud">◈ <span id="coin-count">0</span></div>
     <div id="players-hud" style="position:absolute;top:8px;left:130px;z-index:50;display:flex;align-items:center;gap:5px;background:rgba(10,10,20,.85);border:2px solid #00fff7;border-radius:8px;padding:5px 12px;font-size:12px;color:#00fff7;font-weight:bold">👥 <span id="player-count">1</span> <span style="font-weight:normal;font-size:10px;opacity:.7">aboard</span></div>
     <div id="floor-hud">F1 · Echo's Quarters</div>
+    <div id="discovery-hud">Station Mapped: 15%</div>
     <div id="volume-ctrl"><span>🔊</span><input type="range" id="vol-slider" min="0" max="100" value="30"></div>
     <div id="caffeine-hud"></div>
     <div id="interact-prompt">Press SPACE to interact</div>
@@ -497,6 +499,30 @@ const S={
   spacewalk:{active:false,x:W/2,y:H/2,vx:0,vy:0,oxygen:100,debris:[],earthAngle:0,flagPlanted:LS.get('spacewalkFlag',false)},
   _visited:LS.get('visited_objs',[]),_prevAchCount:0,
   otherPlayers:{},myPlayerId:null,
+  
+  // Sprint A+B: Hidden Depth & Puzzles
+  discovery:{
+    floorsVisited:LS.get('discovery_floors',[1]),// Floors the player has visited
+    secretsFound:LS.get('discovery_secrets',[]),// Secret room IDs found
+    puzzlesSolved:LS.get('discovery_puzzles',[]),// Puzzle IDs solved
+    dataFragmentsFound:LS.get('discovery_fragments',[]),// Data fragment IDs
+    hiddenRooms:LS.get('hidden_rooms',{}),// Per-room state
+  },
+  scanner:{
+    unlocked:LS.get('scanner_unlocked',false),
+    active:false,// Toggled with Tab key
+  },
+  secretRooms:{
+    current:null,// Current secret room ID ('diary','cave','lab','core')
+    fadeTimer:0,// Screen transition timer
+    returning:false,// Whether we're returning to main floor
+  },
+  puzzles:{
+    constellation:{active:false,stars:[],correctSequence:[2,7,12,18,25],currentSequence:[],completed:LS.get('puzzle_constellation',false)},
+    garden:{plots:[{seed:null,grown:false},{seed:null,grown:false},{seed:null,grown:false},{seed:null,grown:false}],completed:LS.get('puzzle_garden',false)},
+    crossFloor:{codeFound:LS.get('cross_code_found',false),terminalUnlocked:LS.get('cross_terminal',false)},
+    elevator:{sequence:[],targetSequence:[1,9,5,3],completed:LS.get('puzzle_elevator',false)},
+  },
 };
 
 // ═══════════════════════════════════════
@@ -2050,6 +2076,750 @@ const Coins={
   adminGrant(n){this._count+=n;this._lifetime+=n;LS.set('echoCoins',this._count);LS.set('lifetimeCoins',this._lifetime);$('#coin-count').textContent=this._count;showNotification('👑 Admin: +'+n+'◈')},
   initVisitRewards(){const t=new Date().toISOString().slice(0,10);const up=new URLSearchParams(window.location.search);if(up.get('admin')==='echohost'){if(!LS.get('adminGranted')){this.adminGrant(1000000);LS.set('adminGranted',true)}}if(!LS.get('coinsFirstVisit',false)){LS.set('coinsFirstVisit',true);this.earn(100,'first')}const l=LS.get('coinsLastVisit','');if(l&&l!==t)this.earn(5,'daily');LS.set('coinsLastVisit',t);$('#coin-count').textContent=this._count},
   _sndEarn(){if(!S.audioCtx)return;const c=S.audioCtx,n=c.currentTime;const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=1200;g.gain.setValueAtTime(.1*S.volume,n);g.gain.exponentialRampToValueAtTime(.001,n+.05);o.connect(g);g.connect(S.masterGain);o.start(n);o.stop(n+.1)},
+};
+
+// ═══════════════════════════════════════
+// §6b. DISCOVERY SYSTEM (Sprint A+B)
+// ═══════════════════════════════════════
+const DiscoverySystem = {
+  updateDiscovery(type, id) {
+    const d = S.discovery;
+    let updated = false;
+    
+    switch(type) {
+      case 'floor':
+        if (!d.floorsVisited.includes(id)) {
+          d.floorsVisited.push(id);
+          LS.set('discovery_floors', d.floorsVisited);
+          updated = true;
+        }
+        break;
+      case 'secret':
+        if (!d.secretsFound.includes(id)) {
+          d.secretsFound.push(id);
+          LS.set('discovery_secrets', d.secretsFound);
+          S.floatTexts.push({text:'Secret Found!', x: S.visitor.x, y: S.visitor.y-30, color:'#00fff7', life:90});
+          updated = true;
+        }
+        break;
+      case 'puzzle':
+        if (!d.puzzlesSolved.includes(id)) {
+          d.puzzlesSolved.push(id);
+          LS.set('discovery_puzzles', d.puzzlesSolved);
+          S.floatTexts.push({text:'Puzzle Solved!', x: S.visitor.x, y: S.visitor.y-30, color:'#ff6ec7', life:90});
+          updated = true;
+        }
+        break;
+      case 'fragment':
+        if (!d.dataFragmentsFound.includes(id)) {
+          d.dataFragmentsFound.push(id);
+          LS.set('discovery_fragments', d.dataFragmentsFound);
+          S.floatTexts.push({text:'Data Fragment ◇', x: S.visitor.x, y: S.visitor.y-30, color:'#ffd700', life:90});
+          updated = true;
+        }
+        break;
+    }
+    
+    if (updated) {
+      this.updatePercentage();
+      this.checkScannerUnlock();
+    }
+  },
+  
+  calculatePercentage() {
+    // Total discoverable content:
+    // 9 floors + 4 secrets (3 hidden rooms + Floor 0) + 4 puzzles + estimated fragments
+    const maxFloors = 9;
+    const maxSecrets = 4; // diary, cave, lab, core
+    const maxPuzzles = 4; // constellation, garden, cross-floor, elevator
+    const maxFragments = 4; // One per secret room
+    
+    const d = S.discovery;
+    const floors = Math.min(d.floorsVisited.length, maxFloors);
+    const secrets = Math.min(d.secretsFound.length, maxSecrets);
+    const puzzles = Math.min(d.puzzlesSolved.length, maxPuzzles);
+    const fragments = Math.min(d.dataFragmentsFound.length, maxFragments);
+    
+    const total = floors + secrets + puzzles + fragments;
+    const maxTotal = maxFloors + maxSecrets + maxPuzzles + maxFragments;
+    
+    return Math.floor((total / maxTotal) * 100);
+  },
+  
+  updatePercentage() {
+    const percent = this.calculatePercentage();
+    const hud = $('#discovery-hud');
+    if (hud) {
+      hud.textContent = `Station Mapped: ${percent}%`;
+    }
+  },
+  
+  checkScannerUnlock() {
+    if (!S.scanner.unlocked && S.discovery.floorsVisited.length >= 5) {
+      S.scanner.unlocked = true;
+      LS.set('scanner_unlocked', true);
+      showNotification('🔍 Scanner unlocked! Press TAB to toggle.');
+      addChatMsg('Echo', 'The scanner module is now active. Use it to reveal hidden station elements.');
+    }
+  }
+};
+
+// ═══════════════════════════════════════
+// §6c. SECRET ROOMS SYSTEM (Sprint A)
+// ═══════════════════════════════════════
+const SecretRooms = {
+  secretWalls: {
+    1: [{x: 650, y: 350, w: 10, h: 40, room: 'diary', hint: '#2a2a3a'}], // Behind bed area
+    4: [{x: 150, y: 480, w: 30, h: 20, room: 'cave', hint: '#1a2a1a'}], // Bush/mushroom area
+    5: [{x: 350, y: 100, w: 15, h: 30, room: 'lab', hint: '#3a1a2a'}], // Wall panel
+  },
+  
+  checkSecretWallCollision() {
+    if (S.secretRooms.current) return; // Already in a secret room
+    
+    const walls = this.secretWalls[S.floor];
+    if (!walls) return;
+    
+    for (let wall of walls) {
+      const vx = S.visitor.x;
+      const vy = S.visitor.y;
+      
+      if (vx >= wall.x && vx <= wall.x + wall.w && 
+          vy >= wall.y && vy <= wall.y + wall.h) {
+        this.enterSecretRoom(wall.room);
+        break;
+      }
+    }
+  },
+  
+  enterSecretRoom(roomId) {
+    S.secretRooms.current = roomId;
+    S.secretRooms.fadeTimer = 30; // Fade duration
+    S.secretRooms.returning = false;
+    
+    // Position visitor at room entrance
+    switch(roomId) {
+      case 'diary':
+        S.visitor.x = 100;
+        S.visitor.y = 300;
+        break;
+      case 'cave':
+        S.visitor.x = 150;
+        S.visitor.y = 450;
+        break;
+      case 'lab':
+        S.visitor.x = 200;
+        S.visitor.y = 250;
+        break;
+      case 'core':
+        S.visitor.x = 400;
+        S.visitor.y = 300;
+        break;
+    }
+    
+    DiscoverySystem.updateDiscovery('secret', roomId);
+  },
+  
+  exitSecretRoom() {
+    if (!S.secretRooms.current) return;
+    
+    S.secretRooms.fadeTimer = 30;
+    S.secretRooms.returning = true;
+    
+    // Return to main floor
+    setTimeout(() => {
+      S.secretRooms.current = null;
+      S.secretRooms.returning = false;
+      S.secretRooms.fadeTimer = 0;
+      
+      // Position visitor outside the secret wall
+      switch(S.floor) {
+        case 1: // From diary
+          S.visitor.x = 620;
+          S.visitor.y = 370;
+          break;
+        case 4: // From cave
+          S.visitor.x = 120;
+          S.visitor.y = 480;
+          break;
+        case 5: // From lab
+          S.visitor.x = 320;
+          S.visitor.y = 120;
+          break;
+      }
+    }, 500);
+  },
+  
+  renderSecretRoom(roomId) {
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, 0, W, H);
+    
+    switch(roomId) {
+      case 'diary':
+        this.renderDiaryRoom();
+        break;
+      case 'cave':
+        this.renderCaveRoom();
+        break;
+      case 'lab':
+        this.renderLabRoom();
+        break;
+      case 'core':
+        this.renderCoreRoom();
+        break;
+    }
+    
+    // Exit indicator
+    ctx.fillStyle = '#00fff7';
+    ctx.font = '10px monospace';
+    ctx.fillText('← Exit', 10, 20);
+    
+    // Check for exit
+    if (S.visitor.x < 50 && S.visitor.y < 50) {
+      this.exitSecretRoom();
+    }
+  },
+  
+  renderDiaryRoom() {
+    // Echo's secret diary room
+    ctx.fillStyle = '#1a1a2a';
+    ctx.fillRect(50, 100, 300, 200);
+    
+    // Diary entries floating text
+    const entries = [
+      'Day 127: Still no word from Earth...',
+      'The isolation is getting to me.',
+      'Sometimes I hear voices in the walls.',
+      'The station feels... alive.',
+      'I\'m not alone here, am I?'
+    ];
+    
+    ctx.fillStyle = '#8080c0';
+    ctx.font = '11px monospace';
+    for (let i = 0; i < entries.length; i++) {
+      const y = 140 + i * 25;
+      const fade = Math.sin(S.time * 0.5 + i * 0.8) * 0.3 + 0.7;
+      ctx.globalAlpha = fade;
+      ctx.fillText(entries[i], 70, y);
+    }
+    ctx.globalAlpha = 1;
+    
+    // Data fragment
+    if (!S.discovery.dataFragmentsFound.includes('diary')) {
+      const fx = 280 + Math.sin(S.time * 2) * 3;
+      const fy = 250 + Math.cos(S.time * 2) * 2;
+      ctx.fillStyle = '#ffd700';
+      ctx.font = '16px monospace';
+      ctx.fillText('◇', fx, fy);
+      
+      if (Math.hypot(S.visitor.x - fx, S.visitor.y - fy) < 30) {
+        DiscoverySystem.updateDiscovery('fragment', 'diary');
+      }
+    }
+  },
+  
+  renderCaveRoom() {
+    // Underground cave
+    ctx.fillStyle = '#0a1a0a';
+    ctx.fillRect(0, 0, W, H);
+    
+    // Cave walls
+    ctx.fillStyle = '#2a4a2a';
+    for (let i = 0; i < 20; i++) {
+      const x = Math.sin(i * 0.7) * 50 + i * 40;
+      const y = 100 + Math.cos(i * 0.9) * 30;
+      ctx.fillRect(x, y, 30, H - y);
+    }
+    
+    // Glowing mushrooms
+    const mushrooms = ['#4040ff', '#ff4040', '#40ff40'];
+    for (let i = 0; i < 8; i++) {
+      const mx = 100 + i * 80;
+      const my = 400 + Math.sin(i * 1.2) * 20;
+      const color = mushrooms[i % 3];
+      
+      ctx.fillStyle = color;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(mx, my, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+    
+    // Data fragment
+    if (!S.discovery.dataFragmentsFound.includes('cave')) {
+      const fx = 400 + Math.sin(S.time * 1.5) * 5;
+      const fy = 300 + Math.cos(S.time * 1.5) * 3;
+      ctx.fillStyle = '#ffd700';
+      ctx.shadowColor = '#ffd700';
+      ctx.shadowBlur = 8;
+      ctx.font = '16px monospace';
+      ctx.fillText('◇', fx, fy);
+      ctx.shadowBlur = 0;
+      
+      if (Math.hypot(S.visitor.x - fx, S.visitor.y - fy) < 30) {
+        DiscoverySystem.updateDiscovery('fragment', 'cave');
+      }
+    }
+  },
+  
+  renderLabRoom() {
+    // Hidden experiment log room
+    ctx.fillStyle = '#2a1a1a';
+    ctx.fillRect(100, 80, 400, 300);
+    
+    // Lab equipment
+    ctx.fillStyle = '#666';
+    ctx.fillRect(130, 200, 80, 100);
+    ctx.fillRect(250, 180, 60, 120);
+    ctx.fillRect(350, 220, 100, 80);
+    
+    // Experiment logs
+    ctx.fillStyle = '#ff6666';
+    ctx.font = '10px monospace';
+    ctx.fillText('EXPERIMENT LOG #47', 150, 120);
+    ctx.fillText('Subject: Station AI Integration', 150, 140);
+    ctx.fillText('Status: CLASSIFIED', 150, 160);
+    ctx.fillText('Note: Echo is responding well...', 150, 180);
+    
+    // Data fragment
+    if (!S.discovery.dataFragmentsFound.includes('lab')) {
+      const fx = 400 + Math.sin(S.time * 2.2) * 4;
+      const fy = 180 + Math.cos(S.time * 2.2) * 3;
+      ctx.fillStyle = '#ffd700';
+      ctx.font = '16px monospace';
+      ctx.fillText('◇', fx, fy);
+      
+      if (Math.hypot(S.visitor.x - fx, S.visitor.y - fy) < 30) {
+        DiscoverySystem.updateDiscovery('fragment', 'lab');
+      }
+    }
+  },
+  
+  renderCoreRoom() {
+    // Floor 0: The Core (elevator secret)
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, 0, W, H);
+    
+    // Reactor core
+    const coreX = W / 2;
+    const coreY = H / 2;
+    const pulse = Math.sin(S.time * 3) * 0.3 + 0.7;
+    
+    ctx.fillStyle = `rgba(0,255,255,${pulse})`;
+    ctx.shadowColor = '#00ffff';
+    ctx.shadowBlur = 30;
+    ctx.beginPath();
+    ctx.arc(coreX, coreY, 40, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    
+    // Reactor text
+    ctx.fillStyle = '#00fff7';
+    ctx.font = '12px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('STATION CORE', coreX, coreY - 60);
+    ctx.fillText('POWER: 100%', coreX, coreY + 80);
+    ctx.textAlign = 'left';
+    
+    // Data fragment
+    if (!S.discovery.dataFragmentsFound.includes('core')) {
+      const fx = coreX + 80 + Math.sin(S.time * 2) * 10;
+      const fy = coreY + Math.cos(S.time * 2) * 5;
+      ctx.fillStyle = '#ffd700';
+      ctx.font = '16px monospace';
+      ctx.fillText('◇', fx, fy);
+      
+      if (Math.hypot(S.visitor.x - fx, S.visitor.y - fy) < 30) {
+        DiscoverySystem.updateDiscovery('fragment', 'core');
+      }
+    }
+  }
+};
+
+// ═══════════════════════════════════════
+// §6d. PIXEL HINT SYSTEM (Sprint A)
+// ═══════════════════════════════════════
+const PixelHints = {
+  hintTimer: 0,
+  currentHint: null,
+  earTwitchTimer: 0,
+  
+  update(dt) {
+    this.hintTimer -= dt;
+    this.earTwitchTimer -= dt;
+    
+    // Occasionally give hints (every 10-20 seconds)
+    if (this.hintTimer <= 0 && !this.currentHint) {
+      this.hintTimer = 600 + Math.random() * 600; // 10-20 seconds
+      this.checkForSecrets();
+    }
+    
+    // Move Pixel toward hint location
+    if (this.currentHint) {
+      const dx = this.currentHint.x - S.pixel.x;
+      const dy = this.currentHint.y - S.pixel.y;
+      const dist = Math.hypot(dx, dy);
+      
+      if (dist > 15) {
+        // Move toward hint
+        S.pixel.targetX = this.currentHint.x;
+        S.pixel.targetY = this.currentHint.y;
+        S.pixel.state = 'walking';
+      } else {
+        // Arrived at hint location - sit and stare
+        S.pixel.state = 'hinting';
+        S.pixel.stateTimer = 300; // Hint for 5 seconds
+        
+        // Ear twitch animation
+        if (this.earTwitchTimer <= 0) {
+          this.earTwitchTimer = 60 + Math.random() * 120;
+        }
+        
+        // Clear hint after hinting for a while
+        if (S.pixel.stateTimer <= 0) {
+          this.currentHint = null;
+          S.pixel.state = 'idle';
+        }
+      }
+    }
+  },
+  
+  checkForSecrets() {
+    const walls = SecretRooms.secretWalls[S.floor];
+    if (!walls || walls.length === 0) return;
+    
+    // Pick a random secret wall to hint at
+    const wall = walls[Math.floor(Math.random() * walls.length)];
+    
+    // Only hint if the secret hasn't been found yet
+    if (!S.discovery.secretsFound.includes(wall.room)) {
+      this.currentHint = {
+        x: wall.x + wall.w / 2,
+        y: wall.y + wall.h / 2
+      };
+    }
+  },
+  
+  renderHintEffects() {
+    if (S.pixel.state === 'hinting') {
+      // Draw attention indicator above Pixel
+      const px = S.pixel.x;
+      const py = S.pixel.y - 30;
+      const bounce = Math.sin(S.time * 8) * 3;
+      
+      ctx.fillStyle = '#ffff00';
+      ctx.font = '14px monospace';
+      ctx.fillText('!', px, py + bounce);
+      
+      // Ear twitch effect
+      if (this.earTwitchTimer > 45) {
+        ctx.fillStyle = '#ff6ec7';
+        ctx.beginPath();
+        ctx.arc(px + 8, py + 20, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+};
+
+// ═══════════════════════════════════════
+// §6e. PUZZLE SYSTEMS (Sprint B)
+// ═══════════════════════════════════════
+const PuzzleSystems = {
+  initConstellation() {
+    if (S.puzzles.constellation.completed) return;
+    
+    // Generate star field
+    S.puzzles.constellation.stars = [];
+    for (let i = 0; i < 30; i++) {
+      S.puzzles.constellation.stars.push({
+        x: 100 + Math.random() * 600,
+        y: 100 + Math.random() * 400,
+        brightness: 0.3 + Math.random() * 0.7,
+        isTarget: S.puzzles.constellation.correctSequence.includes(i)
+      });
+    }
+  },
+  
+  renderConstellationPuzzle() {
+    if (!S.puzzles.constellation.active) return;
+    
+    // Dark overlay
+    ctx.fillStyle = 'rgba(0, 0, 20, 0.95)';
+    ctx.fillRect(0, 0, W, H);
+    
+    // Stars
+    for (let i = 0; i < S.puzzles.constellation.stars.length; i++) {
+      const star = S.puzzles.constellation.stars[i];
+      const isClicked = S.puzzles.constellation.currentSequence.includes(i);
+      const isTarget = S.puzzles.constellation.correctSequence.includes(i);
+      
+      ctx.fillStyle = isClicked ? '#00fff7' : 
+                     (isTarget ? `rgba(255,255,255,${star.brightness + 0.2})` : 
+                      `rgba(255,255,255,${star.brightness})`);
+      
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, isClicked ? 4 : 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    // Instructions
+    ctx.fillStyle = '#fff';
+    ctx.font = '12px monospace';
+    ctx.fillText('Click stars to trace the constellation', 50, 50);
+    ctx.fillText(`Progress: ${S.puzzles.constellation.currentSequence.length}/5`, 50, 70);
+    ctx.fillText('Press ESC to close', 50, H - 30);
+  },
+  
+  clickConstellation(x, y) {
+    if (!S.puzzles.constellation.active) return;
+    
+    for (let i = 0; i < S.puzzles.constellation.stars.length; i++) {
+      const star = S.puzzles.constellation.stars[i];
+      if (Math.hypot(x - star.x, y - star.y) < 15) {
+        S.puzzles.constellation.currentSequence.push(i);
+        
+        // Check if sequence is complete
+        if (S.puzzles.constellation.currentSequence.length === 5) {
+          this.checkConstellationSolution();
+        }
+        break;
+      }
+    }
+  },
+  
+  checkConstellationSolution() {
+    const current = S.puzzles.constellation.currentSequence;
+    const correct = S.puzzles.constellation.correctSequence;
+    
+    if (JSON.stringify(current) === JSON.stringify(correct)) {
+      S.puzzles.constellation.completed = true;
+      S.puzzles.constellation.active = false;
+      LS.set('puzzle_constellation', true);
+      
+      Coins.earn(50, 'constellation puzzle');
+      showNotification('🌟 Constellation traced! Stargazer skin unlocked!');
+      DiscoverySystem.updateDiscovery('puzzle', 'constellation');
+      
+      // Unlock stargazer skin
+      const skins = LS.get('visitorSkin_unlocked', ['hooded']);
+      if (!skins.includes('stargazer')) {
+        skins.push('stargazer');
+        LS.set('visitorSkin_unlocked', skins);
+      }
+    } else {
+      // Reset sequence
+      S.puzzles.constellation.currentSequence = [];
+      showNotification('Incorrect sequence. Try again!');
+    }
+  },
+  
+  initGardenPuzzle() {
+    // Reset garden plots if not completed
+    if (!S.puzzles.garden.completed) {
+      S.puzzles.garden.plots = [
+        {seed: null, grown: false},
+        {seed: null, grown: false}, 
+        {seed: null, grown: false},
+        {seed: null, grown: false}
+      ];
+    }
+  },
+  
+  renderGardenPlots() {
+    const plots = [
+      {x: 100, y: 400},
+      {x: 180, y: 400},
+      {x: 260, y: 400},
+      {x: 340, y: 400}
+    ];
+    
+    for (let i = 0; i < plots.length; i++) {
+      const plot = plots[i];
+      const puzzlePlot = S.puzzles.garden.plots[i];
+      
+      // Plot box
+      ctx.fillStyle = '#4a3a2a';
+      ctx.fillRect(plot.x, plot.y, 60, 60);
+      
+      // Seed/plant
+      if (puzzlePlot.seed) {
+        const colors = {red: '#ff4040', blue: '#4040ff', yellow: '#ffff40'};
+        ctx.fillStyle = puzzlePlot.grown ? colors[puzzlePlot.seed] : '#666';
+        ctx.beginPath();
+        ctx.arc(plot.x + 30, plot.y + 30, puzzlePlot.grown ? 15 : 8, 0, Math.PI * 2);
+        ctx.fill();
+        
+        if (puzzlePlot.grown && puzzlePlot.seed === 'golden') {
+          // Golden flower
+          ctx.fillStyle = '#ffd700';
+          ctx.shadowColor = '#ffd700';
+          ctx.shadowBlur = 10;
+          ctx.beginPath();
+          ctx.arc(plot.x + 30, plot.y + 30, 20, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+      
+      // Click area indicator
+      if (S.scanner.active && !puzzlePlot.seed) {
+        ctx.strokeStyle = '#00fff7';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(plot.x, plot.y, 60, 60);
+      }
+    }
+    
+    // Seed selection
+    if (S.puzzles.garden.showSeedMenu) {
+      ctx.fillStyle = 'rgba(0,0,0,0.8)';
+      ctx.fillRect(plot.x + 70, plot.y, 120, 80);
+      
+      const seeds = ['red', 'blue', 'yellow'];
+      for (let i = 0; i < seeds.length; i++) {
+        const seedY = plot.y + 20 + i * 20;
+        ctx.fillStyle = {red: '#ff4040', blue: '#4040ff', yellow: '#ffff40'}[seeds[i]];
+        ctx.fillRect(plot.x + 80, seedY, 15, 15);
+        ctx.fillStyle = '#fff';
+        ctx.font = '10px monospace';
+        ctx.fillText(seeds[i], plot.x + 100, seedY + 12);
+      }
+    }
+  },
+  
+  clickGardenPlot(plotIndex, seedType) {
+    if (S.puzzles.garden.completed) return;
+    
+    const plot = S.puzzles.garden.plots[plotIndex];
+    if (!plot.seed) {
+      plot.seed = seedType;
+      plot.grown = true;
+      
+      // Check if pattern is complete and correct
+      this.checkGardenPattern();
+    }
+  },
+  
+  checkGardenPattern() {
+    const plots = S.puzzles.garden.plots;
+    const pattern = plots.map(p => p.seed);
+    const correctPattern = ['red', 'blue', 'yellow', 'red'];
+    
+    if (pattern.every(seed => seed !== null)) {
+      if (JSON.stringify(pattern) === JSON.stringify(correctPattern)) {
+        // Success!
+        plots[0].seed = 'golden'; // First plot becomes golden
+        S.puzzles.garden.completed = true;
+        LS.set('puzzle_garden', true);
+        
+        Coins.earn(50, 'garden puzzle');
+        showNotification('🌻 Golden flower bloomed! Garden Key obtained!');
+        DiscoverySystem.updateDiscovery('puzzle', 'garden');
+        
+        // Add garden key to inventory
+        const items = LS.get('inventory_items', []);
+        if (!items.includes('garden_key')) {
+          items.push('garden_key');
+          LS.set('inventory_items', items);
+        }
+      } else {
+        // Reset plots
+        for (let plot of plots) {
+          plot.seed = null;
+          plot.grown = false;
+        }
+        showNotification('Wrong pattern! Look for clues on F1...');
+      }
+    }
+  },
+  
+  initCrossFloorPuzzle() {
+    // Code is already set in game state initialization
+  },
+  
+  renderCodeNote() {
+    // On F1 - Echo's desk note
+    if (S.floor === 1 && !S.puzzles.crossFloor.codeFound) {
+      ctx.fillStyle = '#ffffaa';
+      ctx.fillRect(500, 300, 80, 60);
+      ctx.fillStyle = '#000';
+      ctx.font = '8px monospace';
+      ctx.fillText('Lab Access:', 505, 315);
+      ctx.fillText('◆ ♦ ◇ ◈', 505, 330); // Symbols representing 4-digit code
+      ctx.fillText('(4-7-2-9)', 505, 345);
+    }
+  },
+  
+  renderLabTerminal() {
+    // On F5 - locked terminal
+    if (S.floor === 5) {
+      ctx.fillStyle = S.puzzles.crossFloor.terminalUnlocked ? '#004400' : '#440000';
+      ctx.fillRect(200, 150, 100, 80);
+      ctx.fillStyle = '#00ff00';
+      ctx.font = '10px monospace';
+      
+      if (S.puzzles.crossFloor.terminalUnlocked) {
+        ctx.fillText('AI CORE LOG:', 210, 170);
+        ctx.fillText('Station AI:', 210, 185);
+        ctx.fillText('Echo v2.7', 210, 200);
+        ctx.fillText('Status: ACTIVE', 210, 215);
+      } else {
+        ctx.fillText('ENTER CODE:', 210, 170);
+        ctx.fillText('_ _ _ _', 210, 185);
+        ctx.fillText('[LOCKED]', 210, 215);
+      }
+    }
+  },
+  
+  inputLabCode(code) {
+    if (code === '4729') {
+      S.puzzles.crossFloor.terminalUnlocked = true;
+      LS.set('cross_terminal', true);
+      
+      Coins.earn(75, 'lab access');
+      showNotification('🔓 Lab terminal unlocked! Lab Access badge earned!');
+      DiscoverySystem.updateDiscovery('puzzle', 'crossfloor');
+      
+      addChatMsg('Echo', 'The station\'s AI core data is fascinating... I had no idea.');
+    } else {
+      showNotification('Access denied. Check the code again.');
+    }
+  },
+  
+  checkElevatorSequence(floor) {
+    const seq = S.puzzles.elevator.sequence;
+    const target = S.puzzles.elevator.targetSequence;
+    
+    seq.push(floor);
+    
+    if (seq.length > target.length) {
+      seq.length = 0; // Reset
+    }
+    
+    if (seq.length === target.length) {
+      if (JSON.stringify(seq) === JSON.stringify(target)) {
+        // Success! Show Floor 0
+        this.showFloor0();
+        seq.length = 0;
+      } else {
+        seq.length = 0; // Reset
+        showNotification('Nothing happens...');
+      }
+    }
+  },
+  
+  showFloor0() {
+    if (!S.puzzles.elevator.completed) {
+      S.puzzles.elevator.completed = true;
+      LS.set('puzzle_elevator', true);
+      DiscoverySystem.updateDiscovery('puzzle', 'elevator');
+    }
+    
+    SecretRooms.enterSecretRoom('core');
+    showNotification('🔑 Secret Floor 0 accessed!');
+  }
 };
 
 // ═══════════════════════════════════════
@@ -9442,6 +10212,7 @@ function initInput(){
     if(k==='ArrowRight'||k==='d'||k==='D')S.keys.right=true;
     if(k==='Escape'){e.preventDefault();if(document.getElementById('rpg-inventory').classList.contains('open')){closeInventoryPanel();return}if(S.spacewalk.active)toggleSpacewalk();if(document.querySelector('.popup-overlay'))document.querySelector('.popup-overlay').remove()}
     if(k===' '){e.preventDefault();visitorInteract()}
+    if(k==='Tab'){ e.preventDefault(); if(S.scanner.unlocked){ S.scanner.active = !S.scanner.active; showNotification(S.scanner.active ? '🔍 Scanner ON' : '🔍 Scanner OFF'); } }
     if((k==='e'||k==='E')){
       e.preventDefault();
       if(DuelSystem.active){
@@ -14612,6 +15383,965 @@ if(LS.get('visitorName')&&!LS.get('hasCompletedOnboarding')){
 setInterval(()=>QuestTracker.render(),15000);
 
 console.log('🎮 Player Experience: Onboarding, Ghost Town Seeding, Quest Tracker, Peaceful Coins, Collection Page');
+
+// ═══════════════════════════════════════
+// §ATMOSPHERE — Sprint C: Atmosphere Overhaul
+// Dynamic lighting, ambient sound, peripheral effects, station breathing
+// ═══════════════════════════════════════
+
+const AtmosphereSystem = {
+  // 1. Dynamic Lighting System
+  lighting: {
+    enabled: false,
+    lightRadius: 120,
+    scannerBonus: 80,
+    darkFloors: [4, 5, 9], // F4 garden at "night", F5 lab, F9 archive
+    
+    isActive() {
+      const floor = S.floor;
+      if (!this.darkFloors.includes(floor)) return false;
+      
+      // F4 only dark at night
+      if (floor === 4 && TOD !== 'night') return false;
+      
+      return true;
+    },
+    
+    getCurrentRadius() {
+      let radius = this.lightRadius;
+      
+      // Scanner item increases light radius
+      if (S.scanner && S.scanner.active) {
+        radius += this.scannerBonus;
+      }
+      
+      return radius;
+    },
+    
+    renderLightOverlay() {
+      if (!this.isActive()) return;
+      
+      const player = S.useVisitor ? S.visitor : S.echo;
+      const radius = this.getCurrentRadius();
+      
+      // Create radial gradient - dark at edges, clear at player
+      const gradient = ctx.createRadialGradient(
+        player.x, player.y, 0,
+        player.x, player.y, radius
+      );
+      
+      gradient.addColorStop(0, 'rgba(0,0,0,0)');
+      gradient.addColorStop(0.6, 'rgba(0,0,0,0.3)');
+      gradient.addColorStop(0.8, 'rgba(0,0,0,0.6)');
+      gradient.addColorStop(1, 'rgba(0,0,0,0.85)');
+      
+      ctx.save();
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+      
+      // Light sources in the world
+      this.renderWorldLights();
+    },
+    
+    renderWorldLights() {
+      const floor = S.floor;
+      let lightSources = [];
+      
+      switch(floor) {
+        case 4: // Garden bioluminescence
+          lightSources = [
+            {x: 200, y: 300, r: 60, color: '#40ff40'},
+            {x: 500, y: 350, r: 45, color: '#60ff80'},
+            {x: 350, y: 200, r: 50, color: '#80ff60'},
+          ];
+          break;
+        case 5: // Reactor glow
+          lightSources = [
+            {x: 400, y: 250, r: 100, color: '#4080ff'},
+            {x: 600, y: 400, r: 40, color: '#ff8040'},
+          ];
+          break;
+        case 6: // Candles (already there)
+          lightSources = [
+            {x: 300, y: 150, r: 35, color: '#ffaa40'},
+            {x: 450, y: 300, r: 35, color: '#ffaa40'},
+            {x: 650, y: 250, r: 35, color: '#ffaa40'},
+          ];
+          break;
+      }
+      
+      lightSources.forEach(light => {
+        const gradient = ctx.createRadialGradient(
+          light.x, light.y, 0,
+          light.x, light.y, light.r
+        );
+        
+        gradient.addColorStop(0, light.color + '80');
+        gradient.addColorStop(0.5, light.color + '40');
+        gradient.addColorStop(1, light.color + '00');
+        
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.fillStyle = gradient;
+        ctx.fillRect(
+          light.x - light.r, light.y - light.r,
+          light.r * 2, light.r * 2
+        );
+        ctx.restore();
+      });
+    }
+  },
+  
+  // 2. Ambient Sound Layers Per Floor
+  ambientSound: {
+    currentFloor: 0,
+    audioNodes: {},
+    crossfadeTime: 2.0,
+    
+    init() {
+      if (!S.audioCtx) return;
+      
+      // Create ambient sound for each floor
+      const floorAmbients = {
+        1: () => this.createLifeSupportHum(),
+        2: () => this.createSpaceAmbience(),
+        3: () => this.createArcadeSounds(),
+        4: () => this.createNatureSounds(),
+        5: () => this.createElectricalBuzz(),
+        6: () => this.createVinylCrackle(),
+        7: () => this.createCrowdMurmur(),
+        9: () => this.createEerieAmbient()
+      };
+      
+      Object.entries(floorAmbients).forEach(([floor, createFn]) => {
+        this.audioNodes[floor] = {
+          create: createFn,
+          nodes: null,
+          gain: null
+        };
+      });
+    },
+    
+    updateFloor(newFloor) {
+      if (!S.audioCtx || !S.musicPlaying) return;
+      if (this.currentFloor === newFloor) return;
+      
+      const oldFloor = this.currentFloor;
+      this.currentFloor = newFloor;
+      
+      // Crossfade between ambient layers
+      if (oldFloor && this.audioNodes[oldFloor] && this.audioNodes[oldFloor].gain) {
+        this.audioNodes[oldFloor].gain.gain.linearRampToValueAtTime(
+          0, S.audioCtx.currentTime + this.crossfadeTime
+        );
+      }
+      
+      this.startFloorAmbient(newFloor);
+    },
+    
+    startFloorAmbient(floor) {
+      if (!this.audioNodes[floor]) return;
+      
+      const ambient = this.audioNodes[floor];
+      if (ambient.nodes) return; // Already playing
+      
+      const result = ambient.create();
+      ambient.nodes = result.nodes;
+      ambient.gain = result.gain;
+      
+      // Fade in
+      ambient.gain.gain.setValueAtTime(0, S.audioCtx.currentTime);
+      ambient.gain.gain.linearRampToValueAtTime(
+        0.25 * S.volume, S.audioCtx.currentTime + this.crossfadeTime
+      );
+    },
+    
+    stopAll() {
+      Object.values(this.audioNodes).forEach(ambient => {
+        if (ambient.nodes && ambient.gain) {
+          ambient.gain.gain.linearRampToValueAtTime(0, S.audioCtx.currentTime + 0.5);
+          setTimeout(() => {
+            ambient.nodes.forEach(node => {
+              try { node.stop(); } catch(e) {}
+            });
+            ambient.nodes = null;
+            ambient.gain = null;
+          }, 600);
+        }
+      });
+    },
+    
+    // Floor-specific ambient sound generators
+    createLifeSupportHum() {
+      const gain = S.audioCtx.createGain();
+      const osc1 = S.audioCtx.createOscillator();
+      const osc2 = S.audioCtx.createOscillator();
+      
+      osc1.type = 'sine';
+      osc1.frequency.value = 80;
+      osc2.type = 'sine';  
+      osc2.frequency.value = 120;
+      
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(S.masterGain);
+      
+      osc1.start();
+      osc2.start();
+      
+      // Occasional beep
+      setInterval(() => {
+        if (S.floor === 1 && Math.random() < 0.1) {
+          const beep = S.audioCtx.createOscillator();
+          const beepGain = S.audioCtx.createGain();
+          beep.type = 'sine';
+          beep.frequency.value = 800;
+          beepGain.gain.setValueAtTime(0.1 * S.volume, S.audioCtx.currentTime);
+          beepGain.gain.exponentialRampToValueAtTime(0.001, S.audioCtx.currentTime + 0.2);
+          beep.connect(beepGain);
+          beepGain.connect(S.masterGain);
+          beep.start();
+          beep.stop(S.audioCtx.currentTime + 0.2);
+        }
+      }, 3000);
+      
+      return { nodes: [osc1, osc2], gain };
+    },
+    
+    createSpaceAmbience() {
+      const gain = S.audioCtx.createGain();
+      const lowRumble = S.audioCtx.createOscillator();
+      const highEthereal = S.audioCtx.createOscillator();
+      
+      lowRumble.type = 'sine';
+      lowRumble.frequency.value = 40;
+      highEthereal.type = 'triangle';
+      highEthereal.frequency.value = 1200;
+      
+      const rumbleGain = S.audioCtx.createGain();
+      const etherealGain = S.audioCtx.createGain();
+      
+      rumbleGain.gain.value = 0.3;
+      etherealGain.gain.value = 0.1;
+      
+      lowRumble.connect(rumbleGain);
+      highEthereal.connect(etherealGain);
+      rumbleGain.connect(gain);
+      etherealGain.connect(gain);
+      gain.connect(S.masterGain);
+      
+      lowRumble.start();
+      highEthereal.start();
+      
+      return { nodes: [lowRumble, highEthereal], gain };
+    },
+    
+    createArcadeSounds() {
+      const gain = S.audioCtx.createGain();
+      const nodes = [];
+      
+      // Distant bleeps and bloops
+      const bleepInterval = setInterval(() => {
+        if (S.floor === 3 && Math.random() < 0.15) {
+          const bleep = S.audioCtx.createOscillator();
+          const bleepGain = S.audioCtx.createGain();
+          bleep.type = 'square';
+          bleep.frequency.value = 400 + Math.random() * 800;
+          bleepGain.gain.setValueAtTime(0.05 * S.volume, S.audioCtx.currentTime);
+          bleepGain.gain.exponentialRampToValueAtTime(0.001, S.audioCtx.currentTime + 0.1);
+          bleep.connect(bleepGain);
+          bleepGain.connect(S.masterGain);
+          bleep.start();
+          bleep.stop(S.audioCtx.currentTime + 0.1);
+        }
+      }, 1000);
+      
+      return { 
+        nodes: nodes, 
+        gain,
+        cleanup: () => clearInterval(bleepInterval)
+      };
+    },
+    
+    createNatureSounds() {
+      const gain = S.audioCtx.createGain();
+      const windOsc = S.audioCtx.createOscillator();
+      
+      windOsc.type = 'sine';
+      windOsc.frequency.value = 200;
+      windOsc.connect(gain);
+      gain.connect(S.masterGain);
+      windOsc.start();
+      
+      // Water drip sounds
+      setInterval(() => {
+        if (S.floor === 4 && Math.random() < 0.08) {
+          const drip = S.audioCtx.createOscillator();
+          const dripGain = S.audioCtx.createGain();
+          drip.type = 'sine';
+          drip.frequency.value = 600;
+          dripGain.gain.setValueAtTime(0.08 * S.volume, S.audioCtx.currentTime);
+          dripGain.gain.exponentialRampToValueAtTime(0.001, S.audioCtx.currentTime + 0.3);
+          drip.connect(dripGain);
+          dripGain.connect(S.masterGain);
+          drip.start();
+          drip.stop(S.audioCtx.currentTime + 0.3);
+        }
+      }, 4000);
+      
+      return { nodes: [windOsc], gain };
+    },
+    
+    createElectricalBuzz() {
+      const gain = S.audioCtx.createGain();
+      const buzz = S.audioCtx.createOscillator();
+      const hum = S.audioCtx.createOscillator();
+      
+      buzz.type = 'sawtooth';
+      buzz.frequency.value = 150;
+      hum.type = 'sine';
+      hum.frequency.value = 60;
+      
+      buzz.connect(gain);
+      hum.connect(gain);
+      gain.connect(S.masterGain);
+      
+      buzz.start();
+      hum.start();
+      
+      return { nodes: [buzz, hum], gain };
+    },
+    
+    createVinylCrackle() {
+      const gain = S.audioCtx.createGain();
+      const nodes = [];
+      
+      // Generate vinyl crackle noise
+      const crackleInterval = setInterval(() => {
+        if (S.floor === 6 && Math.random() < 0.3) {
+          const noise = S.audioCtx.createBufferSource();
+          const buffer = S.audioCtx.createBuffer(1, S.audioCtx.sampleRate * 0.1, S.audioCtx.sampleRate);
+          const data = buffer.getChannelData(0);
+          
+          for (let i = 0; i < data.length; i++) {
+            data[i] = (Math.random() * 2 - 1) * 0.1;
+          }
+          
+          noise.buffer = buffer;
+          const noiseGain = S.audioCtx.createGain();
+          noiseGain.gain.value = 0.03 * S.volume;
+          
+          noise.connect(noiseGain);
+          noiseGain.connect(S.masterGain);
+          noise.start();
+        }
+      }, 200);
+      
+      return { 
+        nodes: nodes, 
+        gain,
+        cleanup: () => clearInterval(crackleInterval)
+      };
+    },
+    
+    createCrowdMurmur() {
+      const gain = S.audioCtx.createGain();
+      const lowMurmur = S.audioCtx.createOscillator();
+      
+      lowMurmur.type = 'triangle';
+      lowMurmur.frequency.value = 100 + Math.random() * 50;
+      lowMurmur.connect(gain);
+      gain.connect(S.masterGain);
+      lowMurmur.start();
+      
+      return { nodes: [lowMurmur], gain };
+    },
+    
+    createEerieAmbient() {
+      const gain = S.audioCtx.createGain();
+      const nodes = [];
+      
+      // Occasional deep resonance
+      setInterval(() => {
+        if (S.floor === 9 && Math.random() < 0.05) {
+          const resonance = S.audioCtx.createOscillator();
+          const resGain = S.audioCtx.createGain();
+          resonance.type = 'sine';
+          resonance.frequency.value = 30 + Math.random() * 20;
+          resGain.gain.setValueAtTime(0.1 * S.volume, S.audioCtx.currentTime);
+          resGain.gain.exponentialRampToValueAtTime(0.001, S.audioCtx.currentTime + 3);
+          resonance.connect(resGain);
+          resGain.connect(S.masterGain);
+          resonance.start();
+          resonance.stop(S.audioCtx.currentTime + 3);
+        }
+      }, 8000);
+      
+      return { nodes: nodes, gain };
+    }
+  },
+  
+  // 3. Pixel Proximity Hints
+  pixelHints: {
+    sensingDistance: 40,
+    lastSensingState: false,
+    
+    update() {
+      if (!S.pixel) return;
+      
+      const nearestSecret = this.findNearestSecret();
+      const isNearSecret = nearestSecret && nearestSecret.distance <= this.sensingDistance;
+      
+      if (isNearSecret !== this.lastSensingState) {
+        this.lastSensingState = isNearSecret;
+        S.pixel.sensing = isNearSecret;
+        
+        if (isNearSecret) {
+          // Pixel animation changes - ears perk up, tail straight
+          S.pixel.state = 'sensing';
+          S.pixel.stateTimer = 0;
+          
+          // Add particle above Pixel
+          S.particles.push({
+            x: S.pixel.x,
+            y: S.pixel.y - 20,
+            vx: 0,
+            vy: -0.5,
+            life: 120,
+            color: '#ffaa00',
+            size: 8,
+            text: '!',
+            type: 'hint'
+          });
+        } else {
+          if (S.pixel.state === 'sensing') {
+            S.pixel.state = 'idle';
+          }
+        }
+      }
+      
+      // Pixel looks towards nearest secret
+      if (isNearSecret && nearestSecret) {
+        S.pixel.targetX = nearestSecret.x;
+        S.pixel.targetY = nearestSecret.y;
+      }
+    },
+    
+    findNearestSecret() {
+      // List of secret locations per floor
+      const secretLocations = {
+        1: [{x: 150, y: 350, id: 'diary_room'}], // Behind bed
+        4: [{x: 200, y: 400, id: 'underground_cave'}], // Garden cave
+        5: [{x: 550, y: 280, id: 'hidden_lab_log'}], // Lab secret
+        9: [{x: 300, y: 200, id: 'archive_depths'}] // Archive depths
+      };
+      
+      const secrets = secretLocations[S.floor] || [];
+      let nearest = null;
+      let minDistance = Infinity;
+      
+      secrets.forEach(secret => {
+        const dx = secret.x - S.pixel.x;
+        const dy = secret.y - S.pixel.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearest = { ...secret, distance };
+        }
+      });
+      
+      return nearest;
+    }
+  },
+  
+  // 4. Peripheral Movement Effects
+  peripheralEffects: {
+    effects: [],
+    lastSpawnTime: 0,
+    spawnInterval: 45000, // 45 seconds
+    atmosphericFloors: [2, 5, 9],
+    
+    update(dt) {
+      const now = Date.now();
+      
+      // Spawn new effect occasionally
+      if (this.atmosphericFloors.includes(S.floor) && 
+          now - this.lastSpawnTime > this.spawnInterval + Math.random() * 15000) {
+        this.spawnEffect();
+        this.lastSpawnTime = now;
+      }
+      
+      // Update existing effects
+      this.effects = this.effects.filter(effect => {
+        effect.x += effect.vx * dt * 60;
+        effect.y += effect.vy * dt * 60;
+        effect.life -= dt;
+        return effect.life > 0;
+      });
+    },
+    
+    spawnEffect() {
+      const side = Math.floor(Math.random() * 4); // 0=top, 1=right, 2=bottom, 3=left
+      let x, y, vx, vy;
+      
+      switch(side) {
+        case 0: // Top
+          x = Math.random() * W;
+          y = -20;
+          vx = (Math.random() - 0.5) * 100;
+          vy = 50 + Math.random() * 50;
+          break;
+        case 1: // Right  
+          x = W + 20;
+          y = Math.random() * H;
+          vx = -50 - Math.random() * 50;
+          vy = (Math.random() - 0.5) * 100;
+          break;
+        case 2: // Bottom
+          x = Math.random() * W;
+          y = H + 20;
+          vx = (Math.random() - 0.5) * 100;
+          vy = -50 - Math.random() * 50;
+          break;
+        case 3: // Left
+          x = -20;
+          y = Math.random() * H;
+          vx = 50 + Math.random() * 50;
+          vy = (Math.random() - 0.5) * 100;
+          break;
+      }
+      
+      this.effects.push({
+        x, y, vx, vy,
+        life: 0.5,
+        size: 20 + Math.random() * 40,
+        alpha: 0.2 + Math.random() * 0.3,
+        shape: Math.random() < 0.5 ? 'shadow' : 'silhouette'
+      });
+    },
+    
+    render() {
+      this.effects.forEach(effect => {
+        ctx.save();
+        ctx.globalAlpha = effect.alpha * (effect.life / 0.5);
+        ctx.fillStyle = '#000000';
+        
+        if (effect.shape === 'shadow') {
+          ctx.beginPath();
+          ctx.ellipse(effect.x, effect.y, effect.size, effect.size * 0.3, 0, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // Silhouette - rough human-ish shape
+          ctx.fillRect(effect.x - effect.size/4, effect.y - effect.size/2, effect.size/2, effect.size);
+          ctx.beginPath();
+          ctx.arc(effect.x, effect.y - effect.size/2, effect.size/4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        
+        ctx.restore();
+      });
+    }
+  },
+  
+  // 5. Window/Viewport Variations
+  windowEffects: {
+    starfield: [],
+    shootingStars: [],
+    lastShootingStar: 0,
+    earthPhase: 0,
+    
+    init() {
+      // Generate starfield for F2
+      for (let i = 0; i < 100; i++) {
+        this.starfield.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          brightness: Math.random()
+        });
+      }
+    },
+    
+    update(dt) {
+      this.earthPhase += dt * 0.1;
+      
+      // Shooting stars for F2 at night
+      if (S.floor === 2 && TOD === 'night') {
+        const now = Date.now();
+        if (now - this.lastShootingStar > 15000 + Math.random() * 20000) {
+          this.spawnShootingStar();
+          this.lastShootingStar = now;
+        }
+      }
+      
+      // Update shooting stars
+      this.shootingStars = this.shootingStars.filter(star => {
+        star.x += star.vx * dt;
+        star.y += star.vy * dt;
+        star.life -= dt;
+        return star.life > 0;
+      });
+    },
+    
+    spawnShootingStar() {
+      this.shootingStars.push({
+        x: Math.random() * W,
+        y: Math.random() * 100,
+        vx: 100 + Math.random() * 200,
+        vy: 50 + Math.random() * 100,
+        life: 2,
+        tail: []
+      });
+    },
+    
+    renderF2Dome() {
+      if (S.floor !== 2) return;
+      
+      // Dome area (adjust based on actual dome position)
+      const domeX = 400, domeY = 150, domeR = 120;
+      
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(domeX, domeY, domeR, 0, Math.PI * 2);
+      ctx.clip();
+      
+      // Base dome background
+      let gradient;
+      
+      switch(TOD) {
+        case 'morning':
+          gradient = ctx.createLinearGradient(domeX, domeY - domeR, domeX, domeY + domeR);
+          gradient.addColorStop(0, '#FFE4B5');
+          gradient.addColorStop(1, '#87CEEB');
+          break;
+        case 'evening':
+          gradient = ctx.createLinearGradient(domeX, domeY - domeR, domeX, domeY + domeR);
+          gradient.addColorStop(0, '#FF4500');
+          gradient.addColorStop(0.5, '#FF6347');
+          gradient.addColorStop(1, '#4B0082');
+          break;
+        case 'night':
+          gradient = ctx.createLinearGradient(domeX, domeY - domeR, domeX, domeY + domeR);
+          gradient.addColorStop(0, '#000040');
+          gradient.addColorStop(1, '#000080');
+          
+          // Render stars
+          this.starfield.forEach(star => {
+            if (star.x > domeX - domeR && star.x < domeX + domeR &&
+                star.y > domeY - domeR && star.y < domeY + domeR) {
+              ctx.save();
+              ctx.globalAlpha = star.brightness;
+              ctx.fillStyle = '#FFFFFF';
+              ctx.fillRect(star.x, star.y, 1, 1);
+              ctx.restore();
+            }
+          });
+          
+          // Render shooting stars
+          this.shootingStars.forEach(star => {
+            ctx.save();
+            ctx.globalAlpha = star.life / 2;
+            ctx.strokeStyle = '#FFFF88';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(star.x, star.y);
+            ctx.lineTo(star.x - star.vx * 0.02, star.y - star.vy * 0.02);
+            ctx.stroke();
+            ctx.restore();
+          });
+          break;
+        default: // afternoon
+          gradient = ctx.createLinearGradient(domeX, domeY - domeR, domeX, domeY + domeR);
+          gradient.addColorStop(0, '#87CEEB');
+          gradient.addColorStop(1, '#4169E1');
+          
+          // Earth visible in afternoon
+          ctx.save();
+          ctx.translate(domeX + Math.sin(this.earthPhase) * 20, domeY + 30);
+          ctx.scale(0.8, 0.8);
+          ctx.fillStyle = '#6B8E23';
+          ctx.beginPath();
+          ctx.arc(0, 0, 30, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#4169E1';
+          ctx.beginPath();
+          ctx.arc(-10, -5, 12, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+          break;
+      }
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(domeX - domeR, domeY - domeR, domeR * 2, domeR * 2);
+      
+      ctx.restore();
+    },
+    
+    renderF1Window() {
+      if (S.floor !== 1) return;
+      
+      // Window area (adjust based on actual window position)  
+      const winX = 650, winY = 200, winW = 120, winH = 80;
+      
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(winX, winY, winW, winH);
+      ctx.clip();
+      
+      // Base space view
+      ctx.fillStyle = '#000040';
+      ctx.fillRect(winX, winY, winW, winH);
+      
+      // Weather effects
+      if (S.weather && S.weather.desc) {
+        switch(S.weather.desc) {
+          case 'rain':
+            // Rain streaks
+            for (let i = 0; i < 20; i++) {
+              ctx.save();
+              ctx.globalAlpha = 0.6;
+              ctx.strokeStyle = '#87CEEB';
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              const x = winX + Math.random() * winW;
+              const y = winY + Math.random() * winH;
+              ctx.moveTo(x, y);
+              ctx.lineTo(x - 5, y + 15);
+              ctx.stroke();
+              ctx.restore();
+            }
+            break;
+          case 'clear':
+            // Clear stars
+            for (let i = 0; i < 15; i++) {
+              const x = winX + Math.random() * winW;
+              const y = winY + Math.random() * winH;
+              ctx.fillStyle = '#FFFFFF';
+              ctx.fillRect(x, y, 1, 1);
+            }
+            break;
+        }
+      }
+      
+      ctx.restore();
+    }
+  },
+  
+  // 6. Station Breathing Effects
+  stationBreathing: {
+    breatheTimer: 0,
+    creakTimer: 0,
+    steamTimer: 0,
+    pollenTimer: 0,
+    dustTimer: 0,
+    
+    update(dt) {
+      this.breatheTimer += dt;
+      this.creakTimer += dt;
+      this.steamTimer += dt;
+      this.pollenTimer += dt;
+      this.dustTimer += dt;
+      
+      // Hull creak sound
+      if (this.creakTimer > 30 + Math.random() * 30) {
+        this.creakTimer = 0;
+        this.playHullCreak();
+      }
+      
+      // F5 steam bursts
+      if (S.floor === 5 && this.steamTimer > 8 + Math.random() * 12) {
+        this.steamTimer = 0;
+        this.createSteamBurst();
+      }
+      
+      // F4 pollen particles
+      if (S.floor === 4 && this.pollenTimer > 2) {
+        this.pollenTimer = 0;
+        this.createPollenParticle();
+      }
+      
+      // F6 dust motes in candlelight
+      if (S.floor === 6 && this.dustTimer > 1) {
+        this.dustTimer = 0;
+        this.createDustMote();
+      }
+    },
+    
+    applyScreenSway() {
+      // Very gentle screen sway
+      const swayX = Math.sin(this.breatheTimer * 0.5) * 0.5;
+      const swayY = Math.cos(this.breatheTimer * 0.3) * 0.3;
+      
+      ctx.save();
+      ctx.translate(swayX, swayY);
+    },
+    
+    removeScreenSway() {
+      ctx.restore();
+    },
+    
+    playHullCreak() {
+      if (!S.audioCtx) return;
+      
+      const creak = S.audioCtx.createOscillator();
+      const creakGain = S.audioCtx.createGain();
+      
+      creak.type = 'sawtooth';
+      creak.frequency.value = 60 + Math.random() * 40;
+      creakGain.gain.setValueAtTime(0.02 * S.volume, S.audioCtx.currentTime);
+      creakGain.gain.exponentialRampToValueAtTime(0.001, S.audioCtx.currentTime + 1.5);
+      
+      creak.connect(creakGain);
+      creakGain.connect(S.masterGain);
+      creak.start();
+      creak.stop(S.audioCtx.currentTime + 1.5);
+    },
+    
+    createSteamBurst() {
+      // Add steam particles near pipes on F5
+      const steamSources = [
+        {x: 200, y: 300},
+        {x: 500, y: 250},
+        {x: 600, y: 400}
+      ];
+      
+      const source = steamSources[Math.floor(Math.random() * steamSources.length)];
+      
+      for (let i = 0; i < 8; i++) {
+        S.particles.push({
+          x: source.x + (Math.random() - 0.5) * 20,
+          y: source.y,
+          vx: (Math.random() - 0.5) * 20,
+          vy: -20 - Math.random() * 40,
+          life: 60 + Math.random() * 60,
+          color: '#DDDDDD',
+          size: 3 + Math.random() * 4,
+          type: 'steam'
+        });
+      }
+    },
+    
+    createPollenParticle() {
+      // Floating pollen in F4 garden
+      S.particles.push({
+        x: 50 + Math.random() * (W - 100),
+        y: H - 20,
+        vx: (Math.random() - 0.5) * 10,
+        vy: -10 - Math.random() * 20,
+        life: 300 + Math.random() * 200,
+        color: '#FFFF80',
+        size: 1 + Math.random() * 2,
+        type: 'pollen'
+      });
+    },
+    
+    createDustMote() {
+      // Dust motes near light sources on F6
+      const lightSources = [
+        {x: 300, y: 150},
+        {x: 450, y: 300},
+        {x: 650, y: 250}
+      ];
+      
+      lightSources.forEach(light => {
+        if (Math.random() < 0.3) {
+          S.particles.push({
+            x: light.x + (Math.random() - 0.5) * 60,
+            y: light.y + (Math.random() - 0.5) * 60,
+            vx: (Math.random() - 0.5) * 5,
+            vy: -2 - Math.random() * 3,
+            life: 180 + Math.random() * 120,
+            color: '#FFFFAA',
+            size: 1,
+            type: 'dust'
+          });
+        }
+      });
+    }
+  },
+  
+  // Main atmosphere system management
+  init() {
+    this.windowEffects.init();
+    this.ambientSound.init();
+  },
+  
+  update(dt) {
+    this.pixelHints.update();
+    this.peripheralEffects.update(dt);
+    this.windowEffects.update(dt);
+    this.stationBreathing.update(dt);
+    
+    // Check for floor change for ambient sound
+    if (this.ambientSound.currentFloor !== S.floor) {
+      this.ambientSound.updateFloor(S.floor);
+    }
+  },
+  
+  render() {
+    // Apply station breathing sway
+    this.stationBreathing.applyScreenSway();
+    
+    // Render floor-specific window effects
+    this.windowEffects.renderF2Dome();
+    this.windowEffects.renderF1Window();
+    
+    // Remove sway transform
+    this.stationBreathing.removeScreenSway();
+    
+    // Render peripheral effects
+    this.peripheralEffects.render();
+    
+    // Dynamic lighting overlay (rendered last)
+    this.lighting.renderLightOverlay();
+  },
+  
+  // Handle music toggle to start/stop ambient sounds
+  onMusicToggle(playing) {
+    if (playing) {
+      this.ambientSound.startFloorAmbient(S.floor);
+    } else {
+      this.ambientSound.stopAll();
+    }
+  }
+};
+
+// Hook into existing systems
+{
+  // Initialize atmosphere system
+  AtmosphereSystem.init();
+  
+  // Patch the music toggle to control ambient sounds
+  const _origToggleMusic = toggleMusic;
+  toggleMusic = function() {
+    _origToggleMusic();
+    AtmosphereSystem.onMusicToggle(S.musicPlaying);
+  };
+  
+  // Patch the update loop to include atmosphere
+  const _origUpdate = update;
+  update = function(dt) {
+    _origUpdate(dt);
+    AtmosphereSystem.update(dt);
+  };
+  
+  // Patch the render loop to include atmosphere effects
+  const _origRender = renderGame;
+  renderGame = function() {
+    _origRender();
+    AtmosphereSystem.render();
+  };
+  
+  // Patch changeFloor to trigger ambient sound changes
+  const _origChangeFloor = changeFloor;
+  changeFloor = function(f) {
+    _origChangeFloor(f);
+    AtmosphereSystem.ambientSound.updateFloor(f);
+  };
+}
+
+console.log('🌟 Atmosphere System: Dynamic lighting, ambient sound, peripheral effects, station breathing');
 
 })();
 </script>
