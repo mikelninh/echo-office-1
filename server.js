@@ -1533,6 +1533,53 @@ wss.on('connection', (visitorWs) => {
           }
         }
       }
+      // ═══ MUSIC STUDIO MULTIPLAYER SYNC ═══
+      else if (msg.type === 'music.note') {
+        const visitor = visitors.get(visitorId);
+        if (visitor && visitor.floor === 6) {
+          // Broadcast synth note to all other players on F6
+          for (const [id, v] of visitors) {
+            if (id !== visitorId && v.floor === 6 && v.ws.readyState === WebSocket.OPEN) {
+              v.ws.send(JSON.stringify({
+                type: 'music.note',
+                id: visitorId,
+                instrument: msg.instrument,
+                note: msg.note
+              }));
+            }
+          }
+        }
+      }
+      else if (msg.type === 'music.drum') {
+        const visitor = visitors.get(visitorId);
+        if (visitor && visitor.floor === 6) {
+          // Broadcast drum hit to all other players on F6
+          for (const [id, v] of visitors) {
+            if (id !== visitorId && v.floor === 6 && v.ws.readyState === WebSocket.OPEN) {
+              v.ws.send(JSON.stringify({
+                type: 'music.drum',
+                id: visitorId,
+                drum: msg.drum
+              }));
+            }
+          }
+        }
+      }
+      else if (msg.type === 'music.loop') {
+        const visitor = visitors.get(visitorId);
+        if (visitor && visitor.floor === 6 && msg.events) {
+          // Broadcast loop to all other players on F6
+          for (const [id, v] of visitors) {
+            if (id !== visitorId && v.floor === 6 && v.ws.readyState === WebSocket.OPEN) {
+              v.ws.send(JSON.stringify({
+                type: 'music.loop',
+                id: visitorId,
+                events: msg.events.slice(0, 32) // Limit to prevent spam
+              }));
+            }
+          }
+        }
+      }
       // ═══ SOCIAL/CHAT SYSTEM ═══
       else if (msg.type === 'chat.emote') {
         const visitor = visitors.get(visitorId);

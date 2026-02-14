@@ -17884,6 +17884,1450 @@ const _origUpdateArcadeScore = function(game, score) {
 
 console.log('🔮 NPCs loaded: Nova, Drift, Sol, Glitch, Void, Byte — with sprites, dialogue, and quests!');
 
+// ═══════════════════════════════════════════════════════════════
+// §SOUND-DESIGN — Station Sound & Music Studio
+// ═══════════════════════════════════════════════════════════════
+
+// PART 1: F6 COLLABORATIVE MUSIC STUDIO
+const MusicStudio = {
+  // Synth Pad Configuration
+  synthPads: [
+    {note: 262, name: 'C4', color: '#ff4444', x: 100, y: 350, pressed: false, glow: 0},
+    {note: 294, name: 'D4', color: '#ff8844', x: 140, y: 350, pressed: false, glow: 0},
+    {note: 330, name: 'E4', color: '#ffcc44', x: 180, y: 350, pressed: false, glow: 0},
+    {note: 392, name: 'G4', color: '#44ff44', x: 220, y: 350, pressed: false, glow: 0},
+    {note: 440, name: 'A4', color: '#44ccff', x: 260, y: 350, pressed: false, glow: 0},
+    {note: 523, name: 'C5', color: '#8844ff', x: 100, y: 420, pressed: false, glow: 0},
+    {note: 587, name: 'D5', color: '#ff44cc', x: 140, y: 420, pressed: false, glow: 0},
+    {note: 659, name: 'E5', color: '#ffaa88', x: 180, y: 420, pressed: false, glow: 0}
+  ],
+  
+  // Drum Machine Configuration
+  drumPads: [
+    {name: 'kick', key: 'KeyQ', x: 520, y: 350, color: '#ff6666', pressed: false, glow: 0},
+    {name: 'snare', key: 'KeyW', x: 580, y: 350, color: '#66ff66', pressed: false, glow: 0},
+    {name: 'hihat', key: 'KeyE', x: 640, y: 350, color: '#6666ff', pressed: false, glow: 0},
+    {name: 'clap', key: 'KeyR', x: 700, y: 350, color: '#ffaa66', pressed: false, glow: 0}
+  ],
+  
+  // Loop Station
+  loopStation: {
+    recording: false,
+    playing: false,
+    events: [],
+    position: 0,
+    bpm: 90,
+    loopLength: 4 * (60/90 * 4), // ~10.67 seconds
+    maxEvents: 32,
+    x: 375, y: 315, size: 50
+  },
+  
+  // Drift's Turntable
+  turntable: {
+    x: 450, y: 280, spinning: false, filterActive: false, rotation: 0
+  },
+  
+  // Audio Visualizer
+  visualizer: {
+    bars: [],
+    analyser: null
+  },
+  
+  // Multiplayer tracking
+  otherPlayerNotes: [],
+  
+  init() {
+    if (!S.audioCtx) return;
+    
+    // Create analyser for visualizer
+    this.visualizer.analyser = S.audioCtx.createAnalyser();
+    this.visualizer.analyser.fftSize = 256;
+    this.visualizer.analyser.connect(S.masterGain);
+    
+    // Initialize visualizer bars
+    for (let i = 0; i < 32; i++) {
+      this.visualizer.bars.push(0);
+    }
+  },
+  
+  update(dt) {
+    if (S.floor !== 6) return;
+    
+    // Update pad glow fade
+    this.synthPads.forEach(pad => {
+      if (pad.glow > 0) pad.glow = Math.max(0, pad.glow - dt * 3);
+    });
+    
+    this.drumPads.forEach(pad => {
+      if (pad.glow > 0) pad.glow = Math.max(0, pad.glow - dt * 3);
+    });
+    
+    // Update turntable rotation
+    if (this.turntable.spinning) {
+      this.turntable.rotation += dt * (this.turntable.filterActive ? 1.5 : 3);
+      if (this.turntable.rotation > Math.PI * 2) this.turntable.rotation -= Math.PI * 2;
+    }
+    
+    // Update loop position
+    if (this.loopStation.playing) {
+      this.loopStation.position += dt;
+      if (this.loopStation.position >= this.loopStation.loopLength) {
+        this.loopStation.position = 0;
+        this.replayLoop();
+      }
+    }
+    
+    // Update other players' note particles
+    for (let i = this.otherPlayerNotes.length - 1; i >= 0; i--) {
+      const note = this.otherPlayerNotes[i];
+      note.life -= dt;
+      note.y -= dt * 30;
+      note.size *= (1 - dt * 0.5);
+      if (note.life <= 0) {
+        this.otherPlayerNotes.splice(i, 1);
+      }
+    }
+    
+    // Update visualizer
+    if (this.visualizer.analyser) {
+      const dataArray = new Uint8Array(this.visualizer.analyser.frequencyBinCount);
+      this.visualizer.analyser.getByteFrequencyData(dataArray);
+      
+      for (let i = 0; i < this.visualizer.bars.length; i++) {
+        const value = dataArray[i * 4] / 255;
+        this.visualizer.bars[i] = this.visualizer.bars[i] * 0.8 + value * 0.2;
+      }
+    }
+  },
+  
+  render() {
+    if (S.floor !== 6) return;
+    
+    // Audio visualizer background
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    for (let i = 0; i < this.visualizer.bars.length; i++) {
+      const x = 80 + i * 20;
+      const height = this.visualizer.bars[i] * 150;
+      const hue = (i / this.visualizer.bars.length) * 360;
+      ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
+      ctx.fillRect(x, 500 - height, 15, height);
+    }
+    ctx.restore();
+    
+    // Synth Pads
+    this.synthPads.forEach(pad => {
+      ctx.fillStyle = pad.pressed || pad.glow > 0 ? pad.color : this.darkenColor(pad.color);
+      ctx.fillRect(pad.x, pad.y, 35, 60);
+      
+      if (pad.glow > 0) {
+        ctx.save();
+        ctx.shadowColor = pad.color;
+        ctx.shadowBlur = pad.glow * 20;
+        ctx.fillStyle = pad.color;
+        ctx.fillRect(pad.x, pad.y, 35, 60);
+        ctx.restore();
+      }
+      
+      ctx.fillStyle = '#fff';
+      ctx.font = '8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(pad.name, pad.x + 17.5, pad.y + 50);
+    });
+    
+    // Drum Pads
+    this.drumPads.forEach(pad => {
+      ctx.fillStyle = pad.pressed || pad.glow > 0 ? pad.color : this.darkenColor(pad.color);
+      ctx.fillRect(pad.x, pad.y, 35, 80);
+      
+      if (pad.glow > 0) {
+        ctx.save();
+        ctx.shadowColor = pad.color;
+        ctx.shadowBlur = pad.glow * 20;
+        ctx.fillStyle = pad.color;
+        ctx.fillRect(pad.x, pad.y, 35, 80);
+        ctx.restore();
+      }
+      
+      ctx.fillStyle = '#fff';
+      ctx.font = '8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(pad.name.toUpperCase(), pad.x + 17.5, pad.y + 70);
+    });
+    
+    // Loop Station
+    const loop = this.loopStation;
+    ctx.fillStyle = loop.recording ? '#ff4444' : (loop.playing ? '#44ff44' : '#666666');
+    ctx.beginPath();
+    ctx.arc(loop.x, loop.y, loop.size / 2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Loop progress indicator
+    if (loop.playing) {
+      const progress = loop.position / loop.loopLength;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(loop.x, loop.y, loop.size / 2 + 5, -Math.PI/2, -Math.PI/2 + progress * Math.PI * 2);
+      ctx.stroke();
+    }
+    
+    ctx.fillStyle = '#fff';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(loop.recording ? 'REC' : (loop.playing ? 'PLAY' : 'LOOP'), loop.x, loop.y + 3);
+    ctx.fillText(`${loop.events.length}/${loop.maxEvents}`, loop.x, loop.y + 15);
+    
+    // Drift's Turntable
+    const tt = this.turntable;
+    ctx.save();
+    ctx.translate(tt.x, tt.y);
+    ctx.rotate(tt.rotation);
+    
+    // Record
+    ctx.fillStyle = '#222';
+    ctx.beginPath();
+    ctx.arc(0, 0, 25, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#444';
+    ctx.beginPath();
+    ctx.arc(0, 0, 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Grooves
+    for (let i = 0; i < 3; i++) {
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(0, 0, 8 + i * 5, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    
+    ctx.restore();
+    
+    // Filter indicator
+    if (tt.filterActive) {
+      ctx.fillStyle = '#00fff7';
+      ctx.font = '8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('LO-FI', tt.x, tt.y + 35);
+    }
+    
+    // Other players' note particles
+    this.otherPlayerNotes.forEach(note => {
+      ctx.save();
+      ctx.globalAlpha = note.life / note.maxLife;
+      ctx.fillStyle = note.color;
+      ctx.beginPath();
+      ctx.arc(note.x, note.y, note.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+    
+    // Player count indicator
+    const playerCount = Object.keys(S.otherPlayers).filter(id => S.otherPlayers[id].floor === 6).length + 1;
+    ctx.fillStyle = '#c080ff';
+    ctx.font = '12px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Now Jamming: ${playerCount} players`, 400, 250);
+    
+    // Instructions
+    ctx.fillStyle = '#888';
+    ctx.font = '9px monospace';
+    ctx.fillText('Keys 1-8: Synth | Q,W,E,R: Drums | L: Loop | Click turntable for lo-fi', 400, 520);
+  },
+  
+  handleKeyPress(key, code) {
+    if (S.floor !== 6) return false;
+    
+    // Synth pads (keys 1-8)
+    const synthKey = parseInt(key);
+    if (synthKey >= 1 && synthKey <= 8) {
+      this.playSynthNote(synthKey - 1);
+      return true;
+    }
+    
+    // Drum pads
+    const drumPad = this.drumPads.find(p => p.key === code);
+    if (drumPad) {
+      this.playDrum(drumPad.name);
+      return true;
+    }
+    
+    // Loop station
+    if (key.toLowerCase() === 'l') {
+      this.toggleLoop();
+      return true;
+    }
+    
+    return false;
+  },
+  
+  handleClick(x, y) {
+    if (S.floor !== 6) return false;
+    
+    // Synth pads
+    for (let i = 0; i < this.synthPads.length; i++) {
+      const pad = this.synthPads[i];
+      if (x >= pad.x && x <= pad.x + 35 && y >= pad.y && y <= pad.y + 60) {
+        this.playSynthNote(i);
+        return true;
+      }
+    }
+    
+    // Drum pads
+    for (const pad of this.drumPads) {
+      if (x >= pad.x && x <= pad.x + 35 && y >= pad.y && y <= pad.y + 80) {
+        this.playDrum(pad.name);
+        return true;
+      }
+    }
+    
+    // Loop station
+    const loop = this.loopStation;
+    if (Math.hypot(x - loop.x, y - loop.y) <= loop.size / 2) {
+      this.toggleLoop();
+      return true;
+    }
+    
+    // Turntable
+    const tt = this.turntable;
+    if (Math.hypot(x - tt.x, y - tt.y) <= 25) {
+      this.toggleTurntable();
+      return true;
+    }
+    
+    return false;
+  },
+  
+  playSynthNote(index) {
+    if (!S.audioCtx || index < 0 || index >= this.synthPads.length) return;
+    
+    const pad = this.synthPads[index];
+    pad.glow = 1;
+    
+    // ADSR Envelope: Attack 0.02s, Decay 0.1s, Sustain 0.3, Release 0.3s
+    const now = S.audioCtx.currentTime;
+    const duration = 0.5;
+    
+    // Main oscillator
+    const osc1 = S.audioCtx.createOscillator();
+    const gain1 = S.audioCtx.createGain();
+    
+    // Detuned copy for warmth
+    const osc2 = S.audioCtx.createOscillator();
+    const gain2 = S.audioCtx.createGain();
+    
+    osc1.type = 'sine';
+    osc1.frequency.value = pad.note;
+    
+    osc2.type = 'sine';
+    osc2.frequency.value = pad.note * 1.003; // Slightly detuned
+    
+    // ADSR envelope
+    const volume = S.volume * 0.15;
+    gain1.gain.setValueAtTime(0, now);
+    gain1.gain.linearRampToValueAtTime(volume, now + 0.02); // Attack
+    gain1.gain.linearRampToValueAtTime(volume * 0.3, now + 0.12); // Decay to sustain
+    gain1.gain.setValueAtTime(volume * 0.3, now + duration - 0.3); // Sustain
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + duration); // Release
+    
+    gain2.gain.setValueAtTime(0, now);
+    gain2.gain.linearRampToValueAtTime(volume * 0.5, now + 0.02);
+    gain2.gain.linearRampToValueAtTime(volume * 0.15, now + 0.12);
+    gain2.gain.setValueAtTime(volume * 0.15, now + duration - 0.3);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    
+    osc1.connect(gain1);
+    osc2.connect(gain2);
+    gain1.connect(this.visualizer.analyser || S.masterGain);
+    gain2.connect(this.visualizer.analyser || S.masterGain);
+    
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + duration);
+    osc2.stop(now + duration);
+    
+    // Visual particles
+    this.createNoteParticles(pad.x + 17.5, pad.y + 30, pad.color);
+    
+    // Record in loop if recording
+    if (this.loopStation.recording) {
+      this.recordEvent('synth', index, this.loopStation.position);
+    }
+    
+    // Send to other players
+    if (EchoWS.ws?.readyState === 1) {
+      EchoWS.ws.send(JSON.stringify({
+        type: 'music.note',
+        instrument: 'synth',
+        note: index
+      }));
+    }
+  },
+  
+  playDrum(drumName) {
+    if (!S.audioCtx) return;
+    
+    const pad = this.drumPads.find(p => p.name === drumName);
+    if (pad) pad.glow = 1;
+    
+    const now = S.audioCtx.currentTime;
+    const volume = S.volume * 0.2;
+    
+    switch (drumName) {
+      case 'kick':
+        // Low sine sweep 150→50Hz, short
+        const kickOsc = S.audioCtx.createOscillator();
+        const kickGain = S.audioCtx.createGain();
+        kickOsc.type = 'sine';
+        kickOsc.frequency.setValueAtTime(150, now);
+        kickOsc.frequency.exponentialRampToValueAtTime(50, now + 0.1);
+        kickGain.gain.setValueAtTime(volume, now);
+        kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        kickOsc.connect(kickGain);
+        kickGain.connect(this.visualizer.analyser || S.masterGain);
+        kickOsc.start(now);
+        kickOsc.stop(now + 0.15);
+        break;
+        
+      case 'snare':
+        // Noise burst + tone at 200Hz, bandpass filtered
+        const snareNoise = S.audioCtx.createBufferSource();
+        const noiseBuffer = S.audioCtx.createBuffer(1, S.audioCtx.sampleRate * 0.1, S.audioCtx.sampleRate);
+        const noiseData = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < noiseData.length; i++) {
+          noiseData[i] = Math.random() * 2 - 1;
+        }
+        snareNoise.buffer = noiseBuffer;
+        
+        const snareTone = S.audioCtx.createOscillator();
+        const snareFilter = S.audioCtx.createBiquadFilter();
+        const snareGain = S.audioCtx.createGain();
+        
+        snareTone.frequency.value = 200;
+        snareFilter.type = 'bandpass';
+        snareFilter.frequency.value = 1000;
+        snareFilter.Q.value = 1;
+        
+        snareGain.gain.setValueAtTime(volume, now);
+        snareGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        
+        snareNoise.connect(snareFilter);
+        snareTone.connect(snareFilter);
+        snareFilter.connect(snareGain);
+        snareGain.connect(this.visualizer.analyser || S.masterGain);
+        
+        snareNoise.start(now);
+        snareTone.start(now);
+        snareNoise.stop(now + 0.1);
+        snareTone.stop(now + 0.1);
+        break;
+        
+      case 'hihat':
+        // High-pass filtered noise, very short
+        const hihatNoise = S.audioCtx.createBufferSource();
+        const hihatBuffer = S.audioCtx.createBuffer(1, S.audioCtx.sampleRate * 0.05, S.audioCtx.sampleRate);
+        const hihatData = hihatBuffer.getChannelData(0);
+        for (let i = 0; i < hihatData.length; i++) {
+          hihatData[i] = Math.random() * 2 - 1;
+        }
+        hihatNoise.buffer = hihatBuffer;
+        
+        const hihatFilter = S.audioCtx.createBiquadFilter();
+        const hihatGain = S.audioCtx.createGain();
+        
+        hihatFilter.type = 'highpass';
+        hihatFilter.frequency.value = 8000;
+        
+        hihatGain.gain.setValueAtTime(volume * 0.6, now);
+        hihatGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        
+        hihatNoise.connect(hihatFilter);
+        hihatFilter.connect(hihatGain);
+        hihatGain.connect(this.visualizer.analyser || S.masterGain);
+        
+        hihatNoise.start(now);
+        hihatNoise.stop(now + 0.05);
+        break;
+        
+      case 'clap':
+        // Short noise burst with reverb-like decay
+        const clapNoise = S.audioCtx.createBufferSource();
+        const clapBuffer = S.audioCtx.createBuffer(1, S.audioCtx.sampleRate * 0.15, S.audioCtx.sampleRate);
+        const clapData = clapBuffer.getChannelData(0);
+        for (let i = 0; i < clapData.length; i++) {
+          clapData[i] = (Math.random() * 2 - 1) * (1 - i / clapData.length);
+        }
+        clapNoise.buffer = clapBuffer;
+        
+        const clapGain = S.audioCtx.createGain();
+        clapGain.gain.setValueAtTime(volume * 0.8, now);
+        clapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        
+        clapNoise.connect(clapGain);
+        clapGain.connect(this.visualizer.analyser || S.masterGain);
+        
+        clapNoise.start(now);
+        clapNoise.stop(now + 0.15);
+        break;
+    }
+    
+    // Visual flash
+    if (pad) {
+      this.createNoteParticles(pad.x + 17.5, pad.y + 40, pad.color);
+    }
+    
+    // Record in loop if recording
+    if (this.loopStation.recording) {
+      this.recordEvent('drum', drumName, this.loopStation.position);
+    }
+    
+    // Send to other players
+    if (EchoWS.ws?.readyState === 1) {
+      EchoWS.ws.send(JSON.stringify({
+        type: 'music.drum',
+        drum: drumName
+      }));
+    }
+  },
+  
+  toggleLoop() {
+    const loop = this.loopStation;
+    
+    if (loop.recording) {
+      // Stop recording, start playing
+      loop.recording = false;
+      if (loop.events.length > 0) {
+        loop.playing = true;
+        loop.position = 0;
+        showNotification('🎵 Loop recorded! Playing...');
+        
+        // Send loop to other players
+        if (EchoWS.ws?.readyState === 1) {
+          EchoWS.ws.send(JSON.stringify({
+            type: 'music.loop',
+            events: loop.events
+          }));
+        }
+      } else {
+        showNotification('🔇 Empty loop cancelled');
+      }
+    } else if (loop.playing) {
+      // Stop playing, clear loop
+      loop.playing = false;
+      loop.events = [];
+      loop.position = 0;
+      showNotification('🔇 Loop stopped');
+    } else {
+      // Start recording
+      loop.recording = true;
+      loop.events = [];
+      loop.position = 0;
+      showNotification('🔴 Recording loop...');
+    }
+  },
+  
+  toggleTurntable() {
+    const tt = this.turntable;
+    tt.filterActive = !tt.filterActive;
+    tt.spinning = tt.filterActive;
+    
+    // Play scratch sound
+    if (S.audioCtx) {
+      const now = S.audioCtx.currentTime;
+      const scratchNoise = S.audioCtx.createBufferSource();
+      const scratchBuffer = S.audioCtx.createBuffer(1, S.audioCtx.sampleRate * 0.2, S.audioCtx.sampleRate);
+      const scratchData = scratchBuffer.getChannelData(0);
+      
+      for (let i = 0; i < scratchData.length; i++) {
+        const t = i / scratchData.length;
+        scratchData[i] = (Math.random() * 2 - 1) * (1 - t) * Math.sin(t * 40);
+      }
+      scratchNoise.buffer = scratchBuffer;
+      
+      const scratchGain = S.audioCtx.createGain();
+      scratchGain.gain.setValueAtTime(S.volume * 0.3, now);
+      scratchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      
+      scratchNoise.connect(scratchGain);
+      scratchGain.connect(S.masterGain);
+      scratchNoise.start(now);
+      scratchNoise.stop(now + 0.2);
+    }
+    
+    showNotification(tt.filterActive ? '🎚️ Lo-fi filter ON' : '🎚️ Lo-fi filter OFF');
+  },
+  
+  recordEvent(instrument, data, time) {
+    const loop = this.loopStation;
+    if (loop.events.length >= loop.maxEvents) return;
+    
+    loop.events.push({
+      instrument,
+      data,
+      time
+    });
+  },
+  
+  replayLoop() {
+    const loop = this.loopStation;
+    loop.events.forEach(event => {
+      if (Math.abs(event.time - loop.position) < 0.1) {
+        if (event.instrument === 'synth') {
+          this.playSynthNote(event.data);
+        } else if (event.instrument === 'drum') {
+          this.playDrum(event.data);
+        }
+      }
+    });
+  },
+  
+  createNoteParticles(x, y, color) {
+    for (let i = 0; i < 6; i++) {
+      S.particles.push({
+        x: x + (Math.random() - 0.5) * 20,
+        y: y - 10,
+        vx: (Math.random() - 0.5) * 3,
+        vy: -Math.random() * 2 - 1,
+        life: 30,
+        color: color,
+        size: 2 + Math.random() * 2
+      });
+    }
+  },
+  
+  handleOtherPlayerNote(playerId, instrument, note) {
+    if (S.floor !== 6) return;
+    
+    let x, y, color;
+    
+    if (instrument === 'synth' && note >= 0 && note < this.synthPads.length) {
+      const pad = this.synthPads[note];
+      x = pad.x + 17.5;
+      y = pad.y + 30;
+      color = this.darkenColor(pad.color); // Different brightness for other players
+    } else if (instrument === 'drum') {
+      const pad = this.drumPads.find(p => p.name === note);
+      if (pad) {
+        x = pad.x + 17.5;
+        y = pad.y + 40;
+        color = this.darkenColor(pad.color);
+      }
+    }
+    
+    if (x && y) {
+      this.otherPlayerNotes.push({
+        x, y, color,
+        life: 1,
+        maxLife: 1,
+        size: 8
+      });
+    }
+  },
+  
+  darkenColor(color) {
+    // Make colors dimmer for other players' notes
+    return color.replace(/(\d+)/g, (match) => Math.max(0, parseInt(match) * 0.6));
+  }
+};
+
+// PART 2: STATION-WIDE SOUND EFFECTS
+const SoundFX = {
+  // Footstep system
+  footsteps: {
+    lastStepTime: 0,
+    stepInterval: 0.25, // ~4 steps per second
+    lastX: 0,
+    lastY: 0,
+    
+    update() {
+      if (!S.useVisitor) return;
+      
+      const now = Date.now() / 1000;
+      const dx = S.visitor.x - this.lastX;
+      const dy = S.visitor.y - this.lastY;
+      const moving = Math.abs(dx) > 1 || Math.abs(dy) > 1;
+      
+      if (moving && (now - this.lastStepTime) > this.stepInterval) {
+        this.playFootstep(S.floor);
+        this.lastStepTime = now;
+      }
+      
+      this.lastX = S.visitor.x;
+      this.lastY = S.visitor.y;
+    },
+    
+    playFootstep(floor) {
+      if (!S.audioCtx) return;
+      
+      const now = S.audioCtx.currentTime;
+      const volume = S.volume * 0.15; // Quiet - 15% of master
+      
+      switch (floor) {
+        case 1: // F1 Quarters: soft thud
+          this.createSoftThud(now, volume);
+          break;
+        case 2: // F2 Observatory: glass echo
+          this.createGlassEcho(now, volume);
+          break;
+        case 3: // F3 Arcade: rubber squeak
+          this.createRubberSqueak(now, volume);
+          break;
+        case 4: // F4 Garden: soil crunch
+          this.createSoilCrunch(now, volume);
+          break;
+        case 5: // F5 Lab: metal clang
+          this.createMetalClang(now, volume);
+          break;
+        case 6: // F6 Lounge: carpet muffled
+          this.createCarpetMuffled(now, volume);
+          break;
+        case 7: // F7 Community: wood creak
+          this.createWoodCreak(now, volume);
+          break;
+        case 9: // F9 Archive: stone echo
+          this.createStoneEcho(now, volume);
+          break;
+      }
+    },
+    
+    createSoftThud(now, volume) {
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      const filter = S.audioCtx.createBiquadFilter();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(80, now);
+      osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+      
+      filter.type = 'lowpass';
+      filter.frequency.value = 200;
+      
+      gain.gain.setValueAtTime(volume, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(S.masterGain);
+      
+      osc.start(now);
+      osc.stop(now + 0.15);
+    },
+    
+    createGlassEcho(now, volume) {
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      const delay = S.audioCtx.createDelay(0.3);
+      const delayGain = S.audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = 1200;
+      
+      delay.delayTime.value = 0.15;
+      delayGain.gain.value = 0.3;
+      
+      gain.gain.setValueAtTime(volume * 0.8, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      
+      osc.connect(gain);
+      gain.connect(S.masterGain);
+      gain.connect(delay);
+      delay.connect(delayGain);
+      delayGain.connect(S.masterGain);
+      
+      osc.start(now);
+      osc.stop(now + 0.1);
+    },
+    
+    createRubberSqueak(now, volume) {
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(400, now);
+      osc.frequency.linearRampToValueAtTime(600, now + 0.05);
+      osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
+      
+      gain.gain.setValueAtTime(volume * 0.6, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      
+      osc.connect(gain);
+      gain.connect(S.masterGain);
+      
+      osc.start(now);
+      osc.stop(now + 0.08);
+    },
+    
+    createSoilCrunch(now, volume) {
+      const noise = S.audioCtx.createBufferSource();
+      const buffer = S.audioCtx.createBuffer(1, S.audioCtx.sampleRate * 0.06, S.audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      
+      for (let i = 0; i < data.length; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      noise.buffer = buffer;
+      
+      const filter = S.audioCtx.createBiquadFilter();
+      const gain = S.audioCtx.createGain();
+      
+      filter.type = 'lowpass';
+      filter.frequency.value = 800;
+      
+      gain.gain.setValueAtTime(volume * 0.5, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(S.masterGain);
+      
+      noise.start(now);
+      noise.stop(now + 0.06);
+    },
+    
+    createMetalClang(now, volume) {
+      const osc1 = S.audioCtx.createOscillator();
+      const osc2 = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      
+      osc1.type = 'sine';
+      osc1.frequency.value = 800;
+      osc2.type = 'sine';
+      osc2.frequency.value = 1200; // Harmonic
+      
+      gain.gain.setValueAtTime(volume * 0.7, now);
+      gain.gain.exponentialRampToValueAtTime(volume * 0.3, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(S.masterGain);
+      
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + 0.3);
+      osc2.stop(now + 0.3);
+    },
+    
+    createCarpetMuffled(now, volume) {
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      const filter = S.audioCtx.createBiquadFilter();
+      
+      osc.type = 'sine';
+      osc.frequency.value = 60;
+      
+      filter.type = 'lowpass';
+      filter.frequency.value = 150;
+      
+      gain.gain.setValueAtTime(volume * 0.4, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(S.masterGain);
+      
+      osc.start(now);
+      osc.stop(now + 0.12);
+    },
+    
+    createWoodCreak(now, volume) {
+      const noise = S.audioCtx.createBufferSource();
+      const buffer = S.audioCtx.createBuffer(1, S.audioCtx.sampleRate * 0.1, S.audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      
+      for (let i = 0; i < data.length; i++) {
+        data[i] = (Math.random() * 2 - 1) * (1 - i / data.length * 0.7);
+      }
+      noise.buffer = buffer;
+      
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = 120;
+      
+      gain.gain.setValueAtTime(volume * 0.6, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      
+      noise.connect(gain);
+      osc.connect(gain);
+      gain.connect(S.masterGain);
+      
+      noise.start(now);
+      osc.start(now);
+      noise.stop(now + 0.1);
+      osc.stop(now + 0.15);
+    },
+    
+    createStoneEcho(now, volume) {
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      const delay = S.audioCtx.createDelay(0.5);
+      const delayGain = S.audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = 300;
+      
+      delay.delayTime.value = 0.25;
+      delayGain.gain.value = 0.4;
+      
+      gain.gain.setValueAtTime(volume, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+      
+      osc.connect(gain);
+      gain.connect(S.masterGain);
+      gain.connect(delay);
+      delay.connect(delayGain);
+      delayGain.connect(S.masterGain);
+      
+      osc.start(now);
+      osc.stop(now + 0.15);
+    }
+  },
+  
+  // Elevator sounds
+  elevator: {
+    doorOpen() {
+      if (!S.audioCtx) return;
+      
+      const now = S.audioCtx.currentTime;
+      const noise = S.audioCtx.createBufferSource();
+      const buffer = S.audioCtx.createBuffer(1, S.audioCtx.sampleRate * 0.3, S.audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      
+      for (let i = 0; i < data.length; i++) {
+        const t = i / data.length;
+        data[i] = (Math.random() * 2 - 1) * (1 - t);
+      }
+      noise.buffer = buffer;
+      
+      const filter = S.audioCtx.createBiquadFilter();
+      const gain = S.audioCtx.createGain();
+      
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(200, now);
+      filter.frequency.linearRampToValueAtTime(800, now + 0.3);
+      
+      gain.gain.setValueAtTime(S.volume * 0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(S.masterGain);
+      
+      noise.start(now);
+      noise.stop(now + 0.3);
+    },
+    
+    doorClose() {
+      if (!S.audioCtx) return;
+      
+      const now = S.audioCtx.currentTime;
+      const noise = S.audioCtx.createBufferSource();
+      const buffer = S.audioCtx.createBuffer(1, S.audioCtx.sampleRate * 0.3, S.audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      
+      for (let i = 0; i < data.length; i++) {
+        const t = i / data.length;
+        data[i] = (Math.random() * 2 - 1) * t;
+      }
+      noise.buffer = buffer;
+      
+      const filter = S.audioCtx.createBiquadFilter();
+      const gain = S.audioCtx.createGain();
+      
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(800, now);
+      filter.frequency.linearRampToValueAtTime(200, now + 0.3);
+      
+      gain.gain.setValueAtTime(S.volume * 0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(S.masterGain);
+      
+      noise.start(now);
+      noise.stop(now + 0.3);
+    },
+    
+    moving() {
+      if (!S.audioCtx) return;
+      
+      const now = S.audioCtx.currentTime;
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = 60;
+      
+      gain.gain.setValueAtTime(S.volume * 0.2, now);
+      gain.gain.setValueAtTime(S.volume * 0.2, now + 1.0);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+      
+      osc.connect(gain);
+      gain.connect(S.masterGain);
+      
+      osc.start(now);
+      osc.stop(now + 1.2);
+    },
+    
+    ding() {
+      if (!S.audioCtx) return;
+      
+      const now = S.audioCtx.currentTime;
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = 1200;
+      
+      gain.gain.setValueAtTime(S.volume * 0.4, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+      
+      osc.connect(gain);
+      gain.connect(S.masterGain);
+      
+      osc.start(now);
+      osc.stop(now + 0.8);
+    }
+  },
+  
+  // Pixel the Cat sounds
+  pixel: {
+    purr() {
+      if (!S.audioCtx) return;
+      
+      const now = S.audioCtx.currentTime;
+      const osc = S.audioCtx.createOscillator();
+      const lfo = S.audioCtx.createOscillator();
+      const lfoGain = S.audioCtx.createGain();
+      const gain = S.audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = 40;
+      
+      lfo.type = 'sine';
+      lfo.frequency.value = 15; // 15 Hz modulation
+      lfoGain.gain.value = 10; // Amplitude modulation depth
+      
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.frequency);
+      
+      gain.gain.setValueAtTime(S.volume * 0.25, now);
+      gain.gain.setValueAtTime(S.volume * 0.25, now + 2.0);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 2.2);
+      
+      osc.connect(gain);
+      gain.connect(S.masterGain);
+      
+      lfo.start(now);
+      osc.start(now);
+      lfo.stop(now + 2.2);
+      osc.stop(now + 2.2);
+    },
+    
+    meow() {
+      if (!S.audioCtx) return;
+      
+      const now = S.audioCtx.currentTime;
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(400, now);
+      osc.frequency.linearRampToValueAtTime(800, now + 0.1);
+      osc.frequency.linearRampToValueAtTime(400, now + 0.3);
+      
+      gain.gain.setValueAtTime(S.volume * 0.3, now);
+      gain.gain.setValueAtTime(S.volume * 0.3, now + 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      
+      osc.connect(gain);
+      gain.connect(S.masterGain);
+      
+      osc.start(now);
+      osc.stop(now + 0.4);
+    }
+  },
+  
+  // UI Sounds
+  ui: {
+    menuOpen() {
+      if (!S.audioCtx) return;
+      const now = S.audioCtx.currentTime;
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 800;
+      gain.gain.setValueAtTime(S.volume * 0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.connect(gain); gain.connect(S.masterGain);
+      osc.start(now); osc.stop(now + 0.1);
+    },
+    
+    menuClose() {
+      if (!S.audioCtx) return;
+      const now = S.audioCtx.currentTime;
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 600;
+      gain.gain.setValueAtTime(S.volume * 0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.connect(gain); gain.connect(S.masterGain);
+      osc.start(now); osc.stop(now + 0.1);
+    },
+    
+    notification() {
+      if (!S.audioCtx) return;
+      const now = S.audioCtx.currentTime;
+      const osc1 = S.audioCtx.createOscillator();
+      const osc2 = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      osc1.type = 'sine'; osc1.frequency.value = 1000;
+      osc2.type = 'sine'; osc2.frequency.value = 1500;
+      gain.gain.setValueAtTime(S.volume * 0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      osc1.connect(gain); osc2.connect(gain); gain.connect(S.masterGain);
+      osc1.start(now); osc2.start(now);
+      osc1.stop(now + 0.3); osc2.stop(now + 0.3);
+    },
+    
+    questComplete() {
+      if (!S.audioCtx) return;
+      const now = S.audioCtx.currentTime;
+      const notes = [262, 330, 392, 523]; // C-E-G-C arpeggio
+      notes.forEach((freq, i) => {
+        const osc1 = S.audioCtx.createOscillator();
+        const osc2 = S.audioCtx.createOscillator();
+        const gain = S.audioCtx.createGain();
+        osc1.type = 'sine'; osc1.frequency.value = freq;
+        osc2.type = 'triangle'; osc2.frequency.value = freq;
+        gain.gain.setValueAtTime(S.volume * 0.2, now + i * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.4);
+        osc1.connect(gain); osc2.connect(gain); gain.connect(S.masterGain);
+        osc1.start(now + i * 0.1); osc2.start(now + i * 0.1);
+        osc1.stop(now + i * 0.1 + 0.4); osc2.stop(now + i * 0.1 + 0.4);
+      });
+    },
+    
+    achievementUnlock() {
+      if (!S.audioCtx) return;
+      const now = S.audioCtx.currentTime;
+      const notes = [1047, 932, 831, 740, 659]; // High descending pings
+      notes.forEach((freq, i) => {
+        const osc = S.audioCtx.createOscillator();
+        const gain = S.audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(S.volume * 0.25, now + i * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
+        osc.connect(gain); gain.connect(S.masterGain);
+        osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.3);
+      });
+    },
+    
+    chatMessage() {
+      if (!S.audioCtx) return;
+      const now = S.audioCtx.currentTime;
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, now);
+      osc.frequency.linearRampToValueAtTime(400, now + 0.08);
+      gain.gain.setValueAtTime(S.volume * 0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.connect(gain); gain.connect(S.masterGain);
+      osc.start(now); osc.stop(now + 0.08);
+    }
+  },
+  
+  // Enhanced coin pickup (improve existing)
+  enhanceCoinPickup() {
+    if (!S.audioCtx) return;
+    const now = S.audioCtx.currentTime;
+    // Main chime
+    const osc1 = S.audioCtx.createOscillator();
+    const gain1 = S.audioCtx.createGain();
+    osc1.type = 'sine'; osc1.frequency.value = 800;
+    gain1.gain.setValueAtTime(S.volume * 0.2, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    osc1.connect(gain1); gain1.connect(S.masterGain);
+    osc1.start(now); osc1.stop(now + 0.3);
+    
+    // Second harmonic
+    const osc2 = S.audioCtx.createOscillator();
+    const gain2 = S.audioCtx.createGain();
+    osc2.type = 'sine'; osc2.frequency.value = 1200;
+    gain2.gain.setValueAtTime(S.volume * 0.15, now + 0.05);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc2.connect(gain2); gain2.connect(S.masterGain);
+    osc2.start(now + 0.05); osc2.stop(now + 0.35);
+  },
+  
+  init() {
+    // Initialize sound effects system
+    console.log('🎵 Sound FX system initialized');
+  }
+};
+
+// Enhanced Atmosphere with Reverb
+const AtmosphereEnhancer = {
+  reverbNode: null,
+  
+  init() {
+    if (!S.audioCtx) return;
+    
+    // Create subtle reverb for all ambients
+    this.reverbNode = S.audioCtx.createConvolver();
+    const reverbBuffer = this.createReverbBuffer(0.3, 0.2); // feedback 0.3, mix 0.2
+    this.reverbNode.buffer = reverbBuffer;
+    
+    // Connect to master gain
+    this.reverbNode.connect(S.masterGain);
+  },
+  
+  createReverbBuffer(feedback, mix) {
+    if (!S.audioCtx) return null;
+    
+    const sampleRate = S.audioCtx.sampleRate;
+    const length = sampleRate * 2; // 2 second reverb
+    const buffer = S.audioCtx.createBuffer(2, length, sampleRate);
+    
+    for (let channel = 0; channel < 2; channel++) {
+      const channelData = buffer.getChannelData(channel);
+      for (let i = 0; i < length; i++) {
+        const decay = Math.pow(1 - i / length, 2);
+        channelData[i] = (Math.random() * 2 - 1) * decay * feedback;
+      }
+    }
+    
+    return buffer;
+  },
+  
+  // Add vinyl crackle for F6
+  playVinylCrackle() {
+    if (!S.audioCtx || S.floor !== 6) return;
+    
+    const now = S.audioCtx.currentTime;
+    const noise = S.audioCtx.createBufferSource();
+    const buffer = S.audioCtx.createBuffer(1, S.audioCtx.sampleRate * 0.1, S.audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * 0.02; // Very quiet
+    }
+    noise.buffer = buffer;
+    noise.loop = true;
+    
+    const filter = S.audioCtx.createBiquadFilter();
+    const gain = S.audioCtx.createGain();
+    
+    filter.type = 'bandpass';
+    filter.frequency.value = 2000;
+    filter.Q.value = 2;
+    
+    gain.gain.value = S.volume * 0.05; // Very quiet
+    
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(S.masterGain);
+    
+    noise.start(now);
+    
+    // Store reference to stop later
+    this.vinylCrackle = noise;
+  },
+  
+  stopVinylCrackle() {
+    if (this.vinylCrackle) {
+      this.vinylCrackle.stop();
+      this.vinylCrackle = null;
+    }
+  }
+};
+
+// WebSocket Music Event Handlers
+function handleMusicWebSocket(msg) {
+  if (msg.type === 'music.note' && msg.id !== S.myPlayerId) {
+    MusicStudio.handleOtherPlayerNote(msg.id, msg.instrument, msg.note);
+    // Play the actual sound too (quieter for other players)
+    if (S.floor === 6 && msg.instrument === 'synth') {
+      const pad = MusicStudio.synthPads[msg.note];
+      if (pad && S.audioCtx) {
+        const now = S.audioCtx.currentTime;
+        const osc = S.audioCtx.createOscillator();
+        const gain = S.audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = pad.note;
+        gain.gain.setValueAtTime(S.volume * 0.08, now); // Quieter
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.connect(gain); gain.connect(S.masterGain);
+        osc.start(now); osc.stop(now + 0.3);
+      }
+    }
+  }
+  
+  if (msg.type === 'music.drum' && msg.id !== S.myPlayerId) {
+    MusicStudio.handleOtherPlayerNote(msg.id, 'drum', msg.drum);
+    // Play drum sound (quieter)
+    if (S.floor === 6) {
+      // Simplified drum sounds for other players
+      if (S.audioCtx) {
+        const now = S.audioCtx.currentTime;
+        const osc = S.audioCtx.createOscillator();
+        const gain = S.audioCtx.createGain();
+        
+        switch (msg.drum) {
+          case 'kick': osc.frequency.value = 60; break;
+          case 'snare': osc.frequency.value = 200; break;
+          case 'hihat': osc.frequency.value = 8000; break;
+          case 'clap': osc.frequency.value = 1000; break;
+        }
+        
+        gain.gain.setValueAtTime(S.volume * 0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.connect(gain); gain.connect(S.masterGain);
+        osc.start(now); osc.stop(now + 0.1);
+      }
+    }
+  }
+  
+  if (msg.type === 'music.loop' && msg.id !== S.myPlayerId) {
+    // Show notification of shared loop
+    if (S.floor === 6) {
+      showNotification('🎵 ' + (S.otherPlayers[msg.id]?.name || 'Player') + ' shared a loop!');
+    }
+  }
+}
+
+// Initialize sound design systems
+function initSoundDesign() {
+  SoundFX.init();
+  MusicStudio.init();
+  AtmosphereEnhancer.init();
+  
+  // Hook into existing systems
+  
+  // Enhance existing coin pickup sound
+  const originalEarn = Coins.earn;
+  Coins.earn = function(amount, reason) {
+    SoundFX.enhanceCoinPickup();
+    return originalEarn.call(this, amount, reason);
+  };
+  
+  // Add sound to notifications
+  const originalShowNotification = showNotification;
+  showNotification = function(text, duration) {
+    SoundFX.ui.notification();
+    return originalShowNotification.call(this, text, duration);
+  };
+  
+  // Add Pixel interaction sounds
+  const originalCheckPixelHit = checkPixelHit;
+  checkPixelHit = function() {
+    const result = originalCheckPixelHit.call(this);
+    if (result) {
+      // Random chance for meow when interacting
+      if (Math.random() < 0.3) {
+        SoundFX.pixel.meow();
+      } else {
+        SoundFX.pixel.purr();
+      }
+    }
+    return result;
+  };
+  
+  // Add elevator sounds to floor transitions
+  const originalChangeFloor2 = changeFloor;
+  changeFloor = function(newFloor) {
+    if (newFloor !== S.floor) {
+      SoundFX.elevator.doorClose();
+      setTimeout(() => SoundFX.elevator.moving(), 300);
+      setTimeout(() => {
+        SoundFX.elevator.ding();
+        SoundFX.elevator.doorOpen();
+      }, 1200);
+      
+      // Handle F6 vinyl crackle
+      if (newFloor === 6) {
+        setTimeout(() => AtmosphereEnhancer.playVinylCrackle(), 1500);
+      } else if (S.floor === 6) {
+        AtmosphereEnhancer.stopVinylCrackle();
+      }
+    }
+    return originalChangeFloor2.call(this, newFloor);
+  };
+  
+  console.log('🎵 Sound Design System initialized! F6 Music Studio ready.');
+}
+
+// Add to main update loop
+const originalUpdate3 = update;
+update = function(dt) {
+  originalUpdate3(dt);
+  
+  // Update sound systems
+  SoundFX.footsteps.update();
+  MusicStudio.update(dt);
+};
+
+// Add to main render loop  
+const originalRender3 = render;
+render = function() {
+  originalRender3();
+  MusicStudio.render();
+};
+
+// Add music studio key handling
+const originalHandleKeyDown2 = handleKeyDown;
+handleKeyDown = function(e) {
+  // Check music studio first
+  if (MusicStudio.handleKeyPress(e.key, e.code)) {
+    e.preventDefault();
+    return;
+  }
+  
+  return originalHandleKeyDown2(e);
+};
+
+// Add music studio click handling
+const originalHandleCanvasClick2 = handleCanvasClick;
+handleCanvasClick = function(e) {
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (W / rect.width);
+  const y = (e.clientY - rect.top) * (H / rect.height);
+  
+  // Check music studio first
+  if (MusicStudio.handleClick(x, y)) {
+    return;
+  }
+  
+  return originalHandleCanvasClick2(e);
+};
+
+// Add WebSocket message handling for music
+const originalWSMessage = EchoWS.onMessage;
+EchoWS.onMessage = function(msg) {
+  handleMusicWebSocket(msg);
+  return originalWSMessage.call(this, msg);
+};
+
+// Initialize when audio context is ready
+const originalInitAudio = initAudio;
+initAudio = function() {
+  const result = originalInitAudio();
+  if (S.audioCtx) {
+    setTimeout(initSoundDesign, 100); // Small delay to ensure everything is ready
+  }
+  return result;
+};
+
+console.log('🎵 Sound Design System loaded!');
+
 // §ATMOSPHERE — Sprint C: Atmosphere Overhaul
 // Dynamic lighting, ambient sound, peripheral effects, station breathing
 // ═══════════════════════════════════════
