@@ -20142,32 +20142,26 @@ render = function() {
   MusicStudio.render();
 };
 
-// Add music studio key handling
-const originalHandleKeyDown2 = handleKeyDown;
-handleKeyDown = function(e) {
-  // Check music studio first
-  if (MusicStudio.handleKeyPress(e.key, e.code)) {
+// Add music studio key handling (hooks into existing keydown)
+document.addEventListener('keydown', function(e) {
+  if(document.activeElement && document.activeElement.tagName === 'INPUT') return;
+  if(typeof arcadeGame !== 'undefined' && arcadeGame) return;
+  if(S.floor === 6 && MusicStudio.handleKeyPress && MusicStudio.handleKeyPress(e.key, e.code)) {
     e.preventDefault();
     return;
   }
-  
-  return originalHandleKeyDown2(e);
-};
+});
 
-// Add music studio click handling
-const originalHandleCanvasClick2 = handleCanvasClick;
-handleCanvasClick = function(e) {
+// Add music studio click handling (hooks into canvas click)
+canvas.addEventListener('click', function(e) {
+  if(S.floor !== 6) return;
   const rect = canvas.getBoundingClientRect();
   const x = (e.clientX - rect.left) * (W / rect.width);
   const y = (e.clientY - rect.top) * (H / rect.height);
-  
-  // Check music studio first
-  if (MusicStudio.handleClick(x, y)) {
-    return;
+  if (MusicStudio.handleClick && MusicStudio.handleClick(x, y)) {
+    e.stopPropagation();
   }
-  
-  return originalHandleCanvasClick2(e);
-};
+});
 
 // Add WebSocket message handling for music
 const originalWSMessage = EchoWS.onMessage;
