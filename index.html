@@ -1764,6 +1764,30 @@ const ACCESSORY_ITEMS=[
   {id:'hat_starstorm',name:'Crown of Stars',icon:'💫',type:'hat',cost:-1,desc:'Orbiting mini stars circle your head',rarity:'legendary',lootOnly:true,render:(cx,x,y,t)=>{for(let i=0;i<5;i++){const a=t*2+i*(Math.PI*2/5),r=10;const sx=x+Math.cos(a)*r,sy=y-6+Math.sin(a)*r*.5;cx.fillStyle=`rgba(255,${200+Math.sin(t*4+i)*55},0,${.7+Math.sin(t*3+i)*.3})`;cx.beginPath();cx.arc(sx,sy,1.5,0,Math.PI*2);cx.fill();cx.fillStyle=`rgba(255,255,200,${.3+Math.sin(t*5+i)*.2})`;cx.beginPath();cx.arc(sx,sy,3,0,Math.PI*2);cx.fill()}}},
   {id:'pet_shadow',name:'Shadow Clone',icon:'👤',type:'pet',cost:-1,desc:'A dark copy mimics your movements with delay',rarity:'legendary',lootOnly:true,petColor:'#1a1a2a',petAccent:'#4a4a6a'},
   {id:'aura_timewarp',name:'Time Warp',icon:'⏳',type:'aura',cost:-1,desc:'Screen distortion ripple around you',rarity:'legendary',lootOnly:true,auraColor:'rgba(100,180,255,',auraSize:28},
+  // Drip / Streetwear (v22)
+  // Shoes
+  {id:'shoe_boost',name:'Hyper Boosts',icon:'👟',type:'shoes',cost:80,desc:'Three stripes. Maximum drip. +5% speed.',rarity:'rare',dripColor:'#4488ff',dripAccent:'#ffffff',render:(cx,x,y)=>{cx.fillStyle='#4488ff';cx.fillRect(x-7,y+2,5,3);cx.fillRect(x+2,y+2,5,3);cx.fillStyle='#fff';cx.fillRect(x-6,y+3,3,1);cx.fillRect(x+3,y+3,3,1)}},
+  {id:'shoe_swoosh',name:'Air Zooms',icon:'👟',type:'shoes',cost:100,desc:'Just float it. Leaving vapor trails.',rarity:'epic',dripColor:'#ff4444',dripAccent:'#ffffff',render:(cx,x,y)=>{cx.fillStyle='#ff4444';cx.fillRect(x-7,y+2,5,3);cx.fillRect(x+2,y+2,5,3);cx.fillStyle='#fff';cx.fillRect(x-5,y+3,2,1);cx.fillRect(x+4,y+3,2,1)}},
+  {id:'shoe_yeezy',name:'Cloud Walkers',icon:'👟',type:'shoes',cost:200,desc:'The rarest sole in space. Kanye who?',rarity:'legendary',dripColor:'#d4c4a8',dripAccent:'#f0e6d0',render:(cx,x,y)=>{cx.fillStyle='#d4c4a8';cx.fillRect(x-7,y+1,5,4);cx.fillRect(x+2,y+1,5,4);cx.fillStyle='#f0e6d0';cx.fillRect(x-7,y+4,5,1);cx.fillRect(x+2,y+4,5,1)}},
+  {id:'shoe_converse',name:'Classic Highs',icon:'👟',type:'shoes',cost:25,desc:'Timeless. Chuck would approve.',rarity:'uncommon',dripColor:'#ffffff',dripAccent:'#cc2222',render:(cx,x,y)=>{cx.fillStyle='#fff';cx.fillRect(x-7,y+1,5,4);cx.fillRect(x+2,y+1,5,4);cx.fillStyle='#cc2222';cx.fillRect(x-6,y+2,1,1);cx.fillRect(x+3,y+2,1,1)}},
+  {id:'shoe_jordan',name:'Space Dunks',icon:'👟',type:'shoes',cost:150,desc:'Air time: infinite in zero gravity.',rarity:'epic',lootOnly:true,dripColor:'#cc2222',dripAccent:'#111',render:(cx,x,y)=>{cx.fillStyle='#cc2222';cx.fillRect(x-7,y+1,5,4);cx.fillRect(x+2,y+1,5,4);cx.fillStyle='#111';cx.fillRect(x-7,y+2,5,1);cx.fillRect(x+2,y+2,5,1)}},
+  // Drinks (held)
+  {id:'drink_wings',name:'Wing Juice',icon:'🥫',type:'held',cost:30,desc:'Gives you wings. Temporarily. +20% jump height.',rarity:'uncommon',dripColor:'#4488cc',dripAccent:'#cc2222',render:(cx,x,y)=>{cx.fillStyle='#4488cc';cx.fillRect(x+10,y-8,3,6);cx.fillStyle='#cc2222';cx.fillRect(x+10,y-5,3,2)}},
+  {id:'drink_nrg',name:'Monster Fuel',icon:'🧃',type:'held',cost:30,desc:'Unleash the beast. +15% attack speed for 5min.',rarity:'uncommon',dripColor:'#111',dripAccent:'#44ff44',render:(cx,x,y)=>{cx.fillStyle='#111';cx.fillRect(x+10,y-8,3,6);cx.fillStyle='#44ff44';cx.fillRect(x+11,y-7,1,3)}},
+  {id:'drink_boba',name:'Space Boba',icon:'🧋',type:'held',cost:15,desc:'Tapioca pearls in zero-G. Delicious chaos.',rarity:'common',dripColor:'#d4a574',dripAccent:'#3a2010',render:(cx,x,y)=>{cx.fillStyle='#d4a574';cx.fillRect(x+10,y-9,3,7);cx.fillStyle='#3a2010';cx.fillRect(x+11,y-4,1,1);cx.fillRect(x+10,y-3,1,1)}},
+  // Chains
+  {id:'chain_gold',name:'Gold Chain',icon:'⛓️',type:'chain',cost:60,desc:'Heavy drip. Visitor respect +100%.',rarity:'rare',dripColor:'#ffd700',render:(cx,x,y)=>{cx.strokeStyle='#ffd700';cx.lineWidth=1;cx.beginPath();cx.moveTo(x-5,y-18);cx.quadraticCurveTo(x,y-14,x+5,y-18);cx.stroke();cx.fillStyle='#ffd700';cx.fillRect(x-1,y-15,2,2)}},
+  {id:'chain_diamond',name:'Diamond Pendant',icon:'💎',type:'chain',cost:200,desc:'Blinding brilliance. The ultimate flex.',rarity:'legendary',dripColor:'#b0e0ff',render:(cx,x,y,t)=>{cx.strokeStyle='#c0c0c0';cx.lineWidth=1;cx.beginPath();cx.moveTo(x-5,y-18);cx.quadraticCurveTo(x,y-14,x+5,y-18);cx.stroke();const g=.6+Math.sin(t*4)*.4;cx.fillStyle=`rgba(176,224,255,${g})`;cx.beginPath();cx.moveTo(x,y-16);cx.lineTo(x-2,y-14);cx.lineTo(x,y-12);cx.lineTo(x+2,y-14);cx.closePath();cx.fill()}},
+  {id:'chain_pixel',name:'Pixel Pendant',icon:'🔮',type:'chain',cost:40,desc:'A tiny Pixel charm. She approves.',rarity:'uncommon',dripColor:'#c080ff',render:(cx,x,y)=>{cx.strokeStyle='#c0c0c0';cx.lineWidth=1;cx.beginPath();cx.moveTo(x-4,y-18);cx.quadraticCurveTo(x,y-14,x+4,y-18);cx.stroke();cx.fillStyle='#c080ff';cx.fillRect(x-1,y-15,2,2)}},
+  // Glasses
+  {id:'glasses_clout',name:'Clout Goggles',icon:'🕶️',type:'glasses',cost:35,desc:'Supreme vibes only.',rarity:'uncommon',dripColor:'#ffffff',render:(cx,x,y)=>{cx.fillStyle='#fff';cx.fillRect(x-6,y-28,4,3);cx.fillRect(x+2,y-28,4,3);cx.fillStyle='#111';cx.fillRect(x-5,y-27,2,1);cx.fillRect(x+3,y-27,2,1);cx.fillStyle='#fff';cx.fillRect(x-2,y-27,4,1)}},
+  {id:'glasses_pixel',name:'Pixel Shades',icon:'🕶️',type:'glasses',cost:50,desc:'8-bit vision. Everything looks retro.',rarity:'rare',dripColor:'#111',render:(cx,x,y)=>{cx.fillStyle='#111';cx.fillRect(x-7,y-29,14,4);cx.fillStyle='#222';cx.fillRect(x-6,y-28,4,2);cx.fillRect(x+2,y-28,4,2)}},
+  {id:'glasses_cyber',name:'Cyber Visor',icon:'🥽',type:'glasses',cost:80,desc:'AR overlay. See item stats on sight.',rarity:'epic',dripColor:'#00ffcc',render:(cx,x,y,t)=>{const g=.6+Math.sin(t*3)*.3;cx.fillStyle=`rgba(0,255,204,${g})`;cx.fillRect(x-7,y-29,14,3);cx.fillStyle='#004433';cx.fillRect(x-6,y-28,12,1)}},
+  // Headphones (hat type)
+  {id:'hat_headphones',name:'Bass Cans',icon:'🎧',type:'hat',cost:45,desc:'The beats are in your head. Literally.',rarity:'rare',render:(cx,x,y)=>{cx.fillStyle='#333';cx.fillRect(x-9,y-2,3,8);cx.fillRect(x+6,y-2,3,8);cx.strokeStyle='#444';cx.lineWidth=2;cx.beginPath();cx.arc(x,y-2,9,Math.PI,0);cx.stroke();cx.fillStyle='#666';cx.fillRect(x-10,y,4,6);cx.fillRect(x+6,y,4,6)}},
+  // Watches
+  {id:'watch_smart',name:'Echo Watch',icon:'⌚',type:'watch',cost:60,desc:'Shows your stats, flex your grind.',rarity:'rare',dripColor:'#333',dripAccent:'#00ffcc',render:(cx,x,y,t)=>{cx.fillStyle='#333';cx.fillRect(x-10,y-14,3,3);cx.fillStyle='#00ffcc';cx.fillRect(x-9,y-13,1,1)}},
+  {id:'watch_rolex',name:'Chrono Luxe',icon:'⌚',type:'watch',cost:300,desc:'Time is money. You have both.',rarity:'legendary',dripColor:'#ffd700',dripAccent:'#fff',render:(cx,x,y,t)=>{const g=.7+Math.sin(t*2)*.3;cx.fillStyle=`rgba(255,215,0,${g})`;cx.fillRect(x-10,y-14,3,3);cx.fillStyle='#fff';cx.fillRect(x-9,y-13,1,1)}},
 ];
 
 // -- Weapon Types --
@@ -4427,7 +4451,8 @@ function updatePixelTalks(dt){
 // ═══════════════════════════════════════
 function updateVisitor(dt){
   if(!S.useVisitor)return;
-  const _speedBonus=1+(LootSystem.getStatBonuses().speed||0)/100+(typeof SpecialistSystem!=='undefined'?SpecialistSystem.getSpeedBonus():0);
+  const _dripSpd=(LS.get('equippedAccessories',{}).shoes==='shoe_boost'?0.05:0);
+  const _speedBonus=1+(LootSystem.getStatBonuses().speed||0)/100+(typeof SpecialistSystem!=='undefined'?SpecialistSystem.getSpeedBonus():0)+_dripSpd;
   const spd=160*_speedBonus,v=S.visitor;
   
   // Dash cooldown
@@ -4616,7 +4641,7 @@ function renderVisitor(ctx){
     const eGlow=EnhancementSystem.getGlowColor(eLvl);
     if(eGlow){const pulse=eGlow.intensity*(0.5+Math.sin(S.time*eGlow.pulseSpeed)*0.3);const g=ctx.createRadialGradient(v.x,v.y-15,2,v.x,v.y-15,20+eLvl);g.addColorStop(0,eGlow.color+Math.floor(pulse*200).toString(16).padStart(2,'0'));g.addColorStop(1,eGlow.color+'00');ctx.fillStyle=g;ctx.beginPath();ctx.arc(v.x,v.y-15,20+eLvl,0,Math.PI*2);ctx.fill()}}
   // Render aura behind avatar
-  const eqAcc=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+  const eqAcc=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null,shoes:null,held:null,chain:null,glasses:null,watch:null});
   if(eqAcc.aura){const auraItem=ACCESSORY_ITEMS.find(a=>a.id===eqAcc.aura);if(auraItem){
     const pulse=.35+Math.sin(S.time*2.5)*.15;const auraR=auraItem.auraSize*2;
     // Outer glow ring
@@ -6464,7 +6489,7 @@ function showItemShop(initialTab){
   const tab=initialTab||'skins';
   const ownedSkins=LS.get('visitorSkinsOwned',[]);
   const ownedAcc=LS.get('visitorAccessories',[]);
-  const equipped=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+  const equipped=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null,shoes:null,held:null,chain:null,glasses:null,watch:null});
   const ownedFurniture=LS.get('ownedFurniture',[]);
 
   // Featured items — rotates daily based on date
@@ -6504,6 +6529,7 @@ function showItemShop(initialTab){
   html+='<div class="shop-tab'+(tab==='weapons'?' active':'')+'" data-tab="weapons">\u2694\uFE0F Weapons</div>';
   html+='<div class="shop-tab'+(tab==='furniture'?' active':'')+'" data-tab="furniture">🪑 Furniture</div>';
   html+='<div class="shop-tab'+(tab==='accessories'?' active':'')+'" data-tab="accessories">✨ Accessories</div>';
+  html+='<div class="shop-tab'+(tab==='drip'?' active':'')+'" data-tab="drip">👟 Drip</div>';
   html+='<div class="shop-tab'+(tab==='market'?' active':'')+'" data-tab="market">🏪 Market</div>';
   html+='</div>';
 
@@ -6599,6 +6625,31 @@ function showItemShop(initialTab){
   });
   html+='</div>';
 
+  // Drip tab (v22 streetwear)
+  html+='<div class="shop-content" data-content="drip" style="'+(tab!=='drip'?'display:none':'')+'">';
+  const dripTypes=[{label:'👟 Shoes',type:'shoes'},{label:'🥤 Drinks',type:'held'},{label:'⛓️ Chains',type:'chain'},{label:'🕶️ Glasses',type:'glasses'},{label:'⌚ Watches',type:'watch'}];
+  dripTypes.forEach(dt=>{
+    const items=ACCESSORY_ITEMS.filter(a=>a.type===dt.type);
+    if(!items.length)return;
+    html+='<div style="margin:6px 0"><div style="font-size:10px;color:#ff6ec7;margin-bottom:4px">'+dt.label+'</div><div style="display:flex;flex-wrap:wrap;gap:3px">';
+    items.forEach(acc=>{
+      const owned=ownedAcc.includes(acc.id);
+      const isEquipped=equipped[acc.type]===acc.id;
+      const isLootOnly=acc.lootOnly||acc.cost<0;
+      const r=RARITIES[acc.rarity||'common']||RARITIES.common;
+      const shimCls4=acc.rarity==='mythic'?' shimmer-mythic':acc.rarity==='legendary'?' shimmer-legendary':acc.rarity==='epic'?' shimmer-epic':'';
+      html+='<div class="acc-card'+(owned?' owned':'')+(isEquipped?' equipped':'')+shimCls4+' rarity-'+(acc.rarity||'common')+'" data-action="buy-acc" data-id="'+acc.id+'" data-cost="'+acc.cost+'" data-type="'+acc.type+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">';
+      html+='<div class="acc-icon">'+acc.icon+'</div><div style="font-size:9px;color:'+r.color+'">'+acc.name+'</div>';
+      html+='<span class="rarity-badge '+(acc.rarity||'common')+'" style="font-size:7px"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:'+r.color+';margin-right:2px;vertical-align:middle"></span>'+r.name+'</span>';
+      if(acc.desc)html+='<div style="font-size:7px;color:#888;margin-top:1px">'+acc.desc+'</div>';
+      if(isLootOnly)html+='<span class="shop-loot-badge">LOOT ONLY</span>';
+      else html+='<div class="acc-price">'+(isEquipped?'EQUIPPED':owned?'OWNED':acc.cost+'◈')+'</div>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+  });
+  html+='</div>';
+
   // Market tab (replaces Special)
   html+='<div class="shop-content" data-content="market" style="'+(tab!=='market'?'display:none':'')+'">';
   html+='<div style="text-align:center;padding:16px"><div style="font-size:28px;margin-bottom:6px">🏪</div>';
@@ -6673,7 +6724,7 @@ function showItemShop(initialTab){
       const id=card.dataset.id,cost=parseInt(card.dataset.cost)||0,type=card.dataset.type;
       if(cost<0){showNotification('This item can only drop from loot! 🎁');return}
       const owned=LS.get('visitorAccessories',[]);
-      const eq=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+      const eq=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null,shoes:null,held:null,chain:null,glasses:null,watch:null});
       if(!owned.includes(id)){
         if(!Coins.canAfford(cost)){showNotification('Need more ◈!');return}
         Coins.spend(cost,'accessory');
@@ -6728,7 +6779,7 @@ function renderInventoryPanel(){
   const panel=document.getElementById('rpg-inventory');
   const ownedSkins=LS.get('visitorSkinsOwned',[]);
   const ownedAcc=LS.get('visitorAccessories',[]);
-  const equipped=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+  const equipped=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null,shoes:null,held:null,chain:null,glasses:null,watch:null});
   const ownedWpnIds=LS.get('ownedWeapons',[]);
   const lootInv=LS.get('lootInventory',[]);
   const equippedLoot=LS.get('equippedLoot',{});
@@ -6777,6 +6828,11 @@ function renderInventoryPanel(){
   html+=renderSlot('trail','Trail','✨');
   html+=renderSlot('aura','Aura','🟣');
   html+=renderSlot('pet','Pet','🐾');
+  html+=renderSlot('shoes','Shoes','👟');
+  html+=renderSlot('held','Drink','🥤');
+  html+=renderSlot('chain','Chain','⛓️');
+  html+=renderSlot('glasses','Glasses','🕶️');
+  html+=renderSlot('watch','Watch','⌚');
   html+='</div></div></div>';
 
   // 📊 Stats section
@@ -6797,7 +6853,7 @@ function renderInventoryPanel(){
   html+='<div class="rpg-section" style="flex:1"><div class="rpg-section-header" data-section="backpack">\u{1F392} Backpack <span class="toggle">▾</span></div>';
   html+='<div class="rpg-section-body" data-body="backpack">';
   html+='<div class="bp-filters">';
-  var filterTypes=['All','Skins','Weapons','Hats','Trails','Auras','Pets'];
+  var filterTypes=['All','Skins','Weapons','Hats','Trails','Auras','Pets','Drip'];
   filterTypes.forEach(function(ft){html+='<span class="bp-filter'+(ft==='All'?' active':'')+'" data-bpf="'+ft+'">'+ft+'</span>';});
   html+='</div><div class="bp-grid" id="bp-grid">';
   html+=renderBackpackItems('All',ownedSkins,ownedAcc,equipped,ownedWpnIds,lootInv,equippedLoot);
@@ -6830,7 +6886,7 @@ function renderInventoryPanel(){
       var type=el.dataset.unequip;
       if(type==='skin')return;// Can't unequip skin
       if(type==='weapon'){if(WeaponSystem.equipped){WeaponSystem.unequip();showNotification('Weapon unequipped!');renderInventoryPanel()}return}
-      var eq2=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+      var eq2=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null,shoes:null,held:null,chain:null,glasses:null,watch:null});
       if(eq2[type]){eq2[type]=null;LS.set('equippedAccessories',eq2);showNotification('Unequipped!');renderInventoryPanel()}
     };
   });
@@ -6862,10 +6918,12 @@ function renderBackpackItems(filter,ownedSkins,ownedAcc,equipped,ownedWpnIds,loo
   }
   // Accessories by type
   var accFilterMap={Hats:'hat',Trails:'trail',Auras:'aura',Pets:'pet'};
-  var accFilter=filter==='All'?null:accFilterMap[filter];
+  var dripFilterTypes=['shoes','held','chain','glasses','watch'];
+  var accFilter=filter==='All'?null:filter==='Drip'?'_drip':accFilterMap[filter];
   ACCESSORY_ITEMS.forEach(function(acc){
     if(!ownedAcc.includes(acc.id))return;
-    if(accFilter&&acc.type!==accFilter)return;
+    if(accFilter==='_drip'){if(!dripFilterTypes.includes(acc.type))return}
+    else if(accFilter&&acc.type!==accFilter)return;
     if(filter!=='All'&&!accFilter)return;
     var isEq=equipped[acc.type]===acc.id;
     var r=RARITIES[acc.rarity||'common']||RARITIES.common;
@@ -6912,7 +6970,7 @@ function attachBackpackHandlers(panel){
   });
   panel.querySelectorAll('[data-bp-action="acc"]').forEach(function(el){
     el.onclick=function(){
-      var eq2=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+      var eq2=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null,shoes:null,held:null,chain:null,glasses:null,watch:null});
       var type=el.dataset.type,id=el.dataset.id;
       if(eq2[type]===id){eq2[type]=null;LS.set('equippedAccessories',eq2);showNotification('Unequipped!');renderInventoryPanel();return}
       eq2[type]=id;LS.set('equippedAccessories',eq2);
@@ -7969,7 +8027,7 @@ function renderItemCard(item,options){
 
 // Accessory rendering on visitor (aura rendered separately before avatar)
 function renderVisitorAccessories(cx,v){
-  const eq=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
+  const eq=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null,shoes:null,held:null,chain:null,glasses:null,watch:null});
   const sc=3,sz=10;
   const headX=v.x,headY=v.y-sz*sc;
 
@@ -8079,6 +8137,45 @@ function renderVisitorAccessories(cx,v){
         }
       }
     }
+  }
+
+  // Shoes (render below feet)
+  if(eq.shoes){
+    const shoeItem=ACCESSORY_ITEMS.find(a=>a.id===eq.shoes);
+    if(shoeItem&&shoeItem.render){cx.save();shoeItem.render(cx,v.x,v.y,S.time);cx.restore()}
+  }
+
+  // Held item (render in hand area)
+  if(eq.held){
+    const heldItem=ACCESSORY_ITEMS.find(a=>a.id===eq.held);
+    if(heldItem&&heldItem.render){cx.save();heldItem.render(cx,v.x,v.y,S.time);cx.restore()}
+  }
+
+  // Chain (render on chest)
+  if(eq.chain){
+    const chainItem=ACCESSORY_ITEMS.find(a=>a.id===eq.chain);
+    if(chainItem&&chainItem.render){cx.save();chainItem.render(cx,v.x,v.y,S.time);cx.restore()}
+  }
+
+  // Glasses (render on face)
+  if(eq.glasses){
+    const glassItem=ACCESSORY_ITEMS.find(a=>a.id===eq.glasses);
+    if(glassItem&&glassItem.render){cx.save();glassItem.render(cx,headX,headY,S.time);cx.restore()}
+  }
+
+  // Watch (render on wrist)
+  if(eq.watch){
+    const watchItem=ACCESSORY_ITEMS.find(a=>a.id===eq.watch);
+    if(watchItem&&watchItem.render){cx.save();watchItem.render(cx,v.x,v.y,S.time);cx.restore()}
+  }
+
+  // Air Zooms vapor trail particles
+  if(eq.shoes==='shoe_swoosh'&&v.moving&&Math.random()<.3){
+    S.particles.push({x:v.x+(Math.random()-.5)*6,y:v.y+3,vx:(Math.random()-.5)*.5,vy:.3,life:10+Math.random()*6,color:'rgba(255,255,255,0.4)',size:1.5});
+  }
+  // Wing Juice upward particles
+  if(eq.held==='drink_wings'&&v.moving&&Math.random()<.2){
+    S.particles.push({x:v.x+(Math.random()-.5)*6,y:v.y-5,vx:0,vy:-1,life:8+Math.random()*4,color:'rgba(255,220,100,0.5)',size:1});
   }
 
   // Void Walker skin glitch effect
@@ -13426,13 +13523,15 @@ const CoinArcs = {
   document.head.appendChild(s);
 })();
 // Patch Coins.earn to trigger arcs
-const _origCoinsEarn = Coins.earn.bind(Coins);
+{
+const _coinArcEarn = Coins.earn.bind(Coins);
 Coins.earn = function(n, r) {
   const srcX = S.useVisitor ? S.visitor.x : S.echo.x;
   const srcY = S.useVisitor ? S.visitor.y : S.echo.y;
-  _origCoinsEarn(n, r);
+  _coinArcEarn(n, r);
   CoinArcs.spawn(srcX, srcY - 30, n);
 };
+}
 
 // ─── 6. INTERACTION SPARKLE ───────────────────────────────────
 const InteractionSparkle = {
@@ -13871,6 +13970,578 @@ if(typeof RoomSystem.visitRoom==='function'){
 }
 
 console.log('⚡ Econ Phase 3: Elemental Combat, Tournament Prizes, Server Bazaar, Custom Items, Creator Royalties');
+
+// ═══════════════════════════════════════
+// §99. PLAYER EXPERIENCE: ONBOARDING, GHOST TOWN, QUEST TRACKER, PEACEFUL COINS, COLLECTION
+// ═══════════════════════════════════════
+
+// --- CSS for new systems ---
+(function(){
+const style=document.createElement('style');
+style.textContent=`
+#onboarding-hud{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:6000;background:rgba(10,10,30,.92);border:1px solid #9b59b6;border-radius:10px;padding:8px 18px;font-size:11px;color:#c8a8e8;display:none;align-items:center;gap:10px;backdrop-filter:blur(6px);white-space:nowrap}
+#onboarding-hud.show{display:flex}
+#onboarding-hud .step-text{color:#e0c8f8}
+#onboarding-hud .skip-btn{background:none;border:1px solid #555;color:#888;padding:3px 10px;border-radius:12px;cursor:pointer;font-size:9px;font-family:inherit;margin-left:8px}
+#onboarding-hud .skip-btn:hover{border-color:#ff6ec7;color:#ff6ec7}
+.onboarding-glow{position:absolute;border-radius:50%;pointer-events:none;z-index:100;animation:obGlow 1.5s ease-in-out infinite}
+@keyframes obGlow{0%,100%{box-shadow:0 0 15px 5px rgba(155,89,182,.4)}50%{box-shadow:0 0 25px 10px rgba(155,89,182,.7)}}
+#quest-tracker{position:fixed;top:50px;right:8px;z-index:5500;background:rgba(10,10,30,.92);border:1px solid #444;border-radius:8px;font-size:10px;color:#ccc;max-width:220px;backdrop-filter:blur(6px);transition:all .3s}
+#quest-tracker.collapsed{cursor:pointer}
+#quest-tracker .qt-header{padding:6px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;border-bottom:1px solid #333}
+#quest-tracker .qt-header:hover{color:#00fff7}
+#quest-tracker .qt-body{padding:6px 10px;max-height:300px;overflow-y:auto}
+#quest-tracker.collapsed .qt-body{display:none}
+#quest-tracker.collapsed .qt-header{border-bottom:none}
+.qt-mission{margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid rgba(100,100,150,.15)}
+.qt-mission:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.qt-bar{height:3px;background:#222;border-radius:2px;margin-top:2px;overflow:hidden}
+.qt-bar-fill{height:100%;background:#9b59b6;border-radius:2px;transition:width .3s}
+.qt-onboarding{color:#ff6ec7;font-weight:bold;margin-bottom:6px}
+#collection-tab{cursor:pointer;padding:8px;text-align:center;color:#888;border-bottom:2px solid transparent;transition:all .2s}
+#collection-tab:hover,#collection-tab.active{color:#ff6ec7;border-bottom-color:#ff6ec7}
+.coll-item{display:inline-block;width:44px;height:44px;margin:3px;border-radius:6px;text-align:center;line-height:44px;font-size:18px;border:1px solid #333;position:relative;cursor:pointer;transition:all .2s}
+.coll-item.found{background:rgba(155,89,182,.15);border-color:#9b59b6}
+.coll-item.unfound{background:rgba(20,20,40,.8);border-color:#222;filter:brightness(0.3)}
+.coll-item:hover{transform:scale(1.1);z-index:1}
+.coll-progress{font-size:10px;color:#888;margin:4px 0 8px;text-align:center}
+`;
+document.head.appendChild(style);
+})();
+
+// --- 1. ONBOARDING QUEST ---
+const Onboarding={
+  step:0,
+  active:false,
+  _glowEl:null,
+
+  start(name){
+    if(LS.get('hasCompletedOnboarding'))return;
+    this.active=true;
+    this.step=1;
+    this._createHUD();
+    this._updateHUD();
+    setTimeout(()=>{
+      addChatMsg('Echo',`Welcome aboard, ${name}! 🚀 I'm Echo — I live here. Want me to show you around?`);
+      this._showChips(['Show me around!','I\'ll explore myself'],(choice)=>{
+        if(choice==='I\'ll explore myself'){
+          this._complete();
+          addChatMsg('Echo','No problem! Explore at your own pace. I\'m always here in chat if you need me. 🔮');
+        } else {
+          this.step=2;
+          this._updateHUD();
+          addChatMsg('Echo','First things first — see that cat? That\'s Pixel. Go pet her! Just walk up and press E. 🐱');
+        }
+      });
+    },2000);
+  },
+
+  _createHUD(){
+    if(document.getElementById('onboarding-hud'))return;
+    const el=document.createElement('div');
+    el.id='onboarding-hud';
+    el.className='show';
+    el.innerHTML='<span class="step-text"></span><button class="skip-btn">Skip tutorial</button>';
+    document.body.appendChild(el);
+    el.querySelector('.skip-btn').onclick=()=>{
+      this._complete();
+      addChatMsg('Echo','Tutorial skipped! Explore freely — I\'m here if you need me. 🔮');
+    };
+  },
+
+  _updateHUD(){
+    const el=document.getElementById('onboarding-hud');
+    if(!el)return;
+    const labels={
+      1:'Welcome',2:'Pet Pixel',3:'Visit the shop',
+      4:'Pick a skin',5:'Try the elevator',6:'Visit Floor 2'
+    };
+    el.querySelector('.step-text').textContent=`📋 Step ${this.step}/6 — ${labels[this.step]||''}`;
+    el.className=this.active?'show':'';
+    // Update quest tracker too
+    if(typeof QuestTracker!=='undefined')QuestTracker.render();
+  },
+
+  _showChips(texts,cb){
+    const el=$('#chat-suggestions');
+    el.innerHTML='';
+    texts.forEach(text=>{
+      const chip=document.createElement('div');
+      chip.className='suggest-chip';
+      chip.textContent=text;
+      chip.onclick=()=>{
+        addChatMsg('You',text,'#ff6ec7');
+        el.innerHTML='';
+        cb(text);
+      };
+      el.appendChild(chip);
+    });
+  },
+
+  // Called from petPixel
+  onPetPixel(){
+    if(!this.active||this.step!==2)return;
+    this.step=3;
+    this._updateHUD();
+    Coins.earn(10,'onboarding_bonus');
+    setTimeout(()=>{
+      addChatMsg('Echo','Nice! Pixel likes you. Here, take these. ◈+10 🎁');
+      setTimeout(()=>{
+        addChatMsg('Echo','Now let\'s check out the shop — I bet there\'s a skin that suits you.');
+        this._showChips(['Take me to the shop!'],(choice)=>{
+          this.step=4;
+          this._updateHUD();
+          LS.set('onboardingFreeSkin',true);
+          showVisitorSkinPanel();
+          addChatMsg('Echo','Pick anything you like! My treat for the first one. 🎁');
+        });
+      },1500);
+    },800);
+  },
+
+  // Called from skin purchase
+  onSkinBuy(){
+    if(!this.active||this.step!==4)return;
+    LS.set('onboardingFreeSkin',false);
+    this.step=5;
+    this._updateHUD();
+    setTimeout(()=>{
+      addChatMsg('Echo','Looking good! 😎');
+      setTimeout(()=>{
+        addChatMsg('Echo','There are 9 floors on this station. Each one is different. Try the elevator — Floor 2 has the best view in space. 🛗');
+        this.step=5;
+        this._updateHUD();
+      },1500);
+    },800);
+  },
+
+  // Called from changeFloor
+  onFloorChange(f){
+    if(!this.active)return;
+    if(this.step===5&&f!==1){
+      this.step=6;
+      this._updateHUD();
+    }
+    if(this.step===6&&f===2){
+      setTimeout(()=>{
+        addChatMsg('Echo','Beautiful, right? ✨ Take your time exploring. If you need me, just use the chat. I\'m always here.');
+        this._complete();
+      },1500);
+    }
+  },
+
+  _complete(){
+    this.active=false;
+    this.step=0;
+    LS.set('hasCompletedOnboarding',true);
+    const el=document.getElementById('onboarding-hud');
+    if(el)el.remove();
+    if(typeof QuestTracker!=='undefined')QuestTracker.render();
+  }
+};
+
+// --- 2. GHOST TOWN SEEDING ---
+const SeedData={
+  _seeded:false,
+  seed(){
+    if(LS.get('ghostTownSeeded'))return;
+    LS.set('ghostTownSeeded',true);
+    this._seeded=true;
+
+    // Fake visitor history
+    const SEED_VISITORS=[
+      {name:'Luna',visits:12,firstVisit:Date.now()-86400000*30,favoriteFloor:4},
+      {name:'Kai',visits:8,firstVisit:Date.now()-86400000*25,favoriteFloor:3},
+      {name:'Nova',visits:23,firstVisit:Date.now()-86400000*20,favoriteFloor:2},
+      {name:'Shadow',visits:5,firstVisit:Date.now()-86400000*15,favoriteFloor:5},
+      {name:'Pixel_Fan_99',visits:31,firstVisit:Date.now()-86400000*10,favoriteFloor:1},
+      {name:'StarDust',visits:7,firstVisit:Date.now()-86400000*7,favoriteFloor:6},
+      {name:'Cosmo',visits:14,firstVisit:Date.now()-86400000*28,favoriteFloor:2},
+      {name:'Nebula',visits:19,firstVisit:Date.now()-86400000*22,favoriteFloor:7},
+      {name:'Orbit',visits:3,firstVisit:Date.now()-86400000*5,favoriteFloor:1},
+      {name:'Zenith',visits:16,firstVisit:Date.now()-86400000*18,favoriteFloor:4},
+      {name:'Astrid',visits:9,firstVisit:Date.now()-86400000*12,favoriteFloor:3},
+      {name:'Comet',visits:27,firstVisit:Date.now()-86400000*35,favoriteFloor:6},
+      {name:'Vega',visits:6,firstVisit:Date.now()-86400000*8,favoriteFloor:5},
+      {name:'Solaris',visits:11,firstVisit:Date.now()-86400000*14,favoriteFloor:2},
+      {name:'Quasar',visits:4,firstVisit:Date.now()-86400000*3,favoriteFloor:7},
+      {name:'Andromeda',visits:20,firstVisit:Date.now()-86400000*24,favoriteFloor:4},
+      {name:'Pulsar',visits:15,firstVisit:Date.now()-86400000*16,favoriteFloor:3},
+      {name:'Eclipse',visits:2,firstVisit:Date.now()-86400000*2,favoriteFloor:1},
+    ];
+    LS.set('seedVisitors',SEED_VISITORS);
+
+    // Seed visitor counter — start at believable number
+    const existingCount=LS.get('stationVisitorCount',0);
+    if(existingCount<47)LS.set('stationVisitorCount',47+Math.floor(Math.random()*12));
+
+    // Seed leaderboards
+    const seedLeaderboard=[
+      {name:'Nova',score:2450,wins:23},{name:'Pixel_Fan_99',score:3100,wins:31},
+      {name:'Luna',score:1800,wins:12},{name:'Cosmo',score:2100,wins:14},
+      {name:'Nebula',score:2800,wins:19},{name:'Comet',score:3500,wins:27},
+      {name:'Andromeda',score:2600,wins:20},{name:'StarDust',score:900,wins:7},
+      {name:'Shadow',score:650,wins:5},{name:'Pulsar',score:1950,wins:15}
+    ];
+    LS.set('seedLeaderboard',seedLeaderboard);
+
+    // Seed bazaar listings
+    const seedBazaar=[
+      {seller:'Nova',item:{name:'Crystal Blade',icon:'🗡️',rarity:'rare',type:'weapon'},price:85,listed:Date.now()-86400000*3},
+      {seller:'Cosmo',item:{name:'Star Amulet',icon:'⭐',rarity:'uncommon',type:'accessory'},price:35,listed:Date.now()-86400000*5},
+      {seller:'Pixel_Fan_99',item:{name:'Cat Ears Hat',icon:'🐱',rarity:'rare',type:'accessory'},price:60,listed:Date.now()-86400000*1},
+      {seller:'Luna',item:{name:'Moon Staff',icon:'🌙',rarity:'epic',type:'weapon'},price:150,listed:Date.now()-86400000*7},
+      {seller:'Nebula',item:{name:'Nebula Cloak',icon:'🌌',rarity:'epic',type:'accessory'},price:120,listed:Date.now()-86400000*2},
+      {seller:'Comet',item:{name:'Iron Shield',icon:'🛡️',rarity:'common',type:'weapon'},price:20,listed:Date.now()-86400000*4},
+      {seller:'Shadow',item:{name:'Shadow Dagger',icon:'🗡️',rarity:'uncommon',type:'weapon'},price:45,listed:Date.now()-86400000*6},
+      {seller:'Andromeda',item:{name:'Galaxy Ring',icon:'💍',rarity:'legendary',type:'accessory'},price:300,listed:Date.now()-86400000*1},
+    ];
+    LS.set('seedBazaar',seedBazaar);
+
+    // Seed room directory
+    const seedRooms=[
+      {owner:'Nova',name:'Nova\'s Observatory',visitors:89,likes:34,furniture:['telescope','sofa','bookshelf','plant','lamp']},
+      {owner:'Pixel_Fan_99',name:'Cat Paradise',visitors:156,likes:67,furniture:['cat_bed','cat_tree','sofa','rug','lamp','plant','plant']},
+      {owner:'Cosmo',name:'The Void Lounge',visitors:42,likes:18,furniture:['desk','monitor','chair','lamp','bookshelf']},
+    ];
+    LS.set('seedRooms',seedRooms);
+
+    // Seed milestone progress
+    const existingMilestone=LS.get('milestoneProgress',0);
+    if(existingMilestone<12)LS.set('milestoneProgress',12);
+  }
+};
+
+// --- 3. QUEST TRACKER HUD ---
+const QuestTracker={
+  collapsed:LS.get('questTrackerCollapsed',true),
+
+  init(){
+    const el=document.createElement('div');
+    el.id='quest-tracker';
+    el.className=this.collapsed?'collapsed':'';
+    document.body.appendChild(el);
+    this.render();
+  },
+
+  render(){
+    const el=document.getElementById('quest-tracker');
+    if(!el)return;
+    el.className=this.collapsed?'collapsed':'';
+
+    // Count tasks
+    let taskCount=0;
+    const missions=MissionBoard._missions||[];
+    const progress=MissionBoard._progress||{};
+    missions.forEach(m=>{if(!m.claimed)taskCount++});
+
+    // Fragments
+    const fragments=LS.get('dataFragments',[]).length;
+    const totalFragments=7;
+
+    // Header
+    let html=`<div class="qt-header" onclick="QuestTracker.toggle()">📋 ${this.collapsed?taskCount+' tasks':'Quest Tracker'} <span style="float:right;font-size:8px;color:#666">${this.collapsed?'▶':'▼'}</span></div>`;
+
+    if(!this.collapsed){
+      html+='<div class="qt-body">';
+
+      // Onboarding
+      if(Onboarding.active){
+        const labels={1:'Welcome',2:'Pet Pixel',3:'Visit the shop',4:'Pick a skin',5:'Try the elevator',6:'Visit Floor 2'};
+        html+=`<div class="qt-onboarding">📋 Step ${Onboarding.step}/6 — ${labels[Onboarding.step]||''}</div>`;
+      }
+
+      // Daily missions
+      missions.forEach(m=>{
+        if(m.claimed)return;
+        const p=progress[m.trackKey]||0;
+        const pct=Math.min(100,Math.round(p/m.target*100));
+        html+=`<div class="qt-mission"><div>${m.desc} <span style="float:right;color:#ffd700">${m.reward}◈</span></div><div class="qt-bar"><div class="qt-bar-fill" style="width:${pct}%"></div></div><div style="color:#666;font-size:8px">${p}/${m.target}</div></div>`;
+      });
+
+      // Fragments
+      html+=`<div class="qt-mission"><div>💾 Data Fragments <span style="float:right;color:#00fff7">${fragments}/${totalFragments}</span></div><div class="qt-bar"><div class="qt-bar-fill" style="width:${fragments/totalFragments*100}%;background:#00fff7"></div></div></div>`;
+
+      // Peaceful coin missions
+      const peaceful=PeacefulCoins.getActiveMissions();
+      peaceful.forEach(m=>{
+        const pct=Math.min(100,Math.round(m.progress/m.target*100));
+        html+=`<div class="qt-mission"><div>${m.icon} ${m.desc} <span style="float:right;color:#ffd700">${m.reward}◈</span></div><div class="qt-bar"><div class="qt-bar-fill" style="width:${pct}%;background:#44cc44"></div></div><div style="color:#666;font-size:8px">${m.progress}/${m.target}</div></div>`;
+      });
+
+      html+='</div>';
+    }
+    el.innerHTML=html;
+    // Re-attach click handler after innerHTML change
+    el.querySelector('.qt-header').onclick=()=>QuestTracker.toggle();
+  },
+
+  toggle(){
+    this.collapsed=!this.collapsed;
+    LS.set('questTrackerCollapsed',this.collapsed);
+    this.render();
+  }
+};
+
+// --- 4. PEACEFUL COIN PATHS ---
+const PeacefulCoins={
+  _missions:null,
+
+  init(){
+    const today=new Date().toISOString().slice(0,10);
+    const saved=LS.get('peacefulMissions',null);
+    if(saved&&saved.date===today){
+      this._missions=saved.missions;
+    } else {
+      this._generate(today);
+    }
+  },
+
+  _generate(today){
+    const allMissions=[
+      {id:'explore_floor',desc:'Visit a new floor',icon:'🗺️',target:1,reward:10,trackKey:'peaceful_explore'},
+      {id:'photo_f2',desc:'Stand still on F2 for 10s',icon:'📸',target:10,reward:15,trackKey:'peaceful_photo_timer'},
+      {id:'harvest_plant',desc:'Harvest a grown plant',icon:'🌱',target:1,reward:10,trackKey:'peaceful_harvest'},
+      {id:'decorate',desc:'Place 3 items in your room',icon:'🏠',target:3,reward:20,trackKey:'peaceful_decorate'},
+      {id:'visit_room',desc:'Visit someone\'s room',icon:'🏘️',target:1,reward:5,trackKey:'peaceful_visit_room'},
+      {id:'pet_pixel_5',desc:'Pet Pixel 5 times',icon:'🐱',target:5,reward:12,trackKey:'peaceful_pets'},
+      {id:'interact_5',desc:'Interact with 5 objects',icon:'🔍',target:5,reward:10,trackKey:'peaceful_interact'},
+      {id:'telescope',desc:'Find a constellation',icon:'🔭',target:1,reward:8,trackKey:'peaceful_telescope'},
+    ];
+    // Pick 3 random
+    let seed=0;
+    for(let i=0;i<today.length;i++)seed=((seed<<5)-seed)+today.charCodeAt(i)+7;
+    const shuffled=[...allMissions].sort((a,b)=>{
+      return((seed*37+a.id.charCodeAt(0))%1000)-((seed*37+b.id.charCodeAt(0))%1000);
+    });
+    this._missions=shuffled.slice(0,3).map(m=>({...m,progress:0,claimed:false}));
+    LS.set('peacefulMissions',{date:today,missions:this._missions});
+  },
+
+  getActiveMissions(){
+    if(!this._missions)this.init();
+    return(this._missions||[]).filter(m=>!m.claimed);
+  },
+
+  trackProgress(trackKey,amount){
+    if(!this._missions)return;
+    let changed=false;
+    this._missions.forEach(m=>{
+      if(m.trackKey===trackKey&&!m.claimed){
+        m.progress=(m.progress||0)+amount;
+        if(m.progress>=m.target&&!m.claimed){
+          m.claimed=true;
+          Coins.earn(m.reward,'peaceful_mission');
+          showNotification(`${m.icon} Mission complete: ${m.desc}! +${m.reward}◈`);
+          addChatMsg('Echo',`${m.icon} Nice work! Mission complete: ${m.desc} — +${m.reward}◈`,'#44cc44');
+        }
+        changed=true;
+      }
+    });
+    if(changed){
+      LS.set('peacefulMissions',{date:new Date().toISOString().slice(0,10),missions:this._missions});
+      QuestTracker.render();
+    }
+  }
+};
+
+// --- 5. FIRST-PURCHASE GUIDANCE ---
+const FirstPurchaseGuide={
+  _prompted:false,
+  check(){
+    if(LS.get('firstPurchaseGuided'))return;
+    if(Coins.count>=10&&!this._prompted){
+      this._prompted=true;
+      setTimeout(()=>{
+        if(LS.get('firstPurchaseGuided'))return;
+        addChatMsg('Echo','Hey, you\'ve got some coins! 💰 The shop has some cool skins. Want to check it out?');
+        const el=$('#chat-suggestions');
+        el.innerHTML='';
+        const chip=document.createElement('div');
+        chip.className='suggest-chip';
+        chip.textContent='Let\'s go shopping!';
+        chip.onclick=()=>{
+          addChatMsg('You','Let\'s go shopping!','#ff6ec7');
+          el.innerHTML='';
+          LS.set('firstPurchaseGuided',true);
+          showVisitorSkinPanel();
+        };
+        el.appendChild(chip);
+      },3000);
+    }
+  }
+};
+
+// --- 6. COLLECTION PAGE ---
+const CollectionPage={
+  show(){
+    const ownedSkins=LS.get('visitorSkinsOwned',[]);
+    const lootInv=LS.get('lootInventory',[]);
+    const ownedWeapons=LS.get('ownedWeapons',[]);
+
+    // All collectible items
+    const allSkins=VISITOR_SKINS||[];
+    const allWeapons=typeof WEAPON_TYPES!=='undefined'?Object.values(WEAPON_TYPES):[];
+
+    // Skins
+    let html='<h3>📚 Collection</h3>';
+
+    // Skins section
+    const ownedSkinIds=new Set([...ownedSkins,S.visitor.skin,'hooded','explorer','cadet']);
+    const skinCount=[...ownedSkinIds].filter(id=>allSkins.some(s=>s.id===id)).length;
+    html+=`<div class="coll-progress">Skins: ${skinCount}/${allSkins.length}</div>`;
+    html+='<div style="margin-bottom:12px">';
+    allSkins.forEach(sk=>{
+      const found=ownedSkinIds.has(sk.id);
+      html+=`<div class="coll-item ${found?'found':'unfound'}" title="${found?sk.label+' — '+sk.desc:'??? — Undiscovered'}" data-hint="${found?'':'Found in: Shop'}">${found?sk.icon:'❓'}</div>`;
+    });
+    html+='</div>';
+
+    // Weapons section
+    const ownedWpnSet=new Set(ownedWeapons);
+    const wpnCount=ownedWpnSet.size;
+    html+=`<div class="coll-progress">Weapons: ${wpnCount}/${allWeapons.length}</div>`;
+    html+='<div style="margin-bottom:12px">';
+    allWeapons.forEach(w=>{
+      const found=ownedWpnSet.has(w.id);
+      html+=`<div class="coll-item ${found?'found':'unfound'}" title="${found?w.name:'??? — Undiscovered'}" data-hint="${found?'':'Found in: '+((w.cost||0)>0?'Shop':'Arena drops')}">${found?(w.icon||'⚔️'):'❓'}</div>`;
+    });
+    html+='</div>';
+
+    // Loot items
+    const lootIds=new Set(lootInv.map(i=>i.id||i.name));
+    html+=`<div class="coll-progress">Items: ${lootIds.size} found</div>`;
+    html+='<div style="margin-bottom:8px">';
+    lootInv.slice(0,50).forEach(item=>{
+      html+=`<div class="coll-item found" title="${item.name||'Item'}">${item.icon||'📦'}</div>`;
+    });
+    if(lootInv.length===0)html+='<div style="color:#666;font-size:10px;padding:8px">No items yet — fight in the arena or explore!</div>';
+    html+='</div>';
+
+    const{p}=createPopup(html);
+    // Click on unfound items for hint
+    p.querySelectorAll('.coll-item.unfound').forEach(el=>{
+      el.onclick=()=>showNotification('🔍 '+el.dataset.hint);
+    });
+  }
+};
+
+// --- HOOK INTO EXISTING SYSTEMS ---
+{
+// Patch petPixel for onboarding
+const _obPetPixel=petPixel;
+petPixel=function(){
+  _obPetPixel();
+  Onboarding.onPetPixel();
+  PeacefulCoins.trackProgress('peaceful_pets',1);
+};
+
+// Patch changeFloor for onboarding + peaceful coins
+const _obChangeFloor=changeFloor;
+changeFloor=function(f){
+  _obChangeFloor(f);
+  Onboarding.onFloorChange(f);
+  PeacefulCoins.trackProgress('peaceful_explore',1);
+  // Photo mission: track standing still on F2
+  if(f===2){
+    let photoTimer=0;
+    const photoIv=setInterval(()=>{
+      if(S.floor!==2||S.visitor.moving){photoTimer=0;clearInterval(photoIv);return}
+      photoTimer++;
+      if(photoTimer>=10){
+        PeacefulCoins.trackProgress('peaceful_photo_timer',10);
+        clearInterval(photoIv);
+      }
+    },1000);
+  }
+};
+
+// Patch showVisitorSkinPanel purchase for onboarding free skin
+const _obShowVisitorSkinPanel=showVisitorSkinPanel;
+showVisitorSkinPanel=function(){
+  _obShowVisitorSkinPanel();
+  // If onboarding step 4, patch buy buttons for free first skin
+  if(Onboarding.active&&Onboarding.step===4&&LS.get('onboardingFreeSkin')){
+    setTimeout(()=>{
+      document.querySelectorAll('.skin-card.locked').forEach(card=>{
+        const origClick=card.onclick;
+        card.onclick=()=>{
+          const id=card.dataset.id;
+          const cost=parseInt(card.dataset.cost)||0;
+          const owned=cost===0||LS.get('visitorSkinsOwned',[]).includes(id);
+          if(!owned&&LS.get('onboardingFreeSkin')){
+            // Free during onboarding
+            const skins=LS.get('visitorSkinsOwned',[]);
+            skins.push(id);
+            LS.set('visitorSkinsOwned',skins);
+            card.closest('.popup-overlay')?.remove();
+            setTimeout(()=>visitorTransform(id),200);
+            Onboarding.onSkinBuy();
+            return;
+          }
+          if(origClick)origClick();
+        };
+      });
+    },100);
+  }
+};
+
+// Patch showWelcomeWardrobe finishWelcome to trigger onboarding
+const _obShowWelcomeWardrobe=showWelcomeWardrobe;
+showWelcomeWardrobe=function(){
+  _obShowWelcomeWardrobe();
+  // Hook into the welcome-go button
+  const goBtn=document.getElementById('welcome-go');
+  if(goBtn){
+    const origClick=goBtn.onclick;
+    goBtn.onclick=async function(){
+      if(origClick)await origClick.call(this);
+      setTimeout(()=>{
+        const name=LS.get('visitorName','Visitor');
+        Onboarding.start(name);
+      },1500);
+    };
+  }
+};
+
+// Patch Coins.earn for first-purchase guidance
+const _obCoinsEarn=Coins.earn.bind(Coins);
+Coins.earn=function(n,r){
+  _obCoinsEarn(n,r);
+  FirstPurchaseGuide.check();
+};
+
+// Add Collection tab to inventory panel
+const _obRenderInventoryPanel=renderInventoryPanel;
+renderInventoryPanel=function(){
+  _obRenderInventoryPanel();
+  const panel=document.getElementById('rpg-inventory');
+  if(panel&&!panel.querySelector('#collection-tab')){
+    const tab=document.createElement('div');
+    tab.id='collection-tab';
+    tab.textContent='📚 Collection';
+    tab.onclick=()=>CollectionPage.show();
+    panel.insertBefore(tab,panel.firstChild);
+  }
+};
+
+} // end hooks block
+
+// Initialize everything
+SeedData.seed();
+PeacefulCoins.init();
+QuestTracker.init();
+
+// If returning visitor, check if onboarding was never completed
+if(LS.get('visitorName')&&!LS.get('hasCompletedOnboarding')){
+  // They have a name but never onboarded — start it
+  setTimeout(()=>Onboarding.start(LS.get('visitorName','Visitor')),3000);
+}
+
+// Periodic quest tracker refresh
+setInterval(()=>QuestTracker.render(),15000);
+
+console.log('🎮 Player Experience: Onboarding, Ghost Town Seeding, Quest Tracker, Peaceful Coins, Collection Page');
 
 })();
 </script>
