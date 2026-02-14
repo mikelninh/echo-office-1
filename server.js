@@ -1395,44 +1395,40 @@ wss.on('connection', (visitorWs) => {
       // ═══ SOCIAL/CHAT SYSTEM ═══
       else if (msg.type === 'chat.emote') {
         const v = visitors.get(visitorId);
-        if (!v || !msg.emote) break;
-        // Broadcast emote to same-floor players
-        for (const [id, vis] of visitors) {
-          if (id !== visitorId && vis.floor === v.floor && vis.ws.readyState === WebSocket.OPEN) {
-            vis.ws.send(JSON.stringify({ type: 'player.emote', id: visitorId, emote: msg.emote, x: v.x, y: v.y }));
+        if (v && msg.emote) {
+          for (const [id, vis] of visitors) {
+            if (id !== visitorId && vis.floor === v.floor && vis.ws.readyState === WebSocket.OPEN) {
+              vis.ws.send(JSON.stringify({ type: 'player.emote', id: visitorId, emote: msg.emote, x: v.x, y: v.y }));
+            }
           }
         }
       }
       else if (msg.type === 'chat.proximity') {
         const v = visitors.get(visitorId);
-        if (!v || !msg.text) break;
-        // Rate limit: 3 msgs per 5s
-        const now = Date.now();
-        if (!v._chatTimes) v._chatTimes = [];
-        v._chatTimes = v._chatTimes.filter(t => now - t < 5000);
-        if (v._chatTimes.length >= 3) break;
-        v._chatTimes.push(now);
-        // Sanitize
-        const text = String(msg.text).replace(/<[^>]*>/g, '').slice(0, 100);
-        // Broadcast to same-floor players
-        const chatMsg = { type: 'chat.msg', id: visitorId, name: v.name, text, x: v.x, y: v.y, floor: v.floor };
-        for (const [id, vis] of visitors) {
-          if (id !== visitorId && vis.floor === v.floor && vis.ws.readyState === WebSocket.OPEN) {
-            vis.ws.send(JSON.stringify(chatMsg));
+        if (v && msg.text) {
+          const now = Date.now();
+          if (!v._chatTimes) v._chatTimes = [];
+          v._chatTimes = v._chatTimes.filter(t => now - t < 5000);
+          if (v._chatTimes.length < 3) {
+            v._chatTimes.push(now);
+            const text = String(msg.text).replace(/<[^>]*>/g, '').slice(0, 100);
+            const chatMsg = { type: 'chat.msg', id: visitorId, name: v.name, text, x: v.x, y: v.y, floor: v.floor };
+            for (const [id, vis] of visitors) {
+              if (id !== visitorId && vis.floor === v.floor && vis.ws.readyState === WebSocket.OPEN) {
+                vis.ws.send(JSON.stringify(chatMsg));
+              }
+            }
+            if (!global._floorChat) global._floorChat = {};
+            if (!global._floorChat[v.floor]) global._floorChat[v.floor] = [];
+            global._floorChat[v.floor].push({ name: v.name, text, t: now });
+            if (global._floorChat[v.floor].length > 50) global._floorChat[v.floor].shift();
           }
         }
-        // Store in floor chat history (RAM only)
-        if (!global._floorChat) global._floorChat = {};
-        if (!global._floorChat[v.floor]) global._floorChat[v.floor] = [];
-        global._floorChat[v.floor].push({ name: v.name, text, t: now });
-        if (global._floorChat[v.floor].length > 50) global._floorChat[v.floor].shift();
       }
       else if (msg.type === 'chat.dm') {
         const v = visitors.get(visitorId);
         const target = visitors.get(msg.to);
-        if (!v || !target || !msg.encrypted) break;
-        // Pure relay — server cannot read encrypted content
-        if (target.ws.readyState === WebSocket.OPEN) {
+        if (v && target && msg.encrypted && target.ws.readyState === WebSocket.OPEN) {
           target.ws.send(JSON.stringify({ type: 'chat.dm.recv', from: visitorId, fromName: v.name, encrypted: msg.encrypted }));
         }
       }
