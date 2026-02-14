@@ -407,6 +407,7 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
         <div class="hud-btn" id="btn-trophy" title="Achievements">🏆</div>
         <div class="hud-btn" id="btn-music" title="Music">🎵</div>
         <div class="hud-btn" id="btn-pass" title="Station Pass">🔑</div>
+        <div class="hud-btn" id="btn-bug" title="Report Bug">🐛</div>
       </div>
     </div>
     <div id="coin-hud">◈ <span id="coin-count">0</span></div>
@@ -10027,10 +10028,27 @@ const EchoWS={ws:null,connected:false,
           }
         }
       }
+      // ═══ SOCIAL/CHAT SYSTEM MESSAGE HANDLERS ═══
+      else if(msg.type==='player.emote'){
+        const player=S.otherPlayers[msg.id]||S.visitor;
+        if(player){
+          SocialSystem.showEmote(msg.id,msg.emote,msg.x,msg.y);
+        }
+      }
+      else if(msg.type==='chat.msg'){
+        SocialSystem.showProximitySpeechBubble(msg.id,msg.name,msg.text,msg.x,msg.y);
+      }
+      else if(msg.type==='chat.floor.msg'){
+        SocialSystem.addFloorChatMessage(msg.name,msg.text,msg.timestamp);
+      }
+      else if(msg.type==='chat.dm.recv'){
+        SocialSystem.receiveDM(msg.from,msg.fromName,msg.encrypted);
+      }
       }catch{}};
     this.ws.onclose=()=>{this.connected=false;this.updateIndicator();setTimeout(()=>this.connect(),5000)};
     this.ws.onerror=()=>{this.connected=false;this.updateIndicator()}}catch{}},
   send(msg){if(this.connected&&this.ws?.readyState===1){this.ws.send(JSON.stringify({type:'chat.send',message:msg}));return true}return false},
+  sendSocial(type,data){if(this.connected&&this.ws?.readyState===1){this.ws.send(JSON.stringify({type:type,...data}));return true}return false},
   updateIndicator(){const dot=$('#chat-status');if(dot){dot.style.background=this.connected?'#44cc44':'#cc4444';dot.style.boxShadow=this.connected?'0 0 6px #44cc44':'0 0 6px #cc4444'}},
   _updatePlayerCount(){$('#player-count').textContent=Object.keys(S.otherPlayers).length+1},
   _lastSent:0,_lastDir:-1,_lastMoving:false,
@@ -10041,7 +10059,11 @@ const EchoWS={ws:null,connected:false,
     if(!moved&&now-this._lastSent<500)return;
     if(now-this._lastSent<100)return;
     this._lastSent=now;this._lastDir=v.dir;this._lastMoving=v.moving;
-    this.ws.send(JSON.stringify({type:'player.update',x:v.x,y:v.y,dir:v.dir,floor:S.floor,skin:'visitor',name:LS.get('visitorName','Visitor')}));
+    let publicKey=null;
+    if(SocialSystem.cryptoKeys){
+      publicKey=SocialSystem.cryptoKeys.publicKeyJWK;
+    }
+    this.ws.send(JSON.stringify({type:'player.update',x:v.x,y:v.y,dir:v.dir,floor:S.floor,skin:'visitor',name:LS.get('visitorName','Visitor'),publicKey:publicKey}));
   }
 };
 
@@ -10358,6 +10380,7 @@ function initInput(){
     if(StationPass.hasAccount()){StationPass.showPassPopup(StationPass.passCode,false)}
     else{StationPass.showLoginPopup()}
   };
+  $('#btn-bug').onclick=()=>BugReport.show();
   $('#coin-hud').onclick=showEarnInfo;
   $('#vol-slider').oninput=e=>{S.volume=e.target.value/100;LS.set('volume',e.target.value);if(S.masterGain)S.masterGain.gain.value=S.volume};
   $('#arcade-close').onclick=closeArcade;
@@ -10649,7 +10672,7 @@ S.freezeFrame = 0;
 S.cameraZoom = 1.0;
 S._cameraZoomTimer = 0;
 
-function gameLoop(time){const realDt=Math.min((time-lastTime)/1000,.05);lastTime=time;updateSlowMo(realDt);const dt=realDt*gameTimeScale;if(S.freezeFrame>0){S.freezeFrame-=realDt;render();requestAnimationFrame(gameLoop);return}if(S.chromaticAberration>0)S.chromaticAberration*=0.92;if(S.chromaticAberration<0.1)S.chromaticAberration=0;if(S.vignetteIntensity>0)S.vignetteIntensity*=0.95;if(S._cameraZoomTimer>0){S._cameraZoomTimer-=realDt;if(S._cameraZoomTimer<=0)S.cameraZoom=1.0;}updateImpactRings(dt);update(dt);render();requestAnimationFrame(gameLoop)}
+function gameLoop(time){S._fpsFrames=(S._fpsFrames||0)+1;const realDt=Math.min((time-lastTime)/1000,.05);lastTime=time;updateSlowMo(realDt);const dt=realDt*gameTimeScale;if(S.freezeFrame>0){S.freezeFrame-=realDt;render();requestAnimationFrame(gameLoop);return}if(S.chromaticAberration>0)S.chromaticAberration*=0.92;if(S.chromaticAberration<0.1)S.chromaticAberration=0;if(S.vignetteIntensity>0)S.vignetteIntensity*=0.95;if(S._cameraZoomTimer>0){S._cameraZoomTimer-=realDt;if(S._cameraZoomTimer<=0)S.cameraZoom=1.0;}updateImpactRings(dt);update(dt);render();requestAnimationFrame(gameLoop)}
 
 // ═══════════════════════════════════════
 // §28. ENHANCEMENT SYSTEM (v24)
@@ -15556,6 +15579,90 @@ setInterval(()=>QuestTracker.render(),15000);
 console.log('🎮 Player Experience: Onboarding, Ghost Town Seeding, Quest Tracker, Peaceful Coins, Collection Page');
 
 // ═══════════════════════════════════════
+// §BUG-REPORT — Automated Bug Reporting System
+const BugReport={
+  _errorLog:[],
+  init(){
+    // Capture console errors automatically
+    const origError=console.error;
+    console.error=(...args)=>{BugReport._errorLog.push({t:Date.now(),msg:args.map(a=>String(a)).join(' ')});if(BugReport._errorLog.length>50)BugReport._errorLog.shift();origError.apply(console,args)};
+    window.addEventListener('error',e=>{BugReport._errorLog.push({t:Date.now(),msg:`${e.message} at ${e.filename}:${e.lineno}`})});
+    window.addEventListener('unhandledrejection',e=>{BugReport._errorLog.push({t:Date.now(),msg:'Promise: '+String(e.reason)})});
+  },
+  captureState(){
+    return{
+      timestamp:new Date().toISOString(),
+      floor:S.floor,
+      floorName:typeof FLOOR_NAMES!=='undefined'?FLOOR_NAMES[S.floor]:'?',
+      visitorPos:{x:Math.round(S.visitor.x),y:Math.round(S.visitor.y)},
+      visitorName:LS.get('visitorName','anon'),
+      skin:S.visitor.skin,
+      coins:typeof Coins!=='undefined'?Coins.count:0,
+      otherPlayers:Object.keys(S.otherPlayers||{}).length,
+      useVisitor:S.useVisitor,
+      discoveryPct:typeof DiscoverySystem!=='undefined'?DiscoverySystem.getPercentage():'?',
+      secretRoom:S._inSecretRoom||false,
+      scannerActive:S._scannerActive||false,
+      screenSize:{w:window.innerWidth,h:window.innerHeight},
+      userAgent:navigator.userAgent.slice(0,200),
+      mobile:/Mobi|Android|iPhone/i.test(navigator.userAgent),
+      wsConnected:typeof EchoWS!=='undefined'&&EchoWS.ws?.readyState===1,
+      errors:BugReport._errorLog.slice(-10),
+      sessionDuration:Math.round((Date.now()-(S._sessionStart||Date.now()))/1000),
+      fps:Math.round(S._fps||0)
+    };
+  },
+  show(){
+    const ov=document.createElement('div');ov.className='popup-overlay';
+    ov.innerHTML=`<div class="popup" style="max-width:380px;padding:20px">
+      <h3 style="margin:0 0 8px">🐛 Report a Bug</h3>
+      <p style="font-size:10px;color:#888;margin:0 0 10px">Describe what happened. Game state & error logs are captured automatically and sent to Echo for review.</p>
+      <textarea id="bug-desc" placeholder="What went wrong? What were you doing when it happened?" style="width:100%;height:80px;background:#1a1a2e;border:1px solid #555;color:#eee;border-radius:6px;padding:8px;font-family:inherit;font-size:11px;resize:vertical"></textarea>
+      <div style="margin-top:6px">
+        <label style="font-size:10px;color:#888;display:flex;align-items:center;gap:4px">
+          <input type="checkbox" id="bug-screenshot" checked> Include screenshot
+        </label>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+        <button id="bug-cancel" style="background:#333;border:1px solid #555;color:#aaa;padding:6px 16px;border-radius:6px;cursor:pointer;font-family:inherit">Cancel</button>
+        <button id="bug-send" style="background:#e74c3c;border:none;color:#fff;padding:6px 16px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:bold">Send Report 🐛</button>
+      </div>
+      <div id="bug-status" style="font-size:10px;color:#888;margin-top:8px;text-align:center"></div>
+    </div>`;
+    document.body.appendChild(ov);
+    ov.querySelector('#bug-cancel').onclick=()=>ov.remove();
+    ov.querySelector('#bug-send').onclick=async()=>{
+      const desc=ov.querySelector('#bug-desc').value.trim();
+      if(!desc){ov.querySelector('#bug-desc').style.borderColor='#e74c3c';return}
+      const status=ov.querySelector('#bug-status');
+      status.textContent='Capturing state...';status.style.color='#00fff7';
+      const report={description:desc,state:BugReport.captureState()};
+      // Screenshot
+      if(ov.querySelector('#bug-screenshot').checked){
+        try{report.screenshot=document.querySelector('#game').toDataURL('image/jpeg',0.5)}catch(e){report.screenshot='capture_failed'}
+      }
+      status.textContent='Sending...';
+      try{
+        const r=await fetch('/api/bug-report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(report)});
+        if(r.ok){
+          status.textContent='✅ Bug report sent! Echo will review it.';status.style.color='#2ecc71';
+          showNotification('🐛 Bug report sent — Echo will look into it!');
+          addChatMsg('Echo','Got your bug report! I\\'ll investigate and fix it in the next update. Thanks for helping improve the station! 🔧');
+          setTimeout(()=>ov.remove(),2000);
+        }else{status.textContent='❌ Failed to send. Try again?';status.style.color='#e74c3c'}
+      }catch(e){status.textContent='❌ Network error. Server might be down.';status.style.color='#e74c3c'}
+    };
+    setTimeout(()=>ov.querySelector('#bug-desc')?.focus(),100);
+  }
+};
+// Track session start and FPS
+S._sessionStart=Date.now();
+S._fps=0;S._fpsFrames=0;S._fpsTime=0;
+const _origGameLoop=typeof gameLoop==='function'?gameLoop:null;
+// FPS tracking injected in update
+(function(){const _uf=update;if(_uf)window._bugFpsHook=setInterval(()=>{S._fps=S._fpsFrames;S._fpsFrames=0},1000)})();
+BugReport.init();
+
 // §ATMOSPHERE — Sprint C: Atmosphere Overhaul
 // Dynamic lighting, ambient sound, peripheral effects, station breathing
 // ═══════════════════════════════════════

@@ -539,6 +539,50 @@ const server = http.createServer((req, res) => {
   }
 
   // Duel Leaderboard API
+  // Bug Report endpoint
+  if (req.url === '/api/bug-report' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => { body += c; if (body.length > 2e6) req.destroy(); });
+    req.on('end', () => {
+      try {
+        const report = JSON.parse(body);
+        const reportsDir = path.join(__dirname, 'bug-reports');
+        if (!fs.existsSync(reportsDir)) fs.mkdirSync(reportsDir, { recursive: true });
+        const id = Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+        const fileName = `${id}.json`;
+        // Strip screenshot data for the summary, keep in full report
+        const summary = {
+          id,
+          timestamp: new Date().toISOString(),
+          description: (report.description || '').slice(0, 500),
+          floor: report.state?.floor,
+          floorName: report.state?.floorName,
+          visitor: report.state?.visitorName,
+          position: report.state?.visitorPos,
+          errors: report.state?.errors || [],
+          mobile: report.state?.mobile,
+          browser: report.state?.userAgent?.slice(0, 100),
+          hasScreenshot: !!report.screenshot
+        };
+        // Save full report
+        fs.writeFileSync(path.join(reportsDir, fileName), JSON.stringify(report, null, 2));
+        // Append to summary log
+        const logFile = path.join(reportsDir, 'index.json');
+        let index = [];
+        try { index = JSON.parse(fs.readFileSync(logFile, 'utf8')); } catch {}
+        index.push(summary);
+        fs.writeFileSync(logFile, JSON.stringify(index, null, 2));
+        console.log(`🐛 Bug report #${id}: "${summary.description.slice(0, 60)}..." from ${summary.visitor} on F${summary.floor}`);
+        res.writeHead(200, jsonH);
+        res.end(JSON.stringify({ ok: true, id }));
+      } catch (e) {
+        res.writeHead(400, jsonH);
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
+
   if (req.url === '/api/duel-leaderboard' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(loadDuelLeaderboard()));
@@ -1130,13 +1174,13 @@ wss.on('connection', (visitorWs) => {
   // Send this visitor their ID and all current players
   const playerList = [];
   for (const [id, v] of visitors) {
-    if (id !== visitorId) playerList.push({ id, name: v.name, x: v.x, y: v.y, dir: v.dir, floor: v.floor, skin: v.skin });
+    if (id !== visitorId) playerList.push({ id, name: v.name, x: v.x, y: v.y, dir: v.dir, floor: v.floor, skin: v.skin, publicKey: v.publicKey });
   }
   visitorWs.send(JSON.stringify({ type: 'players.init', id: visitorId, players: playerList }));
 
   // Broadcast join to others (with a slight delay so client can set up)
   const vi = visitors.get(visitorId);
-  broadcast({ type: 'player.join', player: { id: visitorId, name: vi.name, x: vi.x, y: vi.y, dir: vi.dir, floor: vi.floor, skin: vi.skin } }, visitorId);
+  broadcast({ type: 'player.join', player: { id: visitorId, name: vi.name, x: vi.x, y: vi.y, dir: vi.dir, floor: vi.floor, skin: vi.skin, publicKey: vi.publicKey } }, visitorId);
   broadcastFloorPresence();
 
   let gatewayWs = null;
@@ -1293,6 +1337,7 @@ wss.on('connection', (visitorWs) => {
         const oldFloor = v.floor;
         v.x = msg.x; v.y = msg.y; v.dir = msg.dir; v.floor = msg.floor;
         v.skin = msg.skin || v.skin; v.name = msg.name || v.name;
+        if (msg.publicKey) v.publicKey = msg.publicKey; // Store public key for E2E encryption
         v.lastUpdate = Date.now();
         // Throttle broadcasts to 10/s per player
         const now = Date.now();
@@ -1446,6 +1491,127 @@ wss.on('connection', (visitorWs) => {
               break;
             }
           }
+        }
+      }
+      // ═══ SOCIAL/CHAT SYSTEM ═══
+      else if (msg.type === 'chat.emote') {
+        const visitor = visitors.get(visitorId);
+        if (visitor && msg.emote) {
+          // Broadcast emote to all players on same floor
+          for (const [id, v] of visitors) {
+            if (v.floor === visitor.floor && v.ws.readyState === WebSocket.OPEN) {
+              v.ws.send(JSON.stringify({
+                type: 'player.emote',
+                id: visitorId,
+                emote: msg.emote,
+                x: visitor.x,
+                y: visitor.y,
+                name: visitor.name
+              }));
+            }
+          }
+        }
+      }
+      else if (msg.type === 'chat.proximity') {
+        const visitor = visitors.get(visitorId);
+        if (visitor && msg.text) {
+          // Rate limit: max 3 messages per 5 seconds
+          if (!visitor.chatLimitTime) visitor.chatLimitTime = Date.now();
+          if (!visitor.chatCount) visitor.chatCount = 0;
+          
+          const now = Date.now();
+          if (now - visitor.chatLimitTime > 5000) {
+            visitor.chatLimitTime = now;
+            visitor.chatCount = 0;
+          }
+          
+          if (visitor.chatCount >= 3) return; // Rate limited
+          visitor.chatCount++;
+          
+          // Sanitize text
+          const cleanText = msg.text.replace(/<[^>]*>/g, '').slice(0, 100);
+          
+          // Broadcast to same-floor players within 250px
+          for (const [id, v] of visitors) {
+            if (v.floor === visitor.floor && v.ws.readyState === WebSocket.OPEN) {
+              const distance = Math.hypot(v.x - visitor.x, v.y - visitor.y);
+              if (distance <= 250 || id === visitorId) { // Always send to sender
+                v.ws.send(JSON.stringify({
+                  type: 'chat.msg',
+                  id: visitorId,
+                  name: visitor.name,
+                  text: cleanText,
+                  x: visitor.x,
+                  y: visitor.y,
+                  floor: visitor.floor
+                }));
+              }
+            }
+          }
+        }
+      }
+      else if (msg.type === 'chat.floor') {
+        const visitor = visitors.get(visitorId);
+        if (visitor && msg.text) {
+          // Rate limit: max 3 messages per 5 seconds
+          if (!visitor.floorChatLimitTime) visitor.floorChatLimitTime = Date.now();
+          if (!visitor.floorChatCount) visitor.floorChatCount = 0;
+          
+          const now = Date.now();
+          if (now - visitor.floorChatLimitTime > 5000) {
+            visitor.floorChatLimitTime = now;
+            visitor.floorChatCount = 0;
+          }
+          
+          if (visitor.floorChatCount >= 3) return; // Rate limited
+          visitor.floorChatCount++;
+          
+          // Sanitize text
+          const cleanText = msg.text.replace(/<[^>]*>/g, '').slice(0, 100);
+          
+          // Store message in floor history (RAM only)
+          if (!global.floorMessages) global.floorMessages = {};
+          if (!global.floorMessages[visitor.floor]) global.floorMessages[visitor.floor] = [];
+          
+          const message = {
+            id: visitorId,
+            name: visitor.name,
+            text: cleanText,
+            timestamp: Date.now()
+          };
+          
+          global.floorMessages[visitor.floor].push(message);
+          // Keep only last 50 messages per floor
+          if (global.floorMessages[visitor.floor].length > 50) {
+            global.floorMessages[visitor.floor] = global.floorMessages[visitor.floor].slice(-50);
+          }
+          
+          // Broadcast to ALL players on same floor
+          for (const [id, v] of visitors) {
+            if (v.floor === visitor.floor && v.ws.readyState === WebSocket.OPEN) {
+              v.ws.send(JSON.stringify({
+                type: 'chat.floor.msg',
+                id: visitorId,
+                name: visitor.name,
+                text: cleanText,
+                timestamp: message.timestamp
+              }));
+            }
+          }
+        }
+      }
+      else if (msg.type === 'chat.dm') {
+        const visitor = visitors.get(visitorId);
+        const target = visitors.get(msg.to);
+        
+        if (visitor && target && msg.encrypted && target.ws.readyState === WebSocket.OPEN) {
+          // Relay encrypted DM - server cannot read contents
+          target.ws.send(JSON.stringify({
+            type: 'chat.dm.recv',
+            from: visitorId,
+            fromName: visitor.name,
+            encrypted: msg.encrypted
+          }));
         }
       }
     } catch {}
