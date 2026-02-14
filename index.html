@@ -13507,6 +13507,371 @@ render = function() {
   ctx.restore();
 };
 
+// ═══════════════════════════════════════════════════════════════
+// §ECON3: PHASE 3 — DEPTH
+// ═══════════════════════════════════════════════════════════════
+
+// ─── 1. ELEMENTAL COMBAT SYSTEM ─────────────────────────────────
+const ELEMENT_ICONS={fire:'🔥',ice:'❄️',lightning:'⚡',light:'✨',dark:'🌑',energy:'💠'};
+const ELEMENT_COLORS={fire:'#ff4400',ice:'#4488ff',lightning:'#ffdd00',light:'#ffd700',dark:'#9b59b6',energy:'#00ccff'};
+const AI_ELEMENTS=['fire','ice','lightning','light','dark','energy'];
+
+function getElementMultiplier(atk,def){
+  if(!atk||!def)return 1.0;
+  const a=atk.toLowerCase(),d=def.toLowerCase();
+  if(a===d||a==='energy'||d==='energy')return 1.0;
+  if((a==='fire'&&d==='ice')||(a==='ice'&&d==='lightning')||(a==='lightning'&&d==='fire'))return 1.5;
+  if((a==='ice'&&d==='fire')||(a==='lightning'&&d==='ice')||(a==='fire'&&d==='lightning'))return 0.75;
+  if((a==='light'&&d==='dark')||(a==='dark'&&d==='light'))return 1.5;
+  return 1.0;
+}
+
+// Patch AIFighter.start to assign random element
+const _econ3AIStart=AIFighter.start.bind(AIFighter);
+AIFighter.start=function(fid){
+  _econ3AIStart(fid);
+  if(this.fighter)this.fighter._battleElement=AI_ELEMENTS[Math.floor(Math.random()*AI_ELEMENTS.length)];
+};
+
+// Patch AIFighter.takeDamage for elemental multiplier
+const _econ3AITakeDmg=AIFighter.takeDamage.bind(AIFighter);
+AIFighter.takeDamage=function(dmg){
+  const defEl=this.fighter&&this.fighter._battleElement;
+  const atkEl=WeaponSystem.equipped&&WeaponSystem.equipped.element;
+  const mult=getElementMultiplier(atkEl,defEl);
+  dmg=Math.round(dmg*mult);
+  const res=_econ3AITakeDmg(dmg);
+  if(mult>1.0)S.floatTexts.push({text:'SUPER EFFECTIVE!',x:this.x,y:this.y-65,color:'#ff3344',life:50});
+  else if(mult<1.0)S.floatTexts.push({text:'RESISTED...',x:this.x,y:this.y-65,color:'#888888',life:50});
+  return res;
+};
+
+// Patch DuelSystem.takeDamage for elemental when AI attacks player
+const _econ3DuelTakeDmg=DuelSystem.takeDamage.bind(DuelSystem);
+DuelSystem.takeDamage=function(damage,type){
+  if(this.isPvE&&AIFighter.fighter&&AIFighter.fighter._battleElement){
+    const atkEl=AIFighter.fighter._battleElement;
+    const defEl=WeaponSystem.equipped&&WeaponSystem.equipped.element;
+    const mult=getElementMultiplier(atkEl,defEl);
+    damage=Math.round(damage*mult);
+    if(mult>1.0)S.floatTexts.push({text:'SUPER EFFECTIVE!',x:S.visitor.x,y:S.visitor.y-65,color:'#ff3344',life:50});
+    else if(mult<1.0)S.floatTexts.push({text:'RESISTED...',x:S.visitor.x,y:S.visitor.y-65,color:'#888888',life:50});
+  }
+  return _econ3DuelTakeDmg(damage,type);
+};
+
+// Patch AIFighter.render to show element icon
+const _econ3AIRender=AIFighter.render.bind(AIFighter);
+AIFighter.render=function(cx){
+  _econ3AIRender(cx);
+  if(this.active&&this.fighter&&this.fighter._battleElement){
+    const el=this.fighter._battleElement;
+    cx.font='14px sans-serif';cx.textAlign='center';
+    cx.fillText(ELEMENT_ICONS[el]||'💠',this.x,this.y-45);
+    cx.font='8px monospace';cx.fillStyle=ELEMENT_COLORS[el]||'#fff';
+    cx.fillText(el.toUpperCase(),this.x,this.y-35);
+  }
+};
+
+// Element HUD overlay via render patch
+const _econ3Render2=render;
+render=function(){
+  _econ3Render2();
+  // Weapon element in HUD
+  if(WeaponSystem.equipped&&WeaponSystem.equipped.element&&!DuelSystem.active){
+    const el=WeaponSystem.equipped.element;
+    ctx.font='10px sans-serif';ctx.textAlign='left';ctx.fillStyle=ELEMENT_COLORS[el]||'#fff';
+    ctx.fillText((ELEMENT_ICONS[el]||'')+' '+el.toUpperCase(),10,H-35);
+  }
+  // Enemy element during PvE
+  if(DuelSystem.active&&DuelSystem.isPvE&&AIFighter.fighter&&AIFighter.fighter._battleElement){
+    const el=AIFighter.fighter._battleElement;
+    ctx.font='10px sans-serif';ctx.textAlign='right';ctx.fillStyle=ELEMENT_COLORS[el]||'#fff';
+    ctx.fillText((ELEMENT_ICONS[el]||'')+' '+el.toUpperCase(),W-10,80);
+  }
+};
+
+// ─── 2. TOURNAMENT PRIZE POOLS ──────────────────────────────────
+const TOURN_FEE=25,TOURN_POOL=200;
+const _econ3StartTourn=V26Ranked.startTournament.bind(V26Ranked);
+V26Ranked.startTournament=function(){
+  if(!Coins.canAfford(TOURN_FEE)){showNotification('Need '+TOURN_FEE+'◈ entry fee!');return;}
+  Coins.spend(TOURN_FEE,'tournament_entry');
+  showNotification('Paid '+TOURN_FEE+'◈ entry. Prize pool: '+TOURN_POOL+'◈!');
+  this._prizePoolActive=true;
+  _econ3StartTourn();
+};
+
+const _econ3ShowRankedUI=V26Ranked.showUI.bind(V26Ranked);
+V26Ranked.showUI=function(){
+  _econ3ShowRankedUI();
+  setTimeout(()=>{
+    const btn=document.querySelector('#ranked-tournament');
+    if(btn){
+      const d=document.createElement('div');
+      d.style.cssText='font-size:9px;color:#ffd700;margin-top:4px;text-align:center';
+      d.innerHTML='Entry: '+TOURN_FEE+'◈ | Pool: '+TOURN_POOL+'◈<br>🥇 120◈ | 🥈 50◈ | 🥉 30◈';
+      btn.parentElement.insertBefore(d,btn.nextSibling);
+    }
+    const sa=document.querySelector('.popup-content');
+    if(sa){
+      const sd=document.createElement('div');
+      sd.style.cssText='font-size:9px;color:#888;margin-top:8px;border-top:1px solid #333;padding-top:6px';
+      sd.innerHTML='🏆 Wins: '+LS.get('tournament_wins',0)+' | Earnings: '+LS.get('tournament_total_earnings',0)+'◈';
+      sa.appendChild(sd);
+    }
+  },50);
+};
+
+// Patch endRound for tournament prizes
+const _econ3EndRound=DuelSystem.endRound.bind(DuelSystem);
+DuelSystem.endRound=function(result){
+  if(V26Ranked.tournamentActive&&V26Ranked._prizePoolActive){
+    if(result==='victory'&&V26Ranked.bracketRound>=2){
+      // Champion
+      const prize=120;
+      const tw=LS.get('tournament_wins',0)+1;
+      const te=LS.get('tournament_total_earnings',0)+prize;
+      LS.set('tournament_wins',tw);LS.set('tournament_total_earnings',te);
+      V26Ranked._prizePoolActive=false;
+      setTimeout(()=>{
+        let h='<h3 style="color:#ffd700">🏆 Tournament Champion!</h3>';
+        h+='<div style="text-align:center;font-size:24px;margin:10px 0">🏆</div>';
+        h+='<div style="margin:12px 0;padding:8px;background:rgba(255,215,0,.1);border:1px solid #ffd700;border-radius:6px">';
+        h+='<div style="color:#ffd700">🥇 1st: 120◈</div><div style="color:#c0c0c0">🥈 2nd: 50◈</div><div style="color:#cd7f32">🥉 3rd: 30◈</div></div>';
+        h+='<div style="text-align:center;color:#00ff88;font-size:16px;margin:10px 0">You earned '+prize+'◈!</div>';
+        h+='<div style="font-size:9px;color:#888;text-align:center">Wins: '+tw+' | Total: '+te+'◈</div>';
+        createPopup(h);
+      },500);
+    }else if(result==='defeat'){
+      let place=V26Ranked.bracketRound>=2?2:V26Ranked.bracketRound>=1?3:0;
+      V26Ranked._prizePoolActive=false;
+      if(place===2){Coins.earn(50,'tournament_prize');const te=LS.get('tournament_total_earnings',0)+50;LS.set('tournament_total_earnings',te);showNotification('2nd place! Earned 50◈');}
+      else if(place===3){Coins.earn(30,'tournament_prize');const te=LS.get('tournament_total_earnings',0)+30;LS.set('tournament_total_earnings',te);showNotification('3rd place! Earned 30◈');}
+      else showNotification('Eliminated. No prize.');
+    }
+  }
+  return _econ3EndRound(result);
+};
+
+// ─── 3. SERVER BAZAAR ENHANCEMENTS ──────────────────────────────
+function _timeSince(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+
+// Override BazaarUI.showUI to add My Listings tab
+const _econ3BazaarShowUI=BazaarUI.showUI.bind(BazaarUI);
+BazaarUI.showUI=function(){
+  let html='<h3>🏪 Bazaar Trading Post</h3>';
+  html+='<div class="bazaar-tabs"><div class="bazaar-tab active" data-tab="browse">Browse</div><div class="bazaar-tab" data-tab="sell">Sell</div><div class="bazaar-tab" data-tab="mylistings">My Listings</div><div class="bazaar-tab" data-tab="history">History</div></div>';
+  html+='<div id="bazaar-content" style="min-height:200px;max-height:350px;overflow-y:auto"></div>';
+  const{p}=createPopup(html);
+  const tabs=p.querySelectorAll('.bazaar-tab');
+  const self=this;
+  tabs.forEach(tab=>{tab.onclick=()=>{tabs.forEach(t=>t.classList.remove('active'));tab.classList.add('active');self._econ3RenderTab(tab.dataset.tab,p.querySelector('#bazaar-content'),p);}});
+  this._econ3RenderTab('browse',p.querySelector('#bazaar-content'),p);
+};
+
+BazaarUI._econ3RenderTab=async function(tab,container,popup){
+  if(tab==='browse'){
+    container.innerHTML='<div style="text-align:center;color:#888;padding:20px">Loading...</div>';
+    let listings=[],fromServer=false;
+    try{const r=await fetch('/api/marketplace');listings=await r.json();fromServer=true;}catch(e){listings=LS.get('bazaar_offline_listings',[]);}
+    if(!listings.length){container.innerHTML='<div style="text-align:center;color:#888;padding:20px">'+(fromServer?'No listings.':'⚠️ Offline')+'</div>';return;}
+    let html=fromServer?'':'<div style="font-size:8px;color:#ff8800;margin-bottom:6px">⚠️ Offline mode</div>';
+    listings.forEach(l=>{
+      const def=getAllLootableItems().find(i=>i.itemId===(l.item&&l.item.itemId));
+      const r=RARITIES[(l.item&&l.item.rarity)||'common']||RARITIES.common;
+      const icon=def?def.icon:(l.item&&l.item.icon)||'❓';
+      const name=def?def.name:(l.item&&l.item.name)||'???';
+      const enh=l.item&&l.item.enhanceLevel?' +'+l.item.enhanceLevel:'';
+      const ta=l.createdAt?_timeSince(l.createdAt):'';
+      html+=`<div class="bazaar-listing" data-id="${l.id}"><span class="listing-icon">${icon}</span>`;
+      html+=`<div class="listing-info"><div style="color:${r.color};font-weight:bold">${name}${enh}</div>`;
+      html+=`<div class="listing-seller">Seller: ${l.owner}${ta?' · '+ta:''}</div></div>`;
+      html+=`<div class="listing-price">${l.price}◈<div style="font-size:7px;color:#888">+${Math.max(1,Math.ceil(l.price*0.05))}◈ tax</div></div></div>`;
+    });
+    container.innerHTML=html;
+    if(fromServer)LS.set('bazaar_offline_listings',listings);
+    container.querySelectorAll('.bazaar-listing').forEach(el=>{el.onclick=()=>this._econ3Buy(el.dataset.id,popup);});
+  }else if(tab==='mylistings'){
+    container.innerHTML='<div style="text-align:center;color:#888;padding:20px">Loading...</div>';
+    const myName=LS.get('visitorName','Anonymous');
+    try{
+      const r=await fetch('/api/marketplace');const all=await r.json();
+      const mine=all.filter(l=>l.owner===myName);
+      if(!mine.length){container.innerHTML='<div style="text-align:center;color:#888;padding:20px">No active listings.</div>';return;}
+      let html='';
+      mine.forEach(l=>{
+        const def=getAllLootableItems().find(i=>i.itemId===(l.item&&l.item.itemId));
+        const r2=RARITIES[(l.item&&l.item.rarity)||'common']||RARITIES.common;
+        html+=`<div class="bazaar-listing"><span class="listing-icon">${def?def.icon:'❓'}</span>`;
+        html+=`<div class="listing-info"><div style="color:${r2.color}">${def?def.name:'???'}</div></div>`;
+        html+=`<div class="listing-price">${l.price}◈</div>`;
+        html+=`<button class="drink-btn cancel-listing" data-id="${l.id}" style="font-size:8px;padding:2px 6px;border-color:#ff4444;color:#ff4444">Cancel</button></div>`;
+      });
+      container.innerHTML=html;
+      container.querySelectorAll('.cancel-listing').forEach(btn=>{
+        btn.onclick=async()=>{
+          try{await fetch('/api/marketplace/cancel/'+btn.dataset.id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({owner:myName})});
+          btn.textContent='Cancelled';btn.disabled=true;showNotification('Listing cancelled');}catch{showNotification('Failed');}
+        };
+      });
+    }catch{container.innerHTML='<div style="color:#ff4444;padding:10px">Server offline</div>';}
+  }else{
+    await this._renderTab(tab,container,popup);
+    // Inject listing fee notice on sell tab
+    if(tab==='sell'){
+      const fi=document.createElement('div');fi.style.cssText='font-size:9px;color:#ff8800;margin-bottom:6px';
+      fi.textContent='📋 5% listing fee (non-refundable) + 5% sale tax on purchase';
+      container.insertBefore(fi,container.firstChild);
+      // Wrap list buttons to charge fee
+      container.querySelectorAll('.list-item').forEach(btn=>{
+        const orig=btn.onclick;
+        btn.onclick=async()=>{
+          const listing=btn.closest('.bazaar-listing');
+          const price=parseInt(listing.querySelector('.sell-price').value);
+          if(!price||price<1)return;
+          const fee=Math.max(1,Math.ceil(price*0.05));
+          if(!Coins.canAfford(fee)){showNotification('Need '+fee+'◈ listing fee!');return;}
+          Coins.spend(fee,'bazaar_listing_fee');
+          showNotification('Paid '+fee+'◈ listing fee');
+          if(orig)await orig();
+        };
+      });
+    }
+  }
+};
+
+BazaarUI._econ3Buy=async function(listingId,popup){
+  const buyer=LS.get('visitorName','Anonymous');
+  try{
+    const res=await fetch('/api/marketplace/buy/'+listingId,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({buyer})});
+    const data=await res.json();
+    if(data.ok){
+      const tax=Math.max(1,Math.ceil(data.price*0.05));
+      const total=data.price+tax;
+      if(!Coins.canAfford(total)){showNotification('Need '+total+'◈ ('+data.price+'◈ + '+tax+'◈ tax)!');return;}
+      Coins.spend(total,'bazaar_buy');
+      if(data.item){LootSystem.addToInventory(data.item);showNotification('🏪 Bought for '+data.price+'◈ + '+tax+'◈ tax!');MissionBoard.trackProgress('shop_buys',1);}
+      popup.closest('.popup-overlay').remove();this.showUI();
+    }
+  }catch{showNotification('Purchase failed.');}
+};
+
+// ─── 4. CUSTOM ITEM CREATION (Master+) ──────────────────────────
+const CustomItems={
+  SHAPES:{chair:{icon:'🪑',w:30,h:30},table:{icon:'🪑',w:60,h:40},lamp:{icon:'💡',w:20,h:40},shelf:{icon:'📚',w:60,h:80},plant:{icon:'🪴',w:25,h:30},decoration:{icon:'✨',w:30,h:30}},
+  getAll(){return LS.get('customItems',[]);},
+  save(items){LS.set('customItems',items);},
+  create(name,shape,colors){
+    const b=this.SHAPES[shape];if(!b)return null;
+    const item={id:'custom_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),name:name.slice(0,16),baseShape:shape,icon:b.icon,width:b.w,height:b.h,colors,creator:LS.get('visitorName','Anonymous'),createdAt:Date.now(),usageCount:0,rarity:'epic'};
+    const items=this.getAll();items.push(item);this.save(items);return item;
+  },
+  showDesigner(){
+    const level=CreatorLevel.getLevel();
+    const idx=CREATOR_LEVELS.indexOf(level);
+    const mIdx=CREATOR_LEVELS.findIndex(l=>l.id==='master');
+    if(idx<mIdx){showNotification('Need Master creator level! (Currently: '+level.name+')');return;}
+    let selShape='chair';
+    let html='<h3 style="color:#ff6ec7">🎨 Custom Item Designer</h3>';
+    html+='<p style="font-size:9px;color:#888">Master+ creators can design custom furniture!</p>';
+    html+='<div style="margin:8px 0"><label style="font-size:10px;color:#aaa">Name:</label><br>';
+    html+='<input type="text" id="custom-name" maxlength="16" placeholder="My Item" style="width:100%;background:#222;border:1px solid #555;color:#fff;padding:4px 8px;font-size:11px;border-radius:4px;margin-top:4px"></div>';
+    html+='<div style="margin:8px 0"><label style="font-size:10px;color:#aaa">Shape:</label><div id="shape-picker" style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">';
+    Object.entries(this.SHAPES).forEach(([k,v])=>{html+='<button class="drink-btn shape-btn" data-shape="'+k+'" style="font-size:16px;padding:6px 10px;'+(k==='chair'?'border-color:#ff6ec7':'')+'">'+v.icon+'<br><span style="font-size:8px">'+k+'</span></button>';});
+    html+='</div></div>';
+    html+='<div style="margin:8px 0"><label style="font-size:10px;color:#aaa">Colors:</label><div style="display:flex;gap:8px;margin-top:4px">';
+    html+='<div><span style="font-size:8px;color:#888">Primary</span><br><input type="color" id="cc1" value="#ff4444" style="width:40px;height:30px"></div>';
+    html+='<div><span style="font-size:8px;color:#888">Secondary</span><br><input type="color" id="cc2" value="#44ff44" style="width:40px;height:30px"></div>';
+    html+='<div><span style="font-size:8px;color:#888">Accent</span><br><input type="color" id="cc3" value="#4444ff" style="width:40px;height:30px"></div>';
+    html+='</div></div>';
+    html+='<div id="custom-preview" style="margin:8px 0;padding:12px;background:rgba(30,30,50,.6);border:1px solid #444;border-radius:6px;text-align:center"><div style="font-size:24px">🪑</div><div style="font-size:10px;color:#aaa">Preview</div></div>';
+    html+='<button class="drink-btn" id="create-custom-btn" style="width:100%;border-color:#ff6ec7;color:#ff6ec7;margin-top:8px">✨ Create Item</button>';
+    const{p}=createPopup(html);
+    p.querySelectorAll('.shape-btn').forEach(btn=>{btn.onclick=()=>{p.querySelectorAll('.shape-btn').forEach(b=>b.style.borderColor='#444');btn.style.borderColor='#ff6ec7';selShape=btn.dataset.shape;p.querySelector('#custom-preview div').textContent=CustomItems.SHAPES[selShape].icon;};});
+    p.querySelector('#create-custom-btn').onclick=()=>{
+      const nm=p.querySelector('#custom-name').value.trim();
+      if(!nm){showNotification('Enter a name!');return;}
+      const item=CustomItems.create(nm,selShape,[p.querySelector('#cc1').value,p.querySelector('#cc2').value,p.querySelector('#cc3').value]);
+      if(item){showNotification('✨ Created "'+item.name+'"!');p.closest('.popup-overlay').remove();}
+    };
+  },
+  asFurnitureTypes(){
+    const r={};
+    this.getAll().filter(i=>i.creator===LS.get('visitorName','Anonymous')).forEach(item=>{
+      r['custom_'+item.id]={name:item.name,icon:item.icon,cost:0,width:item.width,height:item.height,rarity:'epic',custom:true,colors:item.colors,customId:item.id};
+    });
+    return r;
+  }
+};
+
+// Inject "Design Item" button + custom items into room builder
+const _econ3ShowBuilder=RoomSystem.showBuilder.bind(RoomSystem);
+RoomSystem.showBuilder=function(){
+  _econ3ShowBuilder();
+  const level=CreatorLevel.getLevel();
+  const idx=CREATOR_LEVELS.indexOf(level);
+  const mIdx=CREATOR_LEVELS.findIndex(l=>l.id==='master');
+  if(idx>=mIdx)setTimeout(()=>showNotification('🎨 Master creator! Press D to design custom items.'),500);
+};
+// Bind D key for custom designer when in builder
+document.addEventListener('keydown',e=>{
+  if(e.key==='d'&&RoomSystem.isInBuilder){
+    const level=CreatorLevel.getLevel();
+    const idx=CREATOR_LEVELS.indexOf(level);
+    const mIdx=CREATOR_LEVELS.findIndex(l=>l.id==='master');
+    if(idx>=mIdx)CustomItems.showDesigner();
+  }
+});
+
+// ─── 5. CREATOR ROYALTIES FOUNDATION ────────────────────────────
+const CreatorRoyalties={
+  trackVisit(roomOwner,customItemIds){
+    if(!customItemIds||!customItemIds.length)return;
+    const myName=LS.get('visitorName','Anonymous');
+    if(myName===roomOwner)return;
+    const rd=LS.get('creator_royalties',{});
+    customItemIds.forEach(cid=>{
+      if(!rd[cid])rd[cid]={visitors:[],totalVisits:0,earned:0};
+      if(!rd[cid].visitors.includes(myName)){
+        rd[cid].visitors.push(myName);rd[cid].totalVisits++;
+        if(rd[cid].totalVisits%10===0){rd[cid].earned++;Coins.earn(1,'creator_royalty');}
+      }
+    });
+    LS.set('creator_royalties',rd);
+  },
+  getMyRoyalties(){
+    const myItems=CustomItems.getAll().filter(i=>i.creator===LS.get('visitorName','Anonymous'));
+    const rd=LS.get('creator_royalties',{});
+    let total=0;
+    const items=myItems.map(i=>{const d=rd[i.id]||{totalVisits:0,earned:0};total+=d.earned||0;return{name:i.name,icon:i.icon,visits:d.totalVisits||0,earned:d.earned||0};});
+    return{items,total};
+  },
+  showTab(){
+    const{items,total}=this.getMyRoyalties();
+    let h='<h3 style="color:#ffd700">💰 Creator Royalties</h3>';
+    h+='<div style="font-size:12px;color:#ffd700;margin:8px 0">Total earned: '+total+'◈</div>';
+    h+='<p style="font-size:9px;color:#888">Earn 1◈ per 10 unique room visits with your custom items.</p>';
+    if(!items.length)h+='<div style="text-align:center;color:#888;padding:20px">No custom items yet.</div>';
+    else items.forEach(i=>{h+='<div class="bazaar-listing"><span class="listing-icon">'+i.icon+'</span><div class="listing-info"><div style="color:#c080ff">'+i.name+'</div><div style="font-size:8px;color:#888">'+i.visits+' unique visits</div></div><div class="listing-price">'+i.earned+'◈</div></div>';});
+    createPopup(h);
+  }
+};
+
+// Hook room visits for royalty tracking
+if(typeof RoomSystem.visitRoom==='function'){
+  const _econ3Visit=RoomSystem.visitRoom.bind(RoomSystem);
+  RoomSystem.visitRoom=function(rd){
+    _econ3Visit(rd);
+    if(rd&&rd.furniture){
+      const cids=rd.furniture.filter(f=>f.type&&f.type.startsWith('custom_')).map(f=>f.customId||f.type.replace('custom_',''));
+      if(cids.length>0&&rd.owner)CreatorRoyalties.trackVisit(rd.owner,cids);
+    }
+  };
+}
+
+console.log('⚡ Econ Phase 3: Elemental Combat, Tournament Prizes, Server Bazaar, Custom Items, Creator Royalties');
+
 })();
 </script>
 </body>

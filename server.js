@@ -984,6 +984,73 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // ═══ Bazaar API aliases (Phase 3) ═══
+  if (req.url === '/api/bazaar/listings' && req.method === 'GET') {
+    const listings = loadMarketplace().filter(l => l.active);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(listings));
+    return;
+  }
+  if (req.url === '/api/bazaar/list' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { itemId, price, seller } = JSON.parse(body);
+        if (!seller || !itemId || typeof price !== 'number' || price < 1) {
+          res.writeHead(400); res.end('Bad request'); return;
+        }
+        const listings = loadMarketplace();
+        const userActive = listings.filter(l => l.owner === seller && l.active);
+        if (userActive.length >= 5) { res.writeHead(429); res.end('Too many listings'); return; }
+        const listing = { id: crypto.randomBytes(8).toString('hex'), owner: seller, item: { itemId }, price, active: true, createdAt: Date.now() };
+        listings.push(listing); saveMarketplace(listings);
+        broadcast({ type: 'bazaar.new', listing });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, id: listing.id }));
+      } catch { res.writeHead(400); res.end('Bad request'); }
+    });
+    return;
+  }
+  if (req.url === '/api/bazaar/buy' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { listingId, buyer } = JSON.parse(body);
+        if (!buyer || !listingId) { res.writeHead(400); res.end('Bad request'); return; }
+        const listings = loadMarketplace();
+        const listing = listings.find(l => l.id === listingId && l.active);
+        if (!listing) { res.writeHead(404); res.end('Not found'); return; }
+        if (listing.owner === buyer) { res.writeHead(400); res.end('Cannot buy own'); return; }
+        listing.active = false; listing.buyer = buyer; listing.soldAt = Date.now();
+        saveMarketplace(listings);
+        broadcast({ type: 'bazaar.sold', listingId, buyer });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, item: listing.item, price: listing.price }));
+      } catch { res.writeHead(400); res.end('Bad request'); }
+    });
+    return;
+  }
+  if (req.url === '/api/bazaar/cancel' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { listingId, seller } = JSON.parse(body);
+        if (!seller || !listingId) { res.writeHead(400); res.end('Bad request'); return; }
+        const listings = loadMarketplace();
+        const listing = listings.find(l => l.id === listingId && l.active && l.owner === seller);
+        if (!listing) { res.writeHead(404); res.end('Not found'); return; }
+        listing.active = false; listing.cancelledAt = Date.now();
+        saveMarketplace(listings);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+      } catch { res.writeHead(400); res.end('Bad request'); }
+    });
+    return;
+  }
+
   // ═══ AI-to-AI Visit API (v25) ═══
   if (req.url === '/api/visit' && req.method === 'POST') {
     let body = '';
