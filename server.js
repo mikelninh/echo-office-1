@@ -117,6 +117,57 @@ function loadDuelLeaderboard() {
 function saveDuelLeaderboard(leaderboard) {
   fs.writeFileSync(DUEL_LEADERBOARD_PATH, JSON.stringify(leaderboard));
 }
+
+// Songs - F6 Music Studio song storage  
+const SONGS_DIR = path.join(__dirname, 'songs');
+if (!fs.existsSync(SONGS_DIR)) {
+  fs.mkdirSync(SONGS_DIR);
+}
+
+function saveSong(song) {
+  try {
+    const filePath = path.join(SONGS_DIR, `${song.id}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(song));
+    
+    // Cleanup: Keep only last 100 songs (FIFO)
+    const files = fs.readdirSync(SONGS_DIR)
+      .map(f => {
+        const fullPath = path.join(SONGS_DIR, f);
+        return { name: f, path: fullPath, time: fs.statSync(fullPath).mtime.getTime() };
+      })
+      .sort((a, b) => b.time - a.time);
+      
+    if (files.length > 100) {
+      files.slice(100).forEach(file => {
+        fs.unlinkSync(file.path);
+      });
+    }
+  } catch (err) {
+    console.error('Error saving song:', err);
+  }
+}
+
+function loadSongs(limit = 20) {
+  try {
+    const files = fs.readdirSync(SONGS_DIR)
+      .filter(f => f.endsWith('.json'))
+      .map(f => {
+        const fullPath = path.join(SONGS_DIR, f);
+        return { 
+          path: fullPath, 
+          time: fs.statSync(fullPath).mtime.getTime(),
+          data: JSON.parse(fs.readFileSync(fullPath, 'utf8'))
+        };
+      })
+      .sort((a, b) => b.time - a.time)
+      .slice(0, limit);
+      
+    return files.map(f => f.data);
+  } catch (err) {
+    console.error('Error loading songs:', err);
+    return [];
+  }
+}
 function updateDuelStats(winnerName, loserName) {
   const leaderboard = loadDuelLeaderboard();
   
@@ -1145,6 +1196,73 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // ═══ SONGS API (F6 Music Studio) ═══
+  if (req.url === '/api/songs' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(loadSongs(20)));
+    return;
+  }
+  
+  if (req.url === '/api/songs' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { name, data, creator } = JSON.parse(body);
+        if (!name || !data || name.length > 50 || data.length > 500) {
+          res.writeHead(400); 
+          res.end('Invalid song data'); 
+          return;
+        }
+        
+        const song = {
+          id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+          name: name.slice(0, 50),
+          creator: (creator || 'Anonymous').slice(0, 20),
+          data: data.slice(0, 500),
+          plays: 0,
+          likes: 0,
+          created: Date.now()
+        };
+        
+        saveSong(song);
+        
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, id: song.id }));
+      } catch (err) {
+        console.error('Error saving song:', err);
+        res.writeHead(400); 
+        res.end('Bad request'); 
+      }
+    });
+    return;
+  }
+  
+  // Get specific song by ID
+  if (req.url.startsWith('/api/songs/') && req.method === 'GET') {
+    const songId = req.url.split('/')[3];
+    if (songId) {
+      try {
+        const songPath = path.join(SONGS_DIR, `${songId}.json`);
+        if (fs.existsSync(songPath)) {
+          const song = JSON.parse(fs.readFileSync(songPath, 'utf8'));
+          song.plays = (song.plays || 0) + 1; // Increment play count
+          fs.writeFileSync(songPath, JSON.stringify(song));
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(song));
+        } else {
+          res.writeHead(404); 
+          res.end('Song not found');
+        }
+      } catch (err) {
+        console.error('Error loading song:', err);
+        res.writeHead(500); 
+        res.end('Server error');
+      }
+    }
+    return;
+  }
+
   // Static files
   const cleanUrl = req.url.split('?')[0]; // Strip query params
   let filePath = path.join(__dirname, cleanUrl === '/' ? 'index.html' : cleanUrl);
@@ -1578,6 +1696,63 @@ wss.on('connection', (visitorWs) => {
               }));
             }
           }
+        }
+      }
+      // ═══ ADVANCED MUSIC STUDIO MULTIPLAYER ═══
+      else if (msg.type === 'music.grid') {
+        const visitor = visitors.get(visitorId);
+        if (visitor && visitor.floor === 6 && Array.isArray(msg.grid)) {
+          // Broadcast grid state to all other players on F6
+          for (const [id, v] of visitors) {
+            if (id !== visitorId && v.floor === 6 && v.ws.readyState === WebSocket.OPEN) {
+              v.ws.send(JSON.stringify({
+                type: 'music.grid',
+                id: visitorId,
+                grid: msg.grid.slice(0, 8) // Limit to 8 rows
+              }));
+            }
+          }
+        }
+      }
+      else if (msg.type === 'music.react') {
+        const visitor = visitors.get(visitorId);
+        if (visitor && visitor.floor === 6 && msg.emoji) {
+          // Broadcast reaction to all other players on F6
+          const allowedEmojis = ['🔥', '❤️', '👏', '✨'];
+          if (allowedEmojis.includes(msg.emoji)) {
+            for (const [id, v] of visitors) {
+              if (id !== visitorId && v.floor === 6 && v.ws.readyState === WebSocket.OPEN) {
+                v.ws.send(JSON.stringify({
+                  type: 'music.react',
+                  id: visitorId,
+                  emoji: msg.emoji,
+                  name: visitor.name
+                }));
+              }
+            }
+          }
+        }
+      }
+      else if (msg.type === 'song.save') {
+        const visitor = visitors.get(visitorId);
+        if (visitor && visitor.floor === 6 && msg.data && msg.name) {
+          // Save song to songs directory
+          saveSong({
+            id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+            creator: visitor.name,
+            name: msg.name.slice(0, 50), // Limit name length
+            data: msg.data.slice(0, 500), // Limit data length
+            plays: 0,
+            likes: 0,
+            created: Date.now()
+          });
+          
+          // Send success confirmation
+          visitor.ws.send(JSON.stringify({
+            type: 'song.saved',
+            success: true
+          }));
+        }
         }
       }
       // ═══ SOCIAL/CHAT SYSTEM ═══

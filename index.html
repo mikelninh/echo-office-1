@@ -9697,6 +9697,20 @@ function changeFloor(f){
   showThought(`Arrived at ${FLOOR_NAMES[f]}!`);
   // Change music if playing
   if(S.musicPlaying)startLofi();
+  
+  // ═══ MUSIC STUDIO INITIALIZATION ═══
+  // Initialize sequencer when entering F6
+  if (f === 6 && typeof MusicStudio !== 'undefined') {
+    if (!MusicStudio.sequencer.grids.has(S.myPlayerId || 'player')) {
+      MusicStudio.sequencer.grids.set(S.myPlayerId || 'player', new Array(8).fill(0));
+    }
+    // Start sequencer if not already playing
+    if (!MusicStudio.sequencer.playing) {
+      MusicStudio.sequencer.playing = true;
+      MusicStudio.sequencer.currentStep = 0;
+    }
+  }
+  
   // Track floor visit
   const fv=LS.get('floorsVisited',[]);if(!fv.includes(f)){fv.push(f);LS.set('floorsVisited',fv);Coins.earn(5,'new-floor');checkAchievements();
     // First visit to new room: small chance for loot
