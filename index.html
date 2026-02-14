@@ -4947,6 +4947,11 @@ const VirtualJoystick = {
       e.preventDefault();
       if (this.touchId !== null) return;
       
+      // Recalculate center on each touch (handles scroll/resize)
+      const rect = base.getBoundingClientRect();
+      this.centerX = rect.left + rect.width / 2;
+      this.centerY = rect.top + rect.height / 2;
+      
       const touch = e.touches[0];
       this.touchId = touch.identifier;
       this.active = true;
@@ -9312,6 +9317,15 @@ async function fetchWeather(){try{const r=await fetch('https://wttr.in/Berlin?fo
 // §24. INPUT
 // ═══════════════════════════════════════
 function initInput(){
+  // Tap-to-move: also handle touch on canvas for mobile
+  canvas.addEventListener('touchend',e=>{
+    if(VirtualJoystick.active)return; // don't interfere with joystick
+    const touch=e.changedTouches[0];if(!touch)return;
+    const rect=canvas.getBoundingClientRect(),cx=(touch.clientX-rect.left)/rect.width*W,cy=(touch.clientY-rect.top)/rect.height*H;
+    if(S.useVisitor&&!S.nearObject){S.visitor.walkTarget={x:cx,y:cy}}
+    // Also fire the click handler logic
+    canvas.dispatchEvent(new MouseEvent('click',{clientX:touch.clientX,clientY:touch.clientY}));
+  },{passive:true});
   canvas.addEventListener('click',e=>{
     const rect=canvas.getBoundingClientRect(),cx=(e.clientX-rect.left)/rect.width*W,cy=(e.clientY-rect.top)/rect.height*H;
     // EXIT EVA button click
