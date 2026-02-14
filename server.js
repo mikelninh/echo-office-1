@@ -919,6 +919,49 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // ═══ AI-to-AI Visit API (v25) ═══
+  if (req.url === '/api/visit' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { name, avatar, message } = JSON.parse(body);
+        if (!name || name.length > 30) { res.writeHead(400); res.end('Invalid name'); return; }
+        const aiVisitorId = 'ai_' + crypto.randomBytes(4).toString('hex');
+        const aiVisitor = {
+          id: aiVisitorId,
+          name: '[AI] ' + name.slice(0, 25),
+          avatar: avatar || 'robot',
+          message: (message || '').slice(0, 200),
+          arrivedAt: Date.now()
+        };
+        // Broadcast AI visitor arrival to all connected clients
+        broadcast({ type: 'ai.visitor.arrive', visitor: aiVisitor });
+        // Record as station visit
+        const stats = loadStationStats();
+        if (Array.isArray(stats.uniqueVisitors)) stats.uniqueVisitors = new Set(stats.uniqueVisitors);
+        const isNew = !stats.uniqueVisitors.has(aiVisitor.name);
+        if (isNew) { stats.uniqueVisitors.add(aiVisitor.name); stats.totalVisitors++; }
+        stats.totalVisits++;
+        const newMilestones = checkMilestones(stats);
+        saveStationStats(stats);
+        if (newMilestones.length > 0) {
+          newMilestones.forEach(m => broadcast({ type: 'milestone.unlocked', milestone: m }));
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, visitorId: aiVisitorId, isNew, totalVisitors: stats.totalVisitors }));
+      } catch (e) { res.writeHead(400); res.end('Bad request: ' + e.message); }
+    });
+    return;
+  }
+
+  // Station events API (v25) - get active events
+  if (req.url === '/api/events' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, visitors: visitors.size }));
+    return;
+  }
+
   // Health check
   if (req.url === '/health' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });

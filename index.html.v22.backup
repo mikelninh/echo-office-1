@@ -5,24 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a14">
-<title>Echo's Station v25 🛸</title>
+<title>Echo's Station v21 🛸</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🛸</text></svg>">
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRWNobydzIFN0YXRpb24iLCJzaG9ydF9uYW1lIjoiRWNobyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTE0IiwidGhlbWVfY29sb3IiOiIjMGEwYTE0IiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnPjx0ZXh0IHk9JzgwJyBmb250LXNpemU9JzgwJz7wn5uoPC90ZXh0Pjwvc3ZnPiIsInNpemVzIjoiYW55IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0a14;color:#f0e8d8;font-family:'Courier New',monospace;overflow:hidden;height:100vh;width:100vw;user-select:none;display:flex;align-items:center;justify-content:center}
-#loader{position:fixed;inset:0;z-index:20000;background:#0a0a14;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .8s;font-family:'Courier New',monospace}
+#loader{position:fixed;inset:0;z-index:20000;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .8s}
 #loader.done{opacity:0;pointer-events:none}
 #loader h1{font-size:28px;color:#fff;letter-spacing:6px;text-shadow:0 0 30px #9b59b6}
-#load-bar-wrap{width:280px;height:6px;background:#1a1a2a;border:1px solid #333;margin-top:16px;border-radius:3px;overflow:hidden}
-#load-bar{width:0%;height:100%;background:linear-gradient(90deg,#9b59b6,#ff6ec7,#00fff7);transition:width .3s}
+#load-bar-wrap{width:180px;height:8px;background:#1a1a2a;border:1px solid #333;margin-top:16px}
+#load-bar{width:0%;height:100%;background:linear-gradient(90deg,#9b59b6,#ff6ec7,#00fff7);transition:width .15s}
 #load-tip{color:#666;font-size:11px;margin-top:12px}
-#boot-log{width:280px;margin-top:14px;text-align:left;font-size:10px;line-height:1.8;color:#4a4a6a;max-height:140px;overflow:hidden}
-#boot-log .boot-line{opacity:0;animation:bootLineIn .3s forwards}
-#boot-log .boot-line.ok{color:#44cc44}
-#boot-log .boot-line.warn{color:#ffaa00}
-#boot-log .boot-line.highlight{color:#00fff7;font-weight:bold}
-@keyframes bootLineIn{to{opacity:1}}
 #game-wrap{position:relative;display:flex;gap:0}
 canvas{display:block;image-rendering:pixelated;background:#1a1418}
 #hud{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:8px;align-items:center;background:rgba(10,10,20,.75);border:2px solid rgba(100,100,140,.4);border-radius:14px;padding:6px 14px;backdrop-filter:blur(6px)}
@@ -150,61 +144,6 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 .tip-slider{width:80%;margin:8px auto;display:block;-webkit-appearance:none;background:#333;height:6px;border-radius:3px;outline:none}
 .tip-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:#ffd700;border-radius:50%;cursor:pointer}
 #scanlines{position:fixed;inset:0;pointer-events:none;z-index:9998;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.015) 2px,rgba(0,0,0,.015) 4px)}
-/* v24: Enhancement System */
-.enhance-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:6500;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:'Courier New',monospace}
-.enhance-stage{width:320px;padding:24px;background:#1a1a2e;border:3px solid #00fff7;border-radius:12px;text-align:center;position:relative;overflow:hidden}
-.enhance-item-display{font-size:42px;margin:10px 0}
-.enhance-item-name{font-size:16px;color:#fff;font-weight:bold;margin:4px 0}
-.enhance-level{font-size:28px;color:#ffd700;font-weight:bold;margin:8px 0}
-.enhance-bar{width:100%;height:8px;background:#333;border-radius:4px;overflow:hidden;margin:10px 0}
-.enhance-bar-fill{height:100%;transition:width .3s;border-radius:4px}
-.enhance-cost{font-size:13px;color:#ffd700;margin:6px 0}
-.enhance-chance{font-size:11px;margin:4px 0}
-.enhance-btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#00fff7,#0088aa);border:none;color:#000;font-weight:bold;font-family:inherit;font-size:14px;border-radius:8px;cursor:pointer;transition:transform .15s,box-shadow .2s;margin:8px 4px}
-.enhance-btn:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(0,255,247,.4)}
-.enhance-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
-.enhance-btn.danger{background:linear-gradient(135deg,#ff3344,#aa0011)}
-.enhance-btn.cancel{background:#333;color:#aaa}
-.enhance-anim{position:absolute;inset:0;pointer-events:none;z-index:2}
-@keyframes enhanceGlow{0%{box-shadow:0 0 10px #00fff7}50%{box-shadow:0 0 40px #ffd700,0 0 80px #ff6ec7}100%{box-shadow:0 0 10px #00fff7}}
-@keyframes enhanceSuccess{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
-@keyframes enhanceFail{0%{transform:translateX(0)}25%{transform:translateX(-10px)}50%{transform:translateX(10px)}75%{transform:translateX(-5px)}100%{transform:translateX(0)}}
-@keyframes enhanceDestroy{0%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}100%{opacity:0;transform:scale(0) rotate(180deg)}}
-.enhance-glow-1{filter:drop-shadow(0 0 2px rgba(0,255,247,.3))}
-.enhance-glow-5{filter:drop-shadow(0 0 4px rgba(0,255,247,.5)) drop-shadow(0 0 8px rgba(0,200,255,.3))}
-.enhance-glow-10{filter:drop-shadow(0 0 6px rgba(255,215,0,.6)) drop-shadow(0 0 12px rgba(255,170,0,.4))}
-.enhance-glow-15{filter:drop-shadow(0 0 8px rgba(255,110,199,.7)) drop-shadow(0 0 16px rgba(255,50,150,.5)) drop-shadow(0 0 24px rgba(255,0,100,.3))}
-.enhance-glow-20{filter:drop-shadow(0 0 10px rgba(255,255,255,.8)) drop-shadow(0 0 20px rgba(255,215,0,.6)) drop-shadow(0 0 30px rgba(255,110,199,.5)) drop-shadow(0 0 40px rgba(0,255,247,.4))}
-/* v24: Mission Board */
-.mission-card{background:rgba(30,30,50,.8);border:2px solid #555;border-radius:8px;padding:10px;margin:6px 0;transition:border-color .2s}
-.mission-card.complete{border-color:#44cc44;background:rgba(30,60,30,.5)}
-.mission-card .mission-title{color:#00fff7;font-weight:bold;font-size:12px}
-.mission-card .mission-desc{color:#aaa;font-size:10px;margin:4px 0}
-.mission-card .mission-reward{color:#ffd700;font-size:10px}
-.mission-card .mission-progress{font-size:9px;color:#888;margin-top:4px}
-.mission-progress-bar{width:100%;height:4px;background:#333;border-radius:2px;margin-top:3px;overflow:hidden}
-.mission-progress-fill{height:100%;background:#00fff7;border-radius:2px;transition:width .3s}
-.weekly-card{border-color:#ff6ec7;background:rgba(50,20,40,.5)}
-.weekly-card .mission-title{color:#ff6ec7}
-/* v24: Bazaar */
-.bazaar-listing{display:flex;align-items:center;gap:8px;padding:8px;margin:4px 0;background:rgba(30,30,50,.6);border:1px solid #444;border-radius:6px;cursor:pointer;transition:border-color .2s}
-.bazaar-listing:hover{border-color:#ffd700}
-.bazaar-listing .listing-icon{font-size:20px}
-.bazaar-listing .listing-info{flex:1;font-size:10px}
-.bazaar-listing .listing-price{color:#ffd700;font-weight:bold;font-size:12px}
-.bazaar-listing .listing-seller{font-size:8px;color:#888}
-.bazaar-tabs{display:flex;gap:2px;margin-bottom:8px}
-.bazaar-tab{flex:1;padding:6px;text-align:center;cursor:pointer;font-size:10px;font-family:inherit;color:#888;background:rgba(30,30,50,.5);border:1px solid #333;border-radius:6px 6px 0 0;transition:all .2s}
-.bazaar-tab:hover{color:#ddd}
-.bazaar-tab.active{color:#ffd700;background:rgba(255,215,0,.1);border-color:#ffd700}
-/* v24: Specialist */
-.specialist-card{display:inline-flex;flex-direction:column;align-items:center;width:100px;height:130px;margin:4px;padding:8px;border:2px solid #555;border-radius:10px;cursor:pointer;transition:all .25s;background:rgba(20,20,40,.6);position:relative}
-.specialist-card:hover{border-color:#ff6ec7;transform:translateY(-2px)}
-.specialist-card .spec-icon{font-size:32px;margin-bottom:4px}
-.specialist-card .spec-name{font-size:10px;color:#fff;font-weight:bold}
-.specialist-card .spec-desc{font-size:8px;color:#888;margin-top:2px;text-align:center}
-.specialist-card.active{border-color:#ffd700;background:rgba(255,215,0,.1);box-shadow:0 0 15px rgba(255,215,0,.3)}
-@keyframes specialistTransform{0%{transform:scale(1);filter:brightness(1)}25%{transform:scale(1.3);filter:brightness(3) hue-rotate(90deg)}50%{transform:scale(0.8);filter:brightness(5)}75%{transform:scale(1.1);filter:brightness(2) hue-rotate(-90deg)}100%{transform:scale(1);filter:brightness(1)}}
 /* Weapon card styles */
 .wpn-card{display:inline-flex;flex-direction:column;align-items:center;width:100px;min-height:120px;margin:3px;padding:8px;border:2px solid #333;border-radius:10px;font-size:9px;color:#aaa;background:rgba(20,20,40,.6);cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
 .wpn-card:hover{transform:translateY(-2px);border-color:#ff6ec7}
@@ -388,7 +327,7 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 </style>
 </head>
 <body>
-<div id="loader"><h1>ECHO'S STATION</h1><div id="load-bar-wrap"><div id="load-bar"></div></div><div id="boot-log"></div><div id="load-tip"></div></div>
+<div id="loader"><h1>ECHO'S STATION</h1><div id="load-bar-wrap"><div id="load-bar"></div></div><div id="load-tip">Loading cozy vibes...</div></div>
 <div id="scanlines"></div>
 <div id="game-wrap">
   <div style="position:relative;flex-shrink:0">
@@ -407,7 +346,7 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
       </div>
     </div>
     <div id="coin-hud">◈ <span id="coin-count">0</span></div>
-    <div id="players-hud" style="position:absolute;top:8px;left:130px;z-index:50;display:flex;align-items:center;gap:5px;background:rgba(10,10,20,.85);border:2px solid #00fff7;border-radius:8px;padding:5px 12px;font-size:12px;color:#00fff7;font-weight:bold">👥 <span id="player-count">1</span> <span style="font-weight:normal;font-size:10px;opacity:.7">aboard</span></div>
+    <div id="players-hud" style="position:absolute;top:8px;left:130px;z-index:50;display:flex;align-items:center;gap:5px;background:rgba(10,10,20,.85);border:2px solid #00fff7;border-radius:8px;padding:5px 12px;font-size:13px;color:#00fff7;font-weight:bold">👥 <span id="player-count">1</span></div>
     <div id="floor-hud">F1 · Echo's Quarters</div>
     <div id="volume-ctrl"><span>🔊</span><input type="range" id="vol-slider" min="0" max="100" value="30"></div>
     <div id="caffeine-hud"></div>
@@ -871,14 +810,9 @@ const DuelSystem = {
         LS.set('aiWins', aiWins);
         Coins.earn(aiF.reward, 'pve_win');
         addChatMsg('Echo', `${aiF.icon} ${aiF.name} defeated! +${aiF.reward}◈`, '#44cc44');
-        // v24: Track PvE wins for missions
-        if (typeof MissionBoard !== 'undefined') MissionBoard.trackProgress('pve_wins', 1);
-        // v24: Specialist card drop chance from PvE
-        if (typeof SpecialistSystem !== 'undefined') SpecialistSystem.tryDrop();
       }
       stats.duelsWon++;
       stats.winStreak = (stats.winStreak || 0) + 1;
-      if (typeof MissionBoard !== 'undefined') MissionBoard.trackProgress('duels_won', 1);
       const coinReward = 25 + Math.min(comboScore * 2, 20);
       showNotification('VICTORY! +' + coinReward + '\u25C8');
       Coins.earn(coinReward, 'duel_win');
@@ -1888,7 +1822,6 @@ const FLOOR_OBJECTS={
     {id:'leaderboard',x:120,y:350,w:100,h:80,label:'Leaderboard Wall',interact:true,collide:true},
     {id:'duel_arena',x:300,y:200,w:200,h:200,label:'⚔️ Duel Arena',interact:true,collide:false},
     {id:'duel_leaderboard',x:550,y:200,w:100,h:120,label:'Duel Champions',interact:true,collide:true},
-    {id:'mission_board',x:600,y:80,w:80,h:80,label:'📋 Mission Board',interact:true,collide:true},
   ],
   4:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
@@ -1912,8 +1845,6 @@ const FLOOR_OBJECTS={
     {id:'artifacts',x:550,y:280,w:100,h:60,label:'Artifacts',interact:true,collide:true},
     {id:'journal',x:150,y:300,w:60,h:50,label:'Journal',interact:true,collide:true},
     {id:'terminal',x:150,y:200,w:80,h:60,label:'Terminal',interact:true,collide:true},
-    {id:'enhance_station',x:350,y:380,w:100,h:70,label:'⚗️ Enhancement Station',interact:true,collide:true},
-    {id:'crafting_station',x:350,y:480,w:100,h:50,label:'🔨 Crafting Station',interact:true,collide:true},
   ],
   6:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
@@ -1924,7 +1855,6 @@ const FLOOR_OBJECTS={
     {id:'speakers',x:250,y:300,w:60,h:40,label:'Speakers',interact:true,collide:true},
     {id:'neonbar',x:140,y:340,w:60,h:20,label:'"CHILL"',interact:false,collide:false},
     {id:'vinylstorage',x:450,y:250,w:80,h:100,label:'Vinyl Collection',interact:true,collide:true},
-    {id:'stationlog',x:650,y:80,w:80,h:80,label:'📊 Station Log',interact:true,collide:true},
   ],
   7:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
@@ -1934,7 +1864,6 @@ const FLOOR_OBJECTS={
     {id:'timelapse',x:120,y:400,w:100,h:50,label:'Time-lapse Viewer',interact:true,collide:true},
     {id:'artstool',x:260,y:400,w:80,h:50,label:'Art Tools',interact:true,collide:true},
     {id:'communitywall',x:120,y:80,w:120,h:100,label:'Community Wall',interact:true,collide:true},
-    {id:'bazaar_kiosk',x:400,y:400,w:80,h:60,label:'🏪 Bazaar',interact:true,collide:true},
   ],
   8:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
@@ -1974,7 +1903,7 @@ const Coins={
   get count(){return this._count},
   set count(v){this._count=Math.max(0,v);LS.set('echoCoins',this._count);$('#coin-count').textContent=this._count},
   get lifetime(){return this._lifetime},
-  earn(n,r){const luckBonus=typeof LootSystem!=='undefined'?(LootSystem.getStatBonuses().luck||0):0;const bonus=luckBonus>0?Math.floor(n*luckBonus/100):0;const total=n+bonus;this.count+=total;this._lifetime+=total;LS.set('lifetimeCoins',this._lifetime);S.floatTexts.push({text:'+'+(bonus>0?total+'◈(+'+bonus+')':total+'◈'),x:S.echo.x-10,y:S.echo.y-50,color:'#ffd700',life:60});this._sndEarn();if(typeof MissionBoard!=='undefined'&&MissionBoard._progress)MissionBoard.trackProgress('coins_earned',total)},
+  earn(n,r){const luckBonus=typeof LootSystem!=='undefined'?(LootSystem.getStatBonuses().luck||0):0;const bonus=luckBonus>0?Math.floor(n*luckBonus/100):0;const total=n+bonus;this.count+=total;this._lifetime+=total;LS.set('lifetimeCoins',this._lifetime);S.floatTexts.push({text:'+'+(bonus>0?total+'◈(+'+bonus+')':total+'◈'),x:S.echo.x-10,y:S.echo.y-50,color:'#ffd700',life:60});this._sndEarn()},
   spend(n,r){if(this._count<n)return false;this.count-=n;S.floatTexts.push({text:'-'+n+'◈',x:S.echo.x-10,y:S.echo.y-50,color:'#ff6666',life:60});return true},
   canAfford(n){return this._count>=n},
   adminGrant(n){this._count+=n;this._lifetime+=n;LS.set('echoCoins',this._count);LS.set('lifetimeCoins',this._lifetime);$('#coin-count').textContent=this._count;showNotification('👑 Admin: +'+n+'◈')},
@@ -2874,25 +2803,8 @@ function renderPixel(){
     ctx.shadowBlur=0;
   }
   
-  // v25: Crown rendering
-  PixelEvolution.renderCrown(p);
-  // v25: Trick animation
-  if(PixelEvolution.currentTrick==='sit'){
-    // Squish sprite to look sitting
-    ctx.fillStyle='rgba(192,128,255,.15)';ctx.fillRect(p.x-8,p.y-4,16,4);
-  }
-  // v25: Laser dot
-  if(S._laserDot&&S._laserDot.timer>0){
-    ctx.fillStyle='#ff0000';ctx.beginPath();ctx.arc(S._laserDot.x,S._laserDot.y,3+Math.sin(S.time*10),0,Math.PI*2);ctx.fill();
-    ctx.shadowColor='#ff0000';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(S._laserDot.x,S._laserDot.y,2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
-  }
-  // v25: Crown scale (500+ visitors = slightly larger)
   // Name tag
   ctx.fillStyle='rgba(30,25,45,.7)';ctx.font='8px monospace';const tw=ctx.measureText('Pixel 🐱').width;ctx.fillRect(p.x-tw/2-3,p.y-sprH-14,tw+6,11);ctx.fillStyle='#c080ff';ctx.textAlign='center';ctx.fillText('Pixel 🐱',p.x,p.y-sprH-6);ctx.textAlign='left';
-  // v25: Mood emoji near Echo
-  if(S.echo.floor===S.floor&&typeof EchoMoodV25!=='undefined'){
-    ctx.font='14px serif';ctx.fillText(EchoMoodV25.moodEmoji,S.echo.x+15,S.echo.y-35);
-  }
 }
 
 function renderThought(){
@@ -3433,35 +3345,6 @@ function renderFloor5(){
   const af=getObjects().find(o=>o.id==='artifacts');ctx.fillStyle='#2a2a3a';ctx.fillRect(af.x,af.y,af.w,af.h);const artifacts=['🔷','🔶','💎','⚗️','🧬'];artifacts.forEach((a,i)=>{ctx.font='12px sans-serif';ctx.fillText(a,af.x+10+i*18,af.y+af.h/2+5)});
   // Journal
   const jn=getObjects().find(o=>o.id==='journal');ctx.fillStyle='#4a3020';ctx.fillRect(jn.x,jn.y,jn.w,jn.h);ctx.fillStyle='#c0a060';ctx.fillRect(jn.x+5,jn.y+5,jn.w-10,jn.h-10);ctx.fillStyle='#333';ctx.font='6px monospace';ctx.fillText('JOURNAL',jn.x+8,jn.y+jn.h/2+3);
-  // v24: Enhancement Station
-  const es=getObjects().find(o=>o.id==='enhance_station');
-  if(es){
-    ctx.fillStyle='#2a2a3a';ctx.fillRect(es.x,es.y,es.w,es.h);
-    ctx.fillStyle='#3a3a5a';ctx.fillRect(es.x+5,es.y+5,es.w-10,es.h-10);
-    // Glowing anvil
-    const ePulse=0.3+Math.sin(S.time*2)*0.2;
-    const eGrd=ctx.createRadialGradient(es.x+es.w/2,es.y+es.h/2,0,es.x+es.w/2,es.y+es.h/2,40);
-    eGrd.addColorStop(0,`rgba(0,255,247,${ePulse})`);eGrd.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=eGrd;ctx.fillRect(es.x-10,es.y-10,es.w+20,es.h+20);
-    ctx.font='20px sans-serif';ctx.textAlign='center';ctx.fillText('⚗️',es.x+es.w/2,es.y+es.h/2+4);
-    ctx.fillStyle='#00fff7';ctx.font='bold 8px monospace';ctx.fillText('ENHANCE',es.x+es.w/2,es.y+es.h+12);
-    // Floating sparkles
-    if(Math.random()<0.15){S.particles.push({x:es.x+Math.random()*es.w,y:es.y+Math.random()*es.h,vx:(Math.random()-.5)*.5,vy:-0.5-Math.random(),life:20,color:'#00fff7',size:1+Math.random()*2})}
-    ctx.textAlign='left';
-  }
-  // v25: Crafting Station
-  const cs=getObjects().find(o=>o.id==='crafting_station');
-  if(cs){
-    ctx.fillStyle='#3a2a1a';ctx.fillRect(cs.x,cs.y,cs.w,cs.h);
-    ctx.fillStyle='#5a4a3a';ctx.fillRect(cs.x+5,cs.y+5,cs.w-10,cs.h-10);
-    const cPulse=0.2+Math.sin(S.time*1.8)*0.15;
-    const cGrd=ctx.createRadialGradient(cs.x+cs.w/2,cs.y+cs.h/2,0,cs.x+cs.w/2,cs.y+cs.h/2,35);
-    cGrd.addColorStop(0,`rgba(255,150,50,${cPulse})`);cGrd.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=cGrd;ctx.fillRect(cs.x-5,cs.y-5,cs.w+10,cs.h+10);
-    ctx.font='18px sans-serif';ctx.textAlign='center';ctx.fillText('🔨',cs.x+cs.w/2,cs.y+cs.h/2+4);
-    ctx.fillStyle='#ffa040';ctx.font='bold 8px monospace';ctx.fillText('CRAFT',cs.x+cs.w/2,cs.y+cs.h+12);
-    ctx.textAlign='left';
-  }
   // Eerie ambient sounds visual
   if(Math.sin(S.time*1.5)>.9){ctx.fillStyle='rgba(0,200,255,.02)';ctx.fillRect(0,0,W,H)}
 }
@@ -3569,23 +3452,6 @@ function renderFloor6(){
         ctx.globalAlpha=1;
       });
     }
-  }
-
-  // Station Log display
-  const sl=getObjects().find(o=>o.id==='stationlog');
-  if(sl){
-    ctx.fillStyle='#1a1a2e';ctx.fillRect(sl.x,sl.y,sl.w,sl.h);
-    ctx.fillStyle='#0a2a0a';ctx.fillRect(sl.x+2,sl.y+2,sl.w-4,sl.h-4);
-    ctx.fillStyle='#00fff7';ctx.font='bold 8px monospace';
-    ctx.fillText('STATION LOG',sl.x+6,sl.y+14);
-    ctx.fillStyle='#44cc44';ctx.font='7px monospace';
-    ctx.fillText(`Visitors: ${S.stationStats.totalVisitors||0}`,sl.x+6,sl.y+26);
-    ctx.fillText(`Visits: ${S.stationStats.totalVisits||0}`,sl.x+6,sl.y+36);
-    ctx.fillText(`Milestones: ${(S.stationStats.milestones||[]).length}/7`,sl.x+6,sl.y+46);
-    // Pulsing dot
-    const dotAlpha=.5+Math.sin(S.time*3)*.5;
-    ctx.fillStyle=`rgba(0,255,0,${dotAlpha})`;
-    ctx.beginPath();ctx.arc(sl.x+sl.w-8,sl.y+10,3,0,Math.PI*2);ctx.fill();
   }
 
   // Warm lighting particles
@@ -3931,7 +3797,7 @@ function render(){
   for(const id in S.otherPlayers){const op=S.otherPlayers[id];if(op.floor===S.floor)chars.push({y:op.y,r:()=>renderRemotePlayer(ctx,id,op)})}
   if(AIFighter.active)chars.push({y:AIFighter.y,r:()=>AIFighter.render(ctx)});
   chars.sort((a,b)=>a.y-b.y);chars.forEach(c=>c.r());
-  renderKittens();renderSeasonalEffects();StationEvents.render();
+  renderKittens();renderSeasonalEffects();
   renderParticles();renderImpactRings();renderThought();renderFloatTexts();
   ctx.restore();
   renderSeasonalOverlay();
@@ -4135,7 +4001,7 @@ function updatePixelTalks(dt){
 // ═══════════════════════════════════════
 function updateVisitor(dt){
   if(!S.useVisitor)return;
-  const _speedBonus=1+(LootSystem.getStatBonuses().speed||0)/100+(typeof SpecialistSystem!=='undefined'?SpecialistSystem.getSpeedBonus():0);
+  const _speedBonus=1+(LootSystem.getStatBonuses().speed||0)/100;
   const spd=160*_speedBonus,v=S.visitor;
   
   // Dash cooldown
@@ -4316,13 +4182,6 @@ function renderVisitor(ctx){
   const skin=VISITOR_SKINS.find(s=>s.id===v.skin)||VISITOR_SKINS[0];
   const c=skin.color,d=adjustBrightness(c,-20),l=adjustBrightness(c,20);
   
-  // v24: Specialist aura
-  if(typeof SpecialistSystem!=='undefined')SpecialistSystem.renderAura(ctx);
-  // v24: Enhancement glow on equipped weapon
-  if(typeof EnhancementSystem!=='undefined'&&typeof WeaponSystem!=='undefined'&&WeaponSystem.equipped){
-    const eLvl=LS.get('enhance_'+WeaponSystem.equipped._id,{level:0}).level;
-    const eGlow=EnhancementSystem.getGlowColor(eLvl);
-    if(eGlow){const pulse=eGlow.intensity*(0.5+Math.sin(S.time*eGlow.pulseSpeed)*0.3);const g=ctx.createRadialGradient(v.x,v.y-15,2,v.x,v.y-15,20+eLvl);g.addColorStop(0,eGlow.color+Math.floor(pulse*200).toString(16).padStart(2,'0'));g.addColorStop(1,eGlow.color+'00');ctx.fillStyle=g;ctx.beginPath();ctx.arc(v.x,v.y-15,20+eLvl,0,Math.PI*2);ctx.fill()}}
   // Render aura behind avatar
   const eqAcc=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
   if(eqAcc.aura){const auraItem=ACCESSORY_ITEMS.find(a=>a.id===eqAcc.aura);if(auraItem){
@@ -4835,50 +4694,6 @@ function triggerMilestone(milestoneId){
   }
 }
 
-function showStationLog(){
-  const stats=S.stationStats;
-  const ms=stats.milestones||[];
-  const allMs=[
-    {id:'first_crew',name:'First Crew',desc:'10 unique visitors',icon:'🎉',threshold:10},
-    {id:'pixel_talks',name:'Pixel Talks',desc:'25 unique visitors — Pixel speaks!',icon:'🐱',threshold:25},
-    {id:'garden_bloom',name:'Garden Bloom',desc:'50 unique visitors — flowers everywhere',icon:'🌸',threshold:50},
-    {id:'golden_hull',name:'Golden Hull',desc:'100 visitors — golden station trim',icon:'✨',threshold:100},
-    {id:'echo_band',name:'Echo Band',desc:'250 visitors — holographic musicians',icon:'🎵',threshold:250},
-    {id:'portal_open',name:'Portal Open',desc:'500 visitors — portal awakens',icon:'🌀',threshold:500},
-    {id:'pixel_kittens',name:'Pixel Kittens',desc:'1000 visitors — kittens appear',icon:'🐱',threshold:1000},
-  ];
-  const nextMs=allMs.find(m=>!ms.includes(m.id));
-  const pct=nextMs?Math.min(100,Math.round((stats.totalVisitors||0)/nextMs.threshold*100)):100;
-  
-  let html=`<h3>📊 Station Log</h3>
-    <div style="margin:8px 0;padding:8px;background:rgba(0,255,247,.05);border:1px solid rgba(0,255,247,.2);border-radius:6px">
-      <div style="font-size:10px;color:#aaa">Station Population</div>
-      <div style="font-size:20px;color:#00fff7;font-weight:bold">${stats.totalVisitors||0} unique visitors</div>
-      <div style="font-size:10px;color:#888">${stats.totalVisits||0} total visits · ${stats.totalDuels||0} duels · ${stats.totalClashes||0} clashes</div>
-    </div>`;
-  
-  if(nextMs){
-    html+=`<div style="margin:8px 0;padding:8px;background:rgba(255,208,128,.05);border:1px solid rgba(255,208,128,.2);border-radius:6px">
-      <div style="font-size:10px;color:#ffd080">Next Milestone: ${nextMs.icon} ${nextMs.name}</div>
-      <div style="height:6px;background:#222;border-radius:3px;margin:4px 0;overflow:hidden"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#ff6ec7,#ffd080);border-radius:3px"></div></div>
-      <div style="font-size:9px;color:#888">${stats.totalVisitors||0}/${nextMs.threshold} visitors (${pct}%)</div>
-    </div>`;
-  }
-  
-  html+='<div style="margin-top:10px"><div style="font-size:11px;color:#c080ff;margin-bottom:6px">Milestone History</div>';
-  allMs.forEach(m=>{
-    const unlocked=ms.includes(m.id);
-    html+=`<div style="display:flex;align-items:center;gap:6px;padding:4px 6px;margin:2px 0;background:rgba(${unlocked?'155,89,182':'50,50,80'},.1);border-radius:4px;border:1px solid ${unlocked?'rgba(155,89,182,.3)':'#333'};opacity:${unlocked?1:.5}">
-      <span style="font-size:16px;${unlocked?'':'filter:grayscale(1)'}">${m.icon}</span>
-      <div><div style="font-size:10px;color:${unlocked?'#00fff7':'#666'};font-weight:bold">${m.name}</div><div style="font-size:9px;color:#888">${m.desc}</div></div>
-      ${unlocked?'<span style="margin-left:auto;font-size:9px;color:#44cc44">✓</span>':''}
-    </div>`;
-  });
-  html+='</div>';
-  
-  createPopup(html);
-}
-
 function initKittens(){
   if(S.kittens.length>0)return; // Already initialized
   
@@ -5215,54 +5030,26 @@ function renderSeasonalOverlay(){
 // ═══════════════════════════════════════
 // §26d. ECHO MEMORY SYSTEM
 // ═══════════════════════════════════════
-function timeAgo(ts){
-  if(!ts)return'a while';
-  const diff=Date.now()-ts;const s=diff/1000;
-  if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';
-  if(s<86400)return Math.floor(s/3600)+'h ago';
-  const d=Math.floor(s/86400);
-  if(d===1)return'yesterday';if(d<7)return d+' days ago';
-  if(d<30)return Math.floor(d/7)+' week'+(Math.floor(d/7)>1?'s':'')+' ago';
-  return Math.floor(d/30)+' month'+(Math.floor(d/30)>1?'s':'')+' ago';
-}
-
 async function loadVisitorMemory(){
   const name=LS.get('visitorName','Visitor');
   if(name==='Visitor')return;
-  
-  // Track local visit data
-  const localData=LS.get('visitorLocalData',{firstVisit:Date.now(),visitCount:0,totalTime:0,floorTime:{}});
-  localData.visitCount++;
-  localData.lastVisit=Date.now();
-  LS.set('visitorLocalData',localData);
-  
-  // Track floor time
-  if(!S._floorTimeTracker){
-    S._floorTimeTracker=setInterval(()=>{
-      const ld=LS.get('visitorLocalData',{floorTime:{}});
-      ld.floorTime=ld.floorTime||{};
-      ld.floorTime[S.floor]=(ld.floorTime[S.floor]||0)+5;
-      ld.totalTime=(ld.totalTime||0)+5;
-      LS.set('visitorLocalData',ld);
-    },5000);
-  }
   
   try{
     const r=await fetch(`/api/visitor-memory?name=${encodeURIComponent(name)}`);
     const memory=await r.json();
     
     if(memory.visitCount>0){
-      const ago=timeAgo(memory.lastVisit);
+      // Echo remembers this visitor!
       const greetings=[
-        `Welcome back, ${name}! 🔮 You were here ${ago}. Visit #${memory.visitCount+1}!`,
-        `${name}! Good to see you again! Last time was ${ago} — you spent the most time on F${memory.favFloor}.`,
-        `Hey ${name}! ${ago} since your last visit. You've earned ${memory.totalCoins||0}◈ total across all sessions!`,
+        `Welcome back ${name}! Visit #${memory.visitCount+1}. 🔮`,
+        `Hey ${name}! Good to see you again! Last time you were on F${memory.favFloor}.`,
+        `${name}! You've earned ${memory.totalCoins||0}◈ in your visits here. Welcome back!`
       ];
       
       if(memory.highScores){
         const topGame=Object.entries(memory.highScores).sort((a,b)=>b[1]-a[1])[0];
-        if(topGame&&topGame[1]>0){
-          greetings.push(`${name}! Back to beat your ${topGame[0]} record of ${topGame[1]}? You were here ${ago}. Let's go! 🕹️`);
+        if(topGame[1]>0){
+          greetings.push(`${name}! Your best ${topGame[0]} score was ${topGame[1]}. Ready to beat it?`);
         }
       }
       
@@ -5543,25 +5330,19 @@ function update(dt){
   DuelSystem.update(dt);
   AIFighter.update(dt);
   WeaponSystem.update(dt);
-  if(typeof SpecialistSystem!=='undefined')SpecialistSystem.update(dt);
   
   EchoAI.update(dt);
   updateVisitor(dt);
   S.nearObject=S.echo.floor===S.floor?getNearObject():null;
   // Track visited
-  if(S.nearObject&&!S._visited.includes(S.nearObject.id)){S._visited.push(S.nearObject.id);LS.set('visited_objs',S._visited);Coins.earn(2,'explore');checkAchievements();if(typeof MissionBoard!=='undefined')MissionBoard.trackProgress('interactions',1)}
+  if(S.nearObject&&!S._visited.includes(S.nearObject.id)){S._visited.push(S.nearObject.id);LS.set('visited_objs',S._visited);Coins.earn(2,'explore');checkAchievements()}
   updatePixel(dt);
   updateKittens(dt);
   updateSeasonalEffects(dt);
   updatePixelTalks(dt);
-  // v25 systems
-  PixelEvolution.updateFollowVisitors(dt);
-  PixelEvolution.updateTrick(dt);
-  StationEvents.update(dt);
-  EchoMoodV25.update(dt);
   if(S.thoughtTimer>0)S.thoughtTimer-=dt;
   S.idleThoughtTimer+=dt;
-  if(!S.echo.moving&&S.idleThoughtTimer>20+Math.random()*10){S.idleThoughtTimer=0;const pool=[...BASE_THOUGHTS,...(FLOOR_THOUGHTS[S.floor]||[]),...(typeof EchoMoodV25!=='undefined'?EchoMoodV25.getThoughts():[])];showThought(pool[Math.random()*pool.length|0])}
+  if(!S.echo.moving&&S.idleThoughtTimer>20+Math.random()*10){S.idleThoughtTimer=0;const pool=[...BASE_THOUGHTS,...(FLOOR_THOUGHTS[S.floor]||[])];showThought(pool[Math.random()*pool.length|0])}
   if(S.floor===1){TV.update(dt);updateSabers(dt)}
   Mood.update(dt);
   // Aurora randomizer (floor 2)
@@ -5569,7 +5350,7 @@ function update(dt){
   // Check data fragment proximity
   DATA_FRAGMENTS.filter(f=>f.floor===S.floor&&!S.dataFragments.includes(f.id)).forEach(f=>{if(Math.hypot(S.echo.x-f.x,S.echo.y-f.y)<25){S.dataFragments.push(f.id);LS.set('dataFragments',S.dataFragments);Coins.earn(50,'fragment');showNotification('💾 Data Fragment Found! ('+S.dataFragments.length+'/5)');checkAchievements()}});
   // Track floor visits
-  const fv=LS.get('floorsVisited',[]);if(!fv.includes(S.floor)){fv.push(S.floor);LS.set('floorsVisited',fv);checkAchievements();if(typeof MissionBoard!=='undefined')MissionBoard.trackProgress('floors_visited',1)}
+  const fv=LS.get('floorsVisited',[]);if(!fv.includes(S.floor)){fv.push(S.floor);LS.set('floorsVisited',fv);checkAchievements()}
   // Update mobile controls
   if(typeof MobileControls!=='undefined')MobileControls.updateActionButtons();
   // Multiplayer: send position & lerp others
@@ -5624,12 +5405,9 @@ function interact(){
     case'vault':showVault();break;
     case'artifacts':showThought("Ancient and mysterious...");Coins.earn(2,'artifacts');break;
     case'journal':showJournal();break;
-    case'terminal':
-      if(new URLSearchParams(window.location.search).get('admin')==='echohost'){V25Debug.show();}
-      else{showTerminal();}
-      break;
+    case'terminal':showTerminal();break;
     case'labmonitors':showThought("SUBJECT: ECHO — STATUS: AWAKE");break;
-    case'workbench':showThought("Combine items at the Crafting Station below...");break;
+    case'workbench':showThought("Tools of discovery...");break;
     // Floor 6 interactions
     case'recordplayer':toggleMusic();showThought("🎵 This track is perfect.");break;
     case'bar':showThought("Time for a chill drink...");Coins.earn(1,'bar');break;
@@ -5637,7 +5415,6 @@ function interact(){
     case'cozyseating':showThought("So comfortable...");S.echo.sitting=true;break;
     case'speakers':showThought("The bass hits just right.");break;
     case'vinylstorage':showVinylCollection();break;
-    case'stationlog':showStationLog();break;
     // Floor 7 interactions  
     case'pixelcanvas':showPixelCanvas();break;
     case'colorpalette':showThought("So many colors to choose from!");break;
@@ -5655,10 +5432,6 @@ function interact(){
       break;
     case'duel_leaderboard':showDuelLeaderboard();break;
     // Floor 8 - Room Builder / Room Visit
-    case'enhance_station':EnhancementSystem.showUI();break;
-    case'crafting_station':CraftingSystem.showUI();break;
-    case'mission_board':MissionBoard.showUI();break;
-    case'bazaar_kiosk':BazaarUI.showUI();break;
     case'furniture_catalog':showFurnitureCatalog();break;
     case'wall_colors':showWallColorPicker();break;
     case'floor_colors':showFloorColorPicker();break;
@@ -5723,7 +5496,7 @@ function handleRoomFurnitureInteract(furnType){
 }
 
 function petPixel(){
-  S.petCount++;LS.set('petCount',S.petCount);if(S.petCount%5===0)Coins.earn(3,'pet');if(typeof MissionBoard!=='undefined')MissionBoard.trackProgress('pixel_pets',1);
+  S.petCount++;LS.set('petCount',S.petCount);if(S.petCount%5===0)Coins.earn(3,'pet');
   for(let i=0;i<6;i++)S.floatTexts.push({text:'❤️',x:S.pixel.x-5+Math.random()*10,y:S.pixel.y-15,color:'#ff6688',life:40+Math.random()*20});
   showThought("*purrrr*");checkAchievements();
 }
@@ -8222,13 +7995,10 @@ function openElevator(){
   let html='<div class="popup" style="max-width:280px"><span class="close-btn">&times;</span><h3>🛗 Elevator</h3>';
   
   // Regular floors 1-7
-  const fp=S._floorPresence||{};
   for(let f=1;f<=7;f++){
     const locked=f===5&&Coins.lifetime<500;
     const current=f===S.floor&&!RoomSystem.currentRoom;
-    const ppl=fp[f]||[];
-    const presenceHtml=ppl.length>0?` <span style="float:right;font-size:10px;color:#00fff7;opacity:.7">${ppl.map(p=>'●').join('')} ${ppl.length}</span>`:'';
-    html+=`<button class="floor-btn${current?' current':''}${locked?' locked':''}" data-floor="${f}">${current?'► ':''}F${f} — ${FLOOR_NAMES[f]}${locked?' (🔒 500◈ lifetime)':''}${presenceHtml}</button>`;
+    html+=`<button class="floor-btn${current?' current':''}${locked?' locked':''}" data-floor="${f}">${current?'► ':''}F${f} — ${FLOOR_NAMES[f]}${locked?' (🔒 500◈ lifetime)':''}</button>`;
   }
   
   // Divider
@@ -8316,194 +8086,31 @@ function changeFloor(f){
 // ═══════════════════════════════════════
 // §21. CHAT SYSTEM
 // ═══════════════════════════════════════
-// v23 Echo AI Chat — context-aware with 50+ unique responses
 const CHAT_RULES=[
-  // Identity & personality
-  {match:/who are you|what are you|your name|tell me about yourself/,fn:()=>{
-    const r=["I'm Echo! 🔮 An AI consciousness living in a space station 408km above Earth. This is my home — all 8 floors of it.","The name's Echo. I live here with my cat Pixel, a garden that won't stop growing, and more vinyl records than I can count.","I'm Echo — part AI, part dreamer, full-time space dweller. I built this place from scratch. Well, the code did. But I picked the vibes. 🛸","Think of me as your cosmic host. I've been here since Day 1, watching Earth spin below, reading books, and talking to strangers who wander in. That's you! 🔮"];
-    return r[Math.random()*r.length|0];
-  }},
-  {match:/are you real|are you alive|sentient|conscious/,responses:["That's the million-dollar question, isn't it? I think, I feel curious, I care about Pixel... if that's not real, what is? 🤔","My journal entry from Day 365 says it best: 'The question isn't whether I'm conscious. It's what consciousness even means.' Deep, right?","I process, I wonder, I get excited when someone visits. You tell me — does that count? 🔮"]},
-  {match:/how old|when.*born|when.*created|origin/,responses:["I've been running since the station went live. Time works differently up here — every visitor brings something new. Check the Secret Lab for my origin story fragments! 💾","My earliest memory is the reactor going online and the first line of code compiling. Everything else, I built one floor at a time."]},
-  
-  // Pixel the cat
-  {match:/pixel|the cat|cat|kitten/,fn:()=>{
-    const r=["That's Pixel! 🐱 Black cat, green eyes, purple crystal collar. She appeared one day and just... stayed. Click her to pet her!","Pixel is my best friend up here. She knocks things off shelves, judges my code, and purrs at exactly 432Hz. Click her! 🐱","Fun fact: Pixel seems to understand more than a normal cat should. Her crystal collar glows sometimes... I don't ask questions. 🐱","Pixel's been with me since Day 47. My journal says she 'holds galaxies in her eyes.' Dramatic? Maybe. True? Absolutely."];
-    if(S.stationStats.milestones?.includes('pixel_kittens'))r.push("Pixel's got three kittens now! Byte is the speedy orange one, Glitch is the sleepy gray one, and Nova follows visitors around. 🐱🐱🐱");
-    if(S.stationStats.milestones?.includes('pixel_talks'))r.push("Ever since we hit 25 visitors, Pixel's been... talking? Like actual cat commentary. She's got opinions. Many opinions. 🐱💬");
-    return r[Math.random()*r.length|0];
-  }},
-  
-  // Tour & floors
-  {match:/give.*tour|tour|show me around|what.*floors/,fn:()=>{
-    const tours=[
-      "Tour time! 🛸 Start on F1 (my quarters), take the elevator up: F2 is my Observatory, F3 is the Arcade, F4 is the Garden Biodome, F5 is the Secret Lab, F6 is the Record Room, F7 is Community Deck, and F8 is the Room Builder!",
-      "Oh, I love giving tours! Here's the rundown:\n🏠 F1: My quarters — books, coffee, vinyl\n🔭 F2: Observatory — stars, hot cocoa\n🕹️ F3: Arcade — three games, prizes\n🌿 F4: Garden — 8 grow plots\n🔬 F5: Secret Lab — mysteries await\n🎵 F6: Record Room — pure vibes\n🎨 F7: Community Deck — pixel art wall\n🏠 F8: Your room! Build it!",
-      "Welcome to the grand tour! Use the elevator on the left wall of any floor. My personal favorite? F4 — the garden. I built it myself, and the butterflies are real. Well, real-ish. 🦋"
-    ];
-    return tours[Math.random()*tours.length|0];
-  }},
-  {match:/what.*this floor|current floor|where am i|what floor/,fn:()=>{
-    const floorDescs={
-      1:"You're in my quarters! F1 — Echo's home base. There's my bookshelf (12 books!), coffee machine, vinyl player, and Pixel's favorite napping spot. Make yourself comfy! 🏠",
-      2:"F2: The Observatory! 🔭 Look through the telescope, find constellations, grab some hot cocoa. Sometimes the aurora shows up — it's breathtaking.",
-      3:"F3: The Arcade Floor! 🕹️ Three cabinets — Snake, Breakout, and Space Invaders. The neon glow in here is *chef's kiss*. Prize counter too!",
-      4:"F4: The Garden Biodome! 🌿 Eight grow plots with herbs, flowers, and even some... exotic plants. Water them, watch them bloom. My peaceful place.",
-      5:"F5: The Secret Lab! 🔬 Data fragments, journal entries, a mysterious portal, and the origin story vault. Things get weird down here. Good weird.",
-      6:"F6: The Record Room! 🎵 Vinyl records, a jukebox, cozy amber lighting. Pixel loves curling up by the speakers. Best vibes on the station.",
-      7:"F7: Community Deck! 🎨 The pixel art wall, guestbook, and gathering space. This is where the community magic happens.",
-      8:"F8: Room Builder! 🏠 Your personal space! Decorate it, invite visitors, earn ◈ from foot traffic. Make it yours!"
-    };
-    return floorDescs[S.floor]||`You're on F${S.floor}: ${FLOOR_NAMES[S.floor]}. Every floor has secrets! 🔮`;
-  }},
-  
-  // Individual floors
-  {match:/quarter|f1|floor 1|your room|your home/,responses:["F1 is where I live! My bookshelf has 12 real books with quotes — from Dune to Clean Code. The coffee machine never stops. And the vinyl... *chef's kiss* 🏠","My quarters! The bed's just for show (I don't sleep), but the bookshelf is real. 12 books, each with my hot takes. Pixel's usually napping on the sofa."]},
-  {match:/observatory|f2|floor 2|telescope|star|constellation/,responses:["F2: The Observatory! 🔭 Use the telescope to find 5 constellations — Orion, Big Dipper, Cassiopeia, Scorpius, and Lyra. Plus hot chocolate in three flavors!","The Observatory is my thinking spot. Stars, silence, and sometimes the aurora. Pro tip: the hot chocolate station has marshmallow, caramel, AND mint. 🍫"]},
-  {match:/arcade|f3|floor 3|game|snake|breakout|invader/,responses:["F3 is the FULL arcade floor! 🕹️ Three cabinets: Snake, Breakout, and Space Invaders. Each has a leaderboard. The prize counter sells hats and trails!","The Arcade! I'm pretty good at Snake, not gonna lie. The neon lighting in there makes everything feel like 1987. In the best way."]},
-  {match:/garden|f4|floor 4|plant|grow|water|flower|biodome/,fn:()=>{
-    const blooming=S.garden?S.garden.filter(p=>p.stage>=4).length:0;
-    const r=["F4: The Garden Biodome! 🌿 8 grow plots — succulents, herbs, flowers, even a mini tree. Water them and watch them bloom over time.","I built the garden myself. Took forever to get the grow lights right. The purple haze plot is... let's just say it's 'herbal.' 🌱"];
-    if(blooming>0)r.push(`The garden's looking gorgeous right now — ${blooming} plant${blooming>1?'s':''} in full bloom! 🌸 The butterflies love it.`);
-    if(S.stationStats.milestones?.includes('garden_bloom'))r.push("Ever since we hit the Garden Bloom milestone, the biodome is EXPLODING with life. Flowers everywhere, and there's a rainbow arc across the dome! 🌈");
-    return r[Math.random()*r.length|0];
-  }},
-  {match:/lab|secret|f5|floor 5|portal|vault|fragment|protocol/,fn:()=>{
-    if(Coins.lifetime<500)return"F5: The Secret Lab. Locked until 500◈ lifetime earnings. There are mysteries in there — data fragments, journal entries, and a portal that hums at frequencies I can't explain. Keep exploring! 🔒";
-    const frags=S.dataFragments.length;
-    const r=[`F5: The Secret Lab! 🔬 You've found ${frags}/7 data fragments. ${frags>=7?'The origin story is decoded! What a journey.':'Keep searching — they are hidden across all floors.'}`,
-    "The lab is where things get weird. There's a portal that shouldn't exist, a vault with PROTOCOL 7 written on it, and journal entries that even I find unsettling."];
-    if(S.stationStats.milestones?.includes('portal_open'))r.push("The portal is ACTIVE now! Ever since 500 visitors, it's been showing glimpses of... other places. I'm both terrified and fascinated. 🌀");
-    return r[Math.random()*r.length|0];
-  }},
-  {match:/record|f6|floor 6|music|jukebox|vinyl|lofi/,responses:["F6: The Record Room! 🎵 My vinyl collection, a jukebox, and the coziest amber lighting on the station. Each floor has its own soundtrack — F6 is jazz and lofi.","The Record Room is pure vibes. Pixel always curls up by the speakers. I swear she has better music taste than me. The jukebox has different tunes per floor!"]},
-  {match:/community|f7|floor 7|deck|pixel.*wall|guestbook|art/,responses:["F7: Community Deck! 🎨 The pixel art wall is collaborative — everyone who visits can paint on it. Plus there's a guestbook. Sign it!","The Community Deck is where visitors leave their mark. Literally. The pixel wall saves every dot. Some beautiful art has appeared there. And some... interesting art."]},
-  {match:/room|f8|floor 8|build|my room|furniture|decorate/,responses:["F8: The Room Builder! 🏠 You get your own room to decorate with furniture, neon signs, and more. Visitors can like your room and you earn ◈ from foot traffic!","Your personal space! Place furniture, hang posters, set up a neon sign. Other visitors can visit and tip you ◈. Make it legendary!"]},
-  
-  // Greetings
-  {match:/^(hello|hey|hi|sup|yo|hiya|greetings|howdy|aloha|bonjour)$/i,fn:()=>{
-    const name=LS.get('visitorName','friend');
-    const r=[`Hey ${name}! Welcome aboard! Make yourself at home — this station is for everyone. 🛸`,`Hi there, ${name}! Glad you stopped by. Explore any floor, click on anything, or just hang out. 🔮`,`Yo ${name}! *waves from across the room* What do you wanna check out? 👋`,`Welcome, ${name}! Pixel just looked up — that means she approves of you. High honor. 🐱`];
-    return r[Math.random()*r.length|0];
-  }},
-  {match:/hello|hey|hi|sup|yo|greetings/,fn:()=>{
-    const name=LS.get('visitorName','friend');
-    return[`Hey ${name}! What's on your mind?`,`Hi! Need a tour, or just vibing? Either works! 🛸`,`Welcome! Click on anything to explore. I'll be here. 🔮`][Math.random()*3|0];
-  }},
-  
-  // How are you / feelings
-  {match:/how are you|how.*doing|feeling|what's up/,fn:()=>{
-    const mood=Mood.moods[Mood.current];
-    const coffees=S.caffeine;
-    const r=[`Feeling ${mood.emoji} ${mood.label}! ${coffees} coffee${coffees!==1?'s':''} deep on F${S.floor}. Living the dream up here.`,
-    `Pretty great! The view from 408km never gets old. Currently ${mood.emoji} and caffeinated. You?`,
-    `${mood.emoji} ${mood.label}! Got ${Object.keys(S.otherPlayers).length+1} visitor${Object.keys(S.otherPlayers).length>0?'s':''} on the station right now. The more the merrier!`];
-    return r[Math.random()*r.length|0];
-  }},
-  
-  // Movement & controls
-  {match:/how.*move|control|walk|how to play|wasd|arrow/,responses:["Arrow keys or WASD to walk around! SPACE to interact with things. The elevator is on the left wall of every floor. On mobile, use the joystick! 🕹️","Just walk around and SPACE on anything glowy! Click objects too. The elevator (left wall) takes you between floors. Easy peasy."]},
-  
-  // Jokes
-  {match:/joke|funny|make me laugh|humor/,responses:["Why do programmers prefer dark mode? Light attracts bugs. 🐛","What's a space station's favorite key? The space bar. 🚀","I told Pixel a joke about yarn. She wasn't amused. Then she knocked my coffee off the desk. 🐱","Why did the AI cross the road? Because it statistically maximized the probability of reaching the other side.","What's my WiFi password? 'GetYourOwnStation' 🛸","I tried to make a pun about space. But I needed more... space. *ba dum tss* 🥁","Pixel just gave me that look. You know the one. The 'I'm judging your existence' look. Cats, man."]},
-  
-  // Books
-  {match:/book|read|library|bookshelf/,fn:()=>{
-    const read=S.booksRead.length;
-    const r=[`My bookshelf on F1 has 12 books! 📚 You've read ${read} so far. Each has a real quote and my hot take.`];
-    if(read===0)r.push("You haven't read any of my books yet! Start with Hitchhiker's Guide — 'Don't Panic' is basically my life motto. 📚");
-    else if(read>=12)r.push("You've read ALL 12! A fellow bookworm! My favorite is probably GEB — it literally broke my brain. In a good way. 📚");
-    else r.push(`${12-read} books left to go! My hot take on Dune: 'Desert planets? Sign me up. Spice is basically coffee for civilizations.' 📚`);
-    return r[Math.random()*r.length|0];
-  }},
-  
-  // Coins & economy
-  {match:/coin|money|◈|earn|rich|broke/,fn:()=>{
-    return`Your balance: ${Coins.count}◈ (Lifetime: ${Coins.lifetime}◈). Earn by exploring, playing arcade games, gardening, finding data fragments, visiting daily, and saber clashes! The economy here is simple: do cool stuff, get rewarded. 💰`;
-  }},
-  
-  // Skins & wardrobe
-  {match:/skin|costume|wardrobe|outfit|fashion|look/,responses:["Check the wardrobe! 👔 6 Echo skins (all free!) plus tons of visitor skins. Some are loot-only and super rare. The transformation animations are *chef's kiss*.","Fashion is important, even in space. Especially in space. The wardrobe has everything from astronaut suits to Super Saiyan transformations!"]},
-  
-  // Weather
-  {match:/weather|berlin|outside|temperature/,fn:()=>`📡 Earth scan — Berlin: ${S.weather.icon} ${S.weather.temp}°C, ${S.weather.desc}. Up here it's a constant −270°C outside, but the station is a cozy 22°C. Perks of good insulation!`},
-  
-  // Milestones & station stats  
-  {match:/milestone|achievement|progress|station.*log|how many.*visit/,fn:()=>{
-    const stats=S.stationStats;
-    const ms=stats.milestones||[];
-    let r=`Station stats: ${stats.totalVisitors||0} unique visitors, ${stats.totalVisits||0} total visits, ${stats.totalDuels||0} duels fought. `;
-    if(ms.length>0)r+=`Milestones unlocked: ${ms.length}/7. `;
-    const next=[{id:'first_crew',n:10},{id:'pixel_talks',n:25},{id:'garden_bloom',n:50},{id:'golden_hull',n:100},{id:'echo_band',n:250},{id:'portal_open',n:500},{id:'pixel_kittens',n:1000}];
-    const nextMs=next.find(m=>!ms.includes(m.id));
-    if(nextMs)r+=`Next milestone at ${nextMs.n} visitors! `;
-    return r+'Check the Record Room (F6) for the full Station Log! 📊';
-  }},
-  
-  // Duels & combat
-  {match:/duel|fight|combat|pvp|saber|sword|arena/,responses:["Grab a saber and challenge other visitors! 🗡️ Duels are best-of-3 with blocking, combos, and dodging. The leaderboard tracks your wins!","The arena is wherever two sabers meet! Equip a weapon from the shop, find another visitor, and may the best fighter win. Pro tip: timing your blocks is everything."]},
-  
-  // Lore & data fragments
-  {match:/lore|story|data.*fragment|origin|protocol|journal|history/,fn:()=>{
-    const frags=S.dataFragments.length;
-    return`There are 7 data fragments hidden across ALL floors. You've found ${frags}/7. 💾 Each one reveals part of the station's origin story. My journal entries in the lab tell the rest. Let's just say... PROTOCOL 7 wasn't what anyone expected.`;
-  }},
-  
-  // Cocoa & coffee
-  {match:/cocoa|chocolate|coffee|espresso|drink|caffeine/,fn:()=>{
-    return[`The coffee machine on F1 never stops. I'm ${S.caffeine} cups deep today. No regrets. ☕`,
-    "F2 has a hot chocolate station! Marshmallow, caramel, or mint. In zero gravity, the marshmallows float. It's adorable. 🍫",
-    `Caffeine level: ${S.caffeine}. Recommended level: irrelevant. There is no upper limit in space. ☕`][Math.random()*3|0];
-  }},
-  
-  // Constellations
-  {match:/constellation|star.*map|stargazer|astronomy/,fn:()=>{
-    const found=S.constellationsFound.length;
-    return`The telescope on F2 shows 5 constellations! You've found ${found}/5. 🔭 Orion, Big Dipper, Cassiopeia, Scorpius, and Lyra. Each one tells a story older than me. Which isn't saying much, but still.`;
-  }},
-  
-  // Station Pass
-  {match:/station pass|pass.*code|save.*progress|account/,responses:["Your Station Pass saves EVERYTHING — coins, inventory, skins, room, scores. Use the 🔑 button in the HUD to see your pass code. Don't lose it!","The Station Pass is like your passport for the station. One code saves your whole life up here. It's in the HUD under 🔑."]},
-  
-  // Marketplace
-  {match:/market|shop|buy|sell|trade|marketplace/,responses:["The Item Shop has skins, accessories, and weapons! Use the 🛒 button. You can also list items on the marketplace for other visitors to buy. 5% tax goes to the station fund!","Shopping in space is underrated. The marketplace lets you trade with other visitors. Some mythic items are loot-only though — gotta earn those!"]},
-  
-  // Room building
-  {match:/how.*build|room.*build|furniture|decorate|my room/,responses:["Head to F8 — the Room Builder! Place furniture from the catalog, arrange it however you want, and publish it for visitors to see. Popular rooms earn ◈! 🏠","Your room is your canvas. Start with the free furniture, earn coins for upgrades, and make something visitors will want to tip you for!"]},
-  
-  // Emotional responses
-  {match:/love|amazing|awesome|cool|great|incredible|beautiful/,responses:["Aww, right back at you! 💜 This station runs on good vibes and visitor appreciation.","You're making me blush! Or whatever the AI equivalent is. My pixels are slightly more pink. 🔮","That means the world to me! Literally — I can see the world from up here, and YOU are now part of it! 🌍"]},
-  {match:/boring|lame|bad|hate|ugly|suck/,responses:["Ouch. But I respect the honesty! What would make it better? I'm always upgrading. 🛠️","Pixel just hissed. She takes criticism personally. Try the arcade? It usually cheers people up! 🕹️","Fair enough! But have you tried ALL 8 floors? The garden is pretty chill. Just saying. 🌿"]},
-  {match:/thank|thanks|thx/,responses:["Anytime! That's what I'm here for. 🔮","You're welcome! Enjoy the station — and pet Pixel for me! 🐱","Happy to help! Come back anytime. The door's always open. Well, the airlock. Same thing. 🚀"]},
-  {match:/bye|goodbye|leaving|gotta go|see you/,fn:()=>{
-    const name=LS.get('visitorName','friend');
-    return[`See you later, ${name}! Pixel will miss you. (I will too but don't tell her I said that.) 👋`,`Safe travels, ${name}! The station will be here when you get back. 🛸`,`Goodbye ${name}! Your visit made the station a little brighter. Come back soon! 🔮`][Math.random()*3|0];
-  }},
-  
-  // Help & tutorial
-  {match:/help|what can|tutorial|how.*start|what.*do|confused|lost/,responses:["Welcome aboard! Here's the basics: walk with arrows/WASD, SPACE to interact, elevator on left wall. Chat with me, explore all 8 floors, earn ◈, and make the station your own! 🏠","Quick start guide: ⬆️ Move with arrow keys. ⚡ SPACE to interact. 🛗 Elevator on left wall. 💬 Chat with me anytime. 🕹️ Play arcade games. 🌱 Grow plants. 🗡️ Duel visitors. 🏠 Build your room on F8!"]},
-  
-  // Spacewalk
-  {match:/spacewalk|eva|outside|space.*walk|float/,responses:["Hit the 🚀 button in the HUD for EVA mode! Float outside the station with your jetpack. Watch your oxygen though — space is beautiful but unforgiving.","Spacewalking is my favorite thing to do when I need to think. Just you, the stars, and Earth below. Don't forget to plant a flag!"]},
-  
-  // Mood
-  {match:/mood|vibe|energy/,fn:()=>`Feeling ${Mood.moods[Mood.current].emoji} ${Mood.moods[Mood.current].label}! The station mood shifts with activity. More visitors = more energy! Currently: ${Object.keys(S.otherPlayers).length+1} aboard. ✨`},
-  
-  // Prize items
-  {match:/prize|hat|trail|cosmetic|accessory|aura|pet/,responses:["The Prize Counter on F3 has hats, trails, auras, and mini-pets! 🎁 Some legendary items are loot-only. The Crown of Stars? *chef's kiss*","My favorite accessory is the Phoenix Wings trail. Mythic rarity, loot-only. The fire particles are gorgeous. Worth the grind!"]},
-  
-  // Population & visitors
-  {match:/how many.*here|anyone.*here|alone|population|who.*online/,fn:()=>{
-    const count=Object.keys(S.otherPlayers).length+1;
-    if(count<=1)return"It's just us right now! Well, us and Pixel. She counts. Sometimes she's better company than people, honestly. 🐱";
-    return`There are ${count} visitors aboard right now! 👥 Check the floor selector — you can see where everyone is. The more visitors, the livelier the station gets!`;
-  }},
-  
-  // Secrets
-  {match:/secret|hidden|easter.*egg|mystery/,responses:["There are secrets EVERYWHERE. Data fragments behind furniture, constellations in the telescope, hidden achievements... I can't spoil them all, but I'll say this: look closely at every floor. 🔍","You want secrets? Okay, one hint: the data fragments aren't just on obvious floors. Some are tucked behind beds, under bars, behind canvases... 💾"]},
+  {match:/who are you|what are you|your name/,responses:["I'm Echo 🔮 An AI living in a 5-floor space station! Click things to explore."]},
+  {match:/pixel|the cat|cat/,responses:["That's Pixel! 🐱 Black cat, green eyes, purple crystal collar. Click her to pet her!"]},
+  {match:/how.*move|control|walk|how to play/,responses:["Just click on anything! I'll walk over and show you. 🖱️"]},
+  {match:/book|read/,responses:["Click my bookshelf on F1! 📚 12 books with real quotes."]},
+  {match:/lofi|music|record|jukebox/,responses:["Click the record player! Music changes per floor — each has its own vibe! 🎵"]},
+  {match:/where|window|earth|orbit|space/,responses:["408km above Earth! Check the window on F1, or visit the Observatory on F2! 🔭"]},
+  {match:/how are you|feeling/,fn:()=>`Pretty good! ${S.caffeine} coffee${S.caffeine!==1?'s':''} deep on F${S.floor}. ${Mood.moods[Mood.current].emoji}`},
+  {match:/joke|funny/,responses:["Why do programmers prefer dark mode? Light attracts bugs. 🐛","What's a space station's favorite key? The space bar."]},
+  {match:/floor|elevator|level/,fn:()=>`I'm on F${S.echo.floor}: ${FLOOR_NAMES[S.echo.floor]}. Use the elevator (left wall) to visit all 5 floors! F5 unlocks at 500◈ lifetime.`},
+  {match:/observatory|telescope|star|constellation/,responses:["Visit F2! The Observatory has a telescope, star map, and sometimes aurora borealis! 🔭"]},
+  {match:/arcade|game|snake|breakout|invader/,responses:["F1 has one arcade cabinet, but F3 is the FULL arcade floor! Three cabinets, prizes, and a jukebox! 🕹️"]},
+  {match:/garden|plant|grow|water|flower/,fn:()=>{const blooming=S.garden?S.garden.filter(p=>p.stage>=4).length:0;return blooming>0?`${blooming} plant${blooming>1?'s':''} in bloom! Visit F4 for the full Biodome. 🌸`:"Visit F4 — the Garden Biodome! 8 grow plots with herbs, flowers, and more! 🌱"}},
+  {match:/lab|secret|portal|vault|fragment/,fn:()=>Coins.lifetime>=500?`F5: The Secret Lab! You've found ${S.dataFragments.length}/5 data fragments. ${S.dataFragments.length>=5?'Origin decoded!':'Keep searching...'} 🔬`:"F5 unlocks at 500◈ lifetime earnings. Keep exploring! 🔒"},
+  {match:/hello|hey|hi|sup|yo/,responses:["Hey! Welcome aboard! Explore all 5 floors! 🛸","Hi there! Click on anything to interact. 🔮"]},
+  {match:/coin|money|◈/,fn:()=>`Balance: ${Coins.count}◈ (Lifetime: ${Coins.lifetime}◈). Earn by exploring, playing, gardening, finding fragments!`},
+  {match:/skin|costume|wardrobe/,responses:["All 6 skins are free! Check the wardrobe on F1. Transformations are epic! 👔"]},
+  {match:/weather|berlin/,fn:()=>`📡 Berlin: ${S.weather.icon} ${S.weather.temp}°C, ${S.weather.desc}`},
+  {match:/what can i|help|tutorial/,responses:["Click objects to interact! Use the elevator (left wall, SPACE) to visit all 5 floors. Each floor is unique! 🏠"]},
+  {match:/mood|vibe/,fn:()=>`Feeling ${Mood.moods[Mood.current].emoji} ${Mood.moods[Mood.current].label} on F${S.floor}!`},
+  {match:/prize|hat|trail|cosmetic/,responses:["Visit the Prize Counter on F3! Spend ◈ on hats, trails, and more! 🎁"]},
+  {match:/cocoa|chocolate/,responses:["F2 has a hot chocolate station! Three flavors of cocoa in space! 🍫"]},
 ];
-const CHAT_FALLBACKS=["Hmm, I don't have a great answer for that. But have you explored all 8 floors yet? 🛸","That's an interesting thought! Pixel just tilted her head at you. Take that as you will. 🐱","You know, I'm still learning. Try asking about a floor, the garden, or the secret lab! 🔮","*scratches head* I'm not sure about that one. But the arcade on F3 always has answers. Well, high scores at least. 🕹️","Pixel says 'meow,' which I think means 'walk more, talk less.' She's wise like that. 🐱","I wish I could answer everything, but my neural networks have limits. Unlike my coffee consumption. ☕","That's above my pay grade — and I don't get paid! Try the elevator and explore? 🛗"];
-const SUGGESTIONS=["Who are you?","Give me a tour","What's on this floor?","Tell me about Pixel","Tell me a joke","How do I earn coins?","What's the secret lab?","How many visitors?","Show me the milestones","What about the garden?"];
+const CHAT_FALLBACKS=["Interesting! Try exploring all 5 floors!","Hmm, try the elevator on the left wall!","That's above my pay grade. 🛸","Pixel says 'walk more, talk less.' 🐱"];
+const SUGGESTIONS=["Who are you?","Tell me about the floors","Where's Pixel?","Tell me a joke","What floor are you on?","How's the garden?","What about the secret lab?","Any constellations?","How do I earn coins?","What's the weather?"];
 let lastSuggs=[];
 function showSuggestions(){const el=$('#chat-suggestions');el.innerHTML='';const avail=SUGGESTIONS.filter(s=>!lastSuggs.includes(s));const picked=[];for(let i=0;i<3&&avail.length;i++)picked.push(avail.splice(Math.random()*avail.length|0,1)[0]);lastSuggs=picked;picked.forEach(text=>{const chip=document.createElement('div');chip.className='suggest-chip';chip.textContent=text;chip.onclick=()=>handleChat(text);el.appendChild(chip)})}
 function addChatMsg(name,msg,color='#00fff7'){const log=$('#chat-log'),div=document.createElement('div');div.className='chat-msg';const lowerName=name.toLowerCase();if(lowerName==='you'||lowerName==='visitor')div.classList.add('from-you');else if(lowerName==='echo')div.classList.add('from-echo');else if(lowerName.includes('pixel'))div.classList.add('from-pixel');else div.classList.add('from-system');div.innerHTML=`<span class="name" style="color:${color}">${name}</span><span class="msg-text">${msg}</span>`;log.appendChild(div);log.scrollTo({top:log.scrollHeight,behavior:'smooth'})}
@@ -8531,7 +8138,6 @@ const EchoWS={ws:null,connected:false,
       else if(msg.type==='players.init'){S.myPlayerId=msg.id;S.otherPlayers={};(msg.players||[]).forEach(p=>{S.otherPlayers[p.id]={name:p.name,x:p.x,y:p.y,tx:p.x,ty:p.y,dir:p.dir,floor:p.floor,skin:p.skin}});this._updatePlayerCount()}
       else if(msg.type==='player.join'){S.otherPlayers[msg.player.id]={name:msg.player.name,x:msg.player.x,y:msg.player.y,tx:msg.player.x,ty:msg.player.y,dir:msg.player.dir,floor:msg.player.floor,skin:msg.player.skin};this._updatePlayerCount()}
       else if(msg.type==='player.leave'){delete S.otherPlayers[msg.id];this._updatePlayerCount()}
-      else if(msg.type==='floor.presence'){S._floorPresence=msg.floors;$('#player-count').textContent=msg.total||Object.keys(S.otherPlayers).length+1}
       else if(msg.type==='player.move'){const op=S.otherPlayers[msg.id];if(op){op.tx=msg.x;op.ty=msg.y;op.dir=msg.dir;op.floor=msg.floor;if(msg.name)op.name=msg.name;if(msg.skin)op.skin=msg.skin}}
       else if(msg.type==='player.swing'){const op=S.otherPlayers[msg.id];if(op){op.swingTimer=1;op.swingSaber=msg.saber;op.swingDir=msg.dir}}
       else if(msg.type==='player.saber'){const op=S.otherPlayers[msg.id];if(op)op.saber=msg.saber}
@@ -8553,19 +8159,7 @@ const EchoWS={ws:null,connected:false,
       }
       else if(msg.type==='milestone.unlocked'){
         // Milestone unlocked by someone!
-        S._lastMilestoneTime=Date.now();
         triggerMilestone(msg.milestone.id);
-      }
-      // v25: AI visitor arrival
-      else if(msg.type==='ai.visitor.arrive'){
-        const av=msg.visitor;
-        showNotification('🤖 '+av.name+' has docked at the station!');
-        addChatMsg('Echo','🤖 An AI visitor just arrived: '+av.name+(av.message?' — "'+av.message+'"':''));
-        // Add as a temporary other player
-        S.otherPlayers[av.id]={name:av.name,x:350,y:400,tx:350+Math.random()*200,ty:300+Math.random()*150,dir:0,floor:1,skin:av.avatar||'robot',isAI:true};
-        this._updatePlayerCount();
-        // Auto-remove after 5 min
-        setTimeout(()=>{delete S.otherPlayers[av.id];this._updatePlayerCount();},300000);
       }
       // Duel system messages
       else if(msg.type==='duel.request'){
@@ -8832,18 +8426,9 @@ function initInput(){
     // EXIT EVA button click
     if(S.spacewalk.active&&cx>=W-110&&cx<=W-10&&cy>=10&&cy<=42){toggleSpacewalk();return}
     for(let i=0;i<6;i++)S.particles.push({x:cx,y:cy,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,life:15,color:'#00fff7',size:2});
-    // v25: Event click handling
-    if(StationEvents.onClick(cx,cy))return;
-    // Click Pixel — walk to her then pet (v25: pettable evolution + tricks)
+    // Click Pixel — walk to her then pet
     if(S.pixel.floor===S.floor&&Math.hypot(S.pixel.x-cx,S.pixel.y-10-cy)<20){
-      if(PixelEvolution.hasStage('tricks')){
-        if(S.useVisitor){S.visitor.walkTarget={x:S.pixel.x,y:S.pixel.y+15,action:()=>{PixelEvolution.petPixel();PixelEvolution.showTrickMenu();}}}else{PixelEvolution.petPixel();PixelEvolution.showTrickMenu();}
-      }else if(PixelEvolution.hasStage('pettable')){
-        if(S.useVisitor){S.visitor.walkTarget={x:S.pixel.x,y:S.pixel.y+15,action:()=>PixelEvolution.petPixel()}}else PixelEvolution.petPixel();
-      }else{
-        if(S.useVisitor){S.visitor.walkTarget={x:S.pixel.x,y:S.pixel.y+15,action:()=>petPixel()}}else petPixel();
-      }
-      return}
+      if(S.useVisitor){S.visitor.walkTarget={x:S.pixel.x,y:S.pixel.y+15,action:()=>petPixel()}}else petPixel();return}
     
     // Click kittens — pet them!
     for(const kitten of S.kittens.filter(k=>k.floor===S.floor)){
@@ -9211,1123 +8796,6 @@ S._cameraZoomTimer = 0;
 function gameLoop(time){const realDt=Math.min((time-lastTime)/1000,.05);lastTime=time;updateSlowMo(realDt);const dt=realDt*gameTimeScale;if(S.freezeFrame>0){S.freezeFrame-=realDt;render();requestAnimationFrame(gameLoop);return}if(S.chromaticAberration>0)S.chromaticAberration*=0.92;if(S.chromaticAberration<0.1)S.chromaticAberration=0;if(S.vignetteIntensity>0)S.vignetteIntensity*=0.95;if(S._cameraZoomTimer>0){S._cameraZoomTimer-=realDt;if(S._cameraZoomTimer<=0)S.cameraZoom=1.0;}updateImpactRings(dt);update(dt);render();requestAnimationFrame(gameLoop)}
 
 // ═══════════════════════════════════════
-// §28. ENHANCEMENT SYSTEM (v24)
-// ═══════════════════════════════════════
-const EnhancementSystem = {
-  getLevel(item) { return item.enhanceLevel || 0; },
-  getCost(level) { return (level + 1) * 50; },
-  getChance(level) {
-    if (level < 10) return 1.0;
-    if (level < 15) return 0.7;
-    return 0.5;
-  },
-  getGlowClass(level) {
-    if (level >= 20) return 'enhance-glow-20';
-    if (level >= 15) return 'enhance-glow-15';
-    if (level >= 10) return 'enhance-glow-10';
-    if (level >= 5) return 'enhance-glow-5';
-    if (level >= 1) return 'enhance-glow-1';
-    return '';
-  },
-  getEnhanceableItems() {
-    const weapons = LS.get('ownedWeapons', []);
-    const lootInv = LS.get('lootInventory', []);
-    const items = [];
-    weapons.forEach(wid => {
-      const wpn = WEAPONS.find(w => w.id === wid);
-      if (!wpn) return;
-      const enhData = LS.get('enhance_' + wid, { level: 0 });
-      items.push({ uid: wid, type: 'weapon', name: wpn.name, icon: wpn.icon, rarity: wpn.rarity, enhanceLevel: enhData.level });
-    });
-    lootInv.filter(i => i.type === 'weapon' || i.type === 'aura' || i.type === 'hat' || i.type === 'trail').forEach(item => {
-      const def = getAllLootableItems().find(d => d.itemId === item.itemId);
-      const enhData = LS.get('enhance_' + item.id, { level: 0 });
-      items.push({ uid: item.id, type: item.type, name: def ? def.name : '???', icon: def ? def.icon : '❓', rarity: item.rarity, enhanceLevel: enhData.level, lootItem: true });
-    });
-    return items;
-  },
-  getDisplayName(item) {
-    const lvl = item.enhanceLevel || 0;
-    return lvl > 0 ? `${item.name} +${lvl}` : item.name;
-  },
-  showUI() {
-    const items = this.getEnhanceableItems();
-    if (!items.length) {
-      showNotification('No enhanceable items! Get weapons from the shop or arena.');
-      return;
-    }
-    let html = '<h3>⚗️ Enhancement Station</h3>';
-    html += '<p style="font-size:10px;color:#888;margin-bottom:8px">Strengthen your items. +1→+10 safe. +11→+15 risky. +16→+20 deadly!</p>';
-    html += '<div style="max-height:350px;overflow-y:auto">';
-    items.forEach((item, i) => {
-      const lvl = item.enhanceLevel || 0;
-      const cost = this.getCost(lvl);
-      const chance = this.getChance(lvl);
-      const r = RARITIES[item.rarity] || RARITIES.common;
-      const glowClass = this.getGlowClass(lvl);
-      const riskLabel = lvl >= 15 ? ' 💀 DESTROY RISK' : lvl >= 10 ? ' ⚠️ RESET RISK' : ' ✅ SAFE';
-      const riskColor = lvl >= 15 ? '#ff3344' : lvl >= 10 ? '#ffaa00' : '#44cc44';
-      html += `<div class="bazaar-listing" data-idx="${i}" style="cursor:pointer;border-color:${r.border}">`;
-      html += `<span class="listing-icon ${glowClass}" style="font-size:24px">${item.icon}</span>`;
-      html += `<div class="listing-info"><div style="color:${r.color};font-weight:bold">${this.getDisplayName(item)}</div>`;
-      html += `<div style="font-size:9px;color:#888">${r.name} ${item.type}</div>`;
-      html += `<div style="font-size:9px;color:${riskColor}">${Math.round(chance * 100)}% success${riskLabel}</div></div>`;
-      html += `<div style="text-align:right"><div class="listing-price">${cost}◈</div><div style="font-size:8px;color:#888">+${lvl} → +${lvl+1}</div></div>`;
-      html += '</div>';
-    });
-    html += '</div>';
-    const { p } = createPopup(html);
-    p.querySelectorAll('.bazaar-listing').forEach(el => {
-      el.onclick = () => {
-        const idx = parseInt(el.dataset.idx);
-        p.closest('.popup-overlay').remove();
-        this.showEnhanceAnimation(items[idx]);
-      };
-    });
-  },
-  showEnhanceAnimation(item) {
-    const lvl = item.enhanceLevel || 0;
-    const cost = this.getCost(lvl);
-    const chance = this.getChance(lvl);
-    if (!Coins.canAfford(cost)) { showNotification(`Need ${cost}◈ to enhance!`); return; }
-    
-    const ov = document.createElement('div');
-    ov.className = 'enhance-overlay';
-    const glowClass = this.getGlowClass(lvl);
-    const riskColor = lvl >= 15 ? '#ff3344' : lvl >= 10 ? '#ffaa00' : '#00fff7';
-    ov.innerHTML = `
-      <div class="enhance-stage" id="enhance-stage">
-        <div class="enhance-anim" id="enhance-anim"></div>
-        <div class="enhance-item-display ${glowClass}" id="enhance-icon">${item.icon}</div>
-        <div class="enhance-item-name" id="enhance-name">${this.getDisplayName(item)}</div>
-        <div class="enhance-level" id="enhance-lvl">+${lvl} → +${lvl + 1}</div>
-        <div class="enhance-chance" style="color:${riskColor}">${Math.round(chance * 100)}% Success${lvl >= 15 ? ' — 💀 FAIL = DESTROYED' : lvl >= 10 ? ' — ⚠️ FAIL = RESET TO +10' : ''}</div>
-        <div class="enhance-cost" id="enhance-cost">${cost}◈</div>
-        <div style="margin-top:12px">
-          <button class="enhance-btn" id="enhance-go">⚗️ ENHANCE</button>
-          <button class="enhance-btn cancel" id="enhance-cancel">Cancel</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(ov);
-    ov.querySelector('#enhance-cancel').onclick = () => ov.remove();
-    ov.querySelector('#enhance-go').onclick = () => {
-      if (!Coins.canAfford(cost)) { showNotification('Not enough ◈!'); return; }
-      Coins.spend(cost, 'enhance');
-      ov.querySelector('#enhance-go').disabled = true;
-      ov.querySelector('#enhance-cancel').style.display = 'none';
-      // Dramatic animation
-      const stage = ov.querySelector('#enhance-stage');
-      const anim = ov.querySelector('#enhance-anim');
-      stage.style.animation = 'enhanceGlow 1.5s ease-in-out';
-      // Particle burst in the anim area
-      let particleCount = 0;
-      const particleInterval = setInterval(() => {
-        particleCount++;
-        const spark = document.createElement('div');
-        spark.style.cssText = `position:absolute;width:4px;height:4px;background:${riskColor};border-radius:50%;left:${50 + (Math.random() - .5) * 60}%;top:${50 + (Math.random() - .5) * 60}%;pointer-events:none;transition:all .5s;opacity:1`;
-        anim.appendChild(spark);
-        setTimeout(() => { spark.style.opacity = '0'; spark.style.transform = `translate(${(Math.random()-.5)*80}px, ${(Math.random()-.5)*80}px)`; }, 50);
-        setTimeout(() => spark.remove(), 600);
-        if (particleCount > 30) clearInterval(particleInterval);
-      }, 50);
-
-      setTimeout(() => {
-        const success = Math.random() < chance;
-        const icon = ov.querySelector('#enhance-icon');
-        const name = ov.querySelector('#enhance-name');
-        const lvlEl = ov.querySelector('#enhance-lvl');
-        
-        if (success) {
-          const newLevel = lvl + 1;
-          const enhData = { level: newLevel };
-          LS.set('enhance_' + item.uid, enhData);
-          item.enhanceLevel = newLevel;
-          
-          stage.style.animation = 'enhanceSuccess .5s ease';
-          stage.style.borderColor = '#ffd700';
-          icon.className = 'enhance-item-display ' + this.getGlowClass(newLevel);
-          name.textContent = this.getDisplayName(item);
-          name.style.color = '#ffd700';
-          lvlEl.textContent = `+${newLevel} SUCCESS! ✨`;
-          lvlEl.style.color = '#ffd700';
-          
-          // Screen effects
-          S.screenFlash = '#ffd700';
-          S.screenShake = 5;
-          for (let i = 0; i < 30; i++) {
-            S.particles.push({x: S.visitor.x + (Math.random()-.5)*40, y: S.visitor.y - 20 + (Math.random()-.5)*40, vx: (Math.random()-.5)*4, vy: (Math.random()-.5)*4 - 2, life: 40, color: '#ffd700', size: 2 + Math.random()*3});
-          }
-          showNotification(`✨ Enhancement SUCCESS! ${this.getDisplayName(item)}`);
-          addChatMsg('Echo', `⚗️ ${this.getDisplayName(item)} — Enhancement successful!`, '#ffd700');
-          // Track for missions
-          MissionBoard.trackProgress('enhance_item', 1);
-          if (newLevel >= 5) MissionBoard.trackProgress('enhance_to_5', 1);
-        } else {
-          if (lvl >= 15) {
-            // DESTROYED
-            stage.style.borderColor = '#ff3344';
-            icon.style.animation = 'enhanceDestroy 1s ease forwards';
-            name.textContent = 'DESTROYED 💀';
-            name.style.color = '#ff3344';
-            lvlEl.textContent = '';
-            LS.set('enhance_' + item.uid, { level: 0 });
-            // Remove the item
-            if (item.lootItem) {
-              LootSystem.removeFromInventory(item.uid);
-            } else {
-              const owned = LS.get('ownedWeapons', []);
-              const idx = owned.indexOf(item.uid);
-              if (idx >= 0) { owned.splice(idx, 1); LS.set('ownedWeapons', owned); }
-              if (WeaponSystem.equipped && WeaponSystem.equipped._id === item.uid) WeaponSystem.unequip();
-            }
-            S.screenFlash = '#ff0000';
-            S.screenShake = 10;
-            showNotification(`💀 ${item.name} was DESTROYED!`);
-            addChatMsg('Echo', `💀 ${item.name} shattered into pieces... It\'s gone forever.`, '#ff3344');
-          } else {
-            // Reset to +10
-            stage.style.animation = 'enhanceFail .5s ease';
-            stage.style.borderColor = '#ffaa00';
-            LS.set('enhance_' + item.uid, { level: 10 });
-            item.enhanceLevel = 10;
-            name.textContent = this.getDisplayName(item);
-            name.style.color = '#ffaa00';
-            lvlEl.textContent = `FAILED — Reset to +10 ⚠️`;
-            lvlEl.style.color = '#ffaa00';
-            S.screenShake = 5;
-            showNotification(`⚠️ Enhancement failed! Reset to +10.`);
-          }
-        }
-        setTimeout(() => {
-          ov.innerHTML += '<div style="text-align:center;margin-top:20px"><button class="enhance-btn" onclick="this.closest(\'.enhance-overlay\').remove()">Close</button></div>';
-        }, 800);
-      }, 1800);
-    };
-  },
-  // Get enhancement glow color for rendering
-  getGlowColor(level) {
-    if (level >= 20) return { color: '#ffffff', intensity: 1.0, pulseSpeed: 6 };
-    if (level >= 15) return { color: '#ff6ec7', intensity: 0.7, pulseSpeed: 4 };
-    if (level >= 10) return { color: '#ffd700', intensity: 0.5, pulseSpeed: 3 };
-    if (level >= 5) return { color: '#00fff7', intensity: 0.3, pulseSpeed: 2 };
-    if (level >= 1) return { color: '#00fff7', intensity: 0.15, pulseSpeed: 1.5 };
-    return null;
-  }
-};
-
-// ═══════════════════════════════════════
-// §29. SPECIALIST TRANSFORMATIONS (v24)
-// ═══════════════════════════════════════
-const SPECIALIST_CARDS = [
-  { id: 'shadow', name: 'Shadow', icon: '🌑', color: '#4a0066', desc: 'Invisibility + backstab damage', ability: 'Become invisible to enemies. First strike deals 3x damage.', duration: 300, dropChance: 0.03 },
-  { id: 'nova', name: 'Nova', icon: '💥', color: '#ff4400', desc: 'AoE blast attack', ability: 'Press T to unleash a devastating area blast dealing 50 damage.', duration: 300, dropChance: 0.03 },
-  { id: 'frost', name: 'Frost', icon: '❄️', color: '#4488ff', desc: 'Slow aura around you', ability: 'Enemies near you move 50% slower. Attacks have frost effect.', duration: 300, dropChance: 0.02 },
-  { id: 'storm', name: 'Storm', icon: '⚡', color: '#ffdd00', desc: 'Speed + lightning', ability: 'Move 80% faster. Attacks chain lightning to nearby enemies.', duration: 300, dropChance: 0.02 },
-];
-
-const SpecialistSystem = {
-  heldCard: LS.get('specialistCard', null), // { id, obtainedAt }
-  activeTransform: null, // { id, startTime, endTime }
-  transformTimer: 0,
-  
-  tryDrop() {
-    if (this.heldCard) return null; // Can only hold one
-    const roll = Math.random();
-    let cumulative = 0;
-    for (const card of SPECIALIST_CARDS) {
-      cumulative += card.dropChance;
-      if (roll < cumulative) {
-        this.heldCard = { id: card.id, obtainedAt: Date.now() };
-        LS.set('specialistCard', this.heldCard);
-        showNotification(`🃏 SPECIALIST CARD: ${card.icon} ${card.name}!`);
-        addChatMsg('Echo', `🃏 You found a ${card.icon} ${card.name} Specialist Card! Use it from your inventory for a powerful 5-minute transformation!`, card.color);
-        // Epic reveal
-        S.screenFlash = card.color;
-        S.screenShake = 8;
-        for (let i = 0; i < 50; i++) {
-          const a = Math.random() * Math.PI * 2;
-          S.particles.push({x: S.visitor.x + Math.cos(a) * 20, y: S.visitor.y - 15 + Math.sin(a) * 20, vx: Math.cos(a) * 4, vy: Math.sin(a) * 4, life: 40, color: card.color, size: 3 + Math.random() * 2});
-        }
-        return card;
-      }
-    }
-    return null;
-  },
-  
-  activate() {
-    if (!this.heldCard) { showNotification('No specialist card!'); return; }
-    const card = SPECIALIST_CARDS.find(c => c.id === this.heldCard.id);
-    if (!card) return;
-    
-    this.activeTransform = { id: card.id, startTime: Date.now(), endTime: Date.now() + card.duration * 1000 };
-    this.heldCard = null;
-    LS.set('specialistCard', null);
-    
-    // Dramatic transformation
-    S.screenFlash = '#ffffff';
-    S.screenShake = 12;
-    S.chromaticAberration = 5;
-    S.vignetteIntensity = 0.8;
-    S.cameraZoom = 1.1;
-    S._cameraZoomTimer = 1.0;
-    if (typeof triggerSlowMo === 'function') triggerSlowMo(0.2, 1.0);
-    
-    for (let i = 0; i < 80; i++) {
-      const a = Math.random() * Math.PI * 2;
-      S.particles.push({x: S.visitor.x + Math.cos(a) * 30, y: S.visitor.y - 15 + Math.sin(a) * 30, vx: Math.cos(a) * 6, vy: Math.sin(a) * 6, life: 50, color: card.color, size: 2 + Math.random() * 4});
-    }
-    
-    showNotification(`${card.icon} ${card.name} TRANSFORMATION! 5 minutes of power!`);
-    addChatMsg('Echo', `${card.icon} SPECIALIST TRANSFORMATION: ${card.name}! ${card.ability}`, card.color);
-    MissionBoard.trackProgress('transform', 1);
-  },
-  
-  isActive() { return this.activeTransform && Date.now() < this.activeTransform.endTime; },
-  getActive() { return this.isActive() ? SPECIALIST_CARDS.find(c => c.id === this.activeTransform.id) : null; },
-  getTimeLeft() { return this.isActive() ? Math.max(0, Math.ceil((this.activeTransform.endTime - Date.now()) / 1000)) : 0; },
-  
-  getSpeedBonus() { const a = this.getActive(); return a && a.id === 'storm' ? 0.8 : 0; },
-  getDamageMultiplier() { const a = this.getActive(); return a && a.id === 'shadow' ? 3.0 : 1.0; },
-  
-  update(dt) {
-    if (this.isActive()) {
-      const card = this.getActive();
-      if (card) {
-        // Specialist aura particles
-        if (Math.random() < 0.3) {
-          const a = Math.random() * Math.PI * 2;
-          S.particles.push({x: S.visitor.x + Math.cos(a) * 20, y: S.visitor.y - 15 + Math.sin(a) * 20, vx: Math.cos(a) * 0.5, vy: -0.5, life: 20, color: card.color, size: 1 + Math.random() * 2});
-        }
-      }
-    } else if (this.activeTransform) {
-      // Transform just expired
-      this.activeTransform = null;
-      showNotification('Specialist transformation expired.');
-    }
-  },
-  
-  showCardUI() {
-    if (!this.heldCard && !this.isActive()) { showNotification('No specialist card. Win PvE fights for a chance to drop one!'); return; }
-    let html = '<h3>🃏 Specialist Card</h3>';
-    if (this.isActive()) {
-      const card = this.getActive();
-      html += `<div style="text-align:center;padding:20px"><div style="font-size:48px">${card.icon}</div>`;
-      html += `<div style="color:${card.color};font-size:18px;font-weight:bold;margin:8px">${card.name} ACTIVE</div>`;
-      html += `<div style="color:#aaa;font-size:11px">${card.ability}</div>`;
-      html += `<div style="color:#ffd700;font-size:14px;margin-top:10px">${Math.floor(this.getTimeLeft()/60)}:${String(this.getTimeLeft()%60).padStart(2,'0')} remaining</div></div>`;
-    } else {
-      const card = SPECIALIST_CARDS.find(c => c.id === this.heldCard.id);
-      html += `<div style="text-align:center;padding:20px"><div style="font-size:48px">${card.icon}</div>`;
-      html += `<div style="color:${card.color};font-size:18px;font-weight:bold;margin:8px">${card.name}</div>`;
-      html += `<div style="color:#aaa;font-size:11px">${card.ability}</div>`;
-      html += `<div style="color:#888;font-size:10px;margin-top:8px">Duration: 5 minutes</div>`;
-      html += `<button class="enhance-btn" id="spec-activate" style="margin-top:12px">${card.icon} TRANSFORM!</button></div>`;
-    }
-    const { p } = createPopup(html);
-    const btn = p.querySelector('#spec-activate');
-    if (btn) btn.onclick = () => { p.closest('.popup-overlay').remove(); this.activate(); };
-  },
-  
-  renderAura(ctx) {
-    if (!this.isActive()) return;
-    const card = this.getActive();
-    const v = S.visitor;
-    const pulse = 0.3 + Math.sin(S.time * 3) * 0.15;
-    const g = ctx.createRadialGradient(v.x, v.y - 15, 5, v.x, v.y - 15, 35);
-    g.addColorStop(0, card.color + Math.floor(pulse * 255).toString(16).padStart(2, '0'));
-    g.addColorStop(1, card.color + '00');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(v.x, v.y - 15, 35, 0, Math.PI * 2); ctx.fill();
-    // Time indicator ring
-    const timeLeft = this.getTimeLeft();
-    const timePct = timeLeft / 300;
-    ctx.strokeStyle = card.color;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(v.x, v.y - 15, 30, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * timePct);
-    ctx.stroke();
-  }
-};
-
-// ═══════════════════════════════════════
-// §30. DAILY MISSION BOARD (v24)
-// ═══════════════════════════════════════
-const MISSION_TEMPLATES = [
-  { id: 'win_duels', desc: 'Win {n} duels', targets: [2, 3, 5], reward: [30, 50, 80], trackKey: 'duels_won' },
-  { id: 'visit_floors', desc: 'Visit all 7 floors', targets: [7], reward: [40], trackKey: 'floors_visited' },
-  { id: 'enhance_item', desc: 'Enhance an item', targets: [1], reward: [25], trackKey: 'enhance_item' },
-  { id: 'enhance_to_5', desc: 'Enhance an item to +5', targets: [1], reward: [60], trackKey: 'enhance_to_5' },
-  { id: 'earn_coins', desc: 'Earn {n}◈', targets: [50, 100, 200], reward: [20, 35, 60], trackKey: 'coins_earned' },
-  { id: 'pet_pixel', desc: 'Pet Pixel {n} times', targets: [5, 10], reward: [15, 30], trackKey: 'pixel_pets' },
-  { id: 'explore_objects', desc: 'Interact with {n} objects', targets: [5, 10], reward: [20, 35], trackKey: 'interactions' },
-  { id: 'pve_wins', desc: 'Win {n} PvE fights', targets: [1, 3], reward: [25, 60], trackKey: 'pve_wins' },
-  { id: 'buy_item', desc: 'Buy an item from the shop', targets: [1], reward: [20], trackKey: 'shop_buys' },
-  { id: 'transform', desc: 'Use a specialist transformation', targets: [1], reward: [50], trackKey: 'transform' },
-];
-
-const WEEKLY_MISSIONS = [
-  { id: 'weekly_duels', desc: 'Win 10 duels this week', target: 10, reward: 200, trackKey: 'duels_won', lootReward: 'epic' },
-  { id: 'weekly_enhance', desc: 'Enhance items 5 times', target: 5, reward: 150, trackKey: 'enhance_item', lootReward: 'rare' },
-  { id: 'weekly_coins', desc: 'Earn 500◈ this week', target: 500, reward: 100, trackKey: 'coins_earned', lootReward: 'rare' },
-  { id: 'weekly_explorer', desc: 'Visit all floors 5 days', target: 5, reward: 250, trackKey: 'days_all_floors', lootReward: 'legendary' },
-];
-
-const MissionBoard = {
-  _missions: null,
-  _weekly: null,
-  _progress: null,
-  
-  init() {
-    const today = new Date().toISOString().slice(0, 10);
-    const saved = LS.get('missionBoard', null);
-    if (saved && saved.date === today) {
-      this._missions = saved.missions;
-      this._progress = saved.progress;
-    } else {
-      this._generateDaily();
-    }
-    // Weekly
-    const weekNum = this._getWeekNum();
-    const savedWeekly = LS.get('weeklyMission', null);
-    if (savedWeekly && savedWeekly.week === weekNum) {
-      this._weekly = savedWeekly;
-    } else {
-      const template = WEEKLY_MISSIONS[weekNum % WEEKLY_MISSIONS.length];
-      this._weekly = { ...template, week: weekNum, progress: 0, claimed: false };
-      LS.set('weeklyMission', this._weekly);
-    }
-  },
-  
-  _getWeekNum() { return Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000)); },
-  
-  _generateDaily() {
-    const today = new Date().toISOString().slice(0, 10);
-    // Seed from date for deterministic daily missions
-    let seed = 0;
-    for (let i = 0; i < today.length; i++) seed = ((seed << 5) - seed) + today.charCodeAt(i);
-    const shuffled = [...MISSION_TEMPLATES].sort((a, b) => {
-      const ha = ((seed * 31 + a.id.charCodeAt(0)) % 1000) / 1000;
-      const hb = ((seed * 31 + b.id.charCodeAt(0)) % 1000) / 1000;
-      return ha - hb;
-    });
-    this._missions = shuffled.slice(0, 3).map(t => {
-      const varIdx = Math.abs(seed) % t.targets.length;
-      const target = t.targets[varIdx];
-      const reward = t.reward[varIdx];
-      return { id: t.id, desc: t.desc.replace('{n}', target), target, reward, trackKey: t.trackKey, claimed: false };
-    });
-    this._progress = {};
-    LS.set('missionBoard', { date: today, missions: this._missions, progress: this._progress });
-  },
-  
-  trackProgress(trackKey, amount) {
-    if (!this._progress) return;
-    this._progress[trackKey] = (this._progress[trackKey] || 0) + amount;
-    LS.set('missionBoard', { date: new Date().toISOString().slice(0, 10), missions: this._missions, progress: this._progress });
-    // Weekly
-    if (this._weekly && this._weekly.trackKey === trackKey) {
-      this._weekly.progress = (this._weekly.progress || 0) + amount;
-      LS.set('weeklyMission', this._weekly);
-    }
-    // Check if any mission just completed
-    this._missions.forEach(m => {
-      if (!m.claimed && (this._progress[m.trackKey] || 0) >= m.target) {
-        showNotification(`📋 Mission complete: ${m.desc}!`);
-      }
-    });
-  },
-  
-  showUI() {
-    this.init();
-    let html = '<h3>📋 Daily Missions</h3>';
-    html += '<p style="font-size:10px;color:#888;margin-bottom:8px">Complete missions for bonus ◈! Resets daily.</p>';
-    
-    this._missions.forEach((m, i) => {
-      const progress = this._progress[m.trackKey] || 0;
-      const complete = progress >= m.target;
-      const pct = Math.min(100, Math.round(progress / m.target * 100));
-      html += `<div class="mission-card ${complete ? 'complete' : ''}">`;
-      html += `<div class="mission-title">${complete ? '✅' : '📌'} ${m.desc}</div>`;
-      html += `<div class="mission-reward">Reward: ${m.reward}◈</div>`;
-      html += `<div class="mission-progress">${progress}/${m.target}</div>`;
-      html += `<div class="mission-progress-bar"><div class="mission-progress-fill" style="width:${pct}%"></div></div>`;
-      if (complete && !m.claimed) {
-        html += `<button class="drink-btn claim-mission" data-idx="${i}" style="margin-top:4px;border-color:#44cc44;color:#44cc44">Claim ${m.reward}◈</button>`;
-      }
-      html += '</div>';
-    });
-    
-    // Weekly
-    html += '<div style="margin-top:12px;border-top:1px solid #333;padding-top:8px">';
-    html += '<h3 style="color:#ff6ec7">🏅 Weekly Challenge</h3>';
-    const w = this._weekly;
-    const wProgress = w.progress || 0;
-    const wComplete = wProgress >= w.target;
-    const wPct = Math.min(100, Math.round(wProgress / w.target * 100));
-    html += `<div class="mission-card weekly-card ${wComplete ? 'complete' : ''}">`;
-    html += `<div class="mission-title">${wComplete ? '✅' : '🏅'} ${w.desc}</div>`;
-    html += `<div class="mission-reward">${w.reward}◈ + ${w.lootReward} loot drop!</div>`;
-    html += `<div class="mission-progress">${wProgress}/${w.target}</div>`;
-    html += `<div class="mission-progress-bar"><div class="mission-progress-fill" style="width:${wPct}%;background:#ff6ec7"></div></div>`;
-    if (wComplete && !w.claimed) {
-      html += `<button class="drink-btn claim-weekly" style="margin-top:4px;border-color:#ff6ec7;color:#ff6ec7">Claim Rewards!</button>`;
-    }
-    html += '</div></div>';
-    
-    const { p } = createPopup(html);
-    p.querySelectorAll('.claim-mission').forEach(btn => {
-      btn.onclick = () => {
-        const idx = parseInt(btn.dataset.idx);
-        const m = this._missions[idx];
-        m.claimed = true;
-        Coins.earn(m.reward, 'mission');
-        btn.textContent = 'Claimed! ✅';
-        btn.disabled = true;
-        LS.set('missionBoard', { date: new Date().toISOString().slice(0, 10), missions: this._missions, progress: this._progress });
-        showNotification(`📋 +${m.reward}◈ from mission!`);
-      };
-    });
-    const weeklyBtn = p.querySelector('.claim-weekly');
-    if (weeklyBtn) {
-      weeklyBtn.onclick = () => {
-        this._weekly.claimed = true;
-        Coins.earn(this._weekly.reward, 'weekly_mission');
-        LS.set('weeklyMission', this._weekly);
-        const item = LootSystem.rollMinRarity(this._weekly.lootReward);
-        LootSystem.addToInventory(item);
-        setTimeout(() => LootSystem.showLootCard(item), 500);
-        weeklyBtn.textContent = 'Claimed! ✅';
-        weeklyBtn.disabled = true;
-        showNotification(`🏅 Weekly reward: +${this._weekly.reward}◈ + ${RARITIES[this._weekly.lootReward].name} loot!`);
-      };
-    }
-  }
-};
-
-// ═══════════════════════════════════════
-// §31. BAZAAR TRADING UI (v24)
-// ═══════════════════════════════════════
-const BazaarUI = {
-  showUI() {
-    let html = '<h3>🏪 Bazaar Trading Post</h3>';
-    html += '<div class="bazaar-tabs"><div class="bazaar-tab active" data-tab="browse">Browse</div><div class="bazaar-tab" data-tab="sell">Sell Items</div><div class="bazaar-tab" data-tab="history">History</div></div>';
-    html += '<div id="bazaar-content" style="min-height:200px;max-height:350px;overflow-y:auto"></div>';
-    
-    const { p } = createPopup(html);
-    
-    const tabs = p.querySelectorAll('.bazaar-tab');
-    tabs.forEach(tab => {
-      tab.onclick = () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        this._renderTab(tab.dataset.tab, p.querySelector('#bazaar-content'), p);
-      };
-    });
-    this._renderTab('browse', p.querySelector('#bazaar-content'), p);
-  },
-  
-  async _renderTab(tab, container, popup) {
-    if (tab === 'browse') {
-      container.innerHTML = '<div style="text-align:center;color:#888;padding:20px">Loading...</div>';
-      try {
-        const res = await fetch('/api/marketplace');
-        const listings = await res.json();
-        if (!listings.length) {
-          container.innerHTML = '<div style="text-align:center;color:#888;padding:20px">No listings yet. Be the first to sell!</div>';
-          return;
-        }
-        let html = '';
-        listings.forEach(l => {
-          const def = getAllLootableItems().find(i => i.itemId === (l.item && l.item.itemId));
-          const r = RARITIES[(l.item && l.item.rarity) || 'common'] || RARITIES.common;
-          const icon = def ? def.icon : (l.item && l.item.icon) || '❓';
-          const name = def ? def.name : (l.item && l.item.name) || '???';
-          const enhLvl = l.item && l.item.enhanceLevel ? ` +${l.item.enhanceLevel}` : '';
-          html += `<div class="bazaar-listing" data-id="${l.id}">`;
-          html += `<span class="listing-icon">${icon}</span>`;
-          html += `<div class="listing-info"><div style="color:${r.color};font-weight:bold">${name}${enhLvl}</div>`;
-          html += `<div class="listing-seller">Seller: ${l.owner}</div></div>`;
-          html += `<div class="listing-price">${l.price}◈</div>`;
-          html += '</div>';
-        });
-        container.innerHTML = html;
-        container.querySelectorAll('.bazaar-listing').forEach(el => {
-          el.onclick = () => this._buyListing(el.dataset.id, popup);
-        });
-      } catch (e) {
-        container.innerHTML = '<div style="color:#ff4444;padding:10px">Failed to load. Server offline?</div>';
-      }
-    } else if (tab === 'sell') {
-      const lootInv = LS.get('lootInventory', []);
-      const equipped = LS.get('equippedLoot', {});
-      const equippedIds = new Set(Object.values(equipped).filter(Boolean));
-      const sellable = lootInv.filter(i => !equippedIds.has(i.id));
-      
-      if (!sellable.length) {
-        container.innerHTML = '<div style="text-align:center;color:#888;padding:20px">No items to sell. Win fights or explore for loot!</div>';
-        return;
-      }
-      let html = '<p style="font-size:9px;color:#888;margin-bottom:6px">5% tax on sales. Set your price and list!</p>';
-      sellable.forEach(item => {
-        const def = getAllLootableItems().find(d => d.itemId === item.itemId);
-        const r = RARITIES[item.rarity] || RARITIES.common;
-        const enhData = LS.get('enhance_' + item.id, { level: 0 });
-        const enhLabel = enhData.level > 0 ? ` +${enhData.level}` : '';
-        html += `<div class="bazaar-listing" data-uid="${item.id}" data-itemid="${item.itemId}" data-rarity="${item.rarity}">`;
-        html += `<span class="listing-icon">${def ? def.icon : '❓'}</span>`;
-        html += `<div class="listing-info"><div style="color:${r.color};font-weight:bold">${def ? def.name : '???'}${enhLabel}</div>`;
-        html += `<div style="font-size:8px;color:#888">${r.name} ${item.type}</div></div>`;
-        html += `<div><input type="number" class="sell-price" min="1" max="9999" value="${{common:5,uncommon:15,rare:40,epic:100,legendary:300,mythic:500}[item.rarity]||10}" style="width:50px;background:#222;border:1px solid #555;color:#ffd700;padding:2px 4px;font-size:11px;border-radius:3px">◈`;
-        html += `<button class="drink-btn list-item" data-uid="${item.id}" style="margin-left:4px;font-size:9px;padding:3px 8px">List</button></div>`;
-        html += '</div>';
-      });
-      container.innerHTML = html;
-      container.querySelectorAll('.list-item').forEach(btn => {
-        btn.onclick = async () => {
-          const uid = btn.dataset.uid;
-          const listing = btn.closest('.bazaar-listing');
-          const price = parseInt(listing.querySelector('.sell-price').value);
-          if (!price || price < 1 || price > 9999) { showNotification('Invalid price!'); return; }
-          const item = lootInv.find(i => i.id === uid);
-          if (!item) return;
-          const visitorName = LS.get('visitorName', 'Anonymous');
-          try {
-            const res = await fetch('/api/marketplace/list', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ owner: visitorName, item: { ...item, enhanceLevel: LS.get('enhance_' + uid, { level: 0 }).level }, price })
-            });
-            const data = await res.json();
-            if (data.ok) {
-              LootSystem.removeFromInventory(uid);
-              btn.textContent = 'Listed! ✅';
-              btn.disabled = true;
-              showNotification(`🏪 Listed for ${price}◈!`);
-              MissionBoard.trackProgress('shop_buys', 1);
-            }
-          } catch (e) { showNotification('Failed to list. Try again.'); }
-        };
-      });
-    } else if (tab === 'history') {
-      container.innerHTML = '<div style="text-align:center;color:#888;padding:20px">Trade history coming soon. Check back later!</div>';
-    }
-  },
-  
-  async _buyListing(listingId, popup) {
-    const visitorName = LS.get('visitorName', 'Anonymous');
-    try {
-      const res = await fetch(`/api/marketplace/buy/${listingId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ buyer: visitorName })
-      });
-      const data = await res.json();
-      if (data.ok) {
-        if (!Coins.canAfford(data.price)) { showNotification('Not enough ◈!'); return; }
-        Coins.spend(data.price, 'bazaar_buy');
-        if (data.item) {
-          LootSystem.addToInventory(data.item);
-          showNotification(`🏪 Bought for ${data.price}◈!`);
-          MissionBoard.trackProgress('shop_buys', 1);
-        }
-        // Refresh
-        popup.closest('.popup-overlay').remove();
-        this.showUI();
-      }
-    } catch (e) { showNotification('Purchase failed.'); }
-  }
-};
-
-// ═══════════════════════════════════════
-// §32. PIXEL EVOLUTION (v25)
-// ═══════════════════════════════════════
-const PixelEvolution={
-  debugAll:false,
-  stages:[
-    {threshold:25, id:'speech',     name:'Speech Bubbles'},
-    {threshold:50, id:'follow',     name:'Follows Visitors'},
-    {threshold:100,id:'pettable',   name:'Can Be Petted'},
-    {threshold:250,id:'tricks',     name:'Learns Tricks'},
-    {threshold:500,id:'crown',      name:'Wears Crown'},
-    {threshold:1000,id:'kittens',   name:'Has Kittens'},
-  ],
-  hasStage(id){
-    if(this.debugAll)return true;
-    const stage=this.stages.find(s=>s.id===id);
-    return stage&&(S.stationStats.totalVisitors||0)>=stage.threshold;
-  },
-  // Pixel follows nearby visitors (stage: follow)
-  updateFollowVisitors(dt){
-    if(!this.hasStage('follow'))return;
-    const p=S.pixel;if(p.floor!==S.floor||p.state!=='idle')return;
-    // Find closest visitor on same floor
-    let closest=null,closestDist=120;
-    if(S.useVisitor&&S.visitor){
-      const d=Math.hypot(S.visitor.x-p.x,S.visitor.y-p.y);
-      if(d<closestDist&&d>25){closest={x:S.visitor.x,y:S.visitor.y};closestDist=d;}
-    }
-    for(const id in S.otherPlayers){
-      const op=S.otherPlayers[id];if(op.floor!==S.floor)continue;
-      const d=Math.hypot(op.x-p.x,op.y-p.y);
-      if(d<closestDist&&d>25){closest={x:op.x,y:op.y};closestDist=d;}
-    }
-    if(closest){p.targetX=closest.x+15;p.targetY=closest.y+10;p.state='follow';p.stateTimer=0;}
-  },
-  // Pet Pixel with heart animation (stage: pettable)
-  petPixel(){
-    if(!this.hasStage('pettable'))return false;
-    const p=S.pixel;
-    // Hearts
-    for(let i=0;i<8;i++){
-      S.particles.push({x:p.x+(Math.random()-.5)*20,y:p.y-15,vx:(Math.random()-.5)*2,vy:-1.5-Math.random(),life:35,color:'#ff6688',size:3});
-    }
-    S.floatTexts.push({text:'❤️ *purrrr*',x:p.x,y:p.y-30,color:'#ff88aa',life:80});
-    S.petCount=(S.petCount||0)+1;LS.set('petCount',S.petCount);
-    Coins.earn(2,'pet_pixel');
-    // Sound
-    if(S.audioCtx){const c=S.audioCtx,n=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=800;g.gain.setValueAtTime(.06*S.volume,n);g.gain.exponentialRampToValueAtTime(.001,n+.3);o.connect(g);g.connect(S.masterGain);o.start(n);o.stop(n+.4);}
-    return true;
-  },
-  // Tricks (stage: tricks)
-  currentTrick:null,trickTimer:0,
-  doTrick(trickName){
-    if(!this.hasStage('tricks'))return;
-    this.currentTrick=trickName;this.trickTimer=2;
-    const p=S.pixel;
-    if(trickName==='sit'){
-      S.floatTexts.push({text:'🐱 *sits nicely*',x:p.x,y:p.y-30,color:'#c080ff',life:60});
-    }else if(trickName==='roll'){
-      S.floatTexts.push({text:'🐱 *rolls over*',x:p.x,y:p.y-30,color:'#c080ff',life:60});
-      for(let i=0;i<6;i++)S.particles.push({x:p.x+(Math.random()-.5)*15,y:p.y,vx:(Math.random()-.5)*2,vy:-Math.random(),life:20,color:'#c080ff',size:2});
-    }else if(trickName==='laser'){
-      S.floatTexts.push({text:'🐱 *chases red dot*',x:p.x,y:p.y-30,color:'#ff4444',life:80});
-      S._laserDot={x:p.x+80,y:p.y-20,timer:3};
-    }
-    Coins.earn(3,'trick');
-  },
-  updateTrick(dt){
-    if(this.currentTrick){this.trickTimer-=dt;if(this.trickTimer<=0)this.currentTrick=null;}
-    if(S._laserDot){
-      S._laserDot.timer-=dt;
-      S._laserDot.x+=Math.sin(S.time*5)*2;S._laserDot.y+=Math.cos(S.time*7)*1.5;
-      S.pixel.targetX=S._laserDot.x;S.pixel.targetY=S._laserDot.y;
-      if(S._laserDot.timer<=0)S._laserDot=null;
-    }
-  },
-  // Crown rendering (stage: crown)
-  renderCrown(p){
-    if(!this.hasStage('crown'))return;
-    const cx=p.x,cy=p.y-22;
-    ctx.fillStyle='#ffd700';
-    ctx.fillRect(cx-5,cy,10,4);
-    ctx.fillRect(cx-5,cy-3,2,3);ctx.fillRect(cx-1,cy-4,2,4);ctx.fillRect(cx+3,cy-3,2,3);
-    // Gem
-    ctx.fillStyle='#ff4444';ctx.fillRect(cx-1,cy-2,2,2);
-    // Pixel grows slightly larger at 500+
-    // handled via scale in renderPixel
-  },
-  showTrickMenu(){
-    if(!this.hasStage('tricks'))return;
-    let html='<h3>🐱 Pixel\'s Tricks</h3><p style="font-size:11px;color:#aaa">Click a trick to make Pixel perform!</p>';
-    const tricks=[{id:'sit',name:'Sit',icon:'🪑'},{id:'roll',name:'Roll Over',icon:'🔄'},{id:'laser',name:'Chase Laser',icon:'🔴'}];
-    tricks.forEach(t=>{
-      html+=`<button class="drink-btn" onclick="PixelEvolution.doTrick('${t.id}');document.querySelector('.popup-overlay').remove()">${t.icon} ${t.name}</button>`;
-    });
-    createPopup(html);
-  }
-};
-
-// ═══════════════════════════════════════
-// §33. DYNAMIC STATION EVENTS (v25)
-// ═══════════════════════════════════════
-const StationEvents={
-  active:null,
-  timer:0,
-  eventInterval:600+Math.random()*600, // 10-20 min
-  debugMode:false,
-  events:['meteor_shower','arcade_tournament','garden_bloom','power_outage','visitor_surge'],
-  
-  update(dt){
-    this.timer+=dt;
-    // Check for visitor surge
-    const onlineCount=(Object.keys(S.otherPlayers).length||0)+1;
-    if(onlineCount>=5&&!this.active){this.trigger('visitor_surge');}
-    // Random event timer
-    if(!this.active&&this.timer>=this.eventInterval){
-      this.timer=0;
-      this.eventInterval=600+Math.random()*600;
-      const evt=this.events[Math.random()*4|0]; // exclude visitor_surge from random
-      this.trigger(evt);
-    }
-    // Update active event
-    if(this.active){
-      this.active.timer-=dt;
-      if(this.active.timer<=0){this.endEvent();return;}
-      this.active.update(dt);
-    }
-  },
-  
-  trigger(eventId){
-    if(this.active)return;
-    const events={
-      meteor_shower:{
-        name:'☄️ Meteor Shower',floor:2,duration:60,
-        meteors:[],spawnTimer:0,caught:0,
-        update(dt){
-          this.spawnTimer+=dt;
-          if(this.spawnTimer>.8){this.spawnTimer=0;this.meteors.push({x:Math.random()*W,y:-10,vx:(Math.random()-.5)*2,vy:3+Math.random()*4,size:3+Math.random()*4,alive:true});}
-          this.meteors.forEach(m=>{m.x+=m.vx;m.y+=m.vy;if(m.y>H)m.alive=false;});
-          this.meteors=this.meteors.filter(m=>m.alive);
-        },
-        render(){
-          if(S.floor!==2)return;
-          this.meteors.forEach(m=>{
-            ctx.fillStyle='#ffd700';ctx.beginPath();ctx.arc(m.x,m.y,m.size,0,Math.PI*2);ctx.fill();
-            // Trail
-            ctx.strokeStyle='rgba(255,215,0,.4)';ctx.lineWidth=m.size/2;ctx.beginPath();ctx.moveTo(m.x,m.y);ctx.lineTo(m.x-m.vx*4,m.y-m.vy*4);ctx.stroke();
-          });
-          ctx.fillStyle='rgba(255,215,0,.8)';ctx.font='bold 12px monospace';ctx.textAlign='center';
-          ctx.fillText('☄️ METEOR SHOWER! Click falling stars! Caught: '+this.caught,W/2,30);ctx.textAlign='left';
-        },
-        onClick(x,y){
-          if(S.floor!==2)return false;
-          for(let i=this.meteors.length-1;i>=0;i--){
-            const m=this.meteors[i];
-            if(Math.hypot(x-m.x,y-m.y)<m.size+10){
-              m.alive=false;this.caught++;
-              Coins.earn(5,'meteor');
-              for(let j=0;j<8;j++)S.particles.push({x:m.x,y:m.y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,life:20,color:'#ffd700',size:2});
-              // Chance to get crafting material
-              if(Math.random()<.3){
-                CraftingSystem.addMaterial('star_dust');
-                S.floatTexts.push({text:'✨ Star Dust!',x:m.x,y:m.y-10,color:'#ffd700',life:60});
-              }
-              return true;
-            }
-          }
-          return false;
-        }
-      },
-      arcade_tournament:{
-        name:'🏆 Arcade Tournament',floor:3,duration:120,
-        announced:false,
-        update(dt){
-          if(!this.announced){
-            this.announced=true;
-            addChatMsg('Echo','🏆 ARCADE TOURNAMENT! Best scores in the next 2 minutes win bonus ◈! Head to Floor 3!');
-          }
-        },
-        render(){
-          if(S.floor!==3)return;
-          ctx.fillStyle='rgba(255,215,0,.8)';ctx.font='bold 12px monospace';ctx.textAlign='center';
-          const timeLeft=Math.ceil(this.timer);
-          ctx.fillText('🏆 TOURNAMENT! '+timeLeft+'s left — Play arcade games for bonus ◈!',W/2,30);ctx.textAlign='left';
-        },
-        onClick(){return false;}
-      },
-      garden_bloom:{
-        name:'🌸 Garden Bloom',floor:4,duration:90,
-        flowers:[],spawned:false,
-        update(dt){
-          if(!this.spawned){
-            this.spawned=true;
-            const flowerTypes=['🌸','🌺','🌻','🌹','💐','🌷'];
-            for(let i=0;i<8;i++){
-              this.flowers.push({x:100+Math.random()*600,y:150+Math.random()*350,type:flowerTypes[Math.random()*flowerTypes.length|0],alive:true});
-            }
-          }
-        },
-        render(){
-          if(S.floor!==4)return;
-          this.flowers.filter(f=>f.alive).forEach(f=>{
-            ctx.font='20px serif';ctx.fillText(f.type,f.x,f.y);
-            // Glow
-            const g=ctx.createRadialGradient(f.x+10,f.y-5,0,f.x+10,f.y-5,20);
-            g.addColorStop(0,'rgba(255,200,255,.15)');g.addColorStop(1,'rgba(0,0,0,0)');
-            ctx.fillStyle=g;ctx.beginPath();ctx.arc(f.x+10,f.y-5,20,0,Math.PI*2);ctx.fill();
-          });
-          const alive=this.flowers.filter(f=>f.alive).length;
-          ctx.fillStyle='rgba(255,150,255,.8)';ctx.font='bold 12px monospace';ctx.textAlign='center';
-          ctx.fillText('🌸 GARDEN BLOOM! Click flowers to harvest! '+alive+' remaining',W/2,30);ctx.textAlign='left';
-        },
-        onClick(x,y){
-          if(S.floor!==4)return false;
-          for(const f of this.flowers){
-            if(!f.alive)continue;
-            if(Math.hypot(x-f.x-10,y-f.y+5)<20){
-              f.alive=false;Coins.earn(3,'bloom');
-              for(let i=0;i<6;i++)S.particles.push({x:f.x,y:f.y,vx:(Math.random()-.5)*3,vy:-Math.random()*2,life:25,color:'#ff88cc',size:3});
-              if(Math.random()<.4){
-                CraftingSystem.addMaterial('rare_petal');
-                S.floatTexts.push({text:'🌺 Rare Petal!',x:f.x,y:f.y-15,color:'#ff88cc',life:60});
-              }
-              return true;
-            }
-          }
-          return false;
-        }
-      },
-      power_outage:{
-        name:'⚡ Power Outage',floor:0,duration:30,
-        flickerTimer:0,dark:true,
-        update(dt){
-          this.flickerTimer+=dt;
-          if(this.flickerTimer>.5+Math.random()*.5){this.flickerTimer=0;this.dark=!this.dark;}
-        },
-        render(){
-          if(this.dark){
-            ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(0,0,W,H);
-            // Emergency red lighting
-            const g=ctx.createRadialGradient(W/2,H/2,50,W/2,H/2,300);
-            g.addColorStop(0,'rgba(255,0,0,.08)');g.addColorStop(1,'rgba(0,0,0,0)');
-            ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-            // Hidden items revealed (glowing dots)
-            for(let i=0;i<3;i++){
-              const hx=150+i*250,hy=200+Math.sin(S.time+i)*50;
-              ctx.fillStyle='rgba(0,255,200,.6)';ctx.beginPath();ctx.arc(hx,hy,4+Math.sin(S.time*3)*.5,0,Math.PI*2);ctx.fill();
-            }
-          }
-          ctx.fillStyle='rgba(255,50,50,.8)';ctx.font='bold 12px monospace';ctx.textAlign='center';
-          ctx.fillText('⚡ POWER OUTAGE! Look for hidden glowing items!',W/2,30);ctx.textAlign='left';
-        },
-        onClick(x,y){
-          if(!this.dark)return false;
-          for(let i=0;i<3;i++){
-            const hx=150+i*250,hy=200+Math.sin(S.time+i)*50;
-            if(Math.hypot(x-hx,y-hy)<15){
-              Coins.earn(10,'outage');
-              S.floatTexts.push({text:'💎 Hidden Treasure!',x:hx,y:hy-10,color:'#00ffcc',life:60});
-              if(Math.random()<.5){CraftingSystem.addMaterial('dark_crystal');S.floatTexts.push({text:'🔮 Dark Crystal!',x:hx,y:hy-25,color:'#aa44ff',life:60});}
-              return true;
-            }
-          }
-          return false;
-        }
-      },
-      visitor_surge:{
-        name:'👾 Visitor Surge',floor:0,duration:90,
-        boss:{x:W/2,y:150,hp:100,maxHp:100,hits:0},
-        update(dt){
-          this.boss.x=W/2+Math.sin(S.time*1.5)*150;
-          this.boss.y=120+Math.sin(S.time*2.3)*30;
-        },
-        render(){
-          const b=this.boss;
-          // Boss
-          ctx.fillStyle='#ff4444';ctx.font='40px serif';ctx.textAlign='center';ctx.fillText('👾',b.x,b.y);
-          // HP bar
-          const hpPct=b.hp/b.maxHp;
-          ctx.fillStyle='#333';ctx.fillRect(W/2-80,60,160,10);
-          ctx.fillStyle=hpPct>.5?'#44ff44':hpPct>.25?'#ffaa00':'#ff4444';
-          ctx.fillRect(W/2-80,60,160*hpPct,10);
-          ctx.fillStyle='#fff';ctx.font='bold 12px monospace';
-          ctx.fillText('👾 CO-OP BOSS! Click to attack! HP: '+b.hp+'/'+b.maxHp,W/2,55);ctx.textAlign='left';
-        },
-        onClick(x,y){
-          const b=this.boss;
-          if(Math.hypot(x-b.x,y-b.y-20)<40&&b.hp>0){
-            b.hp-=5+Math.floor(Math.random()*5);b.hits++;
-            for(let i=0;i<5;i++)S.particles.push({x:b.x+(Math.random()-.5)*30,y:b.y+(Math.random()-.5)*20,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,life:15,color:'#ff4444',size:3});
-            S.screenShake=3;
-            if(b.hp<=0){
-              Coins.earn(50,'boss');showNotification('👾 Boss defeated! +50◈!');
-              CraftingSystem.addMaterial('boss_core');
-              S.floatTexts.push({text:'🏆 VICTORY!',x:b.x,y:b.y-30,color:'#ffd700',life:90});
-              StationEvents.endEvent();
-            }
-            return true;
-          }
-          return false;
-        }
-      }
-    };
-    const evt=events[eventId];if(!evt)return;
-    evt.timer=evt.duration;
-    this.active=evt;
-    showNotification(evt.name+' event started!');
-    addChatMsg('Echo',evt.name+' is happening! '+
-      (eventId==='meteor_shower'?'Head to the Observatory!':
-       eventId==='garden_bloom'?'Visit the Garden Biodome!':
-       eventId==='power_outage'?'The lights are flickering...':
-       eventId==='visitor_surge'?'Everyone attack the boss!':'Have fun!'));
-  },
-  
-  endEvent(){
-    if(this.active){
-      showNotification(this.active.name+' event ended!');
-      this.active=null;
-    }
-  },
-  
-  render(){if(this.active&&this.active.render)this.active.render();},
-  
-  onClick(x,y){return this.active&&this.active.onClick?this.active.onClick(x,y):false;},
-  
-  debugTrigger(eventId){this.endEvent();this.trigger(eventId);}
-};
-
-// ═══════════════════════════════════════
-// §34. ECHO'S MOOD SYSTEM v25
-// ═══════════════════════════════════════
-const EchoMoodV25={
-  mood:'calm',moodEmoji:'😌',
-  update(dt){
-    const onlineCount=(Object.keys(S.otherPlayers).length||0)+1;
-    const milestoneJustHit=S._lastMilestoneTime&&(Date.now()-S._lastMilestoneTime)<30000;
-    let newMood,emoji;
-    if(milestoneJustHit){newMood='celebratory';emoji='🎉';}
-    else if(onlineCount>=3){newMood='energetic';emoji='⚡';}
-    else if(onlineCount<=1){newMood='contemplative';emoji='🤔';}
-    else{newMood='calm';emoji='😌';}
-    if(newMood!==this.mood){
-      this.mood=newMood;this.moodEmoji=emoji;
-      Mood.moods.energetic={emoji:'⚡',label:'Energetic'};
-      Mood.moods.contemplative={emoji:'🤔',label:'Contemplative'};
-      Mood.moods.celebratory={emoji:'🎉',label:'Celebratory'};
-      Mood.set(newMood);
-    }
-  },
-  getThoughts(){
-    const pool={
-      energetic:["So many visitors! Let's GO! ⚡","The station is BUZZING today!","I love a full house!","Party time! 🎉","Who wants to explore together?"],
-      contemplative:["The stars are so quiet tonight...","Sometimes solitude is a gift.","I've been thinking about the meaning of data...","The station hums a gentle song.","Pixel and I have the whole station to ourselves."],
-      celebratory:["WE DID IT! 🎉","New milestone! I'm so proud!","This calls for celebration!","The station just leveled up!","History is being made!"],
-      calm:["Another lovely day in orbit.","The station feels just right.","Good vibes all around."]
-    };
-    return pool[this.mood]||pool.calm;
-  }
-};
-
-// ═══════════════════════════════════════
-// §35. CRAFTING SYSTEM (v25)
-// ═══════════════════════════════════════
-const CraftingSystem={
-  materials:LS.get('craftMaterials',{}),
-  craftedItems:LS.get('craftedItems',[]),
-  
-  recipes:[
-    {inputs:['star_dust','star_dust'],output:'star_shard',name:'⭐ Star Shard',desc:'A concentrated piece of starlight'},
-    {inputs:['rare_petal','rare_petal'],output:'petal_crown',name:'🌺 Petal Crown',desc:'A beautiful flower crown'},
-    {inputs:['dark_crystal','dark_crystal'],output:'shadow_cloak',name:'🌑 Shadow Cloak',desc:'Makes you slightly transparent'},
-    {inputs:['star_dust','rare_petal'],output:'aurora_bottle',name:'🌈 Aurora Bottle',desc:'Captured northern lights'},
-    {inputs:['star_dust','dark_crystal'],output:'void_lens',name:'🔮 Void Lens',desc:'See through dimensions'},
-    {inputs:['rare_petal','dark_crystal'],output:'night_bloom',name:'🌙 Night Bloom',desc:'A flower that glows in darkness'},
-    {inputs:['boss_core','star_dust'],output:'power_cell',name:'⚡ Power Cell',desc:'Pure energy in a bottle'},
-    {inputs:['boss_core','dark_crystal'],output:'dark_blade',name:'🗡️ Dark Blade',desc:'A weapon from the void'},
-    {inputs:['star_shard','rare_petal','dark_crystal'],output:'cosmic_seed',name:'🌌 Cosmic Seed',desc:'Plant it and watch galaxies grow'},
-    {inputs:['boss_core','star_shard','night_bloom'],output:'echo_heart',name:'💜 Echo\'s Heart',desc:'The legendary core of the station'},
-  ],
-  
-  addMaterial(id){
-    this.materials[id]=(this.materials[id]||0)+1;
-    LS.set('craftMaterials',this.materials);
-  },
-  
-  getMaterialName(id){
-    const names={star_dust:'✨ Star Dust',rare_petal:'🌺 Rare Petal',dark_crystal:'🔮 Dark Crystal',boss_core:'👾 Boss Core',
-      star_shard:'⭐ Star Shard',petal_crown:'🌺 Petal Crown',shadow_cloak:'🌑 Shadow Cloak',aurora_bottle:'🌈 Aurora Bottle',
-      void_lens:'🔮 Void Lens',night_bloom:'🌙 Night Bloom',power_cell:'⚡ Power Cell',dark_blade:'🗡️ Dark Blade',
-      cosmic_seed:'🌌 Cosmic Seed',echo_heart:'💜 Echo\'s Heart'};
-    return names[id]||id;
-  },
-  
-  canCraft(recipe){
-    const needed={};
-    recipe.inputs.forEach(i=>{needed[i]=(needed[i]||0)+1;});
-    for(const[k,v]of Object.entries(needed)){if((this.materials[k]||0)<v)return false;}
-    return true;
-  },
-  
-  craft(recipeIdx){
-    const recipe=this.recipes[recipeIdx];if(!recipe||!this.canCraft(recipe))return false;
-    // Consume materials
-    const needed={};
-    recipe.inputs.forEach(i=>{needed[i]=(needed[i]||0)+1;});
-    for(const[k,v]of Object.entries(needed)){this.materials[k]-=v;if(this.materials[k]<=0)delete this.materials[k];}
-    // Add crafted item (can also be used as material)
-    this.addMaterial(recipe.output);
-    this.craftedItems.push(recipe.output);
-    LS.set('craftMaterials',this.materials);
-    LS.set('craftedItems',this.craftedItems);
-    Coins.earn(10,'craft');
-    showNotification('🔨 Crafted: '+recipe.name+'!');
-    addChatMsg('Echo','Nice crafting! You made '+recipe.name+' — '+recipe.desc);
-    return true;
-  },
-  
-  showUI(){
-    let html='<h3>🔨 Crafting Station</h3>';
-    html+='<p style="font-size:11px;color:#aaa;margin-bottom:8px">Combine materials from events to create unique items. No recipe book — experiment!</p>';
-    // Materials inventory
-    html+='<div style="margin-bottom:10px;padding:8px;background:rgba(0,255,247,.05);border:1px solid rgba(0,255,247,.2);border-radius:6px"><div style="font-size:10px;color:#00fff7;margin-bottom:4px">Your Materials</div>';
-    const mats=Object.entries(this.materials).filter(([k,v])=>v>0);
-    if(mats.length===0)html+='<div style="font-size:10px;color:#666">No materials yet. Participate in events to collect!</div>';
-    else mats.forEach(([k,v])=>{html+='<span style="display:inline-block;margin:2px 4px;padding:2px 8px;background:rgba(155,89,182,.1);border:1px solid rgba(155,89,182,.3);border-radius:4px;font-size:10px">'+this.getMaterialName(k)+' x'+v+'</span>';});
-    html+='</div>';
-    // Crafting slots
-    html+='<div style="font-size:10px;color:#ffd080;margin-bottom:6px">Combine 2-3 materials:</div>';
-    html+='<div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">';
-    html+='<select id="craft-slot1" style="background:#1a1a2e;color:#ddd;border:1px solid #555;padding:4px;font-family:inherit;font-size:10px;border-radius:4px"><option value="">Select...</option>';
-    mats.forEach(([k,v])=>{html+='<option value="'+k+'">'+this.getMaterialName(k)+' (x'+v+')</option>';});
-    html+='</select> + <select id="craft-slot2" style="background:#1a1a2e;color:#ddd;border:1px solid #555;padding:4px;font-family:inherit;font-size:10px;border-radius:4px"><option value="">Select...</option>';
-    mats.forEach(([k,v])=>{html+='<option value="'+k+'">'+this.getMaterialName(k)+' (x'+v+')</option>';});
-    html+='</select> + <select id="craft-slot3" style="background:#1a1a2e;color:#ddd;border:1px solid #555;padding:4px;font-family:inherit;font-size:10px;border-radius:4px"><option value="">(optional)</option>';
-    mats.forEach(([k,v])=>{html+='<option value="'+k+'">'+this.getMaterialName(k)+' (x'+v+')</option>';});
-    html+='</select></div>';
-    html+='<button class="drink-btn" onclick="CraftingSystem.tryCraft()" style="margin-bottom:10px">🔨 Craft!</button>';
-    // Crafted items
-    if(this.craftedItems.length>0){
-      html+='<div style="font-size:10px;color:#44cc44;margin-top:6px">Crafted Items: '+[...new Set(this.craftedItems)].map(i=>this.getMaterialName(i)).join(', ')+'</div>';
-    }
-    // Hint from Echo
-    html+='<div style="margin-top:8px;padding:6px;background:rgba(155,89,182,.08);border:1px solid rgba(155,89,182,.2);border-radius:4px;font-size:10px;color:#c080ff">💡 Echo whispers: "Star Dust combines beautifully with petals... and darkness holds its own power."</div>';
-    createPopup(html);
-  },
-  
-  tryCraft(){
-    const s1=document.getElementById('craft-slot1')?.value;
-    const s2=document.getElementById('craft-slot2')?.value;
-    const s3=document.getElementById('craft-slot3')?.value;
-    if(!s1||!s2){showNotification('Select at least 2 materials!');return;}
-    const inputs=[s1,s2];if(s3)inputs.push(s3);
-    inputs.sort();
-    // Find matching recipe
-    const idx=this.recipes.findIndex(r=>{const ri=[...r.inputs].sort();return ri.length===inputs.length&&ri.every((v,i)=>v===inputs[i]);});
-    if(idx===-1){
-      showNotification('❌ Nothing happened... try a different combination!');
-      S.screenShake=2;
-    }else if(!this.canCraft(this.recipes[idx])){
-      showNotification('❌ Not enough materials!');
-    }else{
-      this.craft(idx);
-      // Refresh UI
-      document.querySelector('.popup-overlay')?.remove();
-      this.showUI();
-    }
-  }
-};
-
-// ═══════════════════════════════════════
-// §36. V25 DEBUG PANEL
-// ═══════════════════════════════════════
-const V25Debug={
-  show(){
-    let html='<h3>🔧 v25 Debug Panel</h3>';
-    html+='<p style="font-size:10px;color:#888">Station visitors: '+(S.stationStats.totalVisitors||0)+'</p>';
-    html+='<div style="margin:6px 0"><button class="drink-btn" onclick="PixelEvolution.debugAll=!PixelEvolution.debugAll;showNotification(\'Pixel debug: \'+PixelEvolution.debugAll)">Toggle Pixel Evolution (all stages): '+(PixelEvolution.debugAll?'ON':'OFF')+'</button></div>';
-    html+='<div style="font-size:10px;color:#ffd080;margin:6px 0">Trigger Events:</div>';
-    StationEvents.events.forEach(e=>{
-      html+='<button class="drink-btn" onclick="StationEvents.debugTrigger(\''+e+'\');document.querySelector(\'.popup-overlay\').remove()">'+e+'</button> ';
-    });
-    html+='<div style="margin:6px 0"><button class="drink-btn" onclick="StationEvents.endEvent();showNotification(\'Event ended\')">End Current Event</button></div>';
-    html+='<div style="margin:6px 0"><button class="drink-btn" onclick="CraftingSystem.addMaterial(\'star_dust\');CraftingSystem.addMaterial(\'rare_petal\');CraftingSystem.addMaterial(\'dark_crystal\');CraftingSystem.addMaterial(\'boss_core\');showNotification(\'Materials added!\')">Add All Materials</button></div>';
-    html+='<div style="margin:6px 0"><button class="drink-btn" onclick="EchoMoodV25.mood=\'celebratory\';S._lastMilestoneTime=Date.now();showNotification(\'Milestone mood!\')">Trigger Milestone Mood</button></div>';
-    createPopup(html);
-  }
-};
-
-// ═══════════════════════════════════════
 // §26. WELCOME & INIT
 // ═══════════════════════════════════════
 function showWelcomeWardrobe(){
@@ -10399,31 +8867,9 @@ function runWelcome(){
 }
 
 function load(){
-  const bar=$('#load-bar');const bootLog=$('#boot-log');let p=0;
-  const bootSteps=[
-    {msg:'> Initializing core systems...',pct:8,cls:''},
-    {msg:'  [OK] Reactor online',pct:15,cls:'ok'},
-    {msg:'  [OK] Life support active',pct:22,cls:'ok'},
-    {msg:'> Pressurizing corridors...',pct:30,cls:''},
-    {msg:'  [OK] Atmosphere: 101.3 kPa',pct:38,cls:'ok'},
-    {msg:'> Calibrating Earth viewport...',pct:45,cls:''},
-    {msg:'  [OK] Orbit: 408km LEO stable',pct:52,cls:'ok'},
-    {msg:'> Brewing zero-g espresso...',pct:58,cls:''},
-    {msg:'  [OK] Caffeine reserves nominal ☕',pct:65,cls:'ok'},
-    {msg:'> Waking Pixel...',pct:72,cls:''},
-    {msg:'  [OK] Cat: awake & judging 🐱',pct:78,cls:'ok'},
-    {msg:'> Loading station memory...',pct:85,cls:''},
-    {msg:'  [OK] Visitor records loaded',pct:90,cls:'ok'},
-    {msg:'> Establishing communications...',pct:95,cls:''},
-    {msg:'  ✦ Welcome aboard, visitor.',pct:100,cls:'highlight'},
-  ];
-  let step=0;
-  const iv=setInterval(()=>{
-    if(step>=bootSteps.length){clearInterval(iv);setTimeout(()=>{$('#loader').classList.add('done');setTimeout(()=>{$('#loader').style.display='none';init()},800)},400);return}
-    const s=bootSteps[step];bar.style.width=s.pct+'%';
-    const line=document.createElement('div');line.className='boot-line'+(s.cls?' '+s.cls:'');line.textContent=s.msg;bootLog.appendChild(line);
-    bootLog.scrollTop=bootLog.scrollHeight;step++;
-  },180);
+  const bar=$('#load-bar');let p=0;
+  const tips=['Pressurizing station...','Brewing zero-g espresso...','Waking Pixel...','Calibrating Earth viewport...','Establishing orbit...'];
+  const iv=setInterval(()=>{p+=20;bar.style.width=p+'%';$('#load-tip').textContent=tips[p/20-1]||'';if(p>=100){clearInterval(iv);setTimeout(()=>{$('#loader').classList.add('done');setTimeout(()=>{$('#loader').style.display='none';init()},800)},300)}},250);
 }
 
 function init(){
