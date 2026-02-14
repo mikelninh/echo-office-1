@@ -16412,7 +16412,7 @@ const BugReport={
         if(r.ok){
           status.textContent='✅ Bug report sent! Echo will review it.';status.style.color='#2ecc71';
           showNotification('🐛 Bug report sent — Echo will look into it!');
-          addChatMsg('Echo','Got your bug report! I\\'ll investigate and fix it in the next update. Thanks for helping improve the station! 🔧');
+          addChatMsg('Echo','Got your bug report! I will investigate and fix it in the next update. Thanks for helping improve the station! 🔧');
           setTimeout(()=>ov.remove(),2000);
         }else{status.textContent='❌ Failed to send. Try again?';status.style.color='#e74c3c'}
       }catch(e){status.textContent='❌ Network error. Server might be down.';status.style.color='#e74c3c'}
