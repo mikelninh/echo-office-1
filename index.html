@@ -17919,6 +17919,20 @@ console.log('🔮 NPCs loaded: Nova, Drift, Sol, Glitch, Void, Byte — with spr
 
 // PART 1: F6 COLLABORATIVE MUSIC STUDIO
 const MusicStudio = {
+  // Proximity-based instrument activation
+  activeInstrument: null, // null | 'synth' | 'drums' | 'sequencer' | 'loop'
+  instrumentAlpha: 0, // For smooth fade transitions (0 to 1)
+  targetAlpha: 0, // Target alpha for lerping
+  fadeSpeed: 3.33, // Fade in over 0.3s (1/0.3)
+  
+  // Interaction zones
+  zones: {
+    synth: { x: 185, y: 415, radius: 60 }, // Center of synth area
+    drums: { x: 610, y: 415, radius: 60 }, // Center of drum area
+    sequencer: { x: 395, y: 260, radius: 60 }, // Center of sequencer grid
+    loop: { x: 375, y: 315, radius: 40 } // Center of loop station
+  },
+
   // Visual Step Sequencer (8x16 grid, pentatonic scale)
   sequencer: {
     active: false,
@@ -18088,6 +18102,9 @@ const MusicStudio = {
       }
     }
     
+    // ═══ PROXIMITY-BASED INSTRUMENT ACTIVATION ═══
+    this.updateProximity(dt);
+    
     // ═══ NEW MUSIC STUDIO FEATURES ═══
     // Update sequencer
     this.updateSequencer(dt);
@@ -18107,27 +18124,196 @@ const MusicStudio = {
     }
   },
   
+  updateProximity(dt) {
+    if (!S.useVisitor) return;
+    
+    const visitor = S.visitor;
+    let nearestInstrument = null;
+    let minDistance = Infinity;
+    
+    // Check proximity to each instrument zone
+    for (const [instrument, zone] of Object.entries(this.zones)) {
+      const distance = Math.hypot(visitor.x - zone.x, visitor.y - zone.y);
+      if (distance < zone.radius && distance < minDistance) {
+        minDistance = distance;
+        nearestInstrument = instrument;
+      }
+    }
+    
+    // Update active instrument
+    if (nearestInstrument !== this.activeInstrument) {
+      this.activeInstrument = nearestInstrument;
+    }
+    
+    // Update target alpha
+    this.targetAlpha = this.activeInstrument ? 1 : 0;
+    
+    // Smooth alpha transition
+    const fadeDirection = this.targetAlpha > this.instrumentAlpha ? 1 : -1;
+    const speed = fadeDirection > 0 ? this.fadeSpeed : this.fadeSpeed * 1.67; // Slower fade out
+    
+    if (Math.abs(this.targetAlpha - this.instrumentAlpha) > 0.01) {
+      this.instrumentAlpha += fadeDirection * speed * dt;
+      this.instrumentAlpha = Math.max(0, Math.min(1, this.instrumentAlpha));
+    }
+  },
+  
   render() {
     if (S.floor !== 6) return;
     
-    // Audio visualizer background
+    // Audio visualizer background (ambient, low alpha)
     ctx.save();
-    ctx.globalAlpha = 0.3;
+    const isPlaying = this.sequencer.playing || this.loopStation.playing;
+    ctx.globalAlpha = isPlaying ? 0.3 : 0.1; // Brighter when music is playing
     for (let i = 0; i < this.visualizer.bars.length; i++) {
-      const x = 80 + i * 20;
+      const x = 80 + i * 8; // Thinner, more elegant bars
       const height = this.visualizer.bars[i] * 150;
       const hue = (i / this.visualizer.bars.length) * 360;
       ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
-      ctx.fillRect(x, 500 - height, 15, height);
+      ctx.fillRect(x, 500 - height, 6, height); // Thinner bars
     }
     ctx.restore();
     
+    // Floor instrument markers (when no instrument is active)
+    if (!this.activeInstrument) {
+      this.renderFloorMarkers();
+    }
+    
+    // Active instrument panel (only render when player is near)
+    if (this.activeInstrument && this.instrumentAlpha > 0) {
+      ctx.save();
+      ctx.globalAlpha = this.instrumentAlpha;
+      
+      switch (this.activeInstrument) {
+        case 'synth':
+          this.renderSynthPanel();
+          break;
+        case 'drums':
+          this.renderDrumPanel();
+          break;
+        case 'sequencer':
+          this.renderSequencerPanel();
+          break;
+        case 'loop':
+          this.renderLoopPanel();
+          break;
+      }
+      
+      ctx.restore();
+    }
+    // Always render other players' note particles
+    this.otherPlayerNotes.forEach(note => {
+      ctx.save();
+      ctx.globalAlpha = note.life / note.maxLife;
+      ctx.fillStyle = note.color;
+      ctx.beginPath();
+      ctx.arc(note.x, note.y, note.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+    
+    // Always render Drift's Turntable (part of the room)
+    this.renderTurntable();
+    
+    // "Now Jamming" indicator (only show if 2+ players on F6)
+    const playerCount = Object.keys(S.otherPlayers).filter(id => S.otherPlayers[id].floor === 6).length + 1;
+    if (playerCount > 1) {
+      ctx.fillStyle = '#c080ff';
+      ctx.font = '10px monospace';
+      ctx.textAlign = 'center';
+      const text = `♫ Jamming with ${playerCount - 1} ${playerCount === 2 ? 'other' : 'others'}`;
+      ctx.fillText(text, 400, 100);
+    }
+    
+    // Contextual UI elements (only when active instrument)
+    if (this.activeInstrument && this.instrumentAlpha > 0) {
+      ctx.save();
+      ctx.globalAlpha = this.instrumentAlpha;
+      
+      // Render controls HUD for active instrument
+      this.renderControlsHUD();
+      
+      // Mode indicators (only for synth)
+      if (this.activeInstrument === 'synth') {
+        this.renderModeIndicators();
+      }
+      
+      // Beat preset buttons (only for drums)
+      if (this.activeInstrument === 'drums') {
+        this.renderBeatPresetButtons();
+      }
+      
+      ctx.restore();
+    }
+    
+    // Reactions (only show when music is playing)
+    const musicPlaying = this.sequencer.playing || this.loopStation.playing;
+    if (musicPlaying) {
+      this.renderReactions();
+    }
+  },
+  
+  renderFloorMarkers() {
+    // Subtle world-integrated markers showing where instruments are
+    ctx.save();
+    ctx.globalAlpha = 0.4;
+    
+    // Synth marker (keyboard icon)
+    const synthZone = this.zones.synth;
+    ctx.fillStyle = '#00fff7';
+    ctx.fillRect(synthZone.x - 8, synthZone.y + 20, 16, 3);
+    ctx.fillRect(synthZone.x - 6, synthZone.y + 17, 3, 8);
+    ctx.fillRect(synthZone.x - 2, synthZone.y + 17, 3, 8);
+    ctx.fillRect(synthZone.x + 2, synthZone.y + 17, 3, 8);
+    ctx.fillRect(synthZone.x + 6, synthZone.y + 17, 3, 8);
+    
+    // Drum marker (small circle)
+    const drumZone = this.zones.drums;
+    ctx.fillStyle = '#ff6666';
+    ctx.beginPath();
+    ctx.arc(drumZone.x, drumZone.y + 20, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(drumZone.x, drumZone.y + 20, 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Sequencer marker (faint grid outline)
+    const seqZone = this.zones.sequencer;
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
+        const x = seqZone.x - 10 + j * 5;
+        const y = seqZone.y + 15 + i * 3;
+        ctx.strokeRect(x, y, 4, 2);
+      }
+    }
+    
+    // Loop marker (circular with arrow)
+    const loopZone = this.zones.loop;
+    ctx.strokeStyle = '#44ff44';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(loopZone.x, loopZone.y + 20, 6, 0, Math.PI * 1.5);
+    ctx.stroke();
+    // Arrow
+    ctx.fillStyle = '#44ff44';
+    ctx.beginPath();
+    ctx.moveTo(loopZone.x + 2, loopZone.y + 14);
+    ctx.lineTo(loopZone.x + 6, loopZone.y + 17);
+    ctx.lineTo(loopZone.x + 2, loopZone.y + 20);
+    ctx.fill();
+    
+    ctx.restore();
+  },
+  
+  renderSynthPanel() {
     // Synth Pad Panel Background
     ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(88,338,198,148);
     ctx.strokeStyle='rgba(0,255,247,.3)';ctx.strokeRect(88,338,198,148);
     ctx.fillStyle='#00fff7';ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText('🎹 SYNTH',187,350);
     
-    // Synth Pads (small pixel-art style)
+    // Synth Pads
     this.synthPads.forEach(pad => {
       const active = pad.pressed || pad.glow > 0;
       const w=30,h=28;
@@ -18142,13 +18328,15 @@ const MusicStudio = {
       ctx.fillStyle = '#fff';ctx.font = '7px monospace';ctx.textAlign = 'center';
       ctx.fillText(pad.name, pad.x + w/2, pad.y + h - 4);
     });
-    
+  },
+  
+  renderDrumPanel() {
     // Drum Pad Panel Background
     ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(508,338,210,148);
     ctx.strokeStyle='rgba(255,100,100,.3)';ctx.strokeRect(508,338,210,148);
     ctx.fillStyle='#ff6666';ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText('🥁 DRUMS',613,350);
     
-    // Drum Pads (small pixel-art style)
+    // Drum Pads
     this.drumPads.forEach(pad => {
       const active = pad.pressed || pad.glow > 0;
       const w=40,h=40;
@@ -18163,8 +18351,14 @@ const MusicStudio = {
       ctx.fillStyle = '#fff';ctx.font = '7px monospace';ctx.textAlign = 'center';
       ctx.fillText(pad.name.toUpperCase(), pad.x + w/2, pad.y + h - 5);
     });
-    
-    // Loop Station
+  },
+  
+  renderSequencerPanel() {
+    // Just render the sequencer grid
+    this.renderSequencer();
+  },
+  
+  renderLoopPanel() {
     const loop = this.loopStation;
     ctx.fillStyle = loop.recording ? '#ff4444' : (loop.playing ? '#44ff44' : '#666666');
     ctx.beginPath();
@@ -18186,8 +18380,9 @@ const MusicStudio = {
     ctx.textAlign = 'center';
     ctx.fillText(loop.recording ? 'REC' : (loop.playing ? 'PLAY' : 'LOOP'), loop.x, loop.y + 3);
     ctx.fillText(`${loop.events.length}/${loop.maxEvents}`, loop.x, loop.y + 15);
-    
-    // Drift's Turntable
+  },
+  
+  renderTurntable() {
     const tt = this.turntable;
     ctx.save();
     ctx.translate(tt.x, tt.y);
@@ -18222,98 +18417,62 @@ const MusicStudio = {
       ctx.textAlign = 'center';
       ctx.fillText('LO-FI', tt.x, tt.y + 35);
     }
-    
-    // Other players' note particles
-    this.otherPlayerNotes.forEach(note => {
-      ctx.save();
-      ctx.globalAlpha = note.life / note.maxLife;
-      ctx.fillStyle = note.color;
-      ctx.beginPath();
-      ctx.arc(note.x, note.y, note.size, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    });
-    
-    // Player count indicator
-    const playerCount = Object.keys(S.otherPlayers).filter(id => S.otherPlayers[id].floor === 6).length + 1;
-    ctx.fillStyle = '#c080ff';
-    ctx.font = '12px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(`Now Jamming: ${playerCount} players`, 400, 250);
-    
-    // Instructions (replaced with new controls HUD)
-    // this.renderControlsHUD();
-    
-    // ═══ NEW MUSIC STUDIO VISUAL ELEMENTS ═══
-    // Render sequencer grid
-    this.renderSequencer();
-    
-    // Render reactions
-    this.renderReactions();
-    
-    // Render controls HUD
-    this.renderControlsHUD();
-    
-    // Beat preset buttons
-    this.renderBeatPresetButtons();
-    
-    // Mode indicators
-    this.renderModeIndicators();
   },
   
   renderBeatPresetButtons() {
+    // Minimal beat preset indicators (small text with dot indicators)
     const presets = Object.keys(this.beatPresets);
-    const startX = 500, startY = 120;
+    const startX = 520, startY = 120;
     
     ctx.save();
+    ctx.font = '8px monospace';
+    ctx.textAlign = 'left';
+    
     presets.forEach((presetId, i) => {
       const preset = this.beatPresets[presetId];
-      const x = startX + (i % 2) * 120;
-      const y = startY + Math.floor(i / 2) * 30;
-      
-      // Button background
+      const y = startY + i * 12;
       const isActive = this.currentBeatPreset === presetId;
-      ctx.fillStyle = isActive ? 'rgba(255, 215, 0, 0.3)' : 'rgba(40, 40, 60, 0.8)';
-      ctx.fillRect(x, y, 110, 25);
       
-      // Border
-      ctx.strokeStyle = isActive ? '#ffd700' : '#666';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(x, y, 110, 25);
+      // Dot indicator
+      ctx.fillStyle = isActive ? '#ffd700' : '#666';
+      ctx.beginPath();
+      ctx.arc(startX, y - 2, 3, 0, Math.PI * 2);
+      ctx.fill();
       
       // Text
-      ctx.fillStyle = isActive ? '#ffd700' : '#aaa';
-      ctx.font = '10px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(preset.name, x + 55, y + 16);
-      
-      // Key indicator
-      ctx.fillStyle = '#888';
-      ctx.font = '8px monospace';
-      ctx.fillText(['9', '0', '-', '='][i], x + 5, y + 12);
+      ctx.fillStyle = isActive ? '#ffd700' : '#888';
+      ctx.fillText(`${['9', '0', '-', '='][i]}: ${preset.name}`, startX + 10, y);
     });
     ctx.restore();
   },
   
   renderModeIndicators() {
-    const startX = 350, startY = 90;
+    // Minimal mode indicators (small text with dot indicators, only for synth)
+    const startX = 100, startY = 320;
     
     ctx.save();
-    ctx.font = '11px monospace';
+    ctx.font = '8px monospace';
+    ctx.textAlign = 'left';
     
-    // Chord Mode
+    // Chord Mode indicator
     ctx.fillStyle = this.chordMode ? '#ff6ec7' : '#666';
-    ctx.fillText('🎵 CHORD MODE: ' + (this.chordMode ? 'ON' : 'OFF'), startX, startY);
+    ctx.beginPath();
+    ctx.arc(startX, startY - 2, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillText('Chord Mode', startX + 8, startY);
     
-    // Auto-Accompany
+    // Auto-Accompany indicator
     ctx.fillStyle = this.autoAccompany ? '#00fff7' : '#666';
-    ctx.fillText('🎸 AUTO-ACCOMPANY: ' + (this.autoAccompany ? 'ON' : 'OFF'), startX, startY + 20);
+    ctx.beginPath();
+    ctx.arc(startX, startY + 10, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillText('Auto-Play', startX + 8, startY + 12);
     
-    // Current chord in progression
+    // Current chord (minimal)
     if (this.autoAccompany) {
       const chord = this.chordProgression[this.currentChord];
       ctx.fillStyle = '#ffd700';
-      ctx.fillText('Current Chord: ' + chord.name, startX, startY + 40);
+      ctx.fillText(chord.name, startX + 8, startY + 24);
     }
     
     ctx.restore();
@@ -19368,20 +19527,53 @@ const MusicStudio = {
     showNotification('🎵 Song saved: ' + songName);
   },
   
-  // ═══ CONTROLS HUD ═══
+  // ═══ CONTEXTUAL CONTROLS HUD ═══
   renderControlsHUD() {
-    if (S.floor !== 6) return;
+    if (S.floor !== 6 || !this.activeInstrument) return;
     
     ctx.save();
-    ctx.fillStyle = 'rgba(10, 10, 20, 0.9)';
-    ctx.fillRect(50, 545, 700, 40);
-    ctx.strokeStyle='rgba(0,255,247,.2)';ctx.strokeRect(50,545,700,40);
     
-    ctx.fillStyle = '#888';
-    ctx.font = '9px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('🎹 1-8: Notes  🥁 QWER: Drums  🔄 L: Loop  🎵 C: Chords  🎸 B: Auto-Play', 400, 560);
-    ctx.fillText('💾 P: Save  🎛️ 9/0/-/=: Beats  Click Grid: Sequencer', 400, 575);
+    let controlText = '';
+    switch (this.activeInstrument) {
+      case 'synth':
+        controlText = '🎹 1-8: Play Notes · C: Chord Mode · B: Auto-Play';
+        break;
+      case 'drums':
+        controlText = '🥁 Q/W/E/R: Kick/Snare/HiHat/Clap · 9/0/-/=: Presets';
+        break;
+      case 'sequencer':
+        controlText = '🎵 Click grid to place notes · SPACE: Play/Stop';
+        break;
+      case 'loop':
+        const loop = this.loopStation;
+        if (loop.recording) {
+          controlText = '🔴 L: Stop Recording';
+        } else if (loop.playing) {
+          controlText = '▶️ L: Stop Loop · Loop playing...';
+        } else {
+          controlText = '🔄 L: Record/Stop';
+        }
+        break;
+      default:
+        controlText = 'Walk to an instrument to play';
+    }
+    
+    if (controlText) {
+      // Small, unobtrusive HUD
+      const textWidth = ctx.measureText(controlText).width + 20;
+      const hudX = 400 - textWidth / 2;
+      const hudY = 555;
+      
+      ctx.fillStyle = 'rgba(10, 10, 20, 0.8)';
+      ctx.fillRect(hudX, hudY, textWidth, 25);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.strokeRect(hudX, hudY, textWidth, 25);
+      
+      ctx.fillStyle = '#aaa';
+      ctx.font = '8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(controlText, 400, hudY + 16);
+    }
     
     ctx.restore();
   }
