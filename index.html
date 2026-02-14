@@ -16422,6 +16422,1465 @@ const _origGameLoop=typeof gameLoop==='function'?gameLoop:null;
 (function(){const _uf=update;if(_uf)window._bugFpsHook=setInterval(()=>{S._fps=S._fpsFrames;S._fpsFrames=0},1000)})();
 BugReport.init();
 
+// §NPCs — Station Characters & Quests
+// ═══════════════════════════════════════════════════════════════
+// 6 unique NPCs with pixel art sprites, dialogue system, floor-specific behaviors, and quest chains
+// ═══════════════════════════════════════════════════════════════
+
+const StationNPCs = {
+  npcs: {
+    nova: {
+      id: 'nova',
+      floor: 5, x: 300, y: 350, dir: 2, frame: 0, frameTimer: 0,
+      name: 'Nova', title: 'The Tinkerer',
+      moving: false, behaviorTimer: 0, behaviorState: 'idle',
+      targetX: 300, targetY: 350,
+      dialogues: {
+        first: "Oh! A visitor! Don't touch that— actually, touch whatever you want. If it explodes, I'll learn something!",
+        idle: [
+          "Almost got the flux capacitor working... kidding. Or am I?",
+          "Echo says I break more than I fix. Echo is correct.",
+          "Want to see my latest invention? It only caught fire twice!",
+          "The reactor on Floor 0? Yeah, I helped build that. Don't tell Echo it's held together with tape."
+        ]
+      },
+      questActive: false, questComplete: false, hasMetPlayer: false
+    },
+    
+    drift: {
+      id: 'drift',
+      floor: 6, x: 500, y: 400, dir: 3, frame: 0, frameTimer: 0,
+      name: 'Drift', title: 'The Wandering Musician',
+      moving: false, behaviorTimer: 0, behaviorState: 'idle',
+      targetX: 500, targetY: 400,
+      dialogues: {
+        first: "Hey... you hear that? The station hums in B-flat. Everything has a frequency, if you listen.",
+        idle: [
+          "I wrote a song about the nebula outside. It's just one note that lasts forever.",
+          "Music isn't sound. It's the space between sounds.",
+          "Pixel comes and sits with me sometimes. She gets it.",
+          "I've been everywhere. Nowhere sounded like this station."
+        ]
+      },
+      questActive: false, questComplete: false, hasMetPlayer: false
+    },
+    
+    sol: {
+      id: 'sol',
+      floor: 4, x: 400, y: 350, dir: 0, frame: 0, frameTimer: 0,
+      name: 'Sol', title: 'The Gardener',
+      moving: false, behaviorTimer: 0, behaviorState: 'idle',
+      targetX: 400, targetY: 350,
+      dialogues: {
+        first: "Welcome to the biodome. Everything grows here... even secrets. Especially secrets.",
+        idle: [
+          "The mushrooms in the corner? They've been here longer than I have. Longer than Echo, even.",
+          "I talk to the plants. They don't answer. But they listen.",
+          "If you're patient, the garden reveals things the scanners miss.",
+          "Sol is short for Solitude. But I don't mind company."
+        ]
+      },
+      questActive: false, questComplete: false, hasMetPlayer: false
+    },
+    
+    glitch: {
+      id: 'glitch',
+      floor: 3, x: 350, y: 300, dir: 0, frame: 0, frameTimer: 0,
+      name: 'Glitch', title: 'The Arcade Kid',
+      moving: false, behaviorTimer: 0, behaviorState: 'idle',
+      targetX: 350, targetY: 300, glitchTimer: 0,
+      dialogues: {
+        first: "NEW CHALLENGER APPROACHING! Oh wait, you look like a noob. That's fine. Everyone starts somewhere. I started at the TOP. 😎",
+        idle: [
+          "My Snake high score? Don't even ask. Actually, ask. It's 9999.",
+          "I beat Echo at their own game once. They pretend it didn't happen.",
+          "Wanna 1v1? ...when duels work on this floor, anyway.",
+          "I'm not glitching, I'm OPTIMIZING my render pipeline. Big difference."
+        ]
+      },
+      questActive: false, questComplete: false, hasMetPlayer: false
+    },
+    
+    void: {
+      id: 'void',
+      floor: 2, x: 600, y: 250, dir: 3, frame: 0, frameTimer: 0,
+      name: 'Void', title: 'The Observer',
+      moving: false, behaviorTimer: 0, behaviorState: 'idle',
+      targetX: 600, targetY: 250, floatOffset: 0,
+      dialogues: {
+        first: "...You can see me? Interesting. Most visitors walk right past. You have... attention.",
+        idle: [
+          "The stars don't move. We do. Remember that.",
+          "Floor 9 calls to those who seek. Do you seek?",
+          "I've watched this station since before it had a name.",
+          "Echo thinks they built this place. The truth is... older."
+        ]
+      },
+      questActive: false, questComplete: false, hasMetPlayer: false
+    },
+    
+    byte: {
+      id: 'byte',
+      floor: 7, x: 450, y: 400, dir: 0, frame: 0, frameTimer: 0,
+      name: 'Byte', title: 'The Merchant Cat',
+      moving: false, behaviorTimer: 0, behaviorState: 'idle',
+      targetX: 450, targetY: 400, tailTimer: 0,
+      dialogues: {
+        first: "Mrow! A customer! I'm Byte — Pixel's firstborn. Yes, I walk upright. No, we don't talk about it. Now... buying or selling?",
+        idle: [
+          "Purrfect day for commerce, wouldn't you say?",
+          "I've got items you won't find in the shop. Better items. My items.",
+          "Mom — I mean Pixel — doesn't approve of my career choices.",
+          "You look like someone who appreciates a good deal. Or a bad deal at a good price."
+        ]
+      },
+      questActive: false, questComplete: false, hasMetPlayer: false
+    }
+  },
+  
+  // Dialogue popup state
+  dialogue: {
+    active: false,
+    npcId: null,
+    currentText: '',
+    displayText: '',
+    typewriterIndex: 0,
+    typewriterSpeed: 0.05,
+    showingQuest: false,
+    questData: null
+  },
+  
+  // Quest collectibles spawned on floors
+  collectibles: [],
+  
+  update(dt) {
+    // Update NPC behaviors and animations
+    Object.values(this.npcs).forEach(npc => {
+      this.updateNPC(npc, dt);
+    });
+    
+    // Update dialogue typewriter effect
+    if (this.dialogue.active && this.dialogue.typewriterIndex < this.dialogue.currentText.length) {
+      this.dialogue.typewriterIndex += this.dialogue.typewriterSpeed;
+      this.dialogue.displayText = this.dialogue.currentText.slice(0, Math.floor(this.dialogue.typewriterIndex));
+    }
+    
+    // Update collectibles (glowing effect)
+    this.collectibles.forEach(collectible => {
+      collectible.glowTimer = (collectible.glowTimer || 0) + dt * 4;
+    });
+    
+    // Check collectible pickup
+    if (S.useVisitor) {
+      this.collectibles = this.collectibles.filter(collectible => {
+        const distance = Math.hypot(S.visitor.x - collectible.x, S.visitor.y - collectible.y);
+        if (distance < 20) {
+          this.collectItem(collectible);
+          return false; // Remove from array
+        }
+        return true;
+      });
+    }
+  },
+  
+  updateNPC(npc, dt) {
+    // Animation frame timer
+    if (npc.moving) {
+      npc.frameTimer += dt;
+      if (npc.frameTimer > 0.3) {
+        npc.frame = npc.frame ? 0 : 1;
+        npc.frameTimer = 0;
+      }
+    } else {
+      npc.frame = 0;
+    }
+    
+    // Behavior timer
+    npc.behaviorTimer += dt;
+    
+    // Special behavior updates
+    switch (npc.id) {
+      case 'nova':
+        this.updateNova(npc, dt);
+        break;
+      case 'drift':
+        this.updateDrift(npc, dt);
+        break;
+      case 'sol':
+        this.updateSol(npc, dt);
+        break;
+      case 'glitch':
+        this.updateGlitch(npc, dt);
+        break;
+      case 'void':
+        this.updateVoid(npc, dt);
+        break;
+      case 'byte':
+        this.updateByte(npc, dt);
+        break;
+    }
+    
+    // Movement logic
+    if (npc.moving) {
+      const dx = npc.targetX - npc.x;
+      const dy = npc.targetY - npc.y;
+      const distance = Math.hypot(dx, dy);
+      
+      if (distance < 5) {
+        npc.x = npc.targetX;
+        npc.y = npc.targetY;
+        npc.moving = false;
+        npc.behaviorState = 'idle';
+      } else {
+        const speed = 60;
+        npc.x += (dx / distance) * speed * dt;
+        npc.y += (dy / distance) * speed * dt;
+        
+        // Update direction based on movement
+        if (Math.abs(dx) > Math.abs(dy)) {
+          npc.dir = dx > 0 ? 2 : 1;
+        } else {
+          npc.dir = dy > 0 ? 0 : 3;
+        }
+      }
+    }
+  },
+  
+  updateNova(npc, dt) {
+    // Nova wanders around F5 between workbenches
+    if (npc.behaviorState === 'idle' && npc.behaviorTimer > 3 + Math.random() * 4) {
+      const spots = [
+        {x: 200, y: 300}, {x: 500, y: 200}, {x: 600, y: 400}, {x: 300, y: 350}
+      ];
+      const target = spots[Math.floor(Math.random() * spots.length)];
+      npc.targetX = target.x;
+      npc.targetY = target.y;
+      npc.moving = true;
+      npc.behaviorTimer = 0;
+      npc.behaviorState = 'wandering';
+    }
+    
+    // Occasionally create spark particles
+    if (Math.random() < 0.02) {
+      for (let i = 0; i < 3; i++) {
+        S.particles.push({
+          x: npc.x + (Math.random() - 0.5) * 20,
+          y: npc.y - 10,
+          vx: (Math.random() - 0.5) * 3,
+          vy: -Math.random() * 3,
+          life: 15,
+          color: '#ffaa00',
+          size: 2
+        });
+      }
+    }
+  },
+  
+  updateDrift(npc, dt) {
+    // Drift sits near record player, occasionally sways to music
+    if (npc.behaviorState === 'idle' && npc.behaviorTimer > 8 + Math.random() * 6) {
+      const spots = [
+        {x: 400, y: 200}, {x: 600, y: 450}, {x: 500, y: 400}
+      ];
+      const target = spots[Math.floor(Math.random() * spots.length)];
+      npc.targetX = target.x;
+      npc.targetY = target.y;
+      npc.moving = true;
+      npc.behaviorTimer = 0;
+      npc.behaviorState = 'moving';
+    }
+    
+    // Gentle purple aura particles
+    if (Math.random() < 0.01) {
+      S.particles.push({
+        x: npc.x + (Math.random() - 0.5) * 30,
+        y: npc.y - 20,
+        vx: 0,
+        vy: -0.5,
+        life: 60,
+        color: 'rgba(155, 89, 182, 0.6)',
+        size: 3
+      });
+    }
+  },
+  
+  updateSol(npc, dt) {
+    // Sol moves between garden plots
+    if (npc.behaviorState === 'idle' && npc.behaviorTimer > 5 + Math.random() * 5) {
+      const plots = [
+        {x: 200, y: 300}, {x: 400, y: 350}, {x: 600, y: 300}, {x: 300, y: 450}
+      ];
+      const target = plots[Math.floor(Math.random() * plots.length)];
+      npc.targetX = target.x;
+      npc.targetY = target.y;
+      npc.moving = true;
+      npc.behaviorTimer = 0;
+      npc.behaviorState = 'tending';
+    }
+    
+    // Sometimes kneels to tend plants
+    if (!npc.moving && Math.random() < 0.005) {
+      npc.dir = 0; // Face down to tend plants
+    }
+    
+    // Floating leaf particles
+    if (Math.random() < 0.015) {
+      S.particles.push({
+        x: npc.x + (Math.random() - 0.5) * 25,
+        y: npc.y - 15,
+        vx: (Math.random() - 0.5) * 1,
+        vy: -Math.random() * 2,
+        life: 80,
+        color: '#44aa44',
+        size: 2
+      });
+    }
+  },
+  
+  updateGlitch(npc, dt) {
+    // Glitch stands near arcade machines and does victory poses
+    npc.glitchTimer += dt;
+    
+    if (npc.behaviorState === 'idle' && npc.behaviorTimer > 4 + Math.random() * 6) {
+      if (Math.random() < 0.3) {
+        // Victory pose
+        npc.behaviorState = 'victory';
+        npc.behaviorTimer = 0;
+      } else {
+        // Move to another arcade machine
+        const machines = [
+          {x: 185, y: 240}, {x: 335, y: 240}, {x: 500, y: 240}
+        ];
+        const target = machines[Math.floor(Math.random() * machines.length)];
+        npc.targetX = target.x;
+        npc.targetY = target.y;
+        npc.moving = true;
+        npc.behaviorTimer = 0;
+      }
+    }
+    
+    if (npc.behaviorState === 'victory' && npc.behaviorTimer > 2) {
+      npc.behaviorState = 'idle';
+      npc.behaviorTimer = 0;
+    }
+    
+    // Glitch effect - occasionally flicker sprite position
+    if (npc.glitchTimer > 1) {
+      if (Math.random() < 0.05) {
+        npc._glitchOffsetX = (Math.random() - 0.5) * 4;
+        npc._glitchOffsetY = (Math.random() - 0.5) * 4;
+        setTimeout(() => {
+          npc._glitchOffsetX = 0;
+          npc._glitchOffsetY = 0;
+        }, 100);
+      }
+      npc.glitchTimer = 0;
+    }
+  },
+  
+  updateVoid(npc, dt) {
+    // Void floats slightly and stares out at space
+    npc.floatOffset += dt * 2;
+    
+    if (npc.behaviorState === 'idle' && npc.behaviorTimer > 10 + Math.random() * 10) {
+      // Occasionally turn to look at visitor
+      if (S.useVisitor && S.visitor.floor === npc.floor) {
+        const dx = S.visitor.x - npc.x;
+        if (Math.abs(dx) > 50) {
+          npc.dir = dx > 0 ? 2 : 1;
+        }
+      }
+      npc.behaviorTimer = 0;
+    }
+  },
+  
+  updateByte(npc, dt) {
+    // Byte stands behind merchant stall, tail swishes
+    npc.tailTimer += dt;
+    
+    if (npc.behaviorState === 'idle' && npc.behaviorTimer > 6 + Math.random() * 4) {
+      // Occasionally count coins animation
+      if (Math.random() < 0.4) {
+        npc.behaviorState = 'counting';
+        npc.behaviorTimer = 0;
+      }
+    }
+    
+    if (npc.behaviorState === 'counting' && npc.behaviorTimer > 3) {
+      npc.behaviorState = 'idle';
+      npc.behaviorTimer = 0;
+    }
+  },
+  
+  render(ctx) {
+    // Render NPCs on current floor
+    Object.values(this.npcs).forEach(npc => {
+      if (npc.floor === S.floor) {
+        this.renderNPC(ctx, npc);
+      }
+    });
+    
+    // Render quest collectibles on current floor
+    this.collectibles.forEach(collectible => {
+      if (collectible.floor === S.floor) {
+        this.renderCollectible(ctx, collectible);
+      }
+    });
+    
+    // Render dialogue popup
+    if (this.dialogue.active) {
+      this.renderDialogue(ctx);
+    }
+  },
+  
+  renderNPC(ctx, npc) {
+    const sprite = this.getNPCSprite(npc.id, npc.dir, npc.frame);
+    if (!sprite) return;
+    
+    const scale = 3;
+    const spriteW = sprite[0] ? sprite[0].length * scale : 0;
+    const spriteH = sprite.length * scale;
+    
+    let renderX = npc.x - spriteW / 2;
+    let renderY = npc.y - spriteH;
+    
+    // Apply special effects
+    switch (npc.id) {
+      case 'glitch':
+        renderX += npc._glitchOffsetX || 0;
+        renderY += npc._glitchOffsetY || 0;
+        break;
+      case 'void':
+        renderY += Math.sin(npc.floatOffset) * 3; // Floating effect
+        break;
+    }
+    
+    // Draw shadow
+    drawCharacterShadow(npc.x, npc.y, spriteW, S.floor);
+    
+    // Draw sprite
+    drawSprite(ctx, renderX, renderY, sprite, scale);
+    
+    // Name tag
+    ctx.fillStyle = 'rgba(30, 25, 45, 0.8)';
+    ctx.font = '8px monospace';
+    const nameText = `${npc.name} - ${npc.title}`;
+    const textWidth = ctx.measureText(nameText).width;
+    ctx.fillRect(npc.x - textWidth / 2 - 4, npc.y - spriteH - 18, textWidth + 8, 12);
+    
+    ctx.fillStyle = '#c080ff';
+    ctx.textAlign = 'center';
+    ctx.fillText(nameText, npc.x, npc.y - spriteH - 8);
+    ctx.textAlign = 'left';
+    
+    // Interaction indicator when player is nearby
+    if (S.useVisitor && S.visitor.floor === npc.floor) {
+      const distance = Math.hypot(S.visitor.x - npc.x, S.visitor.y - npc.y);
+      if (distance < 40) {
+        const questState = NPCQuests.getQuestState(npc.id);
+        const icon = questState === 'available' || questState === 'complete' ? '❗' : '💬';
+        const pulse = 0.7 + Math.sin(S.time * 4) * 0.3;
+        
+        ctx.save();
+        ctx.globalAlpha = pulse;
+        ctx.font = '16px serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(icon, npc.x, npc.y - spriteH - 25);
+        ctx.restore();
+      }
+    }
+  },
+  
+  renderCollectible(ctx, collectible) {
+    const pulse = 0.6 + Math.sin(collectible.glowTimer) * 0.4;
+    const glow = Math.sin(collectible.glowTimer * 2) * 3;
+    
+    // Glow effect
+    ctx.save();
+    ctx.shadowColor = collectible.color || '#ffd700';
+    ctx.shadowBlur = 10 + glow;
+    ctx.globalAlpha = pulse;
+    
+    // Draw collectible icon
+    ctx.font = '16px serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = collectible.color || '#ffd700';
+    ctx.fillText(collectible.icon, collectible.x, collectible.y + Math.sin(collectible.glowTimer) * 2);
+    
+    ctx.restore();
+  },
+  
+  renderDialogue(ctx) {
+    const dialogue = this.dialogue;
+    const padding = 20;
+    const maxWidth = 400;
+    const lineHeight = 16;
+    
+    // Split text into lines
+    ctx.font = '12px monospace';
+    const words = dialogue.displayText.split(' ');
+    const lines = [];
+    let currentLine = '';
+    
+    words.forEach(word => {
+      const testLine = currentLine + (currentLine ? ' ' : '') + word;
+      if (ctx.measureText(testLine).width > maxWidth - padding * 2) {
+        if (currentLine) lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    });
+    if (currentLine) lines.push(currentLine);
+    
+    const popupHeight = padding * 2 + lines.length * lineHeight + (dialogue.showingQuest ? 60 : 20);
+    const popupWidth = maxWidth;
+    const popupX = (W - popupWidth) / 2;
+    const popupY = (H - popupHeight) / 2;
+    
+    // Background
+    ctx.fillStyle = 'rgba(26, 26, 46, 0.95)';
+    ctx.fillRect(popupX, popupY, popupWidth, popupHeight);
+    
+    // Border
+    ctx.strokeStyle = '#9b59b6';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(popupX, popupY, popupWidth, popupHeight);
+    
+    // NPC name
+    const npc = this.npcs[dialogue.npcId];
+    if (npc) {
+      ctx.fillStyle = '#00fff7';
+      ctx.font = 'bold 14px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(npc.name, popupX + popupWidth / 2, popupY + 20);
+    }
+    
+    // Dialogue text
+    ctx.fillStyle = '#ddd';
+    ctx.font = '12px monospace';
+    ctx.textAlign = 'left';
+    lines.forEach((line, index) => {
+      ctx.fillText(line, popupX + padding, popupY + 45 + index * lineHeight);
+    });
+    
+    // Quest buttons or continue prompt
+    if (dialogue.showingQuest && dialogue.questData) {
+      const buttonY = popupY + popupHeight - 35;
+      
+      // Accept button
+      ctx.fillStyle = '#44aa44';
+      ctx.fillRect(popupX + 30, buttonY, 80, 25);
+      ctx.fillStyle = '#fff';
+      ctx.font = '11px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('Accept', popupX + 70, buttonY + 16);
+      
+      // Decline button
+      ctx.fillStyle = '#aa4444';
+      ctx.fillRect(popupX + 130, buttonY, 80, 25);
+      ctx.fillStyle = '#fff';
+      ctx.fillText('Decline', popupX + 170, buttonY + 16);
+    } else if (dialogue.typewriterIndex >= dialogue.currentText.length) {
+      // Continue prompt
+      ctx.fillStyle = '#888';
+      ctx.font = '10px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('Press SPACE to continue, ESC to close', popupX + popupWidth / 2, popupY + popupHeight - 10);
+    }
+    
+    // Reset text alignment
+    ctx.textAlign = 'left';
+  },
+  
+  interact(npcId) {
+    const npc = this.npcs[npcId];
+    if (!npc || npc.floor !== S.floor) return;
+    
+    if (this.dialogue.active) return; // Already in dialogue
+    
+    // Determine dialogue text
+    let dialogueText;
+    if (!npc.hasMetPlayer) {
+      dialogueText = npc.dialogues.first;
+      npc.hasMetPlayer = true;
+    } else {
+      const idle = npc.dialogues.idle;
+      dialogueText = idle[Math.floor(Math.random() * idle.length)];
+    }
+    
+    // Check for quest availability
+    const questState = NPCQuests.getQuestState(npcId);
+    if (questState === 'available') {
+      const questData = NPCQuests.quests[npcId];
+      if (questData) {
+        dialogueText += `\n\n${questData.description}\n\nWill you help me?`;
+        this.dialogue.showingQuest = true;
+        this.dialogue.questData = questData;
+      }
+    } else if (questState === 'active') {
+      dialogueText = NPCQuests.getProgressText(npcId);
+    } else if (questState === 'complete') {
+      dialogueText = NPCQuests.getCompleteText(npcId);
+    }
+    
+    // Start dialogue
+    this.dialogue.active = true;
+    this.dialogue.npcId = npcId;
+    this.dialogue.currentText = dialogueText;
+    this.dialogue.displayText = '';
+    this.dialogue.typewriterIndex = 0;
+  },
+  
+  closeDialogue() {
+    this.dialogue.active = false;
+    this.dialogue.showingQuest = false;
+    this.dialogue.questData = null;
+    this.dialogue.npcId = null;
+  },
+  
+  handleDialogueInput(key) {
+    if (!this.dialogue.active) return false;
+    
+    if (key === 'Escape') {
+      this.closeDialogue();
+      return true;
+    }
+    
+    if (key === ' ' || key === 'Enter') {
+      if (this.dialogue.typewriterIndex < this.dialogue.currentText.length) {
+        // Skip typewriter animation
+        this.dialogue.typewriterIndex = this.dialogue.currentText.length;
+        this.dialogue.displayText = this.dialogue.currentText;
+      } else if (this.dialogue.showingQuest) {
+        // Handle quest acceptance (default to accept for now)
+        this.acceptQuest();
+      } else {
+        // Close dialogue
+        this.closeDialogue();
+      }
+      return true;
+    }
+    
+    return false;
+  },
+  
+  acceptQuest() {
+    if (this.dialogue.questData && this.dialogue.npcId) {
+      NPCQuests.startQuest(this.dialogue.npcId);
+      this.spawnQuestCollectibles(this.dialogue.npcId);
+      showNotification(`Quest accepted: ${this.dialogue.questData.name}`);
+    }
+    this.closeDialogue();
+  },
+  
+  spawnQuestCollectibles(npcId) {
+    const questData = NPCQuests.quests[npcId];
+    if (!questData || !questData.collectibles) return;
+    
+    questData.collectibles.forEach(collectible => {
+      this.collectibles.push({
+        id: collectible.id,
+        questId: npcId,
+        floor: collectible.floor,
+        x: collectible.x,
+        y: collectible.y,
+        icon: collectible.icon,
+        color: collectible.color,
+        name: collectible.name,
+        glowTimer: 0
+      });
+    });
+  },
+  
+  collectItem(collectible) {
+    // Play collection sound
+    if (S.audioCtx) {
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      osc.frequency.value = 800;
+      gain.gain.setValueAtTime(0.1 * S.volume, S.audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, S.audioCtx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(S.masterGain);
+      osc.start();
+      osc.stop(S.audioCtx.currentTime + 0.3);
+    }
+    
+    // Collection particles
+    for (let i = 0; i < 8; i++) {
+      S.particles.push({
+        x: collectible.x,
+        y: collectible.y,
+        vx: (Math.random() - 0.5) * 4,
+        vy: -Math.random() * 3 - 1,
+        life: 30,
+        color: collectible.color,
+        size: 3
+      });
+    }
+    
+    // Float text
+    S.floatTexts.push({
+      text: `+1 ${collectible.name}`,
+      x: collectible.x,
+      y: collectible.y - 10,
+      color: collectible.color,
+      life: 60
+    });
+    
+    // Update quest progress
+    NPCQuests.collectItem(collectible.questId, collectible.id);
+  },
+  
+  getNPCSprite(npcId, dir, frame) {
+    const T = 0; // Transparent
+    
+    switch (npcId) {
+      case 'nova':
+        return this.getNovaSprite(dir, frame);
+      case 'drift':
+        return this.getDriftSprite(dir, frame);
+      case 'sol':
+        return this.getSolSprite(dir, frame);
+      case 'glitch':
+        return this.getGlitchSprite(dir, frame);
+      case 'void':
+        return this.getVoidSprite(dir, frame);
+      case 'byte':
+        return this.getByteSprite(dir, frame);
+      default:
+        return null;
+    }
+  },
+  
+  getNovaSprite(dir, frame) {
+    // Nova: Short messy hair, goggles, grease-stained orange jumpsuit, wrench
+    const T = 0;
+    const H = '#8B4513'; // Brown messy hair
+    const S = '#FFDBAC'; // Skin
+    const G = '#FFD700'; // Goggles
+    const J = '#FF8C00'; // Orange jumpsuit
+    const Jd = '#FF6347'; // Jumpsuit dark (stains)
+    const W = '#C0C0C0'; // Wrench
+    const E = '#222'; // Eyes
+    const B = '#8B4513'; // Boots
+    
+    if (dir === 0) { // Front
+      return [
+        [T,T,H,H,H,H,H,H,T,T],
+        [T,H,H,H,H,H,H,H,H,T],
+        [T,G,G,S,S,S,S,G,G,T],
+        [T,T,S,E,S,S,E,S,T,T],
+        [T,T,S,S,S,S,S,S,T,T],
+        [T,T,J,J,J,J,J,J,T,T],
+        [T,J,J,Jd,J,J,Jd,J,J,T],
+        [T,J,J,J,J,J,J,J,J,T],
+        [T,T,J,J,J,J,J,J,T,T],
+        [T,T,J,J,T,T,J,J,T,T],
+        [T,T,B,B,T,T,B,B,T,T],
+        [T,W,W,W,T,T,T,T,T,T] // Wrench in hand
+      ];
+    } else if (dir === 3) { // Back
+      return [
+        [T,T,H,H,H,H,H,H,T,T],
+        [T,H,H,H,H,H,H,H,H,T],
+        [T,T,H,H,H,H,H,H,T,T],
+        [T,T,S,S,S,S,S,S,T,T],
+        [T,T,S,S,S,S,S,S,T,T],
+        [T,T,J,J,J,J,J,J,T,T],
+        [T,J,J,J,J,J,J,J,J,T],
+        [T,J,J,Jd,J,J,Jd,J,J,T],
+        [T,T,J,J,J,J,J,J,T,T],
+        [T,T,J,J,T,T,J,J,T,T],
+        [T,T,B,B,T,T,B,B,T,T],
+        [T,T,T,T,T,T,T,T,T,T]
+      ];
+    } else { // Side
+      const grid = [
+        [T,T,H,H,H,H,T,T,T,T],
+        [T,H,H,H,H,H,H,T,T,T],
+        [T,G,S,S,S,S,T,T,T,T],
+        [T,T,S,E,S,S,T,T,T,T],
+        [T,T,S,S,S,S,T,T,T,T],
+        [T,T,J,J,J,J,T,T,T,T],
+        [T,J,J,J,J,J,J,T,T,T],
+        [T,J,Jd,J,J,J,J,T,T,T],
+        [T,T,J,J,J,J,T,T,T,T],
+        [T,T,J,J,T,T,T,T,T,T],
+        [T,T,B,B,T,T,T,T,T,T],
+        [W,W,W,T,T,T,T,T,T,T] // Wrench
+      ];
+      return dir === 2 ? grid.map(r => [...r].reverse()) : grid;
+    }
+  },
+  
+  getDriftSprite(dir, frame) {
+    // Drift: Tall, hoodie, headphones, purple aura
+    const T = 0;
+    const H = '#654321'; // Brown hair
+    const S = '#FFDBAC'; // Skin
+    const Ho = '#6A5ACD'; // Purple hoodie
+    const Hod = '#483D8B'; // Hoodie dark
+    const Hp = '#FFD700'; // Headphones
+    const P = '#2F2F4F'; // Pants
+    const Sh = '#8B4513'; // Shoes
+    const E = '#222'; // Eyes
+    
+    if (dir === 0) { // Front
+      return [
+        [T,T,Ho,Ho,Ho,Ho,Ho,T,T,T],
+        [T,Ho,Ho,Ho,Ho,Ho,Ho,Ho,T,T],
+        [Hp,Ho,H,S,S,S,S,H,Ho,Hp],
+        [T,T,S,E,S,S,E,S,T,T],
+        [T,T,S,S,S,S,S,S,T,T],
+        [T,T,Ho,Ho,Ho,Ho,Ho,T,T,T],
+        [T,Ho,Ho,Ho,Ho,Ho,Ho,Ho,T,T],
+        [T,Ho,Ho,Hod,Ho,Hod,Ho,Ho,T,T],
+        [T,T,Ho,Ho,Ho,Ho,Ho,T,T,T],
+        [T,T,P,P,T,T,P,P,T,T],
+        [T,T,P,P,T,T,P,P,T,T],
+        [T,Sh,Sh,Sh,T,Sh,Sh,Sh,T,T]
+      ];
+    } else if (dir === 3) { // Back
+      return [
+        [T,T,Ho,Ho,Ho,Ho,Ho,T,T,T],
+        [T,Ho,Ho,Ho,Ho,Ho,Ho,Ho,T,T],
+        [T,Ho,Ho,Ho,Ho,Ho,Ho,Ho,T,T],
+        [T,T,Ho,Ho,Ho,Ho,Ho,T,T,T],
+        [T,T,Ho,Ho,Ho,Ho,Ho,T,T,T],
+        [T,T,Ho,Ho,Ho,Ho,Ho,T,T,T],
+        [T,Ho,Ho,Ho,Ho,Ho,Ho,Ho,T,T],
+        [T,Ho,Ho,Ho,Ho,Ho,Ho,Ho,T,T],
+        [T,T,Ho,Ho,Ho,Ho,Ho,T,T,T],
+        [T,T,P,P,T,T,P,P,T,T],
+        [T,T,P,P,T,T,P,P,T,T],
+        [T,Sh,Sh,Sh,T,Sh,Sh,Sh,T,T]
+      ];
+    } else { // Side
+      const grid = [
+        [T,T,Ho,Ho,Ho,T,T,T,T,T],
+        [T,Ho,Ho,Ho,Ho,Ho,T,T,T,T],
+        [Hp,Ho,H,S,S,S,T,T,T,T],
+        [T,T,S,E,S,S,T,T,T,T],
+        [T,T,S,S,S,S,T,T,T,T],
+        [T,T,Ho,Ho,Ho,T,T,T,T,T],
+        [T,Ho,Ho,Ho,Ho,Ho,T,T,T,T],
+        [T,Ho,Hod,Ho,Ho,Ho,T,T,T,T],
+        [T,T,Ho,Ho,Ho,T,T,T,T,T],
+        [T,T,P,P,T,T,T,T,T,T],
+        [T,T,P,P,T,T,T,T,T,T],
+        [T,Sh,Sh,Sh,T,T,T,T,T,T]
+      ];
+      return dir === 2 ? grid.map(r => [...r].reverse()) : grid;
+    }
+  },
+  
+  getSolSprite(dir, frame) {
+    // Sol: Wide hat, earthy colors, braid, watering can, green-tinted hands
+    const T = 0;
+    const Ha = '#8B7355'; // Hat (wide brim)
+    const H = '#D2691E'; // Hair (braid)
+    const S = '#FFDBAC'; // Skin
+    const Sg = '#98FB98'; // Skin with green tint (hands)
+    const C = '#228B22'; // Green clothing
+    const Cd = '#006400'; // Clothing dark
+    const W = '#B0C4DE'; // Watering can
+    const E = '#222'; // Eyes
+    const Bo = '#8B4513'; // Boots
+    
+    if (dir === 0) { // Front
+      return [
+        [Ha,Ha,Ha,Ha,Ha,Ha,Ha,Ha,Ha,T],
+        [T,T,Ha,Ha,Ha,Ha,Ha,T,T,T],
+        [T,T,H,S,S,S,S,H,T,T],
+        [T,T,S,E,S,S,E,S,T,T],
+        [T,T,S,S,S,S,S,S,T,T],
+        [T,T,C,C,C,C,C,T,T,T],
+        [T,C,C,C,C,C,C,C,T,T],
+        [T,C,Cd,C,C,C,Cd,C,T,T],
+        [T,T,C,C,C,C,C,T,T,T],
+        [T,T,C,C,T,T,C,C,T,T],
+        [T,T,Bo,Bo,T,Bo,Bo,T,T,T],
+        [W,W,W,T,T,T,T,T,T,T] // Watering can
+      ];
+    } else if (dir === 3) { // Back
+      return [
+        [Ha,Ha,Ha,Ha,Ha,Ha,Ha,Ha,Ha,T],
+        [T,T,Ha,Ha,Ha,Ha,Ha,T,T,T],
+        [T,T,H,H,H,H,H,H,T,T],
+        [T,T,S,S,S,S,S,S,T,T],
+        [T,T,S,S,S,S,S,S,T,T],
+        [T,T,C,C,C,C,C,T,T,T],
+        [T,C,C,C,C,C,C,C,T,T],
+        [T,C,C,C,C,C,C,C,T,T],
+        [T,T,C,C,C,C,C,T,T,T],
+        [T,T,C,C,T,T,C,C,T,T],
+        [T,T,Bo,Bo,T,Bo,Bo,T,T,T],
+        [T,T,H,H,H,H,H,H,H,H] // Long braid
+      ];
+    } else { // Side
+      const grid = [
+        [Ha,Ha,Ha,Ha,Ha,T,T,T,T,T],
+        [T,Ha,Ha,Ha,Ha,T,T,T,T,T],
+        [T,T,H,S,S,S,T,T,T,T],
+        [T,T,S,E,S,S,T,T,T,T],
+        [T,T,S,S,S,S,T,T,T,T],
+        [T,T,C,C,C,T,T,T,T,T],
+        [T,C,C,C,C,C,T,T,T,T],
+        [Sg,C,Cd,C,C,C,T,T,T,T], // Green hand
+        [T,T,C,C,C,T,T,T,T,T],
+        [T,T,C,C,T,T,T,T,T,T],
+        [T,T,Bo,Bo,T,T,T,T,T,T],
+        [W,W,W,T,T,T,T,T,T,T]
+      ];
+      return dir === 2 ? grid.map(r => [...r].reverse()) : grid;
+    }
+  },
+  
+  getGlitchSprite(dir, frame) {
+    // Glitch: Wild neon hair, oversized jacket with pixel patches
+    const T = 0;
+    const Hp = '#FF69B4'; // Pink hair
+    const Hc = '#00FFFF'; // Cyan hair
+    const S = '#FFDBAC'; // Skin
+    const J = '#4169E1'; // Blue jacket
+    const Jp = '#FF1493'; // Jacket patches
+    const P = '#2F2F4F'; // Pants
+    const Gl = '#1E1E1E'; // Gloves (fingerless)
+    const Sh = '#8B4513'; // Shoes
+    const E = '#222'; // Eyes
+    
+    if (dir === 0) { // Front
+      return [
+        [Hp,Hp,Hc,Hc,Hc,Hp,Hp,T,T,T],
+        [T,Hp,Hc,Hp,Hc,Hc,Hp,Hc,T,T],
+        [T,T,S,S,S,S,S,T,T,T],
+        [T,T,S,E,S,S,E,S,T,T],
+        [T,T,S,S,'😎',S,S,T,T,T], // Mischievous grin
+        [T,T,J,J,J,J,J,T,T,T],
+        [T,J,J,Jp,J,J,Jp,J,T,T],
+        [Gl,J,J,J,J,J,J,J,Gl,T],
+        [T,T,J,J,J,J,J,T,T,T],
+        [T,T,P,P,T,T,P,P,T,T],
+        [T,T,P,P,T,T,P,P,T,T],
+        [T,Sh,Sh,Sh,T,Sh,Sh,Sh,T,T]
+      ];
+    } else if (dir === 3) { // Back
+      return [
+        [Hp,Hp,Hc,Hc,Hc,Hp,Hp,T,T,T],
+        [T,Hp,Hc,Hp,Hc,Hc,Hp,Hc,T,T],
+        [T,T,S,S,S,S,S,T,T,T],
+        [T,T,S,S,S,S,S,T,T,T],
+        [T,T,S,S,S,S,S,T,T,T],
+        [T,T,J,J,J,J,J,T,T,T],
+        [T,J,J,J,J,J,J,J,T,T],
+        [T,J,Jp,J,J,J,Jp,J,T,T],
+        [T,T,J,J,J,J,J,T,T,T],
+        [T,T,P,P,T,T,P,P,T,T],
+        [T,T,P,P,T,T,P,P,T,T],
+        [T,Sh,Sh,Sh,T,Sh,Sh,Sh,T,T]
+      ];
+    } else { // Side
+      const grid = [
+        [Hp,Hc,Hc,Hp,T,T,T,T,T,T],
+        [T,Hp,Hc,Hc,Hp,T,T,T,T,T],
+        [T,T,S,S,S,T,T,T,T,T],
+        [T,T,S,E,S,T,T,T,T,T],
+        [T,T,S,S,S,T,T,T,T,T],
+        [T,T,J,J,J,T,T,T,T,T],
+        [T,J,J,J,J,J,T,T,T,T],
+        [Gl,J,Jp,J,J,J,T,T,T,T],
+        [T,T,J,J,J,T,T,T,T,T],
+        [T,T,P,P,T,T,T,T,T,T],
+        [T,T,P,P,T,T,T,T,T,T],
+        [T,Sh,Sh,Sh,T,T,T,T,T,T]
+      ];
+      return dir === 2 ? grid.map(r => [...r].reverse()) : grid;
+    }
+  },
+  
+  getVoidSprite(dir, frame) {
+    // Void: Dark cloak, glowing blue eye, mysterious
+    const T = 0;
+    const C = '#2F2F4F'; // Dark cloak
+    const Cd = '#191970'; // Cloak dark
+    const Cl = '#4682B4'; // Cloak light
+    const E = '#00BFFF'; // Glowing eye
+    const Eg = '#87CEEB'; // Eye glow
+    
+    if (dir === 0) { // Front
+      return [
+        [T,T,C,C,C,C,C,T,T,T],
+        [T,C,C,C,C,C,C,C,T,T],
+        [T,C,Cd,Cd,Cd,Cd,Cd,C,T,T],
+        [T,T,Cd,Cd,Cd,Cd,Cd,T,T,T],
+        [T,T,Cd,E,Cd,Eg,Cd,T,T,T], // One glowing eye
+        [T,T,Cd,Cd,Cd,Cd,Cd,T,T,T],
+        [T,T,C,C,C,C,C,T,T,T],
+        [T,C,C,Cl,C,C,Cl,C,T,T],
+        [T,C,C,C,C,C,C,C,T,T],
+        [T,T,C,C,C,C,C,T,T,T],
+        [T,C,C,C,T,C,C,C,T,T],
+        [T,T,C,C,T,C,C,T,T,T]
+      ];
+    } else if (dir === 3) { // Back
+      return [
+        [T,T,C,C,C,C,C,T,T,T],
+        [T,C,C,C,C,C,C,C,T,T],
+        [T,C,C,C,C,C,C,C,T,T],
+        [T,T,C,C,C,C,C,T,T,T],
+        [T,T,C,C,C,C,C,T,T,T],
+        [T,T,C,C,C,C,C,T,T,T],
+        [T,T,C,C,C,C,C,T,T,T],
+        [T,C,C,C,C,C,C,C,T,T],
+        [T,C,C,C,C,C,C,C,T,T],
+        [T,T,C,C,C,C,C,T,T,T],
+        [T,C,C,C,T,C,C,C,T,T],
+        [T,T,C,C,T,C,C,T,T,T]
+      ];
+    } else { // Side
+      const grid = [
+        [T,T,C,C,C,T,T,T,T,T],
+        [T,C,C,C,C,C,T,T,T,T],
+        [T,C,Cd,Cd,Cd,C,T,T,T,T],
+        [T,T,Cd,Cd,Cd,T,T,T,T,T],
+        [T,T,Cd,E,Cd,T,T,T,T,T], // Glowing eye
+        [T,T,Cd,Cd,Cd,T,T,T,T,T],
+        [T,T,C,C,C,T,T,T,T,T],
+        [T,C,C,C,C,C,T,T,T,T],
+        [T,C,C,C,C,C,T,T,T,T],
+        [T,T,C,C,C,T,T,T,T,T],
+        [T,C,C,C,T,T,T,T,T,T],
+        [T,T,C,C,T,T,T,T,T,T]
+      ];
+      return dir === 2 ? grid.map(r => [...r].reverse()) : grid;
+    }
+  },
+  
+  getByteSprite(dir, frame) {
+    // Byte: Upright cat, merchant vest, coin sack, swishing tail
+    const T = 0;
+    const B = '#222'; // Black fur
+    const Bh = '#333'; // Fur highlight
+    const V = '#8B4513'; // Merchant vest
+    const Vg = '#DAA520'; // Vest gold trim
+    const C = '#FFD700'; // Coins
+    const E = '#FF4500'; // Orange eyes
+    const P = '#FF69B4'; // Pink nose
+    const W = '#F5DEB3'; // Whiskers
+    
+    if (dir === 0) { // Front
+      return [
+        [T,B,T,T,T,T,T,B,T,T],
+        [B,Bh,B,T,T,T,B,Bh,B,T],
+        [T,B,B,B,B,B,B,B,T,T],
+        [T,B,E,B,B,B,E,B,T,T],
+        [W,T,B,B,P,B,B,T,W,T], // Whiskers and pink nose
+        [T,T,V,Vg,Vg,Vg,V,T,T,T], // Merchant vest
+        [T,V,V,C,V,C,V,V,T,T], // Coins on vest
+        [T,B,V,V,V,V,V,B,T,T],
+        [T,B,B,B,B,B,B,B,T,T],
+        [T,T,B,B,T,B,B,T,T,T],
+        [T,T,B,B,T,B,B,T,T,T],
+        [C,C,C,T,T,T,T,T,T,B] // Coin sack and tail
+      ];
+    } else if (dir === 3) { // Back
+      return [
+        [T,B,T,T,T,T,T,B,T,T],
+        [B,Bh,B,T,T,T,B,Bh,B,T],
+        [T,B,B,B,B,B,B,B,T,T],
+        [T,B,B,B,B,B,B,B,T,T],
+        [T,T,B,B,B,B,B,T,T,T],
+        [T,T,V,Vg,Vg,Vg,V,T,T,T],
+        [T,V,V,V,V,V,V,V,T,T],
+        [T,B,V,V,V,V,V,B,T,T],
+        [T,B,B,B,B,B,B,B,T,T],
+        [T,T,B,B,T,B,B,T,T,T],
+        [T,T,B,B,T,B,B,T,T,T],
+        [T,T,T,T,T,T,T,T,B,B] // Tail
+      ];
+    } else { // Side
+      const grid = [
+        [T,B,T,T,T,T,T,T,T,T],
+        [B,Bh,B,T,T,T,T,T,T,T],
+        [T,B,B,B,B,T,T,T,T,T],
+        [T,B,E,B,B,T,T,T,T,T],
+        [W,T,B,P,B,T,T,T,T,T],
+        [T,T,V,Vg,V,T,T,T,T,T],
+        [T,V,V,C,V,V,T,T,T,T],
+        [T,B,V,V,V,B,T,T,T,T],
+        [T,B,B,B,B,B,T,T,T,T],
+        [T,T,B,B,T,T,T,T,T,T],
+        [T,T,B,B,T,T,T,T,T,T],
+        [C,C,C,T,T,T,T,T,B,B] // Sack and tail
+      ];
+      return dir === 2 ? grid.map(r => [...r].reverse()) : grid;
+    }
+  },
+  
+  // Check if visitor is near any NPC
+  getNearbyNPC() {
+    if (!S.useVisitor) return null;
+    
+    for (const npc of Object.values(this.npcs)) {
+      if (npc.floor === S.floor) {
+        const distance = Math.hypot(S.visitor.x - npc.x, S.visitor.y - npc.y);
+        if (distance < 40) {
+          return npc;
+        }
+      }
+    }
+    return null;
+  }
+};
+
+// NPC Quest System
+const NPCQuests = {
+  quests: {
+    nova: {
+      id: 'nova_parts',
+      name: 'Nova\'s Missing Parts',
+      description: 'I need 3 Gear Parts for my latest invention. They\'re scattered around the station. Find them and I\'ll build you something amazing!',
+      collectibles: [
+        { id: 'gear1', floor: 1, x: 650, y: 500, icon: '⚙️', color: '#ffd700', name: 'Gear Part' },
+        { id: 'gear2', floor: 3, x: 700, y: 350, icon: '⚙️', color: '#ffd700', name: 'Gear Part' },
+        { id: 'gear3', floor: 7, x: 200, y: 450, icon: '⚙️', color: '#ffd700', name: 'Gear Part' }
+      ],
+      reward: { item: 'gravity_boots', coins: 100, achievement: 'chief_engineer' },
+      progressText: 'Still looking for those gear parts? Check behind the bed on F1, arcade corner on F3, and community deck on F7.',
+      completeText: 'Perfect! *builds frantically* Here are your Gravity Boots! They\'ll make you feel lighter on your feet. Probably won\'t explode!'
+    },
+    
+    drift: {
+      id: 'drift_melodies',
+      name: 'Lost Melodies',
+      description: 'I lost 4 Music Notes while wandering the station. Each one holds a piece of a song I\'m composing. Help me find them?',
+      collectibles: [
+        { id: 'note1', floor: 1, x: 500, y: 100, icon: '♪', color: '#9b59b6', name: 'Music Note' },
+        { id: 'note2', floor: 2, x: 400, y: 200, icon: '♪', color: '#9b59b6', name: 'Music Note' },
+        { id: 'note3', floor: 4, x: 300, y: 400, icon: '♪', color: '#9b59b6', name: 'Music Note' },
+        { id: 'note4', floor: 9, x: 500, y: 300, icon: '♪', color: '#9b59b6', name: 'Music Note' }
+      ],
+      reward: { item: 'drifts_mix', coins: 75, achievement: 'audiophile' },
+      progressText: 'The notes... they\'re calling to me. Check near the window on F1, the observatory dome on F2, the garden on F4, and the archive on F9.',
+      completeText: 'You found them all... *plays a haunting melody* Here\'s my special mix. It changes the station\'s background music. Beautiful, isn\'t it?'
+    },
+    
+    sol: {
+      id: 'ancient_seeds',
+      name: 'The Ancient Seeds',
+      description: 'Deep in the station are 3 Ancient Seeds. They hold the memory of worlds long gone. Plant them with me and watch something magical grow.',
+      collectibles: [
+        { id: 'seed1', floor: 1, x: 100, y: 400, icon: '🌱', color: '#44aa44', name: 'Ancient Seed' },
+        { id: 'seed2', floor: 5, x: 650, y: 250, icon: '🌱', color: '#44aa44', name: 'Ancient Seed' },
+        { id: 'seed3', floor: 9, x: 200, y: 400, icon: '🌱', color: '#44aa44', name: 'Ancient Seed' }
+      ],
+      reward: { item: 'sols_blessing', coins: 100, achievement: 'green_thumb' },
+      progressText: 'The seeds sleep in secret places. One rests in Echo\'s secret room, another in the hidden lab, and the third in the archive depths.',
+      completeText: 'The seeds... they remember. *plants them reverently* Behold, the Golden Tree! Its blessing will make all plants grow twice as fast.'
+    },
+    
+    glitch: {
+      id: 'glitch_challenge',
+      name: 'Glitch\'s Challenge',
+      description: 'Think you\'re good at games? Prove it! Beat a score of 30 in ANY arcade game and I\'ll give you my jacket. It\'s totally legit, not stolen.',
+      collectibles: [],
+      reward: { item: 'glitch_jacket', coins: 50, achievement: 'pro_gamer' },
+      progressText: 'Score of 30 in snake, breakout, or invaders. Come on, even my grandma can do better than that! ...Actually, don\'t tell her I said that.',
+      completeText: 'NO WAY! You actually did it! *reluctantly hands over jacket* Fine, you earned it. This jacket has +10 style and -5 humility. Perfect combo!'
+    },
+    
+    void: {
+      id: 'void_riddles',
+      name: 'Void\'s Riddles',
+      description: 'Answer my riddles, seeker. Each answer is a place on this station. Visit them all, and truth shall be your reward.',
+      collectibles: [],
+      riddles: [
+        { question: 'Where does life grow without soil from Earth?', answer: 4, visited: false },
+        { question: 'Where do echoes of the past play on repeat?', answer: 6, visited: false },
+        { question: 'Where does knowledge sleep, waiting to be woken?', answer: 9, visited: false }
+      ],
+      reward: { item: 'voids_sight', coins: 100, achievement: 'truth_seeker' },
+      progressText: 'The riddles echo in your mind. Seek the places they describe. Garden... Record Room... Archive. Truth awaits.',
+      completeText: 'You have seen... understood... Here, take Void\'s Sight. Now all secrets are visible to you, even without scanners.'
+    },
+    
+    byte: {
+      id: 'byte_business',
+      name: 'Byte\'s Business',
+      description: 'I need 5 Shiny Objects to stock my premium shop. They\'re valuable things that sparkle! Bring them to me and I\'ll give you VIP access.',
+      collectibles: [
+        { id: 'shiny1', floor: 1, x: 400, y: 300, icon: '✦', color: '#00ffff', name: 'Shiny Object' },
+        { id: 'shiny2', floor: 2, x: 300, y: 400, icon: '✦', color: '#00ffff', name: 'Shiny Object' },
+        { id: 'shiny3', floor: 3, x: 600, y: 200, icon: '✦', color: '#00ffff', name: 'Shiny Object' },
+        { id: 'shiny4', floor: 4, x: 500, y: 200, icon: '✦', color: '#00ffff', name: 'Shiny Object' },
+        { id: 'shiny5', floor: 6, x: 200, y: 300, icon: '✦', color: '#00ffff', name: 'Shiny Object' }
+      ],
+      reward: { item: 'premium_shop', coins: 50, achievement: 'business_partner' },
+      progressText: 'Still need those shiny things! They sparkle and make good inventory. Check all the floors - shinies love to hide!',
+      completeText: 'Purrfect! *counts shinies greedily* Welcome to Byte\'s Premium Shop! Exclusive items at almost reasonable prices. Family discount not included.'
+    }
+  },
+  
+  getQuestState(npcId) {
+    return LS.get(`quest_${npcId}`, 'available');
+  },
+  
+  startQuest(npcId) {
+    LS.set(`quest_${npcId}`, 'active');
+    LS.set(`quest_${npcId}_progress`, { collected: [] });
+  },
+  
+  collectItem(questId, itemId) {
+    const progress = LS.get(`quest_${questId}_progress`, { collected: [] });
+    if (!progress.collected.includes(itemId)) {
+      progress.collected.push(itemId);
+      LS.set(`quest_${questId}_progress`, progress);
+      
+      // Check if quest is complete
+      const questData = this.quests[questId];
+      if (questData) {
+        if (questData.collectibles && progress.collected.length >= questData.collectibles.length) {
+          this.completeQuest(questId);
+        }
+      }
+    }
+  },
+  
+  checkArcadeScore() {
+    // Check if Glitch's challenge is complete
+    if (this.getQuestState('glitch') === 'active') {
+      const hasHighScore = Object.values(S.highScores).some(score => score >= 30);
+      if (hasHighScore) {
+        this.completeQuest('glitch');
+      }
+    }
+  },
+  
+  checkFloorVisit(floor) {
+    // Check Void's riddle quest
+    if (this.getQuestState('void') === 'active') {
+      const progress = LS.get('quest_void_progress', { visited: [] });
+      const questData = this.quests.void;
+      
+      if (questData.riddles) {
+        questData.riddles.forEach((riddle, index) => {
+          if (riddle.answer === floor && !progress.visited.includes(index)) {
+            progress.visited.push(index);
+            LS.set('quest_void_progress', progress);
+            showNotification(`Riddle ${index + 1} solved!`);
+            
+            // Check if all riddles solved
+            if (progress.visited.length >= questData.riddles.length) {
+              this.completeQuest('void');
+            }
+          }
+        });
+      }
+    }
+  },
+  
+  completeQuest(npcId) {
+    LS.set(`quest_${npcId}`, 'complete');
+    const questData = this.quests[npcId];
+    
+    if (questData && questData.reward) {
+      // Give rewards
+      if (questData.reward.coins) {
+        Coins.earn(questData.reward.coins, 'quest');
+      }
+      
+      if (questData.reward.achievement) {
+        checkAchievement(questData.reward.achievement);
+      }
+      
+      if (questData.reward.item) {
+        // Add special item to inventory
+        const specialItems = LS.get('specialItems', []);
+        if (!specialItems.includes(questData.reward.item)) {
+          specialItems.push(questData.reward.item);
+          LS.set('specialItems', specialItems);
+        }
+      }
+      
+      showNotification(`Quest Complete: ${questData.name}!`);
+    }
+  },
+  
+  getProgressText(npcId) {
+    const questData = this.quests[npcId];
+    const progress = LS.get(`quest_${npcId}_progress`, { collected: [] });
+    
+    if (!questData) return "Quest data not found.";
+    
+    if (npcId === 'glitch') {
+      const hasHighScore = Object.values(S.highScores).some(score => score >= 30);
+      if (hasHighScore) {
+        return questData.completeText;
+      }
+    }
+    
+    if (questData.collectibles) {
+      const collected = progress.collected.length;
+      const total = questData.collectibles.length;
+      return `${questData.progressText}\n\nProgress: ${collected}/${total} items found.`;
+    }
+    
+    return questData.progressText;
+  },
+  
+  getCompleteText(npcId) {
+    const questData = this.quests[npcId];
+    return questData ? questData.completeText : "Quest completed!";
+  }
+};
+
+// Integration hooks
+// Hook into visitor interaction
+const _origVisitorInteract = visitorInteract;
+visitorInteract = function() {
+  // Check for NPC interaction first
+  const nearbyNPC = StationNPCs.getNearbyNPC();
+  if (nearbyNPC) {
+    StationNPCs.interact(nearbyNPC.id);
+    return;
+  }
+  
+  // Fall back to original interaction logic
+  _origVisitorInteract();
+};
+
+// Hook into update loop
+const _origUpdate = update;
+update = function(dt) {
+  _origUpdate(dt);
+  StationNPCs.update(dt);
+};
+
+// Hook into render loop to add NPCs to character list
+const _origRender = render;
+render = function() {
+  ctx.save();
+  if(S.cameraZoom!==1.0){ctx.translate(W/2,H/2);ctx.scale(S.cameraZoom,S.cameraZoom);ctx.translate(-W/2,-H/2)}
+  if(S.screenShake>0){ctx.translate(Math.random()*S.screenShake-S.screenShake/2,Math.random()*S.screenShake-S.screenShake/2);S.screenShake*=.9;if(S.screenShake<.1)S.screenShake=0}
+  
+  if(S.spacewalk.active){renderSpacewalk();ctx.restore();return}
+  
+  // Render current floor or secret room
+  if (S.secretRooms.current) {
+    SecretRooms.renderSecretRoom(S.secretRooms.current);
+  } else {
+    if(S.floor===1)renderFloor1();
+    else if(S.floor===2)renderFloor2();
+    else if(S.floor===3)renderFloor3();
+    else if(S.floor===4)renderFloor4();
+    else if(S.floor===5)renderFloor5();
+    else if(S.floor===6)renderFloor6();
+    else if(S.floor===7)renderFloor7();
+    else if(S.floor===8)renderFloor8();
+    else if(S.floor===9)renderFloor9();
+  }
+  // Shared elements
+  renderElevator();
+  renderDataFragment();
+  renderDustMotes();
+  
+  // Characters sorted by Y (including NPCs)
+  const chars=[];
+  if(S.echo.floor===S.floor)chars.push({y:S.echo.y,r:renderEcho});
+  if(S.pixel.floor===S.floor)chars.push({y:S.pixel.y,r:renderPixel});
+  if(S.useVisitor)chars.push({y:S.visitor.y,r:()=>renderVisitor(ctx)});
+  
+  // Add NPCs to character list
+  Object.values(StationNPCs.npcs).forEach(npc => {
+    if (npc.floor === S.floor) {
+      chars.push({ y: npc.y, r: () => StationNPCs.renderNPC(ctx, npc) });
+    }
+  });
+  
+  // Other multiplayer players
+  for(const id in S.otherPlayers){const op=S.otherPlayers[id];if(op.floor===S.floor)chars.push({y:op.y,r:()=>renderRemotePlayer(ctx,id,op)})}
+  if(AIFighter.active)chars.push({y:AIFighter.y,r:()=>AIFighter.render(ctx)});
+  
+  // Object shadows
+  for(const o of getObjects()){if(o.w>10&&o.h>10)drawObjectShadow(o.x,o.y,o.w,o.h)}
+  chars.sort((a,b)=>a.y-b.y);chars.forEach(c=>c.r());
+  
+  Echo4thWall.render();
+  renderKittens();renderSeasonalEffects();StationEvents.render();
+  renderParticles();renderImpactRings();renderThought();renderFloatTexts();
+  
+  // Sprint A+B effects
+  if (S.scanner.active && !S.secretRooms.current) {
+    renderScannerEffects();
+  }
+  PixelHints.renderHintEffects();
+  PuzzleSystems.renderConstellationPuzzle();
+  
+  // Render NPC collectibles
+  StationNPCs.collectibles.forEach(collectible => {
+    if (collectible.floor === S.floor) {
+      StationNPCs.renderCollectible(ctx, collectible);
+    }
+  });
+  
+  // Fade transition for secret rooms
+  if (S.secretRooms.fadeTimer > 0) {
+    const alpha = S.secretRooms.fadeTimer / 30;
+    ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+  
+  ctx.restore();
+  renderSeasonalOverlay();
+  // ... rest of render function remains the same
+  
+  // Render NPC dialogue popup (after all other UI)
+  if (StationNPCs.dialogue.active) {
+    StationNPCs.renderDialogue(ctx);
+  }
+  
+  // ... continue with existing render code
+  if(S.chromaticAberration>0.1){const ca=S.chromaticAberration;const imgData=ctx.getImageData(0,0,W,H);ctx.globalAlpha=0.15;ctx.drawImage(canvas,-ca,0);ctx.drawImage(canvas,ca,0);ctx.globalAlpha=1}
+  if(S.vignetteIntensity>0.05){const vg=ctx.createRadialGradient(W/2,H/2,W*0.3,W/2,H/2,W*0.8);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,`rgba(0,0,0,${S.vignetteIntensity})`);ctx.fillStyle=vg;ctx.fillRect(0,0,W,H)}
+  if(S.screenFlash){ctx.fillStyle=S.screenFlash;ctx.globalAlpha=.3;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;S.screenFlash=null}
+  renderHoverHighlight();
+  if(DuelSystem.active){renderDuelHUD();}
+  else if(WeaponSystem.equipped&&!S._visitorSaber){const wpn=WeaponSystem.equipped;const r=RARITIES[wpn.rarity]||RARITIES.common;ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(W/2-80,H-28,160,22);ctx.strokeStyle=r.color;ctx.lineWidth=1;ctx.strokeRect(W/2-80,H-28,160,22);ctx.fillStyle=r.color;ctx.font='bold 10px monospace';ctx.textAlign='center';const comboTxt=WeaponSystem._comboCount>1?' x'+WeaponSystem._comboCount:'';ctx.fillText(wpn.icon+' '+wpn.name+comboTxt+'  E:Attack  Q:Block',W/2,H-13);ctx.textAlign='left';}
+  else if(S._visitorSaber){const col=S._visitorSaber==='green'?'#00ff44':'#4488ff';ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(W/2-60,H-28,120,22);ctx.strokeStyle=col;ctx.lineWidth=1;ctx.strokeRect(W/2-60,H-28,120,22);ctx.fillStyle=col;ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText('⚔️ E:Swing  Q:Block  Double-tap WASD:Dodge',W/2,H-13);ctx.textAlign='left'}
+  if(TOD==='night'){ctx.fillStyle='rgba(0,0,30,.15)';ctx.fillRect(0,0,W,H)}
+  else if(TOD==='evening'){ctx.fillStyle='rgba(40,20,0,.06)';ctx.fillRect(0,0,W,H)}
+};
+
+// Hook into input handling
+document.addEventListener('keydown', function(e) {
+  if (StationNPCs.dialogue.active) {
+    if (StationNPCs.handleDialogueInput(e.key)) {
+      e.preventDefault();
+      return;
+    }
+  }
+});
+
+// Hook into floor changes for Void's quest
+const _origChangeFloor = changeFloor;
+changeFloor = function(floor) {
+  _origChangeFloor(floor);
+  NPCQuests.checkFloorVisit(floor);
+};
+
+// Hook into arcade score updates for Glitch's quest
+const _origUpdateArcadeScore = function(game, score) {
+  if (S.highScores[game] < score) {
+    S.highScores[game] = score;
+    LS.set('highScores', S.highScores);
+    NPCQuests.checkArcadeScore();
+  }
+};
+
+console.log('🔮 NPCs loaded: Nova, Drift, Sol, Glitch, Void, Byte — with sprites, dialogue, and quests!');
+
 // §ATMOSPHERE — Sprint C: Atmosphere Overhaul
 // Dynamic lighting, ambient sound, peripheral effects, station breathing
 // ═══════════════════════════════════════
