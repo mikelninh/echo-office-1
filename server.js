@@ -14,10 +14,10 @@ function getToken() {
 }
 
 const TOKEN = getToken();
-if (!TOKEN) { console.error('No auth token found'); process.exit(1); }
+if (!TOKEN && process.env.CHAT_MODE === 'gateway') { console.error('No auth token found'); process.exit(1); }
 
-const GATEWAY_URL = 'ws://127.0.0.1:18789';
-const PORT = 8765;
+const GATEWAY_URL = process.env.GATEWAY_URL || 'ws://127.0.0.1:18789';
+const PORT = process.env.PORT || 8765;
 // Chat mode: 'local' = keyword responses only (no gateway), 'gateway' = forward to OpenClaw
 const CHAT_MODE = process.env.CHAT_MODE || 'local';
 const SESSION_KEY = 'agent:main:main'; // Only used if CHAT_MODE=gateway
@@ -910,17 +910,23 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Health check
+  if (req.url === '/health' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', visitors: visitors.size }));
+    return;
+  }
+
   // Static files
   const cleanUrl = req.url.split('?')[0]; // Strip query params
   let filePath = path.join(__dirname, cleanUrl === '/' ? 'index.html' : cleanUrl);
   const ext = path.extname(filePath);
   fs.readFile(filePath, (err, data) => {
     if (err) { res.writeHead(404); res.end('Not found'); return; }
+    const cacheControl = (ext === '.html') ? 'public, max-age=3600' : 'no-cache, no-store, must-revalidate';
     res.writeHead(200, { 
       'Content-Type': MIME[ext] || 'application/octet-stream',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
+      'Cache-Control': cacheControl
     });
     res.end(data);
   });
@@ -1061,6 +1067,11 @@ wss.on('connection', (visitorWs) => {
 
     gatewayWs.on('error', (err) => {
       console.error('Gateway error:', err.message);
+      // Don't reconnect if gateway URL isn't explicitly set (Railway etc.)
+      if (!process.env.GATEWAY_URL) {
+        console.log('No GATEWAY_URL set, disabling gateway reconnect');
+        gatewayWs = null;
+      }
     });
   }
 
