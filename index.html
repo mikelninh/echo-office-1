@@ -17755,14 +17755,14 @@ visitorInteract = function() {
 };
 
 // Hook into update loop
-const _origUpdate = update;
+const _origUpdateNPC = update;
 update = function(dt) {
-  _origUpdate(dt);
+  _origUpdateNPC(dt);
   StationNPCs.update(dt);
 };
 
 // Hook into render loop to add NPCs to character list
-const _origRender = render;
+const _npcPrevRender = render; // saved but this render() is a full replacement
 render = function() {
   ctx.save();
   if(S.cameraZoom!==1.0){ctx.translate(W/2,H/2);ctx.scale(S.cameraZoom,S.cameraZoom);ctx.translate(-W/2,-H/2)}
@@ -17867,9 +17867,9 @@ document.addEventListener('keydown', function(e) {
 });
 
 // Hook into floor changes for Void's quest
-const _origChangeFloor = changeFloor;
+const _origChangeFloorNPC = changeFloor;
 changeFloor = function(floor) {
-  _origChangeFloor(floor);
+  _origChangeFloorNPC(floor);
   NPCQuests.checkFloorVisit(floor);
 };
 
@@ -17890,7 +17890,57 @@ console.log('🔮 NPCs loaded: Nova, Drift, Sol, Glitch, Void, Byte — with spr
 
 // PART 1: F6 COLLABORATIVE MUSIC STUDIO
 const MusicStudio = {
-  // Synth Pad Configuration
+  // Visual Step Sequencer (8x16 grid, pentatonic scale)
+  sequencer: {
+    active: false,
+    bpm: 90,
+    currentStep: 0,
+    stepTimer: 0,
+    stepDuration: 60 / (90 * 4), // 16th notes at 90 BPM
+    playing: false,
+    grids: new Map(), // playerId -> 8x16 grid (each row is 16-bit bitmask)
+    notes: [262, 294, 330, 392, 440, 523, 587, 659], // C4, D4, E4, G4, A4, C5, D5, E5
+    noteNames: ['C', 'D', 'E', 'G', 'A', 'C', 'D', 'E'],
+    gridX: 240, gridY: 180, cellSize: 20, rows: 8, cols: 16,
+    playheadX: 0, particles: []
+  },
+  
+  // Player settings  
+  chordMode: false,
+  autoAccompany: false,
+  currentBeatPreset: null,
+  
+  // Beat Presets
+  beatPresets: {
+    'lofi': { name: 'Lo-fi Chill', pattern: [1,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0], snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat: [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1], clap: [0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0] },
+    'ambient': { name: 'Space Ambient', pattern: [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], snare: [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], hihat: [0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0], clap: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] },
+    'bounce': { name: 'Arcade Bounce', pattern: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], clap: [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0] },
+    'cosmos': { name: 'Deep Cosmos', pattern: [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], snare: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], hihat: [0,1,1,0,1,0,1,1,0,1,1,0,1,0,1,1], clap: [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0] }
+  },
+  
+  // Auto-accompany chord progression  
+  chordProgression: [
+    {name: 'Am', notes: [220, 262, 330], bass: 110}, // Am
+    {name: 'F', notes: [175, 220, 262], bass: 87.3}, // F  
+    {name: 'C', notes: [262, 330, 392], bass: 131}, // C
+    {name: 'G', notes: [196, 247, 294], bass: 98} // G
+  ],
+  currentChord: 0,
+  chordTimer: 0,
+  
+  // Song Wall
+  songWall: [],
+  reactions: new Map(), // reactionId -> {x, y, emoji, life, playerId}
+  
+  // Onboarding state
+  onboarding: {
+    hasEnteredF6: false,
+    hasPlacedNotes: 0,
+    hasTriedAutoAccompany: false,
+    hasCompletedLoop: false
+  },
+
+  // Synth Pad Configuration (keeping existing)
   synthPads: [
     {note: 262, name: 'C4', color: '#ff4444', x: 100, y: 350, pressed: false, glow: 0},
     {note: 294, name: 'D4', color: '#ff8844', x: 140, y: 350, pressed: false, glow: 0},
@@ -17948,6 +17998,16 @@ const MusicStudio = {
     for (let i = 0; i < 32; i++) {
       this.visualizer.bars.push(0);
     }
+    
+    // ═══ INITIALIZE NEW FEATURES ═══
+    
+    // Initialize sequencer grid for this player
+    this.sequencer.grids.set(S.myPlayerId || 'player', new Array(8).fill(0));
+    
+    // Start sequencer playing by default
+    this.sequencer.playing = true;
+    
+    console.log('🎹 Advanced Music Studio initialized!');
   },
   
   update(dt) {
@@ -17997,6 +18057,24 @@ const MusicStudio = {
         const value = dataArray[i * 4] / 255;
         this.visualizer.bars[i] = this.visualizer.bars[i] * 0.8 + value * 0.2;
       }
+    }
+    
+    // ═══ NEW MUSIC STUDIO FEATURES ═══
+    // Update sequencer
+    this.updateSequencer(dt);
+    
+    // Update auto-accompany
+    this.updateAutoAccompany(dt);
+    
+    // Update reactions
+    this.updateReactions(dt);
+    
+    // Onboarding check
+    if (!this.onboarding.hasEnteredF6) {
+      this.onboarding.hasEnteredF6 = true;
+      setTimeout(() => {
+        if (S.floor === 6) showNotification('🎵 Drift: "Want to make some music? Step up to the grid and click some squares. Trust me — there are no wrong notes here."');
+      }, 1000);
     }
   },
   
@@ -18132,19 +18210,98 @@ const MusicStudio = {
     ctx.textAlign = 'center';
     ctx.fillText(`Now Jamming: ${playerCount} players`, 400, 250);
     
-    // Instructions
-    ctx.fillStyle = '#888';
-    ctx.font = '9px monospace';
-    ctx.fillText('Keys 1-8: Synth | Q,W,E,R: Drums | L: Loop | Click turntable for lo-fi', 400, 520);
+    // Instructions (replaced with new controls HUD)
+    // this.renderControlsHUD();
+    
+    // ═══ NEW MUSIC STUDIO VISUAL ELEMENTS ═══
+    // Render sequencer grid
+    this.renderSequencer();
+    
+    // Render reactions
+    this.renderReactions();
+    
+    // Render controls HUD
+    this.renderControlsHUD();
+    
+    // Beat preset buttons
+    this.renderBeatPresetButtons();
+    
+    // Mode indicators
+    this.renderModeIndicators();
+  },
+  
+  renderBeatPresetButtons() {
+    const presets = Object.keys(this.beatPresets);
+    const startX = 500, startY = 120;
+    
+    ctx.save();
+    presets.forEach((presetId, i) => {
+      const preset = this.beatPresets[presetId];
+      const x = startX + (i % 2) * 120;
+      const y = startY + Math.floor(i / 2) * 30;
+      
+      // Button background
+      const isActive = this.currentBeatPreset === presetId;
+      ctx.fillStyle = isActive ? 'rgba(255, 215, 0, 0.3)' : 'rgba(40, 40, 60, 0.8)';
+      ctx.fillRect(x, y, 110, 25);
+      
+      // Border
+      ctx.strokeStyle = isActive ? '#ffd700' : '#666';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, 110, 25);
+      
+      // Text
+      ctx.fillStyle = isActive ? '#ffd700' : '#aaa';
+      ctx.font = '10px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(preset.name, x + 55, y + 16);
+      
+      // Key indicator
+      ctx.fillStyle = '#888';
+      ctx.font = '8px monospace';
+      ctx.fillText(['9', '0', '-', '='][i], x + 5, y + 12);
+    });
+    ctx.restore();
+  },
+  
+  renderModeIndicators() {
+    const startX = 350, startY = 90;
+    
+    ctx.save();
+    ctx.font = '11px monospace';
+    
+    // Chord Mode
+    ctx.fillStyle = this.chordMode ? '#ff6ec7' : '#666';
+    ctx.fillText('🎵 CHORD MODE: ' + (this.chordMode ? 'ON' : 'OFF'), startX, startY);
+    
+    // Auto-Accompany
+    ctx.fillStyle = this.autoAccompany ? '#00fff7' : '#666';
+    ctx.fillText('🎸 AUTO-ACCOMPANY: ' + (this.autoAccompany ? 'ON' : 'OFF'), startX, startY + 20);
+    
+    // Current chord in progression
+    if (this.autoAccompany) {
+      const chord = this.chordProgression[this.currentChord];
+      ctx.fillStyle = '#ffd700';
+      ctx.fillText('Current Chord: ' + chord.name, startX, startY + 40);
+    }
+    
+    ctx.restore();
   },
   
   handleKeyPress(key, code) {
     if (S.floor !== 6) return false;
     
+    // Check if in chat input - don't process music keys
+    if (document.activeElement && document.activeElement.id === 'chat-input') return false;
+    
     // Synth pads (keys 1-8)
     const synthKey = parseInt(key);
     if (synthKey >= 1 && synthKey <= 8) {
-      this.playSynthNote(synthKey - 1);
+      if (this.chordMode) {
+        this.playSynthChord(synthKey - 1);
+      } else {
+        this.playSynthNote(synthKey - 1);
+      }
       return true;
     }
     
@@ -18161,7 +18318,113 @@ const MusicStudio = {
       return true;
     }
     
+    // ═══ NEW MUSIC STUDIO CONTROLS ═══
+    
+    // Chord Mode toggle
+    if (key.toLowerCase() === 'c') {
+      this.toggleChordMode();
+      return true;
+    }
+    
+    // Auto-Accompany toggle
+    if (key.toLowerCase() === 'b') {
+      this.toggleAutoAccompany();
+      return true;
+    }
+    
+    // Save Song
+    if (key.toLowerCase() === 'p') {
+      this.saveCurrentSong();
+      return true;
+    }
+    
+    // Beat Presets (9, 0, -, =)
+    if (key === '9') {
+      this.setBeatPreset('lofi');
+      return true;
+    }
+    if (key === '0') {
+      this.setBeatPreset('ambient');
+      return true;
+    }
+    if (key === '-') {
+      this.setBeatPreset('bounce');
+      return true;
+    }
+    if (key === '=') {
+      this.setBeatPreset('cosmos');
+      return true;
+    }
+    
+    // Reactions (when not near sequencer)
+    if (!this.nearSequencer()) {
+      if (key === '1') { this.sendReaction('🔥'); return true; }
+      if (key === '2') { this.sendReaction('❤️'); return true; }
+      if (key === '3') { this.sendReaction('👏'); return true; }
+      if (key === '4') { this.sendReaction('✨'); return true; }
+    }
+    
     return false;
+  },
+  
+  nearSequencer() {
+    const sx = this.sequencer;
+    const dist = Math.hypot(S.visitor.x - (sx.gridX + sx.cols * sx.cellSize / 2), 
+                           S.visitor.y - (sx.gridY + sx.rows * sx.cellSize / 2));
+    return dist < 100;
+  },
+  
+  playSynthChord(index) {
+    if (!S.audioCtx || index < 0 || index >= this.synthPads.length) return;
+    
+    const pad = this.synthPads[index];
+    const baseFreq = pad.note;
+    
+    // Pentatonic chord mappings  
+    const chordMap = {
+      0: [baseFreq, baseFreq * 5/4, baseFreq * 3/2], // C -> C-E-G
+      1: [baseFreq, baseFreq * 3/2, baseFreq * 9/8], // D -> D-G-A  
+      2: [baseFreq, baseFreq * 3/2, baseFreq * 2], // E -> E-G-C
+      3: [baseFreq, baseFreq * 4/3, baseFreq * 3/2], // G -> G-C-D
+      4: [baseFreq, baseFreq * 4/3, baseFreq * 5/4], // A -> A-C-E
+      5: [baseFreq, baseFreq * 5/4, baseFreq * 3/2], // C5 -> C-E-G
+      6: [baseFreq, baseFreq * 3/2, baseFreq * 9/8], // D5 -> D-G-A
+      7: [baseFreq, baseFreq * 3/2, baseFreq * 2] // E5 -> E-G-C
+    };
+    
+    const chord = chordMap[index] || [baseFreq];
+    
+    // Play chord notes
+    chord.forEach((freq, i) => {
+      this.playChordNote(freq, i * 0.02); // Slight stagger
+    });
+    
+    pad.glow = 1;
+    showNotification('🎵 ' + pad.name + ' Chord');
+  },
+  
+  playChordNote(freq, delay = 0) {
+    const now = S.audioCtx.currentTime + delay;
+    const duration = 1.0;
+    
+    const osc = S.audioCtx.createOscillator();
+    const gain = S.audioCtx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    
+    const volume = S.volume * 0.12;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(volume, now + 0.02);
+    gain.gain.linearRampToValueAtTime(volume * 0.3, now + 0.12);
+    gain.gain.setValueAtTime(volume * 0.3, now + duration - 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    
+    osc.connect(gain);
+    gain.connect(S.masterGain);
+    
+    osc.start(now);
+    osc.stop(now + duration);
   },
   
   handleClick(x, y) {
@@ -18195,6 +18458,38 @@ const MusicStudio = {
     const tt = this.turntable;
     if (Math.hypot(x - tt.x, y - tt.y) <= 25) {
       this.toggleTurntable();
+      return true;
+    }
+    
+    // ═══ NEW CLICK HANDLERS ═══
+    
+    // Sequencer grid
+    if (this.clickSequencerGrid(x, y)) {
+      return true;
+    }
+    
+    // Beat preset buttons  
+    const presets = Object.keys(this.beatPresets);
+    const startX = 500, startY = 120;
+    
+    for (let i = 0; i < presets.length; i++) {
+      const btnX = startX + (i % 2) * 120;
+      const btnY = startY + Math.floor(i / 2) * 30;
+      
+      if (x >= btnX && x <= btnX + 110 && y >= btnY && y <= btnY + 25) {
+        this.setBeatPreset(presets[i]);
+        return true;
+      }
+    }
+    
+    // Toggle buttons for chord mode and auto-accompany
+    if (x >= 300 && x <= 380 && y >= 85 && y <= 105) {
+      this.toggleChordMode();
+      return true;
+    }
+    
+    if (x >= 300 && x <= 400 && y >= 105 && y <= 125) {
+      this.toggleAutoAccompany();
       return true;
     }
     
@@ -18530,6 +18825,534 @@ const MusicStudio = {
   darkenColor(color) {
     // Make colors dimmer for other players' notes
     return color.replace(/(\d+)/g, (match) => Math.max(0, parseInt(match) * 0.6));
+  },
+  
+  // ═══ VISUAL STEP SEQUENCER ═══
+  initSequencer() {
+    this.sequencer.grids.set(S.myPlayerId || 'player', new Array(8).fill(0));
+    this.sequencer.playing = true;
+    this.sequencer.currentStep = 0;
+    showNotification('🎹 Sequencer activated!');
+  },
+  
+  toggleSequencer() {
+    this.sequencer.playing = !this.sequencer.playing;
+    if (this.sequencer.playing) {
+      this.sequencer.currentStep = 0;
+      this.sequencer.stepTimer = 0;
+    }
+  },
+  
+  updateSequencer(dt) {
+    if (!this.sequencer.playing || S.floor !== 6) return;
+    
+    this.sequencer.stepTimer += dt;
+    
+    if (this.sequencer.stepTimer >= this.sequencer.stepDuration) {
+      this.sequencer.stepTimer = 0;
+      this.sequencer.currentStep = (this.sequencer.currentStep + 1) % this.sequencer.cols;
+      
+      // Play notes for current step
+      this.playSequencerStep(this.sequencer.currentStep);
+    }
+    
+    // Update playhead position
+    this.sequencer.playheadX = this.sequencer.gridX + (this.sequencer.currentStep * this.sequencer.cellSize);
+    
+    // Update particles
+    this.sequencer.particles = this.sequencer.particles.filter(p => {
+      p.life -= dt;
+      p.y += p.vy * dt;
+      p.x += p.vx * dt;
+      return p.life > 0;
+    });
+  },
+  
+  playSequencerStep(step) {
+    if (!S.audioCtx) return;
+    
+    this.sequencer.grids.forEach((grid, playerId) => {
+      for (let row = 0; row < this.sequencer.rows; row++) {
+        if (grid[row] & (1 << step)) { // Check if bit is set
+          const freq = this.sequencer.notes[row];
+          this.playSequencerNote(freq, row, step);
+          
+          // Create note particle
+          this.createNoteParticle(
+            this.sequencer.gridX + step * this.sequencer.cellSize + this.sequencer.cellSize/2,
+            this.sequencer.gridY + row * this.sequencer.cellSize + this.sequencer.cellSize/2,
+            playerId
+          );
+        }
+      }
+    });
+  },
+  
+  playSequencerNote(freq, row, step) {
+    const now = S.audioCtx.currentTime;
+    
+    // Warm sine + triangle blend
+    const osc1 = S.audioCtx.createOscillator();
+    const osc2 = S.audioCtx.createOscillator();
+    const gain1 = S.audioCtx.createGain();
+    const gain2 = S.audioCtx.createGain();
+    const masterGain = S.audioCtx.createGain();
+    
+    osc1.type = 'sine';
+    osc2.type = 'triangle';
+    osc1.frequency.value = freq;
+    osc2.frequency.value = freq;
+    
+    // Envelope: attack 0.01, decay 0.1, sustain 0.2, release 0.2
+    const vol = S.volume * 0.1;
+    masterGain.gain.setValueAtTime(0, now);
+    masterGain.gain.linearRampToValueAtTime(vol, now + 0.01);
+    masterGain.gain.linearRampToValueAtTime(vol * 0.2, now + 0.11);
+    masterGain.gain.exponentialRampToValueAtTime(0.001, now + 0.31);
+    
+    gain1.gain.value = 0.6;
+    gain2.gain.value = 0.4;
+    
+    osc1.connect(gain1);
+    osc2.connect(gain2);
+    gain1.connect(masterGain);
+    gain2.connect(masterGain);
+    masterGain.connect(S.masterGain);
+    
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + 0.31);
+    osc2.stop(now + 0.31);
+  },
+  
+  createNoteParticle(x, y, playerId) {
+    const colors = ['#00fff7', '#ff6ec7', '#ffd700', '#44ff44']; // Player colors
+    const color = colors[parseInt(playerId?.slice(-1) || '0', 16) % colors.length];
+    
+    this.sequencer.particles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 60,
+      vy: -Math.random() * 80 - 20,
+      life: 0.8,
+      maxLife: 0.8,
+      color,
+      size: 4 + Math.random() * 3
+    });
+  },
+  
+  clickSequencerGrid(x, y) {
+    const sx = this.sequencer;
+    const gridRelX = x - sx.gridX;
+    const gridRelY = y - sx.gridY;
+    
+    if (gridRelX < 0 || gridRelY < 0 || gridRelX > sx.cols * sx.cellSize || gridRelY > sx.rows * sx.cellSize) {
+      return false;
+    }
+    
+    const col = Math.floor(gridRelX / sx.cellSize);
+    const row = Math.floor(gridRelY / sx.cellSize);
+    
+    if (col >= 0 && col < sx.cols && row >= 0 && row < sx.rows) {
+      const playerId = S.myPlayerId || 'player';
+      let grid = sx.grids.get(playerId) || new Array(8).fill(0);
+      
+      // Toggle bit
+      grid[row] ^= (1 << col);
+      sx.grids.set(playerId, grid);
+      
+      // Sync to server
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: 'music.grid',
+          grid: grid
+        }));
+      }
+      
+      // Onboarding progress
+      if (!this.onboarding.hasPlacedNotes) {
+        this.onboarding.hasPlacedNotes++;
+        if (this.onboarding.hasPlacedNotes >= 3) {
+          setTimeout(() => {
+            if (S.floor === 6) showNotification('🎵 Drift: "See? You\'re already a musician. Try turning on Auto-Accompany (press B) for backing chords!"');
+          }, 2000);
+        }
+      }
+      
+      return true;
+    }
+    
+    return false;
+  },
+  
+  renderSequencer() {
+    if (S.floor !== 6) return;
+    
+    const sx = this.sequencer;
+    ctx.save();
+    
+    // Grid background
+    ctx.fillStyle = 'rgba(20, 20, 40, 0.8)';
+    ctx.fillRect(sx.gridX - 5, sx.gridY - 25, sx.cols * sx.cellSize + 10, sx.rows * sx.cellSize + 30);
+    
+    // Grid lines
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= sx.cols; i++) {
+      ctx.beginPath();
+      ctx.moveTo(sx.gridX + i * sx.cellSize, sx.gridY);
+      ctx.lineTo(sx.gridX + i * sx.cellSize, sx.gridY + sx.rows * sx.cellSize);
+      ctx.stroke();
+    }
+    for (let i = 0; i <= sx.rows; i++) {
+      ctx.beginPath();
+      ctx.moveTo(sx.gridX, sx.gridY + i * sx.cellSize);
+      ctx.lineTo(sx.gridX + sx.cols * sx.cellSize, sx.gridY + i * sx.cellSize);
+      ctx.stroke();
+    }
+    
+    // Note labels
+    ctx.fillStyle = '#aaa';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    for (let i = 0; i < sx.noteNames.length; i++) {
+      ctx.fillText(sx.noteNames[i], sx.gridX - 15, sx.gridY + i * sx.cellSize + 14);
+    }
+    
+    // Render all player grids
+    sx.grids.forEach((grid, playerId) => {
+      const colors = ['#00fff7', '#ff6ec7', '#ffd700', '#44ff44'];
+      const color = colors[parseInt(playerId?.slice(-1) || '0', 16) % colors.length];
+      
+      ctx.fillStyle = color;
+      for (let row = 0; row < sx.rows; row++) {
+        for (let col = 0; col < sx.cols; col++) {
+          if (grid[row] & (1 << col)) {
+            const cellX = sx.gridX + col * sx.cellSize;
+            const cellY = sx.gridY + row * sx.cellSize;
+            
+            // Active cell glow
+            if (sx.playing && col === sx.currentStep) {
+              ctx.globalAlpha = 0.9;
+              ctx.fillStyle = '#fff';
+            } else {
+              ctx.globalAlpha = 0.7;
+              ctx.fillStyle = color;
+            }
+            
+            ctx.fillRect(cellX + 2, cellY + 2, sx.cellSize - 4, sx.cellSize - 4);
+          }
+        }
+      }
+    });
+    
+    // Playhead
+    if (sx.playing) {
+      ctx.globalAlpha = 0.8;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(sx.playheadX + sx.cellSize/2, sx.gridY);
+      ctx.lineTo(sx.playheadX + sx.cellSize/2, sx.gridY + sx.rows * sx.cellSize);
+      ctx.stroke();
+    }
+    
+    // Particles
+    ctx.globalAlpha = 1;
+    sx.particles.forEach(p => {
+      const alpha = p.life / p.maxLife;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    
+    ctx.restore();
+  },
+  
+  // ═══ CHORD MODE & AUTO-ACCOMPANY ═══
+  toggleChordMode() {
+    this.chordMode = !this.chordMode;
+    showNotification(this.chordMode ? '🎵 Chord Mode ON' : '🎹 Chord Mode OFF');
+  },
+  
+  toggleAutoAccompany() {
+    this.autoAccompany = !this.autoAccompany;
+    this.chordTimer = 0;
+    this.currentChord = 0;
+    showNotification(this.autoAccompany ? '🎸 Auto-Accompany ON' : '🎸 Auto-Accompany OFF');
+    
+    if (this.autoAccompany && !this.onboarding.hasTriedAutoAccompany) {
+      this.onboarding.hasTriedAutoAccompany = true;
+      setTimeout(() => {
+        if (S.floor === 6) showNotification('🎵 Beautiful! The chords are Am → F → C → G. Classic and emotional!');
+      }, 3000);
+    }
+  },
+  
+  updateAutoAccompany(dt) {
+    if (!this.autoAccompany || S.floor !== 6 || !S.audioCtx) return;
+    
+    this.chordTimer += dt;
+    const beatDuration = 60 / this.sequencer.bpm; // One beat
+    
+    if (this.chordTimer >= beatDuration * 4) { // Change chord every 4 beats
+      this.chordTimer = 0;
+      this.currentChord = (this.currentChord + 1) % this.chordProgression.length;
+      this.playChord(this.chordProgression[this.currentChord]);
+    }
+  },
+  
+  playChord(chord) {
+    const now = S.audioCtx.currentTime;
+    const volume = S.volume * 0.08; // 30% of music volume, quieter
+    
+    // Soft pad sound (detuned saws, lowpass filtered)
+    chord.notes.forEach((freq, i) => {
+      const osc = S.audioCtx.createOscillator();
+      const gain = S.audioCtx.createGain();
+      const filter = S.audioCtx.createBiquadFilter();
+      
+      osc.type = 'sawtooth';
+      osc.frequency.value = freq * (1 + (Math.random() - 0.5) * 0.02); // Slight detune
+      
+      filter.type = 'lowpass';
+      filter.frequency.value = 800;
+      filter.Q.value = 1;
+      
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(volume, now + 0.1);
+      gain.gain.setValueAtTime(volume, now + 3.5);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 4);
+      
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(S.masterGain);
+      
+      osc.start(now);
+      osc.stop(now + 4);
+    });
+    
+    // Bass note (sine, one octave lower)
+    const bassOsc = S.audioCtx.createOscillator();
+    const bassGain = S.audioCtx.createGain();
+    
+    bassOsc.type = 'sine';
+    bassOsc.frequency.value = chord.bass;
+    
+    bassGain.gain.setValueAtTime(0, now);
+    bassGain.gain.linearRampToValueAtTime(volume * 0.8, now + 0.1);
+    bassGain.gain.setValueAtTime(volume * 0.8, now + 3.5);
+    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 4);
+    
+    bassOsc.connect(bassGain);
+    bassGain.connect(S.masterGain);
+    
+    bassOsc.start(now);
+    bassOsc.stop(now + 4);
+  },
+  
+  // ═══ BEAT PRESETS ═══
+  setBeatPreset(presetId) {
+    if (!this.beatPresets[presetId]) return;
+    
+    this.currentBeatPreset = presetId;
+    const preset = this.beatPresets[presetId];
+    showNotification('🥁 ' + preset.name);
+    
+    // Start playing the beat pattern
+    this.playBeatPreset(preset);
+  },
+  
+  playBeatPreset(preset) {
+    if (!S.audioCtx) return;
+    
+    const now = S.audioCtx.currentTime;
+    const stepDuration = this.sequencer.stepDuration;
+    
+    preset.pattern.forEach((hit, i) => {
+      if (hit) {
+        setTimeout(() => this.playDrumSound('kick'), i * stepDuration * 1000);
+      }
+    });
+    
+    preset.snare.forEach((hit, i) => {
+      if (hit) {
+        setTimeout(() => this.playDrumSound('snare'), i * stepDuration * 1000);
+      }
+    });
+    
+    preset.hihat.forEach((hit, i) => {
+      if (hit) {
+        setTimeout(() => this.playDrumSound('hihat'), i * stepDuration * 1000);
+      }
+    });
+    
+    preset.clap.forEach((hit, i) => {
+      if (hit) {
+        setTimeout(() => this.playDrumSound('clap'), i * stepDuration * 1000);
+      }
+    });
+  },
+  
+  playDrumSound(type) {
+    if (!S.audioCtx) return;
+    
+    const now = S.audioCtx.currentTime;
+    const volume = S.volume * 0.15;
+    
+    switch (type) {
+      case 'kick': {
+        const osc = S.audioCtx.createOscillator();
+        const gain = S.audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(60, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.1);
+        gain.gain.setValueAtTime(volume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.connect(gain); gain.connect(S.masterGain);
+        osc.start(now); osc.stop(now + 0.3);
+        break;
+      }
+      case 'snare': {
+        const noise = S.audioCtx.createBufferSource();
+        const buffer = S.audioCtx.createBuffer(1, S.audioCtx.sampleRate * 0.1, S.audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+        noise.buffer = buffer;
+        const gain = S.audioCtx.createGain();
+        gain.gain.setValueAtTime(volume * 0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        noise.connect(gain); gain.connect(S.masterGain);
+        noise.start(now);
+        break;
+      }
+      case 'hihat': {
+        const noise = S.audioCtx.createBufferSource();
+        const buffer = S.audioCtx.createBuffer(1, S.audioCtx.sampleRate * 0.05, S.audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+        noise.buffer = buffer;
+        const filter = S.audioCtx.createBiquadFilter();
+        const gain = S.audioCtx.createGain();
+        filter.type = 'highpass';
+        filter.frequency.value = 8000;
+        gain.gain.setValueAtTime(volume * 0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        noise.connect(filter); filter.connect(gain); gain.connect(S.masterGain);
+        noise.start(now);
+        break;
+      }
+      case 'clap': {
+        const noise = S.audioCtx.createBufferSource();
+        const buffer = S.audioCtx.createBuffer(1, S.audioCtx.sampleRate * 0.2, S.audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / 1000);
+        noise.buffer = buffer;
+        const gain = S.audioCtx.createGain();
+        gain.gain.setValueAtTime(volume * 0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        noise.connect(gain); gain.connect(S.masterGain);
+        noise.start(now);
+        break;
+      }
+    }
+  },
+  
+  // ═══ REACTIONS SYSTEM ═══
+  sendReaction(emoji) {
+    if (S.floor !== 6 || !ws || ws.readyState !== WebSocket.OPEN) return;
+    
+    ws.send(JSON.stringify({
+      type: 'music.react',
+      emoji: emoji
+    }));
+    
+    // Create local reaction
+    this.createReaction(S.visitor.x, S.visitor.y, emoji, S.myPlayerId);
+  },
+  
+  createReaction(x, y, emoji, playerId) {
+    const id = Date.now() + '_' + Math.random();
+    this.reactions.set(id, {
+      x, y,
+      emoji,
+      playerId,
+      life: 3,
+      maxLife: 3,
+      vy: -50
+    });
+  },
+  
+  updateReactions(dt) {
+    this.reactions.forEach((reaction, id) => {
+      reaction.life -= dt;
+      reaction.y += reaction.vy * dt;
+      reaction.vy += 20 * dt; // Gravity
+      
+      if (reaction.life <= 0) {
+        this.reactions.delete(id);
+      }
+    });
+  },
+  
+  renderReactions() {
+    if (S.floor !== 6) return;
+    
+    ctx.save();
+    this.reactions.forEach(reaction => {
+      const alpha = Math.min(1, reaction.life / reaction.maxLife);
+      ctx.globalAlpha = alpha;
+      ctx.font = '20px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(reaction.emoji, reaction.x, reaction.y);
+    });
+    ctx.restore();
+  },
+  
+  // ═══ SONG SAVING & SHARING ═══
+  saveCurrentSong() {
+    const playerId = S.myPlayerId || 'player';
+    const grid = this.sequencer.grids.get(playerId) || new Array(8).fill(0);
+    
+    // Encode song data
+    const songData = {
+      grid: grid,
+      chordMode: this.chordMode,
+      autoAccompany: this.autoAccompany,
+      beatPreset: this.currentBeatPreset
+    };
+    
+    const encoded = btoa(JSON.stringify(songData));
+    const songName = prompt('Name your song:') || 'Untitled';
+    
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+        type: 'song.save',
+        data: encoded,
+        name: songName
+      }));
+    }
+    
+    showNotification('🎵 Song saved: ' + songName);
+  },
+  
+  // ═══ CONTROLS HUD ═══
+  renderControlsHUD() {
+    if (S.floor !== 6) return;
+    
+    ctx.save();
+    ctx.fillStyle = 'rgba(10, 10, 20, 0.9)';
+    ctx.fillRect(50, 550, 700, 35);
+    
+    ctx.fillStyle = '#aaa';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'left';
+    
+    const controls = '🎹 1-8: Play Notes | 🥁 Q/W/E/R: Drums | 🔄 L: Loop | 🎵 C: Chords | 🎸 B: Auto-Play | 💾 P: Save Song | 🎛️ 9/0/-/=: Beat Presets | Click Grid: Sequencer';
+    ctx.fillText(controls, 60, 570);
+    
+    ctx.restore();
   }
 };
 
@@ -19200,6 +20023,29 @@ function handleMusicWebSocket(msg) {
     // Show notification of shared loop
     if (S.floor === 6) {
       showNotification('🎵 ' + (S.otherPlayers[msg.id]?.name || 'Player') + ' shared a loop!');
+    }
+  }
+  
+  // ═══ NEW MUSIC STUDIO HANDLERS ═══
+  
+  if (msg.type === 'music.grid' && msg.id !== S.myPlayerId) {
+    // Update other player's sequencer grid
+    if (msg.grid && Array.isArray(msg.grid)) {
+      MusicStudio.sequencer.grids.set(msg.id, msg.grid.slice(0, 8));
+    }
+  }
+  
+  if (msg.type === 'music.react' && msg.id !== S.myPlayerId) {
+    // Show other player's reaction
+    if (S.floor === 6 && msg.emoji) {
+      const player = S.otherPlayers[msg.id];
+      if (player) {
+        MusicStudio.createReaction(player.x, player.y, msg.emoji, msg.id);
+        // Show notification for dramatic reactions
+        if (['🔥', '✨'].includes(msg.emoji)) {
+          showNotification(msg.emoji + ' ' + (msg.name || 'Someone') + ' is feeling the vibe!');
+        }
+      }
     }
   }
 }
