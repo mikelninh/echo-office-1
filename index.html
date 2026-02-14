@@ -16562,7 +16562,7 @@ const StationNPCs = {
     currentText: '',
     displayText: '',
     typewriterIndex: 0,
-    typewriterSpeed: 0.05,
+    typewriterSpeed: 0.8,
     showingQuest: false,
     questData: null
   },
@@ -16987,23 +16987,32 @@ const StationNPCs = {
       
       // Accept button
       ctx.fillStyle = '#44aa44';
-      ctx.fillRect(popupX + 30, buttonY, 80, 25);
-      ctx.fillStyle = '#fff';
-      ctx.font = '11px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('Accept', popupX + 70, buttonY + 16);
-      
-      // Decline button
-      ctx.fillStyle = '#aa4444';
-      ctx.fillRect(popupX + 130, buttonY, 80, 25);
-      ctx.fillStyle = '#fff';
-      ctx.fillText('Decline', popupX + 170, buttonY + 16);
+      // Only show quest buttons after typewriter finishes
+      if (dialogue.typewriterIndex >= dialogue.currentText.length) {
+        ctx.fillRect(popupX + 30, buttonY, 80, 25);
+        ctx.fillStyle = '#fff';
+        ctx.font = '11px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('Accept [SPACE]', popupX + 70, buttonY + 16);
+        
+        ctx.fillStyle = '#aa4444';
+        ctx.fillRect(popupX + 130, buttonY, 80, 25);
+        ctx.fillStyle = '#fff';
+        ctx.fillText('Decline [ESC]', popupX + 170, buttonY + 16);
+      }
+      // Store button positions for click handling
+      this.dialogue._acceptBtn = {x:popupX+30,y:buttonY,w:80,h:25};
+      this.dialogue._declineBtn = {x:popupX+130,y:buttonY,w:80,h:25};
     } else if (dialogue.typewriterIndex >= dialogue.currentText.length) {
-      // Continue prompt
       ctx.fillStyle = '#888';
       ctx.font = '10px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('Press SPACE to continue, ESC to close', popupX + popupWidth / 2, popupY + popupHeight - 10);
+      ctx.fillText('SPACE to continue · ESC to close', popupX + popupWidth / 2, popupY + popupHeight - 10);
+    }
+    // Always show ESC hint while typewriter is running
+    if (dialogue.typewriterIndex < dialogue.currentText.length) {
+      ctx.fillStyle = '#555';ctx.font = '9px monospace';ctx.textAlign = 'center';
+      ctx.fillText('SPACE to skip · ESC to close', popupX + popupWidth / 2, popupY + popupHeight - 10);
     }
     
     // Reset text alignment
@@ -17060,6 +17069,12 @@ const StationNPCs = {
     if (!this.dialogue.active) return false;
     
     if (key === 'Escape') {
+      this.closeDialogue();
+      return true;
+    }
+    
+    // Decline on ESC when quest is showing
+    if (key === 'Escape' && this.dialogue.showingQuest) {
       this.closeDialogue();
       return true;
     }
