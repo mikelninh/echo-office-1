@@ -10074,6 +10074,771 @@ function handleChat(msg){addChatMsg('You',msg,'#ff6ec7');S.echo.dir=1;S.lastChat
   let resp=null;const lower=msg.toLowerCase();for(const rule of CHAT_RULES){if(rule.match.test(lower)){resp=rule.fn?rule.fn():rule.responses[Math.random()*rule.responses.length|0];break}}if(!resp)resp=CHAT_FALLBACKS[Math.random()*CHAT_FALLBACKS.length|0];const log=$('#chat-log'),typing=document.createElement('div');typing.className='typing-indicator';typing.innerHTML='<span></span><span></span><span></span>';log.appendChild(typing);log.scrollTo({top:log.scrollHeight,behavior:'smooth'});setTimeout(()=>{typing.remove();addChatMsg('Echo',resp);showSuggestions()},600+Math.random()*400)}
 
 // ═══════════════════════════════════════
+// §21b. SOCIAL SYSTEM (Multiplayer Features)
+// ═══════════════════════════════════════
+const SocialSystem = {
+  // Emote wheel data
+  emotes: [
+    {icon: '👋', name: 'Wave', key: 'wave'},
+    {icon: '👍', name: 'Nice', key: 'nice'},
+    {icon: '😂', name: 'Lol', key: 'lol'},
+    {icon: '⚔️', name: 'Duel?', key: 'duel'},
+    {icon: '🏠', name: 'Visit Room?', key: 'visit'},
+    {icon: '❤️', name: 'Love', key: 'love'},
+    {icon: '🤔', name: 'Hmm', key: 'hmm'},
+    {icon: '👀', name: 'Look!', key: 'look'}
+  ],
+  emoteWheelActive: false,
+  emoteWheelTarget: null,
+  activeEmotes: [], // {id, emote, x, y, life, maxLife}
+  speechBubbles: [], // {id, name, text, x, y, life, maxLife}
+  floorChatMessages: [], // {name, text, timestamp}
+  dmWindows: {}, // {playerId: {messages: [], visible: true, x, y}}
+  cryptoKeys: null, // {privateKey, publicKey, publicKeyJWK}
+  playerKeys: {}, // {playerId: publicKeyJWK}
+  
+  // Initialize crypto for E2E encryption
+  async initCrypto() {
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      console.warn('E2E encryption only works on HTTPS or localhost');
+      return;
+    }
+    
+    try {
+      // Try to load existing keys from localStorage
+      const storedPrivate = localStorage.getItem('echo_private_key');
+      const storedPublic = localStorage.getItem('echo_public_key_jwk');
+      
+      if (storedPrivate && storedPublic) {
+        // Import existing keys
+        this.cryptoKeys = {
+          privateKey: await crypto.subtle.importKey(
+            'jwk', JSON.parse(storedPrivate), 
+            {name: 'ECDH', namedCurve: 'P-256'}, false, ['deriveKey']
+          ),
+          publicKeyJWK: JSON.parse(storedPublic)
+        };
+      } else {
+        // Generate new keypair
+        const keyPair = await crypto.subtle.generateKey(
+          {name: 'ECDH', namedCurve: 'P-256'}, false, ['deriveKey']
+        );
+        
+        const privateKeyJWK = await crypto.subtle.exportKey('jwk', keyPair.privateKey);
+        const publicKeyJWK = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
+        
+        // Store keys
+        localStorage.setItem('echo_private_key', JSON.stringify(privateKeyJWK));
+        localStorage.setItem('echo_public_key_jwk', JSON.stringify(publicKeyJWK));
+        
+        this.cryptoKeys = {
+          privateKey: keyPair.privateKey,
+          publicKeyJWK: publicKeyJWK
+        };
+      }
+      
+      console.log('🔐 E2E encryption initialized');
+    } catch (error) {
+      console.error('Failed to initialize crypto:', error);
+    }
+  },
+
+  // Show emote wheel near another player
+  showEmoteWheel(targetPlayer) {
+    if (!targetPlayer) return;
+    this.emoteWheelActive = true;
+    this.emoteWheelTarget = targetPlayer;
+    
+    // Create emote wheel UI
+    const wheel = document.createElement('div');
+    wheel.id = 'emote-wheel';
+    wheel.innerHTML = `
+      <div class="emote-wheel-center"></div>
+      ${this.emotes.map((emote, i) => {
+        const angle = (i / this.emotes.length) * Math.PI * 2 - Math.PI / 2;
+        const x = Math.cos(angle) * 60;
+        const y = Math.sin(angle) * 60;
+        return `<div class="emote-option" data-emote="${emote.key}" data-index="${i}"
+                style="transform: translate(calc(-50% + ${x}px), calc(-50% + ${y}px))">
+                  <span class="emote-icon">${emote.icon}</span>
+                  <span class="emote-name">${emote.name}</span>
+                </div>`;
+      }).join('')}
+    `;
+    
+    // Position wheel
+    const rect = canvas.getBoundingClientRect();
+    const centerX = rect.left + (targetPlayer.x / W) * rect.width;
+    const centerY = rect.top + (targetPlayer.y / H) * rect.height;
+    
+    wheel.style.cssText = `
+      position: fixed; z-index: 9999; pointer-events: none;
+      left: ${centerX}px; top: ${centerY}px;
+      width: 140px; height: 140px;
+      transform: translate(-50%, -50%);
+    `;
+    
+    document.body.appendChild(wheel);
+    
+    // Add styles if not already present
+    if (!document.getElementById('emote-wheel-styles')) {
+      const style = document.createElement('style');
+      style.id = 'emote-wheel-styles';
+      style.textContent = `
+        #emote-wheel { animation: emoteWheelIn 0.2s ease-out; }
+        .emote-wheel-center { 
+          position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+          width: 20px; height: 20px; border-radius: 50%;
+          background: rgba(155, 89, 182, 0.8); border: 2px solid #9b59b6;
+        }
+        .emote-option {
+          position: absolute; top: 50%; left: 50%;
+          width: 45px; height: 45px; border-radius: 50%;
+          background: rgba(10, 10, 20, 0.9); border: 2px solid #555;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          cursor: pointer; transition: all 0.2s; pointer-events: all;
+          backdrop-filter: blur(4px);
+        }
+        .emote-option:hover {
+          border-color: #00fff7; background: rgba(0, 255, 247, 0.1);
+          transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(1.1);
+        }
+        .emote-icon { font-size: 16px; margin-bottom: 2px; }
+        .emote-name { font-size: 6px; color: #aaa; }
+        @keyframes emoteWheelIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    // Handle emote selection
+    wheel.addEventListener('click', (e) => {
+      const option = e.target.closest('.emote-option');
+      if (option) {
+        const emoteKey = option.dataset.emote;
+        const emoteData = this.emotes.find(e => e.key === emoteKey);
+        if (emoteData) {
+          this.sendEmote(emoteData.icon);
+        }
+        this.hideEmoteWheel();
+      }
+    });
+  },
+  
+  hideEmoteWheel() {
+    this.emoteWheelActive = false;
+    this.emoteWheelTarget = null;
+    const wheel = document.getElementById('emote-wheel');
+    if (wheel) {
+      wheel.style.animation = 'emoteWheelOut 0.15s ease-in forwards';
+      setTimeout(() => wheel.remove(), 150);
+    }
+  },
+  
+  sendEmote(emote) {
+    EchoWS.sendSocial('chat.emote', {emote: emote});
+    // Also show on our own screen
+    this.showEmote(S.myPlayerId, emote, S.visitor.x, S.visitor.y);
+  },
+  
+  showEmote(playerId, emote, x, y) {
+    this.activeEmotes.push({
+      id: playerId,
+      emote: emote,
+      x: x,
+      y: y,
+      life: 120, // 2 seconds at 60fps
+      maxLife: 120,
+      startY: y
+    });
+  },
+  
+  // Proximity speech bubbles
+  showProximitySpeechBubble(playerId, name, text, x, y) {
+    // Remove existing bubble from this player
+    this.speechBubbles = this.speechBubbles.filter(b => b.id !== playerId);
+    
+    // Add new bubble
+    this.speechBubbles.push({
+      id: playerId,
+      name: name,
+      text: text,
+      x: x,
+      y: y,
+      life: 300, // 5 seconds at 60fps
+      maxLife: 300
+    });
+  },
+  
+  sendProximityMessage(text) {
+    EchoWS.sendSocial('chat.proximity', {text: text});
+  },
+  
+  // Floor chat bar
+  addFloorChatMessage(name, text, timestamp) {
+    this.floorChatMessages.push({
+      name: name,
+      text: text,
+      timestamp: timestamp || Date.now()
+    });
+    
+    // Keep only last 10 messages
+    if (this.floorChatMessages.length > 10) {
+      this.floorChatMessages = this.floorChatMessages.slice(-10);
+    }
+    
+    this.updateFloorChatDisplay();
+  },
+  
+  sendFloorMessage(text) {
+    EchoWS.sendSocial('chat.floor', {text: text});
+  },
+  
+  updateFloorChatDisplay() {
+    let chatBar = document.getElementById('floor-chat-bar');
+    if (!chatBar) {
+      // Create chat bar
+      chatBar = document.createElement('div');
+      chatBar.id = 'floor-chat-bar';
+      chatBar.innerHTML = `
+        <div id="floor-chat-messages"></div>
+        <div id="floor-chat-input-wrap">
+          <input type="text" id="floor-chat-input" placeholder="Type to chat on this floor..." maxlength="100">
+          <button id="floor-chat-send">💬</button>
+        </div>
+      `;
+      
+      // Style the chat bar
+      chatBar.style.cssText = `
+        position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+        width: min(600px, 90vw); z-index: 1000;
+        background: rgba(10, 10, 20, 0.9); border: 2px solid rgba(155, 89, 182, 0.3);
+        border-radius: 12px; backdrop-filter: blur(8px);
+        display: flex; flex-direction: column; max-height: 200px;
+      `;
+      
+      const messagesDiv = chatBar.querySelector('#floor-chat-messages');
+      messagesDiv.style.cssText = `
+        flex: 1; overflow-y: auto; padding: 8px 12px; font-size: 11px;
+        max-height: 120px; line-height: 1.4;
+      `;
+      
+      const inputWrap = chatBar.querySelector('#floor-chat-input-wrap');
+      inputWrap.style.cssText = `
+        display: flex; padding: 8px; border-top: 1px solid rgba(155, 89, 182, 0.2);
+      `;
+      
+      const input = chatBar.querySelector('#floor-chat-input');
+      input.style.cssText = `
+        flex: 1; background: rgba(40, 35, 60, 0.5); border: 1px solid rgba(100, 100, 150, 0.25);
+        border-radius: 15px; color: #e0dce8; padding: 6px 12px; font-family: inherit;
+        font-size: 11px; outline: none; margin-right: 8px;
+      `;
+      
+      const sendBtn = chatBar.querySelector('#floor-chat-send');
+      sendBtn.style.cssText = `
+        width: 32px; height: 32px; background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        border: none; border-radius: 50%; cursor: pointer; font-size: 12px;
+        display: flex; align-items: center; justify-content: center; color: white;
+      `;
+      
+      // Event handlers
+      sendBtn.addEventListener('click', () => {
+        const text = input.value.trim();
+        if (text) {
+          this.sendFloorMessage(text);
+          input.value = '';
+        }
+      });
+      
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          sendBtn.click();
+        }
+      });
+      
+      document.body.appendChild(chatBar);
+    }
+    
+    // Update messages
+    const messagesDiv = chatBar.querySelector('#floor-chat-messages');
+    messagesDiv.innerHTML = this.floorChatMessages.map(msg => {
+      const age = Date.now() - msg.timestamp;
+      const opacity = Math.max(0.3, 1 - age / 30000); // Fade over 30 seconds
+      return `<div style="opacity: ${opacity}; margin-bottom: 4px;">
+        <span style="color: #00fff7; font-weight: bold;">[${msg.name}]</span>
+        <span style="color: #ddd; margin-left: 4px;">${msg.text}</span>
+      </div>`;
+    }).join('');
+    
+    // Auto scroll
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  },
+  
+  // E2E Encrypted Direct Messages
+  showPlayerProfile(playerId, playerData) {
+    if (!playerData) {
+      console.warn('No player data for', playerId);
+      return;
+    }
+    
+    const stats = this.getPlayerStats(playerData);
+    const {p} = createPopup(`
+      <h3 style="color: #00fff7;">👤 ${playerData.name}</h3>
+      <div style="text-align: center; margin: 12px 0;">
+        <div style="font-size: 32px; margin-bottom: 8px;">${this.getPlayerSkinIcon(playerData.skin)}</div>
+        <div style="font-size: 12px; color: #888;">Floor ${playerData.floor}</div>
+        <div style="font-size: 10px; color: #ffd080;">Station Mapped: ${stats.mapped}%</div>
+        <div style="font-size: 10px; color: #ff6ec7;">Duel Record: ${stats.wins}W / ${stats.losses}L</div>
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 16px;">
+        <button class="drink-btn" id="send-dm-btn" style="flex: 1; border-color: #ff6ec7; color: #ff6ec7;">💌 Send DM</button>
+        <button class="drink-btn" id="challenge-btn" style="flex: 1; border-color: #ffd700; color: #ffd700;">⚔️ Challenge</button>
+        <button class="drink-btn" id="visit-room-btn" style="flex: 1; border-color: #00fff7; color: #00fff7;">🏠 Visit Room</button>
+      </div>
+    `);
+    
+    p.querySelector('#send-dm-btn').addEventListener('click', () => {
+      p.closest('.popup-overlay').remove();
+      this.openDMWindow(playerId, playerData.name);
+    });
+    
+    p.querySelector('#challenge-btn').addEventListener('click', () => {
+      p.closest('.popup-overlay').remove();
+      if (DuelSystem) {
+        DuelSystem.sendChallenge(playerId, playerData.name);
+      }
+    });
+    
+    p.querySelector('#visit-room-btn').addEventListener('click', () => {
+      p.closest('.popup-overlay').remove();
+      // Implementation would depend on room system
+      showNotification(`Visiting ${playerData.name}'s room...`);
+    });
+  },
+  
+  getPlayerSkinIcon(skin) {
+    // This would map skin names to icons - simplified for now
+    return '👤';
+  },
+  
+  getPlayerStats(playerData) {
+    // Mock stats - in real implementation this would come from server
+    return {
+      mapped: Math.floor(Math.random() * 100),
+      wins: Math.floor(Math.random() * 50),
+      losses: Math.floor(Math.random() * 20)
+    };
+  },
+  
+  async openDMWindow(playerId, playerName) {
+    if (!this.cryptoKeys) {
+      showNotification('🔐 Setting up encryption...');
+      await this.initCrypto();
+    }
+    
+    // Create or show existing DM window
+    let dmWindow = this.dmWindows[playerId];
+    if (!dmWindow) {
+      dmWindow = {
+        messages: [],
+        visible: true,
+        x: 100 + Object.keys(this.dmWindows).length * 30,
+        y: 100 + Object.keys(this.dmWindows).length * 30
+      };
+      this.dmWindows[playerId] = dmWindow;
+    }
+    
+    this.renderDMWindow(playerId, playerName);
+  },
+  
+  renderDMWindow(playerId, playerName) {
+    const dmWindow = this.dmWindows[playerId];
+    if (!dmWindow || !dmWindow.visible) return;
+    
+    // Remove existing window
+    const existingWindow = document.getElementById(`dm-window-${playerId}`);
+    if (existingWindow) existingWindow.remove();
+    
+    // Create new window
+    const windowEl = document.createElement('div');
+    windowEl.id = `dm-window-${playerId}`;
+    windowEl.innerHTML = `
+      <div class="dm-header">
+        <span>💌 ${playerName}</span>
+        <div>
+          <button class="dm-minimize">─</button>
+          <button class="dm-close">✕</button>
+        </div>
+      </div>
+      <div class="dm-messages">
+        ${dmWindow.messages.map(msg => `
+          <div class="dm-message ${msg.fromMe ? 'from-me' : 'from-them'}">
+            <div class="dm-sender">${msg.fromMe ? 'You' : playerName}</div>
+            <div class="dm-text">${msg.text}</div>
+            <div class="dm-time">${new Date(msg.timestamp).toLocaleTimeString()}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="dm-input-wrap">
+        <input type="text" class="dm-input" placeholder="Type encrypted message..." maxlength="200">
+        <button class="dm-send">🔒</button>
+      </div>
+    `;
+    
+    // Style the window
+    windowEl.style.cssText = `
+      position: fixed; left: ${dmWindow.x}px; top: ${dmWindow.y}px;
+      width: 300px; height: 400px; z-index: 5000;
+      background: rgba(10, 10, 30, 0.95); border: 2px solid #9b59b6;
+      border-radius: 8px; backdrop-filter: blur(8px);
+      display: flex; flex-direction: column; resize: both; overflow: hidden;
+    `;
+    
+    // Style components
+    const header = windowEl.querySelector('.dm-header');
+    header.style.cssText = `
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 12px; background: rgba(155, 89, 182, 0.2);
+      border-bottom: 1px solid rgba(155, 89, 182, 0.3);
+      cursor: move; font-size: 12px; font-weight: bold; color: #ff6ec7;
+    `;
+    
+    const messages = windowEl.querySelector('.dm-messages');
+    messages.style.cssText = `
+      flex: 1; overflow-y: auto; padding: 8px; font-size: 11px;
+    `;
+    
+    const inputWrap = windowEl.querySelector('.dm-input-wrap');
+    inputWrap.style.cssText = `
+      display: flex; padding: 8px; border-top: 1px solid rgba(155, 89, 182, 0.2);
+    `;
+    
+    const input = windowEl.querySelector('.dm-input');
+    input.style.cssText = `
+      flex: 1; background: rgba(40, 35, 60, 0.5); border: 1px solid rgba(100, 100, 150, 0.25);
+      border-radius: 12px; color: #e0dce8; padding: 6px 12px; font-family: inherit;
+      font-size: 11px; outline: none; margin-right: 8px;
+    `;
+    
+    // Event handlers
+    header.addEventListener('mousedown', (e) => {
+      const startX = e.clientX - dmWindow.x;
+      const startY = e.clientY - dmWindow.y;
+      
+      const onMouseMove = (e) => {
+        dmWindow.x = e.clientX - startX;
+        dmWindow.y = e.clientY - startY;
+        windowEl.style.left = dmWindow.x + 'px';
+        windowEl.style.top = dmWindow.y + 'px';
+      };
+      
+      const onMouseUp = () => {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      };
+      
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+    
+    windowEl.querySelector('.dm-close').addEventListener('click', () => {
+      dmWindow.visible = false;
+      windowEl.remove();
+    });
+    
+    windowEl.querySelector('.dm-minimize').addEventListener('click', () => {
+      dmWindow.visible = false;
+      windowEl.remove();
+    });
+    
+    windowEl.querySelector('.dm-send').addEventListener('click', async () => {
+      const text = input.value.trim();
+      if (text && this.cryptoKeys) {
+        await this.sendEncryptedDM(playerId, text);
+        input.value = '';
+      }
+    });
+    
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        windowEl.querySelector('.dm-send').click();
+      }
+    });
+    
+    document.body.appendChild(windowEl);
+    
+    // Scroll to bottom
+    messages.scrollTop = messages.scrollHeight;
+  },
+  
+  async sendEncryptedDM(playerId, text) {
+    try {
+      // Get recipient's public key
+      const recipientKey = this.playerKeys[playerId];
+      if (!recipientKey) {
+        showNotification('⚠️ Player encryption key not available');
+        return;
+      }
+      
+      // Import recipient's public key
+      const theirPublicKey = await crypto.subtle.importKey(
+        'jwk', recipientKey, {name: 'ECDH', namedCurve: 'P-256'}, false, []
+      );
+      
+      // Derive shared secret
+      const sharedKey = await crypto.subtle.deriveKey(
+        {name: 'ECDH', public: theirPublicKey}, this.cryptoKeys.privateKey,
+        {name: 'AES-GCM', length: 256}, false, ['encrypt', 'decrypt']
+      );
+      
+      // Encrypt message
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const encodedText = new TextEncoder().encode(text);
+      const encrypted = await crypto.subtle.encrypt(
+        {name: 'AES-GCM', iv: iv}, sharedKey, encodedText
+      );
+      
+      // Combine IV and ciphertext
+      const combined = new Uint8Array(iv.length + encrypted.byteLength);
+      combined.set(iv);
+      combined.set(new Uint8Array(encrypted), iv.length);
+      
+      // Encode as base64
+      const base64 = btoa(String.fromCharCode(...combined));
+      
+      // Send encrypted message
+      EchoWS.sendSocial('chat.dm', {to: playerId, encrypted: base64});
+      
+      // Add to our conversation
+      const dmWindow = this.dmWindows[playerId];
+      if (dmWindow) {
+        dmWindow.messages.push({
+          text: text,
+          fromMe: true,
+          timestamp: Date.now()
+        });
+        this.renderDMWindow(playerId, 'Player'); // Would need real name
+      }
+    } catch (error) {
+      console.error('Failed to encrypt DM:', error);
+      showNotification('❌ Failed to encrypt message');
+    }
+  },
+  
+  async receiveDM(fromId, fromName, encryptedData) {
+    try {
+      if (!this.cryptoKeys) {
+        await this.initCrypto();
+      }
+      
+      // Get sender's public key
+      const senderKey = this.playerKeys[fromId];
+      if (!senderKey) {
+        console.warn('No public key for sender', fromId);
+        return;
+      }
+      
+      // Import sender's public key
+      const theirPublicKey = await crypto.subtle.importKey(
+        'jwk', senderKey, {name: 'ECDH', namedCurve: 'P-256'}, false, []
+      );
+      
+      // Derive shared secret
+      const sharedKey = await crypto.subtle.deriveKey(
+        {name: 'ECDH', public: theirPublicKey}, this.cryptoKeys.privateKey,
+        {name: 'AES-GCM', length: 256}, false, ['encrypt', 'decrypt']
+      );
+      
+      // Decode base64
+      const combined = new Uint8Array([...atob(encryptedData)].map(c => c.charCodeAt(0)));
+      const iv = combined.slice(0, 12);
+      const ciphertext = combined.slice(12);
+      
+      // Decrypt
+      const decrypted = await crypto.subtle.decrypt(
+        {name: 'AES-GCM', iv: iv}, sharedKey, ciphertext
+      );
+      
+      const text = new TextDecoder().decode(decrypted);
+      
+      // Add to conversation
+      let dmWindow = this.dmWindows[fromId];
+      if (!dmWindow) {
+        dmWindow = {
+          messages: [],
+          visible: false,
+          x: 100,
+          y: 100
+        };
+        this.dmWindows[fromId] = dmWindow;
+      }
+      
+      dmWindow.messages.push({
+        text: text,
+        fromMe: false,
+        timestamp: Date.now()
+      });
+      
+      // Show notification and open window if not visible
+      showNotification(`💌 DM from ${fromName}: ${text.slice(0, 30)}...`);
+      
+      if (!dmWindow.visible) {
+        dmWindow.visible = true;
+        this.renderDMWindow(fromId, fromName);
+      } else {
+        this.renderDMWindow(fromId, fromName);
+      }
+      
+    } catch (error) {
+      console.error('Failed to decrypt DM:', error);
+    }
+  },
+  
+  // Update system (called from main game loop)
+  update(dt) {
+    // Update emotes
+    this.activeEmotes = this.activeEmotes.filter(emote => {
+      emote.life--;
+      emote.y = emote.startY - (1 - emote.life / emote.maxLife) * 30; // Float up
+      return emote.life > 0;
+    });
+    
+    // Update speech bubbles
+    this.speechBubbles = this.speechBubbles.filter(bubble => {
+      bubble.life--;
+      return bubble.life > 0;
+    });
+    
+    // Update floor chat display fade
+    if (this.floorChatMessages.length > 0) {
+      this.updateFloorChatDisplay();
+    }
+  },
+  
+  // Render system (called from main game render loop)
+  render() {
+    // Render emotes
+    this.activeEmotes.forEach(emote => {
+      const player = emote.id === S.myPlayerId ? S.visitor : S.otherPlayers[emote.id];
+      if (!player || player.floor !== S.floor) return;
+      
+      const alpha = emote.life / emote.maxLife;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.font = '20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(emote.emote, emote.x, emote.y - 20);
+      ctx.restore();
+    });
+    
+    // Render speech bubbles
+    this.speechBubbles.forEach(bubble => {
+      const player = bubble.id === S.myPlayerId ? S.visitor : S.otherPlayers[bubble.id];
+      if (!player || player.floor !== S.floor) return;
+      
+      const alpha = Math.min(1, bubble.life / 60); // Fade in first second
+      const x = bubble.x;
+      const y = bubble.y - 40;
+      
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      
+      // Bubble background
+      const bubbleWidth = Math.min(200, ctx.measureText(bubble.text).width + 20);
+      const bubbleHeight = 30;
+      
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.strokeStyle = '#9b59b6';
+      ctx.lineWidth = 2;
+      
+      // Rounded rectangle
+      const radius = 8;
+      ctx.beginPath();
+      ctx.moveTo(x - bubbleWidth/2 + radius, y - bubbleHeight);
+      ctx.lineTo(x + bubbleWidth/2 - radius, y - bubbleHeight);
+      ctx.quadraticCurveTo(x + bubbleWidth/2, y - bubbleHeight, x + bubbleWidth/2, y - bubbleHeight + radius);
+      ctx.lineTo(x + bubbleWidth/2, y - radius);
+      ctx.quadraticCurveTo(x + bubbleWidth/2, y, x + bubbleWidth/2 - radius, y);
+      ctx.lineTo(x - bubbleWidth/2 + radius, y);
+      ctx.quadraticCurveTo(x - bubbleWidth/2, y, x - bubbleWidth/2, y - radius);
+      ctx.lineTo(x - bubbleWidth/2, y - bubbleHeight + radius);
+      ctx.quadraticCurveTo(x - bubbleWidth/2, y - bubbleHeight, x - bubbleWidth/2 + radius, y - bubbleHeight);
+      ctx.fill();
+      ctx.stroke();
+      
+      // Tail
+      ctx.beginPath();
+      ctx.moveTo(x - 8, y);
+      ctx.lineTo(x, y + 8);
+      ctx.lineTo(x + 8, y);
+      ctx.fill();
+      ctx.stroke();
+      
+      // Player name
+      ctx.fillStyle = '#666';
+      ctx.font = '8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(bubble.name, x, y - bubbleHeight - 5);
+      
+      // Message text
+      ctx.fillStyle = '#222';
+      ctx.font = '11px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(bubble.text, x, y - bubbleHeight/2 + 3);
+      
+      ctx.restore();
+    });
+  },
+  
+  // Handle player clicks for profiles
+  handlePlayerClick(playerId) {
+    const player = S.otherPlayers[playerId];
+    if (player) {
+      this.showPlayerProfile(playerId, player);
+    }
+  },
+  
+  // Store player public keys when they join
+  storePlayerKey(playerId, publicKeyJWK) {
+    if (publicKeyJWK) {
+      this.playerKeys[playerId] = publicKeyJWK;
+    }
+  }
+};
+
+// Initialize social system
+(async function() {
+  await SocialSystem.initCrypto();
+  
+  // Patch player.join to store public keys
+  const originalHandlePlayerJoin = (function() {
+    const originalOnMessage = EchoWS.ws?.onmessage;
+    return originalOnMessage;
+  })();
+  
+  // Add mobile chat button
+  if (window.innerWidth <= 900) {
+    const actionButtons = document.getElementById('action-buttons');
+    if (actionButtons) {
+      const chatBtn = document.createElement('div');
+      chatBtn.className = 'action-btn';
+      chatBtn.innerHTML = '💬';
+      chatBtn.id = 'btn-mobile-chat';
+      chatBtn.style.cssText = 'background: rgba(155,89,182,0.3); border-color: rgba(155,89,182,0.6);';
+      chatBtn.addEventListener('click', () => {
+        const chatInput = document.getElementById('floor-chat-input') || document.getElementById('chat-input');
+        if (chatInput) {
+          chatInput.focus();
+        }
+      });
+      actionButtons.appendChild(chatBtn);
+    }
+  }
+  
+  console.log('🎮 Social System initialized: emotes, proximity chat, floor chat, E2E DMs, player profiles');
+})();
+
+// ═══════════════════════════════════════
 // §22. ARCADE SYSTEM
 // ═══════════════════════════════════════
 let arcadeGame=null,arcadeLoop=null;
