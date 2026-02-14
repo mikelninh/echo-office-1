@@ -17956,22 +17956,22 @@ const MusicStudio = {
 
   // Synth Pad Configuration (keeping existing)
   synthPads: [
-    {note: 262, name: 'C4', color: '#ff4444', x: 100, y: 350, pressed: false, glow: 0},
-    {note: 294, name: 'D4', color: '#ff8844', x: 140, y: 350, pressed: false, glow: 0},
-    {note: 330, name: 'E4', color: '#ffcc44', x: 180, y: 350, pressed: false, glow: 0},
-    {note: 392, name: 'G4', color: '#44ff44', x: 220, y: 350, pressed: false, glow: 0},
-    {note: 440, name: 'A4', color: '#44ccff', x: 260, y: 350, pressed: false, glow: 0},
-    {note: 523, name: 'C5', color: '#8844ff', x: 100, y: 420, pressed: false, glow: 0},
-    {note: 587, name: 'D5', color: '#ff44cc', x: 140, y: 420, pressed: false, glow: 0},
-    {note: 659, name: 'E5', color: '#ffaa88', x: 180, y: 420, pressed: false, glow: 0}
+    {note: 262, name: 'C4', color: '#ff4444', x: 95, y: 355, pressed: false, glow: 0},
+    {note: 294, name: 'D4', color: '#ff8844', x: 130, y: 355, pressed: false, glow: 0},
+    {note: 330, name: 'E4', color: '#ffcc44', x: 165, y: 355, pressed: false, glow: 0},
+    {note: 392, name: 'G4', color: '#44ff44', x: 200, y: 355, pressed: false, glow: 0},
+    {note: 440, name: 'A4', color: '#44ccff', x: 235, y: 355, pressed: false, glow: 0},
+    {note: 523, name: 'C5', color: '#8844ff', x: 95, y: 390, pressed: false, glow: 0},
+    {note: 587, name: 'D5', color: '#ff44cc', x: 130, y: 390, pressed: false, glow: 0},
+    {note: 659, name: 'E5', color: '#ffaa88', x: 165, y: 390, pressed: false, glow: 0}
   ],
   
   // Drum Machine Configuration
   drumPads: [
-    {name: 'kick', key: 'KeyQ', x: 520, y: 350, color: '#ff6666', pressed: false, glow: 0},
-    {name: 'snare', key: 'KeyW', x: 580, y: 350, color: '#66ff66', pressed: false, glow: 0},
-    {name: 'hihat', key: 'KeyE', x: 640, y: 350, color: '#6666ff', pressed: false, glow: 0},
-    {name: 'clap', key: 'KeyR', x: 700, y: 350, color: '#ffaa66', pressed: false, glow: 0}
+    {name: 'kick', key: 'KeyQ', x: 515, y: 358, color: '#ff6666', pressed: false, glow: 0},
+    {name: 'snare', key: 'KeyW', x: 565, y: 358, color: '#66ff66', pressed: false, glow: 0},
+    {name: 'hihat', key: 'KeyE', x: 615, y: 358, color: '#6666ff', pressed: false, glow: 0},
+    {name: 'clap', key: 'KeyR', x: 665, y: 358, color: '#ffaa66', pressed: false, glow: 0}
   ],
   
   // Loop Station
@@ -18107,44 +18107,46 @@ const MusicStudio = {
     }
     ctx.restore();
     
-    // Synth Pads
+    // Synth Pad Panel Background
+    ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(88,338,198,148);
+    ctx.strokeStyle='rgba(0,255,247,.3)';ctx.strokeRect(88,338,198,148);
+    ctx.fillStyle='#00fff7';ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText('🎹 SYNTH',187,350);
+    
+    // Synth Pads (small pixel-art style)
     this.synthPads.forEach(pad => {
-      ctx.fillStyle = pad.pressed || pad.glow > 0 ? pad.color : this.darkenColor(pad.color);
-      ctx.fillRect(pad.x, pad.y, 35, 60);
-      
-      if (pad.glow > 0) {
-        ctx.save();
-        ctx.shadowColor = pad.color;
-        ctx.shadowBlur = pad.glow * 20;
-        ctx.fillStyle = pad.color;
-        ctx.fillRect(pad.x, pad.y, 35, 60);
-        ctx.restore();
+      const active = pad.pressed || pad.glow > 0;
+      const w=30,h=28;
+      ctx.fillStyle = active ? pad.color : this.darkenColor(pad.color);
+      ctx.fillRect(pad.x, pad.y, w, h);
+      ctx.strokeStyle = active ? '#fff' : 'rgba(255,255,255,.2)';
+      ctx.strokeRect(pad.x, pad.y, w, h);
+      if (active && pad.glow > 0) {
+        ctx.fillStyle = `rgba(255,255,255,${pad.glow * 0.3})`;
+        ctx.fillRect(pad.x+1, pad.y+1, w-2, h-2);
       }
-      
-      ctx.fillStyle = '#fff';
-      ctx.font = '8px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(pad.name, pad.x + 17.5, pad.y + 50);
+      ctx.fillStyle = '#fff';ctx.font = '7px monospace';ctx.textAlign = 'center';
+      ctx.fillText(pad.name, pad.x + w/2, pad.y + h - 4);
     });
     
-    // Drum Pads
+    // Drum Pad Panel Background
+    ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(508,338,210,148);
+    ctx.strokeStyle='rgba(255,100,100,.3)';ctx.strokeRect(508,338,210,148);
+    ctx.fillStyle='#ff6666';ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText('🥁 DRUMS',613,350);
+    
+    // Drum Pads (small pixel-art style)
     this.drumPads.forEach(pad => {
-      ctx.fillStyle = pad.pressed || pad.glow > 0 ? pad.color : this.darkenColor(pad.color);
-      ctx.fillRect(pad.x, pad.y, 35, 80);
-      
-      if (pad.glow > 0) {
-        ctx.save();
-        ctx.shadowColor = pad.color;
-        ctx.shadowBlur = pad.glow * 20;
-        ctx.fillStyle = pad.color;
-        ctx.fillRect(pad.x, pad.y, 35, 80);
-        ctx.restore();
+      const active = pad.pressed || pad.glow > 0;
+      const w=40,h=40;
+      ctx.fillStyle = active ? pad.color : this.darkenColor(pad.color);
+      ctx.fillRect(pad.x, pad.y, w, h);
+      ctx.strokeStyle = active ? '#fff' : 'rgba(255,255,255,.2)';
+      ctx.strokeRect(pad.x, pad.y, w, h);
+      if (active && pad.glow > 0) {
+        ctx.fillStyle = `rgba(255,255,255,${pad.glow * 0.3})`;
+        ctx.fillRect(pad.x+1, pad.y+1, w-2, h-2);
       }
-      
-      ctx.fillStyle = '#fff';
-      ctx.font = '8px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(pad.name.toUpperCase(), pad.x + 17.5, pad.y + 70);
+      ctx.fillStyle = '#fff';ctx.font = '7px monospace';ctx.textAlign = 'center';
+      ctx.fillText(pad.name.toUpperCase(), pad.x + w/2, pad.y + h - 5);
     });
     
     // Loop Station
@@ -19357,14 +19359,14 @@ const MusicStudio = {
     
     ctx.save();
     ctx.fillStyle = 'rgba(10, 10, 20, 0.9)';
-    ctx.fillRect(50, 550, 700, 35);
+    ctx.fillRect(50, 545, 700, 40);
+    ctx.strokeStyle='rgba(0,255,247,.2)';ctx.strokeRect(50,545,700,40);
     
-    ctx.fillStyle = '#aaa';
-    ctx.font = '11px monospace';
-    ctx.textAlign = 'left';
-    
-    const controls = '🎹 1-8: Play Notes | 🥁 Q/W/E/R: Drums | 🔄 L: Loop | 🎵 C: Chords | 🎸 B: Auto-Play | 💾 P: Save Song | 🎛️ 9/0/-/=: Beat Presets | Click Grid: Sequencer';
-    ctx.fillText(controls, 60, 570);
+    ctx.fillStyle = '#888';
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('🎹 1-8: Notes  🥁 QWER: Drums  🔄 L: Loop  🎵 C: Chords  🎸 B: Auto-Play', 400, 560);
+    ctx.fillText('💾 P: Save  🎛️ 9/0/-/=: Beats  Click Grid: Sequencer', 400, 575);
     
     ctx.restore();
   }
