@@ -150,6 +150,61 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 .tip-slider{width:80%;margin:8px auto;display:block;-webkit-appearance:none;background:#333;height:6px;border-radius:3px;outline:none}
 .tip-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:#ffd700;border-radius:50%;cursor:pointer}
 #scanlines{position:fixed;inset:0;pointer-events:none;z-index:9998;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.015) 2px,rgba(0,0,0,.015) 4px)}
+/* v24: Enhancement System */
+.enhance-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:6500;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:'Courier New',monospace}
+.enhance-stage{width:320px;padding:24px;background:#1a1a2e;border:3px solid #00fff7;border-radius:12px;text-align:center;position:relative;overflow:hidden}
+.enhance-item-display{font-size:42px;margin:10px 0}
+.enhance-item-name{font-size:16px;color:#fff;font-weight:bold;margin:4px 0}
+.enhance-level{font-size:28px;color:#ffd700;font-weight:bold;margin:8px 0}
+.enhance-bar{width:100%;height:8px;background:#333;border-radius:4px;overflow:hidden;margin:10px 0}
+.enhance-bar-fill{height:100%;transition:width .3s;border-radius:4px}
+.enhance-cost{font-size:13px;color:#ffd700;margin:6px 0}
+.enhance-chance{font-size:11px;margin:4px 0}
+.enhance-btn{display:inline-block;padding:10px 28px;background:linear-gradient(135deg,#00fff7,#0088aa);border:none;color:#000;font-weight:bold;font-family:inherit;font-size:14px;border-radius:8px;cursor:pointer;transition:transform .15s,box-shadow .2s;margin:8px 4px}
+.enhance-btn:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(0,255,247,.4)}
+.enhance-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.enhance-btn.danger{background:linear-gradient(135deg,#ff3344,#aa0011)}
+.enhance-btn.cancel{background:#333;color:#aaa}
+.enhance-anim{position:absolute;inset:0;pointer-events:none;z-index:2}
+@keyframes enhanceGlow{0%{box-shadow:0 0 10px #00fff7}50%{box-shadow:0 0 40px #ffd700,0 0 80px #ff6ec7}100%{box-shadow:0 0 10px #00fff7}}
+@keyframes enhanceSuccess{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes enhanceFail{0%{transform:translateX(0)}25%{transform:translateX(-10px)}50%{transform:translateX(10px)}75%{transform:translateX(-5px)}100%{transform:translateX(0)}}
+@keyframes enhanceDestroy{0%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.5)}100%{opacity:0;transform:scale(0) rotate(180deg)}}
+.enhance-glow-1{filter:drop-shadow(0 0 2px rgba(0,255,247,.3))}
+.enhance-glow-5{filter:drop-shadow(0 0 4px rgba(0,255,247,.5)) drop-shadow(0 0 8px rgba(0,200,255,.3))}
+.enhance-glow-10{filter:drop-shadow(0 0 6px rgba(255,215,0,.6)) drop-shadow(0 0 12px rgba(255,170,0,.4))}
+.enhance-glow-15{filter:drop-shadow(0 0 8px rgba(255,110,199,.7)) drop-shadow(0 0 16px rgba(255,50,150,.5)) drop-shadow(0 0 24px rgba(255,0,100,.3))}
+.enhance-glow-20{filter:drop-shadow(0 0 10px rgba(255,255,255,.8)) drop-shadow(0 0 20px rgba(255,215,0,.6)) drop-shadow(0 0 30px rgba(255,110,199,.5)) drop-shadow(0 0 40px rgba(0,255,247,.4))}
+/* v24: Mission Board */
+.mission-card{background:rgba(30,30,50,.8);border:2px solid #555;border-radius:8px;padding:10px;margin:6px 0;transition:border-color .2s}
+.mission-card.complete{border-color:#44cc44;background:rgba(30,60,30,.5)}
+.mission-card .mission-title{color:#00fff7;font-weight:bold;font-size:12px}
+.mission-card .mission-desc{color:#aaa;font-size:10px;margin:4px 0}
+.mission-card .mission-reward{color:#ffd700;font-size:10px}
+.mission-card .mission-progress{font-size:9px;color:#888;margin-top:4px}
+.mission-progress-bar{width:100%;height:4px;background:#333;border-radius:2px;margin-top:3px;overflow:hidden}
+.mission-progress-fill{height:100%;background:#00fff7;border-radius:2px;transition:width .3s}
+.weekly-card{border-color:#ff6ec7;background:rgba(50,20,40,.5)}
+.weekly-card .mission-title{color:#ff6ec7}
+/* v24: Bazaar */
+.bazaar-listing{display:flex;align-items:center;gap:8px;padding:8px;margin:4px 0;background:rgba(30,30,50,.6);border:1px solid #444;border-radius:6px;cursor:pointer;transition:border-color .2s}
+.bazaar-listing:hover{border-color:#ffd700}
+.bazaar-listing .listing-icon{font-size:20px}
+.bazaar-listing .listing-info{flex:1;font-size:10px}
+.bazaar-listing .listing-price{color:#ffd700;font-weight:bold;font-size:12px}
+.bazaar-listing .listing-seller{font-size:8px;color:#888}
+.bazaar-tabs{display:flex;gap:2px;margin-bottom:8px}
+.bazaar-tab{flex:1;padding:6px;text-align:center;cursor:pointer;font-size:10px;font-family:inherit;color:#888;background:rgba(30,30,50,.5);border:1px solid #333;border-radius:6px 6px 0 0;transition:all .2s}
+.bazaar-tab:hover{color:#ddd}
+.bazaar-tab.active{color:#ffd700;background:rgba(255,215,0,.1);border-color:#ffd700}
+/* v24: Specialist */
+.specialist-card{display:inline-flex;flex-direction:column;align-items:center;width:100px;height:130px;margin:4px;padding:8px;border:2px solid #555;border-radius:10px;cursor:pointer;transition:all .25s;background:rgba(20,20,40,.6);position:relative}
+.specialist-card:hover{border-color:#ff6ec7;transform:translateY(-2px)}
+.specialist-card .spec-icon{font-size:32px;margin-bottom:4px}
+.specialist-card .spec-name{font-size:10px;color:#fff;font-weight:bold}
+.specialist-card .spec-desc{font-size:8px;color:#888;margin-top:2px;text-align:center}
+.specialist-card.active{border-color:#ffd700;background:rgba(255,215,0,.1);box-shadow:0 0 15px rgba(255,215,0,.3)}
+@keyframes specialistTransform{0%{transform:scale(1);filter:brightness(1)}25%{transform:scale(1.3);filter:brightness(3) hue-rotate(90deg)}50%{transform:scale(0.8);filter:brightness(5)}75%{transform:scale(1.1);filter:brightness(2) hue-rotate(-90deg)}100%{transform:scale(1);filter:brightness(1)}}
 /* Weapon card styles */
 .wpn-card{display:inline-flex;flex-direction:column;align-items:center;width:100px;min-height:120px;margin:3px;padding:8px;border:2px solid #333;border-radius:10px;font-size:9px;color:#aaa;background:rgba(20,20,40,.6);cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
 .wpn-card:hover{transform:translateY(-2px);border-color:#ff6ec7}
@@ -816,9 +871,14 @@ const DuelSystem = {
         LS.set('aiWins', aiWins);
         Coins.earn(aiF.reward, 'pve_win');
         addChatMsg('Echo', `${aiF.icon} ${aiF.name} defeated! +${aiF.reward}◈`, '#44cc44');
+        // v24: Track PvE wins for missions
+        if (typeof MissionBoard !== 'undefined') MissionBoard.trackProgress('pve_wins', 1);
+        // v24: Specialist card drop chance from PvE
+        if (typeof SpecialistSystem !== 'undefined') SpecialistSystem.tryDrop();
       }
       stats.duelsWon++;
       stats.winStreak = (stats.winStreak || 0) + 1;
+      if (typeof MissionBoard !== 'undefined') MissionBoard.trackProgress('duels_won', 1);
       const coinReward = 25 + Math.min(comboScore * 2, 20);
       showNotification('VICTORY! +' + coinReward + '\u25C8');
       Coins.earn(coinReward, 'duel_win');
@@ -1828,6 +1888,7 @@ const FLOOR_OBJECTS={
     {id:'leaderboard',x:120,y:350,w:100,h:80,label:'Leaderboard Wall',interact:true,collide:true},
     {id:'duel_arena',x:300,y:200,w:200,h:200,label:'⚔️ Duel Arena',interact:true,collide:false},
     {id:'duel_leaderboard',x:550,y:200,w:100,h:120,label:'Duel Champions',interact:true,collide:true},
+    {id:'mission_board',x:600,y:80,w:80,h:80,label:'📋 Mission Board',interact:true,collide:true},
   ],
   4:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
@@ -1851,6 +1912,7 @@ const FLOOR_OBJECTS={
     {id:'artifacts',x:550,y:280,w:100,h:60,label:'Artifacts',interact:true,collide:true},
     {id:'journal',x:150,y:300,w:60,h:50,label:'Journal',interact:true,collide:true},
     {id:'terminal',x:150,y:200,w:80,h:60,label:'Terminal',interact:true,collide:true},
+    {id:'enhance_station',x:350,y:380,w:100,h:70,label:'⚗️ Enhancement Station',interact:true,collide:true},
   ],
   6:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
@@ -1871,6 +1933,7 @@ const FLOOR_OBJECTS={
     {id:'timelapse',x:120,y:400,w:100,h:50,label:'Time-lapse Viewer',interact:true,collide:true},
     {id:'artstool',x:260,y:400,w:80,h:50,label:'Art Tools',interact:true,collide:true},
     {id:'communitywall',x:120,y:80,w:120,h:100,label:'Community Wall',interact:true,collide:true},
+    {id:'bazaar_kiosk',x:400,y:400,w:80,h:60,label:'🏪 Bazaar',interact:true,collide:true},
   ],
   8:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
@@ -1910,7 +1973,7 @@ const Coins={
   get count(){return this._count},
   set count(v){this._count=Math.max(0,v);LS.set('echoCoins',this._count);$('#coin-count').textContent=this._count},
   get lifetime(){return this._lifetime},
-  earn(n,r){const luckBonus=typeof LootSystem!=='undefined'?(LootSystem.getStatBonuses().luck||0):0;const bonus=luckBonus>0?Math.floor(n*luckBonus/100):0;const total=n+bonus;this.count+=total;this._lifetime+=total;LS.set('lifetimeCoins',this._lifetime);S.floatTexts.push({text:'+'+(bonus>0?total+'◈(+'+bonus+')':total+'◈'),x:S.echo.x-10,y:S.echo.y-50,color:'#ffd700',life:60});this._sndEarn()},
+  earn(n,r){const luckBonus=typeof LootSystem!=='undefined'?(LootSystem.getStatBonuses().luck||0):0;const bonus=luckBonus>0?Math.floor(n*luckBonus/100):0;const total=n+bonus;this.count+=total;this._lifetime+=total;LS.set('lifetimeCoins',this._lifetime);S.floatTexts.push({text:'+'+(bonus>0?total+'◈(+'+bonus+')':total+'◈'),x:S.echo.x-10,y:S.echo.y-50,color:'#ffd700',life:60});this._sndEarn();if(typeof MissionBoard!=='undefined'&&MissionBoard._progress)MissionBoard.trackProgress('coins_earned',total)},
   spend(n,r){if(this._count<n)return false;this.count-=n;S.floatTexts.push({text:'-'+n+'◈',x:S.echo.x-10,y:S.echo.y-50,color:'#ff6666',life:60});return true},
   canAfford(n){return this._count>=n},
   adminGrant(n){this._count+=n;this._lifetime+=n;LS.set('echoCoins',this._count);LS.set('lifetimeCoins',this._lifetime);$('#coin-count').textContent=this._count;showNotification('👑 Admin: +'+n+'◈')},
@@ -3352,6 +3415,22 @@ function renderFloor5(){
   const af=getObjects().find(o=>o.id==='artifacts');ctx.fillStyle='#2a2a3a';ctx.fillRect(af.x,af.y,af.w,af.h);const artifacts=['🔷','🔶','💎','⚗️','🧬'];artifacts.forEach((a,i)=>{ctx.font='12px sans-serif';ctx.fillText(a,af.x+10+i*18,af.y+af.h/2+5)});
   // Journal
   const jn=getObjects().find(o=>o.id==='journal');ctx.fillStyle='#4a3020';ctx.fillRect(jn.x,jn.y,jn.w,jn.h);ctx.fillStyle='#c0a060';ctx.fillRect(jn.x+5,jn.y+5,jn.w-10,jn.h-10);ctx.fillStyle='#333';ctx.font='6px monospace';ctx.fillText('JOURNAL',jn.x+8,jn.y+jn.h/2+3);
+  // v24: Enhancement Station
+  const es=getObjects().find(o=>o.id==='enhance_station');
+  if(es){
+    ctx.fillStyle='#2a2a3a';ctx.fillRect(es.x,es.y,es.w,es.h);
+    ctx.fillStyle='#3a3a5a';ctx.fillRect(es.x+5,es.y+5,es.w-10,es.h-10);
+    // Glowing anvil
+    const ePulse=0.3+Math.sin(S.time*2)*0.2;
+    const eGrd=ctx.createRadialGradient(es.x+es.w/2,es.y+es.h/2,0,es.x+es.w/2,es.y+es.h/2,40);
+    eGrd.addColorStop(0,`rgba(0,255,247,${ePulse})`);eGrd.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=eGrd;ctx.fillRect(es.x-10,es.y-10,es.w+20,es.h+20);
+    ctx.font='20px sans-serif';ctx.textAlign='center';ctx.fillText('⚗️',es.x+es.w/2,es.y+es.h/2+4);
+    ctx.fillStyle='#00fff7';ctx.font='bold 8px monospace';ctx.fillText('ENHANCE',es.x+es.w/2,es.y+es.h+12);
+    // Floating sparkles
+    if(Math.random()<0.15){S.particles.push({x:es.x+Math.random()*es.w,y:es.y+Math.random()*es.h,vx:(Math.random()-.5)*.5,vy:-0.5-Math.random(),life:20,color:'#00fff7',size:1+Math.random()*2})}
+    ctx.textAlign='left';
+  }
   // Eerie ambient sounds visual
   if(Math.sin(S.time*1.5)>.9){ctx.fillStyle='rgba(0,200,255,.02)';ctx.fillRect(0,0,W,H)}
 }
@@ -4025,7 +4104,7 @@ function updatePixelTalks(dt){
 // ═══════════════════════════════════════
 function updateVisitor(dt){
   if(!S.useVisitor)return;
-  const _speedBonus=1+(LootSystem.getStatBonuses().speed||0)/100;
+  const _speedBonus=1+(LootSystem.getStatBonuses().speed||0)/100+(typeof SpecialistSystem!=='undefined'?SpecialistSystem.getSpeedBonus():0);
   const spd=160*_speedBonus,v=S.visitor;
   
   // Dash cooldown
@@ -4206,6 +4285,13 @@ function renderVisitor(ctx){
   const skin=VISITOR_SKINS.find(s=>s.id===v.skin)||VISITOR_SKINS[0];
   const c=skin.color,d=adjustBrightness(c,-20),l=adjustBrightness(c,20);
   
+  // v24: Specialist aura
+  if(typeof SpecialistSystem!=='undefined')SpecialistSystem.renderAura(ctx);
+  // v24: Enhancement glow on equipped weapon
+  if(typeof EnhancementSystem!=='undefined'&&typeof WeaponSystem!=='undefined'&&WeaponSystem.equipped){
+    const eLvl=LS.get('enhance_'+WeaponSystem.equipped._id,{level:0}).level;
+    const eGlow=EnhancementSystem.getGlowColor(eLvl);
+    if(eGlow){const pulse=eGlow.intensity*(0.5+Math.sin(S.time*eGlow.pulseSpeed)*0.3);const g=ctx.createRadialGradient(v.x,v.y-15,2,v.x,v.y-15,20+eLvl);g.addColorStop(0,eGlow.color+Math.floor(pulse*200).toString(16).padStart(2,'0'));g.addColorStop(1,eGlow.color+'00');ctx.fillStyle=g;ctx.beginPath();ctx.arc(v.x,v.y-15,20+eLvl,0,Math.PI*2);ctx.fill()}}
   // Render aura behind avatar
   const eqAcc=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null});
   if(eqAcc.aura){const auraItem=ACCESSORY_ITEMS.find(a=>a.id===eqAcc.aura);if(auraItem){
@@ -5426,12 +5512,13 @@ function update(dt){
   DuelSystem.update(dt);
   AIFighter.update(dt);
   WeaponSystem.update(dt);
+  if(typeof SpecialistSystem!=='undefined')SpecialistSystem.update(dt);
   
   EchoAI.update(dt);
   updateVisitor(dt);
   S.nearObject=S.echo.floor===S.floor?getNearObject():null;
   // Track visited
-  if(S.nearObject&&!S._visited.includes(S.nearObject.id)){S._visited.push(S.nearObject.id);LS.set('visited_objs',S._visited);Coins.earn(2,'explore');checkAchievements()}
+  if(S.nearObject&&!S._visited.includes(S.nearObject.id)){S._visited.push(S.nearObject.id);LS.set('visited_objs',S._visited);Coins.earn(2,'explore');checkAchievements();if(typeof MissionBoard!=='undefined')MissionBoard.trackProgress('interactions',1)}
   updatePixel(dt);
   updateKittens(dt);
   updateSeasonalEffects(dt);
@@ -5446,7 +5533,7 @@ function update(dt){
   // Check data fragment proximity
   DATA_FRAGMENTS.filter(f=>f.floor===S.floor&&!S.dataFragments.includes(f.id)).forEach(f=>{if(Math.hypot(S.echo.x-f.x,S.echo.y-f.y)<25){S.dataFragments.push(f.id);LS.set('dataFragments',S.dataFragments);Coins.earn(50,'fragment');showNotification('💾 Data Fragment Found! ('+S.dataFragments.length+'/5)');checkAchievements()}});
   // Track floor visits
-  const fv=LS.get('floorsVisited',[]);if(!fv.includes(S.floor)){fv.push(S.floor);LS.set('floorsVisited',fv);checkAchievements()}
+  const fv=LS.get('floorsVisited',[]);if(!fv.includes(S.floor)){fv.push(S.floor);LS.set('floorsVisited',fv);checkAchievements();if(typeof MissionBoard!=='undefined')MissionBoard.trackProgress('floors_visited',1)}
   // Update mobile controls
   if(typeof MobileControls!=='undefined')MobileControls.updateActionButtons();
   // Multiplayer: send position & lerp others
@@ -5529,6 +5616,9 @@ function interact(){
       break;
     case'duel_leaderboard':showDuelLeaderboard();break;
     // Floor 8 - Room Builder / Room Visit
+    case'enhance_station':EnhancementSystem.showUI();break;
+    case'mission_board':MissionBoard.showUI();break;
+    case'bazaar_kiosk':BazaarUI.showUI();break;
     case'furniture_catalog':showFurnitureCatalog();break;
     case'wall_colors':showWallColorPicker();break;
     case'floor_colors':showFloorColorPicker();break;
@@ -5593,7 +5683,7 @@ function handleRoomFurnitureInteract(furnType){
 }
 
 function petPixel(){
-  S.petCount++;LS.set('petCount',S.petCount);if(S.petCount%5===0)Coins.earn(3,'pet');
+  S.petCount++;LS.set('petCount',S.petCount);if(S.petCount%5===0)Coins.earn(3,'pet');if(typeof MissionBoard!=='undefined')MissionBoard.trackProgress('pixel_pets',1);
   for(let i=0;i<6;i++)S.floatTexts.push({text:'❤️',x:S.pixel.x-5+Math.random()*10,y:S.pixel.y-15,color:'#ff6688',life:40+Math.random()*20});
   showThought("*purrrr*");checkAchievements();
 }
@@ -9058,6 +9148,635 @@ S.cameraZoom = 1.0;
 S._cameraZoomTimer = 0;
 
 function gameLoop(time){const realDt=Math.min((time-lastTime)/1000,.05);lastTime=time;updateSlowMo(realDt);const dt=realDt*gameTimeScale;if(S.freezeFrame>0){S.freezeFrame-=realDt;render();requestAnimationFrame(gameLoop);return}if(S.chromaticAberration>0)S.chromaticAberration*=0.92;if(S.chromaticAberration<0.1)S.chromaticAberration=0;if(S.vignetteIntensity>0)S.vignetteIntensity*=0.95;if(S._cameraZoomTimer>0){S._cameraZoomTimer-=realDt;if(S._cameraZoomTimer<=0)S.cameraZoom=1.0;}updateImpactRings(dt);update(dt);render();requestAnimationFrame(gameLoop)}
+
+// ═══════════════════════════════════════
+// §28. ENHANCEMENT SYSTEM (v24)
+// ═══════════════════════════════════════
+const EnhancementSystem = {
+  getLevel(item) { return item.enhanceLevel || 0; },
+  getCost(level) { return (level + 1) * 50; },
+  getChance(level) {
+    if (level < 10) return 1.0;
+    if (level < 15) return 0.7;
+    return 0.5;
+  },
+  getGlowClass(level) {
+    if (level >= 20) return 'enhance-glow-20';
+    if (level >= 15) return 'enhance-glow-15';
+    if (level >= 10) return 'enhance-glow-10';
+    if (level >= 5) return 'enhance-glow-5';
+    if (level >= 1) return 'enhance-glow-1';
+    return '';
+  },
+  getEnhanceableItems() {
+    const weapons = LS.get('ownedWeapons', []);
+    const lootInv = LS.get('lootInventory', []);
+    const items = [];
+    weapons.forEach(wid => {
+      const wpn = WEAPONS.find(w => w.id === wid);
+      if (!wpn) return;
+      const enhData = LS.get('enhance_' + wid, { level: 0 });
+      items.push({ uid: wid, type: 'weapon', name: wpn.name, icon: wpn.icon, rarity: wpn.rarity, enhanceLevel: enhData.level });
+    });
+    lootInv.filter(i => i.type === 'weapon' || i.type === 'aura' || i.type === 'hat' || i.type === 'trail').forEach(item => {
+      const def = getAllLootableItems().find(d => d.itemId === item.itemId);
+      const enhData = LS.get('enhance_' + item.id, { level: 0 });
+      items.push({ uid: item.id, type: item.type, name: def ? def.name : '???', icon: def ? def.icon : '❓', rarity: item.rarity, enhanceLevel: enhData.level, lootItem: true });
+    });
+    return items;
+  },
+  getDisplayName(item) {
+    const lvl = item.enhanceLevel || 0;
+    return lvl > 0 ? `${item.name} +${lvl}` : item.name;
+  },
+  showUI() {
+    const items = this.getEnhanceableItems();
+    if (!items.length) {
+      showNotification('No enhanceable items! Get weapons from the shop or arena.');
+      return;
+    }
+    let html = '<h3>⚗️ Enhancement Station</h3>';
+    html += '<p style="font-size:10px;color:#888;margin-bottom:8px">Strengthen your items. +1→+10 safe. +11→+15 risky. +16→+20 deadly!</p>';
+    html += '<div style="max-height:350px;overflow-y:auto">';
+    items.forEach((item, i) => {
+      const lvl = item.enhanceLevel || 0;
+      const cost = this.getCost(lvl);
+      const chance = this.getChance(lvl);
+      const r = RARITIES[item.rarity] || RARITIES.common;
+      const glowClass = this.getGlowClass(lvl);
+      const riskLabel = lvl >= 15 ? ' 💀 DESTROY RISK' : lvl >= 10 ? ' ⚠️ RESET RISK' : ' ✅ SAFE';
+      const riskColor = lvl >= 15 ? '#ff3344' : lvl >= 10 ? '#ffaa00' : '#44cc44';
+      html += `<div class="bazaar-listing" data-idx="${i}" style="cursor:pointer;border-color:${r.border}">`;
+      html += `<span class="listing-icon ${glowClass}" style="font-size:24px">${item.icon}</span>`;
+      html += `<div class="listing-info"><div style="color:${r.color};font-weight:bold">${this.getDisplayName(item)}</div>`;
+      html += `<div style="font-size:9px;color:#888">${r.name} ${item.type}</div>`;
+      html += `<div style="font-size:9px;color:${riskColor}">${Math.round(chance * 100)}% success${riskLabel}</div></div>`;
+      html += `<div style="text-align:right"><div class="listing-price">${cost}◈</div><div style="font-size:8px;color:#888">+${lvl} → +${lvl+1}</div></div>`;
+      html += '</div>';
+    });
+    html += '</div>';
+    const { p } = createPopup(html);
+    p.querySelectorAll('.bazaar-listing').forEach(el => {
+      el.onclick = () => {
+        const idx = parseInt(el.dataset.idx);
+        p.closest('.popup-overlay').remove();
+        this.showEnhanceAnimation(items[idx]);
+      };
+    });
+  },
+  showEnhanceAnimation(item) {
+    const lvl = item.enhanceLevel || 0;
+    const cost = this.getCost(lvl);
+    const chance = this.getChance(lvl);
+    if (!Coins.canAfford(cost)) { showNotification(`Need ${cost}◈ to enhance!`); return; }
+    
+    const ov = document.createElement('div');
+    ov.className = 'enhance-overlay';
+    const glowClass = this.getGlowClass(lvl);
+    const riskColor = lvl >= 15 ? '#ff3344' : lvl >= 10 ? '#ffaa00' : '#00fff7';
+    ov.innerHTML = `
+      <div class="enhance-stage" id="enhance-stage">
+        <div class="enhance-anim" id="enhance-anim"></div>
+        <div class="enhance-item-display ${glowClass}" id="enhance-icon">${item.icon}</div>
+        <div class="enhance-item-name" id="enhance-name">${this.getDisplayName(item)}</div>
+        <div class="enhance-level" id="enhance-lvl">+${lvl} → +${lvl + 1}</div>
+        <div class="enhance-chance" style="color:${riskColor}">${Math.round(chance * 100)}% Success${lvl >= 15 ? ' — 💀 FAIL = DESTROYED' : lvl >= 10 ? ' — ⚠️ FAIL = RESET TO +10' : ''}</div>
+        <div class="enhance-cost" id="enhance-cost">${cost}◈</div>
+        <div style="margin-top:12px">
+          <button class="enhance-btn" id="enhance-go">⚗️ ENHANCE</button>
+          <button class="enhance-btn cancel" id="enhance-cancel">Cancel</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(ov);
+    ov.querySelector('#enhance-cancel').onclick = () => ov.remove();
+    ov.querySelector('#enhance-go').onclick = () => {
+      if (!Coins.canAfford(cost)) { showNotification('Not enough ◈!'); return; }
+      Coins.spend(cost, 'enhance');
+      ov.querySelector('#enhance-go').disabled = true;
+      ov.querySelector('#enhance-cancel').style.display = 'none';
+      // Dramatic animation
+      const stage = ov.querySelector('#enhance-stage');
+      const anim = ov.querySelector('#enhance-anim');
+      stage.style.animation = 'enhanceGlow 1.5s ease-in-out';
+      // Particle burst in the anim area
+      let particleCount = 0;
+      const particleInterval = setInterval(() => {
+        particleCount++;
+        const spark = document.createElement('div');
+        spark.style.cssText = `position:absolute;width:4px;height:4px;background:${riskColor};border-radius:50%;left:${50 + (Math.random() - .5) * 60}%;top:${50 + (Math.random() - .5) * 60}%;pointer-events:none;transition:all .5s;opacity:1`;
+        anim.appendChild(spark);
+        setTimeout(() => { spark.style.opacity = '0'; spark.style.transform = `translate(${(Math.random()-.5)*80}px, ${(Math.random()-.5)*80}px)`; }, 50);
+        setTimeout(() => spark.remove(), 600);
+        if (particleCount > 30) clearInterval(particleInterval);
+      }, 50);
+
+      setTimeout(() => {
+        const success = Math.random() < chance;
+        const icon = ov.querySelector('#enhance-icon');
+        const name = ov.querySelector('#enhance-name');
+        const lvlEl = ov.querySelector('#enhance-lvl');
+        
+        if (success) {
+          const newLevel = lvl + 1;
+          const enhData = { level: newLevel };
+          LS.set('enhance_' + item.uid, enhData);
+          item.enhanceLevel = newLevel;
+          
+          stage.style.animation = 'enhanceSuccess .5s ease';
+          stage.style.borderColor = '#ffd700';
+          icon.className = 'enhance-item-display ' + this.getGlowClass(newLevel);
+          name.textContent = this.getDisplayName(item);
+          name.style.color = '#ffd700';
+          lvlEl.textContent = `+${newLevel} SUCCESS! ✨`;
+          lvlEl.style.color = '#ffd700';
+          
+          // Screen effects
+          S.screenFlash = '#ffd700';
+          S.screenShake = 5;
+          for (let i = 0; i < 30; i++) {
+            S.particles.push({x: S.visitor.x + (Math.random()-.5)*40, y: S.visitor.y - 20 + (Math.random()-.5)*40, vx: (Math.random()-.5)*4, vy: (Math.random()-.5)*4 - 2, life: 40, color: '#ffd700', size: 2 + Math.random()*3});
+          }
+          showNotification(`✨ Enhancement SUCCESS! ${this.getDisplayName(item)}`);
+          addChatMsg('Echo', `⚗️ ${this.getDisplayName(item)} — Enhancement successful!`, '#ffd700');
+          // Track for missions
+          MissionBoard.trackProgress('enhance_item', 1);
+          if (newLevel >= 5) MissionBoard.trackProgress('enhance_to_5', 1);
+        } else {
+          if (lvl >= 15) {
+            // DESTROYED
+            stage.style.borderColor = '#ff3344';
+            icon.style.animation = 'enhanceDestroy 1s ease forwards';
+            name.textContent = 'DESTROYED 💀';
+            name.style.color = '#ff3344';
+            lvlEl.textContent = '';
+            LS.set('enhance_' + item.uid, { level: 0 });
+            // Remove the item
+            if (item.lootItem) {
+              LootSystem.removeFromInventory(item.uid);
+            } else {
+              const owned = LS.get('ownedWeapons', []);
+              const idx = owned.indexOf(item.uid);
+              if (idx >= 0) { owned.splice(idx, 1); LS.set('ownedWeapons', owned); }
+              if (WeaponSystem.equipped && WeaponSystem.equipped._id === item.uid) WeaponSystem.unequip();
+            }
+            S.screenFlash = '#ff0000';
+            S.screenShake = 10;
+            showNotification(`💀 ${item.name} was DESTROYED!`);
+            addChatMsg('Echo', `💀 ${item.name} shattered into pieces... It\'s gone forever.`, '#ff3344');
+          } else {
+            // Reset to +10
+            stage.style.animation = 'enhanceFail .5s ease';
+            stage.style.borderColor = '#ffaa00';
+            LS.set('enhance_' + item.uid, { level: 10 });
+            item.enhanceLevel = 10;
+            name.textContent = this.getDisplayName(item);
+            name.style.color = '#ffaa00';
+            lvlEl.textContent = `FAILED — Reset to +10 ⚠️`;
+            lvlEl.style.color = '#ffaa00';
+            S.screenShake = 5;
+            showNotification(`⚠️ Enhancement failed! Reset to +10.`);
+          }
+        }
+        setTimeout(() => {
+          ov.innerHTML += '<div style="text-align:center;margin-top:20px"><button class="enhance-btn" onclick="this.closest(\'.enhance-overlay\').remove()">Close</button></div>';
+        }, 800);
+      }, 1800);
+    };
+  },
+  // Get enhancement glow color for rendering
+  getGlowColor(level) {
+    if (level >= 20) return { color: '#ffffff', intensity: 1.0, pulseSpeed: 6 };
+    if (level >= 15) return { color: '#ff6ec7', intensity: 0.7, pulseSpeed: 4 };
+    if (level >= 10) return { color: '#ffd700', intensity: 0.5, pulseSpeed: 3 };
+    if (level >= 5) return { color: '#00fff7', intensity: 0.3, pulseSpeed: 2 };
+    if (level >= 1) return { color: '#00fff7', intensity: 0.15, pulseSpeed: 1.5 };
+    return null;
+  }
+};
+
+// ═══════════════════════════════════════
+// §29. SPECIALIST TRANSFORMATIONS (v24)
+// ═══════════════════════════════════════
+const SPECIALIST_CARDS = [
+  { id: 'shadow', name: 'Shadow', icon: '🌑', color: '#4a0066', desc: 'Invisibility + backstab damage', ability: 'Become invisible to enemies. First strike deals 3x damage.', duration: 300, dropChance: 0.03 },
+  { id: 'nova', name: 'Nova', icon: '💥', color: '#ff4400', desc: 'AoE blast attack', ability: 'Press T to unleash a devastating area blast dealing 50 damage.', duration: 300, dropChance: 0.03 },
+  { id: 'frost', name: 'Frost', icon: '❄️', color: '#4488ff', desc: 'Slow aura around you', ability: 'Enemies near you move 50% slower. Attacks have frost effect.', duration: 300, dropChance: 0.02 },
+  { id: 'storm', name: 'Storm', icon: '⚡', color: '#ffdd00', desc: 'Speed + lightning', ability: 'Move 80% faster. Attacks chain lightning to nearby enemies.', duration: 300, dropChance: 0.02 },
+];
+
+const SpecialistSystem = {
+  heldCard: LS.get('specialistCard', null), // { id, obtainedAt }
+  activeTransform: null, // { id, startTime, endTime }
+  transformTimer: 0,
+  
+  tryDrop() {
+    if (this.heldCard) return null; // Can only hold one
+    const roll = Math.random();
+    let cumulative = 0;
+    for (const card of SPECIALIST_CARDS) {
+      cumulative += card.dropChance;
+      if (roll < cumulative) {
+        this.heldCard = { id: card.id, obtainedAt: Date.now() };
+        LS.set('specialistCard', this.heldCard);
+        showNotification(`🃏 SPECIALIST CARD: ${card.icon} ${card.name}!`);
+        addChatMsg('Echo', `🃏 You found a ${card.icon} ${card.name} Specialist Card! Use it from your inventory for a powerful 5-minute transformation!`, card.color);
+        // Epic reveal
+        S.screenFlash = card.color;
+        S.screenShake = 8;
+        for (let i = 0; i < 50; i++) {
+          const a = Math.random() * Math.PI * 2;
+          S.particles.push({x: S.visitor.x + Math.cos(a) * 20, y: S.visitor.y - 15 + Math.sin(a) * 20, vx: Math.cos(a) * 4, vy: Math.sin(a) * 4, life: 40, color: card.color, size: 3 + Math.random() * 2});
+        }
+        return card;
+      }
+    }
+    return null;
+  },
+  
+  activate() {
+    if (!this.heldCard) { showNotification('No specialist card!'); return; }
+    const card = SPECIALIST_CARDS.find(c => c.id === this.heldCard.id);
+    if (!card) return;
+    
+    this.activeTransform = { id: card.id, startTime: Date.now(), endTime: Date.now() + card.duration * 1000 };
+    this.heldCard = null;
+    LS.set('specialistCard', null);
+    
+    // Dramatic transformation
+    S.screenFlash = '#ffffff';
+    S.screenShake = 12;
+    S.chromaticAberration = 5;
+    S.vignetteIntensity = 0.8;
+    S.cameraZoom = 1.1;
+    S._cameraZoomTimer = 1.0;
+    if (typeof triggerSlowMo === 'function') triggerSlowMo(0.2, 1.0);
+    
+    for (let i = 0; i < 80; i++) {
+      const a = Math.random() * Math.PI * 2;
+      S.particles.push({x: S.visitor.x + Math.cos(a) * 30, y: S.visitor.y - 15 + Math.sin(a) * 30, vx: Math.cos(a) * 6, vy: Math.sin(a) * 6, life: 50, color: card.color, size: 2 + Math.random() * 4});
+    }
+    
+    showNotification(`${card.icon} ${card.name} TRANSFORMATION! 5 minutes of power!`);
+    addChatMsg('Echo', `${card.icon} SPECIALIST TRANSFORMATION: ${card.name}! ${card.ability}`, card.color);
+    MissionBoard.trackProgress('transform', 1);
+  },
+  
+  isActive() { return this.activeTransform && Date.now() < this.activeTransform.endTime; },
+  getActive() { return this.isActive() ? SPECIALIST_CARDS.find(c => c.id === this.activeTransform.id) : null; },
+  getTimeLeft() { return this.isActive() ? Math.max(0, Math.ceil((this.activeTransform.endTime - Date.now()) / 1000)) : 0; },
+  
+  getSpeedBonus() { const a = this.getActive(); return a && a.id === 'storm' ? 0.8 : 0; },
+  getDamageMultiplier() { const a = this.getActive(); return a && a.id === 'shadow' ? 3.0 : 1.0; },
+  
+  update(dt) {
+    if (this.isActive()) {
+      const card = this.getActive();
+      if (card) {
+        // Specialist aura particles
+        if (Math.random() < 0.3) {
+          const a = Math.random() * Math.PI * 2;
+          S.particles.push({x: S.visitor.x + Math.cos(a) * 20, y: S.visitor.y - 15 + Math.sin(a) * 20, vx: Math.cos(a) * 0.5, vy: -0.5, life: 20, color: card.color, size: 1 + Math.random() * 2});
+        }
+      }
+    } else if (this.activeTransform) {
+      // Transform just expired
+      this.activeTransform = null;
+      showNotification('Specialist transformation expired.');
+    }
+  },
+  
+  showCardUI() {
+    if (!this.heldCard && !this.isActive()) { showNotification('No specialist card. Win PvE fights for a chance to drop one!'); return; }
+    let html = '<h3>🃏 Specialist Card</h3>';
+    if (this.isActive()) {
+      const card = this.getActive();
+      html += `<div style="text-align:center;padding:20px"><div style="font-size:48px">${card.icon}</div>`;
+      html += `<div style="color:${card.color};font-size:18px;font-weight:bold;margin:8px">${card.name} ACTIVE</div>`;
+      html += `<div style="color:#aaa;font-size:11px">${card.ability}</div>`;
+      html += `<div style="color:#ffd700;font-size:14px;margin-top:10px">${Math.floor(this.getTimeLeft()/60)}:${String(this.getTimeLeft()%60).padStart(2,'0')} remaining</div></div>`;
+    } else {
+      const card = SPECIALIST_CARDS.find(c => c.id === this.heldCard.id);
+      html += `<div style="text-align:center;padding:20px"><div style="font-size:48px">${card.icon}</div>`;
+      html += `<div style="color:${card.color};font-size:18px;font-weight:bold;margin:8px">${card.name}</div>`;
+      html += `<div style="color:#aaa;font-size:11px">${card.ability}</div>`;
+      html += `<div style="color:#888;font-size:10px;margin-top:8px">Duration: 5 minutes</div>`;
+      html += `<button class="enhance-btn" id="spec-activate" style="margin-top:12px">${card.icon} TRANSFORM!</button></div>`;
+    }
+    const { p } = createPopup(html);
+    const btn = p.querySelector('#spec-activate');
+    if (btn) btn.onclick = () => { p.closest('.popup-overlay').remove(); this.activate(); };
+  },
+  
+  renderAura(ctx) {
+    if (!this.isActive()) return;
+    const card = this.getActive();
+    const v = S.visitor;
+    const pulse = 0.3 + Math.sin(S.time * 3) * 0.15;
+    const g = ctx.createRadialGradient(v.x, v.y - 15, 5, v.x, v.y - 15, 35);
+    g.addColorStop(0, card.color + Math.floor(pulse * 255).toString(16).padStart(2, '0'));
+    g.addColorStop(1, card.color + '00');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(v.x, v.y - 15, 35, 0, Math.PI * 2); ctx.fill();
+    // Time indicator ring
+    const timeLeft = this.getTimeLeft();
+    const timePct = timeLeft / 300;
+    ctx.strokeStyle = card.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(v.x, v.y - 15, 30, -Math.PI/2, -Math.PI/2 + Math.PI * 2 * timePct);
+    ctx.stroke();
+  }
+};
+
+// ═══════════════════════════════════════
+// §30. DAILY MISSION BOARD (v24)
+// ═══════════════════════════════════════
+const MISSION_TEMPLATES = [
+  { id: 'win_duels', desc: 'Win {n} duels', targets: [2, 3, 5], reward: [30, 50, 80], trackKey: 'duels_won' },
+  { id: 'visit_floors', desc: 'Visit all 7 floors', targets: [7], reward: [40], trackKey: 'floors_visited' },
+  { id: 'enhance_item', desc: 'Enhance an item', targets: [1], reward: [25], trackKey: 'enhance_item' },
+  { id: 'enhance_to_5', desc: 'Enhance an item to +5', targets: [1], reward: [60], trackKey: 'enhance_to_5' },
+  { id: 'earn_coins', desc: 'Earn {n}◈', targets: [50, 100, 200], reward: [20, 35, 60], trackKey: 'coins_earned' },
+  { id: 'pet_pixel', desc: 'Pet Pixel {n} times', targets: [5, 10], reward: [15, 30], trackKey: 'pixel_pets' },
+  { id: 'explore_objects', desc: 'Interact with {n} objects', targets: [5, 10], reward: [20, 35], trackKey: 'interactions' },
+  { id: 'pve_wins', desc: 'Win {n} PvE fights', targets: [1, 3], reward: [25, 60], trackKey: 'pve_wins' },
+  { id: 'buy_item', desc: 'Buy an item from the shop', targets: [1], reward: [20], trackKey: 'shop_buys' },
+  { id: 'transform', desc: 'Use a specialist transformation', targets: [1], reward: [50], trackKey: 'transform' },
+];
+
+const WEEKLY_MISSIONS = [
+  { id: 'weekly_duels', desc: 'Win 10 duels this week', target: 10, reward: 200, trackKey: 'duels_won', lootReward: 'epic' },
+  { id: 'weekly_enhance', desc: 'Enhance items 5 times', target: 5, reward: 150, trackKey: 'enhance_item', lootReward: 'rare' },
+  { id: 'weekly_coins', desc: 'Earn 500◈ this week', target: 500, reward: 100, trackKey: 'coins_earned', lootReward: 'rare' },
+  { id: 'weekly_explorer', desc: 'Visit all floors 5 days', target: 5, reward: 250, trackKey: 'days_all_floors', lootReward: 'legendary' },
+];
+
+const MissionBoard = {
+  _missions: null,
+  _weekly: null,
+  _progress: null,
+  
+  init() {
+    const today = new Date().toISOString().slice(0, 10);
+    const saved = LS.get('missionBoard', null);
+    if (saved && saved.date === today) {
+      this._missions = saved.missions;
+      this._progress = saved.progress;
+    } else {
+      this._generateDaily();
+    }
+    // Weekly
+    const weekNum = this._getWeekNum();
+    const savedWeekly = LS.get('weeklyMission', null);
+    if (savedWeekly && savedWeekly.week === weekNum) {
+      this._weekly = savedWeekly;
+    } else {
+      const template = WEEKLY_MISSIONS[weekNum % WEEKLY_MISSIONS.length];
+      this._weekly = { ...template, week: weekNum, progress: 0, claimed: false };
+      LS.set('weeklyMission', this._weekly);
+    }
+  },
+  
+  _getWeekNum() { return Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000)); },
+  
+  _generateDaily() {
+    const today = new Date().toISOString().slice(0, 10);
+    // Seed from date for deterministic daily missions
+    let seed = 0;
+    for (let i = 0; i < today.length; i++) seed = ((seed << 5) - seed) + today.charCodeAt(i);
+    const shuffled = [...MISSION_TEMPLATES].sort((a, b) => {
+      const ha = ((seed * 31 + a.id.charCodeAt(0)) % 1000) / 1000;
+      const hb = ((seed * 31 + b.id.charCodeAt(0)) % 1000) / 1000;
+      return ha - hb;
+    });
+    this._missions = shuffled.slice(0, 3).map(t => {
+      const varIdx = Math.abs(seed) % t.targets.length;
+      const target = t.targets[varIdx];
+      const reward = t.reward[varIdx];
+      return { id: t.id, desc: t.desc.replace('{n}', target), target, reward, trackKey: t.trackKey, claimed: false };
+    });
+    this._progress = {};
+    LS.set('missionBoard', { date: today, missions: this._missions, progress: this._progress });
+  },
+  
+  trackProgress(trackKey, amount) {
+    if (!this._progress) return;
+    this._progress[trackKey] = (this._progress[trackKey] || 0) + amount;
+    LS.set('missionBoard', { date: new Date().toISOString().slice(0, 10), missions: this._missions, progress: this._progress });
+    // Weekly
+    if (this._weekly && this._weekly.trackKey === trackKey) {
+      this._weekly.progress = (this._weekly.progress || 0) + amount;
+      LS.set('weeklyMission', this._weekly);
+    }
+    // Check if any mission just completed
+    this._missions.forEach(m => {
+      if (!m.claimed && (this._progress[m.trackKey] || 0) >= m.target) {
+        showNotification(`📋 Mission complete: ${m.desc}!`);
+      }
+    });
+  },
+  
+  showUI() {
+    this.init();
+    let html = '<h3>📋 Daily Missions</h3>';
+    html += '<p style="font-size:10px;color:#888;margin-bottom:8px">Complete missions for bonus ◈! Resets daily.</p>';
+    
+    this._missions.forEach((m, i) => {
+      const progress = this._progress[m.trackKey] || 0;
+      const complete = progress >= m.target;
+      const pct = Math.min(100, Math.round(progress / m.target * 100));
+      html += `<div class="mission-card ${complete ? 'complete' : ''}">`;
+      html += `<div class="mission-title">${complete ? '✅' : '📌'} ${m.desc}</div>`;
+      html += `<div class="mission-reward">Reward: ${m.reward}◈</div>`;
+      html += `<div class="mission-progress">${progress}/${m.target}</div>`;
+      html += `<div class="mission-progress-bar"><div class="mission-progress-fill" style="width:${pct}%"></div></div>`;
+      if (complete && !m.claimed) {
+        html += `<button class="drink-btn claim-mission" data-idx="${i}" style="margin-top:4px;border-color:#44cc44;color:#44cc44">Claim ${m.reward}◈</button>`;
+      }
+      html += '</div>';
+    });
+    
+    // Weekly
+    html += '<div style="margin-top:12px;border-top:1px solid #333;padding-top:8px">';
+    html += '<h3 style="color:#ff6ec7">🏅 Weekly Challenge</h3>';
+    const w = this._weekly;
+    const wProgress = w.progress || 0;
+    const wComplete = wProgress >= w.target;
+    const wPct = Math.min(100, Math.round(wProgress / w.target * 100));
+    html += `<div class="mission-card weekly-card ${wComplete ? 'complete' : ''}">`;
+    html += `<div class="mission-title">${wComplete ? '✅' : '🏅'} ${w.desc}</div>`;
+    html += `<div class="mission-reward">${w.reward}◈ + ${w.lootReward} loot drop!</div>`;
+    html += `<div class="mission-progress">${wProgress}/${w.target}</div>`;
+    html += `<div class="mission-progress-bar"><div class="mission-progress-fill" style="width:${wPct}%;background:#ff6ec7"></div></div>`;
+    if (wComplete && !w.claimed) {
+      html += `<button class="drink-btn claim-weekly" style="margin-top:4px;border-color:#ff6ec7;color:#ff6ec7">Claim Rewards!</button>`;
+    }
+    html += '</div></div>';
+    
+    const { p } = createPopup(html);
+    p.querySelectorAll('.claim-mission').forEach(btn => {
+      btn.onclick = () => {
+        const idx = parseInt(btn.dataset.idx);
+        const m = this._missions[idx];
+        m.claimed = true;
+        Coins.earn(m.reward, 'mission');
+        btn.textContent = 'Claimed! ✅';
+        btn.disabled = true;
+        LS.set('missionBoard', { date: new Date().toISOString().slice(0, 10), missions: this._missions, progress: this._progress });
+        showNotification(`📋 +${m.reward}◈ from mission!`);
+      };
+    });
+    const weeklyBtn = p.querySelector('.claim-weekly');
+    if (weeklyBtn) {
+      weeklyBtn.onclick = () => {
+        this._weekly.claimed = true;
+        Coins.earn(this._weekly.reward, 'weekly_mission');
+        LS.set('weeklyMission', this._weekly);
+        const item = LootSystem.rollMinRarity(this._weekly.lootReward);
+        LootSystem.addToInventory(item);
+        setTimeout(() => LootSystem.showLootCard(item), 500);
+        weeklyBtn.textContent = 'Claimed! ✅';
+        weeklyBtn.disabled = true;
+        showNotification(`🏅 Weekly reward: +${this._weekly.reward}◈ + ${RARITIES[this._weekly.lootReward].name} loot!`);
+      };
+    }
+  }
+};
+
+// ═══════════════════════════════════════
+// §31. BAZAAR TRADING UI (v24)
+// ═══════════════════════════════════════
+const BazaarUI = {
+  showUI() {
+    let html = '<h3>🏪 Bazaar Trading Post</h3>';
+    html += '<div class="bazaar-tabs"><div class="bazaar-tab active" data-tab="browse">Browse</div><div class="bazaar-tab" data-tab="sell">Sell Items</div><div class="bazaar-tab" data-tab="history">History</div></div>';
+    html += '<div id="bazaar-content" style="min-height:200px;max-height:350px;overflow-y:auto"></div>';
+    
+    const { p } = createPopup(html);
+    
+    const tabs = p.querySelectorAll('.bazaar-tab');
+    tabs.forEach(tab => {
+      tab.onclick = () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        this._renderTab(tab.dataset.tab, p.querySelector('#bazaar-content'), p);
+      };
+    });
+    this._renderTab('browse', p.querySelector('#bazaar-content'), p);
+  },
+  
+  async _renderTab(tab, container, popup) {
+    if (tab === 'browse') {
+      container.innerHTML = '<div style="text-align:center;color:#888;padding:20px">Loading...</div>';
+      try {
+        const res = await fetch('/api/marketplace');
+        const listings = await res.json();
+        if (!listings.length) {
+          container.innerHTML = '<div style="text-align:center;color:#888;padding:20px">No listings yet. Be the first to sell!</div>';
+          return;
+        }
+        let html = '';
+        listings.forEach(l => {
+          const def = getAllLootableItems().find(i => i.itemId === (l.item && l.item.itemId));
+          const r = RARITIES[(l.item && l.item.rarity) || 'common'] || RARITIES.common;
+          const icon = def ? def.icon : (l.item && l.item.icon) || '❓';
+          const name = def ? def.name : (l.item && l.item.name) || '???';
+          const enhLvl = l.item && l.item.enhanceLevel ? ` +${l.item.enhanceLevel}` : '';
+          html += `<div class="bazaar-listing" data-id="${l.id}">`;
+          html += `<span class="listing-icon">${icon}</span>`;
+          html += `<div class="listing-info"><div style="color:${r.color};font-weight:bold">${name}${enhLvl}</div>`;
+          html += `<div class="listing-seller">Seller: ${l.owner}</div></div>`;
+          html += `<div class="listing-price">${l.price}◈</div>`;
+          html += '</div>';
+        });
+        container.innerHTML = html;
+        container.querySelectorAll('.bazaar-listing').forEach(el => {
+          el.onclick = () => this._buyListing(el.dataset.id, popup);
+        });
+      } catch (e) {
+        container.innerHTML = '<div style="color:#ff4444;padding:10px">Failed to load. Server offline?</div>';
+      }
+    } else if (tab === 'sell') {
+      const lootInv = LS.get('lootInventory', []);
+      const equipped = LS.get('equippedLoot', {});
+      const equippedIds = new Set(Object.values(equipped).filter(Boolean));
+      const sellable = lootInv.filter(i => !equippedIds.has(i.id));
+      
+      if (!sellable.length) {
+        container.innerHTML = '<div style="text-align:center;color:#888;padding:20px">No items to sell. Win fights or explore for loot!</div>';
+        return;
+      }
+      let html = '<p style="font-size:9px;color:#888;margin-bottom:6px">5% tax on sales. Set your price and list!</p>';
+      sellable.forEach(item => {
+        const def = getAllLootableItems().find(d => d.itemId === item.itemId);
+        const r = RARITIES[item.rarity] || RARITIES.common;
+        const enhData = LS.get('enhance_' + item.id, { level: 0 });
+        const enhLabel = enhData.level > 0 ? ` +${enhData.level}` : '';
+        html += `<div class="bazaar-listing" data-uid="${item.id}" data-itemid="${item.itemId}" data-rarity="${item.rarity}">`;
+        html += `<span class="listing-icon">${def ? def.icon : '❓'}</span>`;
+        html += `<div class="listing-info"><div style="color:${r.color};font-weight:bold">${def ? def.name : '???'}${enhLabel}</div>`;
+        html += `<div style="font-size:8px;color:#888">${r.name} ${item.type}</div></div>`;
+        html += `<div><input type="number" class="sell-price" min="1" max="9999" value="${{common:5,uncommon:15,rare:40,epic:100,legendary:300,mythic:500}[item.rarity]||10}" style="width:50px;background:#222;border:1px solid #555;color:#ffd700;padding:2px 4px;font-size:11px;border-radius:3px">◈`;
+        html += `<button class="drink-btn list-item" data-uid="${item.id}" style="margin-left:4px;font-size:9px;padding:3px 8px">List</button></div>`;
+        html += '</div>';
+      });
+      container.innerHTML = html;
+      container.querySelectorAll('.list-item').forEach(btn => {
+        btn.onclick = async () => {
+          const uid = btn.dataset.uid;
+          const listing = btn.closest('.bazaar-listing');
+          const price = parseInt(listing.querySelector('.sell-price').value);
+          if (!price || price < 1 || price > 9999) { showNotification('Invalid price!'); return; }
+          const item = lootInv.find(i => i.id === uid);
+          if (!item) return;
+          const visitorName = LS.get('visitorName', 'Anonymous');
+          try {
+            const res = await fetch('/api/marketplace/list', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ owner: visitorName, item: { ...item, enhanceLevel: LS.get('enhance_' + uid, { level: 0 }).level }, price })
+            });
+            const data = await res.json();
+            if (data.ok) {
+              LootSystem.removeFromInventory(uid);
+              btn.textContent = 'Listed! ✅';
+              btn.disabled = true;
+              showNotification(`🏪 Listed for ${price}◈!`);
+              MissionBoard.trackProgress('shop_buys', 1);
+            }
+          } catch (e) { showNotification('Failed to list. Try again.'); }
+        };
+      });
+    } else if (tab === 'history') {
+      container.innerHTML = '<div style="text-align:center;color:#888;padding:20px">Trade history coming soon. Check back later!</div>';
+    }
+  },
+  
+  async _buyListing(listingId, popup) {
+    const visitorName = LS.get('visitorName', 'Anonymous');
+    try {
+      const res = await fetch(`/api/marketplace/buy/${listingId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ buyer: visitorName })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        if (!Coins.canAfford(data.price)) { showNotification('Not enough ◈!'); return; }
+        Coins.spend(data.price, 'bazaar_buy');
+        if (data.item) {
+          LootSystem.addToInventory(data.item);
+          showNotification(`🏪 Bought for ${data.price}◈!`);
+          MissionBoard.trackProgress('shop_buys', 1);
+        }
+        // Refresh
+        popup.closest('.popup-overlay').remove();
+        this.showUI();
+      }
+    } catch (e) { showNotification('Purchase failed.'); }
+  }
+};
 
 // ═══════════════════════════════════════
 // §26. WELCOME & INIT
