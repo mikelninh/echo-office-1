@@ -10121,7 +10121,7 @@ const SocialSystem = {
       } else {
         // Generate new keypair
         const keyPair = await crypto.subtle.generateKey(
-          {name: 'ECDH', namedCurve: 'P-256'}, false, ['deriveKey']
+          {name: 'ECDH', namedCurve: 'P-256'}, true, ['deriveKey']
         );
         
         const privateKeyJWK = await crypto.subtle.exportKey('jwk', keyPair.privateKey);
@@ -17370,8 +17370,8 @@ const AtmosphereSystem = {
   };
   
   // Patch the render loop to include atmosphere effects
-  const _origRender = renderGame;
-  renderGame = function() {
+  const _origRender = render;
+  render = function() {
     _origRender();
     AtmosphereSystem.render();
   };
