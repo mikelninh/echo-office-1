@@ -220,7 +220,12 @@ function listPublicRooms() {
               visitors: roomData.visitors || 0,
               earnings: roomData.earnings || 0,
               tipTotal: roomData.tipTotal || 0,
-              createdAt: roomData.createdAt
+              createdAt: roomData.createdAt,
+              avgRating: roomData.avgRating || 0,
+              ratingCount: roomData.ratingCount || 0,
+              tier: roomData.tier || 'starter',
+              entryFee: roomData.entryFee || 0,
+              featuredUntil: roomData.featuredUntil || 0
             });
           }
         } catch (error) {
@@ -596,7 +601,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (req.url.startsWith('/api/rooms/') && req.method === 'POST' && !req.url.includes('/like') && !req.url.includes('/visit') && !req.url.includes('/earn') && !req.url.includes('/tip')) {
+  if (req.url.startsWith('/api/rooms/') && req.method === 'POST' && !req.url.includes('/like') && !req.url.includes('/visit') && !req.url.includes('/earn') && !req.url.includes('/tip') && !req.url.includes('/rate') && !req.url.includes('/settings')) {
     const ownerName = decodeURIComponent(req.url.split('/')[3]);
     let body = '';
     req.on('data', c => body += c);
@@ -617,13 +622,21 @@ const server = http.createServer((req, res) => {
           return;
         }
         
-        // Preserve existing likes, visitor count, and earnings
+        // Preserve existing likes, visitor count, earnings, and Phase 2 data
         const existing = loadRoom(ownerName);
         if (existing) {
           roomData.likes = existing.likes || 0;
           roomData.visitors = existing.visitors || 0;
           roomData.earnings = existing.earnings || 0;
           roomData.tipTotal = existing.tipTotal || 0;
+          roomData.ratings = existing.ratings || {};
+          roomData.avgRating = existing.avgRating || 0;
+          roomData.ratingCount = existing.ratingCount || 0;
+          roomData.tier = existing.tier || 'starter';
+          roomData.entryFee = existing.entryFee || 0;
+          roomData.featuredUntil = existing.featuredUntil || 0;
+          roomData.tips = existing.tips || [];
+          roomData.dailyLikes = existing.dailyLikes || {};
         }
         
         roomData.createdAt = roomData.createdAt || Date.now();
@@ -783,6 +796,57 @@ const server = http.createServer((req, res) => {
       } catch {
         res.writeHead(400); res.end('Bad request');
       }
+    });
+    return;
+  }
+
+  // Room rating endpoint
+  if (req.url.startsWith('/api/rooms/') && req.url.endsWith('/rate') && req.method === 'POST') {
+    const ownerName = decodeURIComponent(req.url.split('/')[3]);
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const { rating, visitor } = JSON.parse(body);
+        if (typeof rating !== 'number' || rating < 1 || rating > 5) {
+          res.writeHead(400); res.end('Invalid rating (1-5)'); return;
+        }
+        if (!visitor || visitor === ownerName) {
+          res.writeHead(400); res.end('Cannot rate own room'); return;
+        }
+        const room = loadRoom(ownerName);
+        if (!room) { res.writeHead(404); res.end('Room not found'); return; }
+        if (!room.ratings) room.ratings = {};
+        room.ratings[visitor] = { rating, time: Date.now() };
+        // Calculate average
+        const vals = Object.values(room.ratings).map(r => r.rating);
+        room.avgRating = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10;
+        room.ratingCount = vals.length;
+        saveRoom(ownerName, room);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, avgRating: room.avgRating, ratingCount: room.ratingCount }));
+      } catch { res.writeHead(400); res.end('Bad request'); }
+    });
+    return;
+  }
+
+  // Room update tier/entryFee/featured
+  if (req.url.startsWith('/api/rooms/') && req.url.endsWith('/settings') && req.method === 'POST') {
+    const ownerName = decodeURIComponent(req.url.split('/')[3]);
+    let body = '';
+    req.on('data', c => body += c);
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body);
+        const room = loadRoom(ownerName);
+        if (!room) { res.writeHead(404); res.end('Room not found'); return; }
+        if (typeof data.tier === 'string') room.tier = data.tier;
+        if (typeof data.entryFee === 'number') room.entryFee = Math.max(0, Math.min(25, data.entryFee));
+        if (typeof data.featuredUntil === 'number') room.featuredUntil = data.featuredUntil;
+        saveRoom(ownerName, room);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+      } catch { res.writeHead(400); res.end('Bad request'); }
     });
     return;
   }

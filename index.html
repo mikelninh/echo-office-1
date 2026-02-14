@@ -12038,6 +12038,756 @@ EnhancementSystem.showEnhanceAnimation = function(item) {
   }
 };
 
+// ═══════════════════════════════════════════════════════════════
+// §ECON2. ECONOMICS PHASE 2 — Creator Economy
+//   Room Tiers, Creator Levels, Ratings, Tips (enhanced),
+//   Entry Fees, Featured Room Marketplace
+// ═══════════════════════════════════════════════════════════════
+
+// ─── ROOM TIERS ─────────────────────────────────────────────────
+const ROOM_TIERS = {
+  starter:   { name:'Starter',   cost:0,    width:8,  height:6,  slots:10, visitReq:0,    color:'#aaa',    icon:'🏠' },
+  standard:  { name:'Standard',  cost:100,  width:12, height:8,  slots:20, visitReq:50,   color:'#44cc44', icon:'🏡' },
+  deluxe:    { name:'Deluxe',    cost:300,  width:16, height:10, slots:35, visitReq:200,  color:'#4488ff', icon:'🏘️' },
+  grand:     { name:'Grand',     cost:500,  width:20, height:12, slots:50, visitReq:500,  color:'#bb44ff', icon:'🏰' },
+  legendary: { name:'Legendary', cost:1000, width:24, height:16, slots:75, visitReq:1000, color:'#ffaa00', icon:'👑' }
+};
+const TIER_ORDER = ['starter','standard','deluxe','grand','legendary'];
+
+const RoomTiers = {
+  getCurrentTier() { return LS.get('roomTier', 'starter'); },
+  setTier(t) { LS.set('roomTier', t); },
+  getTotalVisits() { return LS.get('roomTotalVisits', 0); },
+  setTotalVisits(v) { LS.set('roomTotalVisits', v); },
+
+  canUpgrade(targetTier) {
+    const cur = TIER_ORDER.indexOf(this.getCurrentTier());
+    const tgt = TIER_ORDER.indexOf(targetTier);
+    if (tgt <= cur) return { ok:false, reason:'Already at or above this tier' };
+    const td = ROOM_TIERS[targetTier];
+    if (this.getTotalVisits() < td.visitReq) return { ok:false, reason:`Need ${td.visitReq} visits (have ${this.getTotalVisits()})` };
+    if (!Coins.canAfford(td.cost)) return { ok:false, reason:`Need ${td.cost}◈` };
+    return { ok:true };
+  },
+
+  upgrade(targetTier) {
+    const check = this.canUpgrade(targetTier);
+    if (!check.ok) { showNotification(check.reason); return false; }
+    const td = ROOM_TIERS[targetTier];
+    Coins.spend(td.cost, 'room_upgrade');
+    this.setTier(targetTier);
+    // Save tier to server
+    const name = LS.get('visitorName','Visitor');
+    fetch(`/api/rooms/${encodeURIComponent(name)}/settings`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ tier: targetTier })
+    }).catch(()=>{});
+    showNotification(`🎉 Room upgraded to ${td.name}!`);
+    // Celebration
+    for(let i=0;i<20;i++){
+      S.floatTexts.push({text:['🎉','⭐','✨','🎊'][i%4], x:W/2+Math.random()*200-100, y:H/2+Math.random()*100-50, color:td.color, life:80});
+    }
+    return true;
+  },
+
+  getSlotCount() { return ROOM_TIERS[this.getCurrentTier()].slots; },
+
+  showUpgradeUI() {
+    const cur = this.getCurrentTier();
+    const curIdx = TIER_ORDER.indexOf(cur);
+    const visits = this.getTotalVisits();
+    const td = ROOM_TIERS[cur];
+
+    let html = `<h3>🏠 Room Tier: <span style="color:${td.color}">${td.icon} ${td.name}</span></h3>`;
+    html += `<p style="font-size:10px;color:#888">Size: ${td.width}×${td.height} · Slots: ${td.slots} · Visits: ${visits}</p>`;
+    html += '<div style="margin-top:10px">';
+
+    TIER_ORDER.forEach((tid, i) => {
+      const t = ROOM_TIERS[tid];
+      const isCurrent = tid === cur;
+      const isPast = i < curIdx;
+      const isNext = i === curIdx + 1;
+      const canUp = this.canUpgrade(tid);
+      const visitPct = Math.min(100, Math.round(visits / Math.max(1, t.visitReq) * 100));
+
+      html += `<div style="margin:6px 0;padding:8px;border:1px solid ${isCurrent ? '#00fff7' : isPast ? '#333' : t.color};border-radius:6px;background:${isCurrent ? 'rgba(0,255,247,.08)' : 'rgba(0,0,0,.3)'}${isPast ? ';opacity:.5' : ''}">`;
+      html += `<div style="display:flex;justify-content:space-between;align-items:center">`;
+      html += `<span style="color:${t.color};font-weight:bold">${t.icon} ${t.name}</span>`;
+      if (isCurrent) html += `<span style="font-size:9px;color:#00fff7">CURRENT</span>`;
+      else if (isPast) html += `<span style="font-size:9px;color:#666">✓</span>`;
+      else if (canUp.ok) html += `<button class="drink-btn tier-upgrade-btn" data-tier="${tid}" style="font-size:9px;padding:2px 8px;border-color:${t.color};color:${t.color}">Upgrade ${t.cost}◈</button>`;
+      else html += `<span style="font-size:8px;color:#666">${canUp.reason}</span>`;
+      html += `</div>`;
+      html += `<div style="font-size:9px;color:#888;margin-top:3px">${t.width}×${t.height} · ${t.slots} slots · ${t.visitReq} visits needed</div>`;
+      if (!isCurrent && !isPast && t.visitReq > 0) {
+        html += `<div style="margin-top:4px;background:#222;border-radius:3px;height:6px;overflow:hidden"><div style="width:${visitPct}%;height:100%;background:${t.color};border-radius:3px"></div></div>`;
+      }
+      html += `</div>`;
+    });
+
+    html += '</div>';
+    const {p} = createPopup(html);
+    p.querySelectorAll('.tier-upgrade-btn').forEach(btn => {
+      btn.onclick = () => {
+        if (this.upgrade(btn.dataset.tier)) p.closest('.popup-overlay').remove();
+      };
+    });
+  }
+};
+
+// ─── CREATOR LEVELS ─────────────────────────────────────────────
+const CREATOR_LEVELS = [
+  { id:'novice',    name:'Novice',    icon:'🌱', visitReq:0,    ratingReq:0,   topReq:false, perk:'Basic furniture palette' },
+  { id:'builder',   name:'Builder',   icon:'🔨', visitReq:50,   ratingReq:0,   topReq:false, perk:'Animated furniture unlocked' },
+  { id:'architect', name:'Architect', icon:'📐', visitReq:200,  ratingReq:4.0, topReq:false, perk:'Custom floor tiles + wall colors' },
+  { id:'master',    name:'Master',    icon:'🏗️', visitReq:500,  ratingReq:4.5, topReq:false, perk:'NPC placement, interactive objects' },
+  { id:'legend',    name:'Legend',    icon:'👑', visitReq:1000, ratingReq:0,   topReq:true,  perk:'Custom room music, portal placement' }
+];
+
+// Extra furniture unlocked by creator levels
+const CREATOR_FURNITURE = {
+  builder: {
+    disco_ball:    { name:'Disco Ball',    icon:'🪩', cost:30, width:30, height:30, rarity:'uncommon', animated:true },
+    lava_lamp:     { name:'Lava Lamp',     icon:'🫧', cost:20, width:20, height:40, rarity:'uncommon', animated:true },
+    hologram:      { name:'Hologram',      icon:'🌀', cost:40, width:40, height:40, rarity:'rare', animated:true },
+  },
+  architect: {
+    marble_floor:  { name:'Marble Floor',  icon:'⬜', cost:35, width:80, height:50, rarity:'rare' },
+    neon_wall:     { name:'Neon Wall',      icon:'💜', cost:40, width:100, height:10, rarity:'rare' },
+    fountain:      { name:'Fountain',       icon:'⛲', cost:50, width:50, height:50, rarity:'rare', animated:true },
+  },
+  master: {
+    npc_guard:     { name:'NPC Guard',      icon:'💂', cost:60, width:30, height:50, rarity:'epic', interactive:true },
+    npc_merchant:  { name:'NPC Merchant',   icon:'🧑‍💼', cost:80, width:30, height:50, rarity:'epic', interactive:true },
+    portal_mini:   { name:'Mini Portal',    icon:'🌀', cost:100, width:40, height:60, rarity:'epic', interactive:true },
+  },
+  legend: {
+    music_box:     { name:'Music Box',      icon:'🎶', cost:75,  width:30, height:30, rarity:'legendary' },
+    grand_portal:  { name:'Grand Portal',   icon:'🌌', cost:150, width:60, height:80, rarity:'legendary' },
+    throne:        { name:'Throne',          icon:'🪑', cost:200, width:50, height:70, rarity:'legendary' },
+  }
+};
+
+const CreatorLevel = {
+  getLevel() {
+    const visits = RoomTiers.getTotalVisits();
+    const rating = parseFloat(LS.get('roomAvgRating', 0));
+    const isTop10 = LS.get('roomIsTop10', false);
+    let level = CREATOR_LEVELS[0];
+    for (const lv of CREATOR_LEVELS) {
+      if (visits >= lv.visitReq) {
+        if (lv.ratingReq > 0 && rating < lv.ratingReq) continue;
+        if (lv.topReq && !isTop10) continue;
+        level = lv;
+      }
+    }
+    return level;
+  },
+
+  getLevelIndex() {
+    return CREATOR_LEVELS.indexOf(this.getLevel());
+  },
+
+  getUnlockedFurniture() {
+    const idx = this.getLevelIndex();
+    const unlocked = {};
+    CREATOR_LEVELS.forEach((lv, i) => {
+      if (i <= idx && CREATOR_FURNITURE[lv.id]) {
+        Object.assign(unlocked, CREATOR_FURNITURE[lv.id]);
+      }
+    });
+    return unlocked;
+  },
+
+  checkLevelUp() {
+    const prev = LS.get('creatorLevelId', 'novice');
+    const cur = this.getLevel().id;
+    if (cur !== prev) {
+      LS.set('creatorLevelId', cur);
+      const lv = this.getLevel();
+      showNotification(`🎉 Creator Level Up: ${lv.icon} ${lv.name}!`);
+      // Celebration animation
+      for(let i=0;i<15;i++){
+        S.floatTexts.push({text:lv.icon, x:W/2+Math.random()*300-150, y:H/2+Math.random()*200-100, color:'#ffd700', life:90});
+      }
+    }
+  },
+
+  showProfile() {
+    const lv = this.getLevel();
+    const lvIdx = this.getLevelIndex();
+    const visits = RoomTiers.getTotalVisits();
+    const rating = parseFloat(LS.get('roomAvgRating', 0));
+    const tier = ROOM_TIERS[RoomTiers.getCurrentTier()];
+    const tipsReceived = parseInt(LS.get('roomTipsReceived', 0));
+
+    let html = `<h3>${lv.icon} Creator Profile</h3>`;
+    html += `<div style="text-align:center;margin:10px 0">`;
+    html += `<div style="font-size:28px">${lv.icon}</div>`;
+    html += `<div style="color:#ffd700;font-weight:bold;font-size:14px">${lv.name}</div>`;
+    html += `<div style="font-size:9px;color:#888">${lv.perk}</div>`;
+    html += `</div>`;
+
+    html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0">`;
+    html += `<div style="background:rgba(0,255,247,.06);padding:6px;border-radius:4px;text-align:center"><div style="color:#00fff7;font-size:16px;font-weight:bold">${visits}</div><div style="font-size:8px;color:#888">Total Visits</div></div>`;
+    html += `<div style="background:rgba(255,215,0,.06);padding:6px;border-radius:4px;text-align:center"><div style="color:#ffd700;font-size:16px;font-weight:bold">${rating ? rating.toFixed(1) + '★' : 'N/A'}</div><div style="font-size:8px;color:#888">Avg Rating</div></div>`;
+    html += `<div style="background:rgba(255,110,199,.06);padding:6px;border-radius:4px;text-align:center"><div style="color:#ff6ec7;font-size:16px;font-weight:bold">${tier.icon} ${tier.name}</div><div style="font-size:8px;color:#888">Room Tier</div></div>`;
+    html += `<div style="background:rgba(255,215,0,.06);padding:6px;border-radius:4px;text-align:center"><div style="color:#ffd700;font-size:16px;font-weight:bold">${tipsReceived}◈</div><div style="font-size:8px;color:#888">Tips Received</div></div>`;
+    html += `</div>`;
+
+    // Level progress
+    html += `<div style="margin-top:10px"><div style="font-size:10px;color:#888;margin-bottom:4px">Creator Progression</div>`;
+    CREATOR_LEVELS.forEach((cl, i) => {
+      const unlocked = i <= lvIdx;
+      html += `<div style="display:flex;align-items:center;gap:6px;margin:3px 0;opacity:${unlocked?1:.4}">`;
+      html += `<span style="font-size:14px">${cl.icon}</span>`;
+      html += `<div><div style="font-size:10px;color:${unlocked?'#fff':'#666'};font-weight:bold">${cl.name}</div>`;
+      html += `<div style="font-size:8px;color:#888">${cl.perk}</div></div>`;
+      if (unlocked && i === lvIdx) html += `<span style="font-size:8px;color:#00fff7;margin-left:auto">◄ YOU</span>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+
+    createPopup(html);
+  }
+};
+
+// ─── ROOM RATING SYSTEM ─────────────────────────────────────────
+const RoomRating = {
+  async rate(ownerName, rating) {
+    const visitor = LS.get('visitorName', 'Anonymous');
+    if (visitor === ownerName || visitor === 'Anonymous') { showNotification('Cannot rate!'); return; }
+    try {
+      const res = await fetch(`/api/rooms/${encodeURIComponent(ownerName)}/rate`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ rating, visitor })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        showNotification(`⭐ Rated ${rating}/5!`);
+        LS.set('rated_' + ownerName, rating);
+      }
+    } catch { showNotification('Rating failed!'); }
+  },
+
+  showRateUI(ownerName) {
+    const existing = LS.get('rated_' + ownerName, 0);
+    let html = `<h3>⭐ Rate Room</h3>`;
+    html += `<p style="font-size:10px;color:#888;margin-bottom:12px">Rate ${ownerName}'s room</p>`;
+    html += `<div style="text-align:center;font-size:32px;margin:16px 0" id="star-row">`;
+    for (let i = 1; i <= 5; i++) {
+      html += `<span class="rate-star" data-val="${i}" style="cursor:pointer;margin:0 4px;opacity:${i<=existing?.8:.3}">${i<=existing?'★':'☆'}</span>`;
+    }
+    html += `</div>`;
+    if (existing) html += `<p style="text-align:center;font-size:9px;color:#888">Your rating: ${existing}/5 (click to update)</p>`;
+    const {p} = createPopup(html);
+    p.querySelectorAll('.rate-star').forEach(star => {
+      star.onmouseenter = () => {
+        const v = parseInt(star.dataset.val);
+        p.querySelectorAll('.rate-star').forEach(s => {
+          s.textContent = parseInt(s.dataset.val) <= v ? '★' : '☆';
+          s.style.opacity = parseInt(s.dataset.val) <= v ? 1 : .3;
+        });
+      };
+      star.onclick = () => {
+        this.rate(ownerName, parseInt(star.dataset.val));
+        p.closest('.popup-overlay').remove();
+      };
+    });
+  },
+
+  // Weekly rewards (simulated — check if can collect)
+  canCollectWeekly() {
+    const last = LS.get('lastWeeklyRewardCollect', 0);
+    return Date.now() - last > 7 * 24 * 60 * 60 * 1000;
+  },
+
+  async collectWeekly() {
+    if (!this.canCollectWeekly()) { showNotification('Already collected this week!'); return; }
+    try {
+      const res = await fetch('/api/rooms');
+      const rooms = await res.json();
+      rooms.sort((a, b) => (b.avgRating || 0) - (a.avgRating || 0));
+      const myName = LS.get('visitorName', 'Visitor');
+      const myIdx = rooms.findIndex(r => r.owner === myName);
+      let reward = 0;
+      if (myIdx === 0) reward = 200;
+      else if (myIdx >= 1 && myIdx <= 4) reward = 100;
+      else if (myIdx >= 5 && myIdx <= 9) reward = 50;
+      if (reward > 0) {
+        Coins.earn(reward, 'weekly_rating');
+        LS.set('lastWeeklyRewardCollect', Date.now());
+        showNotification(`🏆 Weekly Rating Reward: +${reward}◈ (#${myIdx + 1} rated room!)`);
+      } else {
+        showNotification('Your room needs to be in the top 10 rated to earn weekly rewards!');
+      }
+    } catch { showNotification('Failed to check rankings!'); }
+  }
+};
+
+// ─── ENTRY FEES ─────────────────────────────────────────────────
+const EntryFee = {
+  getMyFee() { return LS.get('roomEntryFee', 0); },
+  setMyFee(fee) {
+    fee = Math.max(0, Math.min(25, fee));
+    LS.set('roomEntryFee', fee);
+    const name = LS.get('visitorName','Visitor');
+    fetch(`/api/rooms/${encodeURIComponent(name)}/settings`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ entryFee: fee })
+    }).catch(()=>{});
+  },
+
+  showEntryDialog(room, callback) {
+    const fee = room.entryFee || 0;
+    if (fee <= 0) { callback(); return; }
+    if (!Coins.canAfford(fee)) { showNotification(`Need ${fee}◈ entry fee!`); return; }
+    const {p} = createPopup(`
+      <h3>🚪 Room Entry Fee</h3>
+      <p style="text-align:center;margin:12px 0">
+        Enter <b style="color:#00fff7">${room.name}</b>?<br>
+        <span style="font-size:20px;color:#ffd700;margin:8px 0;display:block">${fee}◈</span>
+        <span style="font-size:9px;color:#888">Fee goes to room owner</span>
+      </p>
+      <div style="text-align:center">
+        <button class="drink-btn" id="entry-cancel">Cancel</button>
+        <button class="drink-btn" id="entry-pay" style="border-color:#ffd700;color:#ffd700">Pay & Enter</button>
+      </div>
+    `);
+    p.querySelector('#entry-cancel').onclick = () => p.closest('.popup-overlay').remove();
+    p.querySelector('#entry-pay').onclick = () => {
+      if (Coins.spend(fee, 'entry_fee')) {
+        // Credit owner
+        fetch(`/api/rooms/${encodeURIComponent(room.owner)}/earn`, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ amount: Math.min(fee, 10), source:'entry_fee', visitor: LS.get('visitorName','Visitor') })
+        }).catch(()=>{});
+        callback();
+      } else { showNotification('Not enough ◈!'); }
+      p.closest('.popup-overlay').remove();
+    };
+  }
+};
+
+// ─── FEATURED ROOM MARKETPLACE ──────────────────────────────────
+const FeaturedMarketplace = {
+  COST_PER_DAY: 50,
+  MAX_SLOTS: 3,
+
+  async showUI() {
+    try {
+      const rooms = await (await fetch('/api/rooms')).json();
+      const now = Date.now();
+      const featured = rooms.filter(r => r.featuredUntil && r.featuredUntil > now);
+      const myName = LS.get('visitorName', 'Visitor');
+      const myRoom = rooms.find(r => r.owner === myName);
+      const myFeatured = myRoom && myRoom.featuredUntil && myRoom.featuredUntil > now;
+
+      let html = `<h3 style="color:#ffd700">⭐ Featured Room Marketplace</h3>`;
+      html += `<p style="font-size:10px;color:#888">Feature your room for 50◈/day! (${this.MAX_SLOTS} slots)</p>`;
+
+      // Current featured
+      html += `<div style="margin:10px 0"><div style="font-size:10px;color:#ffd700;margin-bottom:4px">Currently Featured (${featured.length}/${this.MAX_SLOTS})</div>`;
+      if (featured.length === 0) {
+        // Show top rated as auto-featured
+        const topRated = rooms.filter(r => r.avgRating > 0).sort((a,b) => (b.avgRating||0) - (a.avgRating||0)).slice(0, 3);
+        if (topRated.length > 0) {
+          html += `<div style="font-size:9px;color:#666;margin-bottom:4px">Auto-featuring top-rated rooms:</div>`;
+          topRated.forEach(r => {
+            html += `<div style="padding:4px 8px;border:1px solid #444;border-radius:4px;margin:3px 0;font-size:10px">🌟 ${r.name} by <span style="color:#ff6ec7">${r.owner}</span> · ${(r.avgRating||0).toFixed(1)}★</div>`;
+          });
+        } else {
+          html += `<div style="font-size:9px;color:#555">No featured rooms — slots available!</div>`;
+        }
+      } else {
+        featured.forEach(r => {
+          const timeLeft = Math.max(0, Math.round((r.featuredUntil - now) / 3600000));
+          html += `<div style="padding:6px 8px;border:1px solid #ffd700;border-radius:4px;margin:3px 0;background:rgba(255,215,0,.05)">`;
+          html += `<div style="font-size:11px;color:#ffd700;font-weight:bold">⭐ ${r.name}</div>`;
+          html += `<div style="font-size:9px;color:#888">by ${r.owner} · ${timeLeft}h remaining</div>`;
+          html += `</div>`;
+        });
+      }
+      html += `</div>`;
+
+      // Buy feature slot
+      if (myRoom && !myFeatured && featured.length < this.MAX_SLOTS) {
+        html += `<button class="drink-btn" id="buy-featured" style="width:100%;border-color:#ffd700;color:#ffd700;margin-top:8px">⭐ Feature My Room (${this.COST_PER_DAY}◈/day)</button>`;
+      } else if (myFeatured) {
+        const timeLeft = Math.round((myRoom.featuredUntil - now) / 3600000);
+        html += `<div style="text-align:center;color:#ffd700;font-size:10px;margin-top:8px">Your room is featured! (${timeLeft}h left)</div>`;
+      } else if (!myRoom) {
+        html += `<div style="text-align:center;color:#666;font-size:10px;margin-top:8px">Create a room first!</div>`;
+      } else if (featured.length >= this.MAX_SLOTS) {
+        html += `<div style="text-align:center;color:#666;font-size:10px;margin-top:8px">All slots taken! Try later.</div>`;
+      }
+
+      const {p} = createPopup(html);
+      const buyBtn = p.querySelector('#buy-featured');
+      if (buyBtn) {
+        buyBtn.onclick = () => {
+          if (!Coins.canAfford(this.COST_PER_DAY)) { showNotification(`Need ${this.COST_PER_DAY}◈!`); return; }
+          Coins.spend(this.COST_PER_DAY, 'featured_room');
+          const until = Date.now() + 24 * 60 * 60 * 1000;
+          fetch(`/api/rooms/${encodeURIComponent(myName)}/settings`, {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ featuredUntil: until })
+          }).then(() => {
+            showNotification('⭐ Your room is now featured for 24h!');
+            p.closest('.popup-overlay').remove();
+          }).catch(() => showNotification('Failed!'));
+        };
+      }
+    } catch { showNotification('Failed to load marketplace!'); }
+  }
+};
+
+// ─── ENHANCED ROOM INFO HUD (with rating, tip history, entry fee) ──
+const _origUpdateRoomInfoHUD = RoomSystem.updateRoomInfoHUD.bind(RoomSystem);
+RoomSystem.updateRoomInfoHUD = function() {
+  const hud = $('#room-info-hud');
+  if (!this.currentRoom || !this.visitingOwner) { hud.style.display = 'none'; return; }
+  const r = this.currentRoom;
+  const isOwnRoom = r.owner === LS.get('visitorName', 'Visitor');
+  const tierInfo = ROOM_TIERS[r.tier || 'starter'] || ROOM_TIERS.starter;
+  const ratingStr = r.avgRating ? `${r.avgRating.toFixed(1)}★(${r.ratingCount})` : 'No ratings';
+  const feeStr = r.entryFee > 0 ? `💳${r.entryFee}◈` : '🆓FREE';
+  const featuredStr = r.featuredUntil && r.featuredUntil > Date.now() ? ' ⭐FEATURED' : '';
+
+  hud.style.display = 'block';
+  hud.innerHTML = `${tierInfo.icon} <b style="color:#00fff7">${r.name}</b>${featuredStr} by <b style="color:#ff6ec7">${r.owner}</b> · 👁️ ${r.visitors||0} · ${ratingStr} · ${feeStr} · 💰 ${r.earnings||0}◈` +
+    (!isOwnRoom ? ` <span id="tip-room-btn" style="cursor:pointer;margin-left:4px;padding:2px 6px;background:rgba(255,215,0,.2);border:1px solid #ffd700;border-radius:4px;color:#ffd700;font-size:9px">💰 Tip</span> <span id="rate-room-btn" style="cursor:pointer;padding:2px 6px;background:rgba(255,255,0,.1);border:1px solid #ff0;border-radius:4px;color:#ff0;font-size:9px">⭐ Rate</span> <span id="like-room-btn" style="cursor:pointer;padding:2px 6px;background:rgba(255,110,199,.15);border:1px solid #ff6ec7;border-radius:4px;color:#ff6ec7;font-size:9px">❤️</span>` : '');
+
+  const tipBtn = hud.querySelector('#tip-room-btn');
+  if (tipBtn) tipBtn.onclick = () => this.showTipPopup(r.owner);
+  const likeBtn = hud.querySelector('#like-room-btn');
+  if (likeBtn) likeBtn.onclick = () => this.likeRoom(r.owner);
+  const rateBtn = hud.querySelector('#rate-room-btn');
+  if (rateBtn) rateBtn.onclick = () => RoomRating.showRateUI(r.owner);
+};
+
+// ─── ENHANCED TIP POPUP (min 5◈, no max) ───────────────────────
+RoomSystem.showTipPopup = function(ownerName) {
+  const myCoins = Coins.count;
+  if (myCoins < 5) { showNotification('Need at least 5◈ to tip!'); return; }
+  const maxTip = myCoins;
+  const {p} = createPopup(`
+    <h3>💰 Tip ${ownerName}</h3>
+    <p style="font-size:11px;color:#888;margin-bottom:8px">Send ◈ to show appreciation! (min 5◈)</p>
+    <p style="text-align:center;font-size:24px;color:#ffd700;margin:12px 0" id="tip-amount-display">5◈</p>
+    <input type="range" class="tip-slider" id="tip-slider" min="5" max="${maxTip}" value="5" style="width:100%">
+    <p style="text-align:center;font-size:10px;color:#666">Your balance: ${myCoins}◈</p>
+    <div style="text-align:center;margin-top:12px">
+      <button class="drink-btn" id="tip-cancel">Cancel</button>
+      <button class="drink-btn" id="tip-send" style="border-color:#ffd700;color:#ffd700">Send Tip 💰</button>
+    </div>
+  `);
+  const slider = p.querySelector('#tip-slider');
+  const display = p.querySelector('#tip-amount-display');
+  slider.oninput = () => { display.textContent = slider.value + '◈'; };
+  p.querySelector('#tip-cancel').onclick = () => p.closest('.popup-overlay').remove();
+  p.querySelector('#tip-send').onclick = async () => {
+    const amount = parseInt(slider.value);
+    if (amount < 5) { showNotification('Minimum tip is 5◈!'); return; }
+    if (!Coins.canAfford(amount)) { showNotification('Not enough ◈!'); return; }
+    Coins.spend(amount, 'tip');
+    try {
+      await fetch(`/api/rooms/${encodeURIComponent(ownerName)}/tip`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: Math.min(amount, 50), tipper: LS.get('visitorName', 'Anonymous') })
+      });
+      showNotification(`💰 Tipped ${ownerName} ${amount}◈!`);
+      if (this.currentRoom) { this.currentRoom.earnings = (this.currentRoom.earnings || 0) + amount; this.updateRoomInfoHUD(); }
+    } catch { showNotification('Tip failed!'); }
+    p.closest('.popup-overlay').remove();
+  };
+};
+
+// ─── PATCH loadRoom to check entry fee ──────────────────────────
+const _origLoadRoom = RoomSystem.loadRoom.bind(RoomSystem);
+RoomSystem.loadRoom = async function(ownerName) {
+  try {
+    const response = await fetch(`/api/rooms/${encodeURIComponent(ownerName)}`);
+    const room = await response.json();
+    // Check entry fee
+    if (room.entryFee > 0 && room.owner !== LS.get('visitorName', 'Visitor')) {
+      EntryFee.showEntryDialog(room, () => _doLoadRoom.call(this, ownerName, room));
+    } else {
+      _doLoadRoom.call(this, ownerName, room);
+    }
+  } catch { showNotification('Failed to load room!'); }
+};
+
+async function _doLoadRoom(ownerName, room) {
+  RoomSystem.currentRoom = room;
+  RoomSystem.visitingOwner = ownerName;
+  RoomSystem.isInBuilder = false;
+  S.floor = 8;
+  $('#floor-hud').textContent = `🏠 ${room.name}`;
+  // Record visit
+  const visitRes = await fetch(`/api/rooms/${encodeURIComponent(ownerName)}/visit`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ visitor: LS.get('visitorName', 'Anonymous') })
+  }).catch(()=>({json:()=>({})}));
+  const visitData = await visitRes.json().catch(()=>({}));
+  if (visitData.visitors) room.visitors = visitData.visitors;
+  RoomSystem.updateRoomInfoHUD();
+  showNotification(`Visiting ${room.name}!`);
+  // Check creator level-up for room owner (if it's us visiting our own)
+  CreatorLevel.checkLevelUp();
+}
+
+// ─── PATCH showRoomList to show ratings, fees, creator badges, featured ──
+RoomSystem.showRoomList = async function() {
+  try {
+    const [roomsRes, lbRes] = await Promise.all([fetch('/api/rooms'), fetch('/api/rooms/leaderboard')]);
+    const rooms = await roomsRes.json();
+    const leaderboard = await lbRes.json().catch(()=>[]);
+    const now = Date.now();
+
+    rooms.sort((a,b) => ((b.visitors||0)+(b.likes||0)) - ((a.visitors||0)+(a.likes||0)));
+
+    let html = '<h3>🏘️ Visit Rooms</h3><p style="font-size:10px;color:#888;margin-bottom:8px">Explore rooms created by visitors!</p>';
+
+    if (rooms.length === 0) {
+      html += '<p style="color:#666">No public rooms yet!</p>';
+    } else {
+      rooms.forEach((room, i) => {
+        const medal = i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
+        const tierInfo = ROOM_TIERS[room.tier || 'starter'] || ROOM_TIERS.starter;
+        const ratingStr = room.avgRating ? `${room.avgRating.toFixed(1)}★` : '';
+        const feeStr = room.entryFee > 0 ? `💳${room.entryFee}◈` : '<span style="color:#0f0;font-size:8px">FREE</span>';
+        const isFeatured = room.featuredUntil && room.featuredUntil > now;
+        const featuredBorder = isFeatured ? 'border-color:#ffd700;background:rgba(255,215,0,.06)' : '';
+
+        html += `
+          <div class="drink-btn" style="width:100%;text-align:left;margin:4px 0;padding:8px 12px;${featuredBorder}" data-owner="${room.owner}">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:bold;color:#00fff7">${medal}${isFeatured?'⭐ ':''}${room.name} ${tierInfo.icon}</div>
+              <div style="font-size:9px;color:#ffd700">${feeStr} · 💰 ${room.earnings||0}◈</div>
+            </div>
+            <div style="font-size:9px;color:#888;margin-top:2px">by <b style="color:#ff6ec7">${room.owner}</b> · 👁️ ${room.visitors||0} · ❤️ ${room.likes||0}${ratingStr ? ' · '+ratingStr : ''}</div>
+          </div>
+        `;
+      });
+    }
+
+    // Top rated
+    const rated = rooms.filter(r => r.avgRating > 0).sort((a,b) => (b.avgRating||0)-(a.avgRating||0));
+    if (rated.length > 0) {
+      html += '<div style="margin-top:12px;border-top:1px solid #333;padding-top:8px"><h3 style="font-size:12px;color:#ff0">⭐ Top Rated</h3>';
+      rated.slice(0,5).forEach((r,i) => {
+        html += `<div style="font-size:10px;margin:2px 0;color:#ddd">${i+1}. <b style="color:#ff6ec7">${r.owner}</b> — ${r.avgRating.toFixed(1)}★ (${r.ratingCount} ratings)</div>`;
+      });
+      html += '</div>';
+    }
+
+    // Earnings leaderboard
+    if (leaderboard.length > 0) {
+      html += '<div style="margin-top:8px;border-top:1px solid #333;padding-top:8px"><h3 style="font-size:12px;color:#ffd700">🏆 Top Earners</h3>';
+      leaderboard.slice(0,5).forEach((r,i) => {
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}.`;
+        html += `<div style="font-size:10px;margin:2px 0;color:#ddd">${medal} <b style="color:#ff6ec7">${r.owner}</b> — <span style="color:#ffd700">${r.earnings}◈</span></div>`;
+      });
+      html += '</div>';
+    }
+
+    const { p } = createPopup(html);
+    p.querySelectorAll('[data-owner]').forEach(btn => {
+      btn.onclick = () => {
+        RoomSystem.loadRoom(btn.dataset.owner);
+        p.closest('.popup-overlay').remove();
+      };
+    });
+  } catch (error) {
+    showNotification('Failed to load room list!');
+  }
+};
+
+// ─── PATCH showFurnitureCatalog to include creator-level furniture ──
+const _origShowFurnitureCatalog = showFurnitureCatalog;
+showFurnitureCatalog = function() {
+  const creatorFurn = CreatorLevel.getUnlockedFurniture();
+  const allFurn = { ...FURNITURE_TYPES, ...creatorFurn };
+  const tierSlots = RoomTiers.getSlotCount();
+  const placedCount = RoomSystem.furniture.length;
+  const lv = CreatorLevel.getLevel();
+
+  let html = `<h3>🛋️ Furniture Catalog</h3>`;
+  html += `<p style="font-size:10px;color:#888;margin-bottom:4px">Slots: ${placedCount}/${tierSlots} · ${lv.icon} ${lv.name}</p>`;
+
+  if (placedCount >= tierSlots) {
+    html += `<p style="color:#ff6666;font-size:10px;margin-bottom:8px">⚠️ Max slots reached! Upgrade room tier for more.</p>`;
+  }
+
+  // Group by section
+  const sections = [
+    { label: '🏠 Basic', items: Object.entries(FURNITURE_TYPES) },
+  ];
+  if (Object.keys(creatorFurn).length > 0) {
+    sections.push({ label: `${lv.icon} Creator Unlocks`, items: Object.entries(creatorFurn) });
+  }
+
+  sections.forEach(sec => {
+    html += `<div style="font-size:10px;color:#ffd700;margin:8px 0 4px">${sec.label}</div>`;
+    sec.items.forEach(([type, furn]) => {
+      const canAfford = Coins.canAfford(furn.cost);
+      const hasSlot = placedCount < tierSlots;
+      const hasRequirement = !furn.requirement || (furn.requirement === 'pet_pixel_100' && S.petCount >= 100);
+      if (!hasRequirement && furn.requirement) {
+        html += `<div class="drink-btn" style="opacity:.3;cursor:not-allowed">${furn.icon} ${furn.name} — ${furn.requirement.replace(/_/g,' ')}</div>`;
+      } else {
+        html += `<div class="drink-btn furniture-item ${!canAfford||!hasSlot?'locked':''}" data-type="${type}" style="text-align:left">
+          <div style="float:left;margin-right:8px;font-size:16px">${furn.icon}</div>
+          <div style="font-weight:bold">${furn.name}${furn.animated?' <span style="font-size:8px;color:#ff6ec7">✨ANIMATED</span>':''}</div>
+          <div style="font-size:9px;color:${furn.cost>0?'#ffd700':'#0f0'}">${furn.cost>0?furn.cost+'◈':'FREE'}${!hasSlot?' · <span style="color:#f66">NO SLOTS</span>':''}</div>
+        </div>`;
+      }
+    });
+  });
+
+  // Buttons
+  html += `<div style="margin-top:10px;border-top:1px solid #333;padding-top:8px">`;
+  html += `<button class="drink-btn" id="cat-tier-btn" style="width:100%;border-color:#00fff7;color:#00fff7">🏠 Room Tiers & Upgrades</button>`;
+  html += `<button class="drink-btn" id="cat-creator-btn" style="width:100%;border-color:#ffd700;color:#ffd700;margin-top:4px">${lv.icon} Creator Profile</button>`;
+  html += `<button class="drink-btn" id="cat-settings-btn" style="width:100%;margin-top:4px">⚙️ Room Settings</button>`;
+  html += `</div>`;
+
+  const {p} = createPopup(html);
+  // Register creator furniture types temporarily for placement
+  Object.assign(FURNITURE_TYPES, creatorFurn);
+
+  p.querySelectorAll('.furniture-item').forEach(btn => {
+    btn.onclick = () => {
+      const type = btn.dataset.type;
+      const furn = allFurn[type];
+      if (!furn) return;
+      if (RoomSystem.furniture.length >= tierSlots) { showNotification('Max furniture slots! Upgrade tier.'); return; }
+      if (!Coins.canAfford(furn.cost)) { showNotification(`Need ${furn.cost}◈!`); return; }
+      RoomSystem.selectedFurniture = furn;
+      RoomSystem.selectedFurniture._type = type;
+      RoomSystem.builderMode = 'place';
+      showNotification(`Click to place ${furn.name}`);
+      p.closest('.popup-overlay').remove();
+    };
+  });
+
+  const tierBtn = p.querySelector('#cat-tier-btn');
+  if (tierBtn) tierBtn.onclick = () => { p.closest('.popup-overlay').remove(); RoomTiers.showUpgradeUI(); };
+  const creatorBtn = p.querySelector('#cat-creator-btn');
+  if (creatorBtn) creatorBtn.onclick = () => { p.closest('.popup-overlay').remove(); CreatorLevel.showProfile(); };
+  const settingsBtn = p.querySelector('#cat-settings-btn');
+  if (settingsBtn) settingsBtn.onclick = () => { p.closest('.popup-overlay').remove(); showRoomSettingsEnhanced(); };
+};
+
+// ─── ENHANCED ROOM SETTINGS (with entry fee, weekly rewards) ────
+function showRoomSettingsEnhanced() {
+  const currentName = RoomSystem.roomName;
+  const fee = EntryFee.getMyFee();
+  const tier = ROOM_TIERS[RoomTiers.getCurrentTier()];
+  const canCollect = RoomRating.canCollectWeekly();
+
+  const {p} = createPopup(`
+    <h3>⚙️ Room Settings</h3>
+    <div style="margin:8px 0">
+      <label style="display:block;margin-bottom:4px">Room Name:</label>
+      <input type="text" id="room-name-input" value="${currentName}" maxlength="30" style="width:100%;background:#111;border:1px solid #444;color:#ddd;padding:4px;font-family:inherit">
+    </div>
+    <div style="margin:8px 0">
+      <label style="display:block;margin-bottom:4px">Entry Fee (0-25◈):</label>
+      <input type="range" id="entry-fee-slider" min="0" max="25" value="${fee}" style="width:100%">
+      <div style="text-align:center;font-size:12px;color:#ffd700" id="fee-display">${fee > 0 ? fee + '◈' : 'FREE'}</div>
+      <div style="font-size:8px;color:#666;text-align:center">Visitors pay this to enter your room</div>
+    </div>
+    <div style="margin:8px 0">
+      <label style="display:block;margin-bottom:4px">
+        <input type="checkbox" id="room-public" checked> Public Room
+      </label>
+    </div>
+    <div style="margin:10px 0;border-top:1px solid #333;padding-top:8px">
+      <div style="font-size:10px;color:#ffd700;margin-bottom:4px">🏆 Weekly Rating Rewards</div>
+      <div style="font-size:9px;color:#888;margin-bottom:6px">Top-rated rooms earn bonus ◈ weekly!</div>
+      <button class="drink-btn" id="collect-weekly" style="width:100%;${canCollect?'border-color:#ffd700;color:#ffd700':'opacity:.4'}">${canCollect?'Collect Weekly Reward':'Already Collected'}</button>
+    </div>
+    <div style="margin-top:10px;text-align:center">
+      <button class="drink-btn" onclick="this.closest('.popup-overlay').remove()">Cancel</button>
+      <button class="drink-btn" id="apply-settings" style="border-color:#00fff7;color:#00fff7">Apply</button>
+    </div>
+  `);
+
+  const feeSlider = p.querySelector('#entry-fee-slider');
+  const feeDisplay = p.querySelector('#fee-display');
+  feeSlider.oninput = () => { const v = parseInt(feeSlider.value); feeDisplay.textContent = v > 0 ? v + '◈' : 'FREE'; };
+
+  p.querySelector('#collect-weekly').onclick = () => {
+    if (canCollect) RoomRating.collectWeekly();
+  };
+
+  p.querySelector('#apply-settings').onclick = () => {
+    const newName = p.querySelector('#room-name-input').value.trim();
+    if (newName) {
+      RoomSystem.roomName = newName;
+      EntryFee.setMyFee(parseInt(feeSlider.value));
+      RoomSystem.save();
+      showNotification('Settings saved!');
+    }
+    p.closest('.popup-overlay').remove();
+  };
+}
+
+// ─── PATCH V26RoomDirectory.showFeatured to use featured marketplace ──
+V26RoomDirectory.showFeatured = function() { FeaturedMarketplace.showUI(); };
+
+// ─── PATCH renderFloor7 to show featured rooms with golden borders ──
+const _p2RenderFloor7 = renderFloor7;
+renderFloor7 = function() {
+  _p2RenderFloor7();
+  // Featured rooms area enhancement
+  const fx=550, fy=420, fw=160, fh=60;
+  // Animated golden border
+  const pulse = 0.5 + Math.sin(S.time * 3) * 0.3;
+  ctx.strokeStyle = `rgba(255,215,0,${pulse})`;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(fx-2, fy-2, fw+4, fh+4);
+};
+
+// ─── SYNC VISIT COUNT FROM SERVER ───────────────────────────────
+(async function syncVisitCount() {
+  const myName = LS.get('visitorName', 'Visitor');
+  if (myName === 'Visitor') return;
+  try {
+    const res = await fetch(`/api/rooms/${encodeURIComponent(myName)}`);
+    if (res.ok) {
+      const room = await res.json();
+      RoomTiers.setTotalVisits(room.visitors || 0);
+      LS.set('roomAvgRating', room.avgRating || 0);
+      // Check top 10
+      const allRes = await fetch('/api/rooms');
+      const all = await allRes.json();
+      all.sort((a,b) => (b.avgRating||0) - (a.avgRating||0));
+      const myIdx = all.findIndex(r => r.owner === myName);
+      LS.set('roomIsTop10', myIdx >= 0 && myIdx < 10);
+      // Check creator level-up
+      CreatorLevel.checkLevelUp();
+    }
+  } catch {}
+})();
+
+// ─── Periodic sync (every 2 minutes) ───────────────────────────
+setInterval(async () => {
+  const myName = LS.get('visitorName', 'Visitor');
+  if (myName === 'Visitor') return;
+  try {
+    const res = await fetch(`/api/rooms/${encodeURIComponent(myName)}`);
+    if (res.ok) {
+      const room = await res.json();
+      RoomTiers.setTotalVisits(room.visitors || 0);
+      LS.set('roomAvgRating', room.avgRating || 0);
+      CreatorLevel.checkLevelUp();
+    }
+  } catch {}
+}, 120000);
+
 })();
 </script>
 </body>
