@@ -1753,7 +1753,6 @@ wss.on('connection', (visitorWs) => {
             success: true
           }));
         }
-        }
       }
       // ═══ SOCIAL/CHAT SYSTEM ═══
       else if (msg.type === 'chat.emote') {
