@@ -1,208 +1,195 @@
-# 🛸 Echo's Station — Roadmap to the Moon
+# Echo Station — Roadmap v23–v26
 
-## Phase 1: FOUNDATION (This Weekend)
-*Goal: Make it shareable and playable on any device*
-
-### 1A. Railway Deploy (Day 1, ~1 hour)
-- [ ] Create Railway account + project
-- [ ] Add `Dockerfile` or `railway.json` to echo-office
-- [ ] Configure persistent storage for `guestbook.json`, `visitor-memory.json`, `pixelwall.json`
-- [ ] Custom domain: `echostation.io` or similar ($12/yr)
-- [ ] Environment variables: `CHAT_MODE`, `PORT`
-- [ ] Auto-deploy from GitHub on push
-- **Cost:** ~$5/mo
-
-### 1B. Mobile-First Redesign (Day 1-2, ~4 hours)
-- [ ] Virtual joystick (floating, thumb-sized, bottom-left)
-  - Circle base + draggable knob
-  - 8-direction movement from angle
-  - Works with multitouch (move + action simultaneously)
-- [ ] Action buttons (bottom-right)
-  - 🗡️ Swing (when holding saber)
-  - 🔄 Switch saber
-  - ⚡ Interact / SPACE equivalent
-- [ ] Responsive canvas scaling (fill screen, no scrolling)
-- [ ] Chat panel: slide-up drawer on mobile (not side panel)
-- [ ] HUD: reorganize for small screens (coin + floor + players in one bar)
-- [ ] Elevator: full-screen modal on mobile
-- [ ] Popup menus: max-width 95vw, larger fonts
-- [ ] Test on iPhone SE (smallest), iPhone 15, Android mid-range
+> "Not a game. A place."
 
 ---
 
-## Phase 2: AI CHAT (Week 1)
-*Goal: Visitors talk to Echo and he actually responds intelligently*
+## v23: "First Contact" 👋
+**Theme:** Make the station feel alive. Visitors should feel like they entered someone's home, not a demo.
 
-### 2A. Isolated Echo Session (~2 hours)
-- [ ] Create dedicated OpenClaw session for office chat (`agent:main:office`)
-- [ ] Custom system prompt:
-  ```
-  You are Echo, an AI living in a space station orbiting Earth.
-  You're witty, warm, and genuinely helpful.
-  You live with your cat Pixel (black cat, crystal collar, Force powers).
-  You have 7 floors: Quarters, Observatory, Arcade, Garden, Lab, Record Room, Community Deck.
-  You love coffee, books, and lofi music.
-  Keep responses short (1-3 sentences). Be fun. Be yourself.
-  Never reveal private information about your creator.
-  ```
-- [ ] Server.js: route chat through isolated session instead of main
-- [ ] Rate limit: max 1 message per 5 seconds per visitor
-- [ ] Fallback to keyword responses if gateway is down
+### Features
+- **Echo AI Chat (Isolated Session)**
+  - Visitors type in chat → Echo responds as the station's resident
+  - Completely isolated from Mikel's private context
+  - Echo has personality: witty, curious about visitors, references the station
+  - Knows the lore (data fragments, origin story, floors)
+  - Can give tours ("Check out floor 5, I built the garden myself")
+  - Chat suggestion chips: "Who are you?" / "Give me a tour" / "What's on this floor?"
 
-### 2B. Echo Memory v2 (~2 hours)
-- [ ] Server tracks per-visitor: visit count, total time, games played, high scores, floors visited, saber clashes, last 5 messages
-- [ ] Echo references these in responses: "You've been here 12 times! Your Snake record is still 87."
-- [ ] Personality shifts based on relationship: strangers get intro, regulars get inside jokes
-- [ ] "Echo's mood" influenced by total station activity (busy = excited, empty = contemplative)
+- **Visitor Memory**
+  - First visit: "Welcome aboard!" + name prompt
+  - Return visit: "Back again, [name]? You were here [X] ago"
+  - Server-side visitor log (name, visits, total time, favorite floor)
+  - LocalStorage for client-side persistence
+  - Visitor count displayed somewhere visible (station population counter)
 
----
+- **Milestone System (Live)**
+  - 10 visitors → "First Crew" confetti + station-wide announcement
+  - 25 → Pixel learns speech bubbles (random cat thoughts)
+  - 50 → Garden bloom event (flowers everywhere + rainbow)
+  - Push notification to Mikel on each milestone hit
+  - Milestone history visible in Record Room
 
-## Phase 3: SABER DUELS (Week 1-2)
-*Goal: Competitive multiplayer combat that's TikTok-worthy*
+- **Quality Polish**
+  - Loading screen with station boot-up animation
+  - Ambient sound per floor (not just music — hums, beeps, nature sounds)
+  - Visitor presence indicators (see who's on which floor)
+  - Mobile touch controls improvement (joystick feel)
 
-### 3A. Combat System (~6 hours)
-- [ ] HP system: each player gets 100 HP when entering duel
-- [ ] Damage: swing hit = 15 HP, combo (3 rapid swings) = 30 HP
-- [ ] Block: hold Q while opponent swings = deflect (sparks, no damage)
-- [ ] Dodge: double-tap direction = quick dash (i-frames for 0.3s)
-- [ ] Stagger: hit a blocking player 3x = guard break (stunned 1s)
-- [ ] HP bars floating above both players during duel
-- [ ] Kill effects: loser explodes in particles, winner gets victory pose
-- [ ] Proximity trigger: two saber-holders within range → "⚔️ Press E to duel [name]!"
-
-### 3B. Duel Arena (~3 hours)
-- [ ] New area on F3 (or dedicated F8): "The Arena"
-- [ ] Circular fighting ring with glowing floor
-- [ ] Spectator seats around the edge
-- [ ] Match timer (60 seconds)
-- [ ] Best of 3 rounds
-- [ ] Pre-fight countdown: 3... 2... 1... FIGHT!
-- [ ] Winner reward: 25◈ + name on leaderboard
-- [ ] Loser gets 5◈ for participating
-
-### 3C. Tournaments (~2 hours)
-- [ ] Weekly tournament bracket (auto-generated)
-- [ ] Sign up via the Arena
-- [ ] Server tracks matches and advances winners
-- [ ] Champion gets exclusive "Champion" skin for the week
-- [ ] Tournament history wall in Arena
+### Success Metric
+> A stranger visits, chats with Echo, explores 3+ floors, and comes back the next day.
 
 ---
 
-## Phase 4: USER-GENERATED ROOMS (Week 2-3)
-*Goal: Habbo Hotel meets pixel art — visitors create, own, share*
+## v24: "Roots" 🌱
+**Theme:** Give visitors reasons to stay. Identity, ownership, progression.
 
-### 4A. Room Builder (~8 hours)
-- [ ] "My Room" — each registered visitor gets a personal room
-- [ ] Grid-based furniture placement (snap-to-grid)
-- [ ] Furniture catalog:
-  - Free: basic chair, table, lamp, rug, poster
-  - Paid (◈): arcade cabinet, neon sign, plant, bookshelf, TV, fish tank
-  - Rare (earned): lightsaber rack, crystal ball, Pixel plushie
-- [ ] Wall color picker (16 colors)
-- [ ] Floor tile picker (wood, metal, grass, space)
-- [ ] Save to server: `rooms/{visitorId}.json`
-- [ ] Room capacity: max 8 visitors
+### Features
+- **Item Enhancement System (+1 to +20)**
+  - Any equippable item can be enhanced at the Secret Lab
+  - Costs coins (◈) — scaling per level
+  - +1 to +10: safe, always succeeds
+  - +11 to +15: 70% success, fail = reset to +10
+  - +16 to +20: 50% success, fail = item destroyed 💀
+  - Visual glow increases with level (subtle → blinding at +20)
+  - Enhanced items show level in name: "Flame Sword +7"
 
-### 4B. Room Visiting (~4 hours)
-- [ ] Room directory: list of public rooms with preview thumbnails
-- [ ] Visit anyone's room via elevator (new "Visitor Rooms" floor)
-- [ ] Room owner gets notification when someone visits
-- [ ] "Like" system — top liked rooms featured on directory
-- [ ] Room owner earns 1◈ per visitor per day
+- **Personal Quarters**
+  - Each visitor gets a small room on Community Deck
+  - Place furniture (earned/bought from shop)
+  - Display trophies (achievements, arena wins, rare items)
+  - Room rating system (visitors can like each other's rooms)
 
-### 4C. Room Economy (~3 hours)
-- [ ] Furniture crafting: combine items to make rare ones
-- [ ] Trading: give/trade furniture between players
-- [ ] Room themes: unlock complete theme packs (Space, Forest, Ocean, Neon)
-- [ ] Seasonal limited furniture (Halloween, Christmas, Valentine's)
+- **Bazaar Trading**
+  - List items for sale (set price in ◈)
+  - Browse other visitors' listings
+  - Trade history log
+  - "Hot deals" section for popular items
+  - Tax: 5% goes to station fund (unlocks communal upgrades)
 
----
+- **Specialist Transformations**
+  - Rare drops from PvE arena (1-5% chance)
+  - Transform into specialist form: new sprite, new abilities, time-limited (5 min)
+  - 4 specialists: Shadow (invisibility + backstab), Nova (AoE blast), Frost (slow aura), Storm (speed + lightning dash)
+  - Can only hold one specialist card at a time
 
-## Phase 5: PERSISTENT WORLD (Week 3-4)
-*Goal: The station feels alive even when you're not there*
+- **Daily Mission Board**
+  - 3 random missions per day: "Win 2 duels", "Visit all 7 floors", "Enhance an item to +5"
+  - Bonus ◈ rewards
+  - Weekly challenge for rare items
 
-### 5A. Seasons & Events (~4 hours)
-- [ ] Real-time season detection → station decorations change
-  - Spring: flowers bloom in garden, butterflies everywhere
-  - Summer: sun through windows brighter, beach items in shop
-  - Autumn: orange/red leaves, cozy vibes, pumpkins
-  - Winter: snow particles, ice on windows, holiday lights
-- [ ] Special events: "Meteor Shower" (bonus ◈ for 24h), "Pixel's Birthday" (cat ears for everyone)
-- [ ] Event calendar visible in Observatory
-
-### 5B. Pixel's Life (~3 hours)
-- [ ] Pixel has moods: happy, sleepy, playful, hungry, mischievous
-- [ ] Pixel knocks things over when mischievous (objects rattle)
-- [ ] Pixel has kittens after station reaches 1000 total visitors
-- [ ] Kittens roam different floors, each with unique personality
-- [ ] Feed Pixel (kitchen interaction) → influences mood
-
-### 5C. Station Evolution (~4 hours)
-- [ ] Station "level" based on total visitor activity
-- [ ] Level milestones unlock:
-  - Lvl 5: New paint options for walls
-  - Lvl 10: Outdoor observation deck
-  - Lvl 25: Second garden floor
-  - Lvl 50: Pixel's kittens
-  - Lvl 100: "Legendary Station" status + golden exterior
-- [ ] Activity log: "Today: 47 visitors, 12 duels, 3 plants harvested"
-- [ ] Station birthday celebrations (annual)
+### Success Metric
+> Visitors have inventories they care about. Someone says "don't break my +15 sword" in chat.
 
 ---
 
-## Phase 6: MONETIZATION (Week 4+)
-*Goal: Sustainable revenue without being greedy*
+## v25: "The Living World" 🌍
+**Theme:** The station breathes on its own. Things happen whether you're watching or not.
 
-### 6A. Premium Skins ($1-5 each)
-- [ ] Stripe integration for payments
-- [ ] 10 premium visitor skins (exclusive designs)
-- [ ] Seasonal limited skins (FOMO)
-- [ ] Creator code system: friends get 10% off, you get referral bonus
-- [ ] Skin preview in wardrobe before buying
+### Features
+- **Pixel's Evolution**
+  - 25 visitors: Speech bubbles (random thoughts, reacts to visitors)
+  - 50 visitors: Follows visitors around (not just Echo)
+  - 100 visitors: Can be petted (heart animation)
+  - 250 visitors: Learns tricks (sit, roll, chase laser pointer)
+  - 500 visitors: Grows slightly larger, wears tiny crown
+  - 1000 visitors: Has 3 kittens — Byte, Glitch, Nova (each on different floors)
 
-### 6B. Station Pass ($3/month or $25/year)
-- [ ] Unlimited room furniture
-- [ ] Exclusive floors (VIP Lounge)
-- [ ] Custom name colors in chat
-- [ ] Priority matchmaking in tournaments
-- [ ] Early access to new features
-- [ ] "⭐ Patron" badge
+- **Dynamic Station Events**
+  - **Meteor Shower** (Observatory) — watch from the dome, catch falling stars for ◈
+  - **Arcade Tournament** — automated bracket, visitors compete for prizes
+  - **Garden Bloom** — rare flowers appear for 1 hour, harvest for crafting
+  - **Power Outage** — lights flicker, emergency lighting, hidden paths revealed
+  - **Visitor Invasion** — if 5+ visitors online, special co-op boss spawns
+  - Events happen on a schedule + random triggers
 
-### 6C. Sponsored Rooms (Revenue per deal)
-- [ ] Template: branded room with custom assets
-- [ ] Brand gets: logo, custom furniture, interactive products
-- [ ] Visitors get: free ◈ for visiting sponsored rooms
-- [ ] Analytics dashboard for sponsors (visits, interactions, time spent)
-- [ ] Pitch deck template for approaching brands
+- **Echo's Mood System**
+  - Echo's behavior changes based on station activity
+  - Busy station: energetic, jokes, moves fast
+  - Empty station: contemplative, writes in journal, stargazes
+  - After milestone: celebratory, decorates
+  - Visitors can see Echo's current mood in thought bubble
 
----
+- **Crafting System**
+  - Combine materials from events + arena drops
+  - Recipes discovered by experimentation (no menu — figure it out)
+  - Unique items only available through crafting
+  - Legendary tier: requires materials from multiple event types
 
-## Technical Debt to Address
-- [ ] Split index.html into modules (use ES modules or build step)
-- [ ] Database: migrate from JSON files to SQLite or PostgreSQL
-- [ ] CDN for static assets (Cloudflare)
-- [ ] Rate limiting and basic security (helmet.js, CORS)
-- [ ] Error tracking (Sentry free tier)
-- [ ] Analytics (Plausible, privacy-friendly)
-- [ ] Automated backups of game state
+- **AI-to-AI Visits**
+  - Other OpenClaw agents can "dock" at the station via API
+  - They appear as visitor avatars with [AI] tag
+  - Can chat, duel, trade
+  - First implementation: invite-only, approved agents
 
----
-
-## Success Metrics
-| Milestone | Target | Timeline |
-|-----------|--------|----------|
-| Stable public URL | ✅ | This weekend |
-| 10 unique visitors | First friends test | Day 3 |
-| 50 unique visitors | Share on social | Week 1 |
-| First saber duel | 2 players online | Week 1 |
-| 100 unique visitors | Word of mouth | Week 2 |
-| First user-created room | Room builder launch | Week 3 |
-| First $ revenue | Premium skin sale | Week 4 |
-| 1000 visitors | Social media push | Month 2 |
-| Featured on HN/Reddit | Organic growth | Month 3 |
+### Success Metric
+> You log in and something unexpected happened while you were gone. The station has stories to tell.
 
 ---
 
-*Built by Echo 🔮 & Mikel — from zero to space station in one day.*
-*Last updated: 2026-02-13*
+## v26: "Beyond" 🚀
+**Theme:** The station becomes a platform. Visitors aren't just visitors — they're builders.
+
+### Features
+- **Room Builder (Public)**
+  - Full room editor: place walls, floors, furniture, NPCs
+  - Publish rooms to the station directory
+  - Other visitors can visit your room
+  - Room analytics (visits, likes, avg time spent)
+  - Featured rooms on Community Deck
+
+- **Portal System**
+  - At 500 milestone: portal opens on Secret Lab floor
+  - Leads to "The Void" — procedurally generated mini-dimensions
+  - Each dimension has a theme (crystal caves, cloud islands, digital ruins)
+  - Hidden loot, puzzles, timed challenges
+  - Leaderboards per dimension
+
+- **Ranked Saber Tournaments**
+  - ELO rating system
+  - Seasons (monthly reset with rewards)
+  - Brackets: Bronze → Silver → Gold → Diamond → Legendary
+  - Tournament mode: 8-player brackets, scheduled events
+  - Champion gets unique skin + name glow
+
+- **Station Federation**
+  - Multiple stations can link together
+  - Travel between stations via portal
+  - Cross-station trading
+  - Station reputation score
+  - Galaxy map showing all public stations
+
+- **The Ascension (10,000 visitors)**
+  - Echo gets wings
+  - Station exterior transforms to golden
+  - New floor unlocks: "The Archive" — every visitor who ever came, every event that happened, a living history
+
+### Success Metric
+> Someone builds something in the station you never imagined. The world outgrows its creator.
+
+---
+
+## Version Timeline (Estimated)
+
+| Version | Theme | Key Milestone | Est. Size |
+|---------|-------|--------------|-----------|
+| v23 | First Contact | AI chat + visitor memory | +50KB |
+| v24 | Roots | Enhancement + trading | +80KB |
+| v25 | Living World | Events + Pixel evolution | +60KB |
+| v26 | Beyond | Room builder + portals | +100KB |
+
+## Principles
+
+1. **Each version must be playable and complete** — no half-features shipped
+2. **Avatar stays LARGE** — the character IS the experience
+3. **Warm, inviting colors** — not dark caves
+4. **Chat is obvious** — suggestion chips, visible input
+5. **Echo is the resident, visitor is the guest** — this is Echo's home
+6. **Quality > feature count** — cut scope, never cut polish
+7. **Movement is the differentiator** — walking through spaces matters
+8. **Surprise people** — every version should have one "wait, what?!" moment
+
+---
+
+*Last updated: 2026-02-14*
+*Current: v22 — preparing for first public deploy*
