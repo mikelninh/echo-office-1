@@ -2048,7 +2048,7 @@ const Coins={
   spend(n,r){if(this._count<n)return false;this.count-=n;S.floatTexts.push({text:'-'+n+'◈',x:S.echo.x-10,y:S.echo.y-50,color:'#ff6666',life:60});return true},
   canAfford(n){return this._count>=n},
   adminGrant(n){this._count+=n;this._lifetime+=n;LS.set('echoCoins',this._count);LS.set('lifetimeCoins',this._lifetime);$('#coin-count').textContent=this._count;showNotification('👑 Admin: +'+n+'◈')},
-  initVisitRewards(){const t=new Date().toISOString().slice(0,10);const up=new URLSearchParams(window.location.search);if(up.get('admin')==='echohost'){if(!LS.get('adminGranted')){this.adminGrant(1000000);LS.set('adminGranted',true)}}if(!LS.get('coinsFirstVisit',false)){LS.set('coinsFirstVisit',true);this.earn(10,'first')}const l=LS.get('coinsLastVisit','');if(l&&l!==t)this.earn(5,'daily');LS.set('coinsLastVisit',t);$('#coin-count').textContent=this._count},
+  initVisitRewards(){const t=new Date().toISOString().slice(0,10);const up=new URLSearchParams(window.location.search);if(up.get('admin')==='echohost'){if(!LS.get('adminGranted')){this.adminGrant(1000000);LS.set('adminGranted',true)}}if(!LS.get('coinsFirstVisit',false)){LS.set('coinsFirstVisit',true);this.earn(100,'first')}const l=LS.get('coinsLastVisit','');if(l&&l!==t)this.earn(5,'daily');LS.set('coinsLastVisit',t);$('#coin-count').textContent=this._count},
   _sndEarn(){if(!S.audioCtx)return;const c=S.audioCtx,n=c.currentTime;const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=1200;g.gain.setValueAtTime(.1*S.volume,n);g.gain.exponentialRampToValueAtTime(.001,n+.05);o.connect(g);g.connect(S.masterGain);o.start(n);o.stop(n+.1)},
 };
 
@@ -10885,7 +10885,7 @@ function showWelcomeWardrobe(){
     setTimeout(()=>{ov.remove();recordStationVisit()},500);
     
     showNotification('Welcome, '+name+'! \u{1F52E} Your room is ready on F8!');
-    addChatMsg('Echo','Welcome aboard, '+name+'! \u{1F52E} Your very own room is set up on F8. Customize it and earn \u25C8 from visitors!');
+    addChatMsg('Echo','Welcome aboard, '+name+'! \u{1F52E} Use WASD or Arrow keys to move (or click/tap anywhere to walk there). Press SPACE to interact! Your room is on F8 — use the elevator on the left wall.');
   }
   
   ov.querySelector('#welcome-go').onclick=finishWelcome;
