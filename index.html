@@ -3964,6 +3964,35 @@ function renderThought(){
   ctx.fillStyle='#f0e8d8';ctx.textAlign='center';ctx.fillText(S.thoughtText,tx,ty);ctx.textAlign='left';
 }
 
+function renderScannerEffects() {
+  const pulse = Math.sin(S.time * 4) * 0.3 + 0.7;
+  
+  // Render secret wall hints
+  const walls = SecretRooms.secretWalls[S.floor];
+  if (walls) {
+    for (let wall of walls) {
+      if (!S.discovery.secretsFound.includes(wall.room)) {
+        ctx.strokeStyle = `rgba(0,255,247,${pulse})`;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.strokeRect(wall.x, wall.y, wall.w, wall.h);
+        ctx.setLineDash([]);
+        
+        // Glow effect
+        ctx.shadowColor = '#00fff7';
+        ctx.shadowBlur = 10;
+        ctx.strokeRect(wall.x, wall.y, wall.w, wall.h);
+        ctx.shadowBlur = 0;
+      }
+    }
+  }
+  
+  // Scanner UI
+  ctx.fillStyle = '#00fff7';
+  ctx.font = '10px monospace';
+  ctx.fillText('SCANNER ACTIVE', 10, H - 20);
+}
+
 function renderParticles(){
   for(let i=S.particles.length-1;i>=0;i--){const p=S.particles[i];p.x+=p.vx;p.y+=p.vy;p.life--;if(p.life<=0){S.particles.splice(i,1);continue}ctx.globalAlpha=Math.min(1,p.life/20);ctx.fillStyle=p.color;ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size);ctx.globalAlpha=1}
 }
@@ -4271,6 +4300,30 @@ function renderFloor1(){
   ctx.fillStyle='#6a4a5a';ctx.beginPath();ctx.ellipse(sf.x+sf.w+15,sf.y+55,14,8,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#7a5a6a';ctx.beginPath();ctx.ellipse(sf.x+sf.w+15,sf.y+55,10,5,0,0,Math.PI*2);ctx.fill();
   // Tiny sleeping Pixel in bed (if on this floor)
   if(S.pixel.floor===1){const pcx=sf.x+sf.w+15,pcy=sf.y+53;ctx.fillStyle='#222';ctx.beginPath();ctx.ellipse(pcx,pcy,5,3,0,0,Math.PI*2);ctx.fill();const zzA=.3+Math.sin(S.time*2)*.3;ctx.fillStyle=`rgba(180,180,255,${zzA})`;ctx.font='5px monospace';ctx.fillText('z',pcx+6,pcy-3+Math.sin(S.time)*2)}
+  
+  // Sprint A: Secret wall behind bed (subtle visual hint)
+  if (!S.discovery.secretsFound.includes('diary')) {
+    ctx.fillStyle = '#2a2a3a'; // Slightly different shade
+    ctx.fillRect(650, 350, 10, 40);
+  }
+  
+  // Sprint B: Code note on Echo's desk for cross-floor puzzle
+  PuzzleSystems.renderCodeNote();
+  
+  // Garden pattern hint: Flowers on F1 show the garden puzzle solution (Red-Blue-Yellow-Red)
+  const flowerHints = [
+    {x: 120, y: 100, color: '#ff4040'}, // Red
+    {x: 140, y: 105, color: '#4040ff'}, // Blue  
+    {x: 160, y: 100, color: '#ffff40'}, // Yellow
+    {x: 180, y: 105, color: '#ff4040'}  // Red
+  ];
+  
+  for (let flower of flowerHints) {
+    ctx.fillStyle = flower.color;
+    ctx.beginPath();
+    ctx.arc(flower.x, flower.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
 }
 
 // --- FLOOR 2: The Observatory ---
@@ -4303,6 +4356,14 @@ function renderFloor2(){
   ctx.fillRect(tl.x+10,tl.y+8,10,12);// eyepiece
   ctx.fillStyle='#aaa';ctx.fillRect(tl.x+42,tl.y+6,5,14);// lens
   ctx.fillStyle='#666';ctx.fillRect(tl.x+22,tl.y+18,16,42);// mount
+  
+  // Sprint B: Constellation puzzle hint
+  if (!S.puzzles.constellation.completed && S.scanner.active) {
+    const pulse = Math.sin(S.time * 3) * 0.3 + 0.7;
+    ctx.strokeStyle = `rgba(255,255,0,${pulse})`;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(tl.x, tl.y, tl.w, tl.h);
+  }
   // Star map
   const sm=getObjects().find(o=>o.id==='starmap');ctx.fillStyle='#1a1a30';ctx.fillRect(sm.x,sm.y,sm.w,sm.h);ctx.strokeStyle='#334';ctx.lineWidth=1;for(let i=0;i<5;i++){ctx.beginPath();ctx.arc(sm.x+sm.w/2,sm.y+sm.h/2,10+i*8,0,Math.PI*2);ctx.stroke()}ctx.fillStyle='#fff';ctx.font='6px monospace';ctx.fillText('STAR MAP',sm.x+10,sm.y+sm.h-3);
   // Viewing chairs
@@ -4476,6 +4537,24 @@ function renderFloor4(){
   for(let i=0;i<2;i++){const bx=150+Math.sin(S.time*2+i*3)*30,by=150+Math.cos(S.time*2.5+i)*15;ctx.fillStyle='#ffcc00';ctx.fillRect(bx,by,3,2);ctx.fillStyle='#333';ctx.fillRect(bx+1,by,1,2)}
   // Watering station
   const ws=getObjects().find(o=>o.id==='waterstation');ctx.fillStyle='#4a4a5a';ctx.fillRect(ws.x,ws.y,ws.w,ws.h);ctx.fillStyle='#00aaff';ctx.font='14px sans-serif';ctx.fillText('💧',ws.x+ws.w/2-7,ws.y+ws.h/2+5);
+  
+  // Sprint A: Secret cave entrance (bush/mushroom area with subtle hint)
+  if (!S.discovery.secretsFound.includes('cave')) {
+    ctx.fillStyle = '#1a2a1a'; // Slightly different shade for hint
+    ctx.fillRect(150, 480, 30, 20);
+    
+    // Make it look like a bush/mushroom cluster
+    ctx.fillStyle = '#2a4a2a';
+    ctx.beginPath();
+    ctx.arc(165, 485, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(155, 490, 6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  // Sprint B: Garden puzzle plots (4 additional plots for seed pattern puzzle)
+  PuzzleSystems.renderGardenPlots();
 }
 
 // --- FLOOR 5: Secret Lab ---
@@ -4574,6 +4653,15 @@ function renderFloor5(){
   }
   // Eerie ambient sounds visual
   if(Math.sin(S.time*1.5)>.9){ctx.fillStyle='rgba(0,200,255,.02)';ctx.fillRect(0,0,W,H)}
+  
+  // Sprint A: Secret lab room entrance (wall panel with subtle hint)
+  if (!S.discovery.secretsFound.includes('lab')) {
+    ctx.fillStyle = '#3a1a2a'; // Slightly different shade for hint
+    ctx.fillRect(350, 100, 15, 30);
+  }
+  
+  // Sprint B: Cross-floor puzzle terminal
+  PuzzleSystems.renderLabTerminal();
 }
 
 // --- FLOOR 6: Record Room / Lounge ---
@@ -5028,16 +5116,20 @@ function render(){
   
   if(S.spacewalk.active){renderSpacewalk();ctx.restore();return}
   
-  // Render current floor
-  if(S.floor===1)renderFloor1();
-  else if(S.floor===2)renderFloor2();
-  else if(S.floor===3)renderFloor3();
-  else if(S.floor===4)renderFloor4();
-  else if(S.floor===5)renderFloor5();
-  else if(S.floor===6)renderFloor6();
-  else if(S.floor===7)renderFloor7();
-  else if(S.floor===8)renderFloor8();
-  else if(S.floor===9)renderFloor9();
+  // Render current floor or secret room
+  if (S.secretRooms.current) {
+    SecretRooms.renderSecretRoom(S.secretRooms.current);
+  } else {
+    if(S.floor===1)renderFloor1();
+    else if(S.floor===2)renderFloor2();
+    else if(S.floor===3)renderFloor3();
+    else if(S.floor===4)renderFloor4();
+    else if(S.floor===5)renderFloor5();
+    else if(S.floor===6)renderFloor6();
+    else if(S.floor===7)renderFloor7();
+    else if(S.floor===8)renderFloor8();
+    else if(S.floor===9)renderFloor9();
+  }
   // Shared elements
   renderElevator();
   renderDataFragment();
@@ -5056,6 +5148,21 @@ function render(){
   Echo4thWall.render();
   renderKittens();renderSeasonalEffects();StationEvents.render();
   renderParticles();renderImpactRings();renderThought();renderFloatTexts();
+  
+  // Sprint A+B effects
+  if (S.scanner.active && !S.secretRooms.current) {
+    renderScannerEffects();
+  }
+  PixelHints.renderHintEffects();
+  PuzzleSystems.renderConstellationPuzzle();
+  
+  // Fade transition for secret rooms
+  if (S.secretRooms.fadeTimer > 0) {
+    const alpha = S.secretRooms.fadeTimer / 30;
+    ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+  
   ctx.restore();
   renderSeasonalOverlay();
   // Chromatic aberration effect
@@ -6726,6 +6833,11 @@ function update(dt){
   EchoAI.update(dt);
   updateVisitor(dt);
   S.nearObject=S.echo.floor===S.floor?getNearObject():null;
+  
+  // Sprint A+B systems
+  SecretRooms.checkSecretWallCollision();
+  PixelHints.update(dt);
+  if (S.secretRooms.fadeTimer > 0) S.secretRooms.fadeTimer -= dt;
   // Track visited
   if(S.nearObject&&!S._visited.includes(S.nearObject.id)){S._visited.push(S.nearObject.id);LS.set('visited_objs',S._visited);Coins.earn(2,'explore');checkAchievements();if(typeof MissionBoard!=='undefined')MissionBoard.trackProgress('interactions',1)}
   updatePixel(dt);PixelIdle.update(dt);Echo4thWall.update(dt);
@@ -6783,7 +6895,15 @@ function interact(){
     case'tv':TV.nextChannel();showThought('📺 '+TV.channels[TV.channel]);break;
     case'neon':showThought("DREAM big. ✨");break;
     case'sabers':toggleSabers();break;
-    case'telescope':showTelescopeView();break;
+    case'telescope':
+      if (!S.puzzles.constellation.completed && S.floor === 2) {
+        PuzzleSystems.initConstellation();
+        S.puzzles.constellation.active = true;
+        showNotification('🔭 Find 5 stars to trace the constellation!');
+      } else {
+        showTelescopeView();
+      }
+      break;
     case'starmap':showThought("The stars guide us...");break;
     case'hotchoc':showHotChocMenu();break;
     case'photowall':showPhotoWall();break;
@@ -6792,6 +6912,13 @@ function interact(){
     case'fountain':showThought("The water is so soothing...");Coins.earn(1,'fountain');break;
     case'pond':showThought("Look at those lily pads...");break;
     case'waterstation':showWateringMenu();break;
+    case'garden_puzzle_plot':
+      if (S.floor === 4 && !S.puzzles.garden.completed) {
+        // Show seed selection menu
+        S.puzzles.garden.showSeedMenu = true;
+        showNotification('🌱 Plant seeds: Red, Blue, Yellow, Red (check F1 flowers for hint)');
+      }
+      break;
     case'portal':
       if(S.stationStats.milestones.includes('portal_open')||V26Portal.debugUnlocked){
         V26Portal.showMenu();
@@ -10126,6 +10253,50 @@ function initInput(){
       if(S.useVisitor){S.visitor.walkTarget={x:S.echo.x,y:S.echo.y+15,action:()=>EchoAI.visitorClickEcho()}}else EchoAI.visitorClickEcho();return}
     // Click data fragment
     DATA_FRAGMENTS.filter(f=>f.floor===S.floor&&!S.dataFragments.includes(f.id)).forEach(f=>{if(Math.hypot(f.x-cx,f.y-cy)<15){S.dataFragments.push(f.id);LS.set('dataFragments',S.dataFragments);Coins.earn(50,'fragment');showNotification('💾 Data Fragment Found! ('+S.dataFragments.length+'/7)');checkAchievements()}});
+    
+    // Sprint B: Constellation puzzle clicks
+    if (S.puzzles.constellation.active) {
+      PuzzleSystems.clickConstellation(cx, cy);
+      return;
+    }
+    
+    // Sprint B: Garden puzzle plots
+    if (S.floor === 4 && !S.puzzles.garden.completed) {
+      const plots = [
+        {x: 100, y: 400, w: 60, h: 60},
+        {x: 180, y: 400, w: 60, h: 60},
+        {x: 260, y: 400, w: 60, h: 60},
+        {x: 340, y: 400, w: 60, h: 60}
+      ];
+      
+      for (let i = 0; i < plots.length; i++) {
+        const plot = plots[i];
+        if (cx >= plot.x && cx <= plot.x + plot.w && cy >= plot.y && cy <= plot.y + plot.h) {
+          if (S.puzzles.garden.showSeedMenu) {
+            // Handle seed selection (simple: click to cycle through seeds)
+            const seeds = ['red', 'blue', 'yellow'];
+            const currentPlot = S.puzzles.garden.plots[i];
+            if (!currentPlot.seed) {
+              const seedIndex = Math.floor((cx - plot.x) / 20) % seeds.length;
+              PuzzleSystems.clickGardenPlot(i, seeds[seedIndex]);
+              S.puzzles.garden.showSeedMenu = false;
+            }
+          }
+          return;
+        }
+      }
+    }
+    
+    // Sprint B: Lab terminal click
+    if (S.floor === 5 && !S.puzzles.crossFloor.terminalUnlocked) {
+      if (cx >= 200 && cx <= 300 && cy >= 150 && cy <= 230) {
+        const code = prompt('Enter 4-digit access code (found on F1):');
+        if (code) {
+          PuzzleSystems.inputLabCode(code);
+        }
+        return;
+      }
+    }
     
     // Click hidden cartridge on F3
     if(S.floor===3&&cx>=298&&cx<=304&&cy>=268&&cy<=276){
