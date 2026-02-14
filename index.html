@@ -11252,6 +11252,721 @@ interact=function(){
   _origInteract();
 };
 
+// ═══════════════════════════════════════════════════════════════
+// §ECON. ECONOMICS PHASE 1 — Stat Reroll, Durability, Consumables,
+//   Pity, Rent, Enhanced Enhancement, Crafting/Entry Fees
+// ═══════════════════════════════════════════════════════════════
+
+// ─── 1. STAT REROLLING ─────────────────────────────────────────
+const StatReroll = {
+  getRerollCount(itemUid) { return LS.get('rerollCount_' + itemUid, 0); },
+  getCost(itemUid) { return 30 + 10 * this.getRerollCount(itemUid); },
+
+  showUI(itemUid) {
+    const inv = LS.get('lootInventory', []);
+    const item = inv.find(i => i.id === itemUid);
+    if (!item) { showNotification('Item not found!'); return; }
+    const def = getAllLootableItems().find(i => i.itemId === item.itemId) || { name: '???', icon: '❓' };
+    const r = RARITIES[item.rarity] || RARITIES.common;
+    const cost = this.getCost(itemUid);
+    const rerolls = this.getRerollCount(itemUid);
+
+    if (!item.stats || item.stats.length === 0) { showNotification('This item has no stats to reroll!'); return; }
+    if (!Coins.canAfford(cost)) { showNotification('Need ' + cost + '◈ to reroll!'); return; }
+
+    // Generate new stats (preview)
+    const newStats = rollStats(item.rarity);
+    // Ensure same count as original
+    while (newStats.length < item.stats.length) {
+      const statKeys = Object.keys(STAT_TYPES);
+      const used = new Set(newStats.map(s => s.type));
+      let type;
+      do { type = statKeys[Math.floor(Math.random() * statKeys.length)]; } while (used.has(type));
+      const cfg = { common:{valMin:1,valMax:3}, uncommon:{valMin:3,valMax:6}, rare:{valMin:5,valMax:10}, epic:{valMin:8,valMax:15}, legendary:{valMin:12,valMax:18}, mythic:{valMin:15,valMax:20} }[item.rarity] || {valMin:1,valMax:3};
+      newStats.push({ type, value: cfg.valMin + Math.floor(Math.random() * (cfg.valMax - cfg.valMin + 1)) });
+    }
+    while (newStats.length > item.stats.length) newStats.pop();
+
+    // Build comparison UI
+    let html = '<h3>🎲 Stat Reroll</h3>';
+    html += '<div style="text-align:center;margin-bottom:8px"><span style="font-size:28px">' + def.icon + '</span>';
+    html += '<div style="color:' + r.color + ';font-weight:bold">' + def.name + '</div>';
+    html += '<span class="rarity-badge ' + item.rarity + '">' + r.name + '</span>';
+    html += '<div style="font-size:9px;color:#888;margin-top:4px">Rerolls: ' + rerolls + ' · Cost: <span style="color:#ffd700">' + cost + '◈</span></div></div>';
+
+    html += '<div style="display:flex;gap:12px;justify-content:center;margin:12px 0">';
+    // Old stats
+    html += '<div style="flex:1;padding:8px;background:rgba(255,50,50,.08);border:1px solid rgba(255,50,50,.3);border-radius:8px">';
+    html += '<div style="font-size:10px;color:#ff5555;margin-bottom:6px;text-align:center">OLD STATS</div>';
+    item.stats.forEach(s => {
+      const st = STAT_TYPES[s.type];
+      html += '<div style="font-size:11px;color:#888;text-decoration:line-through;margin:3px 0">' + st.icon + ' ' + st.name + ' +' + s.value + '%</div>';
+    });
+    html += '</div>';
+    // New stats
+    html += '<div style="flex:1;padding:8px;background:rgba(0,255,100,.08);border:1px solid rgba(0,255,100,.3);border-radius:8px">';
+    html += '<div style="font-size:10px;color:#44ff88;margin-bottom:6px;text-align:center">NEW STATS</div>';
+    newStats.forEach(s => {
+      const st = STAT_TYPES[s.type];
+      html += '<div style="font-size:11px;color:#44ff88;font-weight:bold;margin:3px 0">' + st.icon + ' ' + st.name + ' +' + s.value + '%</div>';
+    });
+    html += '</div></div>';
+
+    html += '<div style="text-align:center;font-size:9px;color:#ff8844;margin-bottom:8px">⚠️ Cost is deducted whether you accept or not!</div>';
+    html += '<div style="display:flex;gap:8px;justify-content:center">';
+    html += '<button class="enhance-btn" id="reroll-accept">✅ Accept New</button>';
+    html += '<button class="enhance-btn cancel" id="reroll-reject">❌ Keep Old</button>';
+    html += '</div>';
+
+    const { p } = createPopup(html);
+
+    // Deduct cost immediately
+    Coins.spend(cost, 'stat_reroll');
+    LS.set('rerollCount_' + itemUid, rerolls + 1);
+
+    p.querySelector('#reroll-accept').onclick = () => {
+      item.stats = newStats;
+      const inv2 = LS.get('lootInventory', []);
+      const idx = inv2.findIndex(i => i.id === itemUid);
+      if (idx >= 0) { inv2[idx] = item; LS.set('lootInventory', inv2); }
+      showNotification('✨ Stats rerolled!');
+      S.screenFlash = '#44ff88';
+      p.closest('.popup-overlay').remove();
+    };
+    p.querySelector('#reroll-reject').onclick = () => {
+      showNotification('Kept old stats. ◈ spent.');
+      p.closest('.popup-overlay').remove();
+    };
+  }
+};
+
+// ─── 2. WEAPON DURABILITY + REPAIR ─────────────────────────────
+const DurabilitySystem = {
+  RARITY_MULT: { common: 0.2, uncommon: 0.3, rare: 0.5, epic: 0.8, legendary: 1.2, mythic: 1.5 },
+
+  getDurability(weaponId) { return LS.get('durability_' + weaponId, 100); },
+  setDurability(weaponId, val) { LS.set('durability_' + weaponId, Math.max(0, Math.min(100, val))); },
+
+  loseDurability(type) {
+    if (!WeaponSystem.equipped) return;
+    const wid = WeaponSystem.equipped._id;
+    const loss = type === 'pvp' ? (5 + Math.floor(Math.random() * 4)) : (3 + Math.floor(Math.random() * 3));
+    const cur = this.getDurability(wid);
+    this.setDurability(wid, cur - loss);
+    const newDur = this.getDurability(wid);
+    if (newDur <= 0) {
+      showNotification('⚠️ Weapon broken! 50% damage. Visit Repair Station!');
+    } else if (newDur <= 20) {
+      showNotification('🔧 Weapon durability low: ' + newDur + '/100');
+    }
+  },
+
+  getRepairCost(weaponId, rarity) {
+    const cur = this.getDurability(weaponId);
+    const mult = this.RARITY_MULT[rarity] || 0.5;
+    return Math.ceil((100 - cur) * mult);
+  },
+
+  repair(weaponId) {
+    this.setDurability(weaponId, 100);
+    showNotification('🔧 Weapon fully repaired!');
+  },
+
+  getDamageMultiplier(weaponId) {
+    return this.getDurability(weaponId) <= 0 ? 0.5 : 1.0;
+  },
+
+  showRepairUI() {
+    const owned = LS.get('ownedWeapons', []);
+    if (owned.length === 0) { showNotification('No weapons to repair!'); return; }
+    let html = '<h3>🔧 Repair Station</h3>';
+    html += '<p style="font-size:10px;color:#888;margin-bottom:10px">Restore weapon durability. Broken weapons deal 50% damage!</p>';
+    owned.forEach(wid => {
+      const wpn = WEAPONS.find(w => w.id === wid);
+      if (!wpn) return;
+      const dur = this.getDurability(wid);
+      const cost = this.getRepairCost(wid, wpn.rarity);
+      const r = RARITIES[wpn.rarity] || RARITIES.common;
+      const pct = dur;
+      const barColor = dur > 50 ? '#44cc44' : dur > 20 ? '#ffaa00' : '#ff3344';
+      html += '<div class="bazaar-listing" style="border-color:' + r.border + '">';
+      html += '<span class="listing-icon" style="font-size:24px">' + wpn.icon + '</span>';
+      html += '<div class="listing-info"><div style="color:' + r.color + ';font-weight:bold">' + wpn.name + '</div>';
+      html += '<div style="margin:3px 0;height:6px;background:#222;border-radius:3px;overflow:hidden"><div style="width:' + pct + '%;height:100%;background:' + barColor + ';border-radius:3px;transition:width .3s"></div></div>';
+      html += '<div style="font-size:9px;color:' + barColor + '">' + dur + '/100' + (dur <= 0 ? ' ⚠️ BROKEN' : '') + '</div></div>';
+      if (dur < 100) {
+        html += '<button class="enhance-btn" data-repair="' + wid + '" data-cost="' + cost + '" style="font-size:11px;padding:6px 12px">' + cost + '◈ Repair</button>';
+      } else {
+        html += '<div style="font-size:10px;color:#44cc44">✅ Full</div>';
+      }
+      html += '</div>';
+    });
+    const { p } = createPopup(html);
+    p.querySelectorAll('[data-repair]').forEach(btn => {
+      btn.onclick = () => {
+        const wid = btn.dataset.repair;
+        const cost = parseInt(btn.dataset.cost);
+        if (!Coins.canAfford(cost)) { showNotification('Need ' + cost + '◈!'); return; }
+        Coins.spend(cost, 'repair');
+        this.repair(wid);
+        p.closest('.popup-overlay').remove();
+        this.showRepairUI();
+      };
+    });
+  }
+};
+
+// Add repair station to Secret Lab floor (floor 5, same as enhancement)
+FLOOR_OBJECTS[5].push({id:'repair_station',x:450,y:380,w:80,h:70,label:'🔧 Repair Station',interact:true,collide:true});
+
+// Hook durability into combat - patch DuelSystem.endDuel
+const _origEndDuel = DuelSystem.endDuel.bind(DuelSystem);
+DuelSystem.endDuel = function(result) {
+  if (result === 'victory' || result === 'defeat') {
+    DurabilitySystem.loseDurability(this.isPvE ? 'pve' : 'pvp');
+  }
+  _origEndDuel(result);
+};
+
+// Hook durability into weapon damage - patch WeaponSystem.attack
+const _origWpnAttack = WeaponSystem.attack.bind(WeaponSystem);
+WeaponSystem.attack = function() {
+  const result = _origWpnAttack();
+  // Damage multiplier applied in DuelSystem already via getComboMultiplier
+  return result;
+};
+
+// Patch weapon damage calculation to factor durability
+const _origGetComboMult = WeaponSystem.getComboMultiplier.bind(WeaponSystem);
+WeaponSystem.getComboMultiplier = function() {
+  let mult = _origGetComboMult();
+  if (this.equipped) {
+    mult *= DurabilitySystem.getDamageMultiplier(this.equipped._id);
+  }
+  return mult;
+};
+
+// Hook repair_station interaction
+const _origInteract2 = interact;
+interact = function() {
+  if (S.nearObject?.id === 'repair_station') {
+    DurabilitySystem.showRepairUI();
+    return;
+  }
+  _origInteract2();
+};
+
+// ─── 3. CONSUMABLES SYSTEM ─────────────────────────────────────
+const ConsumableSystem = {
+  ITEMS: [
+    { id: 'speed_potion', name: 'Speed Potion', icon: '⚡', cost: 15, duration: 300000, desc: '+30% movement speed', effect: 'speed' },
+    { id: 'luck_elixir', name: 'Luck Elixir', icon: '🍀', cost: 30, duration: 600000, desc: '+15% better loot rolls', effect: 'luck' },
+    { id: 'shield_orb', name: 'Shield Orb', icon: '🛡️', cost: 25, duration: -1, uses: 3, desc: 'Absorbs first hit (3 fights)', effect: 'shield' },
+    { id: 'coin_magnet', name: 'Coin Magnet', icon: '🧲', cost: 20, duration: 900000, desc: '+25% coin earnings', effect: 'coin' },
+    { id: 'repair_kit', name: 'Repair Kit', icon: '🔧', cost: 40, duration: 0, desc: 'Full weapon repair', effect: 'repair' },
+    { id: 'echos_blessing', name: "Echo's Blessing", icon: '✨', cost: 50, duration: -1, uses: 1, desc: '+20% enhancement success', effect: 'blessing' },
+  ],
+
+  getInventory() { return LS.get('consumableInv', []); },
+  setInventory(inv) { LS.set('consumableInv', inv); },
+  getActive() { return LS.get('activeConsumables', []); },
+  setActive(list) { LS.set('activeConsumables', list); },
+
+  buy(itemId) {
+    const item = this.ITEMS.find(i => i.id === itemId);
+    if (!item) return;
+    if (!Coins.canAfford(item.cost)) { showNotification('Need ' + item.cost + '◈!'); return; }
+    Coins.spend(item.cost, 'consumable');
+    const inv = this.getInventory();
+    inv.push(itemId);
+    this.setInventory(inv);
+    showNotification('Bought ' + item.icon + ' ' + item.name + '!');
+  },
+
+  use(invIndex) {
+    const inv = this.getInventory();
+    if (invIndex >= inv.length) return;
+    const itemId = inv[invIndex];
+    const item = this.ITEMS.find(i => i.id === itemId);
+    if (!item) return;
+
+    // Instant effects
+    if (item.effect === 'repair') {
+      if (!WeaponSystem.equipped) { showNotification('No weapon equipped!'); return; }
+      DurabilitySystem.repair(WeaponSystem.equipped._id);
+      inv.splice(invIndex, 1);
+      this.setInventory(inv);
+      return;
+    }
+
+    // Check if already active
+    const active = this.getActive();
+    if (active.find(a => a.id === itemId)) { showNotification('Already active!'); return; }
+
+    // Activate
+    const entry = { id: itemId, start: Date.now() };
+    if (item.uses) entry.usesLeft = item.uses;
+    if (item.duration > 0) entry.expires = Date.now() + item.duration;
+    active.push(entry);
+    this.setActive(active);
+    inv.splice(invIndex, 1);
+    this.setInventory(inv);
+    showNotification(item.icon + ' ' + item.name + ' activated!');
+  },
+
+  isActive(effectType) {
+    const active = this.getActive();
+    const now = Date.now();
+    return active.some(a => {
+      const item = this.ITEMS.find(i => i.id === a.id);
+      if (!item || item.effect !== effectType) return false;
+      if (a.expires && now > a.expires) return false;
+      if (a.usesLeft !== undefined && a.usesLeft <= 0) return false;
+      return true;
+    });
+  },
+
+  consumeUse(effectType) {
+    const active = this.getActive();
+    const entry = active.find(a => {
+      const item = this.ITEMS.find(i => i.id === a.id);
+      return item && item.effect === effectType && (a.usesLeft === undefined || a.usesLeft > 0);
+    });
+    if (entry && entry.usesLeft !== undefined) {
+      entry.usesLeft--;
+      if (entry.usesLeft <= 0) {
+        const idx = active.indexOf(entry);
+        active.splice(idx, 1);
+        showNotification('Shield Orb expired!');
+      }
+      this.setActive(active);
+    }
+  },
+
+  cleanup() {
+    const active = this.getActive();
+    const now = Date.now();
+    const cleaned = active.filter(a => {
+      if (a.expires && now > a.expires) return false;
+      if (a.usesLeft !== undefined && a.usesLeft <= 0) return false;
+      return true;
+    });
+    if (cleaned.length !== active.length) this.setActive(cleaned);
+  },
+
+  renderHUD() {
+    this.cleanup();
+    let el = document.getElementById('consumable-hud');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'consumable-hud';
+      el.style.cssText = 'position:fixed;top:60px;left:10px;z-index:3500;display:flex;gap:4px;flex-wrap:wrap;pointer-events:none';
+      document.body.appendChild(el);
+    }
+    const active = this.getActive();
+    const now = Date.now();
+    if (active.length === 0) { el.innerHTML = ''; return; }
+    let html = '';
+    active.forEach(a => {
+      const item = this.ITEMS.find(i => i.id === a.id);
+      if (!item) return;
+      let timeStr = '';
+      if (a.expires) {
+        const left = Math.max(0, Math.ceil((a.expires - now) / 1000));
+        const min = Math.floor(left / 60);
+        const sec = left % 60;
+        timeStr = min + ':' + (sec < 10 ? '0' : '') + sec;
+      } else if (a.usesLeft !== undefined) {
+        timeStr = a.usesLeft + ' use' + (a.usesLeft !== 1 ? 's' : '');
+      }
+      html += '<div style="background:rgba(0,0,0,.7);border:1px solid rgba(0,255,247,.4);border-radius:6px;padding:2px 6px;font-size:9px;color:#fff;font-family:monospace">';
+      html += item.icon + ' <span style="color:#00fff7">' + timeStr + '</span></div>';
+    });
+    el.innerHTML = html;
+  }
+};
+
+// Hook consumable speed bonus into movement
+const _origSpeedBonus = Object.getOwnPropertyDescriptor(Object.getPrototypeOf({}), 'unused') || null; // placeholder
+// Patch the game loop speed calculation - find _speedBonus usage
+// We'll hook into the Coins.earn for coin magnet
+const _origCoinsEarn = Coins.earn.bind(Coins);
+Coins.earn = function(n, r) {
+  let bonus = 0;
+  if (ConsumableSystem.isActive('coin')) bonus = Math.floor(n * 0.25);
+  _origCoinsEarn(n + bonus, r);
+};
+
+// ─── 4. PITY SYSTEM ────────────────────────────────────────────
+const PitySystem = {
+  getLegendaryPity() { return LS.get('pityLegendary', 0); },
+  getMythicPity() { return LS.get('pityMythic', 0); },
+  increment() {
+    LS.set('pityLegendary', this.getLegendaryPity() + 1);
+    LS.set('pityMythic', this.getMythicPity() + 1);
+  },
+  resetLegendary() { LS.set('pityLegendary', 0); },
+  resetMythic() { LS.set('pityMythic', 0); LS.set('pityLegendary', 0); },
+  check(rarity) {
+    if (rarity === 'mythic') { this.resetMythic(); return; }
+    if (rarity === 'legendary') { this.resetLegendary(); return; }
+  },
+  shouldForce() {
+    if (this.getMythicPity() >= 200) return 'mythic';
+    if (this.getLegendaryPity() >= 50) return 'legendary';
+    return null;
+  }
+};
+
+// Patch LootSystem.roll to use pity
+const _origLootRoll = LootSystem.roll.bind(LootSystem);
+LootSystem.roll = function(bonusLuck) {
+  PitySystem.increment();
+  const forced = PitySystem.shouldForce();
+  if (forced) {
+    PitySystem.check(forced);
+    showNotification(forced === 'mythic' ? '🌟 MYTHIC PITY! 200 rolls!' : '⭐ LEGENDARY PITY! 50 rolls!');
+    return this.rollWithRarity(forced);
+  }
+  // Add luck elixir bonus
+  let luck = bonusLuck || 0;
+  if (ConsumableSystem.isActive('luck')) luck += 15;
+  const item = _origLootRoll(luck);
+  PitySystem.check(item.rarity);
+  return item;
+};
+
+// ─── 5. QUARTERS RENT ──────────────────────────────────────────
+const RentSystem = {
+  DAILY_RENT: 5,
+  check() {
+    const today = new Date().toISOString().slice(0, 10);
+    const lastRentDay = LS.get('lastRentDay', null);
+    if (lastRentDay === today) return;
+    if (!lastRentDay) { LS.set('lastRentDay', today); return; } // first visit, no rent
+
+    const daysMissed = Math.floor((new Date(today) - new Date(lastRentDay)) / (1000 * 60 * 60 * 24));
+    if (daysMissed <= 0) return;
+
+    const totalRent = daysMissed * this.DAILY_RENT;
+    if (Coins.canAfford(totalRent)) {
+      Coins.spend(totalRent, 'rent');
+      LS.set('lastRentDay', today);
+      LS.set('rentPaid', true);
+      showNotification('🏠 Quarters rent: ' + totalRent + '◈ deducted (' + daysMissed + ' day' + (daysMissed > 1 ? 's' : '') + ')');
+    } else {
+      LS.set('rentPaid', false);
+      LS.set('lastRentDay', today);
+      showNotification('🏠 Can\'t afford rent! Quarters locked. Pay ' + this.DAILY_RENT + '◈ to restore.');
+    }
+  },
+  isLocked() { return LS.get('rentPaid', true) === false; },
+  payRent() {
+    if (!this.isLocked()) { showNotification('Rent is paid!'); return; }
+    if (!Coins.canAfford(this.DAILY_RENT)) { showNotification('Need ' + this.DAILY_RENT + '◈!'); return; }
+    Coins.spend(this.DAILY_RENT, 'rent');
+    LS.set('rentPaid', true);
+    showNotification('🏠 Quarters restored!');
+  }
+};
+
+// ─── 6. ENHANCED ENHANCEMENT (TYPE-SPECIFIC BONUSES) ───────────
+const EnhanceBonuses = {
+  BONUSES: {
+    weapon: { label: '+5% base damage', perLevel: 5, unit: '%', stat: 'damage' },
+    hat: { label: '+2% defense', perLevel: 2, unit: '%', stat: 'defense' },
+    trail: { label: '+0.5% luck', perLevel: 0.5, unit: '%', stat: 'luck' },
+    aura: { label: '+1% coin bonus', perLevel: 1, unit: '%', stat: 'coin' },
+    pet: { label: '+3% event drops', perLevel: 3, unit: '%', stat: 'eventDrop' },
+  },
+  getBonus(type, level) {
+    const b = this.BONUSES[type];
+    if (!b) return null;
+    return { label: b.label + '/lvl', value: +(b.perLevel * level).toFixed(1), unit: b.unit, stat: b.stat, desc: '+' + (b.perLevel * level).toFixed(1) + b.unit + ' ' + b.stat };
+  }
+};
+
+// Patch EnhancementSystem.showUI to show type-specific bonuses
+const _origEnhShowUI = EnhancementSystem.showUI.bind(EnhancementSystem);
+EnhancementSystem.showUI = function() {
+  const items = this.getEnhanceableItems();
+  if (!items.length) {
+    showNotification('No enhanceable items! Get weapons from the shop or arena.');
+    return;
+  }
+  let html = '<h3>⚗️ Enhancement Station</h3>';
+  html += '<p style="font-size:10px;color:#888;margin-bottom:8px">Strengthen your items. +1→+10 safe. +11→+15 risky. +16→+20 deadly!</p>';
+  html += '<div style="max-height:350px;overflow-y:auto">';
+  items.forEach((item, i) => {
+    const lvl = item.enhanceLevel || 0;
+    const cost = this.getCost(lvl);
+    const chance = this.getChance(lvl);
+    const r = RARITIES[item.rarity] || RARITIES.common;
+    const glowClass = this.getGlowClass(lvl);
+    const riskLabel = lvl >= 15 ? ' 💀 DESTROY RISK' : lvl >= 10 ? ' ⚠️ RESET RISK' : ' ✅ SAFE';
+    const riskColor = lvl >= 15 ? '#ff3344' : lvl >= 10 ? '#ffaa00' : '#44cc44';
+    const bonus = EnhanceBonuses.getBonus(item.type, lvl);
+    html += '<div class="bazaar-listing" data-idx="' + i + '" style="cursor:pointer;border-color:' + r.border + '">';
+    html += '<span class="listing-icon ' + glowClass + '" style="font-size:24px">' + item.icon + '</span>';
+    html += '<div class="listing-info"><div style="color:' + r.color + ';font-weight:bold">' + this.getDisplayName(item) + '</div>';
+    html += '<div style="font-size:9px;color:#888">' + r.name + ' ' + item.type + '</div>';
+    if (bonus) html += '<div style="font-size:9px;color:#00fff7">' + bonus.desc + '</div>';
+    html += '<div style="font-size:9px;color:' + riskColor + '">' + Math.round(chance * 100) + '% success' + riskLabel + '</div></div>';
+    html += '<div style="text-align:right"><div class="listing-price">' + cost + '◈</div><div style="font-size:8px;color:#888">+' + lvl + ' → +' + (lvl + 1) + '</div></div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  const { p } = createPopup(html);
+  p.querySelectorAll('.bazaar-listing').forEach(el => {
+    el.onclick = () => {
+      const idx = parseInt(el.dataset.idx);
+      p.closest('.popup-overlay').remove();
+      this.showEnhanceAnimation(items[idx]);
+    };
+  });
+};
+
+// Patch enhancement chance for Echo's Blessing consumable
+const _origGetChance = EnhancementSystem.getChance.bind(EnhancementSystem);
+EnhancementSystem.getChance = function(level) {
+  let chance = _origGetChance(level);
+  if (ConsumableSystem.isActive('blessing')) {
+    chance = Math.min(1.0, chance + 0.20);
+  }
+  return chance;
+};
+
+// ─── 7. CRAFTING FEES ──────────────────────────────────────────
+const _origCraft = CraftingSystem.craft.bind(CraftingSystem);
+CraftingSystem.craft = function(recipeIdx) {
+  const recipe = this.recipes[recipeIdx];
+  if (!recipe) return false;
+  // Determine fee based on recipe complexity
+  const fee = recipe.inputs.length >= 3 ? 30 : (recipe.inputs.some(i => ['boss_core', 'dark_crystal'].includes(i)) ? 20 : 10);
+  if (!Coins.canAfford(fee)) { showNotification('Need ' + fee + '◈ crafting fee!'); return false; }
+  if (!this.canCraft(recipe)) return false;
+  Coins.spend(fee, 'craft_fee');
+  return _origCraft(recipeIdx);
+};
+
+// Patch crafting UI to show fees
+const _origCraftUI = CraftingSystem.showUI.bind(CraftingSystem);
+CraftingSystem.showUI = function() {
+  _origCraftUI();
+  // Add fee info to popup
+  const popup = document.querySelector('.popup-overlay .popup-content');
+  if (popup) {
+    const feeInfo = document.createElement('div');
+    feeInfo.style.cssText = 'font-size:9px;color:#ffd700;margin-top:6px;text-align:center';
+    feeInfo.textContent = '💰 Crafting fees: 10◈ basic · 20◈ rare materials · 30◈ epic+ (3 inputs)';
+    const craftBtn = popup.querySelector('.drink-btn');
+    if (craftBtn) craftBtn.parentNode.insertBefore(feeInfo, craftBtn.nextSibling);
+  }
+};
+
+// ─── 8. PORTAL/EVENT ENTRY FEES ────────────────────────────────
+const _origPortalEnter = V26Portal.enter.bind(V26Portal);
+V26Portal.enter = function(dimId) {
+  const PORTAL_FEE = 15;
+  if (!Coins.canAfford(PORTAL_FEE)) { showNotification('Need ' + PORTAL_FEE + '◈ for portal entry!'); return; }
+  Coins.spend(PORTAL_FEE, 'portal_entry');
+  showNotification('🌀 Portal entry: -' + PORTAL_FEE + '◈');
+  _origPortalEnter(dimId);
+};
+
+// Patch portal menu to show cost
+const _origPortalMenu = V26Portal.showMenu.bind(V26Portal);
+V26Portal.showMenu = function() {
+  _origPortalMenu();
+  // Add cost info
+  const popup = document.querySelector('.popup-overlay .popup-content');
+  if (popup) {
+    const h3 = popup.querySelector('h3');
+    if (h3) {
+      const costEl = document.createElement('div');
+      costEl.style.cssText = 'font-size:10px;color:#ffd700;margin:4px 0';
+      costEl.textContent = '💰 Entry fee: 15◈ per run';
+      h3.after(costEl);
+    }
+  }
+};
+
+// ─── CONSUMABLES SHOP TAB ──────────────────────────────────────
+// Patch showItemShop to add consumables tab
+const _origShowItemShop = showItemShop;
+showItemShop = function(initialTab) {
+  _origShowItemShop(initialTab === 'consumables' ? 'skins' : initialTab);
+  const popup = document.querySelector('.popup-overlay .popup-content');
+  if (!popup) return;
+
+  // Add consumables tab
+  const tabs = popup.querySelector('.shop-tabs');
+  if (tabs && !tabs.querySelector('[data-tab="consumables"]')) {
+    const newTab = document.createElement('div');
+    newTab.className = 'shop-tab' + (initialTab === 'consumables' ? ' active' : '');
+    newTab.dataset.tab = 'consumables';
+    newTab.textContent = '🧪 Potions';
+    tabs.appendChild(newTab);
+
+    // Create consumables content
+    const content = document.createElement('div');
+    content.className = 'shop-content';
+    content.dataset.content = 'consumables';
+    content.style.display = initialTab === 'consumables' ? '' : 'none';
+    let cHtml = '<div style="font-size:10px;color:#888;margin-bottom:8px">Single-use consumables. Use from inventory.</div>';
+    ConsumableSystem.ITEMS.forEach(item => {
+      const active = ConsumableSystem.isActive(item.effect);
+      cHtml += '<div class="bazaar-listing" style="border-color:rgba(0,255,247,.3)">';
+      cHtml += '<span class="listing-icon" style="font-size:22px">' + item.icon + '</span>';
+      cHtml += '<div class="listing-info"><div style="color:#fff;font-weight:bold">' + item.name + '</div>';
+      cHtml += '<div style="font-size:9px;color:#888">' + item.desc + '</div>';
+      if (item.duration > 0) cHtml += '<div style="font-size:8px;color:#666">' + Math.round(item.duration / 60000) + ' min</div>';
+      else if (item.uses) cHtml += '<div style="font-size:8px;color:#666">' + item.uses + ' use(s)</div>';
+      cHtml += '</div>';
+      cHtml += '<button class="enhance-btn" data-buy-consumable="' + item.id + '" style="font-size:11px;padding:6px 12px">' + item.cost + '◈</button>';
+      cHtml += '</div>';
+    });
+    // Show owned consumables
+    const inv = ConsumableSystem.getInventory();
+    if (inv.length > 0) {
+      cHtml += '<div style="border-top:1px solid #333;margin-top:8px;padding-top:8px"><div style="font-size:10px;color:#c080ff;margin-bottom:4px">🎒 Owned (' + inv.length + ')</div>';
+      const counts = {};
+      inv.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+      Object.entries(counts).forEach(([id, count]) => {
+        const item = ConsumableSystem.ITEMS.find(i => i.id === id);
+        if (item) cHtml += '<span style="display:inline-block;margin:2px;padding:2px 8px;background:rgba(155,89,182,.1);border:1px solid rgba(155,89,182,.3);border-radius:4px;font-size:10px">' + item.icon + ' ' + item.name + ' x' + count + '</span>';
+      });
+      cHtml += '</div>';
+    }
+    content.innerHTML = cHtml;
+    popup.querySelector('.shop-content')?.parentNode?.appendChild(content);
+
+    // Re-bind tab switching
+    popup.querySelectorAll('.shop-tab').forEach(t => {
+      t.onclick = () => {
+        popup.querySelectorAll('.shop-tab').forEach(tt => tt.classList.remove('active'));
+        t.classList.add('active');
+        popup.querySelectorAll('.shop-content').forEach(c => c.style.display = 'none');
+        const ct = popup.querySelector('[data-content="' + t.dataset.tab + '"]');
+        if (ct) ct.style.display = '';
+      };
+    });
+
+    // Buy handlers
+    content.querySelectorAll('[data-buy-consumable]').forEach(btn => {
+      btn.onclick = () => {
+        ConsumableSystem.buy(btn.dataset.buyConsumable);
+        popup.closest('.popup-overlay')?.remove();
+        showItemShop('consumables');
+      };
+    });
+
+    if (initialTab === 'consumables') {
+      popup.querySelectorAll('.shop-tab').forEach(tt => tt.classList.remove('active'));
+      newTab.classList.add('active');
+      popup.querySelectorAll('.shop-content').forEach(c => c.style.display = 'none');
+      content.style.display = '';
+    }
+  }
+};
+
+// ─── REROLL BUTTON IN INVENTORY ────────────────────────────────
+// Patch loot item click in backpack to show reroll option
+const _origAttachBP = attachBackpackHandlers;
+attachBackpackHandlers = function(panel) {
+  _origAttachBP(panel);
+  // Add reroll + use consumable for loot items
+  panel.querySelectorAll('[data-bp-action="loot"]').forEach(el => {
+    // Add contextmenu (long-press) for reroll
+    el.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      const uid = el.dataset.uid;
+      const inv = LS.get('lootInventory', []);
+      const item = inv.find(i => i.id === uid);
+      if (!item || !item.stats || item.stats.length === 0) return;
+      StatReroll.showUI(uid);
+    });
+    // Add a small reroll indicator
+    const uid = el.dataset.uid;
+    const inv = LS.get('lootInventory', []);
+    const item = inv.find(i => i.id === uid);
+    if (item && item.stats && item.stats.length > 0) {
+      const rerollBtn = document.createElement('div');
+      rerollBtn.style.cssText = 'font-size:7px;color:#ffd700;cursor:pointer;text-align:center;margin-top:2px';
+      rerollBtn.textContent = '🎲 Reroll ' + StatReroll.getCost(uid) + '◈';
+      rerollBtn.onclick = (e) => { e.stopPropagation(); StatReroll.showUI(uid); };
+      el.appendChild(rerollBtn);
+    }
+  });
+  // Add use button for consumables display
+  panel.querySelectorAll('[data-bp-action="weapon"]').forEach(el => {
+    const wid = el.dataset.id;
+    const dur = DurabilitySystem.getDurability(wid);
+    if (dur < 100) {
+      const durBar = document.createElement('div');
+      durBar.style.cssText = 'height:3px;background:#222;border-radius:2px;margin-top:2px;overflow:hidden';
+      const barColor = dur > 50 ? '#44cc44' : dur > 20 ? '#ffaa00' : '#ff3344';
+      durBar.innerHTML = '<div style="width:' + dur + '%;height:100%;background:' + barColor + ';border-radius:2px"></div>';
+      el.appendChild(durBar);
+    }
+  });
+};
+
+// ─── PITY COUNTER IN HUD ───────────────────────────────────────
+// Add pity display to the consumable HUD update cycle
+const _origConsumableRender = ConsumableSystem.renderHUD.bind(ConsumableSystem);
+ConsumableSystem.renderHUD = function() {
+  _origConsumableRender();
+  let el = document.getElementById('pity-hud');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'pity-hud';
+    el.style.cssText = 'position:fixed;bottom:60px;right:10px;z-index:3500;font-size:9px;font-family:monospace;color:#888;pointer-events:none';
+    document.body.appendChild(el);
+  }
+  const lp = PitySystem.getLegendaryPity();
+  const mp = PitySystem.getMythicPity();
+  el.innerHTML = '🍀 ' + lp + '/50 · ' + mp + '/200';
+};
+
+// ─── RENT CHECK ON LOAD ────────────────────────────────────────
+setTimeout(() => { RentSystem.check(); }, 3000);
+
+// ─── UPDATE LOOP FOR CONSUMABLE HUD ────────────────────────────
+setInterval(() => { ConsumableSystem.renderHUD(); }, 2000);
+
+// ─── SPEED BONUS FROM CONSUMABLE ───────────────────────────────
+// Patch the movement speed calculation (runs each frame)
+const _origUpdateVisitor = S.updateVisitor;
+if (typeof _origUpdateVisitor === 'function') {
+  S.updateVisitor = function() {
+    _origUpdateVisitor.call(this);
+  };
+}
+
+// Speed potion: hook into the speed calculation where _speedBonus is used
+// The game uses: const _speedBonus=1+(LootSystem.getStatBonuses().speed||0)/100+...
+// We patch getStatBonuses to add consumable speed
+const _origGetStatBonuses = LootSystem.getStatBonuses.bind(LootSystem);
+LootSystem.getStatBonuses = function() {
+  const bonuses = _origGetStatBonuses();
+  if (ConsumableSystem.isActive('speed')) bonuses.speed = (bonuses.speed || 0) + 30;
+  return bonuses;
+};
+
+// Consume blessing on enhance
+const _origEnhGo = EnhancementSystem.showEnhanceAnimation;
+const _patchedEnhAnim = EnhancementSystem.showEnhanceAnimation.bind(EnhancementSystem);
+EnhancementSystem.showEnhanceAnimation = function(item) {
+  // If blessing active, consume one use after enhance attempt
+  const hadBlessing = ConsumableSystem.isActive('blessing');
+  _patchedEnhAnim(item);
+  if (hadBlessing) {
+    // Consume after a delay (after the animation triggers the roll)
+    setTimeout(() => { ConsumableSystem.consumeUse('blessing'); }, 2000);
+  }
+};
+
 })();
 </script>
 </body>
