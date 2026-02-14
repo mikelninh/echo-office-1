@@ -896,7 +896,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Visitor Memory API
-  if (req.url === '/api/visitor-memory' && req.method === 'GET') {
+  if (req.url.startsWith('/api/visitor-memory') && req.method === 'GET') {
     const url = new URL(req.url, `http://${req.headers.host}`);
     const visitorName = url.searchParams.get('name');
     if (!visitorName) { res.writeHead(400); res.end('Missing name param'); return; }

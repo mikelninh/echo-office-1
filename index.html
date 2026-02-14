@@ -12698,15 +12698,9 @@ function init(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load);else load();
 
 // Service Worker for PWA with notifications
-if('serviceWorker' in navigator){
-  const swCode=`
-    self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>new Response('Offline'))));
-    self.addEventListener('push',e=>{
-      const data=e.data?e.data.json():{title:'Echo\\'s Station',body:'Pixel misses you! 🐱',icon:'🛸'};
-      e.waitUntil(self.registration.showNotification(data.title,{body:data.body,icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" font-size="80">🛸</text></svg>',badge:'🔮'}));
-    });
-  `;
-  navigator.serviceWorker.register('data:text/javascript,'+encodeURIComponent(swCode)).then(()=>{
+if('serviceWorker' in navigator && location.protocol === 'https:'){
+  // Only register SW on HTTPS (required by browsers)
+  navigator.serviceWorker.register('/sw.js').then(()=>{
     // Request notification permission on first visit
     if(!LS.get('notificationRequested',false)&&'Notification' in window){
       LS.set('notificationRequested',true);
