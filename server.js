@@ -257,7 +257,8 @@ function checkMilestones(stats) {
     { id: 'golden_hull', threshold: 100, name: 'Golden Hull' },
     { id: 'echo_band', threshold: 250, name: 'Echo Band' },
     { id: 'portal_open', threshold: 500, name: 'Portal Open' },
-    { id: 'pixel_kittens', threshold: 1000, name: 'Pixel Kittens' }
+    { id: 'pixel_kittens', threshold: 1000, name: 'Pixel Kittens' },
+    { id: 'ascension', threshold: 10000, name: 'The Ascension' }
   ];
   
   milestones.forEach(milestone => {

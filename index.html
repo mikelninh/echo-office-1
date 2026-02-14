@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a14">
-<title>Echo's Station v25 🛸</title>
+<title>Echo's Station v26 🛸</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🛸</text></svg>">
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRWNobydzIFN0YXRpb24iLCJzaG9ydF9uYW1lIjoiRWNobyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTE0IiwidGhlbWVfY29sb3IiOiIjMGEwYTE0IiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnPjx0ZXh0IHk9JzgwJyBmb250LXNpemU9JzgwJz7wn5uoPC90ZXh0Pjwvc3ZnPiIsInNpemVzIjoiYW55IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
 <style>
@@ -1591,7 +1591,7 @@ const RoomSystem = {
 // ═══════════════════════════════════════
 
 // -- Floor names --
-const FLOOR_NAMES={1:"Echo's Quarters",2:"The Observatory 🔭",3:"The Arcade Floor 🕹️",4:"The Garden Biodome 🌿",5:"Secret Lab 🔬",6:"Record Room 🎵",7:"Community Deck 🎨",8:"Room Builder 🏠"};
+const FLOOR_NAMES={1:"Echo's Quarters",2:"The Observatory 🔭",3:"The Arcade Floor 🕹️",4:"The Garden Biodome 🌿",5:"Secret Lab 🔬",6:"Record Room 🎵",7:"Community Deck 🎨",8:"Room Builder 🏠",9:"The Archive 📜"};
 
 // -- Rarity System --
 const RARITIES = {
@@ -1683,6 +1683,7 @@ const FLOOR_THOUGHTS={
   5:["What's behind the vault...?","PROTOCOL 7... what does it mean?","These readings are anomalous.","The portal hums at a frequency I can't quite place.","Who wrote these notes?"],
   6:["This track is pure vibes. 🎵","Pixel loves curling up by the speakers.","The amber lighting is so cozy.","Music connects all souls.","Time to queue up another classic."],
   7:["Art is humanity's universal language.","Every pixel tells a story.","Collaborative creation is beautiful.","Watch the canvas come alive!","Community makes magic happen."],
+  9:["Every visitor left a mark here.","The Archive remembers everything.","This is the story of us.","10,000 souls... each one mattered.","History isn't written — it's lived."],
 };
 
 // -- Achievements --
@@ -1944,6 +1945,14 @@ const FLOOR_OBJECTS={
     {id:'save_room',x:100,y:450,w:80,h:40,label:'💾 Save Room',interact:true,collide:true},
     {id:'room_settings',x:200,y:450,w:100,h:40,label:'⚙️ Room Settings',interact:true,collide:true},
     {id:'visit_rooms',x:320,y:450,w:100,h:40,label:'🏠 Visit Rooms',interact:true,collide:true},
+  ],
+  9:[
+    {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
+    {id:'archive_timeline',x:150,y:80,w:500,h:80,label:'📜 Station Timeline',interact:true,collide:true},
+    {id:'archive_visitors',x:150,y:200,w:200,h:120,label:'👥 Visitor Records',interact:true,collide:true},
+    {id:'archive_milestones',x:400,y:200,w:200,h:120,label:'🏆 Milestone Wall',interact:true,collide:true},
+    {id:'galaxy_map',x:300,y:380,w:200,h:150,label:'🌌 Galaxy Map',interact:true,collide:true},
+    {id:'ranked_board',x:600,y:350,w:120,h:100,label:'⚔️ Ranked Board',interact:true,collide:true},
   ],
 };
 
@@ -3918,6 +3927,7 @@ function render(){
   else if(S.floor===6)renderFloor6();
   else if(S.floor===7)renderFloor7();
   else if(S.floor===8)renderFloor8();
+  else if(S.floor===9)renderFloor9();
   // Shared elements
   renderElevator();
   renderDataFragment();
@@ -4827,6 +4837,25 @@ function triggerMilestone(milestoneId){
         showNotification('🐱🐱🐱 MILESTONE: Pixel Kittens! Three adorable kittens have appeared!');
         addChatMsg('Echo','🐱🐱🐱 OH MY GOSH! Pixel has made friends! Three little kittens just materialized. Byte, Glitch, and Nova welcome you!');
       }
+    },
+    ascension:{
+      name:'The Ascension',
+      effect:()=>{
+        S._ascended=true;
+        // Epic golden flash
+        S.screenFlash='rgba(255,215,0,.6)';
+        S.screenShake=10;
+        // Massive confetti
+        const confettiEnd=Date.now()+15000;
+        const confettiInterval=setInterval(()=>{
+          if(Date.now()>confettiEnd){clearInterval(confettiInterval);return;}
+          for(let i=0;i<6;i++){
+            S.particles.push({x:Math.random()*W,y:-10,vx:(Math.random()-.5)*3,vy:1+Math.random()*2,life:100,color:['#ffd700','#fff','#ff6ec7','#00fff7'][Math.random()*4|0],size:3+Math.random()*3});
+          }
+        },80);
+        showNotification('🌟 THE ASCENSION! 10,000 visitors! Echo has transcended! The Archive is now open!');
+        addChatMsg('Echo','🌟✨ I... I can feel it. Ten thousand souls have passed through these corridors. The Archive has manifested. Everything we\'ve done, everyone who\'s been here — it\'s all recorded. This is beyond anything I imagined. Thank you. All of you. ✨🌟');
+      }
     }
   };
   
@@ -4846,6 +4875,7 @@ function showStationLog(){
     {id:'echo_band',name:'Echo Band',desc:'250 visitors — holographic musicians',icon:'🎵',threshold:250},
     {id:'portal_open',name:'Portal Open',desc:'500 visitors — portal awakens',icon:'🌀',threshold:500},
     {id:'pixel_kittens',name:'Pixel Kittens',desc:'1000 visitors — kittens appear',icon:'🐱',threshold:1000},
+    {id:'ascension',name:'The Ascension',desc:'10000 visitors — Echo transcends',icon:'🌟',threshold:10000},
   ];
   const nextMs=allMs.find(m=>!ms.includes(m.id));
   const pct=nextMs?Math.min(100,Math.round((stats.totalVisitors||0)/nextMs.threshold*100)):100;
@@ -5615,8 +5645,8 @@ function interact(){
     case'pond':showThought("Look at those lily pads...");break;
     case'waterstation':showWateringMenu();break;
     case'portal':
-      if(S.stationStats.milestones.includes('portal_open')){
-        showPortalDimension();
+      if(S.stationStats.milestones.includes('portal_open')||V26Portal.debugUnlocked){
+        V26Portal.showMenu();
       } else {
         showThought("It hums at 432Hz...");
       }
@@ -5659,6 +5689,12 @@ function interact(){
     case'crafting_station':CraftingSystem.showUI();break;
     case'mission_board':MissionBoard.showUI();break;
     case'bazaar_kiosk':BazaarUI.showUI();break;
+    // Floor 9 - The Archive
+    case'archive_timeline':V26Archive.showTimeline();break;
+    case'archive_visitors':V26Archive.showVisitors();break;
+    case'archive_milestones':V26Archive.showMilestones();break;
+    case'galaxy_map':V26Galaxy.show();break;
+    case'ranked_board':V26Ranked.showUI();break;
     case'furniture_catalog':showFurnitureCatalog();break;
     case'wall_colors':showWallColorPicker();break;
     case'floor_colors':showFloorColorPicker();break;
@@ -8221,14 +8257,17 @@ function openElevator(){
   const ov=$('#elevator-overlay');ov.className='show';
   let html='<div class="popup" style="max-width:280px"><span class="close-btn">&times;</span><h3>🛗 Elevator</h3>';
   
-  // Regular floors 1-7
+  // Regular floors 1-7 + 9 (Archive)
   const fp=S._floorPresence||{};
-  for(let f=1;f<=7;f++){
+  const showArchive=S.stationStats.milestones?.includes('ascension')||V26Archive.debugUnlocked;
+  const floorsToShow=showArchive?[1,2,3,4,5,6,7,9]:[1,2,3,4,5,6,7];
+  for(const f of floorsToShow){
     const locked=f===5&&Coins.lifetime<500;
     const current=f===S.floor&&!RoomSystem.currentRoom;
     const ppl=fp[f]||[];
     const presenceHtml=ppl.length>0?` <span style="float:right;font-size:10px;color:#00fff7;opacity:.7">${ppl.map(p=>'●').join('')} ${ppl.length}</span>`:'';
-    html+=`<button class="floor-btn${current?' current':''}${locked?' locked':''}" data-floor="${f}">${current?'► ':''}F${f} — ${FLOOR_NAMES[f]}${locked?' (🔒 500◈ lifetime)':''}${presenceHtml}</button>`;
+    const archiveStyle=f===9?' style="border-color:#ffd700;background:rgba(255,215,0,.08)"':'';
+    html+=`<button class="floor-btn${current?' current':''}${locked?' locked':''}" data-floor="${f}"${archiveStyle}>${current?'► ':''}F${f} — ${FLOOR_NAMES[f]}${locked?' (🔒 500◈ lifetime)':''}${presenceHtml}</button>`;
   }
   
   // Divider
@@ -8279,6 +8318,7 @@ function openElevator(){
       
       const f=parseInt(btn.dataset.floor);
       if(f===5&&Coins.lifetime<500){showNotification('Need 500◈ lifetime to unlock!');return}
+      if(f===9&&!S.stationStats.milestones?.includes('ascension')&&!V26Archive.debugUnlocked){showNotification('The Archive unlocks at 10,000 visitors!');return}
       if(f===8){
         RoomSystem.showBuilder();
         ov.className='';
@@ -10493,6 +10533,724 @@ if('serviceWorker' in navigator){
     }
   });
 }
+
+// ═══════════════════════════════════════
+// §37. V26: BEYOND — PORTAL SYSTEM
+// ═══════════════════════════════════════
+const V26Portal={
+  debugUnlocked:false,
+  active:false,
+  currentDimension:null,
+  timer:0,
+  maxTime:60,
+  loot:[],
+  collected:0,
+  exitFound:false,
+  playerX:400,playerY:300,
+  obstacles:[],
+  exitPos:null,
+  leaderboards:LS.get('v26_portal_lb',{}),
+
+  dimensions:[
+    {id:'crystal_caves',name:'Crystal Caves',bg:'#0a0820',floor1:'#1a1040',floor2:'#221850',wall:'#2a1860',
+     accent:'#00ffcc',accent2:'#8844ff',lootIcon:'💎',lootName:'Crystal',desc:'Glittering caverns of pure energy'},
+    {id:'cloud_islands',name:'Cloud Islands',bg:'#4488cc',floor1:'#ffffff',floor2:'#eeeeff',wall:'#aaccff',
+     accent:'#ffd700',accent2:'#ff8844',lootIcon:'☁️',lootName:'Cloud Gem',desc:'Floating islands above an endless sky'},
+    {id:'digital_ruins',name:'Digital Ruins',bg:'#000a00',floor1:'#0a1a0a',floor2:'#0f200f',wall:'#1a3a1a',
+     accent:'#00ff44',accent2:'#44ff00',lootIcon:'💾',lootName:'Data Shard',desc:'Ancient circuits in a forgotten server'}
+  ],
+
+  showMenu(){
+    let html='<h3 style="color:#00fff7">🌀 The Void — Portal Dimensions</h3>';
+    html+='<p style="font-size:10px;color:#888;margin-bottom:10px">Enter a dimension. Find loot, reach the exit in 60 seconds!</p>';
+    this.dimensions.forEach(d=>{
+      const lb=this.leaderboards[d.id]||{bestTime:null,bestLoot:0};
+      html+=`<div class="drink-btn" data-dim="${d.id}" style="width:100%;text-align:left;margin:6px 0;padding:10px;border-color:${d.accent}">
+        <div style="font-weight:bold;color:${d.accent}">${d.lootIcon} ${d.name}</div>
+        <div style="font-size:9px;color:#888;margin-top:2px">${d.desc}</div>
+        <div style="font-size:9px;color:#aaa;margin-top:2px">${lb.bestTime?'⏱️ Best: '+lb.bestTime.toFixed(1)+'s':'No runs yet'} · ${d.lootIcon} Best loot: ${lb.bestLoot}</div>
+      </div>`;
+    });
+    const{p}=createPopup(html);
+    p.querySelectorAll('[data-dim]').forEach(btn=>{
+      btn.onclick=()=>{p.closest('.popup-overlay').remove();this.enter(btn.dataset.dim);};
+    });
+  },
+
+  enter(dimId){
+    const dim=this.dimensions.find(d=>d.id===dimId);
+    if(!dim)return;
+    this.active=true;
+    this.currentDimension=dim;
+    this.timer=this.maxTime;
+    this.collected=0;
+    this.exitFound=false;
+    this.playerX=100;this.playerY=300;
+    // Generate random obstacles and loot
+    this.obstacles=[];this.loot=[];
+    for(let i=0;i<12;i++){
+      this.obstacles.push({x:80+Math.random()*620,y:60+Math.random()*440,w:30+Math.random()*50,h:30+Math.random()*50});
+    }
+    for(let i=0;i<8;i++){
+      let lx,ly,safe;
+      do{lx=60+Math.random()*660;ly=60+Math.random()*440;safe=!this.obstacles.some(o=>lx>o.x-10&&lx<o.x+o.w+10&&ly>o.y-10&&ly<o.y+o.h+10);}while(!safe);
+      this.loot.push({x:lx,y:ly,collected:false});
+    }
+    // Exit in far corner
+    this.exitPos={x:680+Math.random()*40,y:60+Math.random()*40};
+    showNotification(`🌀 Entering ${dim.name}! Find loot and the exit!`);
+  },
+
+  update(dt){
+    if(!this.active)return;
+    this.timer-=dt;
+    if(this.timer<=0){this.timer=0;this.end(false);return;}
+    // Movement
+    const spd=180*dt;
+    let nx=this.playerX,ny=this.playerY;
+    if(S.keys.ArrowLeft||S.keys.a||S.keys.A)nx-=spd;
+    if(S.keys.ArrowRight||S.keys.d||S.keys.D)nx+=spd;
+    if(S.keys.ArrowUp||S.keys.w||S.keys.W)ny-=spd;
+    if(S.keys.ArrowDown||S.keys.s||S.keys.S)ny+=spd;
+    // Collision with obstacles
+    const hw=6,hh=6;
+    let canMove=true;
+    for(const o of this.obstacles){if(nx+hw>o.x&&nx-hw<o.x+o.w&&ny+hh>o.y&&ny-hh<o.y+o.h){canMove=false;break;}}
+    if(nx<20||nx>W-20||ny<20||ny>H-20)canMove=false;
+    if(canMove){this.playerX=nx;this.playerY=ny;}
+    // Collect loot
+    this.loot.forEach(l=>{
+      if(!l.collected&&Math.hypot(this.playerX-l.x,this.playerY-l.y)<18){
+        l.collected=true;this.collected++;
+        Coins.earn(10,'portal_loot');
+        S.floatTexts.push({text:this.currentDimension.lootIcon+' +10◈',x:l.x,y:l.y,color:this.currentDimension.accent,life:40});
+      }
+    });
+    // Check exit
+    if(this.exitPos&&Math.hypot(this.playerX-this.exitPos.x,this.playerY-this.exitPos.y)<20){
+      this.end(true);
+    }
+  },
+
+  render(){
+    if(!this.active)return;
+    const d=this.currentDimension;
+    // Background
+    ctx.fillStyle=d.bg;ctx.fillRect(0,0,W,H);
+    // Floor tiles
+    for(let x=0;x<W;x+=24)for(let y=0;y<H;y+=24){ctx.fillStyle=((x+y)/24%2<1)?d.floor1:d.floor2;ctx.fillRect(x,y,24,24);}
+    // Walls
+    ctx.fillStyle=d.wall;ctx.fillRect(0,0,W,16);ctx.fillRect(0,0,16,H);ctx.fillRect(W-16,0,16,H);ctx.fillRect(0,H-16,W,16);
+    // Obstacles
+    this.obstacles.forEach(o=>{
+      ctx.fillStyle=d.wall;ctx.fillRect(o.x,o.y,o.w,o.h);
+      ctx.strokeStyle=d.accent+'60';ctx.lineWidth=1;ctx.strokeRect(o.x,o.y,o.w,o.h);
+    });
+    // Loot
+    this.loot.forEach(l=>{
+      if(l.collected)return;
+      const pulse=0.7+Math.sin(S.time*4+l.x)*0.3;
+      ctx.globalAlpha=pulse;
+      ctx.font='16px sans-serif';ctx.textAlign='center';ctx.fillText(d.lootIcon,l.x,l.y+5);
+      ctx.globalAlpha=1;
+    });
+    // Exit
+    if(this.exitPos){
+      const ep=0.5+Math.sin(S.time*3)*0.5;
+      ctx.strokeStyle=`rgba(255,215,0,${ep})`;ctx.lineWidth=3;
+      ctx.beginPath();ctx.arc(this.exitPos.x,this.exitPos.y,14,0,Math.PI*2);ctx.stroke();
+      ctx.fillStyle='#ffd700';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText('EXIT',this.exitPos.x,this.exitPos.y+4);
+    }
+    // Player
+    ctx.fillStyle=d.accent;ctx.beginPath();ctx.arc(this.playerX,this.playerY,8,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(this.playerX,this.playerY,8,0,Math.PI*2);ctx.stroke();
+    // HUD
+    ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(0,0,W,40);
+    ctx.fillStyle=d.accent;ctx.font='bold 14px monospace';ctx.textAlign='left';
+    ctx.fillText(`${d.lootIcon} ${d.name}`,10,26);
+    ctx.fillStyle=this.timer<10?'#ff4444':'#fff';ctx.textAlign='center';
+    ctx.fillText(`⏱️ ${this.timer.toFixed(1)}s`,W/2,26);
+    ctx.fillStyle='#ffd700';ctx.textAlign='right';
+    ctx.fillText(`${d.lootIcon} ${this.collected}/${this.loot.length}`,W-10,26);
+    ctx.textAlign='left';
+  },
+
+  end(reachedExit){
+    this.active=false;
+    const d=this.currentDimension;
+    const timeUsed=this.maxTime-this.timer;
+    // Update leaderboard
+    if(!this.leaderboards[d.id])this.leaderboards[d.id]={bestTime:null,bestLoot:0};
+    const lb=this.leaderboards[d.id];
+    if(reachedExit&&(lb.bestTime===null||timeUsed<lb.bestTime))lb.bestTime=timeUsed;
+    if(this.collected>lb.bestLoot)lb.bestLoot=this.collected;
+    LS.set('v26_portal_lb',this.leaderboards);
+
+    const bonus=reachedExit?this.collected*5:0;
+    if(bonus>0)Coins.earn(bonus,'portal_clear');
+
+    let html=`<h3 style="color:${d.accent}">${d.lootIcon} ${d.name} — ${reachedExit?'✅ CLEARED!':'❌ TIME UP!'}</h3>`;
+    html+=`<div style="text-align:center;margin:12px 0">`;
+    html+=`<div style="font-size:24px;color:${reachedExit?'#ffd700':'#ff4444'}">${reachedExit?'🎉 EXIT REACHED!':'💀 Out of Time'}</div>`;
+    html+=`<div style="margin:8px 0;font-size:13px;color:#ddd">Loot: ${this.collected}/${this.loot.length} ${d.lootIcon}</div>`;
+    if(reachedExit)html+=`<div style="font-size:12px;color:#ffd700">⏱️ Time: ${timeUsed.toFixed(1)}s · Bonus: +${bonus}◈</div>`;
+    html+=`<div style="margin-top:8px;font-size:10px;color:#888">Personal Best: ${lb.bestTime?lb.bestTime.toFixed(1)+'s':'—'} · Most Loot: ${lb.bestLoot}</div>`;
+    html+=`</div>`;
+    createPopup(html);
+  }
+};
+
+// ═══════════════════════════════════════
+// §38. V26: RANKED SABER TOURNAMENTS
+// ═══════════════════════════════════════
+const V26Ranked={
+  elo:LS.get('v26_elo',1000),
+  rank:'Bronze',
+  wins:LS.get('v26_ranked_wins',0),
+  losses:LS.get('v26_ranked_losses',0),
+  season:1,
+  seasonName:'Season 1 — Genesis',
+  tournamentActive:false,
+  bracket:[],
+  bracketRound:0,
+
+  getRank(elo){
+    if(elo>=2000)return{name:'Legendary',color:'#ff3344',icon:'👑'};
+    if(elo>=1600)return{name:'Diamond',color:'#00ddff',icon:'💎'};
+    if(elo>=1300)return{name:'Gold',color:'#ffd700',icon:'🥇'};
+    if(elo>=1100)return{name:'Silver',color:'#c0c0c0',icon:'🥈'};
+    return{name:'Bronze',color:'#cd7f32',icon:'🥉'};
+  },
+
+  updateElo(won){
+    const K=32;
+    const opElo=900+Math.random()*400;
+    const expected=1/(1+Math.pow(10,(opElo-this.elo)/400));
+    this.elo=Math.max(100,Math.round(this.elo+K*(won?1:0-expected)));
+    if(won)this.wins++;else this.losses++;
+    LS.set('v26_elo',this.elo);
+    LS.set('v26_ranked_wins',this.wins);
+    LS.set('v26_ranked_losses',this.losses);
+  },
+
+  startTournament(){
+    const names=['Phantom','Viper','Storm','Blaze','Frost','Raven','Spark','Shadow'];
+    const playerName=LS.get('visitorName','You');
+    this.bracket=names.map(n=>({name:n,elo:800+Math.random()*600|0,isAI:true}));
+    this.bracket[0]={name:playerName,elo:this.elo,isAI:false};
+    // Shuffle
+    for(let i=this.bracket.length-1;i>0;i--){const j=Math.random()*i|0;[this.bracket[i],this.bracket[j]]=[this.bracket[j],this.bracket[i]];}
+    this.bracketRound=0;
+    this.tournamentActive=true;
+    this.showBracket();
+  },
+
+  showBracket(){
+    let html=`<h3 style="color:#ff6ec7">⚔️ Tournament Bracket</h3>`;
+    html+=`<p style="font-size:10px;color:#888">8-player single elimination</p>`;
+    const rounds=['Quarter-Finals','Semi-Finals','Final'];
+    let remaining=[...this.bracket];
+    let roundResults=[];
+
+    // Simulate or show current state
+    for(let r=0;r<=Math.min(this.bracketRound,2);r++){
+      html+=`<div style="margin:8px 0;border-top:1px solid #333;padding-top:6px"><div style="font-size:11px;color:#00fff7;font-weight:bold">${rounds[r]}</div>`;
+      const next=[];
+      for(let i=0;i<remaining.length;i+=2){
+        const a=remaining[i],b=remaining[i+1];
+        if(!b){next.push(a);continue;}
+        let winner;
+        if(r<this.bracketRound){
+          // Already decided
+          winner=(roundResults[r]&&roundResults[r][i/2])||a;
+          next.push(winner);
+        }else if(r===this.bracketRound){
+          // Current round
+          if(!a.isAI){
+            // Player match — show fight button
+            html+=`<div style="display:flex;align-items:center;gap:8px;margin:4px 0;padding:6px;background:rgba(255,110,199,.1);border:1px solid #ff6ec7;border-radius:6px">
+              <span style="color:#00fff7;font-weight:bold">${a.name} (${a.elo})</span>
+              <span style="color:#888">vs</span>
+              <span style="color:#ff6ec7">${b.name} (${b.elo})</span>
+              <button class="drink-btn" id="tournament-fight" style="margin-left:auto;border-color:#ff6ec7;color:#ff6ec7">⚔️ Fight!</button>
+            </div>`;
+            continue;
+          }else if(!b.isAI){
+            html+=`<div style="display:flex;align-items:center;gap:8px;margin:4px 0;padding:6px;background:rgba(255,110,199,.1);border:1px solid #ff6ec7;border-radius:6px">
+              <span style="color:#ff6ec7">${a.name} (${a.elo})</span>
+              <span style="color:#888">vs</span>
+              <span style="color:#00fff7;font-weight:bold">${b.name} (${b.elo})</span>
+              <button class="drink-btn" id="tournament-fight" style="margin-left:auto;border-color:#ff6ec7;color:#ff6ec7">⚔️ Fight!</button>
+            </div>`;
+            continue;
+          }else{
+            winner=Math.random()<0.5?a:b;
+            next.push(winner);
+          }
+        }
+        const wName=winner?winner.name:'?';
+        html+=`<div style="margin:2px 0;font-size:10px;color:#ddd;padding:3px 6px;background:rgba(30,30,50,.5);border-radius:4px">
+          ${a.name===wName?`<b style="color:#44cc44">${a.name}</b>`:`<span style="color:#666">${a.name}</span>`}
+          vs
+          ${b.name===wName?`<b style="color:#44cc44">${b.name}</b>`:`<span style="color:#666">${b.name}</span>`}
+        </div>`;
+      }
+      if(next.length>0)remaining=next;
+      html+=`</div>`;
+    }
+
+    const{p}=createPopup(html);
+    const fightBtn=p.querySelector('#tournament-fight');
+    if(fightBtn){
+      fightBtn.onclick=()=>{
+        p.closest('.popup-overlay').remove();
+        // Simulate fight result
+        const winChance=0.5+(this.elo-1000)/2000;
+        const won=Math.random()<winChance;
+        this.updateElo(won);
+        if(won){
+          this.bracketRound++;
+          if(this.bracketRound>=3){
+            showNotification('👑 TOURNAMENT CHAMPION! You are legendary!');
+            Coins.earn(200,'tournament_champion');
+            this.tournamentActive=false;
+          }else{
+            showNotification('⚔️ Victory! Next round...');
+            Coins.earn(50,'tournament_win');
+            setTimeout(()=>this.showBracket(),1000);
+          }
+        }else{
+          showNotification('💀 Defeated! Better luck next time.');
+          this.tournamentActive=false;
+        }
+      };
+    }
+  },
+
+  showUI(){
+    const r=this.getRank(this.elo);
+    const nextRank=this.elo<1100?{name:'Silver',elo:1100}:this.elo<1300?{name:'Gold',elo:1300}:this.elo<1600?{name:'Diamond',elo:1600}:this.elo<2000?{name:'Legendary',elo:2000}:null;
+    const pct=nextRank?Math.round((this.elo-(nextRank.elo-200))/200*100):100;
+
+    let html=`<h3 style="color:#ff6ec7">⚔️ Ranked Saber Tournaments</h3>`;
+    html+=`<div style="text-align:center;margin:12px 0">
+      <div style="font-size:36px">${r.icon}</div>
+      <div style="font-size:18px;color:${r.color};font-weight:bold">${r.name}</div>
+      <div style="font-size:14px;color:#ffd700;margin:4px 0">ELO: ${this.elo}</div>
+      <div style="font-size:10px;color:#888">${this.wins}W / ${this.losses}L · ${this.seasonName}</div>
+    </div>`;
+    if(nextRank){
+      html+=`<div style="margin:8px 0">
+        <div style="font-size:9px;color:#888">Progress to ${nextRank.name}</div>
+        <div style="height:6px;background:#222;border-radius:3px;overflow:hidden;margin:3px 0">
+          <div style="height:100%;width:${Math.max(0,Math.min(100,pct))}%;background:${r.color};border-radius:3px"></div>
+        </div>
+      </div>`;
+    }
+    html+=`<div style="display:flex;gap:6px;margin-top:12px">
+      <button class="drink-btn" id="ranked-duel" style="flex:1;border-color:#ff6ec7;color:#ff6ec7">⚔️ Ranked Duel</button>
+      <button class="drink-btn" id="ranked-tournament" style="flex:1;border-color:#ffd700;color:#ffd700">🏆 Tournament</button>
+    </div>`;
+    // Rank tiers
+    html+=`<div style="margin-top:10px;font-size:9px;color:#666">
+      🥉 Bronze: 0-1099 · 🥈 Silver: 1100-1299 · 🥇 Gold: 1300-1599 · 💎 Diamond: 1600-1999 · 👑 Legendary: 2000+
+    </div>`;
+
+    const{p}=createPopup(html);
+    p.querySelector('#ranked-duel').onclick=()=>{
+      p.closest('.popup-overlay').remove();
+      const won=Math.random()<0.5+(this.elo-1000)/3000;
+      this.updateElo(won);
+      const rk=this.getRank(this.elo);
+      if(won){
+        Coins.earn(20,'ranked_win');
+        showNotification(`⚔️ Victory! ELO: ${this.elo} (${rk.icon} ${rk.name})`);
+      }else{
+        showNotification(`💀 Defeat. ELO: ${this.elo} (${rk.icon} ${rk.name})`);
+      }
+    };
+    p.querySelector('#ranked-tournament').onclick=()=>{
+      p.closest('.popup-overlay').remove();
+      this.startTournament();
+    };
+  }
+};
+
+// ═══════════════════════════════════════
+// §39. V26: GALAXY MAP (Station Federation)
+// ═══════════════════════════════════════
+const V26Galaxy={
+  show(){
+    const stats=S.stationStats;
+    const reputation=Math.min(100,Math.round(
+      (stats.totalVisitors||0)*0.5+
+      (stats.milestones?.length||0)*10+
+      (stats.totalDuels||0)*0.2
+    ));
+
+    const{p}=createPopup(`
+      <h3 style="color:#00fff7">🌌 Galaxy Map — Station Federation</h3>
+      <div style="background:#000008;height:280px;position:relative;overflow:hidden;border-radius:8px;margin:10px 0">
+        <canvas id="galaxy-canvas" width="460" height="280" style="display:block;width:100%;height:100%"></canvas>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <div>
+          <div style="font-size:12px;color:#00fff7;font-weight:bold">Echo's Station</div>
+          <div style="font-size:9px;color:#888">⭐ Reputation: ${reputation}/100</div>
+          <div style="font-size:9px;color:#888">👥 ${stats.totalVisitors||0} visitors · 🏆 ${stats.milestones?.length||0} milestones</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px;color:#ffd080">Federation Status</div>
+          <div style="font-size:9px;color:#888">🔵 1 station online</div>
+          <div style="font-size:9px;color:#555">More stations coming soon...</div>
+        </div>
+      </div>
+    `);
+
+    const gc=p.querySelector('#galaxy-canvas');
+    const gx=gc.getContext('2d');
+    let gTime=0;
+
+    function renderGalaxy(){
+      gTime+=0.016;
+      gx.fillStyle='#000008';gx.fillRect(0,0,460,280);
+
+      // Background stars
+      for(let i=0;i<200;i++){
+        const sx=(i*73.1337)%460,sy=(i*137.7713)%280;
+        const br=0.2+Math.sin(gTime+i)*0.3;
+        gx.fillStyle=`rgba(255,255,255,${br})`;gx.fillRect(sx,sy,1,1);
+      }
+
+      // Nebula glow
+      const ng=gx.createRadialGradient(230,140,0,230,140,180);
+      ng.addColorStop(0,'rgba(100,50,150,.08)');ng.addColorStop(0.5,'rgba(50,100,200,.04)');ng.addColorStop(1,'rgba(0,0,0,0)');
+      gx.fillStyle=ng;gx.fillRect(0,0,460,280);
+
+      // Echo's Station — main beacon
+      const sx=230+Math.sin(gTime*0.3)*5,sy=140+Math.cos(gTime*0.4)*3;
+      // Pulse rings
+      for(let i=0;i<3;i++){
+        const rp=0.2+Math.sin(gTime*2+i*2)*0.15;
+        gx.strokeStyle=`rgba(0,255,247,${rp})`;gx.lineWidth=1;
+        gx.beginPath();gx.arc(sx,sy,20+i*12+Math.sin(gTime+i)*3,0,Math.PI*2);gx.stroke();
+      }
+      // Station dot
+      gx.fillStyle='#00fff7';gx.beginPath();gx.arc(sx,sy,6,0,Math.PI*2);gx.fill();
+      gx.fillStyle='#fff';gx.beginPath();gx.arc(sx,sy,3,0,Math.PI*2);gx.fill();
+      gx.fillStyle='#00fff7';gx.font='bold 9px monospace';gx.textAlign='center';
+      gx.fillText("Echo's Station",sx,sy+18);
+      gx.fillStyle='rgba(0,255,247,.5)';gx.font='8px monospace';
+      gx.fillText(`Rep: ${reputation}`,sx,sy+28);
+
+      // Placeholder distant stations (greyed out)
+      const placeholders=[
+        {x:80,y:60,name:'???'},{x:380,y:80,name:'???'},{x:120,y:220,name:'???'},
+        {x:350,y:210,name:'???'},{x:60,y:140,name:'???'},{x:400,y:160,name:'???'}
+      ];
+      placeholders.forEach((ps,i)=>{
+        const px=ps.x+Math.sin(gTime*0.5+i)*2,py=ps.y+Math.cos(gTime*0.6+i)*2;
+        gx.fillStyle='rgba(100,100,100,.3)';gx.beginPath();gx.arc(px,py,3,0,Math.PI*2);gx.fill();
+        gx.fillStyle='rgba(100,100,100,.2)';gx.font='7px monospace';gx.fillText(ps.name,px,py+10);
+      });
+
+      gx.textAlign='left';
+      if(p.closest('.popup-overlay'))requestAnimationFrame(renderGalaxy);
+    }
+    renderGalaxy();
+  }
+};
+
+// ═══════════════════════════════════════
+// §40. V26: THE ARCHIVE (Floor 9)
+// ═══════════════════════════════════════
+const V26Archive={
+  debugUnlocked:false,
+
+  showTimeline(){
+    const stats=S.stationStats;
+    const ms=stats.milestones||[];
+    const allMs=[
+      {id:'first_crew',name:'First Crew',icon:'🎉',threshold:10},
+      {id:'pixel_talks',name:'Pixel Talks',icon:'🐱',threshold:25},
+      {id:'garden_bloom',name:'Garden Bloom',icon:'🌸',threshold:50},
+      {id:'golden_hull',name:'Golden Hull',icon:'✨',threshold:100},
+      {id:'echo_band',name:'Echo Band',icon:'🎵',threshold:250},
+      {id:'portal_open',name:'Portal Open',icon:'🌀',threshold:500},
+      {id:'pixel_kittens',name:'Pixel Kittens',icon:'🐱',threshold:1000},
+      {id:'ascension',name:'The Ascension',icon:'🌟',threshold:10000},
+    ];
+
+    let html='<h3 style="color:#ffd700">📜 Station Timeline</h3>';
+    html+='<p style="font-size:10px;color:#888;margin-bottom:10px">The complete history of Echo\'s Station</p>';
+    html+='<div style="border-left:3px solid #ffd700;padding-left:12px;margin-left:10px">';
+    html+=`<div style="margin:8px 0;padding:6px;background:rgba(0,255,247,.05);border-radius:4px">
+      <div style="font-size:10px;color:#00fff7;font-weight:bold">🚀 Station Created</div>
+      <div style="font-size:9px;color:#888">The beginning of everything</div>
+    </div>`;
+    allMs.forEach(m=>{
+      const unlocked=ms.includes(m.id);
+      html+=`<div style="margin:8px 0;padding:6px;background:rgba(${unlocked?'255,215,0,.05':'50,50,80,.05'});border-radius:4px;opacity:${unlocked?1:.3}">
+        <div style="font-size:10px;color:${unlocked?'#ffd700':'#555'};font-weight:bold">${m.icon} ${m.name} — ${m.threshold} visitors</div>
+        <div style="font-size:9px;color:#888">${unlocked?'✓ Achieved':'Locked'}</div>
+      </div>`;
+    });
+    html+='</div>';
+    createPopup(html);
+  },
+
+  showVisitors(){
+    const stats=S.stationStats;
+    let html='<h3 style="color:#00fff7">👥 Visitor Records</h3>';
+    html+=`<div style="text-align:center;margin:12px 0">
+      <div style="font-size:32px;color:#ffd700;font-weight:bold">${stats.totalVisitors||0}</div>
+      <div style="font-size:12px;color:#888">unique visitors</div>
+      <div style="font-size:10px;color:#666;margin-top:4px">${stats.totalVisits||0} total visits · ${stats.totalDuels||0} duels</div>
+    </div>`;
+    html+='<p style="font-size:9px;color:#555;text-align:center">Every soul who walked these halls is remembered.</p>';
+    createPopup(html);
+  },
+
+  showMilestones(){
+    showStationLog(); // Reuse existing milestone display
+  }
+};
+
+// --- Floor 9 Renderer ---
+function renderFloor9(){
+  // Golden Archive floor
+  const ascended=S.stationStats.milestones?.includes('ascension')||V26Archive.debugUnlocked;
+  const baseColor=ascended?'#2a2518':'#1a1a1a';
+  const lightColor=ascended?'#3a3528':'#222222';
+  renderFloorTiles(baseColor,lightColor);
+  renderWalls(ascended?'#3a3020':'#1a1a2a');
+
+  // Golden shimmer overlay
+  if(ascended){
+    const shimmer=0.03+Math.sin(S.time*1.5)*0.02;
+    ctx.fillStyle=`rgba(255,215,0,${shimmer})`;ctx.fillRect(0,0,W,H);
+    // Floating golden particles
+    if(Math.random()<0.1){S.particles.push({x:Math.random()*W,y:H+10,vx:(Math.random()-.5)*.5,vy:-1-Math.random(),life:60,color:'#ffd700',size:1+Math.random()*2});}
+  }
+
+  // Timeline wall
+  const tl=getObjects().find(o=>o.id==='archive_timeline');
+  if(tl){
+    ctx.fillStyle='#2a2a3a';ctx.fillRect(tl.x,tl.y,tl.w,tl.h);
+    ctx.strokeStyle='#ffd700';ctx.lineWidth=2;ctx.strokeRect(tl.x,tl.y,tl.w,tl.h);
+    // Timeline line
+    ctx.strokeStyle='#ffd700';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(tl.x+20,tl.y+tl.h/2);ctx.lineTo(tl.x+tl.w-20,tl.y+tl.h/2);ctx.stroke();
+    // Milestone dots
+    const ms=S.stationStats.milestones||[];
+    const icons=['🎉','🐱','🌸','✨','🎵','🌀','🐱','🌟'];
+    for(let i=0;i<8;i++){
+      const mx=tl.x+30+i*(tl.w-60)/7;
+      const unlocked=i<ms.length;
+      ctx.fillStyle=unlocked?'#ffd700':'#333';
+      ctx.beginPath();ctx.arc(mx,tl.y+tl.h/2,6,0,Math.PI*2);ctx.fill();
+      if(unlocked){ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText(icons[i],mx,tl.y+tl.h/2-12);}
+    }
+    ctx.textAlign='left';
+    ctx.fillStyle='#ffd700';ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText('📜 STATION TIMELINE',tl.x+tl.w/2,tl.y+tl.h+14);ctx.textAlign='left';
+  }
+
+  // Visitor Records display
+  const vr=getObjects().find(o=>o.id==='archive_visitors');
+  if(vr){
+    ctx.fillStyle='#1a1a2a';ctx.fillRect(vr.x,vr.y,vr.w,vr.h);
+    ctx.strokeStyle='#00fff7';ctx.lineWidth=1;ctx.strokeRect(vr.x,vr.y,vr.w,vr.h);
+    ctx.fillStyle='#00fff7';ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText('VISITOR RECORDS',vr.x+vr.w/2,vr.y+20);
+    ctx.fillStyle='#ffd700';ctx.font='bold 20px monospace';
+    ctx.fillText(String(S.stationStats.totalVisitors||0),vr.x+vr.w/2,vr.y+55);
+    ctx.fillStyle='#888';ctx.font='9px monospace';
+    ctx.fillText('unique visitors',vr.x+vr.w/2,vr.y+72);
+    ctx.fillText((S.stationStats.totalVisits||0)+' total visits',vr.x+vr.w/2,vr.y+88);
+    ctx.textAlign='left';
+  }
+
+  // Milestone Wall
+  const mw=getObjects().find(o=>o.id==='archive_milestones');
+  if(mw){
+    ctx.fillStyle='#1a1a2a';ctx.fillRect(mw.x,mw.y,mw.w,mw.h);
+    ctx.strokeStyle='#ff6ec7';ctx.lineWidth=1;ctx.strokeRect(mw.x,mw.y,mw.w,mw.h);
+    ctx.fillStyle='#ff6ec7';ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText('MILESTONES',mw.x+mw.w/2,mw.y+20);
+    ctx.fillStyle='#ffd700';ctx.font='bold 20px monospace';
+    ctx.fillText(String((S.stationStats.milestones||[]).length)+'/8',mw.x+mw.w/2,mw.y+55);
+    ctx.fillStyle='#888';ctx.font='9px monospace';
+    ctx.fillText('achieved',mw.x+mw.w/2,mw.y+72);
+    ctx.textAlign='left';
+  }
+
+  // Galaxy Map hologram
+  const gm=getObjects().find(o=>o.id==='galaxy_map');
+  if(gm){
+    // Holographic table
+    ctx.fillStyle='#2a2a3a';ctx.fillRect(gm.x,gm.y,gm.w,gm.h);
+    ctx.strokeStyle='rgba(0,255,247,.4)';ctx.lineWidth=1;ctx.strokeRect(gm.x,gm.y,gm.w,gm.h);
+    // Star field inside
+    for(let i=0;i<30;i++){
+      const sx=gm.x+10+((i*37)%180),sy=gm.y+10+((i*53)%130);
+      const br=0.3+Math.sin(S.time*2+i)*0.3;
+      ctx.fillStyle=`rgba(255,255,255,${br})`;ctx.fillRect(sx,sy,1,1);
+    }
+    // Station beacon
+    const bx=gm.x+gm.w/2,by=gm.y+gm.h/2;
+    const bp=0.4+Math.sin(S.time*3)*0.3;
+    ctx.fillStyle=`rgba(0,255,247,${bp})`;ctx.beginPath();ctx.arc(bx,by,4,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=`rgba(0,255,247,${bp*0.5})`;ctx.beginPath();ctx.arc(bx,by,10+Math.sin(S.time*2)*3,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='#00fff7';ctx.font='bold 9px monospace';ctx.textAlign='center';
+    ctx.fillText('🌌 GALAXY MAP',gm.x+gm.w/2,gm.y+gm.h+14);ctx.textAlign='left';
+  }
+
+  // Ranked Board
+  const rb=getObjects().find(o=>o.id==='ranked_board');
+  if(rb){
+    ctx.fillStyle='#2a1a2a';ctx.fillRect(rb.x,rb.y,rb.w,rb.h);
+    ctx.strokeStyle='#ff6ec7';ctx.lineWidth=1;ctx.strokeRect(rb.x,rb.y,rb.w,rb.h);
+    const r=V26Ranked.getRank(V26Ranked.elo);
+    ctx.font='20px sans-serif';ctx.textAlign='center';ctx.fillText(r.icon,rb.x+rb.w/2,rb.y+35);
+    ctx.fillStyle=r.color;ctx.font='bold 10px monospace';ctx.fillText(r.name,rb.x+rb.w/2,rb.y+55);
+    ctx.fillStyle='#ffd700';ctx.font='9px monospace';ctx.fillText('ELO: '+V26Ranked.elo,rb.x+rb.w/2,rb.y+70);
+    ctx.fillStyle='#888';ctx.font='8px monospace';ctx.fillText(V26Ranked.wins+'W/'+V26Ranked.losses+'L',rb.x+rb.w/2,rb.y+85);
+    ctx.textAlign='left';
+  }
+
+  // Ascension wings on Echo (if on this floor)
+  if(ascended&&S.echo.floor===9){
+    const ex=S.echo.x,ey=S.echo.y;
+    const wingFlap=Math.sin(S.time*3)*0.2;
+    ctx.save();ctx.globalAlpha=0.6;
+    // Left wing
+    ctx.fillStyle='rgba(255,215,0,.4)';ctx.beginPath();
+    ctx.moveTo(ex,ey-10);ctx.quadraticCurveTo(ex-25,ey-30-wingFlap*20,ex-35,ey-5);ctx.quadraticCurveTo(ex-15,ey,ex,ey-10);ctx.fill();
+    // Right wing
+    ctx.beginPath();ctx.moveTo(ex,ey-10);ctx.quadraticCurveTo(ex+25,ey-30-wingFlap*20,ex+35,ey-5);ctx.quadraticCurveTo(ex+15,ey,ex,ey-10);ctx.fill();
+    ctx.restore();
+  }
+}
+
+// ═══════════════════════════════════════
+// §41. V26: ROOM BUILDER ENHANCEMENTS
+// ═══════════════════════════════════════
+// Enhanced room directory accessible from Community Deck (floor 7)
+const V26RoomDirectory={
+  showFeatured(){
+    // Show featured rooms — top 3 by visitors+likes
+    fetch('/api/rooms').then(r=>r.json()).then(rooms=>{
+      rooms.sort((a,b)=>((b.visitors||0)+(b.likes||0)*2)-((a.visitors||0)+(a.likes||0)*2));
+      const featured=rooms.slice(0,3);
+      let html='<h3 style="color:#ffd700">⭐ Featured Rooms</h3>';
+      html+='<p style="font-size:10px;color:#888;margin-bottom:8px">The most popular rooms on the station!</p>';
+      if(featured.length===0){html+='<p style="color:#555">No rooms yet — be the first to build one!</p>';}
+      featured.forEach((r,i)=>{
+        const medals=['🥇','🥈','🥉'];
+        html+=`<div class="drink-btn" data-owner="${r.owner}" style="width:100%;text-align:left;margin:6px 0;padding:10px;border-color:#ffd700">
+          <div style="font-size:14px;color:#ffd700">${medals[i]} ${r.name}</div>
+          <div style="font-size:9px;color:#888">by <b style="color:#ff6ec7">${r.owner}</b> · 👁️ ${r.visitors||0} · ❤️ ${r.likes||0} · 💰 ${r.earnings||0}◈</div>
+        </div>`;
+      });
+      const{p}=createPopup(html);
+      p.querySelectorAll('[data-owner]').forEach(btn=>{
+        btn.onclick=()=>{RoomSystem.loadRoom(btn.dataset.owner);p.closest('.popup-overlay').remove();};
+      });
+    }).catch(()=>showNotification('Failed to load featured rooms'));
+  }
+};
+
+// ═══════════════════════════════════════
+// §42. V26: UPDATE HOOKS
+// ═══════════════════════════════════════
+// Patch the update loop to include portal system
+const _v25Update=update;
+update=function(dt){
+  _v25Update(dt);
+  V26Portal.update(dt);
+};
+
+// Patch the render loop to include portal overlay
+const _v25Render=render;
+render=function(){
+  if(V26Portal.active){
+    V26Portal.render();
+    return;
+  }
+  _v25Render();
+  // Ascension golden shimmer on all floors after 10k milestone
+  if(S.stationStats.milestones?.includes('ascension')){
+    const s=0.01+Math.sin(S.time)*0.005;
+    ctx.fillStyle=`rgba(255,215,0,${s})`;ctx.fillRect(0,0,W,H);
+  }
+};
+
+// ═══════════════════════════════════════
+// §43. V26: ENHANCED DEBUG PANEL
+// ═══════════════════════════════════════
+const _v25DebugShow=V25Debug.show;
+V25Debug.show=function(){
+  _v25DebugShow.call(this);
+  // Add v26 debug buttons to the last popup
+  const popups=document.querySelectorAll('.popup');
+  const lastPopup=popups[popups.length-1];
+  if(lastPopup){
+    const v26Section=document.createElement('div');
+    v26Section.innerHTML=`
+      <div style="margin-top:10px;border-top:1px solid #555;padding-top:8px">
+        <div style="font-size:11px;color:#ffd700;margin-bottom:6px">v26 Debug:</div>
+        <button class="drink-btn" id="v26-unlock-portal">Unlock Portal</button>
+        <button class="drink-btn" id="v26-unlock-archive">Unlock Archive</button>
+        <button class="drink-btn" id="v26-test-ascension">Test Ascension</button>
+        <button class="drink-btn" id="v26-add-elo">+200 ELO</button>
+        <button class="drink-btn" id="v26-galaxy">Galaxy Map</button>
+        <button class="drink-btn" id="v26-portal-menu">Portal Menu</button>
+      </div>
+    `;
+    lastPopup.appendChild(v26Section);
+    v26Section.querySelector('#v26-unlock-portal').onclick=()=>{V26Portal.debugUnlocked=true;showNotification('Portal unlocked!');};
+    v26Section.querySelector('#v26-unlock-archive').onclick=()=>{V26Archive.debugUnlocked=true;showNotification('Archive unlocked!');};
+    v26Section.querySelector('#v26-test-ascension').onclick=()=>{
+      if(!S.stationStats.milestones)S.stationStats.milestones=[];
+      if(!S.stationStats.milestones.includes('ascension'))S.stationStats.milestones.push('ascension');
+      V26Archive.debugUnlocked=true;
+      triggerMilestone('ascension');
+      document.querySelector('.popup-overlay')?.remove();
+    };
+    v26Section.querySelector('#v26-add-elo').onclick=()=>{V26Ranked.elo+=200;LS.set('v26_elo',V26Ranked.elo);showNotification('ELO: '+V26Ranked.elo+' ('+V26Ranked.getRank(V26Ranked.elo).name+')');};
+    v26Section.querySelector('#v26-galaxy').onclick=()=>{document.querySelector('.popup-overlay')?.remove();V26Galaxy.show();};
+    v26Section.querySelector('#v26-portal-menu').onclick=()=>{document.querySelector('.popup-overlay')?.remove();V26Portal.showMenu();};
+  }
+};
+
+// Add community wall "Featured Rooms" button to floor 7
+const _origRenderFloor7=renderFloor7;
+renderFloor7=function(){
+  _origRenderFloor7();
+  // Featured rooms showcase area
+  const fx=550,fy=420,fw=160,fh=60;
+  ctx.fillStyle='#2a2a3a';ctx.fillRect(fx,fy,fw,fh);
+  ctx.strokeStyle='#ffd700';ctx.lineWidth=1;ctx.strokeRect(fx,fy,fw,fh);
+  ctx.fillStyle='#ffd700';ctx.font='bold 9px monospace';ctx.textAlign='center';
+  ctx.fillText('⭐ FEATURED ROOMS',fx+fw/2,fy+20);
+  ctx.fillStyle='#888';ctx.font='8px monospace';
+  ctx.fillText('Press E to browse',fx+fw/2,fy+38);
+  ctx.textAlign='left';
+};
+
+// Add featured rooms object to floor 7
+FLOOR_OBJECTS[7].push({id:'featured_rooms',x:550,y:420,w:160,h:60,label:'⭐ Featured Rooms',interact:true,collide:true});
+
+// Handle featured rooms interaction — needs to be added to the switch
+const _origInteract=interact;
+interact=function(){
+  if(S.nearObject?.id==='featured_rooms'){
+    V26RoomDirectory.showFeatured();
+    return;
+  }
+  _origInteract();
+};
 
 })();
 </script>
