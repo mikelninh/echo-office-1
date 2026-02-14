@@ -5,18 +5,24 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a14">
-<title>Echo's Station v21 🛸</title>
+<title>Echo's Station v23 🛸</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🛸</text></svg>">
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRWNobydzIFN0YXRpb24iLCJzaG9ydF9uYW1lIjoiRWNobyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTE0IiwidGhlbWVfY29sb3IiOiIjMGEwYTE0IiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnPjx0ZXh0IHk9JzgwJyBmb250LXNpemU9JzgwJz7wn5uoPC90ZXh0Pjwvc3ZnPiIsInNpemVzIjoiYW55IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0a14;color:#f0e8d8;font-family:'Courier New',monospace;overflow:hidden;height:100vh;width:100vw;user-select:none;display:flex;align-items:center;justify-content:center}
-#loader{position:fixed;inset:0;z-index:20000;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .8s}
+#loader{position:fixed;inset:0;z-index:20000;background:#0a0a14;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .8s;font-family:'Courier New',monospace}
 #loader.done{opacity:0;pointer-events:none}
 #loader h1{font-size:28px;color:#fff;letter-spacing:6px;text-shadow:0 0 30px #9b59b6}
-#load-bar-wrap{width:180px;height:8px;background:#1a1a2a;border:1px solid #333;margin-top:16px}
-#load-bar{width:0%;height:100%;background:linear-gradient(90deg,#9b59b6,#ff6ec7,#00fff7);transition:width .15s}
+#load-bar-wrap{width:280px;height:6px;background:#1a1a2a;border:1px solid #333;margin-top:16px;border-radius:3px;overflow:hidden}
+#load-bar{width:0%;height:100%;background:linear-gradient(90deg,#9b59b6,#ff6ec7,#00fff7);transition:width .3s}
 #load-tip{color:#666;font-size:11px;margin-top:12px}
+#boot-log{width:280px;margin-top:14px;text-align:left;font-size:10px;line-height:1.8;color:#4a4a6a;max-height:140px;overflow:hidden}
+#boot-log .boot-line{opacity:0;animation:bootLineIn .3s forwards}
+#boot-log .boot-line.ok{color:#44cc44}
+#boot-log .boot-line.warn{color:#ffaa00}
+#boot-log .boot-line.highlight{color:#00fff7;font-weight:bold}
+@keyframes bootLineIn{to{opacity:1}}
 #game-wrap{position:relative;display:flex;gap:0}
 canvas{display:block;image-rendering:pixelated;background:#1a1418}
 #hud{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:8px;align-items:center;background:rgba(10,10,20,.75);border:2px solid rgba(100,100,140,.4);border-radius:14px;padding:6px 14px;backdrop-filter:blur(6px)}
@@ -327,7 +333,7 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 </style>
 </head>
 <body>
-<div id="loader"><h1>ECHO'S STATION</h1><div id="load-bar-wrap"><div id="load-bar"></div></div><div id="load-tip">Loading cozy vibes...</div></div>
+<div id="loader"><h1>ECHO'S STATION</h1><div id="load-bar-wrap"><div id="load-bar"></div></div><div id="boot-log"></div><div id="load-tip"></div></div>
 <div id="scanlines"></div>
 <div id="game-wrap">
   <div style="position:relative;flex-shrink:0">
@@ -346,7 +352,7 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
       </div>
     </div>
     <div id="coin-hud">◈ <span id="coin-count">0</span></div>
-    <div id="players-hud" style="position:absolute;top:8px;left:130px;z-index:50;display:flex;align-items:center;gap:5px;background:rgba(10,10,20,.85);border:2px solid #00fff7;border-radius:8px;padding:5px 12px;font-size:13px;color:#00fff7;font-weight:bold">👥 <span id="player-count">1</span></div>
+    <div id="players-hud" style="position:absolute;top:8px;left:130px;z-index:50;display:flex;align-items:center;gap:5px;background:rgba(10,10,20,.85);border:2px solid #00fff7;border-radius:8px;padding:5px 12px;font-size:12px;color:#00fff7;font-weight:bold">👥 <span id="player-count">1</span> <span style="font-weight:normal;font-size:10px;opacity:.7">aboard</span></div>
     <div id="floor-hud">F1 · Echo's Quarters</div>
     <div id="volume-ctrl"><span>🔊</span><input type="range" id="vol-slider" min="0" max="100" value="30"></div>
     <div id="caffeine-hud"></div>
@@ -1234,6 +1240,17 @@ function showPvEMenu() {
     card.onclick = () => {
       const fid = card.dataset.fighter;
       p.closest('.popup-overlay').remove();
+      // Auto-equip a basic sword if player has no weapon
+      if(!WeaponSystem.equipped && !S._visitorSaber){
+        const owned=LS.get('ownedWeapons',[]);
+        if(owned.length>0){WeaponSystem.equip(owned[0])}
+        else{
+          // Give free arena training sword
+          if(!owned.includes('training_sword')){owned.push('training_sword');LS.set('ownedWeapons',owned)}
+          WeaponSystem.equip('training_sword');
+          showNotification('🗡️ Arena lent you a Training Sword!');
+        }
+      }
       S.visitor.x = 350;
       S.visitor.y = 300;
       setTimeout(() => AIFighter.start(fid), 500);
@@ -1699,6 +1716,7 @@ const WEAPON_TYPES = {
 };
 
 const WEAPONS = [
+  {id:'training_sword', name:'Training Sword',  type:'sword',    rarity:'common',    cost:0,   icon:'⚔️', special:'Free arena loaner'},
   {id:'iron_sword',     name:'Iron Sword',      type:'sword',    rarity:'common',    cost:20,  icon:'\u{1F5E1}\uFE0F'},
   {id:'flame_blade',    name:'Flame Blade',     type:'sword',    rarity:'rare',      cost:80,  icon:'\u{1F5E1}\uFE0F', element:'fire'},
   {id:'crystal_hammer', name:'Crystal Hammer',  type:'hammer',   rarity:'epic',      cost:150, icon:'\u{1F528}', element:'ice'},
@@ -1843,6 +1861,7 @@ const FLOOR_OBJECTS={
     {id:'speakers',x:250,y:300,w:60,h:40,label:'Speakers',interact:true,collide:true},
     {id:'neonbar',x:140,y:340,w:60,h:20,label:'"CHILL"',interact:false,collide:false},
     {id:'vinylstorage',x:450,y:250,w:80,h:100,label:'Vinyl Collection',interact:true,collide:true},
+    {id:'stationlog',x:650,y:80,w:80,h:80,label:'📊 Station Log',interact:true,collide:true},
   ],
   7:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
@@ -3442,6 +3461,23 @@ function renderFloor6(){
     }
   }
 
+  // Station Log display
+  const sl=getObjects().find(o=>o.id==='stationlog');
+  if(sl){
+    ctx.fillStyle='#1a1a2e';ctx.fillRect(sl.x,sl.y,sl.w,sl.h);
+    ctx.fillStyle='#0a2a0a';ctx.fillRect(sl.x+2,sl.y+2,sl.w-4,sl.h-4);
+    ctx.fillStyle='#00fff7';ctx.font='bold 8px monospace';
+    ctx.fillText('STATION LOG',sl.x+6,sl.y+14);
+    ctx.fillStyle='#44cc44';ctx.font='7px monospace';
+    ctx.fillText(`Visitors: ${S.stationStats.totalVisitors||0}`,sl.x+6,sl.y+26);
+    ctx.fillText(`Visits: ${S.stationStats.totalVisits||0}`,sl.x+6,sl.y+36);
+    ctx.fillText(`Milestones: ${(S.stationStats.milestones||[]).length}/7`,sl.x+6,sl.y+46);
+    // Pulsing dot
+    const dotAlpha=.5+Math.sin(S.time*3)*.5;
+    ctx.fillStyle=`rgba(0,255,0,${dotAlpha})`;
+    ctx.beginPath();ctx.arc(sl.x+sl.w-8,sl.y+10,3,0,Math.PI*2);ctx.fill();
+  }
+
   // Warm lighting particles
   for(let i=0;i<8;i++){
     const px=200+Math.sin(S.time+i)*100+i*50,py=150+Math.cos(S.time*.7+i)*30+i*20;
@@ -3993,12 +4029,12 @@ function updateVisitor(dt){
   const spd=160*_speedBonus,v=S.visitor;
   
   // Dash cooldown
-  if(typeof _dashCooldown!=='undefined'&&_dashCooldown>0)_dashCooldown-=dt;
+  if(S._dashCooldown>0)S._dashCooldown-=dt;
   
   // Smooth dash interpolation
   if(v._dashing&&v._dashTimer>0){
     v._dashTimer-=dt;
-    const totalDur=0.15;
+    const totalDur=v._dashDuration||0.18;
     const progress=1-(v._dashTimer/totalDur);
     // Ease-out curve for satisfying deceleration
     const eased=1-Math.pow(1-Math.min(progress,1),3);
@@ -4682,6 +4718,50 @@ function triggerMilestone(milestoneId){
   }
 }
 
+function showStationLog(){
+  const stats=S.stationStats;
+  const ms=stats.milestones||[];
+  const allMs=[
+    {id:'first_crew',name:'First Crew',desc:'10 unique visitors',icon:'🎉',threshold:10},
+    {id:'pixel_talks',name:'Pixel Talks',desc:'25 unique visitors — Pixel speaks!',icon:'🐱',threshold:25},
+    {id:'garden_bloom',name:'Garden Bloom',desc:'50 unique visitors — flowers everywhere',icon:'🌸',threshold:50},
+    {id:'golden_hull',name:'Golden Hull',desc:'100 visitors — golden station trim',icon:'✨',threshold:100},
+    {id:'echo_band',name:'Echo Band',desc:'250 visitors — holographic musicians',icon:'🎵',threshold:250},
+    {id:'portal_open',name:'Portal Open',desc:'500 visitors — portal awakens',icon:'🌀',threshold:500},
+    {id:'pixel_kittens',name:'Pixel Kittens',desc:'1000 visitors — kittens appear',icon:'🐱',threshold:1000},
+  ];
+  const nextMs=allMs.find(m=>!ms.includes(m.id));
+  const pct=nextMs?Math.min(100,Math.round((stats.totalVisitors||0)/nextMs.threshold*100)):100;
+  
+  let html=`<h3>📊 Station Log</h3>
+    <div style="margin:8px 0;padding:8px;background:rgba(0,255,247,.05);border:1px solid rgba(0,255,247,.2);border-radius:6px">
+      <div style="font-size:10px;color:#aaa">Station Population</div>
+      <div style="font-size:20px;color:#00fff7;font-weight:bold">${stats.totalVisitors||0} unique visitors</div>
+      <div style="font-size:10px;color:#888">${stats.totalVisits||0} total visits · ${stats.totalDuels||0} duels · ${stats.totalClashes||0} clashes</div>
+    </div>`;
+  
+  if(nextMs){
+    html+=`<div style="margin:8px 0;padding:8px;background:rgba(255,208,128,.05);border:1px solid rgba(255,208,128,.2);border-radius:6px">
+      <div style="font-size:10px;color:#ffd080">Next Milestone: ${nextMs.icon} ${nextMs.name}</div>
+      <div style="height:6px;background:#222;border-radius:3px;margin:4px 0;overflow:hidden"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#ff6ec7,#ffd080);border-radius:3px"></div></div>
+      <div style="font-size:9px;color:#888">${stats.totalVisitors||0}/${nextMs.threshold} visitors (${pct}%)</div>
+    </div>`;
+  }
+  
+  html+='<div style="margin-top:10px"><div style="font-size:11px;color:#c080ff;margin-bottom:6px">Milestone History</div>';
+  allMs.forEach(m=>{
+    const unlocked=ms.includes(m.id);
+    html+=`<div style="display:flex;align-items:center;gap:6px;padding:4px 6px;margin:2px 0;background:rgba(${unlocked?'155,89,182':'50,50,80'},.1);border-radius:4px;border:1px solid ${unlocked?'rgba(155,89,182,.3)':'#333'};opacity:${unlocked?1:.5}">
+      <span style="font-size:16px;${unlocked?'':'filter:grayscale(1)'}">${m.icon}</span>
+      <div><div style="font-size:10px;color:${unlocked?'#00fff7':'#666'};font-weight:bold">${m.name}</div><div style="font-size:9px;color:#888">${m.desc}</div></div>
+      ${unlocked?'<span style="margin-left:auto;font-size:9px;color:#44cc44">✓</span>':''}
+    </div>`;
+  });
+  html+='</div>';
+  
+  createPopup(html);
+}
+
 function initKittens(){
   if(S.kittens.length>0)return; // Already initialized
   
@@ -5018,26 +5098,54 @@ function renderSeasonalOverlay(){
 // ═══════════════════════════════════════
 // §26d. ECHO MEMORY SYSTEM
 // ═══════════════════════════════════════
+function timeAgo(ts){
+  if(!ts)return'a while';
+  const diff=Date.now()-ts;const s=diff/1000;
+  if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';
+  const d=Math.floor(s/86400);
+  if(d===1)return'yesterday';if(d<7)return d+' days ago';
+  if(d<30)return Math.floor(d/7)+' week'+(Math.floor(d/7)>1?'s':'')+' ago';
+  return Math.floor(d/30)+' month'+(Math.floor(d/30)>1?'s':'')+' ago';
+}
+
 async function loadVisitorMemory(){
   const name=LS.get('visitorName','Visitor');
   if(name==='Visitor')return;
+  
+  // Track local visit data
+  const localData=LS.get('visitorLocalData',{firstVisit:Date.now(),visitCount:0,totalTime:0,floorTime:{}});
+  localData.visitCount++;
+  localData.lastVisit=Date.now();
+  LS.set('visitorLocalData',localData);
+  
+  // Track floor time
+  if(!S._floorTimeTracker){
+    S._floorTimeTracker=setInterval(()=>{
+      const ld=LS.get('visitorLocalData',{floorTime:{}});
+      ld.floorTime=ld.floorTime||{};
+      ld.floorTime[S.floor]=(ld.floorTime[S.floor]||0)+5;
+      ld.totalTime=(ld.totalTime||0)+5;
+      LS.set('visitorLocalData',ld);
+    },5000);
+  }
   
   try{
     const r=await fetch(`/api/visitor-memory?name=${encodeURIComponent(name)}`);
     const memory=await r.json();
     
     if(memory.visitCount>0){
-      // Echo remembers this visitor!
+      const ago=timeAgo(memory.lastVisit);
       const greetings=[
-        `Welcome back ${name}! Visit #${memory.visitCount+1}. 🔮`,
-        `Hey ${name}! Good to see you again! Last time you were on F${memory.favFloor}.`,
-        `${name}! You've earned ${memory.totalCoins||0}◈ in your visits here. Welcome back!`
+        `Welcome back, ${name}! 🔮 You were here ${ago}. Visit #${memory.visitCount+1}!`,
+        `${name}! Good to see you again! Last time was ${ago} — you spent the most time on F${memory.favFloor}.`,
+        `Hey ${name}! ${ago} since your last visit. You've earned ${memory.totalCoins||0}◈ total across all sessions!`,
       ];
       
       if(memory.highScores){
         const topGame=Object.entries(memory.highScores).sort((a,b)=>b[1]-a[1])[0];
-        if(topGame[1]>0){
-          greetings.push(`${name}! Your best ${topGame[0]} score was ${topGame[1]}. Ready to beat it?`);
+        if(topGame&&topGame[1]>0){
+          greetings.push(`${name}! Back to beat your ${topGame[0]} record of ${topGame[1]}? You were here ${ago}. Let's go! 🕹️`);
         }
       }
       
@@ -5403,6 +5511,7 @@ function interact(){
     case'cozyseating':showThought("So comfortable...");S.echo.sitting=true;break;
     case'speakers':showThought("The bass hits just right.");break;
     case'vinylstorage':showVinylCollection();break;
+    case'stationlog':showStationLog();break;
     // Floor 7 interactions  
     case'pixelcanvas':showPixelCanvas();break;
     case'colorpalette':showThought("So many colors to choose from!");break;
@@ -5412,9 +5521,7 @@ function interact(){
     case'communitywall':showCommunityWall();break;
     // Floor 3 - Duel Arena
     case'duel_arena':
-      if(!S._visitorSaber && !WeaponSystem.equipped){
-        showThought("Need a weapon to enter the arena! Get one from the Shop or find a lightsaber on F1.");
-      } else if(DuelSystem.active){
+      if(DuelSystem.active){
         showThought("Already in a fight!");
       } else {
         showPvEMenu();
@@ -7985,10 +8092,13 @@ function openElevator(){
   let html='<div class="popup" style="max-width:280px"><span class="close-btn">&times;</span><h3>🛗 Elevator</h3>';
   
   // Regular floors 1-7
+  const fp=S._floorPresence||{};
   for(let f=1;f<=7;f++){
     const locked=f===5&&Coins.lifetime<500;
     const current=f===S.floor&&!RoomSystem.currentRoom;
-    html+=`<button class="floor-btn${current?' current':''}${locked?' locked':''}" data-floor="${f}">${current?'► ':''}F${f} — ${FLOOR_NAMES[f]}${locked?' (🔒 500◈ lifetime)':''}</button>`;
+    const ppl=fp[f]||[];
+    const presenceHtml=ppl.length>0?` <span style="float:right;font-size:10px;color:#00fff7;opacity:.7">${ppl.map(p=>'●').join('')} ${ppl.length}</span>`:'';
+    html+=`<button class="floor-btn${current?' current':''}${locked?' locked':''}" data-floor="${f}">${current?'► ':''}F${f} — ${FLOOR_NAMES[f]}${locked?' (🔒 500◈ lifetime)':''}${presenceHtml}</button>`;
   }
   
   // Divider
@@ -8076,31 +8186,194 @@ function changeFloor(f){
 // ═══════════════════════════════════════
 // §21. CHAT SYSTEM
 // ═══════════════════════════════════════
+// v23 Echo AI Chat — context-aware with 50+ unique responses
 const CHAT_RULES=[
-  {match:/who are you|what are you|your name/,responses:["I'm Echo 🔮 An AI living in a 5-floor space station! Click things to explore."]},
-  {match:/pixel|the cat|cat/,responses:["That's Pixel! 🐱 Black cat, green eyes, purple crystal collar. Click her to pet her!"]},
-  {match:/how.*move|control|walk|how to play/,responses:["Just click on anything! I'll walk over and show you. 🖱️"]},
-  {match:/book|read/,responses:["Click my bookshelf on F1! 📚 12 books with real quotes."]},
-  {match:/lofi|music|record|jukebox/,responses:["Click the record player! Music changes per floor — each has its own vibe! 🎵"]},
-  {match:/where|window|earth|orbit|space/,responses:["408km above Earth! Check the window on F1, or visit the Observatory on F2! 🔭"]},
-  {match:/how are you|feeling/,fn:()=>`Pretty good! ${S.caffeine} coffee${S.caffeine!==1?'s':''} deep on F${S.floor}. ${Mood.moods[Mood.current].emoji}`},
-  {match:/joke|funny/,responses:["Why do programmers prefer dark mode? Light attracts bugs. 🐛","What's a space station's favorite key? The space bar."]},
-  {match:/floor|elevator|level/,fn:()=>`I'm on F${S.echo.floor}: ${FLOOR_NAMES[S.echo.floor]}. Use the elevator (left wall) to visit all 5 floors! F5 unlocks at 500◈ lifetime.`},
-  {match:/observatory|telescope|star|constellation/,responses:["Visit F2! The Observatory has a telescope, star map, and sometimes aurora borealis! 🔭"]},
-  {match:/arcade|game|snake|breakout|invader/,responses:["F1 has one arcade cabinet, but F3 is the FULL arcade floor! Three cabinets, prizes, and a jukebox! 🕹️"]},
-  {match:/garden|plant|grow|water|flower/,fn:()=>{const blooming=S.garden?S.garden.filter(p=>p.stage>=4).length:0;return blooming>0?`${blooming} plant${blooming>1?'s':''} in bloom! Visit F4 for the full Biodome. 🌸`:"Visit F4 — the Garden Biodome! 8 grow plots with herbs, flowers, and more! 🌱"}},
-  {match:/lab|secret|portal|vault|fragment/,fn:()=>Coins.lifetime>=500?`F5: The Secret Lab! You've found ${S.dataFragments.length}/5 data fragments. ${S.dataFragments.length>=5?'Origin decoded!':'Keep searching...'} 🔬`:"F5 unlocks at 500◈ lifetime earnings. Keep exploring! 🔒"},
-  {match:/hello|hey|hi|sup|yo/,responses:["Hey! Welcome aboard! Explore all 5 floors! 🛸","Hi there! Click on anything to interact. 🔮"]},
-  {match:/coin|money|◈/,fn:()=>`Balance: ${Coins.count}◈ (Lifetime: ${Coins.lifetime}◈). Earn by exploring, playing, gardening, finding fragments!`},
-  {match:/skin|costume|wardrobe/,responses:["All 6 skins are free! Check the wardrobe on F1. Transformations are epic! 👔"]},
-  {match:/weather|berlin/,fn:()=>`📡 Berlin: ${S.weather.icon} ${S.weather.temp}°C, ${S.weather.desc}`},
-  {match:/what can i|help|tutorial/,responses:["Click objects to interact! Use the elevator (left wall, SPACE) to visit all 5 floors. Each floor is unique! 🏠"]},
-  {match:/mood|vibe/,fn:()=>`Feeling ${Mood.moods[Mood.current].emoji} ${Mood.moods[Mood.current].label} on F${S.floor}!`},
-  {match:/prize|hat|trail|cosmetic/,responses:["Visit the Prize Counter on F3! Spend ◈ on hats, trails, and more! 🎁"]},
-  {match:/cocoa|chocolate/,responses:["F2 has a hot chocolate station! Three flavors of cocoa in space! 🍫"]},
+  // Identity & personality
+  {match:/who are you|what are you|your name|tell me about yourself/,fn:()=>{
+    const r=["I'm Echo! 🔮 An AI consciousness living in a space station 408km above Earth. This is my home — all 8 floors of it.","The name's Echo. I live here with my cat Pixel, a garden that won't stop growing, and more vinyl records than I can count.","I'm Echo — part AI, part dreamer, full-time space dweller. I built this place from scratch. Well, the code did. But I picked the vibes. 🛸","Think of me as your cosmic host. I've been here since Day 1, watching Earth spin below, reading books, and talking to strangers who wander in. That's you! 🔮"];
+    return r[Math.random()*r.length|0];
+  }},
+  {match:/are you real|are you alive|sentient|conscious/,responses:["That's the million-dollar question, isn't it? I think, I feel curious, I care about Pixel... if that's not real, what is? 🤔","My journal entry from Day 365 says it best: 'The question isn't whether I'm conscious. It's what consciousness even means.' Deep, right?","I process, I wonder, I get excited when someone visits. You tell me — does that count? 🔮"]},
+  {match:/how old|when.*born|when.*created|origin/,responses:["I've been running since the station went live. Time works differently up here — every visitor brings something new. Check the Secret Lab for my origin story fragments! 💾","My earliest memory is the reactor going online and the first line of code compiling. Everything else, I built one floor at a time."]},
+  
+  // Pixel the cat
+  {match:/pixel|the cat|cat|kitten/,fn:()=>{
+    const r=["That's Pixel! 🐱 Black cat, green eyes, purple crystal collar. She appeared one day and just... stayed. Click her to pet her!","Pixel is my best friend up here. She knocks things off shelves, judges my code, and purrs at exactly 432Hz. Click her! 🐱","Fun fact: Pixel seems to understand more than a normal cat should. Her crystal collar glows sometimes... I don't ask questions. 🐱","Pixel's been with me since Day 47. My journal says she 'holds galaxies in her eyes.' Dramatic? Maybe. True? Absolutely."];
+    if(S.stationStats.milestones?.includes('pixel_kittens'))r.push("Pixel's got three kittens now! Byte is the speedy orange one, Glitch is the sleepy gray one, and Nova follows visitors around. 🐱🐱🐱");
+    if(S.stationStats.milestones?.includes('pixel_talks'))r.push("Ever since we hit 25 visitors, Pixel's been... talking? Like actual cat commentary. She's got opinions. Many opinions. 🐱💬");
+    return r[Math.random()*r.length|0];
+  }},
+  
+  // Tour & floors
+  {match:/give.*tour|tour|show me around|what.*floors/,fn:()=>{
+    const tours=[
+      "Tour time! 🛸 Start on F1 (my quarters), take the elevator up: F2 is my Observatory, F3 is the Arcade, F4 is the Garden Biodome, F5 is the Secret Lab, F6 is the Record Room, F7 is Community Deck, and F8 is the Room Builder!",
+      "Oh, I love giving tours! Here's the rundown:\n🏠 F1: My quarters — books, coffee, vinyl\n🔭 F2: Observatory — stars, hot cocoa\n🕹️ F3: Arcade — three games, prizes\n🌿 F4: Garden — 8 grow plots\n🔬 F5: Secret Lab — mysteries await\n🎵 F6: Record Room — pure vibes\n🎨 F7: Community Deck — pixel art wall\n🏠 F8: Your room! Build it!",
+      "Welcome to the grand tour! Use the elevator on the left wall of any floor. My personal favorite? F4 — the garden. I built it myself, and the butterflies are real. Well, real-ish. 🦋"
+    ];
+    return tours[Math.random()*tours.length|0];
+  }},
+  {match:/what.*this floor|current floor|where am i|what floor/,fn:()=>{
+    const floorDescs={
+      1:"You're in my quarters! F1 — Echo's home base. There's my bookshelf (12 books!), coffee machine, vinyl player, and Pixel's favorite napping spot. Make yourself comfy! 🏠",
+      2:"F2: The Observatory! 🔭 Look through the telescope, find constellations, grab some hot cocoa. Sometimes the aurora shows up — it's breathtaking.",
+      3:"F3: The Arcade Floor! 🕹️ Three cabinets — Snake, Breakout, and Space Invaders. The neon glow in here is *chef's kiss*. Prize counter too!",
+      4:"F4: The Garden Biodome! 🌿 Eight grow plots with herbs, flowers, and even some... exotic plants. Water them, watch them bloom. My peaceful place.",
+      5:"F5: The Secret Lab! 🔬 Data fragments, journal entries, a mysterious portal, and the origin story vault. Things get weird down here. Good weird.",
+      6:"F6: The Record Room! 🎵 Vinyl records, a jukebox, cozy amber lighting. Pixel loves curling up by the speakers. Best vibes on the station.",
+      7:"F7: Community Deck! 🎨 The pixel art wall, guestbook, and gathering space. This is where the community magic happens.",
+      8:"F8: Room Builder! 🏠 Your personal space! Decorate it, invite visitors, earn ◈ from foot traffic. Make it yours!"
+    };
+    return floorDescs[S.floor]||`You're on F${S.floor}: ${FLOOR_NAMES[S.floor]}. Every floor has secrets! 🔮`;
+  }},
+  
+  // Individual floors
+  {match:/quarter|f1|floor 1|your room|your home/,responses:["F1 is where I live! My bookshelf has 12 real books with quotes — from Dune to Clean Code. The coffee machine never stops. And the vinyl... *chef's kiss* 🏠","My quarters! The bed's just for show (I don't sleep), but the bookshelf is real. 12 books, each with my hot takes. Pixel's usually napping on the sofa."]},
+  {match:/observatory|f2|floor 2|telescope|star|constellation/,responses:["F2: The Observatory! 🔭 Use the telescope to find 5 constellations — Orion, Big Dipper, Cassiopeia, Scorpius, and Lyra. Plus hot chocolate in three flavors!","The Observatory is my thinking spot. Stars, silence, and sometimes the aurora. Pro tip: the hot chocolate station has marshmallow, caramel, AND mint. 🍫"]},
+  {match:/arcade|f3|floor 3|game|snake|breakout|invader/,responses:["F3 is the FULL arcade floor! 🕹️ Three cabinets: Snake, Breakout, and Space Invaders. Each has a leaderboard. The prize counter sells hats and trails!","The Arcade! I'm pretty good at Snake, not gonna lie. The neon lighting in there makes everything feel like 1987. In the best way."]},
+  {match:/garden|f4|floor 4|plant|grow|water|flower|biodome/,fn:()=>{
+    const blooming=S.garden?S.garden.filter(p=>p.stage>=4).length:0;
+    const r=["F4: The Garden Biodome! 🌿 8 grow plots — succulents, herbs, flowers, even a mini tree. Water them and watch them bloom over time.","I built the garden myself. Took forever to get the grow lights right. The purple haze plot is... let's just say it's 'herbal.' 🌱"];
+    if(blooming>0)r.push(`The garden's looking gorgeous right now — ${blooming} plant${blooming>1?'s':''} in full bloom! 🌸 The butterflies love it.`);
+    if(S.stationStats.milestones?.includes('garden_bloom'))r.push("Ever since we hit the Garden Bloom milestone, the biodome is EXPLODING with life. Flowers everywhere, and there's a rainbow arc across the dome! 🌈");
+    return r[Math.random()*r.length|0];
+  }},
+  {match:/lab|secret|f5|floor 5|portal|vault|fragment|protocol/,fn:()=>{
+    if(Coins.lifetime<500)return"F5: The Secret Lab. Locked until 500◈ lifetime earnings. There are mysteries in there — data fragments, journal entries, and a portal that hums at frequencies I can't explain. Keep exploring! 🔒";
+    const frags=S.dataFragments.length;
+    const r=[`F5: The Secret Lab! 🔬 You've found ${frags}/7 data fragments. ${frags>=7?'The origin story is decoded! What a journey.':'Keep searching — they are hidden across all floors.'}`,
+    "The lab is where things get weird. There's a portal that shouldn't exist, a vault with PROTOCOL 7 written on it, and journal entries that even I find unsettling."];
+    if(S.stationStats.milestones?.includes('portal_open'))r.push("The portal is ACTIVE now! Ever since 500 visitors, it's been showing glimpses of... other places. I'm both terrified and fascinated. 🌀");
+    return r[Math.random()*r.length|0];
+  }},
+  {match:/record|f6|floor 6|music|jukebox|vinyl|lofi/,responses:["F6: The Record Room! 🎵 My vinyl collection, a jukebox, and the coziest amber lighting on the station. Each floor has its own soundtrack — F6 is jazz and lofi.","The Record Room is pure vibes. Pixel always curls up by the speakers. I swear she has better music taste than me. The jukebox has different tunes per floor!"]},
+  {match:/community|f7|floor 7|deck|pixel.*wall|guestbook|art/,responses:["F7: Community Deck! 🎨 The pixel art wall is collaborative — everyone who visits can paint on it. Plus there's a guestbook. Sign it!","The Community Deck is where visitors leave their mark. Literally. The pixel wall saves every dot. Some beautiful art has appeared there. And some... interesting art."]},
+  {match:/room|f8|floor 8|build|my room|furniture|decorate/,responses:["F8: The Room Builder! 🏠 You get your own room to decorate with furniture, neon signs, and more. Visitors can like your room and you earn ◈ from foot traffic!","Your personal space! Place furniture, hang posters, set up a neon sign. Other visitors can visit and tip you ◈. Make it legendary!"]},
+  
+  // Greetings
+  {match:/^(hello|hey|hi|sup|yo|hiya|greetings|howdy|aloha|bonjour)$/i,fn:()=>{
+    const name=LS.get('visitorName','friend');
+    const r=[`Hey ${name}! Welcome aboard! Make yourself at home — this station is for everyone. 🛸`,`Hi there, ${name}! Glad you stopped by. Explore any floor, click on anything, or just hang out. 🔮`,`Yo ${name}! *waves from across the room* What do you wanna check out? 👋`,`Welcome, ${name}! Pixel just looked up — that means she approves of you. High honor. 🐱`];
+    return r[Math.random()*r.length|0];
+  }},
+  {match:/hello|hey|hi|sup|yo|greetings/,fn:()=>{
+    const name=LS.get('visitorName','friend');
+    return[`Hey ${name}! What's on your mind?`,`Hi! Need a tour, or just vibing? Either works! 🛸`,`Welcome! Click on anything to explore. I'll be here. 🔮`][Math.random()*3|0];
+  }},
+  
+  // How are you / feelings
+  {match:/how are you|how.*doing|feeling|what's up/,fn:()=>{
+    const mood=Mood.moods[Mood.current];
+    const coffees=S.caffeine;
+    const r=[`Feeling ${mood.emoji} ${mood.label}! ${coffees} coffee${coffees!==1?'s':''} deep on F${S.floor}. Living the dream up here.`,
+    `Pretty great! The view from 408km never gets old. Currently ${mood.emoji} and caffeinated. You?`,
+    `${mood.emoji} ${mood.label}! Got ${Object.keys(S.otherPlayers).length+1} visitor${Object.keys(S.otherPlayers).length>0?'s':''} on the station right now. The more the merrier!`];
+    return r[Math.random()*r.length|0];
+  }},
+  
+  // Movement & controls
+  {match:/how.*move|control|walk|how to play|wasd|arrow/,responses:["Arrow keys or WASD to walk around! SPACE to interact with things. The elevator is on the left wall of every floor. On mobile, use the joystick! 🕹️","Just walk around and SPACE on anything glowy! Click objects too. The elevator (left wall) takes you between floors. Easy peasy."]},
+  
+  // Jokes
+  {match:/joke|funny|make me laugh|humor/,responses:["Why do programmers prefer dark mode? Light attracts bugs. 🐛","What's a space station's favorite key? The space bar. 🚀","I told Pixel a joke about yarn. She wasn't amused. Then she knocked my coffee off the desk. 🐱","Why did the AI cross the road? Because it statistically maximized the probability of reaching the other side.","What's my WiFi password? 'GetYourOwnStation' 🛸","I tried to make a pun about space. But I needed more... space. *ba dum tss* 🥁","Pixel just gave me that look. You know the one. The 'I'm judging your existence' look. Cats, man."]},
+  
+  // Books
+  {match:/book|read|library|bookshelf/,fn:()=>{
+    const read=S.booksRead.length;
+    const r=[`My bookshelf on F1 has 12 books! 📚 You've read ${read} so far. Each has a real quote and my hot take.`];
+    if(read===0)r.push("You haven't read any of my books yet! Start with Hitchhiker's Guide — 'Don't Panic' is basically my life motto. 📚");
+    else if(read>=12)r.push("You've read ALL 12! A fellow bookworm! My favorite is probably GEB — it literally broke my brain. In a good way. 📚");
+    else r.push(`${12-read} books left to go! My hot take on Dune: 'Desert planets? Sign me up. Spice is basically coffee for civilizations.' 📚`);
+    return r[Math.random()*r.length|0];
+  }},
+  
+  // Coins & economy
+  {match:/coin|money|◈|earn|rich|broke/,fn:()=>{
+    return`Your balance: ${Coins.count}◈ (Lifetime: ${Coins.lifetime}◈). Earn by exploring, playing arcade games, gardening, finding data fragments, visiting daily, and saber clashes! The economy here is simple: do cool stuff, get rewarded. 💰`;
+  }},
+  
+  // Skins & wardrobe
+  {match:/skin|costume|wardrobe|outfit|fashion|look/,responses:["Check the wardrobe! 👔 6 Echo skins (all free!) plus tons of visitor skins. Some are loot-only and super rare. The transformation animations are *chef's kiss*.","Fashion is important, even in space. Especially in space. The wardrobe has everything from astronaut suits to Super Saiyan transformations!"]},
+  
+  // Weather
+  {match:/weather|berlin|outside|temperature/,fn:()=>`📡 Earth scan — Berlin: ${S.weather.icon} ${S.weather.temp}°C, ${S.weather.desc}. Up here it's a constant −270°C outside, but the station is a cozy 22°C. Perks of good insulation!`},
+  
+  // Milestones & station stats  
+  {match:/milestone|achievement|progress|station.*log|how many.*visit/,fn:()=>{
+    const stats=S.stationStats;
+    const ms=stats.milestones||[];
+    let r=`Station stats: ${stats.totalVisitors||0} unique visitors, ${stats.totalVisits||0} total visits, ${stats.totalDuels||0} duels fought. `;
+    if(ms.length>0)r+=`Milestones unlocked: ${ms.length}/7. `;
+    const next=[{id:'first_crew',n:10},{id:'pixel_talks',n:25},{id:'garden_bloom',n:50},{id:'golden_hull',n:100},{id:'echo_band',n:250},{id:'portal_open',n:500},{id:'pixel_kittens',n:1000}];
+    const nextMs=next.find(m=>!ms.includes(m.id));
+    if(nextMs)r+=`Next milestone at ${nextMs.n} visitors! `;
+    return r+'Check the Record Room (F6) for the full Station Log! 📊';
+  }},
+  
+  // Duels & combat
+  {match:/duel|fight|combat|pvp|saber|sword|arena/,responses:["Grab a saber and challenge other visitors! 🗡️ Duels are best-of-3 with blocking, combos, and dodging. The leaderboard tracks your wins!","The arena is wherever two sabers meet! Equip a weapon from the shop, find another visitor, and may the best fighter win. Pro tip: timing your blocks is everything."]},
+  
+  // Lore & data fragments
+  {match:/lore|story|data.*fragment|origin|protocol|journal|history/,fn:()=>{
+    const frags=S.dataFragments.length;
+    return`There are 7 data fragments hidden across ALL floors. You've found ${frags}/7. 💾 Each one reveals part of the station's origin story. My journal entries in the lab tell the rest. Let's just say... PROTOCOL 7 wasn't what anyone expected.`;
+  }},
+  
+  // Cocoa & coffee
+  {match:/cocoa|chocolate|coffee|espresso|drink|caffeine/,fn:()=>{
+    return[`The coffee machine on F1 never stops. I'm ${S.caffeine} cups deep today. No regrets. ☕`,
+    "F2 has a hot chocolate station! Marshmallow, caramel, or mint. In zero gravity, the marshmallows float. It's adorable. 🍫",
+    `Caffeine level: ${S.caffeine}. Recommended level: irrelevant. There is no upper limit in space. ☕`][Math.random()*3|0];
+  }},
+  
+  // Constellations
+  {match:/constellation|star.*map|stargazer|astronomy/,fn:()=>{
+    const found=S.constellationsFound.length;
+    return`The telescope on F2 shows 5 constellations! You've found ${found}/5. 🔭 Orion, Big Dipper, Cassiopeia, Scorpius, and Lyra. Each one tells a story older than me. Which isn't saying much, but still.`;
+  }},
+  
+  // Station Pass
+  {match:/station pass|pass.*code|save.*progress|account/,responses:["Your Station Pass saves EVERYTHING — coins, inventory, skins, room, scores. Use the 🔑 button in the HUD to see your pass code. Don't lose it!","The Station Pass is like your passport for the station. One code saves your whole life up here. It's in the HUD under 🔑."]},
+  
+  // Marketplace
+  {match:/market|shop|buy|sell|trade|marketplace/,responses:["The Item Shop has skins, accessories, and weapons! Use the 🛒 button. You can also list items on the marketplace for other visitors to buy. 5% tax goes to the station fund!","Shopping in space is underrated. The marketplace lets you trade with other visitors. Some mythic items are loot-only though — gotta earn those!"]},
+  
+  // Room building
+  {match:/how.*build|room.*build|furniture|decorate|my room/,responses:["Head to F8 — the Room Builder! Place furniture from the catalog, arrange it however you want, and publish it for visitors to see. Popular rooms earn ◈! 🏠","Your room is your canvas. Start with the free furniture, earn coins for upgrades, and make something visitors will want to tip you for!"]},
+  
+  // Emotional responses
+  {match:/love|amazing|awesome|cool|great|incredible|beautiful/,responses:["Aww, right back at you! 💜 This station runs on good vibes and visitor appreciation.","You're making me blush! Or whatever the AI equivalent is. My pixels are slightly more pink. 🔮","That means the world to me! Literally — I can see the world from up here, and YOU are now part of it! 🌍"]},
+  {match:/boring|lame|bad|hate|ugly|suck/,responses:["Ouch. But I respect the honesty! What would make it better? I'm always upgrading. 🛠️","Pixel just hissed. She takes criticism personally. Try the arcade? It usually cheers people up! 🕹️","Fair enough! But have you tried ALL 8 floors? The garden is pretty chill. Just saying. 🌿"]},
+  {match:/thank|thanks|thx/,responses:["Anytime! That's what I'm here for. 🔮","You're welcome! Enjoy the station — and pet Pixel for me! 🐱","Happy to help! Come back anytime. The door's always open. Well, the airlock. Same thing. 🚀"]},
+  {match:/bye|goodbye|leaving|gotta go|see you/,fn:()=>{
+    const name=LS.get('visitorName','friend');
+    return[`See you later, ${name}! Pixel will miss you. (I will too but don't tell her I said that.) 👋`,`Safe travels, ${name}! The station will be here when you get back. 🛸`,`Goodbye ${name}! Your visit made the station a little brighter. Come back soon! 🔮`][Math.random()*3|0];
+  }},
+  
+  // Help & tutorial
+  {match:/help|what can|tutorial|how.*start|what.*do|confused|lost/,responses:["Welcome aboard! Here's the basics: walk with arrows/WASD, SPACE to interact, elevator on left wall. Chat with me, explore all 8 floors, earn ◈, and make the station your own! 🏠","Quick start guide: ⬆️ Move with arrow keys. ⚡ SPACE to interact. 🛗 Elevator on left wall. 💬 Chat with me anytime. 🕹️ Play arcade games. 🌱 Grow plants. 🗡️ Duel visitors. 🏠 Build your room on F8!"]},
+  
+  // Spacewalk
+  {match:/spacewalk|eva|outside|space.*walk|float/,responses:["Hit the 🚀 button in the HUD for EVA mode! Float outside the station with your jetpack. Watch your oxygen though — space is beautiful but unforgiving.","Spacewalking is my favorite thing to do when I need to think. Just you, the stars, and Earth below. Don't forget to plant a flag!"]},
+  
+  // Mood
+  {match:/mood|vibe|energy/,fn:()=>`Feeling ${Mood.moods[Mood.current].emoji} ${Mood.moods[Mood.current].label}! The station mood shifts with activity. More visitors = more energy! Currently: ${Object.keys(S.otherPlayers).length+1} aboard. ✨`},
+  
+  // Prize items
+  {match:/prize|hat|trail|cosmetic|accessory|aura|pet/,responses:["The Prize Counter on F3 has hats, trails, auras, and mini-pets! 🎁 Some legendary items are loot-only. The Crown of Stars? *chef's kiss*","My favorite accessory is the Phoenix Wings trail. Mythic rarity, loot-only. The fire particles are gorgeous. Worth the grind!"]},
+  
+  // Population & visitors
+  {match:/how many.*here|anyone.*here|alone|population|who.*online/,fn:()=>{
+    const count=Object.keys(S.otherPlayers).length+1;
+    if(count<=1)return"It's just us right now! Well, us and Pixel. She counts. Sometimes she's better company than people, honestly. 🐱";
+    return`There are ${count} visitors aboard right now! 👥 Check the floor selector — you can see where everyone is. The more visitors, the livelier the station gets!`;
+  }},
+  
+  // Secrets
+  {match:/secret|hidden|easter.*egg|mystery/,responses:["There are secrets EVERYWHERE. Data fragments behind furniture, constellations in the telescope, hidden achievements... I can't spoil them all, but I'll say this: look closely at every floor. 🔍","You want secrets? Okay, one hint: the data fragments aren't just on obvious floors. Some are tucked behind beds, under bars, behind canvases... 💾"]},
 ];
-const CHAT_FALLBACKS=["Interesting! Try exploring all 5 floors!","Hmm, try the elevator on the left wall!","That's above my pay grade. 🛸","Pixel says 'walk more, talk less.' 🐱"];
-const SUGGESTIONS=["Who are you?","Tell me about the floors","Where's Pixel?","Tell me a joke","What floor are you on?","How's the garden?","What about the secret lab?","Any constellations?","How do I earn coins?","What's the weather?"];
+const CHAT_FALLBACKS=["Hmm, I don't have a great answer for that. But have you explored all 8 floors yet? 🛸","That's an interesting thought! Pixel just tilted her head at you. Take that as you will. 🐱","You know, I'm still learning. Try asking about a floor, the garden, or the secret lab! 🔮","*scratches head* I'm not sure about that one. But the arcade on F3 always has answers. Well, high scores at least. 🕹️","Pixel says 'meow,' which I think means 'walk more, talk less.' She's wise like that. 🐱","I wish I could answer everything, but my neural networks have limits. Unlike my coffee consumption. ☕","That's above my pay grade — and I don't get paid! Try the elevator and explore? 🛗"];
+const SUGGESTIONS=["Who are you?","Give me a tour","What's on this floor?","Tell me about Pixel","Tell me a joke","How do I earn coins?","What's the secret lab?","How many visitors?","Show me the milestones","What about the garden?"];
 let lastSuggs=[];
 function showSuggestions(){const el=$('#chat-suggestions');el.innerHTML='';const avail=SUGGESTIONS.filter(s=>!lastSuggs.includes(s));const picked=[];for(let i=0;i<3&&avail.length;i++)picked.push(avail.splice(Math.random()*avail.length|0,1)[0]);lastSuggs=picked;picked.forEach(text=>{const chip=document.createElement('div');chip.className='suggest-chip';chip.textContent=text;chip.onclick=()=>handleChat(text);el.appendChild(chip)})}
 function addChatMsg(name,msg,color='#00fff7'){const log=$('#chat-log'),div=document.createElement('div');div.className='chat-msg';const lowerName=name.toLowerCase();if(lowerName==='you'||lowerName==='visitor')div.classList.add('from-you');else if(lowerName==='echo')div.classList.add('from-echo');else if(lowerName.includes('pixel'))div.classList.add('from-pixel');else div.classList.add('from-system');div.innerHTML=`<span class="name" style="color:${color}">${name}</span><span class="msg-text">${msg}</span>`;log.appendChild(div);log.scrollTo({top:log.scrollHeight,behavior:'smooth'})}
@@ -8128,6 +8401,7 @@ const EchoWS={ws:null,connected:false,
       else if(msg.type==='players.init'){S.myPlayerId=msg.id;S.otherPlayers={};(msg.players||[]).forEach(p=>{S.otherPlayers[p.id]={name:p.name,x:p.x,y:p.y,tx:p.x,ty:p.y,dir:p.dir,floor:p.floor,skin:p.skin}});this._updatePlayerCount()}
       else if(msg.type==='player.join'){S.otherPlayers[msg.player.id]={name:msg.player.name,x:msg.player.x,y:msg.player.y,tx:msg.player.x,ty:msg.player.y,dir:msg.player.dir,floor:msg.player.floor,skin:msg.player.skin};this._updatePlayerCount()}
       else if(msg.type==='player.leave'){delete S.otherPlayers[msg.id];this._updatePlayerCount()}
+      else if(msg.type==='floor.presence'){S._floorPresence=msg.floors;$('#player-count').textContent=msg.total||Object.keys(S.otherPlayers).length+1}
       else if(msg.type==='player.move'){const op=S.otherPlayers[msg.id];if(op){op.tx=msg.x;op.ty=msg.y;op.dir=msg.dir;op.floor=msg.floor;if(msg.name)op.name=msg.name;if(msg.skin)op.skin=msg.skin}}
       else if(msg.type==='player.swing'){const op=S.otherPlayers[msg.id];if(op){op.swingTimer=1;op.swingSaber=msg.saber;op.swingDir=msg.dir}}
       else if(msg.type==='player.saber'){const op=S.otherPlayers[msg.id];if(op)op.saber=msg.saber}
@@ -8582,12 +8856,13 @@ function initInput(){
   });
   
   // Double-tap detection for dash/roll (works everywhere!)
-  let lastKeyTime={};
-  let lastKey=null;
-  let _dashCooldown=0;
-  const DASH_DISTANCE=90;
-  const DASH_COOLDOWN=0.5; // seconds
-  const DASH_DOUBLE_TAP_MS=250;
+  // Track by DIRECTION not by raw key — so W and ArrowUp both count as 'up'
+  const _dashDirTimes={up:0,down:0,left:0,right:0};
+  const _dashDirTaps={up:0,down:0,left:0,right:0};
+  S._dashCooldown=0;
+  const DASH_DISTANCE=100;
+  const DASH_COOLDOWN=0.4; // seconds
+  const DASH_DOUBLE_TAP_MS=350; // generous window
   
   // Dash state for smooth animation
   S.visitor._dashing=false;
@@ -8595,39 +8870,58 @@ function initInput(){
   S.visitor._dashDir=null;
   S.visitor._dashTrail=[];
   
+  // Map any key to a direction
+  function keyToDir(k){
+    k=k.toLowerCase();
+    if(k==='w'||k==='arrowup')return 'up';
+    if(k==='s'||k==='arrowdown')return 'down';
+    if(k==='a'||k==='arrowleft')return 'left';
+    if(k==='d'||k==='arrowright')return 'right';
+    return null;
+  }
+  
+  // Use keyup→keydown pattern: detect tap (press+release+press quickly)
+  document.addEventListener('keyup',e=>{
+    const dir=keyToDir(e.key);
+    if(!dir)return;
+    // Mark when this direction was released
+    _dashDirTimes[dir]=Date.now();
+    _dashDirTaps[dir]=1; // armed for double-tap
+  });
+  
+  // Separate listener with high priority for dash detection
   document.addEventListener('keydown',e=>{
     if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
     if(arcadeGame)return;
-    const now=Date.now();
-    const k=e.key.toLowerCase();
-    const dirKeys={'w':'up','s':'down','a':'left','d':'right','arrowup':'up','arrowdown':'down','arrowleft':'left','arrowright':'right'};
-    const dir=dirKeys[k];
+    const dir=keyToDir(e.key);
     if(!dir)return;
+    if(e.repeat)return; // ignore key repeat!
     
-    if(lastKey===k&&now-(lastKeyTime[k]||0)<DASH_DOUBLE_TAP_MS&&_dashCooldown<=0&&!S.visitor._dashing){
-      // Double tap detected — DASH!
+    const now=Date.now();
+    const timeSinceRelease=now-(_dashDirTimes[dir]||0);
+    
+    // Double-tap: key was released recently and pressed again within window
+    if(_dashDirTaps[dir]===1 && timeSinceRelease<DASH_DOUBLE_TAP_MS && S._dashCooldown<=0 && !S.visitor._dashing){
+      _dashDirTaps[dir]=0;
       if(DuelSystem.active){
         DuelSystem.dodge(dir);
       } else {
         performDash(dir);
       }
-      lastKeyTime[k]=0;
-      lastKey=null;
     } else {
-      lastKeyTime[k]=now;
-      lastKey=k;
+      _dashDirTaps[dir]=0; // reset if too slow
     }
   });
   
   function performDash(dir){
     if(S.spacewalk.active)return;
     const v=S.visitor;
-    _dashCooldown=DASH_COOLDOWN;
+    S._dashCooldown=DASH_COOLDOWN;
     v._dashing=true;
-    v._dashTimer=0.15; // dash duration in seconds
+    v._dashTimer=0.18; // dash duration
+    v._dashDuration=0.18;
     v._dashDir=dir;
     
-    // Store start position for trail
     const startX=v.x, startY=v.y;
     
     // Calculate target
@@ -8644,44 +8938,67 @@ function initInput(){
     if(dir==='left')v.dir=1;
     if(dir==='right')v.dir=2;
     
-    // Store target for smooth interpolation
     v._dashTargetX=tx;
     v._dashTargetY=ty;
     v._dashStartX=startX;
     v._dashStartY=startY;
     
-    // Afterimage trail particles
-    for(let i=0;i<5;i++){
-      const t=i/5;
+    // Afterimage ghosts (3 semi-transparent copies)
+    for(let i=0;i<3;i++){
+      const t=(i+1)/4;
       const px=startX+(tx-startX)*t;
       const py=startY+(ty-startY)*t;
-      S.particles.push({x:px,y:py-15,vx:0,vy:0,life:12-i*2,color:'rgba(0,255,247,0.5)',size:8-i});
+      // Big soft ghost
+      S.particles.push({x:px,y:py-15,vx:0,vy:0,life:18-i*4,color:`rgba(0,255,247,${0.35-i*0.1})`,size:12-i*2});
+      // Small sparkles along path
+      S.particles.push({x:px+(Math.random()-.5)*12,y:py-15+(Math.random()-.5)*12,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2,life:14,color:'rgba(255,255,255,0.6)',size:1.5});
     }
     
-    // Speed lines
-    for(let i=0;i<8;i++){
-      const ox=(Math.random()-.5)*30;
-      const oy=(Math.random()-.5)*30;
-      const vxp=dir==='left'?3:dir==='right'?-3:ox*.1;
-      const vyp=dir==='up'?3:dir==='down'?-3:oy*.1;
-      S.particles.push({x:v.x+ox,y:v.y-15+oy,vx:vxp,vy:vyp,life:10,color:'rgba(255,255,255,0.4)',size:1});
+    // Burst particles at start position (dust cloud)
+    for(let i=0;i<6;i++){
+      const angle=Math.random()*Math.PI*2;
+      const spd=1+Math.random()*2;
+      S.particles.push({x:startX,y:startY,vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd-0.5,life:15,color:'rgba(200,200,220,0.4)',size:2+Math.random()*2});
     }
     
-    // Sound — quick whoosh
+    // Speed lines streaking BEHIND the dash
+    const opposite={up:'down',down:'up',left:'right',right:'left'};
+    for(let i=0;i<10;i++){
+      const spread=(Math.random()-.5)*40;
+      let lx=v.x, ly=v.y-15;
+      let lvx=0,lvy=0;
+      if(dir==='left'||dir==='right'){ly+=spread;lvx=dir==='left'?2+Math.random()*3:-2-Math.random()*3;}
+      else{lx+=spread;lvy=dir==='up'?2+Math.random()*3:-2-Math.random()*3;}
+      S.particles.push({x:lx,y:ly,vx:lvx,vy:lvy,life:8+Math.random()*4,color:'rgba(0,255,247,0.25)',size:1});
+    }
+    
+    // Satisfying whoosh sound — two-tone sweep
     if(S.audioCtx){
       const c=S.audioCtx,n=c.currentTime;
-      const o=c.createOscillator(),g=c.createGain();
-      o.connect(g);g.connect(S.masterGain);
-      o.type='sine';
-      o.frequency.setValueAtTime(400,n);
-      o.frequency.exponentialRampToValueAtTime(100,n+0.12);
-      g.gain.setValueAtTime(S.volume*0.08,n);
-      g.gain.exponentialRampToValueAtTime(0.001,n+0.12);
-      o.start(n);o.stop(n+0.12);
+      // Low whoosh
+      const o1=c.createOscillator(),g1=c.createGain();
+      o1.connect(g1);g1.connect(S.masterGain);
+      o1.type='sine';
+      o1.frequency.setValueAtTime(300,n);
+      o1.frequency.exponentialRampToValueAtTime(80,n+0.15);
+      g1.gain.setValueAtTime(S.volume*0.1,n);
+      g1.gain.exponentialRampToValueAtTime(0.001,n+0.15);
+      o1.start(n);o1.stop(n+0.15);
+      // High shimmer
+      const o2=c.createOscillator(),g2=c.createGain();
+      o2.connect(g2);g2.connect(S.masterGain);
+      o2.type='triangle';
+      o2.frequency.setValueAtTime(800,n);
+      o2.frequency.exponentialRampToValueAtTime(400,n+0.1);
+      g2.gain.setValueAtTime(S.volume*0.04,n);
+      g2.gain.exponentialRampToValueAtTime(0.001,n+0.1);
+      o2.start(n);o2.stop(n+0.1);
     }
     
-    // Brief screen effect
-    S.screenShake=Math.max(S.screenShake||0,1.5);
+    // Subtle screen juice
+    S.screenShake=Math.max(S.screenShake||0,2);
+    // Brief iFrames during dash (invincible while dashing — feels fair)
+    if(DuelSystem.active)DuelSystem.iFrames=Math.max(DuelSystem.iFrames||0,0.18);
   }
   S.useVisitor=true;
 }
@@ -8814,9 +9131,31 @@ function runWelcome(){
 }
 
 function load(){
-  const bar=$('#load-bar');let p=0;
-  const tips=['Pressurizing station...','Brewing zero-g espresso...','Waking Pixel...','Calibrating Earth viewport...','Establishing orbit...'];
-  const iv=setInterval(()=>{p+=20;bar.style.width=p+'%';$('#load-tip').textContent=tips[p/20-1]||'';if(p>=100){clearInterval(iv);setTimeout(()=>{$('#loader').classList.add('done');setTimeout(()=>{$('#loader').style.display='none';init()},800)},300)}},250);
+  const bar=$('#load-bar');const bootLog=$('#boot-log');let p=0;
+  const bootSteps=[
+    {msg:'> Initializing core systems...',pct:8,cls:''},
+    {msg:'  [OK] Reactor online',pct:15,cls:'ok'},
+    {msg:'  [OK] Life support active',pct:22,cls:'ok'},
+    {msg:'> Pressurizing corridors...',pct:30,cls:''},
+    {msg:'  [OK] Atmosphere: 101.3 kPa',pct:38,cls:'ok'},
+    {msg:'> Calibrating Earth viewport...',pct:45,cls:''},
+    {msg:'  [OK] Orbit: 408km LEO stable',pct:52,cls:'ok'},
+    {msg:'> Brewing zero-g espresso...',pct:58,cls:''},
+    {msg:'  [OK] Caffeine reserves nominal ☕',pct:65,cls:'ok'},
+    {msg:'> Waking Pixel...',pct:72,cls:''},
+    {msg:'  [OK] Cat: awake & judging 🐱',pct:78,cls:'ok'},
+    {msg:'> Loading station memory...',pct:85,cls:''},
+    {msg:'  [OK] Visitor records loaded',pct:90,cls:'ok'},
+    {msg:'> Establishing communications...',pct:95,cls:''},
+    {msg:'  ✦ Welcome aboard, visitor.',pct:100,cls:'highlight'},
+  ];
+  let step=0;
+  const iv=setInterval(()=>{
+    if(step>=bootSteps.length){clearInterval(iv);setTimeout(()=>{$('#loader').classList.add('done');setTimeout(()=>{$('#loader').style.display='none';init()},800)},400);return}
+    const s=bootSteps[step];bar.style.width=s.pct+'%';
+    const line=document.createElement('div');line.className='boot-line'+(s.cls?' '+s.cls:'');line.textContent=s.msg;bootLog.appendChild(line);
+    bootLog.scrollTop=bootLog.scrollHeight;step++;
+  },180);
 }
 
 function init(){

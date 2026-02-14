@@ -39,6 +39,15 @@ function broadcast(msg, excludeId) {
   }
 }
 
+function broadcastFloorPresence() {
+  const floorMap = {};
+  for (const [id, v] of visitors) {
+    if (!floorMap[v.floor]) floorMap[v.floor] = [];
+    floorMap[v.floor].push({ name: v.name, id });
+  }
+  broadcast({ type: 'floor.presence', floors: floorMap, total: visitors.size });
+}
+
 // Guestbook - persisted to file
 const GUESTBOOK_PATH = path.join(__dirname, 'guestbook.json');
 function loadGuestbook() {
@@ -953,6 +962,7 @@ wss.on('connection', (visitorWs) => {
   // Broadcast join to others (with a slight delay so client can set up)
   const vi = visitors.get(visitorId);
   broadcast({ type: 'player.join', player: { id: visitorId, name: vi.name, x: vi.x, y: vi.y, dir: vi.dir, floor: vi.floor, skin: vi.skin } }, visitorId);
+  broadcastFloorPresence();
 
   let gatewayWs = null;
   let authenticated = false;
@@ -1105,6 +1115,7 @@ wss.on('connection', (visitorWs) => {
       else if (msg.type === 'player.update') {
         const v = visitors.get(visitorId);
         if (!v) return;
+        const oldFloor = v.floor;
         v.x = msg.x; v.y = msg.y; v.dir = msg.dir; v.floor = msg.floor;
         v.skin = msg.skin || v.skin; v.name = msg.name || v.name;
         v.lastUpdate = Date.now();
@@ -1113,6 +1124,10 @@ wss.on('connection', (visitorWs) => {
         if (now - v.lastBroadcast >= 100) {
           v.lastBroadcast = now;
           broadcast({ type: 'player.move', id: visitorId, x: v.x, y: v.y, dir: v.dir, floor: v.floor, name: v.name, skin: v.skin }, visitorId);
+        }
+        // Broadcast floor presence update when floor changes
+        if (oldFloor !== v.floor) {
+          broadcastFloorPresence();
         }
       }
       else if (msg.type === 'player.swing') {
@@ -1287,6 +1302,7 @@ wss.on('connection', (visitorWs) => {
     
     visitors.delete(visitorId);
     broadcast({ type: 'player.leave', id: visitorId });
+    broadcastFloorPresence();
     if (gatewayWs) gatewayWs.close();
   });
 
