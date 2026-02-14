@@ -116,14 +116,16 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 .coin-float{position:fixed;font-family:monospace;font-size:14px;font-weight:bold;color:#ffd700;pointer-events:none;z-index:700;animation:coinFloat 1.5s ease forwards}
 @keyframes coinFloat{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-40px)}}
 /* Virtual Joystick for Mobile */
-#virtual-joystick{position:fixed;bottom:20px;left:20px;width:80px;height:80px;z-index:9000;touch-action:none;display:none}
-#joystick-base{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.3);position:relative}
-#joystick-knob{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.6);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);transition:all .1s ease}
+#virtual-joystick{position:fixed;bottom:25px;left:25px;width:100px;height:100px;z-index:9000;touch-action:none;display:none}
+#joystick-base{width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.15);border:3px solid rgba(255,255,255,.35);position:relative;box-shadow:0 0 15px rgba(255,255,255,.1)}
+#joystick-knob{width:45px;height:45px;border-radius:50%;background:rgba(255,255,255,.5);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);transition:all .08s ease;box-shadow:0 0 10px rgba(255,255,255,.2)}
 
 /* Action Buttons for Mobile */
 #action-buttons{position:fixed;bottom:20px;right:20px;z-index:9000;display:none;flex-direction:column;gap:10px}
-.action-btn{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.4);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;touch-action:none;-webkit-tap-highlight-color:transparent}
-.action-btn:active{background:rgba(255,255,255,.4);transform:scale(.95)}
+.action-btn{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.25);border:3px solid rgba(255,255,255,.5);color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;touch-action:none;-webkit-tap-highlight-color:transparent;box-shadow:0 0 10px rgba(255,255,255,.1)}
+.action-btn:active{background:rgba(255,255,255,.5);transform:scale(.9);box-shadow:0 0 20px rgba(255,255,255,.3)}
+.action-btn.attack-btn{background:rgba(255,50,50,.3);border-color:rgba(255,100,100,.6);box-shadow:0 0 15px rgba(255,50,50,.2)}
+.action-btn.attack-btn:active{background:rgba(255,50,50,.5)}
 
 /* Mobile Chat Drawer */
 #chat-drawer-toggle{display:none;position:fixed;bottom:0;left:0;right:0;height:30px;background:rgba(10,10,20,.95);border-top:2px solid #333;color:#00fff7;z-index:100;cursor:pointer;align-items:center;justify-content:center}
@@ -427,8 +429,9 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
     <!-- Action Buttons for Mobile -->
     <div id="action-buttons">
       <div class="action-btn" id="btn-saber-switch" style="display:none">🔄</div>
-      <div class="action-btn" id="btn-saber-swing" style="display:none">🗡️</div>
+      <div class="action-btn attack-btn" id="btn-saber-swing" style="display:none">⚔️</div>
       <div class="action-btn" id="btn-interact">⚡</div>
+      <div class="action-btn attack-btn" id="btn-duel-request" style="display:none">🤺</div>
     </div>
   </div>
   
@@ -4979,7 +4982,7 @@ const VirtualJoystick = {
     const dx = touchX - this.centerX;
     const dy = touchY - this.centerY;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const maxDistance = 25; // Half of base radius
+    const maxDistance = 35; // Half of base radius
     
     let knobX = dx;
     let knobY = dy;
@@ -4991,24 +4994,20 @@ const VirtualJoystick = {
     
     knob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
     
-    // Convert to 8-direction movement
+    // Convert to 4-direction movement based on joystick angle
     const deadzone = 8;
     if (distance > deadzone) {
-      const angle = Math.atan2(dy, dx) + Math.PI;
-      const octant = Math.round(angle / (Math.PI / 4)) % 8;
+      const angle = Math.atan2(dy, dx); // radians: 0=right, PI/2=down, PI=left, -PI/2=up
       
       // Clear all directions first
       S.keys.up = S.keys.down = S.keys.left = S.keys.right = false;
       
-      // Set directions based on octant
-      if (octant === 0 || octant === 1) S.keys.right = true;
-      if (octant === 1 || octant === 2) S.keys.down = true;
-      if (octant === 2 || octant === 3) S.keys.down = true;
-      if (octant === 3 || octant === 4) S.keys.left = true;
-      if (octant === 4 || octant === 5) S.keys.left = true;
-      if (octant === 5 || octant === 6) S.keys.up = true;
-      if (octant === 6 || octant === 7) S.keys.up = true;
-      if (octant === 7 || octant === 0) S.keys.right = true;
+      // 8-directional: set based on angle quadrants with diagonals
+      const deg = angle * 180 / Math.PI;
+      if (deg > -67.5 && deg < 67.5) S.keys.right = true;
+      if (deg > 22.5 && deg < 157.5) S.keys.down = true;
+      if (deg > 112.5 || deg < -112.5) S.keys.left = true;
+      if (deg > -157.5 && deg < -22.5) S.keys.up = true;
     } else {
       S.keys.up = S.keys.down = S.keys.left = S.keys.right = false;
     }
@@ -5057,18 +5056,41 @@ const MobileControls = {
       });
     }
     
-    // Update action button visibility
+    const btnDuelRequest = $('#btn-duel-request');
+    if (btnDuelRequest) {
+      btnDuelRequest.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        // Request duel with nearest player
+        if (S._nearbyPlayers && S._nearbyPlayers.length > 0) {
+          const nearest = S._nearbyPlayers[0];
+          if (S._ws && S._ws.readyState === WebSocket.OPEN) {
+            S._ws.send(JSON.stringify({type:'duel.request',targetId:nearest.id}));
+            showNotification('⚔️ Duel request sent!');
+          }
+        }
+      });
+    }
+    
+    // Update action button visibility periodically
     this.updateActionButtons();
+    setInterval(() => this.updateActionButtons(), 1000);
   },
   
   updateActionButtons() {
     const btnSaberSwing = $('#btn-saber-swing');
     const btnSaberSwitch = $('#btn-saber-switch');
+    const btnDuelRequest = $('#btn-duel-request');
     
     if (btnSaberSwing && btnSaberSwitch) {
       const hasSaber = S._visitorSaber;
       btnSaberSwing.style.display = hasSaber ? 'flex' : 'none';
       btnSaberSwitch.style.display = hasSaber ? 'flex' : 'none';
+    }
+    // Show duel request button when near another player
+    if (btnDuelRequest && S._nearbyPlayers && S._nearbyPlayers.length > 0) {
+      btnDuelRequest.style.display = 'flex';
+    } else if (btnDuelRequest) {
+      btnDuelRequest.style.display = 'none';
     }
   }
 };
