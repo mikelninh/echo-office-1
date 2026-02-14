@@ -5446,16 +5446,19 @@ function visitorInteract(){
     return;
   }
   
+  // Don't interact if a popup is already open
+  if(document.querySelector('.popup-overlay'))return;
+  
   if(S.visitorNear){
-    // Trigger the same interactions as clicking
     const id=S.visitorNear.id;
     S.nearObject=S.visitorNear;
     interact();
-    Coins.earn(1,'interact');
+    return;
   }
   // Check if near Echo
   if(Math.hypot(S.visitor.x-S.echo.x,S.visitor.y-S.echo.y)<40){
     EchoAI.visitorClickEcho();
+    return;
   }
   // Check if near Pixel
   if(Math.hypot(S.visitor.x-S.pixel.x,S.visitor.y-S.pixel.y)<30){
