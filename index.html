@@ -1693,7 +1693,7 @@ const SKINS=[
 
 // -- Visitor Skins --
 const VISITOR_SKINS=[
-  {id:'hooded',label:'Hooded',icon:'🧑‍💻',color:'#44ccbb',cost:0,desc:'Classic teal hooded figure',rarity:'common'},
+  {id:'hooded',label:'Hooded',icon:'🧑‍💻',color:'#44ccbb',cost:0,desc:'Classic teal hooded figure',rarity:'common',hasSprite:true},
   {id:'astronaut',label:'Astronaut',icon:'👨‍🚀',color:'#ffffff',cost:10,desc:'White space suit',rarity:'common'},
   {id:'catsuit',label:'Cat Suit',icon:'🐱',color:'#222222',cost:10,desc:'Black with cat ears',rarity:'common'},
   {id:'alien',label:'Alien',icon:'👽',color:'#60ff60',cost:10,desc:'Green with antennae',rarity:'common'},
@@ -7418,13 +7418,16 @@ function showVisitorSkinPanel(){
       
       if(!owned){
         if(!Coins.canAfford(cost)){showNotification('Need more ◈!');return}
-        if(confirm(`Buy ${VISITOR_SKINS.find(s=>s.id===id).label} for ${cost}◈?`)){
-          Coins.spend(cost,'skin');
-          const skins=LS.get('visitorSkinsOwned',[]);skins.push(id);LS.set('visitorSkinsOwned',skins);
-          p.closest('.popup-overlay').remove();setTimeout(()=>visitorTransform(id),200);
-        }
+        const skinLabel=VISITOR_SKINS.find(s=>s.id===id).label;
+        const confirmDiv=document.createElement('div');
+        confirmDiv.style.cssText='position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;border-radius:12px';
+        confirmDiv.innerHTML='<div style="font-size:14px;margin-bottom:12px;color:#fff">Buy <b style="color:#9b59b6">'+skinLabel+'</b> for <b style="color:#ffd700">'+cost+'◈</b>?</div><div style="display:flex;gap:8px"><button id="confirm-buy-yes" style="padding:6px 20px;background:#9b59b6;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">Buy</button><button id="confirm-buy-no" style="padding:6px 20px;background:#333;color:#aaa;border:1px solid #555;border-radius:6px;cursor:pointer;font-size:12px">Cancel</button></div>';
+        p.style.position='relative';
+        p.appendChild(confirmDiv);
+        confirmDiv.querySelector('#confirm-buy-yes').onclick=function(e){e.stopPropagation();Coins.spend(cost,'skin');const skins=LS.get('visitorSkinsOwned',[]);skins.push(id);LS.set('visitorSkinsOwned',skins);p.closest('.popup-overlay').remove();setTimeout(function(){visitorTransform(id)},200);};
+        confirmDiv.querySelector('#confirm-buy-no').onclick=function(e){e.stopPropagation();confirmDiv.remove();};
       } else {
-        p.closest('.popup-overlay').remove();setTimeout(()=>visitorTransform(id),200);
+        p.closest('.popup-overlay').remove();setTimeout(function(){visitorTransform(id)},200);
       }
     }
   });
