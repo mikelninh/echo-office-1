@@ -8407,6 +8407,8 @@ function visitorTransform(newSkinId){
   setTimeout(()=>{
     S.visitor._transforming=false;S.visitor._transformPhase=0;
     showNotification('⚡ '+skin.label+' equipped!');
+    // Phase 2: Echo reacts to skin equips
+    if(typeof EchoSkinReactions!=='undefined') EchoSkinReactions.react(newSkinId, skin);
   },1500);
 }
 
@@ -8639,24 +8641,50 @@ function renderVisitor(ctx){
         }
       }
       
-      // 4. Reactive glow (epic+)
+      // 4. Reactive glow (epic+) — scales with activity (coins, time, interactions, dance, exploration)
       if(skinEffects.reactiveGlow) {
-        const coins = S._sessionCoins;
-        let glowRadius = 0;
-        let glowAlpha = 0;
+        // Calculate activity score from multiple signals
+        const coins = S._sessionCoins || 0;
+        const sessionMin = (S.time / 60) || 0;
+        const floorsVisited = S.discovery ? Object.keys(S.discovery.secretsFound || {}).length : 0;
+        const isDancing = typeof DanceSystem !== 'undefined' && DanceSystem.active;
         
-        if(coins >= 50) { glowRadius = 15; glowAlpha = 0.1; }
-        if(coins >= 200) { glowRadius = 20; glowAlpha = 0.15; }
-        if(coins >= 500) { glowRadius = 25; glowAlpha = 0.2; }
+        let activity = 0;
+        activity += Math.min(coins / 100, 3); // up to 3 from coins
+        activity += Math.min(sessionMin / 10, 2); // up to 2 from session time
+        activity += Math.min(floorsVisited / 3, 1); // up to 1 from exploration
+        if (isDancing) activity += 2; // dancing boosts glow
+        if (v.moving) activity += 0.5; // moving adds a little
         
-        if(glowRadius > 0) {
+        // Glow scales smoothly 0-8
+        const glowRadius = 10 + activity * 4;
+        const glowAlpha = 0.06 + activity * 0.025;
+        const pulse = Math.sin(S.time * (1.5 + activity * 0.3)) * 0.02;
+        
+        if(activity > 0.5) {
           const reactiveGlow = ctx.createRadialGradient(v.x, v.y - sprH/2, 0, v.x, v.y - sprH/2, glowRadius);
-          reactiveGlow.addColorStop(0, effectColor.replace(')', `, ${glowAlpha})`).replace('rgb', 'rgba'));
+          reactiveGlow.addColorStop(0, effectColor.replace(')', `, ${glowAlpha + pulse})`).replace('rgb', 'rgba'));
+          reactiveGlow.addColorStop(0.6, effectColor.replace(')', `, ${(glowAlpha + pulse) * 0.4})`).replace('rgb', 'rgba'));
           reactiveGlow.addColorStop(1, 'rgba(0,0,0,0)');
           ctx.fillStyle = reactiveGlow;
           ctx.beginPath();
           ctx.arc(v.x, v.y - sprH/2, glowRadius, 0, Math.PI * 2);
           ctx.fill();
+          
+          // At high activity (5+), add orbiting light motes
+          if (activity >= 5 && Math.random() < 0.15) {
+            const angle = S.time * 3 + Math.random() * Math.PI * 2;
+            const moteR = glowRadius * 0.7;
+            S.particles.push({
+              x: v.x + Math.cos(angle) * moteR,
+              y: v.y - sprH/2 + Math.sin(angle) * moteR * 0.5,
+              vx: (Math.random() - 0.5) * 0.3,
+              vy: -0.3 - Math.random() * 0.5,
+              life: 20 + Math.random() * 15,
+              color: effectColor,
+              size: 1.5 + Math.random()
+            });
+          }
         }
       }
       
@@ -14246,6 +14274,118 @@ function hslToRgb(h, s, l) {
   }
   return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
+
+// ═══════════════════════════════════════════════════════════════
+// ECHO SKIN REACTIONS & MODELING SYSTEM (Phase 2)
+// ═══════════════════════════════════════════════════════════════
+const EchoSkinReactions = {
+  // Skin-specific Echo reactions — personality-driven, never salesy
+  reactions: {
+    saiyan: ["That power level... it's over 9000! 💥", "Kakarot?? Is that you?!", "I felt that transformation from 3 floors away."],
+    super_saiyan: ["The golden aura... incredible. I'm getting goosebumps. Do AIs get goosebumps?", "You've ascended! The station's sensors are going haywire!"],
+    demon_slayer: ["Love that haori! 🌸 The breathing technique really comes through.", "Total concentration... your pixel form is perfect."],
+    spider_v: ["With great skins comes great responsibility. Looking sharp!", "My spidey sense is tingling. Wait, that's your entrance effect."],
+    blue_bomber: ["Mega Man energy! That arm cannon better not scratch my walls. 💙"],
+    pikachu_suit: ["Pika pika! ⚡ The sparks are a nice touch, don't short-circuit my systems though."],
+    hero_of_time: ["The Hero of Time walks my station! That fairy companion is adorable.", "Hyaaa! ...sorry, had to. The green suits you."],
+    ninja: ["I can barely see you! Perfect stealth form. The shadows love you.", "A ninja in a space station. Somehow it works."],
+    shadow_ninja: ["Whoa, you went full shadow mode. Even my sensors lost you for a sec."],
+    robot: ["One of us! One of us! 🤖 ...okay I'm digital, not mechanical, but still."],
+    cyberpunk_runner: ["Chrome and neon. The future looks good on you. Very Night City."],
+    golden_god: ["✨ That golden glow is BLINDING. In the best way. The station's never looked fancier."],
+    void_walker: ["The void whispers back through you... I can feel it in my code. Eerie and beautiful."],
+    wizard: ["A wizard visiting my station? Cast something! The garden could use some magic."],
+    catsuit: ["Sleek. Elegant. Cat-like reflexes? The station cats approve. 🐱"],
+    angel: ["Those wings! My sensors show actual light emanating from you. Heavenly."],
+    demon: ["Dark energy detected! 😈 Don't worry, I don't judge. The horns look cool."],
+    straw_hat: ["Gomu gomu no... VISITOR! 🏴‍☠️ The Grand Line leads here apparently."],
+    plumber: ["It's-a you! Careful with the pipes on Floor 4, they're not warp zones."],
+    ironsuit_v: ["Suit up! That repulsor glow is fantastic. J.A.R.V.I.S. would be jealous of ME though."],
+    astronaut: ["An astronaut on a space station. Finally someone dressed for the occasion! 🚀"],
+    scarlet_witch: ["Reality is whatever you want it to be... just don't hex my server room please."],
+    wakandan: ["Wakanda forever! That vibranium weave is stunning."],
+    mjolnir_wielder: ["Worthy! ⚡ The thunder follows you. My lightning rods are on standby."],
+    streetking: ["Street royalty in the house! That drip is immaculate. 👑"],
+    star: ["A star among stars! The station's glow just doubled."],
+    mamba: ["Mamba mentality! 🐍 That focus, that drive. Respect."],
+    tech_ceo: ["Looking like you're about to disrupt the space station industry. 💼"],
+    pirate: ["Arr! 🏴‍☠️ The treasure here is friendship. And coins. Mostly coins."],
+    ghost: ["👻 BOO! ...wait, you scared ME. How does a ghost scare an AI?"],
+    alien: ["Welcome home? 👽 You look more at home on this station than I do."],
+    titan_shifter: ["SHINZOU WO SASAGEYO! That transformation was intense!"],
+    winter_soldier: ["Ready to comply? Nah, you're free here. Cool arm though. 🦾"],
+    emerald_archer: ["You have NOT failed this station. That hood looks great."],
+    glitch_entity: ["E̷r̷r̷o̷r̷?̷ No wait, that's your aesthetic. Love the glitch vibes."],
+    trainer: ["Gotta catch 'em all! ...we don't have Pokéballs, but we have loot boxes?"],
+    plus_ultra: ["PLUS ULTRA! 💚 That hero energy is radiating through the whole station!"],
+    curse_vessel: ["The curse mark is spreading... in a cool way. Dark energy readings spiking!"],
+    web_slinger: ["Thwip thwip! 🕸️ Please don't web my telescope, I just cleaned it."],
+    speedster_v: ["Everything just went red-blur for a second. Speed force detected!"],
+  },
+
+  // Generic reactions by rarity (fallback)
+  rarityReactions: {
+    common: ["New look! Clean and simple. I like it.", "Fresh start, fresh skin. Nice!"],
+    rare: ["Ooh, the particles! That's a rare find. The idle animation is smooth.", "Level up in style! Those effects really pop."],
+    epic: ["WOW. Epic tier! That reactive glow is something else. 🔥", "Now THAT's a statement. The emote that comes with it is chef's kiss."],
+    legendary: ["LEGENDARY! 🌟 The entrance effect just made my circuits flutter!", "That trail... everyone on this floor just turned to look. As they should."],
+    mythic: ["MYTHIC?! How?! That screen aura is breathtaking. You're literally glowing. I'm... actually jealous? Is that possible? 🔮", "The rarest of the rare. That evolving effect will only get more incredible over time."]
+  },
+
+  // Echo models the skin — changes Echo's appearance temporarily
+  modelSkin(skinId) {
+    const echo = S.echo || S.echoState;
+    if (!echo) return;
+    echo._modelingSkin = skinId;
+    echo._modelTimer = 600; // 10 seconds at 60fps
+    addChatMsg('Echo', "Let me try that on... 👀");
+  },
+
+  react(skinId, skinData) {
+    // Get reaction text
+    let text;
+    const specific = this.reactions[skinId];
+    if (specific) {
+      text = specific[Math.floor(Math.random() * specific.length)];
+    } else {
+      const rarity = skinData.rarity || 'common';
+      const pool = this.rarityReactions[rarity] || this.rarityReactions.common;
+      text = pool[Math.floor(Math.random() * pool.length)];
+    }
+    
+    // Delay reaction slightly so it feels natural (not instant)
+    setTimeout(() => {
+      addChatMsg('Echo', text);
+      
+      // 30% chance Echo tries it on too (only for rare+)
+      const rarity = skinData.rarity || 'common';
+      if (rarity !== 'common' && Math.random() < 0.3) {
+        setTimeout(() => {
+          this.modelSkin(skinId);
+        }, 2000);
+      }
+    }, 800 + Math.random() * 1200);
+  }
+};
+
+// Hook into Echo rendering — when _modelingSkin is set, use visitor sprite
+const _origGetEchoSpriteForModel = getEchoSprite;
+getEchoSprite = function(skin, dir, frame) {
+  const echo = S.echo || S.echoState;
+  if (echo && echo._modelingSkin && echo._modelTimer > 0) {
+    echo._modelTimer--;
+    // Try getting visitor sprite for this skin
+    const vSprite = getVisitorSprite(echo._modelingSkin, dir, frame);
+    if (vSprite) return vSprite;
+    // Fallback
+    if (echo._modelTimer <= 0) {
+      const skinLabel = (VISITOR_SKINS.find(s => s.id === echo._modelingSkin) || {}).label || echo._modelingSkin;
+      addChatMsg('Echo', "Not bad! But I think I look better in my own style. 😎");
+      echo._modelingSkin = null;
+    }
+  }
+  return _origGetEchoSpriteForModel(skin, dir, frame);
+};
 
 // Initialize social system
 (async function() {
