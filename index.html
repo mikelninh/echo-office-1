@@ -2011,32 +2011,32 @@ const WEAPONS = [
 // -- Furniture types for user rooms --
 const FURNITURE_TYPES = {
   // Free furniture
-  basic_chair: { name: 'Basic Chair', icon: '🪑', cost: 0, width: 30, height: 30, rarity:'common' },
-  basic_table: { name: 'Basic Table', icon: '🪑', cost: 0, width: 60, height: 40, rarity:'common' },
-  basic_lamp: { name: 'Basic Lamp', icon: '💡', cost: 0, width: 20, height: 40, rarity:'common' },
-  basic_rug: { name: 'Basic Rug', icon: '🟫', cost: 0, width: 80, height: 50, rarity:'common' },
-  poster: { name: 'Poster', icon: '🖼️', cost: 0, width: 40, height: 60, rarity:'common' },
+  basic_chair: { name: 'Basic Chair', icon: '🪑', cost: 0, width: 30, height: 30, rarity:'common', render:function(cx,x,y){cx.fillStyle='#8B6914';cx.fillRect(x-6,y+2,2,8);cx.fillRect(x+4,y+2,2,8);cx.fillRect(x-6,y-2,12,4);cx.fillStyle='#6B4F12';cx.fillRect(x-6,y-10,2,8);cx.fillRect(x+4,y-10,2,8);cx.fillRect(x-6,y-10,12,2)} },
+  basic_table: { name: 'Basic Table', icon: '🪑', cost: 0, width: 60, height: 40, rarity:'common', render:function(cx,x,y){cx.fillStyle='#8B6914';cx.fillRect(x-10,y-2,20,3);cx.fillStyle='#6B4F12';cx.fillRect(x-8,y+1,2,8);cx.fillRect(x+6,y+1,2,8)} },
+  basic_lamp: { name: 'Basic Lamp', icon: '💡', cost: 0, width: 20, height: 40, rarity:'common', render:function(cx,x,y){cx.fillStyle='#555';cx.fillRect(x-1,y-2,2,12);cx.fillStyle='#ffdd44';cx.beginPath();cx.arc(x,y-5,5,0,Math.PI*2);cx.fill();cx.fillStyle='rgba(255,221,68,0.3)';cx.beginPath();cx.arc(x,y-5,8,0,Math.PI*2);cx.fill()} },
+  basic_rug: { name: 'Basic Rug', icon: '🟫', cost: 0, width: 80, height: 50, rarity:'common', render:function(cx,x,y){cx.fillStyle='#8B4513';cx.fillRect(x-10,y-4,20,8);cx.fillStyle='#A0522D';cx.fillRect(x-8,y-2,16,4);cx.fillStyle='#CD853F';cx.fillRect(x-3,y-1,6,2)} },
+  poster: { name: 'Poster', icon: '🖼️', cost: 0, width: 40, height: 60, rarity:'common', render:function(cx,x,y){cx.fillStyle='#4a3830';cx.fillRect(x-8,y-10,16,18);cx.fillStyle='#2a4a6a';cx.fillRect(x-6,y-8,12,14);cx.fillStyle='#ffdd44';cx.fillRect(x-2,y-4,4,3)} },
   
   // 10◈ furniture
-  comfy_chair: { name: 'Comfy Chair', icon: '🛋️', cost: 10, width: 40, height: 40, rarity:'common' },
-  desk: { name: 'Desk', icon: '🪑', cost: 10, width: 80, height: 50, rarity:'common' },
-  bookshelf: { name: 'Bookshelf', icon: '📚', cost: 10, width: 60, height: 80, rarity:'common' },
-  plant_pot: { name: 'Plant Pot', icon: '🪴', cost: 10, width: 25, height: 30, rarity:'common' },
+  comfy_chair: { name: 'Comfy Chair', icon: '🛋️', cost: 10, width: 40, height: 40, rarity:'common', render:function(cx,x,y){cx.fillStyle='#6a4aaa';cx.fillRect(x-8,y-2,16,8);cx.fillRect(x-8,y-8,16,6);cx.fillStyle='#5a3a9a';cx.fillRect(x-10,y-2,3,10);cx.fillRect(x+7,y-2,3,10)} },
+  desk: { name: 'Desk', icon: '🪑', cost: 10, width: 80, height: 50, rarity:'common', render:function(cx,x,y){cx.fillStyle='#6B4F12';cx.fillRect(x-10,y-3,20,3);cx.fillStyle='#8B6914';cx.fillRect(x-9,y,2,8);cx.fillRect(x+7,y,2,8);cx.fillStyle='#555';cx.fillRect(x-4,y-5,3,2)} },
+  bookshelf: { name: 'Bookshelf', icon: '📚', cost: 10, width: 60, height: 80, rarity:'common', render:function(cx,x,y){cx.fillStyle='#6B4F12';cx.fillRect(x-8,y-10,16,20);cx.fillStyle='#cc2222';cx.fillRect(x-6,y-8,3,6);cx.fillStyle='#2266cc';cx.fillRect(x-3,y-8,3,6);cx.fillStyle='#22aa44';cx.fillRect(x+1,y-8,3,6);cx.fillStyle='#ddaa22';cx.fillRect(x-5,y+1,4,6);cx.fillStyle='#8844aa';cx.fillRect(x+1,y+1,4,6)} },
+  plant_pot: { name: 'Plant Pot', icon: '🪴', cost: 10, width: 25, height: 30, rarity:'common', render:function(cx,x,y){cx.fillStyle='#8B4513';cx.fillRect(x-4,y+1,8,6);cx.fillStyle='#22aa44';cx.fillRect(x-2,y-4,4,5);cx.fillRect(x-5,y-6,3,4);cx.fillRect(x+2,y-6,3,4);cx.fillStyle='#118833';cx.fillRect(x-1,y-2,2,3)} },
   
   // 25◈ furniture
-  neon_sign: { name: 'Neon Sign', icon: '💫', cost: 25, width: 80, height: 20, customizable: true, rarity:'uncommon' },
-  arcade_cabinet: { name: 'Arcade Cabinet', icon: '🕹️', cost: 25, width: 60, height: 90, rarity:'uncommon' },
-  tv: { name: 'TV', icon: '📺', cost: 25, width: 50, height: 40, rarity:'uncommon' },
-  fish_tank: { name: 'Fish Tank', icon: '🐠', cost: 25, width: 60, height: 40, rarity:'uncommon' },
+  neon_sign: { name: 'Neon Sign', icon: '💫', cost: 25, width: 80, height: 20, customizable: true, rarity:'uncommon', render:function(cx,x,y){cx.fillStyle='rgba(255,0,200,0.3)';cx.fillRect(x-10,y-5,20,10);cx.strokeStyle='#ff44cc';cx.lineWidth=2;cx.strokeRect(x-10,y-5,20,10);cx.fillStyle='#ff66dd';cx.fillRect(x-6,y-2,12,4);cx.shadowColor='#ff44cc';cx.shadowBlur=6;cx.strokeRect(x-10,y-5,20,10);cx.shadowBlur=0} },
+  arcade_cabinet: { name: 'Arcade Cabinet', icon: '🕹️', cost: 25, width: 60, height: 90, rarity:'uncommon', render:function(cx,x,y){cx.fillStyle='#1a1a2a';cx.fillRect(x-7,y-10,14,20);cx.fillStyle='#2255aa';cx.fillRect(x-5,y-8,10,8);cx.fillStyle='#44ff44';cx.fillRect(x-2,y-5,4,3);cx.fillStyle='#ff4444';cx.fillRect(x-1,y+2,2,2);cx.fillStyle='#333';cx.fillRect(x-4,y+2,2,3)} },
+  tv: { name: 'TV', icon: '📺', cost: 25, width: 50, height: 40, rarity:'uncommon', render:function(cx,x,y){cx.fillStyle='#222';cx.fillRect(x-9,y-7,18,14);cx.fillStyle='#335588';cx.fillRect(x-7,y-5,14,10);cx.fillStyle='rgba(100,180,255,0.2)';cx.fillRect(x-7,y-5,14,10);cx.fillStyle='#333';cx.fillRect(x-3,y+7,6,2)} },
+  fish_tank: { name: 'Fish Tank', icon: '🐠', cost: 25, width: 60, height: 40, rarity:'uncommon', render:function(cx,x,y){cx.fillStyle='rgba(50,150,220,0.4)';cx.fillRect(x-8,y-6,16,12);cx.strokeStyle='#88ccff';cx.lineWidth=1;cx.strokeRect(x-8,y-6,16,12);cx.fillStyle='#ff8844';cx.fillRect(x-3,y-2,3,2);cx.fillStyle='#44dd44';cx.fillRect(x+3,y+1,2,5)} },
   
   // 50◈ furniture
-  lightsaber_rack: { name: 'Lightsaber Rack', icon: '⚔️', cost: 50, width: 40, height: 60, rarity:'rare' },
-  crystal_ball: { name: 'Crystal Ball', icon: '🔮', cost: 50, width: 30, height: 30, rarity:'rare' },
-  jukebox: { name: 'Jukebox', icon: '🎵', cost: 50, width: 50, height: 80, rarity:'rare' },
+  lightsaber_rack: { name: 'Lightsaber Rack', icon: '⚔️', cost: 50, width: 40, height: 60, rarity:'rare', render:function(cx,x,y){cx.fillStyle='#555';cx.fillRect(x-8,y-2,16,4);cx.fillStyle='#44aaff';cx.fillRect(x-5,y-10,2,8);cx.fillStyle='#ff4444';cx.fillRect(x+3,y-10,2,8);cx.fillStyle='#333';cx.fillRect(x-5,y-2,2,2);cx.fillRect(x+3,y-2,2,2)} },
+  crystal_ball: { name: 'Crystal Ball', icon: '🔮', cost: 50, width: 30, height: 30, rarity:'rare', render:function(cx,x,y){cx.fillStyle='#6a3aaa';cx.beginPath();cx.arc(x,y-2,6,0,Math.PI*2);cx.fill();cx.fillStyle='rgba(180,140,255,0.5)';cx.beginPath();cx.arc(x-2,y-4,2,0,Math.PI*2);cx.fill();cx.fillStyle='#4a3830';cx.fillRect(x-4,y+4,8,3)} },
+  jukebox: { name: 'Jukebox', icon: '🎵', cost: 50, width: 50, height: 80, rarity:'rare', render:function(cx,x,y){cx.fillStyle='#cc4422';cx.fillRect(x-7,y-10,14,20);cx.fillStyle='#ffdd44';cx.fillRect(x-5,y-8,10,6);cx.fillStyle='#222';cx.fillRect(x-3,y-2,6,4);cx.fillStyle='#44ff44';cx.fillRect(x-5,y+4,3,2);cx.fillStyle='#ff4444';cx.fillRect(x+2,y+4,3,2);cx.beginPath();cx.arc(x,y-5,2,0,Math.PI*2);cx.fillStyle='#111';cx.fill()} },
   
   // Special (earned) furniture
-  pixel_plushie: { name: 'Pixel Plushie', icon: '🐱', cost: 0, width: 20, height: 20, requirement: 'pet_pixel_100', rarity:'epic' },
-  trophy: { name: 'Trophy', icon: '🏆', cost: 0, width: 25, height: 35, requirement: 'win_10_duels', rarity:'epic' },
+  pixel_plushie: { name: 'Pixel Plushie', icon: '🐱', cost: 0, width: 20, height: 20, requirement: 'pet_pixel_100', rarity:'epic', render:function(cx,x,y){cx.fillStyle='#ff88aa';cx.fillRect(x-5,y-4,10,8);cx.fillStyle='#ff6688';cx.fillRect(x-7,y-7,4,4);cx.fillRect(x+3,y-7,4,4);cx.fillStyle='#111';cx.fillRect(x-3,y-2,2,2);cx.fillRect(x+1,y-2,2,2);cx.fillStyle='#ff4466';cx.fillRect(x-1,y+1,2,1)} },
+  trophy: { name: 'Trophy', icon: '🏆', cost: 0, width: 25, height: 35, requirement: 'win_10_duels', rarity:'epic', render:function(cx,x,y){cx.fillStyle='#ffd700';cx.fillRect(x-5,y-8,10,8);cx.fillRect(x-7,y-6,2,4);cx.fillRect(x+5,y-6,2,4);cx.fillStyle='#daa520';cx.fillRect(x-2,y,4,4);cx.fillRect(x-4,y+4,8,2)} },
 };
 
 // -- Lab journal entries --
@@ -6883,6 +6883,21 @@ function renderItemPreview(item, canvas) {
     ctx.fillRect(w/2-4, h/2-1, 2, 2);
     ctx.fillRect(w/2, h/2-1, 2, 2);
     ctx.fillRect(w/2-2, h/2+2, 4, 2);
+  } else if (item.icon) {
+    // Fallback: draw emoji icon as text
+    ctx.font = '16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(item.icon, w/2, h/2);
+  } else {
+    // Ultimate fallback: draw a "?" box
+    ctx.fillStyle = '#444';
+    ctx.fillRect(w/2-6, h/2-6, 12, 12);
+    ctx.fillStyle = '#aaa';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('?', w/2, h/2);
   }
   return true;
 }
