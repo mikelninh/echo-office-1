@@ -388,6 +388,16 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
 @media(max-width:600px){
   #rpg-inventory{width:100%}
 }
+/* === MMORPG UI OVERHAUL === */
+#hud, #mood-hud, #caffeine-hud, #volume-ctrl, #coin-hud, #players-hud, #floor-hud, #discovery-hud { display:none !important; }
+#action-bar{position:fixed;bottom:0;left:0;right:0;height:40px;background:linear-gradient(to bottom,rgba(15,10,30,.95),rgba(5,5,15,.98));border-top:1px solid rgba(155,89,182,.4);display:flex;align-items:center;justify-content:center;gap:4px;z-index:100;padding:0 10px}
+#action-bar .ab{width:32px;height:32px;background:rgba(30,20,50,.8);border:1px solid rgba(155,89,182,.3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s;user-select:none}
+#action-bar .ab:hover{background:rgba(60,40,100,.8);border-color:rgba(155,89,182,.7);transform:translateY(-2px)}
+#action-bar .ab.active{border-color:#9b59b6;background:rgba(155,89,182,.3)}
+#top-left-hud{position:fixed;top:6px;left:6px;display:flex;gap:8px;align-items:center;z-index:100;font-size:12px;pointer-events:none;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+#top-right-hud{position:fixed;top:6px;right:6px;display:flex;gap:8px;align-items:center;z-index:100;font-size:10px;color:#888;pointer-events:none;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+#game-wrap{padding-bottom:44px}
+@media(max-width:700px){#action-bar{height:36px;gap:2px}#action-bar .ab{width:28px;height:28px;font-size:14px}}
 </style>
 </head>
 <body>
@@ -447,6 +457,19 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
     <div id="chat-input-wrap"><input id="chat-input" placeholder="Say something..." maxlength="200"><button id="chat-send">↑</button></div>
     <div id="chat-suggestions"></div>
   </div>
+</div>
+<div id="top-left-hud"><span style="color:#ffd700;font-weight:bold">◈ <span id="coin-display">0</span></span><span style="color:#aaa;font-size:11px" id="floor-display">F1 · Echo's Quarters</span></div>
+<div id="top-right-hud"><span>👥 <span id="player-display">1</span></span><span>🗺️ <span id="discovery-display">15%</span></span></div>
+<div id="action-bar">
+<div class="ab" id="ab-inventory" title="Inventory [I]">🎒</div>
+<div class="ab" id="ab-shop" title="Shop">🛒</div>
+<div class="ab" id="ab-wardrobe" title="Wardrobe">👔</div>
+<div class="ab" id="ab-quests" title="Quests [J]">📋</div>
+<div class="ab" id="ab-collection" title="Collection">📖</div>
+<div class="ab" id="ab-achievements" title="Achievements">🏆</div>
+<div class="ab" id="ab-spacewalk" title="Spacewalk">🚀</div>
+<div class="ab" id="ab-settings" title="Settings">⚙️</div>
+<div class="ab" id="ab-bug" title="Report Bug">🐛</div>
 </div>
 <div id="elevator-overlay"></div>
 <div id="arcade-overlay"><div id="arcade-close">✕</div><div id="arcade-glow"></div><div id="arcade-crt"><div id="arcade-screen"><canvas id="arcade-canvas" width="420" height="380"></canvas></div></div></div>
@@ -21348,6 +21371,63 @@ const AtmosphereSystem = {
 }
 
 console.log('🌟 Atmosphere System: Dynamic lighting, ambient sound, peripheral effects, station breathing');
+
+// === MMORPG UI: Action Bar + Top HUD Wiring ===
+(function initMMORPGUI(){
+  const $ = s => document.querySelector(s);
+  // Sync coin display
+  const origCoinSet = Object.getOwnPropertyDescriptor(Coins,'count');
+  if(origCoinSet && origCoinSet.set){
+    const oldSet = origCoinSet.set;
+    Object.defineProperty(Coins,'count',{
+      get: origCoinSet.get,
+      set: function(v){ oldSet.call(this,v); const cd=$('#coin-display'); if(cd) cd.textContent=this._count; }
+    });
+  }
+  // Init coin display
+  const cd=$('#coin-display'); if(cd) cd.textContent=Coins._count||0;
+  // Sync floor display
+  const origChangeFloor = window.changeFloor || (typeof changeFloor==='function'?changeFloor:null);
+  if(origChangeFloor){
+    const wrapped = function(f){
+      origChangeFloor(f);
+      const fd=$('#floor-display');
+      if(fd && typeof FLOOR_NAMES!=='undefined') fd.textContent='F'+f+' · '+(FLOOR_NAMES[f]||'');
+    };
+    if(typeof changeFloor==='function') changeFloor=wrapped;
+  }
+  // Sync player count — poll every 2s
+  setInterval(function(){
+    const src=$('#player-count'); const dst=$('#player-display');
+    if(src&&dst) dst.textContent=src.textContent;
+    const dsrc=$('#discovery-hud'); const ddst=$('#discovery-display');
+    if(dsrc&&ddst){ const m=dsrc.textContent.match(/(\d+%?)/); if(m) ddst.textContent=m[1]; }
+    const csrc=$('#coin-count'); const cdst=$('#coin-display');
+    if(csrc&&cdst) cdst.textContent=csrc.textContent;
+    const fsrc=$('#floor-hud'); const fdst=$('#floor-display');
+    if(fsrc&&fdst) fdst.textContent=fsrc.textContent;
+  },2000);
+  // Action bar buttons
+  $('#ab-inventory').onclick=function(){ if(typeof toggleInventoryPanel==='function') toggleInventoryPanel(); else if(typeof showInventory==='function') showInventory(); };
+  $('#ab-shop').onclick=function(){ if(typeof showItemShop==='function') showItemShop(); };
+  $('#ab-wardrobe').onclick=function(){ if(typeof showVisitorWardrobe==='function') showVisitorWardrobe(); };
+  $('#ab-quests').onclick=function(){ if(typeof MissionBoard!=='undefined'&&MissionBoard.show) MissionBoard.show(); };
+  $('#ab-collection').onclick=function(){ if(typeof showCollectionPage==='function') showCollectionPage(); };
+  $('#ab-achievements').onclick=function(){ if(typeof showAchievements==='function') showAchievements(); };
+  $('#ab-spacewalk').onclick=function(){ if(typeof toggleSpacewalk==='function') toggleSpacewalk(); };
+  $('#ab-bug').onclick=function(){ if(typeof BugReport!=='undefined'&&BugReport.show) BugReport.show(); };
+  $('#ab-settings').onclick=function(){
+    const existing=document.getElementById('settings-popup');
+    if(existing){existing.remove();return;}
+    const d=document.createElement('div');d.id='settings-popup';
+    d.style.cssText='position:fixed;bottom:50px;right:10px;background:rgba(15,10,30,.95);border:1px solid rgba(155,89,182,.5);border-radius:10px;padding:16px;z-index:200;min-width:200px;color:#ddd;font-size:12px;';
+    d.innerHTML='<div style="font-weight:bold;margin-bottom:8px;color:#9b59b6">⚙️ Settings</div><div style="display:flex;align-items:center;gap:8px"><span>🔊</span><input type="range" min="0" max="100" value="'+(document.getElementById('vol-slider')?document.getElementById('vol-slider').value:'30')+'" style="flex:1" id="settings-vol"></div>';
+    document.body.appendChild(d);
+    d.querySelector('#settings-vol').oninput=function(e){const v=document.getElementById('vol-slider');if(v){v.value=e.target.value;v.dispatchEvent(new Event('input'));}};
+    setTimeout(function(){document.addEventListener('click',function cl(e){if(!d.contains(e.target)&&e.target.id!=='ab-settings'){d.remove();document.removeEventListener('click',cl);}});},100);
+  };
+  console.log('🎮 MMORPG UI: Action bar + minimal HUD active');
+})();
 
 })();
 </script>
