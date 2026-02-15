@@ -6671,7 +6671,12 @@ function renderScannerEffects() {
 }
 
 function renderParticles(){
-  for(let i=S.particles.length-1;i>=0;i--){const p=S.particles[i];p.x+=p.vx;p.y+=p.vy;p.life--;if(p.life<=0){S.particles.splice(i,1);continue}ctx.globalAlpha=Math.min(1,p.life/20);ctx.fillStyle=p.color;ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size);ctx.globalAlpha=1}
+  for(let i=S.particles.length-1;i>=0;i--){const p=S.particles[i];p.x+=p.vx;p.y+=p.vy;p.life--;if(p.life<=0){S.particles.splice(i,1);continue}ctx.globalAlpha=Math.min(1,p.life/20);
+  // Dance: musical note particles
+  if(p._note){ctx.fillStyle='#fff';ctx.font='12px serif';ctx.fillText(p._noteChar,p.x,p.y);ctx.globalAlpha=1;continue}
+  // Dance: expanding ring particles
+  if(p._ring){p._ringRadius+=p._ringGrow;ctx.strokeStyle=p.color;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p.x,p.y,p._ringRadius,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;continue}
+  ctx.fillStyle=p.color;ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size);ctx.globalAlpha=1}
 }
 
 function renderFloatTexts(){
@@ -8302,6 +8307,7 @@ function updateVisitor(dt){
     if(nx>20&&nx<W-20)v.x=nx;
     if(ny>60&&ny<H-20)v.y=ny;
     v.moving=true;v.frameTimer+=dt;if(v.frameTimer>.15){v.frameTimer=0;v.frame=(v.frame+1)%3}
+    if(typeof DanceSystem!=='undefined'&&DanceSystem.active)DanceSystem.stop();
   } else {v.moving=false;v.frame=0}
   // Check what's near visitor
   S.visitorNear=null;
@@ -8480,15 +8486,26 @@ function renderVisitor(ctx){
         if(v._dashDir==='left'||v._dashDir==='right'){squashX=1.3;squashY=0.75;}
         else{squashX=0.75;squashY=1.3;}
       }
-      // Shadow
-      ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(v.x,v.y+2,sprW/2.5,4,0,0,Math.PI*2);ctx.fill();
+      // Dance animation transforms
+      let danceOffY=0, danceSwayX=0, danceRot=0;
+      if(typeof DanceSystem!=='undefined'&&DanceSystem.active){
+        const dt=DanceSystem.getTransform();
+        if(dt){
+          danceOffY=dt.offsetY;danceSwayX=dt.swayX;danceRot=dt.rotation;
+          squashX*=dt.squashX;squashY*=dt.squashY;
+        }
+        DanceSystem.renderEffects(ctx,v.x,v.y);
+      }
+      // Shadow (pulses with dance)
+      const shadowW=DanceSystem.active?sprW/2.5+Math.sin(S.time*8)*3:sprW/2.5;
+      ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(v.x,v.y+2,shadowW,4,0,0,Math.PI*2);ctx.fill();
       // Hurt flash (iFrames)
       if(DuelSystem.active&&DuelSystem.iFrames>0){ctx.globalAlpha=0.5+Math.sin(S.time*30)*0.5;if(Math.floor(S.time*15)%2===0){ctx.filter='brightness(3) saturate(0)'}else{ctx.filter='brightness(1.5) hue-rotate(340deg)'}}
       // Attack lean
       let attackLean=0;
       if(typeof WeaponSystem!=='undefined'&&WeaponSystem._attackTimer>0){const f=v.dir===2?1:v.dir===3?-1:0;attackLean=f*3}
-      ctx.save();ctx.translate(v.x,v.y);ctx.scale(squashX,squashY);ctx.translate(-v.x,-v.y);
-      drawSprite(ctx,v.x-sprW/2+attackLean,v.y-sprH+breathe,sprGrid,sprScale);
+      ctx.save();ctx.translate(v.x+danceSwayX,v.y+danceOffY);ctx.rotate(danceRot);ctx.scale(squashX,squashY);ctx.translate(-(v.x+danceSwayX),-(v.y+danceOffY));
+      drawSprite(ctx,v.x-sprW/2+attackLean+danceSwayX,v.y-sprH+breathe+danceOffY,sprGrid,sprScale);
       ctx.restore();ctx.filter='none';ctx.globalAlpha=1;
       // Skin-specific particle effects
       if(skin.id==='super_saiyan'){
@@ -13954,6 +13971,282 @@ const SocialSystem = {
   }
 };
 
+// ═══════════════════════════════════════════════════════════════
+// DANCE ANIMATION SYSTEM
+// ═══════════════════════════════════════════════════════════════
+const DanceSystem = {
+  active: false,
+  style: 'bounce', // current dance style
+  beatBPM: 128,
+  beatPhase: 0,
+  startTime: 0,
+  
+  // Dance styles — each returns transform params per beat phase
+  styles: {
+    bounce: {
+      name: 'Bounce',
+      update(t, beat) {
+        const b = Math.sin(beat * Math.PI * 2) * 0.5 + 0.5; // 0-1 bounce
+        const half = Math.sin(beat * Math.PI * 4); // double-time
+        return {
+          offsetY: -Math.abs(Math.sin(beat * Math.PI * 2)) * 12,
+          squashX: 1 + half * 0.08,
+          squashY: 1 - half * 0.08,
+          rotation: 0,
+          swayX: 0
+        };
+      }
+    },
+    sway: {
+      name: 'Sway',
+      update(t, beat) {
+        return {
+          offsetY: -Math.abs(Math.sin(beat * Math.PI * 4)) * 6,
+          squashX: 1,
+          squashY: 1,
+          rotation: Math.sin(beat * Math.PI * 2) * 0.15,
+          swayX: Math.sin(beat * Math.PI * 2) * 8
+        };
+      }
+    },
+    headbang: {
+      name: 'Headbang',
+      update(t, beat) {
+        const bang = Math.max(0, Math.sin(beat * Math.PI * 4));
+        return {
+          offsetY: -bang * 8,
+          squashX: 1 + bang * 0.12,
+          squashY: 1 - bang * 0.15,
+          rotation: 0,
+          swayX: 0
+        };
+      }
+    },
+    robot: {
+      name: 'Robot',
+      update(t, beat) {
+        // Sharp snappy moves — quantized to 8th notes
+        const step = Math.floor(beat * 8) % 8;
+        const poses = [
+          {oY:0, sX:1, sY:1, r:0, sw:0},
+          {oY:-6, sX:1.1, sY:0.9, r:0, sw:-6},
+          {oY:0, sX:1, sY:1, r:0.1, sw:-6},
+          {oY:-10, sX:0.9, sY:1.1, r:0.1, sw:0},
+          {oY:0, sX:1, sY:1, r:0, sw:0},
+          {oY:-6, sX:1.1, sY:0.9, r:0, sw:6},
+          {oY:0, sX:1, sY:1, r:-0.1, sw:6},
+          {oY:-10, sX:0.9, sY:1.1, r:-0.1, sw:0}
+        ];
+        const p = poses[step];
+        return {offsetY: p.oY, squashX: p.sX, squashY: p.sY, rotation: p.r, swayX: p.sw};
+      }
+    },
+    disco: {
+      name: 'Disco',
+      update(t, beat) {
+        const arm = Math.floor(beat * 4) % 4;
+        const pointDir = [1, 1, -1, -1][arm];
+        const pointUp = [1, -1, -1, 1][arm];
+        return {
+          offsetY: -Math.abs(Math.sin(beat * Math.PI * 4)) * 10,
+          squashX: 1 + Math.sin(beat * Math.PI * 4) * 0.06,
+          squashY: 1 - Math.sin(beat * Math.PI * 4) * 0.06,
+          rotation: pointDir * 0.12 * pointUp,
+          swayX: pointDir * 5
+        };
+      }
+    },
+    breakdance: {
+      name: 'Breakdance',
+      update(t, beat) {
+        const phase = beat % 1;
+        if (phase < 0.25) {
+          // Crouch
+          return {offsetY: 4, squashX: 1.2, squashY: 0.7, rotation: 0, swayX: 0};
+        } else if (phase < 0.5) {
+          // Spin
+          const spin = (phase - 0.25) / 0.25;
+          return {offsetY: -2, squashX: 1, squashY: 1, rotation: spin * Math.PI * 2, swayX: 0};
+        } else if (phase < 0.75) {
+          // Pop up
+          return {offsetY: -18, squashX: 0.85, squashY: 1.2, rotation: 0, swayX: 0};
+        } else {
+          // Land + freeze
+          return {offsetY: 2, squashX: 1.15, squashY: 0.85, rotation: 0.2, swayX: 4};
+        }
+      }
+    }
+  },
+
+  // Skin → preferred dance style mapping
+  skinDances: {
+    'robot': 'robot',
+    'cyberpunk_runner': 'robot', 
+    'ironsuit-v': 'robot',
+    'saiyan': 'headbang',
+    'super_saiyan': 'headbang',
+    'demon_slayer': 'headbang',
+    'straw_hat': 'bounce',
+    'pikachu_suit': 'bounce',
+    'plumber': 'bounce',
+    'speedster-v': 'disco',
+    'spider-v': 'breakdance',
+    'web_slinger': 'breakdance',
+    'blue_bomber': 'robot',
+    'ninja': 'breakdance',
+    'shadow_ninja': 'breakdance',
+    'streetking': 'disco',
+    'golden_god': 'disco',
+    'catsuit': 'sway',
+    'scarlet_witch': 'sway',
+    'angel': 'sway',
+    'demon': 'headbang',
+    'void_walker': 'sway',
+    'wizard': 'sway',
+    'star': 'disco'
+  },
+
+  toggle() {
+    if (this.active) {
+      this.stop();
+    } else {
+      this.start();
+    }
+  },
+
+  start(style) {
+    this.active = true;
+    this.startTime = S.time;
+    // Pick style: explicit > skin-specific > random
+    if (style) {
+      this.style = style;
+    } else {
+      const skinId = S.visitor.skin;
+      if (this.skinDances[skinId]) {
+        this.style = this.skinDances[skinId];
+      } else {
+        const keys = Object.keys(this.styles);
+        this.style = keys[Math.floor(Math.random() * keys.length)];
+      }
+    }
+    S.visitor.moving = false;
+    S.visitor.walkTarget = null;
+    showNotification('💃 Dancing! (' + this.styles[this.style].name + ') [V to stop]');
+    
+    // Broadcast to multiplayer
+    if (S.ws && S.ws.readyState === 1) {
+      S.ws.send(JSON.stringify({type: 'player.dance', dancing: true, style: this.style}));
+    }
+  },
+
+  stop() {
+    this.active = false;
+    // Broadcast stop
+    if (S.ws && S.ws.readyState === 1) {
+      S.ws.send(JSON.stringify({type: 'player.dance', dancing: false}));
+    }
+  },
+
+  // Called every frame — returns dance transform or null
+  getTransform() {
+    if (!this.active) return null;
+    const elapsed = S.time - this.startTime;
+    const beatDuration = 60 / this.beatBPM;
+    const beat = elapsed / beatDuration;
+    const styleFn = this.styles[this.style];
+    if (!styleFn) return null;
+    return styleFn.update(S.time, beat);
+  },
+
+  // Render dance effects (floor sparkles, rhythm rings)
+  renderEffects(ctx, x, y) {
+    if (!this.active) return;
+    const elapsed = S.time - this.startTime;
+    const beatDuration = 60 / this.beatBPM;
+    const beat = elapsed / beatDuration;
+    const onBeat = Math.sin(beat * Math.PI * 2) > 0.9;
+    
+    // Floor disco light circle
+    const pulse = 0.15 + Math.sin(beat * Math.PI * 2) * 0.1;
+    const hue = (beat * 60) % 360;
+    const rgb = hslToRgb(hue / 360, 0.8, 0.5);
+    ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${pulse})`;
+    ctx.beginPath();
+    ctx.ellipse(x, y + 4, 28, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Beat ring expanding outward
+    if (onBeat && Math.random() < 0.3) {
+      S.particles.push({
+        x, y: y + 2,
+        vx: 0, vy: 0,
+        life: 20,
+        color: `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.6)`,
+        size: 2,
+        _ring: true,
+        _ringRadius: 5,
+        _ringGrow: 2
+      });
+    }
+    
+    // Sparkle particles on beats
+    if (onBeat && Math.random() < 0.5) {
+      for (let i = 0; i < 2; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 0.5 + Math.random() * 1.5;
+        S.particles.push({
+          x: x + Math.cos(angle) * 8,
+          y: y - 10 + Math.sin(angle) * 8,
+          vx: Math.cos(angle) * speed,
+          vy: -Math.random() * 2 - 0.5,
+          life: 15 + Math.random() * 10,
+          color: ['#ff6ec7', '#00fff7', '#ffd700', '#ff4488', '#44ffaa'][Math.floor(Math.random() * 5)],
+          size: 1 + Math.random() * 2
+        });
+      }
+    }
+    
+    // Musical notes floating up occasionally
+    if (Math.random() < 0.04) {
+      const noteX = x + (Math.random() - 0.5) * 30;
+      S.particles.push({
+        x: noteX, y: y - 20,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: -0.8 - Math.random() * 0.5,
+        life: 40,
+        color: '#fff',
+        size: 0, // special rendering
+        _note: true,
+        _noteChar: ['♪', '♫', '♬'][Math.floor(Math.random() * 3)]
+      });
+    }
+  },
+
+  // Cycle to next dance style
+  cycleStyle() {
+    const keys = Object.keys(this.styles);
+    const idx = keys.indexOf(this.style);
+    this.style = keys[(idx + 1) % keys.length];
+    showNotification('💃 ' + this.styles[this.style].name);
+    if (S.ws && S.ws.readyState === 1) {
+      S.ws.send(JSON.stringify({type: 'player.dance', dancing: true, style: this.style}));
+    }
+  }
+};
+
+// HSL to RGB helper for dance floor colors
+function hslToRgb(h, s, l) {
+  let r, g, b;
+  if (s === 0) { r = g = b = l; }
+  else {
+    const hue2rgb = (p, q, t) => { if (t < 0) t += 1; if (t > 1) t -= 1; if (t < 1/6) return p + (q-p)*6*t; if (t < 1/2) return q; if (t < 2/3) return p + (q-p)*(2/3-t)*6; return p; };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3); g = hue2rgb(p, q, h); b = hue2rgb(p, q, h - 1/3);
+  }
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
 // Initialize social system
 (async function() {
   await SocialSystem.initCrypto();
@@ -14319,6 +14612,8 @@ function initInput(){
     if(k==='ArrowRight'||k==='d'||k==='D')S.keys.right=true;
     if(k==='Escape'){e.preventDefault();if(document.getElementById('rpg-inventory').classList.contains('open')){closeInventoryPanel();return}if(S.spacewalk.active)toggleSpacewalk();if(document.querySelector('.popup-overlay'))document.querySelector('.popup-overlay').remove()}
     if(k===' '){e.preventDefault();visitorInteract()}
+    if(k==='v'||k==='V'){e.preventDefault();if(typeof DanceSystem!=='undefined'){if(DanceSystem.active&&e.shiftKey){DanceSystem.cycleStyle()}else{DanceSystem.toggle()}}}
+
     if(k==='Tab'){ e.preventDefault(); if(S.scanner.unlocked){ S.scanner.active = !S.scanner.active; showNotification(S.scanner.active ? '🔍 Scanner ON' : '🔍 Scanner OFF'); } }
     if((k==='e'||k==='E')){
       e.preventDefault();
