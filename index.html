@@ -8753,6 +8753,7 @@ function renderVisitor(ctx){
           squashX*=dt.squashX;squashY*=dt.squashY;
         }
         DanceSystem.renderEffects(ctx,v.x,v.y);
+        DanceSystem.checkCombo();
       }
       // Shadow (pulses with dance)
       const shadowW=DanceSystem.active?sprW/2.5+Math.sin(S.time*8)*3:sprW/2.5;
@@ -14365,6 +14366,83 @@ const DanceSystem = {
           return {offsetY: 2, squashX: 1.15, squashY: 0.85, rotation: 0.2, swayX: 4};
         }
       }
+    },
+    moonwalk: {
+      name: 'Moonwalk',
+      update(t, beat) {
+        return {
+          offsetY: -Math.abs(Math.sin(beat * Math.PI * 2)) * 4,
+          squashX: 1,
+          squashY: 1,
+          rotation: 0.08,
+          swayX: Math.sin(beat * Math.PI) * 14
+        };
+      }
+    },
+    floss: {
+      name: 'Floss',
+      update(t, beat) {
+        const sw = Math.sin(beat * Math.PI * 4);
+        return {
+          offsetY: -Math.abs(Math.sin(beat * Math.PI * 4)) * 3,
+          squashX: 1 - Math.abs(sw) * 0.12,
+          squashY: 1,
+          rotation: 0,
+          swayX: sw * 16
+        };
+      }
+    },
+    macarena: {
+      name: 'Macarena',
+      update(t, beat) {
+        const phase = Math.floor(beat * 1) % 4;
+        if (phase === 0) return {offsetY: -2, squashX: 1.18, squashY: 0.95, rotation: 0, swayX: 0};
+        if (phase === 1) return {offsetY: -2, squashX: 0.82, squashY: 1.05, rotation: 0, swayX: 0};
+        if (phase === 2) return {offsetY: -2, squashX: 1, squashY: 1, rotation: -0.18, swayX: 4};
+        return {offsetY: -16, squashX: 0.9, squashY: 1.15, rotation: 0, swayX: 0};
+      }
+    },
+    thriller: {
+      name: 'Thriller',
+      update(t, beat) {
+        const q = Math.floor(beat * 4) / 4;
+        const jerk = Math.sin(q * Math.PI * 6);
+        return {
+          offsetY: -Math.abs(Math.round(Math.sin(beat * Math.PI * 2) * 3) * 3),
+          squashX: 1 + jerk * 0.1,
+          squashY: 1 - jerk * 0.08,
+          rotation: 0.06 + Math.round(Math.sin(q * Math.PI * 4) * 3) * 0.07,
+          swayX: Math.round(Math.sin(q * Math.PI * 2) * 2) * 3
+        };
+      }
+    },
+    spin: {
+      name: 'Spin',
+      update(t, beat) {
+        const spinPhase = (beat % 2) / 2;
+        const rise = Math.sin(spinPhase * Math.PI);
+        return {
+          offsetY: -rise * 14,
+          squashX: 1 - rise * 0.1,
+          squashY: 1 + rise * 0.1,
+          rotation: spinPhase * Math.PI * 2,
+          swayX: 0
+        };
+      }
+    },
+    worm: {
+      name: 'The Worm',
+      update(t, beat) {
+        const wave = Math.sin(beat * Math.PI * 2);
+        const wave2 = Math.sin(beat * Math.PI * 2 + 1);
+        return {
+          offsetY: -Math.abs(wave) * 20,
+          squashX: 1 + wave2 * 0.15,
+          squashY: 1 - wave2 * 0.15,
+          rotation: wave * 0.25,
+          swayX: wave2 * 5
+        };
+      }
     }
   },
 
@@ -14393,7 +14471,13 @@ const DanceSystem = {
     'demon': 'headbang',
     'void_walker': 'sway',
     'wizard': 'sway',
-    'star': 'disco'
+    'star': 'disco',
+    'zombie': 'thriller',
+    'pirate': 'moonwalk',
+    'skeleton': 'thriller',
+    'astronaut': 'spin',
+    'hero_of_time': 'spin',
+    'alien': 'worm'
   },
 
   toggle() {
@@ -14520,6 +14604,40 @@ const DanceSystem = {
     showNotification('💃 ' + this.styles[this.style].name);
     if (S.ws && S.ws.readyState === 1) {
       S.ws.send(JSON.stringify({type: 'player.dance', dancing: true, style: this.style}));
+    }
+  },
+
+  // Dance Floor Combo — 3+ players same floor same dance = combo!
+  _lastComboTime: 0,
+  checkCombo() {
+    if (!this.active || !S.remotePlayers) return;
+    const now = S.time;
+    if (now - this._lastComboTime < 5) return; // cooldown 5s
+    const myFloor = S.floor;
+    const myStyle = this.style;
+    let count = 1; // self
+    for (const id in S.remotePlayers) {
+      const rp = S.remotePlayers[id];
+      if (rp.floor === myFloor && rp.dancing && rp.danceStyle === myStyle) count++;
+    }
+    if (count >= 3) {
+      this._lastComboTime = now;
+      showNotification('🔥 DANCE COMBO! x' + count + ' 🔥');
+      // Particle burst
+      const v = S.visitor;
+      for (let i = 0; i < 20; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1 + Math.random() * 3;
+        S.particles.push({
+          x: v.x + Math.cos(angle) * 10,
+          y: v.y - 16 + Math.sin(angle) * 10,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 2,
+          life: 30 + Math.random() * 20,
+          color: ['#ff6ec7','#00fff7','#ffd700','#ff4488','#44ffaa','#ff0','#f0f'][Math.floor(Math.random()*7)],
+          size: 2 + Math.random() * 3
+        });
+      }
     }
   }
 };
