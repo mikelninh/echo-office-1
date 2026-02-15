@@ -19207,6 +19207,184 @@ update = function(dt) {
 };
 
 // ═══════════════════════════════════════
+// §40B. BRAND-THEMED CLUB ROOMS + OMI ECONOMY BRIDGE
+// ═══════════════════════════════════════
+
+const BRAND_CLUBS = {
+  cantina:{name:"Mos Eisley Cantina",brand:"Star Wars",zone:{x:50,y:100,w:200,h:250},genre:'Latin',colors:{primary:'#8B7355',accent:'#FFD700',glow:'#4a9eff'},desc:"A wretched hive of scum and villainy... and great music."},
+  tower:{name:"Avengers Tower Lounge",brand:"Marvel",zone:{x:280,y:100,w:200,h:250},genre:'House',colors:{primary:'#1a1a8a',accent:'#cc0000',glow:'#4488ff'},desc:"Earth's mightiest dance floor."},
+  batcave:{name:"The Batcave Club",brand:"DC",zone:{x:510,y:100,w:200,h:250},genre:'Techno',colors:{primary:'#1a1a2a',accent:'#FFD700',glow:'#4444aa'},desc:"Dark. Brooding. Excellent bass."},
+  dojo:{name:"World Warrior Dojo",brand:"Street Fighter",zone:{x:740,y:100,w:200,h:250},genre:'DnB',colors:{primary:'#8B0000',accent:'#FFD700',glow:'#ff4444'},desc:"Round 1... DANCE!"}
+};
+
+// Club room entry detection
+(function(){
+  let currentClub=null;
+  window.playersInBrandClub={};
+  const _clubUpdate=update;
+  update=function(dt){
+    _clubUpdate(dt);
+    if(S.floor!==10)return;
+    const px=S.visitor.x,py=S.visitor.y;
+    let foundClub=null;
+    for(const[key,club]of Object.entries(BRAND_CLUBS)){
+      const z=club.zone;
+      if(px>=z.x&&px<=z.x+z.w&&py>=z.y&&py<=z.y+z.h){foundClub=key;break;}
+    }
+    if(foundClub&&foundClub!==currentClub){
+      const club=BRAND_CLUBS[foundClub];
+      currentClub=foundClub;
+      showNotification('Entering '+club.name);
+      if(typeof DISCO_GENRES!=='undefined'&&DISCO_GENRES[club.genre]){DiscoFloor.genre=club.genre;}
+      // Entry particle burst
+      for(let i=0;i<12;i++){
+        S.particles.push({x:px,y:py,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,life:20+Math.random()*15,color:club.colors.accent,size:1.5+Math.random()*2});
+      }
+    }else if(!foundClub){currentClub=null;}
+    // Count players per room
+    const counts={};
+    if(S.players){Object.values(S.players).forEach(p=>{if(p.floor===10){for(const[key,club]of Object.entries(BRAND_CLUBS)){const z=club.zone;if(p.x>=z.x&&p.x<=z.x+z.w&&p.y>=z.y&&p.y<=z.y+z.h){counts[key]=(counts[key]||0)+1;break;}}}});}
+    // Count self
+    if(currentClub)counts[currentClub]=(counts[currentClub]||0)+1;
+    window.playersInBrandClub=counts;
+  };
+})();
+
+// ═══════════════════════════════════════
+// OMI ECONOMY BRIDGE (Infrastructure - Coming Soon)
+// ═══════════════════════════════════════
+
+const OMIBridge={
+  connected:false,
+  walletAddress:null,
+  omiBalance:0,
+  tournamentPool:0,
+  creatorEarnings:0,
+  RATE:{omi_to_coins:100,coins_to_omi:100},
+
+  init(){
+    const saved=LS.get('omiBridge',null);
+    if(saved){this.connected=saved.connected;this.walletAddress=saved.walletAddress;this.omiBalance=saved.omiBalance||0;this.tournamentPool=saved.tournamentPool||0;this.creatorEarnings=saved.creatorEarnings||0;}
+  },
+  save(){LS.set('omiBridge',{connected:this.connected,walletAddress:this.walletAddress,omiBalance:this.omiBalance,tournamentPool:this.tournamentPool,creatorEarnings:this.creatorEarnings});},
+
+  showConnectWallet(){
+    const d=document.createElement('div');d.id='omi-wallet-modal';
+    d.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:10000;display:flex;align-items:center;justify-content:center;font-family:monospace;';
+    const connected=this.connected;
+    d.innerHTML=`<div style="background:#1a1a2e;border:2px solid #4a9eff;border-radius:12px;padding:24px;max-width:380px;width:90%;color:#fff;text-align:center;">
+      <div style="font-size:24px;margin-bottom:8px;">🔗 OMI Bridge</div>
+      <div style="color:#888;font-size:12px;margin-bottom:16px;">OMI Bridge coming soon — Connect wallet to be first in line</div>
+      ${connected?`<div style="background:#0a2a0a;border:1px solid #2a6a2a;border-radius:8px;padding:12px;margin:12px 0;">
+        <div style="color:#4a4;font-size:10px;">✓ WALLET CONNECTED</div>
+        <div style="color:#6a6;font-size:11px;margin-top:4px;">${this.walletAddress}</div>
+        <div style="color:#FFD700;font-size:16px;margin-top:8px;">${this.omiBalance.toFixed(1)} OMI</div>
+      </div>`:`<button onclick="OMIBridge.simulateConnect()" style="background:#4a9eff;color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:14px;font-family:monospace;">Connect Wallet (Preview)</button>`}
+      <div style="color:#666;font-size:10px;margin-top:16px;">Launching Q3 2026</div>
+      <button onclick="this.parentElement.parentElement.remove()" style="margin-top:12px;background:#333;color:#aaa;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-family:monospace;">Close</button>
+    </div>`;
+    document.body.appendChild(d);
+  },
+
+  simulateConnect(){
+    this.connected=true;
+    this.walletAddress='0x'+Array.from({length:8},()=>Math.floor(Math.random()*16).toString(16)).join('')+'...'+Array.from({length:4},()=>Math.floor(Math.random()*16).toString(16)).join('');
+    this.omiBalance=1000;this.save();
+    showNotification('🔗 Wallet connected (preview mode)');
+    const m=document.getElementById('omi-wallet-modal');if(m)m.remove();this.showConnectWallet();
+  },
+
+  showExchange(){
+    const d=document.createElement('div');d.id='omi-exchange-modal';
+    d.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:10000;display:flex;align-items:center;justify-content:center;font-family:monospace;';
+    d.innerHTML=`<div style="background:#1a1a2e;border:2px solid #FFD700;border-radius:12px;padding:24px;max-width:420px;width:90%;color:#fff;text-align:center;">
+      <div style="font-size:20px;margin-bottom:4px;">💱 OMI Exchange</div>
+      <div style="color:#888;font-size:11px;margin-bottom:16px;">Exchange launching soon</div>
+      <div style="background:#111;border-radius:8px;padding:12px;margin:8px 0;">
+        <div style="color:#aaa;font-size:10px;">RATE: 1 OMI = 1 ◈</div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin:12px 0;">
+        <button disabled style="background:#333;color:#666;border:1px solid #444;padding:10px 16px;border-radius:8px;font-family:monospace;cursor:not-allowed;">OMI → ◈<br><span style="font-size:9px;">Coming Soon</span></button>
+        <button disabled style="background:#333;color:#666;border:1px solid #444;padding:10px 16px;border-radius:8px;font-family:monospace;cursor:not-allowed;">◈ → OMI<br><span style="font-size:9px;">Coming Soon</span></button>
+      </div>
+      <div style="background:#0a0a1a;border:1px solid #333;border-radius:8px;padding:10px;margin:8px 0;text-align:left;">
+        <div style="color:#888;font-size:10px;">🏆 Tournament Prize Pool: <span style="color:#FFD700;">${this.tournamentPool.toFixed(1)} OMI</span></div>
+        <div style="color:#888;font-size:10px;margin-top:4px;">🎨 Creator Earnings: <span style="color:#4a9eff;">${this.creatorEarnings.toFixed(1)} OMI</span></div>
+      </div>
+      <div style="color:#555;font-size:9px;margin-top:12px;">OMI Bridge launching Q3 2026</div>
+      <button onclick="this.parentElement.parentElement.remove()" style="margin-top:10px;background:#333;color:#aaa;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-family:monospace;">Close</button>
+    </div>`;
+    document.body.appendChild(d);
+  },
+
+  renderWidget(ctx){
+    if(!this.connected)return;
+    ctx.save();ctx.font='6px monospace';ctx.textAlign='right';
+    ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(W-95,4,90,16);
+    ctx.strokeStyle='#4a9eff';ctx.lineWidth=1;ctx.strokeRect(W-95,4,90,16);
+    ctx.fillStyle='#FFD700';ctx.fillText('🔗 '+this.omiBalance.toFixed(0)+' OMI',W-10,14);
+    ctx.textAlign='left';ctx.restore();
+  },
+
+  addTournamentPrize(amount){this.tournamentPool+=amount;this.save();},
+  awardWinner(amount){if(this.connected){this.omiBalance+=amount;this.tournamentPool=Math.max(0,this.tournamentPool-amount);this.save();showNotification('🏆 Won '+amount.toFixed(1)+' OMI!');}}
+};
+
+// Init OMI on load
+OMIBridge.init();
+
+// Render OMI widget in HUD
+(function(){
+  const _omiRender=typeof renderHUD==='function'?renderHUD:null;
+  if(_omiRender){renderHUD=function(){_omiRender.apply(this,arguments);OMIBridge.renderWidget(ctx);};}
+})();
+
+// OMI Exchange Kiosk on Floor 9
+(function(){
+  const _f9Render=renderFloor9;
+  renderFloor9=function(){
+    _f9Render();
+    // OMI Exchange ATM kiosk (right side, near VeVe area)
+    const kx=W-80,ky=180;
+    ctx.fillStyle='#2a2a3a';ctx.fillRect(kx,ky,50,70);
+    ctx.fillStyle='#3a3a4a';ctx.fillRect(kx+3,ky+3,44,30);
+    ctx.fillStyle='#1a3a1a';ctx.fillRect(kx+5,ky+5,40,26);
+    ctx.font='5px monospace';ctx.textAlign='center';ctx.fillStyle='#4a9eff';ctx.fillText('OMI',kx+25,ky+16);ctx.fillStyle='#888';ctx.font='4px monospace';ctx.fillText('EXCHANGE',kx+25,ky+24);
+    ctx.fillStyle='#FFD700';ctx.fillRect(kx+18,ky+38,14,8);
+    ctx.fillStyle='#555';ctx.fillRect(kx+15,ky+50,20,3);ctx.fillRect(kx+15,ky+56,20,3);
+    // Glow
+    const near=S.floor===9&&Math.abs(S.visitor.x-(kx+25))<40&&Math.abs(S.visitor.y-(ky+35))<50;
+    if(near){ctx.strokeStyle='#4a9eff';ctx.lineWidth=1;ctx.globalAlpha=0.5+Math.sin(S.time*3)*0.2;ctx.strokeRect(kx-2,ky-2,54,74);ctx.globalAlpha=1;showInteractPrompt('Press E for OMI Exchange');}
+    ctx.textAlign='left';
+  };
+  // E key handler for OMI kiosk
+  const _omiKey=window.onkeydown;
+  const origKeydown=document.onkeydown||window._echoKeydown;
+  document.addEventListener('keydown',function(e){
+    if(e.key==='e'||e.key==='E'){
+      if(S.floor===9){
+        const kx=W-80,ky=180;
+        if(Math.abs(S.visitor.x-(kx+25))<40&&Math.abs(S.visitor.y-(ky+35))<50){
+          OMIBridge.showExchange();
+        }
+      }
+    }
+  });
+})();
+
+// Hook OMI into duel rewards
+(function(){
+  const _origEndDuel=DuelSystem.endDuel.bind(DuelSystem);
+  DuelSystem.endDuel=function(result){
+    _origEndDuel(result);
+    if(result==='victory'&&OMIBridge.connected){
+      const prize=5;
+      OMIBridge.awardWinner(prize);
+    }
+  };
+})();
+
+// ═══════════════════════════════════════
 // §41. V26: ROOM BUILDER ENHANCEMENTS
 // ═══════════════════════════════════════
 // Enhanced room directory accessible from Community Deck (floor 7)
