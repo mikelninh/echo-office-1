@@ -2169,6 +2169,9 @@ const FLOOR_OBJECTS={
     {id:'archive_milestones',x:400,y:200,w:200,h:120,label:'🏆 Milestone Wall',interact:true,collide:true},
     {id:'galaxy_map',x:300,y:380,w:200,h:150,label:'🌌 Galaxy Map',interact:true,collide:true},
     {id:'ranked_board',x:600,y:350,w:120,h:100,label:'⚔️ Ranked Board',interact:true,collide:true},
+    {id:'veve_rentals',x:100,y:350,w:130,h:70,label:'🎭 NFT Rentals',interact:true,collide:true},
+    {id:'veve_drops',x:100,y:440,w:130,h:70,label:'🔴 Live Drops',interact:true,collide:true},
+    {id:'veve_trading',x:400,y:440,w:160,h:70,label:'📈 Trading Floor',interact:true,collide:true},
   ],
 };
 
@@ -9156,6 +9159,8 @@ function updateVisitor(dt){
 }
 function visitorInteract(){
   if(!S.useVisitor)return;
+  // VeVe Showroom interaction
+  if(typeof VeVeShowroom!=='undefined'&&VeVeShowroom.isNearVault()){if(VeVeShowroom.interact())return;}
   
   // Spacewalk interactions
   if(S.spacewalk.active){
@@ -9841,7 +9846,11 @@ function renderVisitor(ctx){
   
   // Name label
   ctx.fillStyle=skin.color;ctx.font='bold 9px monospace';ctx.textAlign='center';
-  ctx.fillText(LS.get('visitorName','Visitor'),v.x,v.y-sz*sc-4);ctx.textAlign='left';
+  const _vName=LS.get('visitorName','Visitor');
+  ctx.fillText(_vName,v.x,v.y-sz*sc-4);
+  if(typeof VeVeShowroom!=='undefined'&&VeVeShowroom.connected){ctx.fillStyle='#ffd700';ctx.font='7px monospace';ctx.fillText('VeVe✓',v.x,v.y-sz*sc-13);}
+  ctx.textAlign='left';
+  if(typeof VeVeShowroom!=='undefined')VeVeShowroom.renderPlayerEffects(ctx);
   
   // Lightsaber held by visitor
   if(S._visitorSaber){
@@ -11057,6 +11066,9 @@ function interact(){
     case'archive_milestones':V26Archive.showMilestones();break;
     case'galaxy_map':V26Galaxy.show();break;
     case'ranked_board':V26Ranked.showUI();break;
+    case'veve_rentals':VeVeRentals.showUI();break;
+    case'veve_drops':VeVeDrops.showUI();break;
+    case'veve_trading':VeVeTrading.showUI();break;
     case'furniture_catalog':showFurnitureCatalog();break;
     case'wall_colors':showWallColorPicker();break;
     case'floor_colors':showFloorColorPicker();break;
@@ -16191,7 +16203,7 @@ function initInput(){
     if(k==='ArrowDown'||k==='s'||k==='S')S.keys.down=true;
     if(k==='ArrowLeft'||k==='a'||k==='A')S.keys.left=true;
     if(k==='ArrowRight'||k==='d'||k==='D')S.keys.right=true;
-    if(k==='Escape'){e.preventDefault();if(document.getElementById('rpg-inventory').classList.contains('open')){closeInventoryPanel();return}if(S.spacewalk.active)toggleSpacewalk();if(document.querySelector('.popup-overlay'))document.querySelector('.popup-overlay').remove()}
+    if(k==='Escape'){e.preventDefault();if(typeof VeVeShowroom!=='undefined'&&VeVeShowroom.panelOpen){VeVeShowroom.disconnect();return;}if(document.getElementById('rpg-inventory').classList.contains('open')){closeInventoryPanel();return}if(S.spacewalk.active)toggleSpacewalk();if(document.querySelector('.popup-overlay'))document.querySelector('.popup-overlay').remove()}
     if(k===' '){e.preventDefault();visitorInteract()}
     if(k==='v'||k==='V'){e.preventDefault();if(typeof DanceSystem!=='undefined'){if(DanceSystem.active&&e.shiftKey){DanceSystem.cycleStyle()}else{DanceSystem.toggle()}}}
 
@@ -18349,8 +18361,404 @@ function renderFloor9(){
     ctx.beginPath();ctx.moveTo(ex,ey-10);ctx.quadraticCurveTo(ex+25,ey-30-wingFlap*20,ex+35,ey-5);ctx.quadraticCurveTo(ex+15,ey,ex,ey-10);ctx.fill();
     ctx.restore();
   }
+  // VeVe Showroom render
+  if(typeof VeVeShowroom!=='undefined')VeVeShowroom.render(ctx);
+
   FloorDepth.renderShadows(ctx,9);FloorDepth.renderLightRays(ctx,9);
 }
+
+// ═══════════════════════════════════════════════════════════════
+// VEVE COLLECTIBLES SHOWROOM — Floor 9 Integration
+// ═══════════════════════════════════════════════════════════════
+
+const VEVE_SKIN_MAP = {
+  'Star Wars': { badge: '⚔️ Jedi Collector', bonus: 'lightsaber_glow' },
+  'Marvel': { badge: '🦸 Marvel Collector', bonus: 'hero_aura' },
+  'Disney': { badge: '🏰 Disney Collector', bonus: 'magic_sparkle' },
+  'DC': { badge: '🦇 DC Collector', bonus: 'dark_knight_trail' },
+  'TMNT': { badge: '🐢 Shell Collector', bonus: 'turtle_power' },
+  'Street Fighter': { badge: '👊 Fighter Collector', bonus: 'hadouken_emote' },
+};
+
+const VEVE_BRANDS = ['Star Wars','Marvel','Disney','DC','TMNT','Street Fighter'];
+const VEVE_RARITIES = ['Common','Common','Common','Uncommon','Uncommon','Rare','Rare','Epic','Ultra Rare','Secret Rare'];
+const VEVE_RARITY_COLORS = {Common:'#ffffff',Uncommon:'#44ff44',Rare:'#4488ff',Epic:'#aa44ff','Ultra Rare':'#ffd700','Secret Rare':'rainbow'};
+const VEVE_ITEMS = {
+  'Star Wars':['Lightsaber','Darth Vader Helmet','X-Wing','Yoda Figure','Mandalorian Helmet','Death Star'],
+  'Marvel':['Spider-Man Mask','Iron Man Helmet','Cap Shield','Thor Hammer','Wolverine Claws','Black Panther'],
+  'Disney':['Mickey Ears','Castle','Genie Lamp','Glass Slipper','Buzz Lightyear','Simba'],
+  'DC':['Batman Cowl','Superman S','Wonder Tiara','Flash Ring','Aquaman Trident','Green Lantern'],
+  'TMNT':['Turtle Shell','Leo Mask','Raph Sai','Donnie Staff','Mikey Nunchucks','Pizza Box'],
+  'Street Fighter':['Hadouken','Fight Glove','Shoryuken','Chun-Li Bracelet','Ryu Headband','Fireball']
+};
+
+const VeVeShowroom = {
+  connected: false,
+  username: null,
+  collection: [],
+  panelOpen: false,
+  AREA: {x:600,y:80,w:300,h:400},
+
+  init() {
+    this.username = LS.get('veve_username', null);
+    this.connected = !!this.username;
+    if (this.connected) this.loadCollection();
+  },
+
+  _hash(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+    return Math.abs(h);
+  },
+
+  _seededRand(seed) {
+    let s = seed;
+    return function() { s = (s * 16807 + 0) % 2147483647; return s / 2147483647; };
+  },
+
+  loadCollection() {
+    const seed = this._hash(this.username);
+    const rng = this._seededRand(seed);
+    const count = 3 + Math.floor(rng() * 10);
+    this.collection = [];
+    for (let i = 0; i < count; i++) {
+      const brand = VEVE_BRANDS[Math.floor(rng() * VEVE_BRANDS.length)];
+      const items = VEVE_ITEMS[brand];
+      const name = items[Math.floor(rng() * items.length)];
+      const rarity = VEVE_RARITIES[Math.floor(rng() * VEVE_RARITIES.length)];
+      this.collection.push({ id: i, name, brand, rarity, edition: '#' + (1 + Math.floor(rng() * 5000)) });
+    }
+  },
+
+  promptConnect() {
+    const name = prompt('Enter your VeVe username:');
+    if (name && name.trim()) {
+      this.username = name.trim();
+      this.connected = true;
+      LS.set('veve_username', this.username);
+      this.loadCollection();
+      showNotification('🎮 VeVe connected: ' + this.username + ' — ' + this.collection.length + ' collectibles loaded!');
+    }
+  },
+
+  disconnect() {
+    this.username = null;
+    this.connected = false;
+    this.collection = [];
+    this.panelOpen = false;
+    LS.set('veve_username', '');
+    showNotification('VeVe account disconnected');
+  },
+
+  isNearVault() {
+    if (S.floor !== 9 || !S.useVisitor) return false;
+    const a = this.AREA, vx = S.visitor.x, vy = S.visitor.y;
+    return vx > a.x - 30 && vx < a.x + a.w + 30 && vy > a.y - 30 && vy < a.y + a.h + 30;
+  },
+
+  interact() {
+    if (!this.isNearVault()) return false;
+    if (!this.connected) { this.promptConnect(); return true; }
+    this.panelOpen = !this.panelOpen;
+    return true;
+  },
+
+  _drawPixelArt(ctx, x, y, brand, idx) {
+    // 8x8 pixel art for each brand
+    const s = 2; // pixel scale
+    ctx.save();
+    const arts = {
+      'Star Wars': [
+        () => { // lightsaber
+          ctx.fillStyle='#888';ctx.fillRect(x+2*s,y+5*s,4*s,3*s);
+          ctx.fillStyle='#0f0';ctx.fillRect(x+3*s,y,2*s,5*s);ctx.fillStyle='#8f8';ctx.fillRect(x+3.5*s,y,s,5*s);
+        },
+        () => { // vader helmet
+          ctx.fillStyle='#222';ctx.fillRect(x+s,y+s,6*s,6*s);ctx.fillStyle='#444';ctx.fillRect(x+2*s,y+3*s,s,2*s);ctx.fillRect(x+5*s,y+3*s,s,2*s);ctx.fillStyle='#333';ctx.fillRect(x+2*s,y+6*s,4*s,s);
+        },
+        () => { // x-wing
+          ctx.fillStyle='#ccc';ctx.fillRect(x+3*s,y+2*s,2*s,4*s);ctx.fillStyle='#f44';ctx.fillRect(x+s,y+3*s,6*s,s);ctx.fillRect(x+s,y+5*s,6*s,s);
+        }
+      ],
+      'Marvel': [
+        () => { // spiderman mask
+          ctx.fillStyle='#d00';ctx.fillRect(x+s,y+s,6*s,6*s);ctx.fillStyle='#fff';ctx.fillRect(x+2*s,y+3*s,s,s);ctx.fillRect(x+5*s,y+3*s,s,s);ctx.fillStyle='#111';for(let i=0;i<8;i++)ctx.fillRect(x+i*s,y+4*s,s,0.5);
+        },
+        () => { // iron man
+          ctx.fillStyle='#d40';ctx.fillRect(x+s,y+s,6*s,6*s);ctx.fillStyle='#ff0';ctx.fillRect(x+2*s,y+2*s,4*s,s);ctx.fillStyle='#0ff';ctx.fillRect(x+2*s,y+4*s,s,s);ctx.fillRect(x+5*s,y+4*s,s,s);
+        },
+        () => { // cap shield
+          ctx.fillStyle='#00f';ctx.fillRect(x+s,y+s,6*s,6*s);ctx.fillStyle='#d00';ctx.fillRect(x+2*s,y+2*s,4*s,4*s);ctx.fillStyle='#fff';ctx.fillRect(x+3*s,y+3*s,2*s,2*s);ctx.fillStyle='#00f';ctx.fillRect(x+3.5*s,y+3.5*s,s,s);
+        }
+      ],
+      'Disney': [
+        () => { // mickey ears
+          ctx.fillStyle='#111';ctx.fillRect(x+s,y+s,2*s,2*s);ctx.fillRect(x+5*s,y+s,2*s,2*s);ctx.fillRect(x+2*s,y+3*s,4*s,4*s);
+        },
+        () => { // castle
+          ctx.fillStyle='#88f';ctx.fillRect(x+2*s,y+3*s,4*s,5*s);ctx.fillRect(x+3*s,y+s,2*s,2*s);ctx.fillStyle='#aaf';ctx.fillRect(x+s,y+4*s,s,4*s);ctx.fillRect(x+6*s,y+4*s,s,4*s);
+        }
+      ],
+      'DC': [
+        () => { // batman cowl
+          ctx.fillStyle='#222';ctx.fillRect(x+2*s,y+2*s,4*s,5*s);ctx.fillRect(x+s,y+s,2*s,2*s);ctx.fillRect(x+5*s,y+s,2*s,2*s);ctx.fillStyle='#fff';ctx.fillRect(x+3*s,y+4*s,s,s);ctx.fillRect(x+4*s,y+4*s,s,s);
+        },
+        () => { // superman S
+          ctx.fillStyle='#00f';ctx.fillRect(x+s,y+s,6*s,6*s);ctx.fillStyle='#d00';ctx.fillRect(x+2*s,y+2*s,4*s,4*s);ctx.fillStyle='#ff0';ctx.font='10px sans-serif';ctx.fillText('S',x+2.5*s,y+5.5*s);
+        }
+      ],
+      'TMNT': [
+        () => { // shell
+          ctx.fillStyle='#4a2';ctx.fillRect(x+s,y+2*s,6*s,5*s);ctx.fillStyle='#5b3';ctx.fillRect(x+2*s,y+3*s,4*s,3*s);ctx.fillStyle='#3a1';ctx.fillRect(x+3.5*s,y+2*s,s,5*s);ctx.fillRect(x+s,y+4*s,6*s,s);
+        },
+        () => { // mask
+          ctx.fillStyle='#f44';ctx.fillRect(x+s,y+3*s,6*s,2*s);ctx.fillStyle='#fff';ctx.fillRect(x+2*s,y+3*s,s,2*s);ctx.fillRect(x+5*s,y+3*s,s,2*s);
+        }
+      ],
+      'Street Fighter': [
+        () => { // hadouken
+          const glow = 0.6 + Math.sin(S.time * 4) * 0.3;
+          ctx.fillStyle=`rgba(80,150,255,${glow})`;ctx.beginPath();ctx.arc(x+4*s,y+4*s,3*s,0,Math.PI*2);ctx.fill();
+          ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+4*s,y+4*s,s,0,Math.PI*2);ctx.fill();
+        },
+        () => { // glove
+          ctx.fillStyle='#d00';ctx.fillRect(x+2*s,y+2*s,4*s,5*s);ctx.fillStyle='#a00';ctx.fillRect(x+2*s,y+s,5*s,2*s);ctx.fillStyle='#fff';ctx.fillRect(x+3*s,y+4*s,2*s,s);
+        }
+      ]
+    };
+    const brandArts = arts[brand] || arts['Marvel'];
+    brandArts[idx % brandArts.length]();
+    ctx.restore();
+  },
+
+  _rarityGlow(ctx, x, y, w, h, rarity) {
+    const col = VEVE_RARITY_COLORS[rarity] || '#fff';
+    if (col === 'rainbow') {
+      const hue = (S.time * 60) % 360;
+      ctx.shadowColor = `hsl(${hue},100%,60%)`;
+    } else {
+      ctx.shadowColor = col;
+    }
+    ctx.shadowBlur = 8 + Math.sin(S.time * 3) * 3;
+    ctx.strokeStyle = col === 'rainbow' ? `hsl(${(S.time*60)%360},100%,60%)` : col;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x, y, w, h);
+    ctx.shadowBlur = 0;
+  },
+
+  render(ctx) {
+    if (S.floor !== 9) return;
+    const a = this.AREA;
+
+    // Vault background
+    ctx.fillStyle = 'rgba(10,5,20,0.85)';
+    ctx.fillRect(a.x, a.y, a.w, a.h);
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(a.x, a.y, a.w, a.h);
+
+    // "VEVE VAULT" sign with glow
+    const signGlow = 0.5 + Math.sin(S.time * 2) * 0.3;
+    ctx.save();
+    ctx.shadowColor = '#ffd700';
+    ctx.shadowBlur = 12 + Math.sin(S.time * 2) * 5;
+    ctx.fillStyle = `rgba(255,215,0,${signGlow + 0.3})`;
+    ctx.font = 'bold 16px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('🏛️ VEVE VAULT 🏛️', a.x + a.w / 2, a.y + 24);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+
+    if (this.connected) {
+      // Username + count
+      ctx.fillStyle = '#aaa';
+      ctx.font = '9px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(this.username + ' — ' + this.collection.length + ' collectibles', a.x + a.w / 2, a.y + 40);
+
+      // 2x3 grid of pedestals
+      const cols = 3, rows = 2, pedW = 70, pedH = 80;
+      const startX = a.x + 30, startY = a.y + 55;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const idx = r * cols + c;
+          const px = startX + c * (pedW + 20);
+          const py = startY + r * (pedH + 30);
+
+          // Pedestal base
+          ctx.fillStyle = '#1a1a2a';
+          ctx.fillRect(px, py, pedW, pedH);
+          ctx.strokeStyle = '#333';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(px, py, pedW, pedH);
+
+          if (idx < this.collection.length) {
+            const item = this.collection[idx];
+            // Rarity glow
+            this._rarityGlow(ctx, px, py, pedW, pedH, item.rarity);
+            // Pixel art
+            this._drawPixelArt(ctx, px + 19, py + 8, item.brand, idx);
+            // Name
+            ctx.fillStyle = '#ddd';
+            ctx.font = '7px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(item.name, px + pedW / 2, py + pedH - 18);
+            // Brand + rarity
+            ctx.fillStyle = '#888';
+            ctx.font = '6px monospace';
+            ctx.fillText(item.brand, px + pedW / 2, py + pedH - 10);
+            ctx.fillStyle = VEVE_RARITY_COLORS[item.rarity] === 'rainbow' ? '#ff88ff' : (VEVE_RARITY_COLORS[item.rarity] || '#fff');
+            ctx.fillText(item.rarity + ' ' + item.edition, px + pedW / 2, py + pedH - 3);
+          } else {
+            // Empty pedestal
+            ctx.fillStyle = '#333';
+            ctx.font = '20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('?', px + pedW / 2, py + pedH / 2 + 8);
+          }
+        }
+      }
+      ctx.textAlign = 'left';
+
+      // Unlocked bonuses summary at bottom
+      const brands = [...new Set(this.collection.map(c => c.brand))];
+      let by = a.y + a.h - 50;
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('UNLOCKED BONUSES', a.x + a.w / 2, by);
+      by += 10;
+      ctx.font = '7px monospace';
+      for (const b of brands) {
+        const map = VEVE_SKIN_MAP[b];
+        if (map) { ctx.fillStyle = '#ccc'; ctx.fillText(map.badge, a.x + a.w / 2, by); by += 10; }
+      }
+      ctx.textAlign = 'left';
+    } else {
+      // Not connected — empty pedestals
+      for (let i = 0; i < 6; i++) {
+        const c = i % 3, r = Math.floor(i / 3);
+        const px = a.x + 30 + c * 90, py = a.y + 55 + r * 110;
+        ctx.fillStyle = '#1a1a2a';
+        ctx.fillRect(px, py, 70, 80);
+        ctx.strokeStyle = '#333';
+        ctx.strokeRect(px, py, 70, 80);
+        ctx.fillStyle = '#333';
+        ctx.font = '20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('?', px + 35, py + 48);
+      }
+      ctx.textAlign = 'left';
+    }
+
+    // Proximity prompt
+    if (this.isNearVault()) {
+      ctx.fillStyle = 'rgba(255,215,0,0.9)';
+      ctx.font = 'bold 10px monospace';
+      ctx.textAlign = 'center';
+      if (!this.connected) {
+        ctx.fillText('Press SPACE to connect VeVe account', a.x + a.w / 2, a.y + a.h + 16);
+      } else {
+        ctx.fillText('Press SPACE to ' + (this.panelOpen ? 'close' : 'open') + ' VeVe panel', a.x + a.w / 2, a.y + a.h + 16);
+      }
+      ctx.textAlign = 'left';
+    }
+
+    // Panel overlay
+    if (this.panelOpen && this.connected) {
+      this._renderPanel(ctx);
+    }
+  },
+
+  _renderPanel(ctx) {
+    const pw = 260, ph = 320;
+    const px = 400 - pw / 2, py = 300 - ph / 2;
+    ctx.fillStyle = 'rgba(5,0,15,0.95)';
+    ctx.fillRect(px, py, pw, ph);
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(px, py, pw, ph);
+
+    ctx.fillStyle = '#ffd700';
+    ctx.font = 'bold 12px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('🎮 VEVE COLLECTION', px + pw / 2, py + 20);
+    ctx.fillStyle = '#aaa';
+    ctx.font = '9px monospace';
+    ctx.fillText(this.username + ' — ' + this.collection.length + ' items', px + pw / 2, py + 35);
+
+    // Collection grid
+    const cols = 4;
+    for (let i = 0; i < this.collection.length; i++) {
+      const item = this.collection[i];
+      const c = i % cols, r = Math.floor(i / cols);
+      const ix = px + 15 + c * 60, iy = py + 50 + r * 55;
+      ctx.fillStyle = '#111';
+      ctx.fillRect(ix, iy, 50, 45);
+      this._rarityGlow(ctx, ix, iy, 50, 45, item.rarity);
+      this._drawPixelArt(ctx, ix + 9, iy + 4, item.brand, i);
+      ctx.fillStyle = '#ccc';
+      ctx.font = '6px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(item.name, ix + 25, iy + 38);
+    }
+
+    // Unlocked bonuses
+    const brands = [...new Set(this.collection.map(c => c.brand))];
+    let by = py + ph - 60;
+    ctx.fillStyle = '#ffd700';
+    ctx.font = 'bold 8px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('BONUSES', px + pw / 2, by);
+    by += 10;
+    ctx.font = '7px monospace';
+    for (const b of brands) {
+      const m = VEVE_SKIN_MAP[b];
+      if (m) { ctx.fillStyle = '#ccc'; ctx.fillText(m.badge + ' → ' + m.bonus, px + pw / 2, by); by += 9; }
+    }
+
+    // Disconnect hint
+    ctx.fillStyle = '#666';
+    ctx.font = '7px monospace';
+    ctx.fillText('Press SPACE to close | ESC to disconnect', px + pw / 2, py + ph - 8);
+    ctx.textAlign = 'left';
+  },
+
+  getUnlockedSkins() {
+    const brands = [...new Set(this.collection.map(c => c.brand))];
+    return brands.map(b => VEVE_SKIN_MAP[b]?.bonus).filter(Boolean);
+  },
+
+  getUnlockedWeapons() {
+    const has = b => this.collection.some(c => c.brand === b);
+    const weapons = [];
+    if (has('Star Wars')) weapons.push('veve_lightsaber');
+    if (has('Street Fighter')) weapons.push('veve_hadouken');
+    return weapons;
+  },
+
+  // Render bonus particles on player
+  renderPlayerEffects(ctx) {
+    if (!this.connected || S.floor === undefined) return;
+    const skins = this.getUnlockedSkins();
+    const vx = S.visitor.x, vy = S.visitor.y;
+    for (const bonus of skins) {
+      if (bonus === 'lightsaber_glow' && Math.random() < 0.1) {
+        S.particles.push({x:vx+(Math.random()-0.5)*10,y:vy-20,vx:0,vy:-0.5,life:20,color:'#0f0',size:1});
+      } else if (bonus === 'hero_aura' && Math.random() < 0.08) {
+        S.particles.push({x:vx+(Math.random()-0.5)*12,y:vy-10,vx:(Math.random()-0.5)*0.5,vy:-1,life:25,color:'#f44',size:1});
+      } else if (bonus === 'magic_sparkle' && Math.random() < 0.08) {
+        S.particles.push({x:vx+(Math.random()-0.5)*14,y:vy-15,vx:0,vy:-0.3,life:30,color:'#ffd700',size:1.5});
+      } else if (bonus === 'dark_knight_trail' && Math.random() < 0.06) {
+        S.particles.push({x:vx+(Math.random()-0.5)*8,y:vy,vx:0,vy:0.3,life:20,color:'#336',size:1});
+      } else if (bonus === 'turtle_power' && Math.random() < 0.05) {
+        S.particles.push({x:vx+(Math.random()-0.5)*10,y:vy-5,vx:(Math.random()-0.5),vy:-0.5,life:15,color:'#4a2',size:1.5});
+      } else if (bonus === 'hadouken_emote' && Math.random() < 0.04) {
+        S.particles.push({x:vx+10,y:vy-15,vx:1.5,vy:0,life:20,color:'#48f',size:2});
+      }
+    }
+  }
+};
 
 // ═══════════════════════════════════════════════════════════════
 // FLOOR 10: THE UNDERGROUND 🪩 — Disco Floor / Club Space
@@ -18766,6 +19174,28 @@ function renderFloor10() {
     ctx.fillStyle = `rgba(200,200,220,${0.02 + energy * 0.02})`;
     ctx.beginPath(); ctx.arc(fx, fy, 30 + i * 5, 0, Math.PI * 2); ctx.fill();
   }
+  // === BRAND-THEMED CLUB ROOMS ===
+  if(typeof BRAND_CLUBS!=='undefined'){const px=S.visitor.x,py=S.visitor.y;Object.entries(BRAND_CLUBS).forEach(([key,club])=>{const z=club.zone;const inZone=S.floor===10&&px>=z.x&&px<=z.x+z.w&&py>=z.y&&py<=z.y+z.h;
+  // Floor zone
+  ctx.fillStyle=club.colors.primary;ctx.globalAlpha=0.35;ctx.fillRect(z.x,z.y,z.w,z.h);ctx.globalAlpha=1;
+  // Border
+  ctx.strokeStyle=club.colors.accent;ctx.lineWidth=inZone?2:1;ctx.globalAlpha=inZone?0.9:0.4;ctx.strokeRect(z.x,z.y,z.w,z.h);ctx.globalAlpha=1;
+  // Glow when inside
+  if(inZone){ctx.fillStyle=club.colors.glow;ctx.globalAlpha=0.08+Math.sin(S.time*3)*0.03;ctx.fillRect(z.x,z.y,z.w,z.h);ctx.globalAlpha=1;}
+  // Sign
+  ctx.font='bold 6px monospace';ctx.textAlign='center';ctx.fillStyle=club.colors.accent;ctx.shadowColor=club.colors.glow;ctx.shadowBlur=inZone?8:3;ctx.fillText(club.name,z.x+z.w/2,z.y-4);ctx.shadowBlur=0;
+  // Brand text
+  ctx.font='4px monospace';ctx.fillStyle='#888';ctx.fillText(club.brand,z.x+z.w/2,z.y-12);
+  // Decorations per club
+  const cx=z.x,cy=z.y;
+  if(key==='cantina'){for(let t=0;t<3;t++){ctx.fillStyle='#6a5a3a';ctx.beginPath();ctx.arc(cx+40+t*65,cy+120,12,0,Math.PI*2);ctx.fill();}ctx.fillStyle='rgba(255,200,100,0.06)';ctx.fillRect(cx,cy,z.w,z.h);}
+  else if(key==='tower'){for(let p=0;p<3;p++){ctx.fillStyle='#2244aa';ctx.fillRect(cx+15+p*70,cy+20,30,80);ctx.fillStyle='rgba(68,136,255,0.15)';ctx.fillRect(cx+18+p*70,cy+25,24,70);}ctx.fillStyle='#cc0000';ctx.globalAlpha=0.3+Math.sin(S.time*2)*0.1;for(let r=0;r<4;r++){ctx.fillRect(cx+10+r*50,cy+z.h-15,8,3);}ctx.globalAlpha=1;}
+  else if(key==='batcave'){ctx.fillStyle='#111118';ctx.fillRect(cx+5,cy+5,z.w-10,30);for(let s=0;s<3;s++){ctx.fillStyle='#335';ctx.fillRect(cx+20+s*60,cy+10,25,18);ctx.fillStyle='#4a4aaa';ctx.globalAlpha=0.4+Math.sin(S.time*1.5+s)*0.2;ctx.fillRect(cx+22+s*60,cy+12,21,14);ctx.globalAlpha=1;}}
+  else if(key==='dojo'){ctx.fillStyle='#5a3a1a';ctx.fillRect(cx+5,cy+z.h-30,z.w-10,25);for(let b=0;b<2;b++){ctx.fillStyle='#cc2222';ctx.fillRect(cx+20+b*140,cy+15,15,100);}for(let l=0;l<3;l++){ctx.fillStyle='#FFD700';ctx.globalAlpha=0.5+Math.sin(S.time*2+l)*0.2;ctx.beginPath();ctx.arc(cx+50+l*55,cy+50,4,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;}}
+  // Player count
+  const inRoom=(window.playersInBrandClub||{})[key]||0;if(inRoom>0){ctx.font='5px monospace';ctx.fillStyle='#aaa';ctx.fillText(inRoom+' vibing',z.x+z.w/2,z.y+z.h+10);}
+  ctx.textAlign='left';});}
+
   FloorDepth.renderShadows(ctx,10);FloorDepth.renderLightRays(ctx,10);
 }
 
@@ -26816,6 +27246,7 @@ const AtmosphereSystem = {
 {
   // Initialize atmosphere system
   AtmosphereSystem.init();
+  if(typeof VeVeShowroom!=='undefined')VeVeShowroom.init();
   
   // Patch the music toggle to control ambient sounds
   const _origToggleMusic = toggleMusic;
