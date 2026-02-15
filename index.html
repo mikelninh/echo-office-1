@@ -11202,7 +11202,7 @@ function initInput(){
   });
   // Visitor WASD/Arrow movement
   document.addEventListener('keydown',e=>{
-    if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
+    if(document.activeElement&&(document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='TEXTAREA'||document.activeElement.isContentEditable))return;
     if(arcadeGame)return; // don't interfere with arcade
     const k=e.key;
     if(k==='ArrowUp'||k==='w'||k==='W')S.keys.up=true;
@@ -11311,7 +11311,7 @@ function initInput(){
   
   // Separate listener with high priority for dash detection
   document.addEventListener('keydown',e=>{
-    if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
+    if(document.activeElement&&(document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='TEXTAREA'||document.activeElement.isContentEditable))return;
     if(arcadeGame)return;
     const dir=keyToDir(e.key);
     if(!dir)return;
