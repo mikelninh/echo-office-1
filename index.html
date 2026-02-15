@@ -17710,6 +17710,7 @@ function init(){
   loadVisitorMemory();
   // Initialize weapon system (v20)
   WeaponSystem.init();
+  VeVeRentals.init();VeVeDrops.init();VeVeTrading.init();
   
   // Auto-login with Station Pass if available
   if(StationPass.passCode){
@@ -18235,6 +18236,245 @@ const V26Archive={
   }
 };
 
+// ═══════════════════════════════════════
+// VeVe NFT Rentals, Live Drops, Trading Floor (Floor 9)
+// ═══════════════════════════════════════
+const VeVeRentals={
+  listings:[],activeRentals:[],
+  init(){this.activeRentals=LS.get('veve_rentals',[]);this.seedDemoListings();this.cleanExpired();},
+  seedDemoListings(){
+    this.listings=[
+      {id:'r1',owner:'DarkVader99',nftName:'Darth Vader #442',brand:'Star Wars',rarity:'Ultra Rare',skinId:null,pricePerHour:30,available:true},
+      {id:'r2',owner:'SpideyFan',nftName:'Spider-Man #1281',brand:'Marvel',rarity:'Rare',skinId:null,pricePerHour:15,available:true},
+      {id:'r3',owner:'BatCollector',nftName:'Batman #89',brand:'DC',rarity:'Secret Rare',skinId:null,pricePerHour:50,available:true},
+      {id:'r4',owner:'ShellHead',nftName:'Leonardo #333',brand:'TMNT',rarity:'Common',skinId:'turtle_blue',pricePerHour:5,available:true},
+      {id:'r5',owner:'PixelKing',nftName:'Ryu #721',brand:'Street Fighter',rarity:'Uncommon',skinId:'street_warrior',pricePerHour:10,available:true},
+      {id:'r6',owner:'DisneyMagic',nftName:'Mickey Classic #55',brand:'Disney',rarity:'Epic',skinId:null,pricePerHour:25,available:true},
+      {id:'r7',owner:'WonderGal',nftName:'Wonder Woman #200',brand:'DC',rarity:'Rare',skinId:null,pricePerHour:18,available:true},
+    ];
+  },
+  rent(listingId){
+    const l=this.listings.find(x=>x.id===listingId);
+    if(!l||!l.available)return;
+    if(!Coins.spend(l.pricePerHour)){showNotification('Not enough ◈!');return;}
+    l.available=false;
+    const rental={nftId:l.id,nftName:l.nftName,skinId:l.skinId,expiresAt:Date.now()+3600000};
+    this.activeRentals.push(rental);
+    LS.set('veve_rentals',this.activeRentals);
+    showNotification('🎭 Rented '+l.nftName+' for 1 hour!');
+    setTimeout(()=>{l.available=true;this.cleanExpired();},3600000);
+  },
+  cleanExpired(){
+    const now=Date.now();
+    const before=this.activeRentals.length;
+    this.activeRentals=this.activeRentals.filter(r=>r.expiresAt>now);
+    if(this.activeRentals.length<before){
+      this.listings.forEach(l=>{if(!this.activeRentals.find(r=>r.nftId===l.id))l.available=true;});
+    }
+    LS.set('veve_rentals',this.activeRentals);
+  },
+  showUI(){
+    this.cleanExpired();
+    const rarityColor={Common:'#aaa',Uncommon:'#4a4',Rare:'#44f','Ultra Rare':'#a4f','Secret Rare':'#f44',Epic:'#fa0'};
+    let html='<h3 style="color:#ff6ec7">🎭 NFT Rental Marketplace</h3>';
+    html+='<p style="font-size:10px;color:#888;margin-bottom:8px">Rent collectible skins from other collectors</p>';
+    if(this.activeRentals.length>0){
+      html+='<div style="margin-bottom:10px;padding:6px;background:rgba(0,255,100,.08);border:1px solid #0f4;border-radius:4px">';
+      html+='<div style="font-size:10px;color:#0f4;font-weight:bold;margin-bottom:4px">Active Rentals</div>';
+      this.activeRentals.forEach(r=>{
+        const left=Math.max(0,Math.ceil((r.expiresAt-Date.now())/60000));
+        html+='<div style="font-size:9px;color:#ccc">'+r.nftName+' — '+left+'min left</div>';
+      });
+      html+='</div>';
+    }
+    this.listings.forEach(l=>{
+      const rc=rarityColor[l.rarity]||'#888';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px;margin:3px 0;background:rgba(255,255,255,.03);border-radius:4px;border-left:3px solid '+rc+'">';
+      html+='<div><div style="font-size:10px;color:#fff;font-weight:bold">'+l.nftName+'</div>';
+      html+='<div style="font-size:8px;color:#888">'+l.brand+' · <span style="color:'+rc+'">'+l.rarity+'</span> · by '+l.owner+'</div></div>';
+      if(l.available){
+        html+='<button onclick="VeVeRentals.rent(\''+l.id+'\');document.querySelector(\'.popup-overlay\').remove();VeVeRentals.showUI()" style="background:'+rc+';border:none;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:9px;white-space:nowrap">'+l.pricePerHour+'◈/hr</button>';
+      } else {
+        html+='<span style="font-size:9px;color:#f88">Rented</span>';
+      }
+      html+='</div>';
+    });
+    createPopup(html);
+  },
+  render(ctx){
+    const o=getObjects().find(x=>x.id==='veve_rentals');if(!o)return;
+    ctx.fillStyle='#1a1a2a';ctx.fillRect(o.x,o.y,o.w,o.h);
+    ctx.strokeStyle='#ff6ec7';ctx.lineWidth=1;ctx.strokeRect(o.x,o.y,o.w,o.h);
+    ctx.fillStyle='#ff6ec7';ctx.font='bold 9px monospace';ctx.textAlign='center';
+    ctx.fillText('🎭 NFT RENTALS',o.x+o.w/2,o.y+16);
+    ctx.fillStyle='#aaa';ctx.font='8px monospace';
+    ctx.fillText(this.listings.filter(l=>l.available).length+'/'+this.listings.length+' available',o.x+o.w/2,o.y+30);
+    if(this.activeRentals.length>0){
+      const pulse=0.5+Math.sin(S.time*3)*0.3;
+      ctx.fillStyle='rgba(0,255,100,'+pulse+')';ctx.font='8px monospace';
+      ctx.fillText(this.activeRentals.length+' active',o.x+o.w/2,o.y+44);
+    }
+    ctx.fillStyle='#555';ctx.font='7px monospace';ctx.fillText('Press E',o.x+o.w/2,o.y+o.h-6);
+    ctx.textAlign='left';
+  }
+};
+
+const VeVeDrops={
+  upcoming:[],recent:[],_timer:null,
+  init(){
+    this.seedDrops();
+    this._timer=setInterval(()=>this.simulateDrop(),30*60*1000);
+  },
+  seedDrops(){
+    const now=Date.now();
+    this.upcoming=[
+      {id:'d1',name:'Predator: Jungle Hunter',brand:'Predator',time:now+3600000,editions:5000,price:60},
+      {id:'d2',name:'Luke Skywalker: Jedi Knight',brand:'Star Wars',time:now+7200000,editions:3000,price:80},
+      {id:'d3',name:'Batman: Year One',brand:'DC',time:now+14400000,editions:2000,price:120},
+      {id:'d4',name:'Groot: Baby Form',brand:'Marvel',time:now+21600000,editions:8000,price:40},
+    ];
+  },
+  simulateDrop(){
+    if(this.upcoming.length>0){
+      const drop=this.upcoming.shift();
+      drop.droppedAt=Date.now();drop.soldOut=Math.random()>0.3;
+      this.recent.unshift(drop);
+      if(S.floor===9)showNotification('🔴 LIVE DROP: '+drop.name+' just dropped on VeVe!');
+    }
+  },
+  showUI(){
+    let html='<h3 style="color:#ff4444">🔴 Live Drops</h3>';
+    html+='<p style="font-size:10px;color:#888;margin-bottom:8px">Upcoming & recent VeVe drops</p>';
+    if(this.upcoming.length>0){
+      html+='<div style="font-size:10px;color:#ffd700;font-weight:bold;margin:6px 0">⏳ Upcoming</div>';
+      this.upcoming.forEach(d=>{
+        const mins=Math.max(0,Math.ceil((d.time-Date.now())/60000));
+        const hrs=Math.floor(mins/60),m=mins%60;
+        html+='<div style="padding:5px;margin:3px 0;background:rgba(255,68,68,.06);border-radius:4px;border-left:3px solid #f44">';
+        html+='<div style="font-size:10px;color:#fff;font-weight:bold">'+d.name+'</div>';
+        html+='<div style="font-size:8px;color:#888">'+d.brand+' · '+d.editions+' editions · '+d.price+'◈</div>';
+        html+='<div style="font-size:9px;color:#f88">Drops in '+hrs+'h '+m+'m</div></div>';
+      });
+    }
+    if(this.recent.length>0){
+      html+='<div style="font-size:10px;color:#888;font-weight:bold;margin:8px 0 4px">Recent Drops</div>';
+      this.recent.forEach(d=>{
+        const status=d.soldOut?'<span style="color:#f44">SOLD OUT</span>':'<span style="color:#4f4">Available</span>';
+        html+='<div style="padding:4px;margin:2px 0;font-size:9px;color:#aaa">'+d.name+' — '+status+'</div>';
+      });
+    }
+    const watchers=3+Math.floor(Math.random()*12);
+    html+='<div style="text-align:center;margin-top:10px;font-size:9px;color:#555">👀 '+watchers+' station visitors watching</div>';
+    createPopup(html);
+  },
+  render(ctx){
+    const o=getObjects().find(x=>x.id==='veve_drops');if(!o)return;
+    ctx.fillStyle='#1a0a0a';ctx.fillRect(o.x,o.y,o.w,o.h);
+    ctx.strokeStyle='#ff4444';ctx.lineWidth=1;ctx.strokeRect(o.x,o.y,o.w,o.h);
+    // Pulsing LIVE indicator
+    const pulse=0.5+Math.sin(S.time*4)*0.4;
+    ctx.fillStyle='rgba(255,0,0,'+pulse+')';ctx.beginPath();ctx.arc(o.x+15,o.y+14,4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#ff4444';ctx.font='bold 9px monospace';ctx.textAlign='center';
+    ctx.fillText('LIVE DROPS',o.x+o.w/2,o.y+16);
+    if(this.upcoming.length>0){
+      const next=this.upcoming[0];
+      const mins=Math.max(0,Math.ceil((next.time-Date.now())/60000));
+      ctx.fillStyle='#ccc';ctx.font='8px monospace';
+      ctx.fillText(next.name.substring(0,18),o.x+o.w/2,o.y+32);
+      ctx.fillStyle='#f88';ctx.font='7px monospace';
+      ctx.fillText('in '+Math.floor(mins/60)+'h '+mins%60+'m',o.x+o.w/2,o.y+44);
+    }
+    ctx.fillStyle='#555';ctx.font='7px monospace';ctx.fillText('Press E',o.x+o.w/2,o.y+o.h-6);
+    ctx.textAlign='left';
+  }
+};
+
+const VeVeTrading={
+  orders:[],history:[],_tickerOffset:0,
+  init(){this.seedOrders();},
+  seedOrders(){
+    this.orders=[
+      {type:'sell',item:'Iron Man MK1 #299',brand:'Marvel',price:500,user:'TonyStark88'},
+      {type:'sell',item:'Yoda #1337',brand:'Star Wars',price:800,user:'JediMaster'},
+      {type:'buy',item:'Any Batman',brand:'DC',price:300,user:'GothamNights'},
+      {type:'sell',item:'Deadpool #666',brand:'Marvel',price:350,user:'ChimiChanga'},
+      {type:'buy',item:'Any Spider-Man',brand:'Marvel',price:200,user:'WebHead22'},
+      {type:'sell',item:'Elsa #100',brand:'Disney',price:450,user:'LetItGo'},
+      {type:'sell',item:'Goku SSJ #9001',brand:'Dragon Ball',price:1200,user:'Kakarot'},
+      {type:'buy',item:'Any Rare DC',brand:'DC',price:400,user:'Arkham_Fan'},
+      {type:'sell',item:'Captain America #42',brand:'Marvel',price:600,user:'ShieldBearer'},
+      {type:'sell',item:'Pikachu #025',brand:'Pokémon',price:900,user:'Ash_K'},
+      {type:'buy',item:'Any Ultra Rare',brand:'Any',price:700,user:'WhaleCollector'},
+      {type:'sell',item:'Wolverine #181',brand:'Marvel',price:550,user:'AdamantiumX'},
+    ];
+    this.history=[
+      {item:'Thor #616',price:720,change:+45,time:'2m ago'},
+      {item:'Joker #1',price:380,change:-20,time:'5m ago'},
+      {item:'Black Panther #7',price:290,change:+15,time:'12m ago'},
+    ];
+  },
+  showUI(){
+    let html='<h3 style="color:#ffd700">📈 Trading Floor</h3>';
+    html+='<p style="font-size:10px;color:#888;margin-bottom:8px">P2P NFT marketplace</p>';
+    // Tabs
+    html+='<div style="display:flex;gap:4px;margin-bottom:8px">';
+    html+='<button onclick="VeVeTrading._showTab(\'sell\')" style="flex:1;background:#2a2a3a;border:1px solid #f44;color:#f88;padding:4px;border-radius:3px;cursor:pointer;font-size:9px">Sell Orders</button>';
+    html+='<button onclick="VeVeTrading._showTab(\'buy\')" style="flex:1;background:#2a2a3a;border:1px solid #4f4;color:#8f8;padding:4px;border-radius:3px;cursor:pointer;font-size:9px">Buy Orders</button>';
+    html+='<button onclick="VeVeTrading._showTab(\'history\')" style="flex:1;background:#2a2a3a;border:1px solid #ffd700;color:#ffd700;padding:4px;border-radius:3px;cursor:pointer;font-size:9px">Recent</button>';
+    html+='</div>';
+    html+='<div id="veve-trading-list"></div>';
+    html+='<div style="text-align:center;margin-top:12px;padding:8px;background:rgba(255,215,0,.06);border:1px dashed #ffd700;border-radius:4px">';
+    html+='<div style="font-size:10px;color:#ffd700;font-weight:bold">🔒 Coming Soon</div>';
+    html+='<div style="font-size:8px;color:#888">P2P trading launches with OMI Bridge</div></div>';
+    const p=createPopup(html);
+    VeVeTrading._showTab('sell');
+  },
+  _showTab(tab){
+    const el=document.getElementById('veve-trading-list');if(!el)return;
+    let html='';
+    if(tab==='history'){
+      this.history.forEach(t=>{
+        const cc=t.change>=0?'#4f4':'#f44';const sign=t.change>=0?'+':'';
+        html+='<div style="display:flex;justify-content:space-between;padding:4px;margin:2px 0;font-size:9px;background:rgba(255,255,255,.02);border-radius:3px">';
+        html+='<span style="color:#ccc">'+t.item+'</span>';
+        html+='<span>'+t.price+'◈ <span style="color:'+cc+'">'+sign+t.change+'</span> <span style="color:#555">'+t.time+'</span></span></div>';
+      });
+    } else {
+      this.orders.filter(o=>o.type===tab).forEach(o=>{
+        const c=tab==='sell'?'#f88':'#8f8';
+        html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px;margin:2px 0;background:rgba(255,255,255,.02);border-radius:3px">';
+        html+='<div><div style="font-size:10px;color:#fff">'+o.item+'</div>';
+        html+='<div style="font-size:8px;color:#888">'+o.brand+' · '+o.user+'</div></div>';
+        html+='<span style="color:'+c+';font-size:10px;font-weight:bold">'+o.price+'◈</span></div>';
+      });
+    }
+    el.innerHTML=html;
+  },
+  render(ctx){
+    const o=getObjects().find(x=>x.id==='veve_trading');if(!o)return;
+    ctx.fillStyle='#1a1a10';ctx.fillRect(o.x,o.y,o.w,o.h);
+    ctx.strokeStyle='#ffd700';ctx.lineWidth=1;ctx.strokeRect(o.x,o.y,o.w,o.h);
+    ctx.fillStyle='#ffd700';ctx.font='bold 9px monospace';ctx.textAlign='center';
+    ctx.fillText('📈 TRADING FLOOR',o.x+o.w/2,o.y+16);
+    // Scrolling ticker
+    ctx.save();ctx.beginPath();ctx.rect(o.x+2,o.y+24,o.w-4,14);ctx.clip();
+    this._tickerOffset=(this._tickerOffset+0.5)%600;
+    let tx=o.x+o.w-this._tickerOffset;
+    this.history.forEach(t=>{
+      const cc=t.change>=0?'#4f4':'#f44';
+      ctx.fillStyle='#aaa';ctx.font='7px monospace';ctx.textAlign='left';
+      ctx.fillText(t.item,tx,o.y+34);
+      ctx.fillStyle=cc;ctx.fillText((t.change>=0?'▲':'▼')+Math.abs(t.change),tx+80,o.y+34);
+      tx+=130;
+    });
+    ctx.restore();ctx.textAlign='center';
+    ctx.fillStyle='#888';ctx.font='8px monospace';
+    ctx.fillText(this.orders.length+' open orders',o.x+o.w/2,o.y+52);
+    ctx.fillStyle='#555';ctx.font='7px monospace';ctx.fillText('Press E',o.x+o.w/2,o.y+o.h-6);
+    ctx.textAlign='left';
+  }
+};
+
 // --- Floor 9 Renderer ---
 function renderFloor9(){
   FloorDepth.renderBackground(ctx,9);
@@ -18348,6 +18588,9 @@ function renderFloor9(){
     ctx.fillStyle='#888';ctx.font='8px monospace';ctx.fillText(V26Ranked.wins+'W/'+V26Ranked.losses+'L',rb.x+rb.w/2,rb.y+85);
     ctx.textAlign='left';
   }
+
+  // VeVe systems
+  VeVeRentals.render(ctx);VeVeDrops.render(ctx);VeVeTrading.render(ctx);
 
   // Ascension wings on Echo (if on this floor)
   if(ascended&&S.echo.floor===9){
