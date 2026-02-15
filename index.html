@@ -1792,6 +1792,11 @@ const VISITOR_SKINS=[
   {id:'psychic_girl',label:'Psychic Girl',icon:'🔮',color:'#223366',cost:2000,desc:'The mind is the strongest weapon.',accent:'#aa55ff',rarity:'legendary',hasSprite:true},
   {id:'turbo_runner',label:'Turbo Runner',icon:'🏃',color:'#2244aa',cost:2000,desc:'These legs were borrowed from something terrifying.',accent:'#ffaa00',rarity:'legendary',hasSprite:true},
   {id:'spirit_granny',label:'Spirit Granny',icon:'👵',color:'#ccddcc',cost:5000,desc:'Hehehehe... want to race?',accent:'#44ff66',rarity:'mythic',hasSprite:true},
+  // Fighting game / cartoon inspired skins (v28)
+  {id:'street_warrior',label:'Street Warrior',icon:'🥋',color:'#f0f0f0',cost:800,desc:'The path of the true warrior.',accent:'#dd2222',rarity:'epic',hasSprite:true},
+  {id:'kick_fighter',label:'Kick Fighter',icon:'👠',color:'#2266cc',cost:2000,desc:'The strongest woman in the world.',accent:'#ddaa33',rarity:'legendary',hasSprite:true},
+  {id:'turtle_blue',label:'Turtle Blue',icon:'🐢',color:'#44aa44',cost:800,desc:'Heroes in a half shell.',accent:'#3366cc',rarity:'epic',hasSprite:true},
+  {id:'turtle_orange',label:'Turtle Orange',icon:'🍕',color:'#44aa44',cost:800,desc:'Cowabunga, dude!',accent:'#ee8822',rarity:'epic',hasSprite:true},
 ];
 
 // -- Skin Effects System --
@@ -6464,6 +6469,310 @@ function getVisitorSprite(skinId,dir,frame){
         [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
         [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
         [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  else if(skinId==='street_warrior'){
+    // Street Warrior — white gi, red headband, brown hair, muscular - Ryu inspired
+    const W='#f0f0f0',Wd='#cccccc',Wl='#ffffff',Ws='#dddddd',R='#dd2222',Rd='#aa1111',Rl='#ff4444',H='#664422',Hd='#442200',Hl='#886644',S1='#eebb88',S1d='#cc9966',S1l='#ffd4a8',E='#222222',Ed='#111111',Bt='#cc9966',Btd='#aa7744';
+    if(dir===0){
+      grid=[
+        [T, T, T, T, H, Hl,H, H, Hl,H, T, T, T, T, T, T],
+        [T, T, T, H, H, H, H, H, H, H, H, T, T, T, T, T],
+        [T, T, R, Rl,R, R, R, R, R, R, Rl,R, T, T, T, T],
+        [T, T, R, S1,S1l,S1,S1,S1,S1l,S1,R, T, T, T, T],
+        [T, T, T, S1,S1l,S1d,S1,S1,S1d,S1l,S1,T, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1l,S1l,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1d,S1,S1,S1d,S1,T, T, T, T, T, T],
+        [T, T, T, T, T, S1d,S1,S1,S1d,T, T, T, T, T, T, T],
+        [T, T, S1l,W, W, Wl,W, W, Wl,W, W, S1l,T, T, T, T],
+        [T, S1l,W, W, Wl,Ws,W, W, Ws,Wl,W, W, S1l,T, T, T],
+        [T, S1,W, Wl,W, W, W, W, W, W, Wl,W, S1,T, T, T],
+        [T, T, W, W, Wd,W, W, W, W, Wd,W, W, T, T, T, T],
+        [T, T, W, W, W, Ws,Wd,Wd,Ws,W, W, W, T, T, T, T],
+        [T, T, T, W, W, Wd,W, W, Wd,W, W, T, T, T, T, T],
+        [T, T, T, W, Wd,W, W, W, W, Wd,W, T, T, T, T, T],
+        [T, T, T, T, S1d,S1,S1,T, S1,S1,S1d,T, T, T, T, T],
+        [T, T, T, T, S1d,S1,S1,T, S1,S1,S1d,T, T, T, T, T],
+        [T, T, T, Btd,Bt,Bt,Bt,T, Bt,Bt,Bt,Btd,T, T, T, T],
+        [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, T, T, T, H, Hl,H, H, Hl,H, T, T, T, T, T, T],
+        [T, T, T, H, H, H, H, H, H, H, H, T, T, T, T, T],
+        [T, T, R, Rl,R, R, R, R, R, R, Rl,R, Rl,R, T, T],
+        [T, T, R, H, H, H, H, H, H, H, R, T, Rd,R, T, T],
+        [T, T, T, H, Hd,H, H, H, Hd,H, T, T, T, T, T, T],
+        [T, T, T, H, H, H, H, H, H, H, T, T, T, T, T, T],
+        [T, T, T, H, H, H, H, H, H, H, T, T, T, T, T, T],
+        [T, T, T, T, H, H, H, H, H, T, T, T, T, T, T, T],
+        [T, T, T, T, T, S1d,S1,S1,S1d,T, T, T, T, T, T, T],
+        [T, T, S1l,W, W, Wl,W, W, Wl,W, W, S1l,T, T, T, T],
+        [T, S1l,W, W, Wl,Ws,W, W, Ws,Wl,W, W, S1l,T, T, T],
+        [T, S1,W, Wl,W, W, W, W, W, W, Wl,W, S1,T, T, T],
+        [T, T, W, W, Wd,W, W, W, W, Wd,W, W, T, T, T, T],
+        [T, T, W, W, W, Ws,Wd,Wd,Ws,W, W, W, T, T, T, T],
+        [T, T, T, W, W, Wd,W, W, Wd,W, W, T, T, T, T, T],
+        [T, T, T, W, Wd,W, W, W, W, Wd,W, T, T, T, T, T],
+        [T, T, T, T, S1d,S1,S1,T, S1,S1,S1d,T, T, T, T, T],
+        [T, T, T, T, S1d,S1,S1,T, S1,S1,S1d,T, T, T, T, T],
+        [T, T, T, Btd,Bt,Bt,Bt,T, Bt,Bt,Bt,Btd,T, T, T, T],
+        [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
+      ];
+    } else {
+      grid=[
+        [T, T, T, T, H, Hl,H, H, H, T, T, T, T, T, T, T],
+        [T, T, T, H, H, H, H, H, H, H, T, T, T, T, T, T],
+        [T, T, R, Rl,R, R, R, R, R, R, R, T, T, T, T, T],
+        [T, T, R, S1,S1l,S1,S1,S1,R, R, T, T, T, T, T, T],
+        [T, T, T, S1,S1l,S1d,S1,S1,S1,T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1l,S1,T, T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1,T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1d,S1,S1,T, T, T, T, T, T, T, T],
+        [T, T, T, T, T, S1d,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, S1l,W, W, Wl,W, W, W, S1l,T, T, T, T, T, T],
+        [T, S1l,W, W, Wl,Ws,W, Ws,W, W, S1l,T, T, T, T, T],
+        [T, S1,W, Wl,W, W, W, W, W, Wl,W, S1,T, T, T, T],
+        [T, T, W, W, Wd,W, W, W, Wd,W, W, T, T, T, T, T],
+        [T, T, W, W, W, Ws,Wd,Ws,W, W, W, T, T, T, T, T],
+        [T, T, T, W, W, Wd,W, Wd,W, W, T, T, T, T, T, T],
+        [T, T, T, W, Wd,W, W, W, Wd,W, T, T, T, T, T, T],
+        [T, T, T, T, S1d,S1,S1,S1,S1d,T, T, T, T, T, T, T],
+        [T, T, T, T, S1d,S1,S1,S1,S1d,T, T, T, T, T, T, T],
+        [T, T, T, Btd,Bt,Bt,Bt,Bt,Btd,T, T, T, T, T, T, T],
+        [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  else if(skinId==='kick_fighter'){
+    // Kick Fighter — blue qipao, hair buns, thick legs - Chun-Li inspired
+    const B='#2266cc',Bd='#1a4f99',Bl='#3388dd',Bs='#2a77cc',G='#ddaa33',Gd='#bb8822',Gl='#eecc55',H='#222222',Hd='#111111',Hl='#333333',S1='#eebb88',S1d='#cc9966',S1l='#ffd4a8',E='#222222',Ed='#111111',Wh='#eeeeee',Whd='#cccccc',Whl='#ffffff',Sp='#888888',Spd='#666666';
+    if(dir===0){
+      grid=[
+        [T, T, H, Hd,T, T, T, T, T, T, Hd,H, T, T, T, T],
+        [T, T, H, H, H, H, H, H, H, H, H, H, T, T, T, T],
+        [T, T, Hl,H, H, H, H, H, H, H, H, Hl,T, T, T, T],
+        [T, T, T, H, S1,S1l,S1,S1,S1l,S1,H, T, T, T, T, T],
+        [T, T, T, S1,S1l,S1d,S1,S1,S1d,S1l,S1,T, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1l,S1l,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1d,S1,S1,S1d,S1,T, T, T, T, T, T],
+        [T, T, T, T, T, S1d,S1,S1,S1d,T, T, T, T, T, T, T],
+        [T, T, Sp,B, B, Bl,G, G, Bl,B, B, Sp,T, T, T, T],
+        [T, Sp,B, Bl,B, G, Bl,Bl,G, B, Bl,B, Sp,T, T, T],
+        [T, T, B, B, Bd,B, B, B, B, Bd,B, B, T, T, T, T],
+        [T, T, B, Bl,B, Bd,G, G, Bd,B, Bl,B, T, T, T, T],
+        [T, T, T, B, B, B, Bd,Bd,B, B, B, T, T, T, T, T],
+        [T, T, T, S1,S1l,S1,S1d,S1d,S1,S1l,S1,T, T, T, T, T],
+        [T, T, S1l,S1,S1l,S1d,S1,S1,S1d,S1l,S1,S1l,T, T, T, T],
+        [T, T, S1,S1l,S1,S1d,S1,S1,S1d,S1,S1l,S1,T, T, T, T],
+        [T, T, Wh,Whl,Wh,Whd,Wh,Wh,Whd,Wh,Whl,Wh,T, T, T, T],
+        [T, T, Wh,Wh,Whd,Wh,Wh,Wh,Wh,Whd,Wh,Wh,T, T, T, T],
+        [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, T, H, Hd,T, T, T, T, T, T, Hd,H, T, T, T, T],
+        [T, T, H, H, H, H, H, H, H, H, H, H, T, T, T, T],
+        [T, T, Hl,H, Hd,H, H, H, Hd,H, H, Hl,T, T, T, T],
+        [T, T, T, H, H, H, H, H, H, H, H, T, T, T, T, T],
+        [T, T, T, H, Hd,H, H, H, Hd,H, T, T, T, T, T, T],
+        [T, T, T, H, H, H, H, H, H, H, T, T, T, T, T, T],
+        [T, T, T, H, H, H, H, H, H, H, T, T, T, T, T, T],
+        [T, T, T, T, H, H, H, H, H, T, T, T, T, T, T, T],
+        [T, T, T, T, T, S1d,S1,S1,S1d,T, T, T, T, T, T, T],
+        [T, T, Sp,B, B, Bl,G, G, Bl,B, B, Sp,T, T, T, T],
+        [T, Sp,B, Bl,B, G, Bl,Bl,G, B, Bl,B, Sp,T, T, T],
+        [T, T, B, B, Bd,B, B, B, B, Bd,B, B, T, T, T, T],
+        [T, T, B, Bl,B, Bd,G, G, Bd,B, Bl,B, T, T, T, T],
+        [T, T, T, B, B, B, Bd,Bd,B, B, B, T, T, T, T, T],
+        [T, T, T, S1,S1l,S1,S1d,S1d,S1,S1l,S1,T, T, T, T, T],
+        [T, T, S1l,S1,S1l,S1d,S1,S1,S1d,S1l,S1,S1l,T, T, T, T],
+        [T, T, S1,S1l,S1,S1d,S1,S1,S1d,S1,S1l,S1,T, T, T, T],
+        [T, T, Wh,Whl,Wh,Whd,Wh,Wh,Whd,Wh,Whl,Wh,T, T, T, T],
+        [T, T, Wh,Wh,Whd,Wh,Wh,Wh,Wh,Whd,Wh,Wh,T, T, T, T],
+        [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
+      ];
+    } else {
+      grid=[
+        [T, T, H, Hd,T, T, T, T, T, T, T, T, T, T, T, T],
+        [T, T, H, H, H, H, H, H, H, T, T, T, T, T, T, T],
+        [T, T, Hl,H, H, H, H, H, H, Hl,T, T, T, T, T, T],
+        [T, T, T, H, S1,S1l,S1,S1,H, T, T, T, T, T, T, T],
+        [T, T, T, S1,S1l,S1d,S1,S1,T, T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1l,S1,T, T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1,T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1d,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, T, S1d,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, Sp,B, B, Bl,G, Bl,B, Sp,T, T, T, T, T, T],
+        [T, Sp,B, Bl,B, G, Bl,G, B, Bl,Sp,T, T, T, T, T],
+        [T, T, B, B, Bd,B, B, Bd,B, B, T, T, T, T, T, T],
+        [T, T, B, Bl,B, Bd,G, Bd,B, Bl,T, T, T, T, T, T],
+        [T, T, T, B, B, B, Bd,B, B, T, T, T, T, T, T, T],
+        [T, T, T, S1,S1l,S1,S1d,S1,S1l,T, T, T, T, T, T, T],
+        [T, T, S1l,S1,S1l,S1d,S1,S1d,S1l,S1l,T, T, T, T, T, T],
+        [T, T, S1,S1l,S1,S1d,S1,S1d,S1,S1l,T, T, T, T, T, T],
+        [T, T, Wh,Whl,Wh,Whd,Wh,Whd,Wh,Whl,T, T, T, T, T, T],
+        [T, T, Wh,Wh,Whd,Wh,Wh,Wh,Whd,Wh,T, T, T, T, T, T],
+        [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  else if(skinId==='turtle_blue'){
+    // Turtle Blue — green skin, blue mask, shell, katana - Leonardo inspired
+    const Gn='#44aa44',Gnd='#338833',Gnl='#55cc55',Gns='#3d9d3d',M='#3366cc',Md='#2255aa',Ml='#4488dd',Sh='#886633',Shd='#664422',Shl='#aa8844',Shs='#775533',S1='#44aa44',E='#ffffff',Ed='#222222',Bt='#886633',Btd='#664422',Btl='#aa8844',Kh='#888888',Khd='#666666',Khl='#aaaaaa';
+    if(dir===0){
+      grid=[
+        [T, T, T, T, Gn, Gnl,Gn, Gn, Gnl,Gn, T, T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gn, Gn, Gn, Gn, Gn, Gn, T, T, T, T, T],
+        [T, T, Gn, Gnl,Gn, Gn, Gn, Gn, Gn, Gn, Gnl,Gn, T, T, T, T],
+        [T, T, M, Ml, M, M, M, M, M, M, Ml, M, T, T, T, T],
+        [T, T, M, E, Ed, Md, M, M, Md, Ed, E, M, T, T, T, T],
+        [T, T, T, Gn, Gn, Gnd,Gn, Gn, Gnd,Gn, Gn, T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gn, Gnd,Gnd,Gn, Gn, Gn, T, T, T, T, T],
+        [T, T, T, T, Gn, Gnd,Gn, Gn, Gnd,Gn, T, T, T, T, T, T],
+        [T, T, T, T, T, Gnd,Gn, Gn, Gnd,T, T, T, T, T, T, T],
+        [T, T, Gn, Sh, Shl,Sh, Sh, Sh, Sh, Shl,Sh, Gn, T, T, T, T],
+        [T, Gn, Sh, Shl,Sh, Shd,Sh, Sh, Shd,Sh, Shl,Sh, Gn, T, T, T],
+        [T, Gn, Sh, Sh, Shd,Sh, Sh, Sh, Sh, Shd,Sh, Sh, Gn, T, T, T],
+        [T, T, Gn, Gn, Gnd,Gn, Gn, Gn, Gn, Gnd,Gn, Gn, T, T, T, T],
+        [T, T, Gn, Gnl,Gn, Gnd,Sh, Sh, Gnd,Gn, Gnl,Gn, T, T, T, T],
+        [T, T, T, Gn, Gn, Gnd,Gn, Gn, Gnd,Gn, Gn, T, T, T, T, T],
+        [T, T, T, Gn, Gnd,Gn, Gn, Gn, Gn, Gnd,Gn, T, T, T, T, T],
+        [T, T, T, T, Gnd,Gn, Gn, T, Gn, Gn, Gnd,T, T, T, T, T],
+        [T, T, T, T, Gnd,Gn, Gn, T, Gn, Gn, Gnd,T, T, T, T, T],
+        [T, T, T, Gnd,Gn, Gnl,Gn, T, Gn, Gnl,Gn, Gnd,T, T, T, T],
+        [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, T, T, T, Gn, Gnl,Gn, Gn, Gnl,Gn, T, T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gn, Gn, Gn, Gn, Gn, Gn, T, T, T, T, T],
+        [T, T, Gn, Gnl,Gn, Gn, Gn, Gn, Gn, Gn, Gnl,Gn, T, T, T, T],
+        [T, T, M, Ml, M, M, M, M, M, M, Ml, M, T, T, T, T],
+        [T, T, T, Gn, Gnd,Gn, Gn, Gn, Gnd,Gn, T, T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gnd,Gn, Gn, Gnd,Gn, Gn, T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gn, Gnd,Gnd,Gn, Gn, Gn, T, T, T, T, T],
+        [T, T, T, T, Gn, Gnd,Gn, Gn, Gnd,Gn, T, T, T, T, T, T],
+        [T, T, T, T, T, Gnd,Gn, Gn, Gnd,T, T, T, T, T, T, T],
+        [T, T, Sh, Shl,Sh, Sh, Sh, Sh, Sh, Shl,Sh, T, Kh, T, T, T],
+        [T, Sh, Shl,Sh, Shd,Shs,Sh, Sh, Shs,Shd,Sh, Shl,Khd,T, T, T],
+        [T, Sh, Sh, Shd,Shs,Shd,Sh, Sh, Shd,Shs,Shd,Sh, Kh, T, T, T],
+        [T, Sh, Sh, Shd,Sh, Sh, Sh, Sh, Sh, Sh, Shd,Sh, T, T, T, T],
+        [T, T, Sh, Shl,Sh, Shd,Sh, Sh, Shd,Sh, Shl,T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gnd,Gn, Gn, Gnd,Gn, Gn, T, T, T, T, T],
+        [T, T, T, Gn, Gnd,Gn, Gn, Gn, Gn, Gnd,Gn, T, T, T, T, T],
+        [T, T, T, T, Gnd,Gn, Gn, T, Gn, Gn, Gnd,T, T, T, T, T],
+        [T, T, T, T, Gnd,Gn, Gn, T, Gn, Gn, Gnd,T, T, T, T, T],
+        [T, T, T, Gnd,Gn, Gnl,Gn, T, Gn, Gnl,Gn, Gnd,T, T, T, T],
+        [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
+      ];
+    } else {
+      grid=[
+        [T, T, T, T, Gn, Gnl,Gn, Gn, T, T, T, T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gn, Gn, Gn, Gn, T, T, T, T, T, T, T],
+        [T, T, Gn, Gnl,Gn, Gn, Gn, Gn, Gnl,Gn, T, T, T, T, T, T],
+        [T, T, M, Ml, M, M, M, M, Ml, Md, T, T, T, T, T, T],
+        [T, T, M, E, Ed, Md, M, M, Md, T, T, T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gnd,Gn, Gn, T, T, T, T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gn, Gnd,Gn, T, T, T, T, T, T, T, T],
+        [T, T, T, T, Gn, Gnd,Gn, Gn, T, T, T, T, T, T, T, T],
+        [T, T, T, T, T, Gnd,Gn, T, T, T, Kh, Khl,T, T, T, T],
+        [T, T, Gn, Sh, Shl,Sh, Sh, Sh, Shl,Gn, Khd,Kh, T, T, T, T],
+        [T, Gn, Sh, Shl,Sh, Shd,Sh, Shd,Sh, Shl,Gn, T, T, T, T, T],
+        [T, Gn, Sh, Sh, Shd,Sh, Sh, Sh, Shd,Sh, Gn, T, T, T, T, T],
+        [T, T, Gn, Gn, Gnd,Gn, Gn, Gnd,Gn, Gn, T, T, T, T, T, T],
+        [T, T, Gn, Gnl,Gn, Gnd,Sh, Gnd,Gn, Gnl,T, T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gnd,Gn, Gnd,Gn, Gn, T, T, T, T, T, T],
+        [T, T, T, Gn, Gnd,Gn, Gn, Gn, Gnd,Gn, T, T, T, T, T, T],
+        [T, T, T, T, Gnd,Gn, Gn, Gn, Gnd,T, T, T, T, T, T, T],
+        [T, T, T, T, Gnd,Gn, Gn, Gn, Gnd,T, T, T, T, T, T, T],
+        [T, T, T, Gnd,Gn, Gnl,Gn, Gnl,Gn, Gnd,T, T, T, T, T, T],
+        [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  else if(skinId==='turtle_orange'){
+    // Turtle Orange — green skin, orange mask, nunchucks - Michelangelo inspired
+    const Gn='#44aa44',Gnd='#338833',Gnl='#55cc55',Gns='#3d9d3d',M='#ee8822',Md='#cc6611',Ml='#ffaa44',Sh='#886633',Shd='#664422',Shl='#aa8844',Shs='#775533',S1='#44aa44',E='#ffffff',Ed='#222222',Bt='#886633',Btd='#664422',Btl='#aa8844',Nc='#884422',Ncd='#663311',Ncl='#aa6633';
+    if(dir===0){
+      grid=[
+        [T, T, T, T, Gn, Gnl,Gn, Gn, Gnl,Gn, T, T, T, T, T, T],
+        [T, T, T, Gn, Gnl,Gn, Gn, Gn, Gn, Gnl,Gn, T, T, T, T, T],
+        [T, T, Gn, Gnl,Gn, Gn, Gn, Gn, Gn, Gn, Gnl,Gn, T, T, T, T],
+        [T, T, M, Ml, M, M, M, M, M, M, Ml, M, T, T, T, T],
+        [T, T, M, E, Ed, Md, M, M, Md, Ed, E, M, T, T, T, T],
+        [T, T, T, Gn, Gn, Gnd,Gnl,Gnl,Gnd,Gn, Gn, T, T, T, T, T],
+        [T, T, T, Gn, Gnl,Gn, Gnd,Gnd,Gn, Gnl,Gn, T, T, T, T, T],
+        [T, T, T, T, Gn, Gnd,Gnl,Gnl,Gnd,Gn, T, T, T, T, T, T],
+        [T, T, T, T, T, Gnd,Gn, Gn, Gnd,T, T, T, T, T, T, T],
+        [T, T, Gn, Sh, Shl,Sh, Sh, Sh, Sh, Shl,Sh, Gn, T, T, T, T],
+        [T, Gn, Sh, Shl,Sh, Shd,Sh, Sh, Shd,Sh, Shl,Sh, Gn, T, T, T],
+        [T, Gn, Sh, Sh, Shd,Sh, Sh, Sh, Sh, Shd,Sh, Sh, Gn, T, T, T],
+        [T, T, Gn, Gn, Gnd,Gn, Gn, Gn, Gn, Gnd,Gn, Gn, T, T, T, T],
+        [T, T, Gn, Gnl,Gn, Gnd,Sh, Sh, Gnd,Gn, Gnl,Gn, T, T, T, T],
+        [T, T, T, Gn, Gn, Gnd,Gn, Gn, Gnd,Gn, Gn, T, T, T, T, T],
+        [T, T, T, Gn, Gnd,Gn, Gn, Gn, Gn, Gnd,Gn, T, T, T, T, T],
+        [T, T, T, T, Gnd,Gn, Gn, T, Gn, Gn, Gnd,T, T, T, T, T],
+        [T, T, T, T, Gnd,Gn, Gn, T, Gn, Gn, Gnd,T, T, T, T, T],
+        [T, T, T, Gnd,Gn, Gnl,Gn, T, Gn, Gnl,Gn, Gnd,T, T, T, T],
+        [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, T, T, T, Gn, Gnl,Gn, Gn, Gnl,Gn, T, T, T, T, T, T],
+        [T, T, T, Gn, Gnl,Gn, Gn, Gn, Gn, Gnl,Gn, T, T, T, T, T],
+        [T, T, Gn, Gnl,Gn, Gn, Gn, Gn, Gn, Gn, Gnl,Gn, T, T, T, T],
+        [T, T, M, Ml, M, M, M, M, M, M, Ml, M, T, T, T, T],
+        [T, T, T, Gn, Gnd,Gn, Gn, Gn, Gnd,Gn, T, T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gnd,Gn, Gn, Gnd,Gn, Gn, T, T, T, T, T],
+        [T, T, T, Gn, Gnl,Gn, Gnd,Gnd,Gn, Gnl,Gn, T, T, T, T, T],
+        [T, T, T, T, Gn, Gnd,Gn, Gn, Gnd,Gn, T, T, T, T, T, T],
+        [T, T, T, T, T, Gnd,Gn, Gn, Gnd,T, T, T, T, T, T, T],
+        [T, T, Sh, Shl,Sh, Sh, Sh, Sh, Sh, Shl,Sh, T, T, T, T, T],
+        [T, Sh, Shl,Sh, Shd,Shs,Sh, Sh, Shs,Shd,Sh, Shl,T, T, T, T],
+        [T, Sh, Sh, Shd,Shs,Shd,Sh, Sh, Shd,Shs,Shd,Sh, T, T, T, T],
+        [T, Sh, Sh, Shd,Sh, Sh, Sh, Sh, Sh, Sh, Shd,Sh, T, T, T, T],
+        [T, T, Sh, Shl,Sh, Shd,Sh, Sh, Shd,Sh, Shl,T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gnd,Gn, Gn, Gnd,Gn, Gn, T, T, T, T, T],
+        [T, T, T, Gn, Gnd,Gn, Gn, Gn, Gn, Gnd,Gn, T, T, T, T, T],
+        [T, T, T, T, Gnd,Gn, Gn, T, Gn, Gn, Gnd,T, T, T, T, T],
+        [T, T, T, T, Gnd,Gn, Gn, T, Gn, Gn, Gnd,T, T, T, T, T],
+        [T, T, T, Gnd,Gn, Gnl,Gn, T, Gn, Gnl,Gn, Gnd,T, T, T, T],
+        [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
+      ];
+    } else {
+      grid=[
+        [T, T, T, T, Gn, Gnl,Gn, Gn, T, T, T, T, T, T, T, T],
+        [T, T, T, Gn, Gnl,Gn, Gn, Gn, Gn, T, T, T, T, T, T, T],
+        [T, T, Gn, Gnl,Gn, Gn, Gn, Gn, Gnl,Gn, T, T, T, T, T, T],
+        [T, T, M, Ml, M, M, M, M, Ml, Md, T, T, T, T, T, T],
+        [T, T, M, E, Ed, Md, M, M, Md, T, T, T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gnd,Gnl,Gn, T, T, T, T, T, T, T, T],
+        [T, T, T, Gn, Gnl,Gn, Gnd,Gn, T, T, T, T, T, T, T, T],
+        [T, T, T, T, Gn, Gnd,Gn, Gn, T, T, T, T, T, T, T, T],
+        [T, T, T, T, T, Gnd,Gn, T, T, T, T, T, T, T, T, T],
+        [T, Nc, Gn, Sh, Shl,Sh, Sh, Sh, Shl,Gn, T, T, T, T, T, T],
+        [Ncd,Nc, Sh, Shl,Sh, Shd,Sh, Shd,Sh, Shl,Gn, T, T, T, T, T],
+        [T, Ncl,Sh, Sh, Shd,Sh, Sh, Sh, Shd,Sh, Gn, T, T, T, T, T],
+        [T, T, Gn, Gn, Gnd,Gn, Gn, Gnd,Gn, Gn, T, T, T, T, T, T],
+        [T, T, Gn, Gnl,Gn, Gnd,Sh, Gnd,Gn, Gnl,T, T, T, T, T, T],
+        [T, T, T, Gn, Gn, Gnd,Gn, Gnd,Gn, Gn, T, T, T, T, T, T],
+        [T, T, T, Gn, Gnd,Gn, Gn, Gn, Gnd,Gn, T, T, T, T, T, T],
+        [T, T, T, T, Gnd,Gn, Gn, Gn, Gnd,T, T, T, T, T, T, T],
+        [T, T, T, T, Gnd,Gn, Gn, Gn, Gnd,T, T, T, T, T, T, T],
+        [T, T, T, Gnd,Gn, Gnl,Gn, Gnl,Gn, Gnd,T, T, T, T, T, T],
         [T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T],
       ];
       if(dir===2)grid=grid.map(r=>[...r].reverse());
@@ -14572,6 +14881,10 @@ const IdleAnims = {
     if (sk === 'psychic_girl') return { offsetY: 0, squashX: 1, squashY: 1 + Math.sin(pn * 2) * 0.03, rotation: 0, swayX: 0 };
     if (sk === 'turbo_runner') return { offsetY: 0, squashX: 1, squashY: 1, rotation: 0, swayX: (Math.random() - 0.5) * 1.5 };
     if (sk === 'spirit_granny') return { offsetY: Math.sin(pn * 1.5) * 4, squashX: 1, squashY: 1, rotation: 0, swayX: 0, alpha: 0.4 + (Math.sin(pn * 2.5) * 0.5 + 0.5) * 0.6 };
+    if (sk === 'street_warrior') return { offsetY: 0, squashX: 1, squashY: 1 + Math.sin(pn * 1.8) * 0.03, rotation: 0, swayX: 0 };
+    if (sk === 'kick_fighter') return { offsetY: 0, squashX: 1, squashY: 1, rotation: 0, swayX: Math.sin(pn * 1.2) * 1.5 };
+    if (sk === 'turtle_blue') return { offsetY: 0, squashX: 1, squashY: 1 + Math.sin(pn * 1.5) * 0.02, rotation: 0, swayX: Math.sin(pn * 0.8) * 1 };
+    if (sk === 'turtle_orange') return { offsetY: 0, squashX: 1, squashY: 1 + Math.sin(pn * 1.5) * 0.02, rotation: 0, swayX: Math.sin(pn * 0.9) * 1.2 };
     if (sk.startsWith('power_')) return { offsetY: Math.sin(pn * 2) * 3, squashX: 1, squashY: 1 + Math.sin(pn * 2.5) * 0.02, rotation: 0, swayX: Math.sin(pn * 1.0) * 1.5 };
     if (sk.includes('saiyan') || sk === 'super_saiyan') return { offsetY: 0, squashX: 1, squashY: 1 + Math.sin(pn * 4) * 0.03, rotation: 0, swayX: 0 };
     if (sk.includes('shadow')) return { offsetY: 0, squashX: 1, squashY: 1, rotation: 0, swayX: 0, alpha: 0.8 + Math.sin(pn * 3) * 0.15 };
@@ -14593,6 +14906,7 @@ const SkinParticles = {
     power_blossom:  { colors: ['#ff6699', '#ff3366', '#ffaacc'], vy: -0.8, vx: 0, spread: 14, rate: 0.4, sz: 2 },
     power_bubbles:  { colors: ['#66bbff', '#3399ff', '#aaddff'], vy: -0.8, vx: 0, spread: 14, rate: 0.4, sz: 2 },
     power_buttercup:{ colors: ['#66dd44', '#44bb22', '#aaff88'], vy: -0.8, vx: 0, spread: 14, rate: 0.4, sz: 2 },
+    kick_fighter:   { colors: ['#66bbff', '#3399ff', '#aaddff'], vy: -0.5, vx: 0, spread: 12, rate: 0.3, sz: 2 },
     psychic_girl:   { colors: ['#aa55ff', '#ff66cc', '#cc77ff'], vy: -0.3, vx: 0, spread: 14, rate: 0.4, sz: 2, orbit: true },
     turbo_runner:   { colors: ['#ffaa00', '#ff7700', '#ffcc44'], vy: 0, vx: 0, spread: 8, rate: 0.5, sz: 2 },
     spirit_granny:  { colors: ['#44ff66', '#88ffaa', '#33dd55'], vy: -0.8, vx: 0, spread: 10, rate: 0.3, sz: 2 },
@@ -15182,6 +15496,10 @@ const EchoSkinReactions = {
     psychic_girl: ["I sense great power in you... and excellent taste in anime. 🔮"],
     turbo_runner: ["Those legs! ...I won't ask where you got them. 🏃"],
     spirit_granny: ["Oh no. Oh no no no. ...Actually, I respect the audacity. 👵"],
+    street_warrior: ["HADOUKEN! ...sorry, had to. That white gi is pristine! The red headband says it all. 🥋", "A true warrior walks these halls. That fighting stance is intimidating even in pixel form."],
+    kick_fighter: ["Those kicks could break through my hull! 💪 The strongest woman in the station, no contest.", "That qipao is gorgeous! And those legs... the legends were true. Spinning Bird Kick incoming?"],
+    turtle_blue: ["A turtle... with katanas... in a space station. 🐢 The blue mask suits you, leader.", "Heroes in a half shell! That shell looks sturdy. Please don't slice anything important with those blades."],
+    turtle_orange: ["COWABUNGA! 🍕 Is that... are those nunchucks?! Party dude energy is OFF the charts.", "The orange mask! The fun one! Please tell me you brought pizza to my station."],
   },
 
   // Generic reactions by rarity (fallback)
