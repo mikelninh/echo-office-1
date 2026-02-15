@@ -6898,12 +6898,158 @@ function showInteractPrompt(text){
 }
 
 // ═══════════════════════════════════════
+// §11b. FLOOR DEPTH SYSTEM — parallax, volumetric light, shadows
+const FloorDepth=(function(){
+const FD={};
+// Per-floor config: parallax layers, light sources
+const cfg={
+1:{bg:[{c:'rgba(80,40,160,.04)',sx:.02,sy:.01,type:'stars'},{c:'rgba(0,180,255,.03)',sx:.03,sy:.02,type:'nebula'}],
+   lights:[{x:400,y:30,a:25,c:'160,80,255'},{x:210,y:36,a:20,c:'0,255,255'},{x:600,y:100,a:18,c:'160,80,255'}]},
+2:{bg:[{c:'rgba(10,8,40,.06)',sx:.015,sy:.01,type:'deepspace'},{c:'rgba(80,60,120,.04)',sx:.04,sy:.02,type:'planet'}],
+   lights:[{x:400,y:140,a:30,c:'100,120,255'},{x:200,y:50,a:20,c:'200,200,255'},{x:650,y:80,a:15,c:'150,100,200'}]},
+3:{bg:[{c:'rgba(0,255,136,.02)',sx:.03,sy:.015,type:'neongrid'},{c:'rgba(255,110,199,.03)',sx:.05,sy:.03,type:'shapes'}],
+   lights:[{x:200,y:30,a:22,c:'0,255,136'},{x:400,y:30,a:22,c:'255,215,0'},{x:600,y:30,a:22,c:'255,110,199'}]},
+4:{bg:[{c:'rgba(100,180,255,.04)',sx:.01,sy:.005,type:'sky'},{c:'rgba(60,120,60,.03)',sx:.025,sy:.01,type:'mountains'},{c:'rgba(255,255,255,.02)',sx:.04,sy:.02,type:'clouds'}],
+   lights:[{x:200,y:80,a:25,c:'170,80,255'},{x:500,y:80,a:25,c:'170,80,255'},{x:700,y:60,a:18,c:'200,220,255'}]},
+5:{bg:[{c:'rgba(0,255,100,.02)',sx:.02,sy:.01,type:'circuits'},{c:'rgba(0,200,255,.03)',sx:.04,sy:.03,type:'datastream'}],
+   lights:[{x:150,y:60,a:20,c:'0,255,100'},{x:400,y:50,a:25,c:'0,200,255'},{x:650,y:70,a:18,c:'255,100,0'}]},
+6:{bg:[{c:'rgba(200,150,80,.03)',sx:.015,sy:.01,type:'vinyl'},{c:'rgba(255,100,150,.02)',sx:.03,sy:.02,type:'waves'}],
+   lights:[{x:200,y:100,a:22,c:'255,180,100'},{x:500,y:80,a:20,c:'200,100,255'},{x:700,y:120,a:18,c:'255,150,80'}]},
+7:{bg:[{c:'rgba(255,100,200,.02)',sx:.02,sy:.01,type:'banners'},{c:'rgba(100,200,255,.03)',sx:.035,sy:.02,type:'crowd'}],
+   lights:[{x:300,y:40,a:25,c:'255,100,200'},{x:500,y:60,a:22,c:'0,255,247'},{x:150,y:100,a:18,c:'255,215,0'}]},
+8:{bg:[{c:'rgba(50,120,255,.03)',sx:.02,sy:.01,type:'blueprint'},{c:'rgba(255,200,50,.02)',sx:.04,sy:.03,type:'tools'}],
+   lights:[{x:400,y:50,a:28,c:'50,120,255'},{x:200,y:120,a:18,c:'255,200,50'},{x:650,y:80,a:15,c:'100,200,255'}]},
+9:{bg:[{c:'rgba(255,215,0,.03)',sx:.015,sy:.01,type:'dust'},{c:'rgba(180,140,60,.02)',sx:.03,sy:.02,type:'symbols'}],
+   lights:[{x:400,y:80,a:25,c:'255,215,0'},{x:150,y:60,a:20,c:'255,180,80'},{x:680,y:100,a:18,c:'200,160,50'}]},
+10:{bg:[{c:'rgba(200,50,255,.03)',sx:.025,sy:.015,type:'skyline'},{c:'rgba(255,50,100,.03)',sx:.05,sy:.03,type:'clublights'}],
+   lights:[{x:300,y:50,a:24,c:'200,50,255'},{x:500,y:40,a:22,c:'255,50,100'},{x:700,y:80,a:18,c:'0,200,255'}]}
+};
+// Parallax background layers
+FD.renderBackground=function(c,floor){
+const f=cfg[floor];if(!f)return;
+const t=performance.now()*.001;
+const vx=S.visitor?S.visitor.x:W/2,vy=S.visitor?S.visitor.y:H/2;
+const sa=c.globalAlpha;
+f.bg.forEach(function(layer,li){
+  const ox=(vx-W/2)*layer.sx,oy=(vy-H/2)*layer.sy;
+  c.save();c.globalAlpha=1;
+  switch(layer.type){
+  case'stars':case'deepspace':
+    for(let i=0;i<40;i++){
+      const sx=((i*97+li*31)%W)+ox*(.5+li*.5),sy=((i*53+li*17)%H)+oy*(.5+li*.5);
+      const b=.1+Math.sin(t*.8+i*1.3)*.08;
+      c.fillStyle=`rgba(255,255,255,${b})`;c.fillRect(((sx%W)+W)%W,((sy%H)+H)%H,1,1);
+    }break;
+  case'nebula':
+    const ng=c.createRadialGradient(W/2+ox*2,H*.3+oy*2,20,W/2+ox*2,H*.3+oy*2,200);
+    ng.addColorStop(0,`rgba(80,40,160,${.03+Math.sin(t*.3)*.01})`);ng.addColorStop(1,'rgba(0,0,0,0)');
+    c.fillStyle=ng;c.fillRect(0,0,W,H);break;
+  case'planet':
+    const px=600+ox*3,py=80+oy*2;
+    c.fillStyle=`rgba(60,40,100,${.06+Math.sin(t*.2)*.02})`;c.beginPath();c.arc(px,py,35,0,Math.PI*2);c.fill();break;
+  case'neongrid':
+    c.strokeStyle=`rgba(0,255,136,${.03+Math.sin(t*.5)*.01})`;c.lineWidth=.5;
+    for(let i=0;i<8;i++){const gy=50+i*50+oy;c.beginPath();c.moveTo(0,gy);c.lineTo(W,gy);c.stroke()}
+    for(let i=0;i<12;i++){const gx=50+i*60+ox;c.beginPath();c.moveTo(gx,0);c.lineTo(gx,H);c.stroke()}break;
+  case'shapes':
+    for(let i=0;i<6;i++){const sx=100+i*120+ox*2+Math.sin(t*.7+i)*15,sy=80+Math.cos(t*.5+i*2)*40+oy*2;
+      c.fillStyle=`rgba(255,110,199,${.04+Math.sin(t+i)*.02})`;c.beginPath();c.arc(sx,sy,8+i*2,0,Math.PI*2);c.fill()}break;
+  case'sky':
+    const sg=c.createLinearGradient(0,0+oy*.5,0,120+oy*.5);
+    sg.addColorStop(0,'rgba(40,80,150,.05)');sg.addColorStop(1,'rgba(100,180,255,0)');c.fillStyle=sg;c.fillRect(0,0,W,120);break;
+  case'mountains':
+    c.fillStyle=`rgba(40,80,40,${.03+Math.sin(t*.15)*.01})`;c.beginPath();c.moveTo(0,100+oy);
+    for(let i=0;i<=8;i++)c.lineTo(i*W/8+ox*.5,80+oy+Math.sin(i*1.2)*20);
+    c.lineTo(W,120+oy);c.lineTo(0,120+oy);c.fill();break;
+  case'clouds':
+    for(let i=0;i<4;i++){const cx=((t*8+i*200)%( W+100))-50+ox*3,cy=30+i*15+oy*2;
+      c.fillStyle=`rgba(255,255,255,${.02+Math.sin(t*.3+i)*.01})`;
+      c.beginPath();c.ellipse(cx,cy,40+i*5,8+i*2,0,0,Math.PI*2);c.fill()}break;
+  case'circuits':
+    c.strokeStyle=`rgba(0,255,100,${.025+Math.sin(t*.6)*.01})`;c.lineWidth=.5;
+    for(let i=0;i<10;i++){const cy=30+i*40+oy;c.beginPath();c.moveTo(ox,cy);
+      for(let j=0;j<6;j++){const jx=j*W/6+ox;c.lineTo(jx,cy+((j%2)?-5:5))}c.stroke()}break;
+  case'datastream':
+    for(let i=0;i<12;i++){const dx=60+i*65+ox*2,dy=((t*30+i*80)%(H+40))-20;
+      c.fillStyle=`rgba(0,200,255,${.04+Math.sin(t*2+i)*.02})`;c.fillRect(dx,dy,2,8)}break;
+  case'vinyl':
+    c.strokeStyle=`rgba(200,150,80,${.025+Math.sin(t*.4)*.01})`;c.lineWidth=.3;
+    for(let i=1;i<6;i++){c.beginPath();c.arc(W/2+ox*2,H/2+oy*2,40+i*30,0,Math.PI*2);c.stroke()}break;
+  case'waves':
+    c.strokeStyle=`rgba(255,100,150,${.03+Math.sin(t*.5)*.01})`;c.lineWidth=.5;
+    for(let w=0;w<3;w++){c.beginPath();
+      for(let x=0;x<W;x+=4){c.lineTo(x,H*.3+w*30+Math.sin(x*.02+t*1.5+w)*10+oy)}c.stroke()}break;
+  case'banners':
+    for(let i=0;i<5;i++){const bx=80+i*150+ox*1.5,by=20+Math.sin(t*.8+i)*3+oy;
+      c.fillStyle=`rgba(255,100,200,${.03+Math.sin(t+i)*.01})`;c.fillRect(bx,by,30,50)}break;
+  case'crowd':
+    for(let i=0;i<10;i++){const cx=50+i*75+ox*2,cy=H-30+oy*1.5;
+      c.fillStyle=`rgba(100,100,120,${.03+Math.sin(t*.6+i)*.01})`;c.beginPath();c.arc(cx,cy-8,5,0,Math.PI*2);c.fill();c.fillRect(cx-3,cy-3,6,10)}break;
+  case'blueprint':
+    c.strokeStyle=`rgba(50,120,255,${.03+Math.sin(t*.3)*.01})`;c.lineWidth=.3;
+    for(let i=0;i<16;i++){c.beginPath();c.moveTo(i*50+ox,0);c.lineTo(i*50+ox,H);c.stroke();c.beginPath();c.moveTo(0,i*30+oy);c.lineTo(W,i*30+oy);c.stroke()}break;
+  case'tools':
+    const tools=['⚡','🔧','📐','✏️'];
+    c.font='10px serif';c.globalAlpha=.04+Math.sin(t*.5)*.02;
+    for(let i=0;i<4;i++){c.fillText(tools[i],150+i*160+ox*3+Math.sin(t+i)*8,100+Math.cos(t*.7+i)*20+oy*3)}break;
+  case'dust':
+    for(let i=0;i<20;i++){const dx=((i*41+t*5)%W)+ox,dy=((i*67+t*3)%H)+oy;
+      c.fillStyle=`rgba(255,215,0,${.03+Math.sin(t+i)*.015})`;c.fillRect(((dx%W)+W)%W,((dy%H)+H)%H,2,2)}break;
+  case'symbols':
+    const syms='☥⊕◈△▽✦';c.font='8px serif';
+    c.fillStyle=`rgba(180,140,60,${.03+Math.sin(t*.4)*.01})`;
+    for(let i=0;i<6;i++){c.fillText(syms[i],100+i*110+ox*2+Math.sin(t*.5+i)*5,60+Math.cos(t*.3+i)*20+oy*2)}break;
+  case'skyline':
+    c.fillStyle=`rgba(30,10,40,${.04+Math.sin(t*.2)*.01})`;
+    for(let i=0;i<10;i++){const bw=20+i*5,bh=30+((i*7)%40),bx=i*80+ox*2;c.fillRect(bx,H-bh-20+oy,bw,bh)}break;
+  case'clublights':
+    for(let i=0;i<5;i++){const lx=80+i*160+ox*3,hue=(t*40+i*72)%360;
+      c.fillStyle=`hsla(${hue},100%,60%,.03)`;c.beginPath();c.arc(lx,H/2+oy*2,50,0,Math.PI*2);c.fill()}break;
+  }
+  c.restore();
+});
+};
+// Volumetric light rays
+FD.renderLightRays=function(c,floor){
+const f=cfg[floor];if(!f)return;
+const t=performance.now()*.001;
+const sa=c.globalAlpha;c.save();
+f.lights.forEach(function(l,i){
+  const sway=Math.sin(t*.6+i*2.1)*8;
+  const pulse=.025+Math.sin(t*.8+i*1.7)*.015;
+  const x=l.x+sway,y=l.y;
+  const halfA=l.a*(Math.PI/180);
+  const rayLen=H-y;
+  const x1=x+Math.tan(-halfA)*rayLen,x2=x+Math.tan(halfA)*rayLen;
+  const g=c.createLinearGradient(x,y,x,y+rayLen);
+  g.addColorStop(0,`rgba(${l.c},${pulse*1.5})`);g.addColorStop(.5,`rgba(${l.c},${pulse*.5})`);g.addColorStop(1,`rgba(${l.c},0)`);
+  c.fillStyle=g;c.beginPath();c.moveTo(x,y);c.lineTo(x1,y+rayLen);c.lineTo(x2,y+rayLen);c.closePath();c.fill();
+});
+c.restore();
+};
+// Object/visitor shadows
+FD.renderShadows=function(c,floor){
+const f=cfg[floor];if(!f||!f.lights[0])return;
+const lx=f.lights[0].x,ly=f.lights[0].y;
+c.save();
+// Visitor shadow
+if(S.visitor){
+  const vx=S.visitor.x,vy=S.visitor.y;
+  const dx=(vx-lx)*.15,offX=dx;
+  c.fillStyle='rgba(0,0,0,.12)';c.beginPath();c.ellipse(vx+offX,vy+16,12,4,0,0,Math.PI*2);c.fill();
+}
+c.restore();
+};
+return FD;
+})();
+
+// ═══════════════════════════════════════
 // §12. FLOOR-SPECIFIC RENDERING
 // ═══════════════════════════════════════
 
 // --- FLOOR 1: Echo's Command Center ---
 function renderFloor1(){
-  renderFloorMaterial('tech');
+  renderFloorMaterial('tech');FloorDepth.renderBackground(ctx,1);
   renderWalls('#0a0a1a');renderWallDetails('#0a0a1a');
   
   // Circuit board pattern on walls (subtle teal lines)
@@ -7281,10 +7427,12 @@ function renderFloor1(){
     ctx.arc(flower.x, flower.y, 3, 0, Math.PI * 2);
     ctx.fill();
   }
+  FloorDepth.renderShadows(ctx,1);FloorDepth.renderLightRays(ctx,1);
 }
 
 // --- FLOOR 2: The Observatory ---
 function renderFloor2(){
+  FloorDepth.renderBackground(ctx,2);
   renderFloorMaterial('tech');
   renderWalls('#0a0820');renderWallDetails('#0a0820');
   // Panoramic dome window (expanded to 280px)
@@ -7333,10 +7481,12 @@ function renderFloor2(){
   photos.forEach((ph,i)=>{const px=pw.x+8+i*48,py=pw.y+8;ctx.fillStyle=ph.c;ctx.fillRect(px,py,40,40);ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.strokeRect(px,py,40,40);ctx.fillStyle='#ddd';ctx.font='5px monospace';ctx.fillText(ph.l,px+4,py+52)});
   // Ambient
   const ag=ctx.createRadialGradient(400,100,0,400,100,300);ag.addColorStop(0,'rgba(50,30,80,.06)');ag.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=ag;ctx.fillRect(0,0,W,H);
+  FloorDepth.renderShadows(ctx,2);FloorDepth.renderLightRays(ctx,2);
 }
 
 // --- FLOOR 3: The Arcade Floor ---
 function renderFloor3(){
+  FloorDepth.renderBackground(ctx,3);
   renderFloorMaterial('metal');
   renderWalls('#0a0a1a');renderWallDetails('#0a0a1a');
   // Neon everywhere
@@ -7428,10 +7578,12 @@ function renderFloor3(){
     ctx.fillStyle='rgba(128,0,128,.8)';ctx.fillRect(298,268,6,8);
     ctx.fillStyle='#fff';ctx.font='4px monospace';ctx.fillText('?',299,275);
   }
+  FloorDepth.renderShadows(ctx,3);FloorDepth.renderLightRays(ctx,3);
 }
 
 // --- FLOOR 4: The Garden Biodome ---
 function renderFloor4(){
+  FloorDepth.renderBackground(ctx,4);
   renderFloorMaterial('soil');
   // Glass dome top (stars visible)
   ctx.fillStyle='#010412';ctx.fillRect(0,0,W,120);
@@ -7512,10 +7664,12 @@ function renderFloor4(){
   
   // Sprint B: Garden puzzle plots (4 additional plots for seed pattern puzzle)
   PuzzleSystems.renderGardenPlots();
+  FloorDepth.renderShadows(ctx,4);FloorDepth.renderLightRays(ctx,4);
 }
 
 // --- FLOOR 5: Secret Lab ---
 function renderFloor5(){
+  FloorDepth.renderBackground(ctx,5);
   renderFloorMaterial('metal');
   renderWalls('#0a0a10');renderWallDetails('#0a0a10');
   // Dark with blue/green accent lighting
@@ -7619,10 +7773,12 @@ function renderFloor5(){
   
   // Sprint B: Cross-floor puzzle terminal
   PuzzleSystems.renderLabTerminal();
+  FloorDepth.renderShadows(ctx,5);FloorDepth.renderLightRays(ctx,5);
 }
 
 // --- FLOOR 6: Record Room / Lounge ---
 function renderFloor6(){
+  FloorDepth.renderBackground(ctx,6);
   renderFloorMaterial('carpet');
   renderWalls('#1a0a0a');renderWallDetails('#1a0a0a');
   // Warm amber lighting throughout
@@ -7758,10 +7914,12 @@ function renderFloor6(){
   const vinylWallX=60,vinylWallY=30;ctx.fillStyle='#2a1a10';ctx.fillRect(vinylWallX,vinylWallY,120,40);
   const vinylColors=['#c44','#4a4','#44c','#c8a020','#c4c','#4cc','#fa0','#a4a'];
   for(let i=0;i<8;i++){const vx=vinylWallX+5+i*14;ctx.fillStyle='#111';ctx.fillRect(vx,vinylWallY+5,12,30);ctx.fillStyle=vinylColors[i];ctx.fillRect(vx+2,vinylWallY+8,8,24)}
+  FloorDepth.renderShadows(ctx,6);FloorDepth.renderLightRays(ctx,6);
 }
 
 // --- FLOOR 8: Room Builder ---
 function renderFloor8(){
+  FloorDepth.renderBackground(ctx,8);
   if(RoomSystem.currentRoom){
     renderUserRoom(RoomSystem.currentRoom);
     return;
@@ -7865,6 +8023,7 @@ function renderFloor8(){
     ctx.fillText('Click to place '+RoomSystem.selectedFurniture.name,W/2,H-30);
     ctx.textAlign='left';
   }
+  FloorDepth.renderShadows(ctx,8);FloorDepth.renderLightRays(ctx,8);
 }
 
 function renderUserRoom(room){
@@ -7938,6 +8097,7 @@ function renderFurniture(furn){
 }
 
 // --- FLOOR 7: Community Deck ---
+  FloorDepth.renderBackground(ctx,7);
 function renderFloor7(){
   renderFloorMaterial('stone');
   renderWalls('#0a0a1a');renderWallDetails('#0a0a1a');
@@ -8022,6 +8182,7 @@ function renderFloor7(){
     ctx.fillStyle=colors[i%4];ctx.globalAlpha=.3+Math.sin(S.time*2+i)*.2;
     ctx.fillRect(px,py,3,3);ctx.globalAlpha=1;
   }
+  FloorDepth.renderShadows(ctx,7);FloorDepth.renderLightRays(ctx,7);
 }
 
 // ═══════════════════════════════════════
@@ -16885,6 +17046,7 @@ const V26Archive={
 
 // --- Floor 9 Renderer ---
 function renderFloor9(){
+  FloorDepth.renderBackground(ctx,9);
   // Golden Archive floor
   const ascended=S.stationStats.milestones?.includes('ascension')||V26Archive.debugUnlocked;
   const baseColor=ascended?'#2a2518':'#1a1a1a';
@@ -17008,6 +17170,7 @@ function renderFloor9(){
     ctx.beginPath();ctx.moveTo(ex,ey-10);ctx.quadraticCurveTo(ex+25,ey-30-wingFlap*20,ex+35,ey-5);ctx.quadraticCurveTo(ex+15,ey,ex,ey-10);ctx.fill();
     ctx.restore();
   }
+  FloorDepth.renderShadows(ctx,9);FloorDepth.renderLightRays(ctx,9);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -17122,6 +17285,7 @@ const DiscoFloor = {
 };
 
 function renderFloor10() {
+  FloorDepth.renderBackground(ctx,10);
   DiscoFloor.init();
   const g = DiscoFloor.getGenre();
   const beat = Math.sin(DiscoFloor.beatPhase * Math.PI * 2);
@@ -17423,6 +17587,7 @@ function renderFloor10() {
     ctx.fillStyle = `rgba(200,200,220,${0.02 + energy * 0.02})`;
     ctx.beginPath(); ctx.arc(fx, fy, 30 + i * 5, 0, Math.PI * 2); ctx.fill();
   }
+  FloorDepth.renderShadows(ctx,10);FloorDepth.renderLightRays(ctx,10);
 }
 
 // Hook DiscoFloor update into game loop
