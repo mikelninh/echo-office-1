@@ -21410,11 +21410,11 @@ console.log('🌟 Atmosphere System: Dynamic lighting, ambient sound, peripheral
   // Action bar buttons
   $('#ab-inventory').onclick=function(){ if(typeof toggleInventoryPanel==='function') toggleInventoryPanel(); else if(typeof showInventory==='function') showInventory(); };
   $('#ab-shop').onclick=function(){ if(typeof showItemShop==='function') showItemShop(); };
-  $('#ab-wardrobe').onclick=function(){ if(typeof showVisitorWardrobe==='function') showVisitorWardrobe(); };
-  $('#ab-quests').onclick=function(){ if(typeof MissionBoard!=='undefined'&&MissionBoard.show) MissionBoard.show(); };
-  $('#ab-collection').onclick=function(){ if(typeof showCollectionPage==='function') showCollectionPage(); };
-  $('#ab-achievements').onclick=function(){ if(typeof showAchievements==='function') showAchievements(); };
-  $('#ab-spacewalk').onclick=function(){ if(typeof toggleSpacewalk==='function') toggleSpacewalk(); };
+  $('#ab-wardrobe').onclick=function(){ if(typeof showVisitorSkinPanel==='function') showVisitorSkinPanel(); };
+  $('#ab-quests').onclick=function(){ if(typeof MissionBoard!=='undefined'&&MissionBoard.showUI) MissionBoard.showUI(); };
+  $('#ab-collection').onclick=function(){ if(typeof CollectionPage!=='undefined'&&CollectionPage.show) CollectionPage.show(); };
+  $('#ab-achievements').onclick=function(){ if(typeof showAchievements==='function') showAchievements(); else if(typeof checkAchievements==='function') checkAchievements(); };
+  $('#ab-spacewalk').onclick=function(){ if(typeof S!=='undefined'&&S.spacewalk&&S.spacewalk.active){S.spacewalk.active=false;var eb=document.getElementById('eva-exit-btn');if(eb)eb.style.display='none';if(typeof showThought==='function')showThought('Back inside the station. 🛸');} else if(typeof toggleSpacewalk==='function') toggleSpacewalk(); };
   $('#ab-bug').onclick=function(){ if(typeof BugReport!=='undefined'&&BugReport.show) BugReport.show(); };
   $('#ab-settings').onclick=function(){
     const existing=document.getElementById('settings-popup');
