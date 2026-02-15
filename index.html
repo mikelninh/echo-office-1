@@ -9628,6 +9628,28 @@ function showItemShop(initialTab){
     renderSkinPreview(cv.dataset.skin,cv);
   });
 
+  // Render item preview canvases
+  p.querySelectorAll('.item-preview').forEach(cv=>{
+    const itemId = cv.dataset.itemId;
+    const itemType = cv.dataset.itemType;
+    let item = null;
+    
+    if (itemType === 'weapon') {
+      item = WEAPONS.find(w => w.id === itemId);
+    } else if (itemType === 'furniture') {
+      item = FURNITURE_TYPES[itemId];
+    } else if (itemType === 'skin') {
+      item = VISITOR_SKINS.find(s => s.id === itemId);
+    } else {
+      // Accessory types (hat, trail, aura, pet, shoes, held, chain, glasses, watch)
+      item = ACCESSORY_ITEMS.find(a => a.id === itemId);
+    }
+    
+    if (item) {
+      renderItemPreview(item, cv);
+    }
+  });
+
   // Open marketplace button
   const mpBtn=p.querySelector('#open-marketplace');
   if(mpBtn)mpBtn.onclick=()=>{p.closest('.popup-overlay').remove();Marketplace.showUI()};
@@ -9855,8 +9877,12 @@ function renderBackpackItems(filter,ownedSkins,ownedAcc,equipped,ownedWpnIds,loo
       var worn=S.visitor.skin===sk.id;
       var r=RARITIES[sk.rarity||'common']||RARITIES.common;
       var rarCls='rarity-'+(sk.rarity||'common');
-      html+='<div class="bp-item '+rarCls+(worn?' equipped-bp':'')+'" data-bp-action="skin" data-id="'+sk.id+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">'
-        +'<div class="bp-icon">'+sk.icon+'</div><div class="bp-name">'+sk.label+'</div>'
+      html+='<div class="bp-item '+rarCls+(worn?' equipped-bp':'')+'" data-bp-action="skin" data-id="'+sk.id+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">';
+      if(sk.hasSprite) {
+        html+='<canvas class="item-preview" data-item-id="'+sk.id+'" data-item-type="skin" width="32" height="32" style="display:block;margin:0 auto 2px;image-rendering:pixelated"></canvas><div class="bp-name">'+sk.label+'</div>';
+      } else {
+        html+='<div class="bp-icon">'+sk.icon+'</div><div class="bp-name">'+sk.label+'</div>';
+      }
         +'<div class="bp-equip">'+(worn?'WORN':'EQUIP')+'</div></div>';
     });
   }
@@ -9867,7 +9893,7 @@ function renderBackpackItems(filter,ownedSkins,ownedAcc,equipped,ownedWpnIds,loo
       var isEq=WeaponSystem.equipped&&WeaponSystem.equipped._id===wid;
       var r=RARITIES[wpn.rarity]||RARITIES.common;
       html+='<div class="bp-item rarity-'+wpn.rarity+(isEq?' equipped-bp':'')+'" data-bp-action="weapon" data-id="'+wid+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">'
-        +'<div class="bp-icon">'+wpn.icon+'</div><div class="bp-name">'+wpn.name+'</div>'
+        +'<canvas class="item-preview" data-item-id="'+wid+'" data-item-type="weapon" width="32" height="32" style="display:block;margin:0 auto 2px;image-rendering:pixelated"></canvas><div class="bp-name">'+wpn.name+'</div>'
         +'<div class="bp-equip">'+(isEq?'ON':'EQUIP')+'</div></div>';
     });
   }
@@ -9883,7 +9909,7 @@ function renderBackpackItems(filter,ownedSkins,ownedAcc,equipped,ownedWpnIds,loo
     var isEq=equipped[acc.type]===acc.id;
     var r=RARITIES[acc.rarity||'common']||RARITIES.common;
     html+='<div class="bp-item rarity-'+(acc.rarity||'common')+(isEq?' equipped-bp':'')+'" data-bp-action="acc" data-id="'+acc.id+'" data-type="'+acc.type+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">'
-      +'<div class="bp-icon">'+acc.icon+'</div><div class="bp-name">'+acc.name+'</div>'
+      +'<canvas class="item-preview" data-item-id="'+acc.id+'" data-item-type="'+acc.type+'" width="32" height="32" style="display:block;margin:0 auto 2px;image-rendering:pixelated"></canvas><div class="bp-name">'+acc.name+'</div>'
       +'<div class="bp-equip">'+(isEq?'ON':'EQUIP')+'</div></div>';
   });
   // Loot items
@@ -9892,8 +9918,12 @@ function renderBackpackItems(filter,ownedSkins,ownedAcc,equipped,ownedWpnIds,loo
       var def=getAllLootableItems().find(function(i){return i.itemId===item.itemId})||{name:'???',icon:'❓'};
       var r=RARITIES[item.rarity]||RARITIES.common;
       var isEq=Object.values(equippedLoot).includes(item.id);
-      html+='<div class="bp-item rarity-'+item.rarity+(isEq?' equipped-bp':'')+'" data-bp-action="loot" data-uid="'+item.id+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">'
-        +'<div class="bp-icon">'+def.icon+'</div><div class="bp-name" style="color:'+r.color+'">'+def.name+'</div>'
+      html+='<div class="bp-item rarity-'+item.rarity+(isEq?' equipped-bp':'')+'" data-bp-action="loot" data-uid="'+item.id+'" style="border-color:'+r.border+';--rarity-glow:'+(r.glow||'transparent')+'">';
+      if(def.icon !== '❓' && def.icon !== '📦') {
+        html+='<canvas class="item-preview" data-item-id="'+item.itemId+'" data-item-type="loot" width="32" height="32" style="display:block;margin:0 auto 2px;image-rendering:pixelated"></canvas><div class="bp-name" style="color:'+r.color+'">'+def.name+'</div>';
+      } else {
+        html+='<div class="bp-icon">'+def.icon+'</div><div class="bp-name" style="color:'+r.color+'">'+def.name+'</div>';
+      }
         +'<div class="bp-equip">'+(isEq?'ON':'EQUIP')+'</div></div>';
     });
   }
@@ -9901,6 +9931,28 @@ function renderBackpackItems(filter,ownedSkins,ownedAcc,equipped,ownedWpnIds,loo
   return html;
 }
 function attachBackpackHandlers(panel){
+  // Render item preview canvases in backpack
+  panel.querySelectorAll('.item-preview').forEach(function(cv){
+    const itemId = cv.dataset.itemId;
+    const itemType = cv.dataset.itemType;
+    let item = null;
+    
+    if (itemType === 'weapon') {
+      item = WEAPONS.find(w => w.id === itemId);
+    } else if (itemType === 'skin') {
+      item = VISITOR_SKINS.find(s => s.id === itemId);
+    } else if (itemType === 'loot') {
+      item = ACCESSORY_ITEMS.find(a => a.id === itemId);
+    } else {
+      // Accessory types
+      item = ACCESSORY_ITEMS.find(a => a.id === itemId);
+    }
+    
+    if (item) {
+      renderItemPreview(item, cv);
+    }
+  });
+
   panel.querySelectorAll('[data-bp-action="skin"]').forEach(function(el){
     el.onclick=function(){
       var id=el.dataset.id;
@@ -18197,7 +18249,15 @@ const CollectionPage={
     html+='<div style="margin-bottom:12px">';
     allSkins.forEach(sk=>{
       const found=ownedSkinIds.has(sk.id);
-      html+=`<div class="coll-item ${found?'found':'unfound'}" title="${found?sk.label+' — '+sk.desc:'??? — Undiscovered'}" data-hint="${found?'':'Found in: Shop'}">${found?sk.icon:'❓'}</div>`;
+      if(found && sk.hasSprite) {
+        html+=`<div class="coll-item found" title="${sk.label} — ${sk.desc}" data-hint="">`;
+        html+=`<canvas class="item-preview" data-item-id="${sk.id}" data-item-type="skin" width="32" height="32" style="display:block;image-rendering:pixelated"></canvas>`;
+        html+=`</div>`;
+      } else if(found) {
+        html+=`<div class="coll-item found" title="${sk.label} — ${sk.desc}" data-hint="">${sk.icon}</div>`;
+      } else {
+        html+=`<div class="coll-item unfound" title="??? — Undiscovered" data-hint="Found in: Shop">❓</div>`;
+      }
     });
     html+='</div>';
 
@@ -18208,7 +18268,13 @@ const CollectionPage={
     html+='<div style="margin-bottom:12px">';
     allWeapons.forEach(w=>{
       const found=ownedWpnSet.has(w.id);
-      html+=`<div class="coll-item ${found?'found':'unfound'}" title="${found?w.name:'??? — Undiscovered'}" data-hint="${found?'':'Found in: '+((w.cost||0)>0?'Shop':'Arena drops')}">${found?(w.icon||'⚔️'):'❓'}</div>`;
+      if(found) {
+        html+=`<div class="coll-item found" title="${w.name}" data-hint="">`;
+        html+=`<canvas class="item-preview" data-item-id="${w.id}" data-item-type="weapon" width="32" height="32" style="display:block;image-rendering:pixelated"></canvas>`;
+        html+=`</div>`;
+      } else {
+        html+=`<div class="coll-item unfound" title="??? — Undiscovered" data-hint="Found in: ${(w.cost||0)>0?'Shop':'Arena drops'}">❓</div>`;
+      }
     });
     html+='</div>';
 
@@ -18217,12 +18283,46 @@ const CollectionPage={
     html+=`<div class="coll-progress">Items: ${lootIds.size} found</div>`;
     html+='<div style="margin-bottom:8px">';
     lootInv.slice(0,50).forEach(item=>{
-      html+=`<div class="coll-item found" title="${item.name||'Item'}">${item.icon||'📦'}</div>`;
+      if(item.icon && item.icon !== '📦') {
+        html+=`<div class="coll-item found" title="${item.name||'Item'}">`;
+        html+=`<canvas class="item-preview" data-item-id="${item.id||item.name}" data-item-type="loot" width="32" height="32" style="display:block;image-rendering:pixelated"></canvas>`;
+        html+=`</div>`;
+      } else {
+        html+=`<div class="coll-item found" title="${item.name||'Item'}">${item.icon||'📦'}</div>`;
+      }
     });
     if(lootInv.length===0)html+='<div style="color:#666;font-size:10px;padding:8px">No items yet — fight in the arena or explore!</div>';
     html+='</div>';
 
     const{p}=createPopup(html);
+
+    // Render item preview canvases in Collection
+    p.querySelectorAll('.item-preview').forEach(cv=>{
+      const itemId = cv.dataset.itemId;
+      const itemType = cv.dataset.itemType;
+      let item = null;
+      
+      if (itemType === 'weapon') {
+        item = WEAPONS.find(w => w.id === itemId);
+      } else if (itemType === 'skin') {
+        item = VISITOR_SKINS.find(s => s.id === itemId);
+      } else if (itemType === 'loot') {
+        // For loot items, try to find in ACCESSORY_ITEMS or create basic representation
+        item = ACCESSORY_ITEMS.find(a => a.id === itemId);
+        if (!item) {
+          const lootItem = lootInv.find(l => (l.id || l.name) === itemId);
+          if (lootItem && lootItem.icon !== '📦') {
+            // Create a basic item representation for non-standard loot
+            item = { icon: lootItem.icon, name: lootItem.name };
+          }
+        }
+      }
+      
+      if (item) {
+        renderItemPreview(item, cv);
+      }
+    });
+
     // Click on unfound items for hint
     p.querySelectorAll('.coll-item.unfound').forEach(el=>{
       el.onclick=()=>showNotification('🔍 '+el.dataset.hint);
