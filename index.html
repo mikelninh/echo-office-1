@@ -1809,6 +1809,10 @@ const VISITOR_SKINS=[
   {id:'ice_queen',label:'Ice Queen',icon:'❄️',color:'#88ccff',cost:2000,desc:'Crystal crown, blue dress',accent:'#ffffff',rarity:'legendary',hasSprite:true,seasonal:{months:[12,1,2],season:'Winter'}},
   {id:'snowdrift',label:'Snowdrift',icon:'⛄',color:'#ffffff',cost:400,desc:'Walking snowman, top hat',accent:'#ff6600',rarity:'rare',hasSprite:true,seasonal:{months:[12,1,2],season:'Winter'}},
   {id:'cozy_fireplace',label:'Cozy Fireplace',icon:'🔥',color:'#ff4400',cost:800,desc:'Walking fireplace with legs, fire head',accent:'#884422',rarity:'epic',hasSprite:true,seasonal:{months:[12,1,2],season:'Winter'}},
+  // Power Trio skins (Powerpuff-inspired parody)
+  {id:'power_blossom',label:'Power Blossom',icon:'🌺',color:'#ff6699',cost:800,desc:'Commander of sweetness and light',accent:'#ff3366',rarity:'epic',hasSprite:true},
+  {id:'power_bubbles',label:'Power Bubbles',icon:'💙',color:'#66bbff',cost:800,desc:'Joy is a superpower',accent:'#3399ff',rarity:'epic',hasSprite:true},
+  {id:'power_buttercup',label:'Power Buttercup',icon:'💚',color:'#66dd44',cost:800,desc:'Sugar, spice, and a right hook',accent:'#44bb22',rarity:'epic',hasSprite:true},
 ];
 
 // -- Skin Effects System --
@@ -8055,6 +8059,163 @@ function getVisitorSprite(skinId,dir,frame){
         [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
         [T, T, T, Bt,Bt,Btl,Bt,T, T, T, T, T, T, T, T, T],
         [T, T, T, Bt,Bt,Bt,Bt,T, T, T, T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  // Power Trio skins (Powerpuff-inspired parody)
+  else if(skinId==='power_blossom'){
+    const Pk='#ff6699',Pkd='#dd4477',Pkl='#ff88bb',Bw='#cc2222',Bwd='#aa1111',Bwl='#ee4444',S1='#ffccaa',S1d='#ddaa88',S1l='#ffddcc',E='#ff3399',Ed='#cc1177',Bl='#111111',Bld='#000000',Bll='#333333',Sh='#222222',Shd='#111111',Shl='#333333',Hr='#ff6633',Hrd='#dd4411',Hrl='#ff8855';
+    if(dir===0){
+      grid=[
+        [T, T, T, T, Bw,Bwl,Bwd,Bw,T, T, T, T, T, T, T, T],
+        [T, T, T, Bw,Bwl,Bw,Bw,Bwl,Bw,T, T, T, T, T, T, T],
+        [T, T, Hr,Hrl,Hr,Hr,Hr,Hr,Hrl,Hr,T, T, T, T, T, T],
+        [T, Hr,Hr,Hrl,Hr,Hr,Hr,Hr,Hr,Hrl,Hr,T, T, T, T, T],
+        [T, Hr,Hr,S1,S1l,S1,S1,S1,S1l,S1,Hr,Hr,T, T, T, T],
+        [T, T, S1,S1,S1l,S1,S1,S1,S1l,S1,S1,T, T, T, T, T],
+        [T, T, S1,E, Ed,E, S1,E, Ed,E, S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, T, S1,S1l,S1,S1l,S1,T, T, T, T, T, T, T],
+        [T, T, T, Pk,Pkl,Pk,Pk,Pk,Pkl,Pk,T, T, T, T, T, T],
+        [T, T, Pk,Pkl,Pk,Pk,Pk,Pk,Pk,Pkl,Pk,T, T, T, T, T],
+        [T, S1,Pk,Pk,Bl,Bll,Bl,Bl,Bll,Bl,Pk,Pk,S1,T, T, T],
+        [T, T, Pk,Pkl,Pk,Pk,Pk,Pk,Pk,Pkl,Pk,T, T, T, T, T],
+        [T, T, Pk,Pk,Pkd,Pk,Pk,Pk,Pkd,Pk,Pk,T, T, T, T, T],
+        [T, T, T, Pk,Pk,Pk,Pk,Pk,Pk,Pk,T, T, T, T, T, T],
+        [T, T, T, Pk,Pkd,Pk,T, Pk,Pkd,Pk,T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,T, S1,S1,T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,T, S1,S1,T, T, T, T, T, T, T],
+        [T, T, T, Sh,Sh,Shl,T, Sh,Shl,Sh,T, T, T, T, T, T],
+        [T, T, T, Sh,Sh,Sh,T, Sh,Sh,Sh,T, T, T, T, T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, T, T, T, T, Bw,Bwl,Bwd,T, T, T, T, T, T, T, T],
+        [T, T, T, T, Bw,Bwl,Bw,Bwl,T, T, T, T, T, T, T, T],
+        [T, T, T, Hr,Hrl,Hr,Hr,Hr,Hr,T, T, T, T, T, T, T],
+        [T, T, Hr,Hrl,Hr,Hr,Hr,Hr,Hrl,T, T, T, T, T, T, T],
+        [T, T, Hr,S1,S1l,S1,S1,S1l,S1,T, T, T, T, T, T, T],
+        [T, T, S1,S1l,S1,S1,S1,S1l,S1,T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,E, S1d,S1,T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1,T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1l,S1,S1,T, T, T, T, T, T, T, T],
+        [T, T, T, Pk,Pkl,Pk,Pk,Pk,T, T, T, T, T, T, T, T],
+        [T, T, Pk,Pkl,Pk,Pk,Pk,Pk,Pk,T, T, T, T, T, T, T],
+        [T, S1,Pk,Bl,Bll,Bl,Bl,Bll,Pk,S1,T, T, T, T, T, T],
+        [T, T, Pk,Pkl,Pk,Pk,Pk,Pkl,Pk,T, T, T, T, T, T, T],
+        [T, T, Pk,Pk,Pkd,Pk,Pkd,Pk,Pk,T, T, T, T, T, T, T],
+        [T, T, T, Pk,Pk,Pk,Pk,Pk,T, T, T, T, T, T, T, T],
+        [T, T, T, T, Pk,Pk,Pk,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,T, T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,T, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Sh,Sh,Shl,T, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Sh,Sh,Sh,T, T, T, T, T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  else if(skinId==='power_bubbles'){
+    const Bl2='#66bbff',Bl2d='#4499dd',Bl2l='#88ddff',Bnd='#ffdd44',Bndd='#ddbb22',Bndl='#ffee66',S1='#ffccaa',S1d='#ddaa88',S1l='#ffddcc',E='#3399ff',Ed='#1177dd',Bk='#111111',Bkd='#000000',Bkl='#333333',Sh='#222222',Shd='#111111',Shl='#333333';
+    if(dir===0){
+      grid=[
+        [T, T, Bnd,Bndl,T, T, T, T, T, Bndl,Bnd,T, T, T, T, T],
+        [T, Bnd,Bndl,Bnd,T, T, T, T, T, Bnd,Bndl,Bnd,T, T, T, T],
+        [T, Bnd,Bnd,Bndl,Bnd,Bnd,Bnd,Bnd,Bndl,Bnd,Bnd,Bnd,T, T, T, T],
+        [T, T, Bnd,Bndl,Bnd,Bnd,Bnd,Bnd,Bndl,Bnd,T, T, T, T, T, T],
+        [T, T, S1,S1,S1l,S1,S1,S1,S1l,S1,S1,T, T, T, T, T],
+        [T, T, S1,S1l,S1,S1,S1,S1,S1,S1l,S1,T, T, T, T, T],
+        [T, T, S1,E, Ed,E, S1,E, Ed,E, S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, T, S1,S1l,S1,S1l,S1,T, T, T, T, T, T, T],
+        [T, T, T,Bl2,Bl2l,Bl2,Bl2,Bl2,Bl2l,Bl2,T, T, T, T, T, T],
+        [T, T,Bl2,Bl2l,Bl2,Bl2,Bl2,Bl2,Bl2,Bl2l,Bl2,T, T, T, T, T],
+        [T, S1,Bl2,Bl2,Bk,Bkl,Bk,Bk,Bkl,Bk,Bl2,Bl2,S1,T, T, T],
+        [T, T,Bl2,Bl2l,Bl2,Bl2,Bl2,Bl2,Bl2,Bl2l,Bl2,T, T, T, T, T],
+        [T, T,Bl2,Bl2,Bl2d,Bl2,Bl2,Bl2,Bl2d,Bl2,Bl2,T, T, T, T, T],
+        [T, T, T,Bl2,Bl2,Bl2,Bl2,Bl2,Bl2,Bl2,T, T, T, T, T, T],
+        [T, T, T,Bl2,Bl2d,Bl2,T, Bl2,Bl2d,Bl2,T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,T, S1,S1,T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,T, S1,S1,T, T, T, T, T, T, T],
+        [T, T, T, Sh,Sh,Shl,T, Sh,Shl,Sh,T, T, T, T, T, T],
+        [T, T, T, Sh,Sh,Sh,T, Sh,Sh,Sh,T, T, T, T, T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, T, T, Bnd,Bndl,T, T, T, T, T, T, T, T, T, T, T],
+        [T, T, Bnd,Bndl,Bnd,T, T, T, T, T, T, T, T, T, T, T],
+        [T, T, Bnd,Bndl,Bnd,Bnd,Bnd,Bnd,Bndl,T, T, T, T, T, T, T],
+        [T, T, T, Bndl,Bnd,Bnd,Bnd,Bndl,T, T, T, T, T, T, T, T],
+        [T, T, S1,S1l,S1,S1,S1,S1l,S1,T, T, T, T, T, T, T],
+        [T, T, S1,S1l,S1,S1,S1,S1l,S1,T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,E, S1d,S1,T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1,T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1l,S1,S1,T, T, T, T, T, T, T, T],
+        [T, T, T,Bl2,Bl2l,Bl2,Bl2,Bl2,T, T, T, T, T, T, T, T],
+        [T, T,Bl2,Bl2l,Bl2,Bl2,Bl2,Bl2,Bl2,T, T, T, T, T, T, T],
+        [T, S1,Bl2,Bk,Bkl,Bk,Bk,Bkl,Bl2,S1,T, T, T, T, T, T],
+        [T, T,Bl2,Bl2l,Bl2,Bl2,Bl2,Bl2l,Bl2,T, T, T, T, T, T, T],
+        [T, T,Bl2,Bl2,Bl2d,Bl2,Bl2d,Bl2,Bl2,T, T, T, T, T, T, T],
+        [T, T, T,Bl2,Bl2,Bl2,Bl2,Bl2,T, T, T, T, T, T, T, T],
+        [T, T, T, T,Bl2,Bl2,Bl2,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,T, T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,T, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Sh,Sh,Shl,T, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Sh,Sh,Sh,T, T, T, T, T, T, T, T, T, T],
+      ];
+      if(dir===2)grid=grid.map(r=>[...r].reverse());
+    }
+  }
+
+  else if(skinId==='power_buttercup'){
+    const Gn='#66dd44',Gnd='#44bb22',Gnl='#88ff66',Hk='#111111',Hkd='#000000',Hkl='#333333',S1='#ffccaa',S1d='#ddaa88',S1l='#ffddcc',E='#33cc22',Ed='#22aa11',Bk='#111111',Bkd='#000000',Bkl='#333333',Sh='#222222',Shd='#111111',Shl='#333333';
+    if(dir===0){
+      grid=[
+        [T, T, T, Hk,Hkl,Hk,Hk,Hkl,Hk,T, T, T, T, T, T, T],
+        [T, T, Hk,Hkl,Hk,Hk,Hk,Hk,Hkl,Hk,T, T, T, T, T, T],
+        [T, Hk,Hkl,Hk,Hk,Hk,Hk,Hk,Hk,Hkl,Hk,T, T, T, T, T],
+        [T, Hkl,Hk,Hk,Hk,Hk,Hk,Hk,Hk,Hk,Hkl,T, T, T, T, T],
+        [T, T, Hk,S1,S1l,S1,S1,S1,S1l,S1,Hk,T, T, T, T, T],
+        [T, T, S1,S1l,S1,S1,S1,S1,S1,S1l,S1,T, T, T, T, T],
+        [T, T, S1,E, Ed,E, S1,E, Ed,E, S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, T, S1d,S1,S1,S1,S1d,T, T, T, T, T, T, T],
+        [T, T, T, Gn,Gnl,Gn,Gn,Gn,Gnl,Gn,T, T, T, T, T, T],
+        [T, T, Gn,Gnl,Gn,Gn,Gn,Gn,Gn,Gnl,Gn,T, T, T, T, T],
+        [T, S1,Gn,Gn,Bk,Bkl,Bk,Bk,Bkl,Bk,Gn,Gn,S1,T, T, T],
+        [T, T, Gn,Gnl,Gn,Gn,Gn,Gn,Gn,Gnl,Gn,T, T, T, T, T],
+        [T, T, Gn,Gn,Gnd,Gn,Gn,Gn,Gnd,Gn,Gn,T, T, T, T, T],
+        [T, T, T, Gn,Gn,Gn,Gn,Gn,Gn,Gn,T, T, T, T, T, T],
+        [T, T, T, Gn,Gnd,Gn,T, Gn,Gnd,Gn,T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,T, S1,S1,T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,T, S1,S1,T, T, T, T, T, T, T],
+        [T, T, T, Sh,Sh,Shl,T, Sh,Shl,Sh,T, T, T, T, T, T],
+        [T, T, T, Sh,Sh,Sh,T, Sh,Sh,Sh,T, T, T, T, T, T],
+      ];
+    } else if(dir===3){
+      grid=[
+        [T, T, T, Hk,Hkl,Hk,Hk,Hkl,T, T, T, T, T, T, T, T],
+        [T, T, Hk,Hkl,Hk,Hk,Hk,Hkl,Hk,T, T, T, T, T, T, T],
+        [T, Hk,Hkl,Hk,Hk,Hk,Hk,Hk,Hkl,T, T, T, T, T, T, T],
+        [T, Hkl,Hk,Hk,Hk,Hk,Hk,Hk,Hk,T, T, T, T, T, T, T],
+        [T, T, Hk,S1,S1l,S1,S1,S1l,S1,T, T, T, T, T, T, T],
+        [T, T, S1,S1l,S1,S1,S1,S1l,S1,T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,E, S1d,S1,T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1,T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1d,S1,S1,S1,T, T, T, T, T, T, T, T],
+        [T, T, T, Gn,Gnl,Gn,Gn,Gn,T, T, T, T, T, T, T, T],
+        [T, T, Gn,Gnl,Gn,Gn,Gn,Gn,Gn,T, T, T, T, T, T, T],
+        [T, S1,Gn,Bk,Bkl,Bk,Bk,Bkl,Gn,S1,T, T, T, T, T, T],
+        [T, T, Gn,Gnl,Gn,Gn,Gn,Gnl,Gn,T, T, T, T, T, T, T],
+        [T, T, Gn,Gn,Gnd,Gn,Gnd,Gn,Gn,T, T, T, T, T, T, T],
+        [T, T, T, Gn,Gn,Gn,Gn,Gn,T, T, T, T, T, T, T, T],
+        [T, T, T, T, Gn,Gn,Gn,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,T, T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,T, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Sh,Sh,Shl,T, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Sh,Sh,Sh,T, T, T, T, T, T, T, T, T, T],
       ];
       if(dir===2)grid=grid.map(r=>[...r].reverse());
     }
@@ -16155,6 +16316,7 @@ const IdleAnims = {
     };
     // Variant matching for saiyan/shadow/cyber
     const sk = skinId || '';
+    if (sk.startsWith('power_')) return { offsetY: Math.sin(pn * 2) * 3, squashX: 1, squashY: 1 + Math.sin(pn * 2.5) * 0.02, rotation: 0, swayX: Math.sin(pn * 1.0) * 1.5 };
     if (sk.includes('saiyan') || sk === 'super_saiyan') return { offsetY: 0, squashX: 1, squashY: 1 + Math.sin(pn * 4) * 0.03, rotation: 0, swayX: 0 };
     if (sk.includes('shadow')) return { offsetY: 0, squashX: 1, squashY: 1, rotation: 0, swayX: 0, alpha: 0.8 + Math.sin(pn * 3) * 0.15 };
     if (sk.includes('cyber')) return { offsetY: (Math.random() < 0.05 ? (Math.random() - 0.5) * 3 : 0), squashX: 1, squashY: 1, rotation: 0, swayX: 0 };
@@ -16176,6 +16338,9 @@ const SkinParticles = {
     pirate_ghost:   { colors: ['#88ffaa', '#66dd88'], vy: 0.6, vx: 0, spread: 10, rate: 0.25, sz: 2 },
     snowdrift:      { colors: ['#ffffff', '#ddeeff'], vy: 0.5, vx: 0, spread: 18, rate: 0.4, sz: 2 },
     pumpkin_knight: { colors: ['#ffaa33', '#ff8800'], vy: -0.2, vx: 0, spread: 20, rate: 0.25, sz: 2, wander: true },
+    power_blossom:  { colors: ['#ff6699', '#ff3366', '#ffaacc'], vy: -0.8, vx: 0, spread: 14, rate: 0.4, sz: 2 },
+    power_bubbles:  { colors: ['#66bbff', '#3399ff', '#aaddff'], vy: -0.8, vx: 0, spread: 14, rate: 0.4, sz: 2 },
+    power_buttercup:{ colors: ['#66dd44', '#44bb22', '#aaff88'], vy: -0.8, vx: 0, spread: 14, rate: 0.4, sz: 2 },
   },
   _getConfig(skinId) {
     if (this.configs[skinId]) return this.configs[skinId];
@@ -16768,6 +16933,10 @@ const EchoSkinReactions = {
     ninja_crimson: ["Blood moon ninja! That crimson outfit means business. 🔴"],
     pirate_ghost: ["A ghost pirate?! 👻 The spectral glow... the void seas sent their captain."],
     knight_dark: ["The Dark Knight got... darker? That black armor absorbs ALL the light. 🖤"],
+    // Power Trio skins
+    power_blossom: ["Everything nice... and a commanding presence! 🌺 Saving the station before bedtime.", "Commander of sweetness detected! My sensors are reading maximum pink energy."],
+    power_bubbles: ["So much joy! 💙 The giggles are literally generating power. Is that... scientifically possible here?", "Bubbly energy overload! The whole station just got 200% more cheerful."],
+    power_buttercup: ["Tough. Green. Ready to throw hands — er, stubs. 💚 Don't mess with this one.", "Sugar, spice, and a right hook! My threat assessment just went through the roof. In a good way."],
   },
 
   // Generic reactions by rarity (fallback)
