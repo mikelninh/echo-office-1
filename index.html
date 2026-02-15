@@ -1821,6 +1821,17 @@ const VISITOR_SKINS=[
 ];
 
 // -- Skin Effects System --
+// Helper: convert any color + alpha to rgba string
+function colorAlpha(c, a) {
+  if (c.startsWith('rgba')) return c.replace(/,[^,]*\)$/, `,${a})`);
+  if (c.startsWith('rgb')) return c.replace('rgb', 'rgba').replace(')', `,${a})`);
+  // hex
+  const hex = c.replace('#','');
+  const r = parseInt(hex.length===3?hex[0]+hex[0]:hex.substring(0,2),16);
+  const g = parseInt(hex.length===3?hex[1]+hex[1]:hex.substring(2,4),16);
+  const b = parseInt(hex.length===3?hex[2]+hex[2]:hex.substring(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
 const SKIN_EFFECTS = {
   common: {},
   uncommon: {},
@@ -11198,11 +11209,14 @@ function renderVisitor(ctx){
         // Enhanced trail for mythic
         if(skin.rarity === 'mythic') {
           // Screen-wide subtle glow
-          const mythicGlow = ctx.createRadialGradient(v.x, v.y, 0, v.x, v.y, 100);
-          mythicGlow.addColorStop(0, effectColor.replace(')', ', 0.05)').replace('rgb', 'rgba'));
-          mythicGlow.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.save();
+          ctx.globalAlpha = 0.06;
+          const mythicGlow = ctx.createRadialGradient(v.x, v.y - sprH/2, 0, v.x, v.y - sprH/2, 80);
+          mythicGlow.addColorStop(0, effectColor);
+          mythicGlow.addColorStop(1, 'transparent');
           ctx.fillStyle = mythicGlow;
-          ctx.fillRect(v.x - 100, v.y - 100, 200, 200);
+          ctx.beginPath();ctx.arc(v.x, v.y - sprH/2, 80, 0, Math.PI*2);ctx.fill();
+          ctx.restore();
         }
       }
       
@@ -11247,8 +11261,8 @@ function renderVisitor(ctx){
         
         if(activity > 0.5) {
           const reactiveGlow = ctx.createRadialGradient(v.x, v.y - sprH/2, 0, v.x, v.y - sprH/2, glowRadius);
-          reactiveGlow.addColorStop(0, effectColor.replace(')', `, ${glowAlpha + pulse})`).replace('rgb', 'rgba'));
-          reactiveGlow.addColorStop(0.6, effectColor.replace(')', `, ${(glowAlpha + pulse) * 0.4})`).replace('rgb', 'rgba'));
+          reactiveGlow.addColorStop(0, colorAlpha(effectColor, glowAlpha + pulse));
+          reactiveGlow.addColorStop(0.6, colorAlpha(effectColor, (glowAlpha + pulse) * 0.4));
           reactiveGlow.addColorStop(1, 'rgba(0,0,0,0)');
           ctx.fillStyle = reactiveGlow;
           ctx.beginPath();
@@ -11276,8 +11290,8 @@ function renderVisitor(ctx){
       if(skinEffects.screenAura) {
         const auraIntensity = 0.03 + Math.sin(S.time * 1.5) * 0.02;
         const screenAura = ctx.createRadialGradient(v.x, v.y - sprH/2, 0, v.x, v.y - sprH/2, 150);
-        screenAura.addColorStop(0, effectColor.replace(')', `, ${auraIntensity})`).replace('rgb', 'rgba'));
-        screenAura.addColorStop(0.7, effectColor.replace(')', `, ${auraIntensity * 0.5})`).replace('rgb', 'rgba'));
+        screenAura.addColorStop(0, colorAlpha(effectColor, auraIntensity));
+        screenAura.addColorStop(0.7, colorAlpha(effectColor, auraIntensity * 0.5));
         screenAura.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = screenAura;
         ctx.fillRect(0, 0, W, H);
@@ -28744,6 +28758,9 @@ const DiscoMusic = {
   }, 500);
 })();
 
+// Expose for skin gallery
+window.getVisitorSprite = getVisitorSprite;
+window.VISITOR_SKINS = VISITOR_SKINS;
 })();
 </script>
 </body>
