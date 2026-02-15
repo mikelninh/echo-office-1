@@ -9246,6 +9246,157 @@ function visitorTransform(newSkinId){
   },1500);
 }
 
+// --- Premium Walk & Idle Render ---
+const PremiumRender = {
+  _premiumRarities: new Set(['rare','epic','legendary','mythic']),
+  isEligible(skin) { return this._premiumRarities.has(skin.rarity); },
+
+  // Walk personality profiles per skin
+  _walkProfiles: {
+    'hulk-v':          { stride: 3, bounce: 4, sway: 0, lean: 0.04, type: 'stomp' },
+    'hulk_v':          { stride: 3, bounce: 4, sway: 0, lean: 0.04, type: 'stomp' },
+    'speedster-v':     { stride: 1, bounce: 1, sway: 0, lean: 0.01, type: 'micro' },
+    'speedster_v':     { stride: 1, bounce: 1, sway: 0, lean: 0.01, type: 'micro' },
+    'spirit_granny':   { stride: 0, bounce: 0, sway: 2, lean: 0, type: 'glide' },
+    'power_blossom':   { stride: 1, bounce: 3, sway: 1, lean: 0.02, type: 'hop' },
+    'power_bubbles':   { stride: 1, bounce: 3, sway: 1, lean: 0.02, type: 'hop' },
+    'power_buttercup': { stride: 1, bounce: 3, sway: 1, lean: 0.02, type: 'hop' },
+    'pikachu_suit':    { stride: 2, bounce: 2, sway: 3, lean: 0.02, type: 'waddle' },
+    'ninja':           { stride: 1, bounce: 0.5, sway: 0, lean: 0.005, type: 'slide' },
+    'shadow_ninja':    { stride: 1, bounce: 0.5, sway: 0, lean: 0.005, type: 'slide' },
+    'turbo_runner':    { stride: 2, bounce: 2, sway: 0, lean: 0.02, type: 'standard' },
+    'super_saiyan':    { stride: 2, bounce: 2, sway: 0.5, lean: 0.02, type: 'standard' },
+  },
+  _defaultWalk: { stride: 2, bounce: 2, sway: 0, lean: 0.02, type: 'standard' },
+
+  getWalkProfile(skinId) { return this._walkProfiles[skinId] || this._defaultWalk; },
+
+  drawSplit(ctx, x, y, grid, scale, splitRow, upperOX, upperOY, lowerOX, lowerOY) {
+    for (let row = 0; row < grid.length; row++) {
+      const ox = row < splitRow ? upperOX : lowerOX;
+      const oy = row < splitRow ? upperOY : lowerOY;
+      const r = grid[row];
+      for (let col = 0; col < r.length; col++) {
+        const c = r[col];
+        if (c && c !== '.') { ctx.fillStyle = c; ctx.fillRect(x + col * scale + ox, y + row * scale + oy, scale, scale); }
+      }
+    }
+  },
+
+  renderWalk(ctx, x, y, grid, scale, v, skinId) {
+    const wp = this.getWalkProfile(skinId);
+    const frame = v.frame || 0;
+    const gh = grid.length;
+    const splitRow = Math.floor(gh * 0.55); // upper/lower split
+    const legStart = gh - 4; // bottom 4 rows for stride
+
+    // Leg stride offsets per frame: 0=center, 1=right, 2=left
+    const strideShift = frame === 0 ? 0 : (frame === 1 ? wp.stride : -wp.stride);
+    // Upper body counter-lean
+    const upperLeanX = -strideShift * 0.3;
+    // Sway (side-to-side, e.g. waddle)
+    const pn = performance.now() / 1000;
+    const swayX = wp.sway * Math.sin(pn * 6);
+
+    // Draw upper body (rows 0 to splitRow-1) with lean
+    for (let row = 0; row < splitRow; row++) {
+      const r = grid[row];
+      for (let col = 0; col < r.length; col++) {
+        const c = r[col];
+        if (c && c !== '.') {
+          ctx.fillStyle = c;
+          ctx.fillRect(x + col * scale + upperLeanX + swayX, y + row * scale, scale, scale);
+        }
+      }
+    }
+    // Draw lower body (splitRow to end), bottom 4 rows get stride shift
+    for (let row = splitRow; row < gh; row++) {
+      const r = grid[row];
+      const ox = row >= legStart ? strideShift + swayX : swayX;
+      for (let col = 0; col < r.length; col++) {
+        const c = r[col];
+        if (c && c !== '.') {
+          ctx.fillStyle = c;
+          ctx.fillRect(x + col * scale + ox, y + row * scale, scale, scale);
+        }
+      }
+    }
+  },
+
+  // Idle render with breathing + head bob + skin-specific effects
+  _idleProfiles: {
+    'saiyan': 'hairFlicker', 'super_saiyan': 'hairFlicker',
+    'ice_queen': 'shimmer',
+    'hulk-v': 'bigBreathe', 'hulk_v': 'bigBreathe',
+    'spirit_granny': 'ghostJitter',
+    'psychic_girl': 'floatHair',
+    'turbo_runner': 'legTwitch',
+  },
+
+  renderIdle(ctx, x, y, grid, scale, v, skinId) {
+    const pn = performance.now() / 1000;
+    const gh = grid.length;
+
+    // Breathing: rows 7-12 expand/contract by shifting lower rows
+    const breathPhase = Math.sin(pn * Math.PI); // ~2s cycle
+    const breathOffset = breathPhase > 0.9 ? 1 : 0; // insert 1px gap occasionally
+
+    // Head bob: top 6 rows shift up by 0-1px
+    const headBob = Math.sin(pn * 1.5) > 0.7 ? -1 : 0;
+
+    // Skin-specific effect
+    const idleType = this._idleProfiles[skinId] || 'default';
+    const hairFlick = (idleType === 'hairFlicker' && Math.sin(pn * 3) > 0.8) ? -1 : 0;
+    const ghostJitter = idleType === 'ghostJitter' ? (Math.random() - 0.5) * 1.5 : 0;
+    const bigBreatheExtra = idleType === 'bigBreathe' ? 1 : 0;
+    const legTwitch = (idleType === 'legTwitch' && Math.random() < 0.03) ? ((Math.random() - 0.5) * 2) : 0;
+
+    for (let row = 0; row < gh; row++) {
+      const r = grid[row];
+      let ox = ghostJitter, oy = 0;
+
+      // Head bob for top 6 rows
+      if (row < 6) { oy = headBob; }
+      // Hair flicker for top 3 rows
+      if (row < 3) { oy += hairFlick; }
+      // Breathing: push rows below 12 down by breathOffset
+      if (row >= 12) { oy += breathOffset + bigBreatheExtra * breathOffset; }
+      // Leg twitch on bottom 4 rows
+      if (row >= gh - 4) { ox += legTwitch; }
+
+      // Shimmer for ice_queen: randomly brighten pixels
+      const doShimmer = idleType === 'shimmer';
+
+      for (let col = 0; col < r.length; col++) {
+        const c = r[col];
+        if (c && c !== '.') {
+          if (doShimmer && Math.random() < 0.008) {
+            ctx.fillStyle = '#eeffff';
+          } else {
+            ctx.fillStyle = c;
+          }
+          ctx.fillRect(x + col * scale + ox, y + row * scale + oy, scale, scale);
+        }
+      }
+    }
+    // Float hair wave for psychic_girl
+    if (idleType === 'floatHair') {
+      // Already drawn, add wave overlay on top 4 rows by redrawing with shift
+      const waveOx = Math.sin(pn * 2.5) * 1.5;
+      for (let row = 0; row < Math.min(4, gh); row++) {
+        const r = grid[row];
+        for (let col = 0; col < r.length; col++) {
+          const c = r[col];
+          if (c && c !== '.') {
+            ctx.fillStyle = c;
+            ctx.fillRect(x + col * scale + waveOx + Math.sin(row + pn * 3) * 0.5, y + row * scale + headBob, scale, scale);
+          }
+        }
+      }
+    }
+  }
+};
+
 function renderVisitor(ctx){
   if(!S.useVisitor)return;
   const v=S.visitor,sc=3,sz=10;
@@ -9347,7 +9498,13 @@ function renderVisitor(ctx){
       let attackLean=0;
       if(typeof WeaponSystem!=='undefined'&&WeaponSystem._attackTimer>0){const f=v.dir===2?1:v.dir===3?-1:0;attackLean=f*3}
       ctx.save();ctx.translate(v.x+danceSwayX,v.y+danceOffY);ctx.rotate(danceRot);ctx.scale(squashX,squashY);ctx.translate(-(v.x+danceSwayX),-(v.y+danceOffY));
-      drawSprite(ctx,v.x-sprW/2+attackLean+danceSwayX,v.y-sprH+breathe+danceOffY,sprGrid,sprScale);
+      // Premium procedural walk/idle rendering
+      if(typeof PremiumRender!=='undefined'&&PremiumRender.isEligible(skin)){
+        const _prX=v.x-sprW/2+attackLean+danceSwayX, _prY=v.y-sprH+breathe+danceOffY;
+        if(v.moving){ PremiumRender.renderWalk(ctx,_prX,_prY,sprGrid,sprScale,v,skin.id); }
+        else if(!(typeof DanceSystem!=='undefined'&&DanceSystem.active)){ PremiumRender.renderIdle(ctx,_prX,_prY,sprGrid,sprScale,v,skin.id); }
+        else { drawSprite(ctx,_prX,_prY,sprGrid,sprScale); }
+      } else { drawSprite(ctx,v.x-sprW/2+attackLean+danceSwayX,v.y-sprH+breathe+danceOffY,sprGrid,sprScale); }
       ctx.restore();ctx.filter='none';ctx.globalAlpha=1;
       // Premium: Skin ambient particles
       if(typeof SkinParticles!=='undefined'){SkinParticles.render(ctx);}
