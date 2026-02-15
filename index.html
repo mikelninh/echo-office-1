@@ -524,6 +524,10 @@ const S={
   _visited:LS.get('visited_objs',[]),_prevAchCount:0,
   otherPlayers:{},myPlayerId:null,
   
+  // Skin tier effects tracking
+  _sessionCoins:0,
+  _lastPositions:[],// For mythic walk trails
+  
   // Sprint A+B: Hidden Depth & Puzzles
   discovery:{
     floorsVisited:LS.get('discovery_floors',[1]),// Floors the player has visited
@@ -1723,6 +1727,40 @@ const VISITOR_SKINS=[
   {id:'void_walker',label:'Void Walker',icon:'🌀',color:'#220033',cost:-1,desc:'Animated glitch effect — reality tears around you',accent:'#ff3344',rarity:'mythic',lootOnly:true,hasSprite:true},
 ];
 
+// -- Skin Effects System --
+const SKIN_EFFECTS = {
+  common: {},
+  uncommon: {},
+  rare: {
+    idleAnim: true,        // subtle idle animation (breathing/sway)
+    footstepParticles: true // small particles when walking
+  },
+  epic: {
+    idleAnim: true,
+    footstepParticles: true,
+    reactiveGlow: true,    // glow intensifies with coin earning
+    uniqueEmote: true      // skin-specific emote
+  },
+  legendary: {
+    idleAnim: true,
+    footstepParticles: true,
+    reactiveGlow: true,
+    uniqueEmote: true,
+    walkTrail: true,       // permanent particle trail
+    floorEntrance: true    // special effect on floor change
+  },
+  mythic: {
+    idleAnim: true,
+    footstepParticles: true,
+    reactiveGlow: true,
+    uniqueEmote: true,
+    walkTrail: true,
+    floorEntrance: true,
+    screenAura: true,      // visible glow to other players
+    evolves: true          // changes over time
+  }
+};
+
 // -- Fortunes --
 const FORTUNES=["A bug will reveal itself at 3AM.","Your next commit will be clean.","The semicolon you seek is on line 42.","A cat will bring unexpected wisdom.","The cloud holds your answer.","Refactor before you regret.","A stranger will star your repo.","Sleep is the best debugger.","The answer was in the docs all along.","Trust the process. And the tests.","Your coffee will get cold but your code will get better.","Pixel approves of your next decision.","The variable you named 'temp' will outlive the project.","Today's bug is tomorrow's feature.","Somewhere, a senior dev just mass-pushed to main."];
 
@@ -2094,7 +2132,7 @@ const Coins={
   get count(){return this._count},
   set count(v){this._count=Math.max(0,v);LS.set('echoCoins',this._count);$('#coin-count').textContent=this._count},
   get lifetime(){return this._lifetime},
-  earn(n,r){const luckBonus=typeof LootSystem!=='undefined'?(LootSystem.getStatBonuses().luck||0):0;const bonus=luckBonus>0?Math.floor(n*luckBonus/100):0;const total=n+bonus;this.count+=total;this._lifetime+=total;LS.set('lifetimeCoins',this._lifetime);S.floatTexts.push({text:'+'+(bonus>0?total+'◈(+'+bonus+')':total+'◈'),x:S.echo.x-10,y:S.echo.y-50,color:'#ffd700',life:60});this._sndEarn();if(typeof MissionBoard!=='undefined'&&MissionBoard._progress)MissionBoard.trackProgress('coins_earned',total)},
+  earn(n,r){const luckBonus=typeof LootSystem!=='undefined'?(LootSystem.getStatBonuses().luck||0):0;const bonus=luckBonus>0?Math.floor(n*luckBonus/100):0;const total=n+bonus;this.count+=total;this._lifetime+=total;S._sessionCoins+=total;LS.set('lifetimeCoins',this._lifetime);S.floatTexts.push({text:'+'+(bonus>0?total+'◈(+'+bonus+')':total+'◈'),x:S.echo.x-10,y:S.echo.y-50,color:'#ffd700',life:60});this._sndEarn();if(typeof MissionBoard!=='undefined'&&MissionBoard._progress)MissionBoard.trackProgress('coins_earned',total)},
   spend(n,r){if(this._count<n)return false;this.count-=n;S.floatTexts.push({text:'-'+n+'◈',x:S.echo.x-10,y:S.echo.y-50,color:'#ff6666',life:60});return true},
   canAfford(n){return this._count>=n},
   adminGrant(n){this._count+=n;this._lifetime+=n;LS.set('echoCoins',this._count);LS.set('lifetimeCoins',this._lifetime);$('#coin-count').textContent=this._count;showNotification('👑 Admin: +'+n+'◈')},
@@ -8276,10 +8314,166 @@ function renderVisitor(ctx){
         ctx.fillStyle=`rgba(200,255,200,${.15+Math.sin(S.time*6)*.1})`;
         ctx.beginPath();ctx.arc(fx,fy,5,0,Math.PI*2);ctx.fill();
       }
+      
+      // ═══ SKIN TIER EFFECTS SYSTEM ═══
+      const skinEffects = SKIN_EFFECTS[skin.rarity] || {};
+      const effectColor = skin.accent || skin.color;
+      
+      // 1. Footstep particles (rare+)
+      if(skinEffects.footstepParticles && v.moving) {
+        let particleFreq = 0.33; // 1 particle every 3 frames (rare)
+        let particleCount = 1;
+        let particleSize = 1.5;
+        let particleLife = 15;
+        
+        if(skin.rarity === 'epic') { particleFreq = 0.4; particleSize = 1.8; }
+        if(skin.rarity === 'legendary') { particleFreq = 0.5; particleCount = 2; particleSize = 2.2; particleLife = 20; }
+        if(skin.rarity === 'mythic') { particleFreq = 1; particleCount = 3; particleSize = 2.5; particleLife = 25; }
+        
+        if(Math.random() < particleFreq) {
+          for(let i = 0; i < particleCount; i++) {
+            S.particles.push({
+              x: v.x + (Math.random() - 0.5) * 8,
+              y: v.y + (Math.random() - 0.5) * 4,
+              vx: (Math.random() - 0.5) * 0.5,
+              vy: 0.3 + Math.random() * 0.5,
+              life: particleLife,
+              color: effectColor,
+              size: particleSize + Math.random()
+            });
+          }
+        }
+      }
+      
+      // 2. Walk trail (legendary+)
+      if(skinEffects.walkTrail && v.moving) {
+        // Track last positions for trail
+        if(!S._lastPositions) S._lastPositions = [];
+        S._lastPositions.push({x: v.x, y: v.y, time: S.time});
+        if(S._lastPositions.length > 8) S._lastPositions.shift();
+        
+        // Draw faint line trail for legendary
+        if(skin.rarity === 'legendary' && S._lastPositions.length > 3) {
+          ctx.save();
+          ctx.globalAlpha = 0.3;
+          ctx.strokeStyle = effectColor;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          for(let i = 1; i < S._lastPositions.length; i++) {
+            const pos = S._lastPositions[i];
+            if(i === 1) ctx.moveTo(pos.x, pos.y);
+            else ctx.lineTo(pos.x, pos.y);
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
+        
+        // Enhanced trail for mythic
+        if(skin.rarity === 'mythic') {
+          // Screen-wide subtle glow
+          const mythicGlow = ctx.createRadialGradient(v.x, v.y, 0, v.x, v.y, 100);
+          mythicGlow.addColorStop(0, effectColor.replace(')', ', 0.05)').replace('rgb', 'rgba'));
+          mythicGlow.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = mythicGlow;
+          ctx.fillRect(v.x - 100, v.y - 100, 200, 200);
+        }
+      }
+      
+      // 3. Idle animation (rare+)
+      if(skinEffects.idleAnim && !v.moving) {
+        // Apply idle float offset (already applied above via breathe variable)
+        // Epic+: Add orbiting particle
+        if(skin.rarity === 'epic' || skin.rarity === 'legendary' || skin.rarity === 'mythic') {
+          const orbitAngle = S.time * 1.5;
+          const orbitRadius = 20;
+          const orbitX = v.x + Math.cos(orbitAngle) * orbitRadius;
+          const orbitY = v.y - sprH/2 + Math.sin(orbitAngle) * orbitRadius * 0.6;
+          
+          ctx.fillStyle = effectColor.replace(')', ', 0.6)').replace('rgb', 'rgba');
+          ctx.beginPath();
+          ctx.arc(orbitX, orbitY, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        
+        // Legendary+: Add shimmer effect
+        if((skin.rarity === 'legendary' || skin.rarity === 'mythic') && Math.random() < 0.02) {
+          S.particles.push({
+            x: v.x + (Math.random() - 0.5) * sprW,
+            y: v.y - sprH + Math.random() * sprH,
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: -0.5 - Math.random() * 0.5,
+            life: 20 + Math.random() * 10,
+            color: '#ffffff',
+            size: 1 + Math.random()
+          });
+        }
+      }
+      
+      // 4. Reactive glow (epic+)
+      if(skinEffects.reactiveGlow) {
+        const coins = S._sessionCoins;
+        let glowRadius = 0;
+        let glowAlpha = 0;
+        
+        if(coins >= 50) { glowRadius = 15; glowAlpha = 0.1; }
+        if(coins >= 200) { glowRadius = 20; glowAlpha = 0.15; }
+        if(coins >= 500) { glowRadius = 25; glowAlpha = 0.2; }
+        
+        if(glowRadius > 0) {
+          const reactiveGlow = ctx.createRadialGradient(v.x, v.y - sprH/2, 0, v.x, v.y - sprH/2, glowRadius);
+          reactiveGlow.addColorStop(0, effectColor.replace(')', `, ${glowAlpha})`).replace('rgb', 'rgba'));
+          reactiveGlow.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = reactiveGlow;
+          ctx.beginPath();
+          ctx.arc(v.x, v.y - sprH/2, glowRadius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      
+      // 5. Screen aura for mythic skins (visible to other players)
+      if(skinEffects.screenAura) {
+        const auraIntensity = 0.03 + Math.sin(S.time * 1.5) * 0.02;
+        const screenAura = ctx.createRadialGradient(v.x, v.y - sprH/2, 0, v.x, v.y - sprH/2, 150);
+        screenAura.addColorStop(0, effectColor.replace(')', `, ${auraIntensity})`).replace('rgb', 'rgba'));
+        screenAura.addColorStop(0.7, effectColor.replace(')', `, ${auraIntensity * 0.5})`).replace('rgb', 'rgba'));
+        screenAura.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = screenAura;
+        ctx.fillRect(0, 0, W, H);
+      }
+      
       // Accessories + name label
       renderVisitorAccessories(ctx,v);
       ctx.fillStyle=skin.color;ctx.font='bold 9px monospace';ctx.textAlign='center';
-      ctx.fillText(LS.get('visitorName','Visitor'),v.x,v.y-sprH-4);ctx.textAlign='left';
+      ctx.fillText(LS.get('visitorName','Visitor'),v.x,v.y-sprH-4);
+      
+      // 6. Tier badge in nameplate (rare+)
+      if(skin.rarity !== 'common' && skin.rarity !== 'uncommon') {
+        const badgeX = v.x + 40; // Position to the right of name
+        const badgeY = v.y - sprH - 6;
+        
+        if(skin.rarity === 'rare') {
+          ctx.fillStyle = '#4444ff';
+          ctx.beginPath();
+          ctx.arc(badgeX, badgeY, 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else if(skin.rarity === 'epic') {
+          ctx.fillStyle = '#aa44ff';
+          ctx.font = '8px monospace';
+          ctx.fillText('★', badgeX - 3, badgeY + 2);
+        } else if(skin.rarity === 'legendary') {
+          ctx.fillStyle = '#ffdd44';
+          ctx.font = '8px monospace';
+          ctx.fillText('★', badgeX - 3, badgeY + 2);
+        } else if(skin.rarity === 'mythic') {
+          // Animated rainbow star
+          const hue = (S.time * 200) % 360;
+          ctx.fillStyle = `hsl(${hue}, 80%, 60%)`;
+          ctx.font = '8px monospace';
+          ctx.fillText('★', badgeX - 3, badgeY + 2);
+        }
+      }
+      
+      ctx.textAlign='left';
       // Lightsaber (replicated from below)
       if(S._visitorSaber){
         const col2=S._visitorSaber==='green'?'#00ff44':'#4488ff';
@@ -12388,6 +12582,37 @@ function changeFloor(f){
   }
   $('#floor-hud').textContent=`F${f} · ${FLOOR_NAMES[f]}`;
   showThought(`Arrived at ${FLOOR_NAMES[f]}!`);
+  
+  // Floor entrance effects for legendary+ skins
+  if(S.useVisitor) {
+    const skin = VISITOR_SKINS.find(s => s.id === S.visitor.skin) || VISITOR_SKINS[0];
+    const skinEffects = SKIN_EFFECTS[skin.rarity] || {};
+    
+    if(skinEffects.floorEntrance) {
+      const effectColor = skin.accent || skin.color;
+      const v = S.visitor;
+      
+      // Spawn burst particles at visitor position
+      const particleCount = skin.rarity === 'mythic' ? 30 : 20;
+      for(let i = 0; i < particleCount; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2 + Math.random() * 4;
+        S.particles.push({
+          x: v.x,
+          y: v.y - 15,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 25 + Math.random() * 15,
+          color: effectColor,
+          size: 1.5 + Math.random() * 2
+        });
+      }
+      
+      // Brief screen flash
+      S.screenFlash = 'rgba(255,255,255,0.3)';
+    }
+  }
+  
   // Change music if playing
   if(S.musicPlaying)startLofi();
   
