@@ -2231,7 +2231,7 @@ const Coins={
   spend(n,r){if(this._count<n)return false;this.count-=n;S.floatTexts.push({text:'-'+n+'◈',x:S.echo.x-10,y:S.echo.y-50,color:'#ff6666',life:60});return true},
   canAfford(n){return this._count>=n},
   adminGrant(n){this._count+=n;this._lifetime+=n;LS.set('echoCoins',this._count);LS.set('lifetimeCoins',this._lifetime);$('#coin-count').textContent=this._count;showNotification('👑 Admin: +'+n+'◈')},
-  initVisitRewards(){const t=new Date().toISOString().slice(0,10);const up=new URLSearchParams(window.location.search);if(up.get('admin')==='echohost'){if(!LS.get('adminGranted')){this.adminGrant(1000000);LS.set('adminGranted',true)}}if(!LS.get('coinsFirstVisit',false)){LS.set('coinsFirstVisit',true);this.earn(100,'first')}const l=LS.get('coinsLastVisit','');if(l&&l!==t)this.earn(5,'daily');LS.set('coinsLastVisit',t);$('#coin-count').textContent=this._count},
+  initVisitRewards(){const t=new Date().toISOString().slice(0,10);const up=new URLSearchParams(window.location.search);if(up.get('admin')==='echohost'){this.adminGrant(1000000)}if(!LS.get('coinsFirstVisit',false)){LS.set('coinsFirstVisit',true);this.earn(100,'first')}const l=LS.get('coinsLastVisit','');if(l&&l!==t)this.earn(5,'daily');LS.set('coinsLastVisit',t);$('#coin-count').textContent=this._count},
   _sndEarn(){if(!S.audioCtx)return;const c=S.audioCtx,n=c.currentTime;const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=1200;g.gain.setValueAtTime(.1*S.volume,n);g.gain.exponentialRampToValueAtTime(.001,n+.05);o.connect(g);g.connect(S.masterGain);o.start(n);o.stop(n+.1)},
 };
 
@@ -8381,7 +8381,7 @@ function getVisitorSprite(skinId,dir,frame){
 
   else if(skinId==='spirit_granny'){
     // Turbo Granny-inspired: tiny hunched figure, white hair bun, ghostly pale, wide grin, floating
-    const H='#eeeeff',Hd='#ccccdd',Hl='#ffffff',Sk='#ccddcc',Skd='#aabbaa',Skl='#ddeedd',Rb='#553355',Rbd='#442244',Rbl='#664466',E='#111',Ed='#000',M='#cc2222',Md='#aa1111',T2='rgba(200,220,200,0.6)';
+    const H='#ddddef',Hd='#bbbbcc',Hl='#ffffff',Sk='#c8e0c8',Skd='#99bb99',Skl='#daf0da',Rb='#6b3a6b',Rbd='#4a254a',Rbl='#8a558a',E='#220000',Ed='#000',M='#ee3333',Md='#cc1111',T2=T;
     if(dir===0){
       grid=[
         [T, T, T, T, T, H, Hl,H, T, T, T, T, T, T, T, T],
@@ -11209,18 +11209,7 @@ function renderVisitor(ctx){
       // 3. Idle animation (rare+)
       if(skinEffects.idleAnim && !v.moving) {
         // Apply idle float offset (already applied above via breathe variable)
-        // Epic+: Add orbiting particle
-        if(skin.rarity === 'epic' || skin.rarity === 'legendary' || skin.rarity === 'mythic') {
-          const orbitAngle = S.time * 1.5;
-          const orbitRadius = 20;
-          const orbitX = v.x + Math.cos(orbitAngle) * orbitRadius;
-          const orbitY = v.y - sprH/2 + Math.sin(orbitAngle) * orbitRadius * 0.6;
-          
-          ctx.fillStyle = effectColor.replace(')', ', 0.6)').replace('rgb', 'rgba');
-          ctx.beginPath();
-          ctx.arc(orbitX, orbitY, 1.5, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        // Epic+: orbiting mote removed — SkinParticles handles per-skin effects better
         
         // Legendary+: Add shimmer effect
         if((skin.rarity === 'legendary' || skin.rarity === 'mythic') && Math.random() < 0.02) {
