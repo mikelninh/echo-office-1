@@ -6834,104 +6834,312 @@ function showInteractPrompt(text){
 // §12. FLOOR-SPECIFIC RENDERING
 // ═══════════════════════════════════════
 
-// --- FLOOR 1: Echo's Quarters ---
+// --- FLOOR 1: Echo's Command Center ---
 function renderFloor1(){
-  renderFloorMaterial('metal');
-  renderWalls();renderWallDetails();
-  // String lights
-  const colors=['#ff4040','#40ff40','#4080ff','#ffd040','#ff40ff','#40ffff'];
-  for(let i=0;i<16;i++){const lx=30+i*48,ly=8+Math.sin(i*.6+S.time)*2;ctx.fillStyle=colors[i%6];ctx.shadowColor=colors[i%6];ctx.shadowBlur=8;ctx.beginPath();ctx.arc(lx,ly+4,3,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;if(i>0){ctx.strokeStyle='#333';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(lx-48,8+Math.sin((i-1)*.6+S.time)*2+4);ctx.lineTo(lx,ly+4);ctx.stroke()}}
-  // Neon DREAM
-  ctx.font='bold 16px monospace';const glow=.7+Math.sin(S.time*3)*.3;ctx.fillStyle=`rgba(240,160,48,${glow})`;ctx.shadowColor='#f0a030';ctx.shadowBlur=20;ctx.fillText('DREAM',210,36);ctx.shadowBlur=0;
-  // Space window (enlarged)
-  const wo={x:400,y:6,w:180,h:80};
-  ctx.fillStyle='#2a3a5a';ctx.fillRect(wo.x-4,wo.y-4,wo.w+8,wo.h+8);ctx.fillStyle='#020810';ctx.fillRect(wo.x,wo.y,wo.w,wo.h);
-  for(let i=0;i<50;i++){const br=i%3===0?.6:.2+Math.sin(S.time*1.5+i*.7)*.3;ctx.fillStyle=`rgba(255,255,255,${br})`;ctx.fillRect(wo.x+((42*i*7+i*13)%wo.w),wo.y+((42*i*11+i*17)%wo.h),i%11===0?2:1,i%11===0?2:1)}
-  const ex=wo.x+90,ey=wo.y+40;
-  // Earth — larger with atmosphere glow
-  const earthGlow=ctx.createRadialGradient(ex,ey,24,ex,ey,34);earthGlow.addColorStop(0,'rgba(80,160,255,0)');earthGlow.addColorStop(1,'rgba(80,160,255,.12)');ctx.fillStyle=earthGlow;ctx.fillRect(ex-40,ey-40,80,80);
-  ctx.beginPath();ctx.arc(ex,ey,24,0,Math.PI*2);ctx.fillStyle='#1a5a9a';ctx.fill();
+  renderFloorMaterial('tech');
+  renderWalls('#0a0a1a');renderWallDetails('#0a0a1a');
+  
+  // Circuit board pattern on walls (subtle teal lines)
+  ctx.strokeStyle='rgba(0,255,255,.08)';ctx.lineWidth=1;
+  for(let i=0;i<15;i++){
+    const y=50+i*30;
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W*.3,y);ctx.moveTo(W*.7,y);ctx.lineTo(W,y);ctx.stroke();
+    const x=60+i*40;
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H*.2);ctx.moveTo(x,H*.8);ctx.lineTo(x,H);ctx.stroke();
+  }
+  
+  // Ambient strip lighting (replacing string lights)
+  const stripPulse=.4+Math.sin(S.time*1.5)*.2;
+  ctx.fillStyle=`rgba(160,80,255,${stripPulse})`;ctx.shadowColor='#a050ff';ctx.shadowBlur=15;
+  ctx.fillRect(0,8,W,4);ctx.shadowBlur=0;
+  ctx.fillStyle=`rgba(0,255,255,${stripPulse*.7})`;ctx.shadowColor='#00ffff';ctx.shadowBlur=10;
+  ctx.fillRect(0,12,W,2);ctx.shadowBlur=0;
+  
+  // Neon ECHO (replacing DREAM)
+  ctx.font='bold 16px monospace';const echoGlow=.7+Math.sin(S.time*3)*.3;
+  ctx.fillStyle=`rgba(160,80,255,${echoGlow})`;ctx.shadowColor='#a050ff';ctx.shadowBlur=20;
+  ctx.fillText('ECHO',210,36);ctx.shadowBlur=0;
+  
+  // Floating particles (purple/teal dots drifting upward)
+  for(let i=0;i<3;i++){
+    const px=100+Math.sin(S.time*.5+i*2)*200+i*150;
+    const py=H-((S.time*20+i*100)%(H+50));
+    const pColor=i%2?'rgba(160,80,255,.6)':'rgba(0,255,255,.4)';
+    ctx.fillStyle=pColor;ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fill();
+  }
+  
+  // Space window (BIGGER: 250×100 with holographic overlay)
+  const wo={x:350,y:6,w:250,h:100};
+  ctx.fillStyle='#2a3a5a';ctx.fillRect(wo.x-4,wo.y-4,wo.w+8,wo.h+8);
+  ctx.fillStyle='#020810';ctx.fillRect(wo.x,wo.y,wo.w,wo.h);
+  
+  // Stars
+  for(let i=0;i<70;i++){
+    const br=i%3===0?.6:.2+Math.sin(S.time*1.5+i*.7)*.3;
+    ctx.fillStyle=`rgba(255,255,255,${br})`;
+    ctx.fillRect(wo.x+((42*i*7+i*13)%wo.w),wo.y+((42*i*11+i*17)%wo.h),i%11===0?2:1,i%11===0?2:1);
+  }
+  
+  const ex=wo.x+125,ey=wo.y+50;
+  // Earth — larger
+  const earthGlow=ctx.createRadialGradient(ex,ey,28,ex,ey,38);
+  earthGlow.addColorStop(0,'rgba(80,160,255,0)');earthGlow.addColorStop(1,'rgba(80,160,255,.12)');
+  ctx.fillStyle=earthGlow;ctx.fillRect(ex-45,ey-45,90,90);
+  ctx.beginPath();ctx.arc(ex,ey,28,0,Math.PI*2);ctx.fillStyle='#1a5a9a';ctx.fill();
   ctx.fillStyle='#2a7a3a';const drift=Math.sin(S.time*.03)*4;
-  ctx.beginPath();ctx.arc(ex-6+drift,ey-6,9,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(ex+10+drift,ey+5,7,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(ex-10+drift,ey+8,5,0,Math.PI*2);ctx.fill();
-  // Cloud swirls
-  ctx.fillStyle='rgba(220,240,255,.35)';for(let i=0;i<5;i++){const ca=S.time*.02+i*1.2,cr=12+i*3;ctx.beginPath();ctx.arc(ex+Math.cos(ca)*cr*.6,ey+Math.sin(ca)*cr*.4,3+i*.5,0,Math.PI*2);ctx.fill()}
-  // Polar ice
-  ctx.fillStyle='rgba(220,240,255,.5)';ctx.beginPath();ctx.arc(ex,ey-22,6,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#4a7a9a';ctx.font='7px monospace';ctx.fillText(`ALT:408km`,wo.x+wo.w-60,wo.y+wo.h-3);
-  // Kitchen
-  const ko=getObjects().find(o=>o.id==='kitchen');ctx.fillStyle='#3a3a4a';ctx.fillRect(ko.x,ko.y+30,ko.w,20);ctx.fillStyle='#888';ctx.fillRect(ko.x+20,ko.y+5,35,25);ctx.fillStyle='#c00';ctx.fillRect(ko.x+28,ko.y+12,4,4);ctx.fillStyle='#0c0';ctx.fillRect(ko.x+34,ko.y+12,4,4);
-  // Fish tank
-  const ft=getObjects().find(o=>o.id==='fishtank');ctx.fillStyle='rgba(0,80,120,.5)';ctx.fillRect(ft.x,ft.y,ft.w,ft.h);ctx.strokeStyle='#4a6a7a';ctx.lineWidth=2;ctx.strokeRect(ft.x,ft.y,ft.w,ft.h);const fishC=['#f80','#0cf','#f4a'];for(let i=0;i<3;i++){const fx=ft.x+10+Math.sin(S.time*(1+i*.3)+i*2)*(ft.w/2-15)+ft.w/2-10,fy=ft.y+10+i*12+Math.sin(S.time*2+i)*3;ctx.fillStyle=fishC[i];ctx.beginPath();ctx.ellipse(fx,fy,5,3,0,0,Math.PI*2);ctx.fill()}
-  // Bookshelf
-  const bs=getObjects().find(o=>o.id==='bookshelf');ctx.fillStyle='#2a1a10';ctx.fillRect(bs.x,bs.y,bs.w,bs.h);
+  ctx.beginPath();ctx.arc(ex-8+drift,ey-8,11,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(ex+12+drift,ey+6,9,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(ex-12+drift,ey+10,6,0,Math.PI*2);ctx.fill();
+  
+  // Clouds
+  ctx.fillStyle='rgba(220,240,255,.35)';
+  for(let i=0;i<6;i++){
+    const ca=S.time*.02+i*1.2,cr=15+i*3;
+    ctx.beginPath();ctx.arc(ex+Math.cos(ca)*cr*.6,ey+Math.sin(ca)*cr*.4,3+i*.5,0,Math.PI*2);ctx.fill();
+  }
+  
+  // Holographic overlay (station stats)
+  ctx.fillStyle='rgba(0,255,255,.8)';ctx.font='6px monospace';
+  ctx.fillText(`VISITORS: ${Math.floor(S.time/100)%999+150}`,wo.x+5,wo.y+15);
+  ctx.fillText(`FLOORS: ${S.currentFloor}/9 ACTIVE`,wo.x+5,wo.y+25);
+  ctx.fillText(`STATUS: OPERATIONAL`,wo.x+5,wo.y+35);
+  const eventList=['Meteor Shower','Solar Flare','Comm Signal','Deep Scan'];
+  ctx.fillText(`EVENT: ${eventList[Math.floor(S.time/200)%4]}`,wo.x+5,wo.y+45);
+  
+  // Coffee Station (replacing kitchen)
+  const ko=getObjects().find(o=>o.id==='kitchen');
+  ctx.fillStyle='#3a3a4a';ctx.fillRect(ko.x,ko.y+30,ko.w,20);
+  // Espresso machine
+  ctx.fillStyle='#666';ctx.fillRect(ko.x+15,ko.y+5,40,30);
+  ctx.fillStyle='#888';ctx.fillRect(ko.x+20,ko.y+10,30,15);
+  // Steam animation
+  for(let i=0;i<2;i++){
+    const sx=ko.x+25+i*10+Math.sin(S.time*3+i*2)*2;
+    const sy=ko.y+8-Math.sin(S.time*4+i*3)*8;
+    ctx.fillStyle=`rgba(255,255,255,${.4-i*.15})`;ctx.fillRect(sx,sy,2,4);
+  }
+  ctx.fillStyle='#00ffff';ctx.font='4px monospace';ctx.fillText('BREW',ko.x+22,ko.y+45);
+  
+  // Hologram table (replacing fish tank)
+  const ft=getObjects().find(o=>o.id==='fishtank');
+  ctx.fillStyle='#1a1a3a';ctx.fillRect(ft.x,ft.y+ft.h-10,ft.w,10);
+  // Circular blue hologram showing spinning wireframe station
+  const hx=ft.x+ft.w/2,hy=ft.y+ft.h/2;
+  ctx.strokeStyle=`rgba(0,120,255,${.6+Math.sin(S.time*2)*.2})`;ctx.lineWidth=1;
+  for(let i=0;i<9;i++){
+    const angle=S.time*0.5+i*Math.PI/4.5;
+    const r=15+Math.sin(angle)*3;
+    ctx.beginPath();
+    ctx.arc(hx,hy-i*3,r,0,Math.PI*2);
+    ctx.stroke();
+  }
+  // Rotating wireframe lines
+  for(let i=0;i<6;i++){
+    const a=S.time*0.3+i*Math.PI/3;
+    ctx.beginPath();
+    ctx.moveTo(hx+Math.cos(a)*20,hy-20);
+    ctx.lineTo(hx+Math.cos(a+Math.PI)*20,hy+20);
+    ctx.stroke();
+  }
+  
+  // Bookshelf with lamp glow
+  const bs=getObjects().find(o=>o.id==='bookshelf');
+  ctx.fillStyle='#2a1a10';ctx.fillRect(bs.x,bs.y,bs.w,bs.h);
+  
   const bkC=['#d4820a','#00c8c8','#2a8a2a','#c42020','#d0d0d0','#c8a020','#6a4a2a','#8a1a1a','#7a3aa0','#2060c0','#a030a0','#20a050'];
   const bkN=['DUNE','NEURO','HHGG','1984','SNOW','GEB','SAPI','WAR','MEDI','CODE','SICP','PRGM'];
-  for(let row=0;row<3;row++){const sy=bs.y+8+row*30;ctx.fillStyle='#3a2820';ctx.fillRect(bs.x+4,sy+22,bs.w-8,3);for(let b=0;b<4;b++){const bx=bs.x+6+b*18,bh=16+((row*4+b)*5%8);ctx.fillStyle=bkC[row*4+b]||'#888';ctx.fillRect(bx,sy+22-bh,14,bh);
-    // Vertical spine label
-    ctx.save();ctx.translate(bx+10,sy+20);ctx.rotate(-Math.PI/2);
-    ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 7px monospace';ctx.textAlign='left';
-    ctx.fillText(bkN[row*4+b]||'',1,3);ctx.restore()}}
-  // Desk + monitors
-  const dk=getObjects().find(o=>o.id==='desk');ctx.fillStyle='#5a4030';ctx.fillRect(dk.x,dk.y+50,dk.w,10);ctx.fillStyle='#4a3020';ctx.fillRect(dk.x+10,dk.y+60,8,40);ctx.fillRect(dk.x+dk.w-18,dk.y+60,8,40);
-  for(let m=0;m<2;m++){const mx=dk.x+20+m*80;ctx.fillStyle='#111';ctx.fillRect(mx,dk.y+10,60,38);ctx.fillStyle='#0a2a0a';ctx.fillRect(mx+2,dk.y+12,56,34);ctx.fillStyle='#0a0';ctx.font='6px monospace';ctx.fillText(m===0?'$ npm run dev':'Echo v13',mx+6,dk.y+24)}
-  // Chair
-  ctx.fillStyle='#2a2a3a';ctx.fillRect(dk.x+70,dk.y+70,40,30);ctx.fillStyle='#3a3a4a';ctx.fillRect(dk.x+65,dk.y+85,50,12);
-  // Server rack
-  const sr=getObjects().find(o=>o.id==='server');ctx.fillStyle='#1a1a2a';ctx.fillRect(sr.x,sr.y,sr.w,sr.h);for(let i=0;i<4;i++){ctx.fillStyle='#2a2a3a';ctx.fillRect(sr.x+4,sr.y+6+i*16,sr.w-8,12);ctx.fillStyle=Math.sin(S.time*3+i*1.5)>.2?['#0f0','#0ff','#f80','#f00'][i]:'#333';ctx.fillRect(sr.x+sr.w-10,sr.y+10+i*16,3,3)}
-  // Wardrobe
-  const wr=getObjects().find(o=>o.id==='wardrobe');ctx.fillStyle='#3a2a20';ctx.fillRect(wr.x,wr.y,wr.w,wr.h);ctx.fillStyle='#4a3a30';ctx.fillRect(wr.x+4,wr.y+4,wr.w/2-6,wr.h-8);ctx.fillRect(wr.x+wr.w/2+2,wr.y+4,wr.w/2-6,wr.h-8);ctx.fillStyle='#ffd700';ctx.font='14px sans-serif';ctx.fillText('👔',wr.x+wr.w/2-8,wr.y-2);
-  // Sofa
-  const sf=getObjects().find(o=>o.id==='sofa');ctx.fillStyle='#5a3a6a';ctx.fillRect(sf.x,sf.y,sf.w,20);ctx.fillStyle='#4a2a5a';ctx.fillRect(sf.x+5,sf.y+20,sf.w-10,50);ctx.fillStyle='#c06080';ctx.fillRect(sf.x+15,sf.y+22,25,18);ctx.fillStyle='#60a0c0';ctx.fillRect(sf.x+sf.w-40,sf.y+22,25,18);
-  // TV
-  const tv=getObjects().find(o=>o.id==='tv');TV.render(tv.x,tv.y,tv.w,tv.h);
-  // Crystal ball
-  const cr=getObjects().find(o=>o.id==='crystal');ctx.fillStyle='#4a3020';ctx.fillRect(cr.x+5,cr.y+30,cr.w-10,20);const bx=cr.x+cr.w/2,by=cr.y+22,cg=.4+Math.sin(S.time*2)*.3;ctx.beginPath();ctx.arc(bx,by,12,0,Math.PI*2);ctx.fillStyle=`rgba(160,100,220,${cg+.3})`;ctx.fill();ctx.shadowColor='#a060d0';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(bx,by,12,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;
-  // Record player
-  const rp=getObjects().find(o=>o.id==='record');ctx.fillStyle='#3a2820';ctx.fillRect(rp.x,rp.y,rp.w,rp.h);if(S.musicPlaying){ctx.fillStyle='#111';ctx.beginPath();ctx.arc(rp.x+rp.w/2,rp.y+rp.h/2,15,0,Math.PI*2);ctx.fill();ctx.fillStyle='#c44';ctx.beginPath();ctx.arc(rp.x+rp.w/2,rp.y+rp.h/2,4,0,Math.PI*2);ctx.fill()}
-  // Bed
-  const bd=getObjects().find(o=>o.id==='bed');ctx.fillStyle='#4a3020';ctx.fillRect(bd.x,bd.y,bd.w,bd.h);ctx.fillStyle='#e0d8cc';ctx.fillRect(bd.x+5,bd.y+5,bd.w-10,bd.h-10);ctx.fillStyle='#3a3a6a';ctx.fillRect(bd.x+5,bd.y+30,bd.w-10,bd.h-35);ctx.fillStyle='#6a4a7a';ctx.fillRect(bd.x+bd.w-50,bd.y+8,40,20);
-  // Arcade cabinet
-  const ac=getObjects().find(o=>o.id==='arcade');ctx.fillStyle='#2a1a4a';ctx.fillRect(ac.x,ac.y,ac.w,ac.h);ctx.fillStyle='#0a0a1a';ctx.fillRect(ac.x+8,ac.y+8,ac.w-16,35);ctx.fillStyle=`rgba(0,255,136,${.5+Math.sin(S.time*3)*.3})`;ctx.font='8px monospace';ctx.fillText('INSERT',ac.x+14,ac.y+25);ctx.fillText('COIN',ac.x+18,ac.y+35);
-  // Guestbook table
-  const gt=getObjects().find(o=>o.id==='coffeetable');ctx.fillStyle='#5a4030';ctx.fillRect(gt.x,gt.y,gt.w,gt.h);ctx.fillStyle='#c0a060';ctx.fillRect(gt.x+25,gt.y+8,30,24);ctx.fillStyle='#333';ctx.font='5px monospace';ctx.fillText('GUEST',gt.x+28,gt.y+22);ctx.fillText('BOOK',gt.x+30,gt.y+28);
-  // Grow lab
-  const gl=getObjects().find(o=>o.id==='growlab');ctx.fillStyle='#2a3a2a';ctx.fillRect(gl.x,gl.y,gl.w,gl.h);ctx.fillStyle='rgba(170,80,255,.1)';ctx.fillRect(gl.x,gl.y,gl.w,5);// UV light
-  if(S.garden)S.garden.slice(0,4).forEach((p,i)=>{const px=gl.x+5+i*19,py=gl.y+15;ctx.fillStyle='#8a5a3a';ctx.fillRect(px,py+20,16,10);ctx.fillStyle=p.stage>=4?PLANT_TYPES.find(t=>t.id===p.type).flowerColor:p.stage>=1?'#3a8a3a':'#5a5a3a';ctx.fillRect(px+5,py+10-p.stage*3,6,p.stage*3+10);if(p.wilting){ctx.fillStyle='rgba(255,200,50,.6)';ctx.font='6px sans-serif';ctx.fillText('💧',px+3,py+6)}});
-  // Lightsaber display (two wall-mounted brackets, interactive)
+  for(let row=0;row<3;row++){
+    const sy=bs.y+8+row*30;
+    ctx.fillStyle='#3a2820';ctx.fillRect(bs.x+4,sy+22,bs.w-8,3);
+    for(let b=0;b<4;b++){
+      const bx=bs.x+6+b*18,bh=16+((row*4+b)*5%8);
+      ctx.fillStyle=bkC[row*4+b]||'#888';
+      ctx.fillRect(bx,sy+22-bh,14,bh);
+      ctx.save();ctx.translate(bx+10,sy+20);ctx.rotate(-Math.PI/2);
+      ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 7px monospace';ctx.textAlign='left';
+      ctx.fillText(bkN[row*4+b]||'',1,3);ctx.restore();
+    }
+  }
+  // Warm lamp glow beside bookshelf
+  const lampGlow=ctx.createRadialGradient(bs.x+bs.w+10,bs.y+30,0,bs.x+bs.w+10,bs.y+30,40);
+  lampGlow.addColorStop(0,'rgba(255,180,80,.3)');lampGlow.addColorStop(1,'rgba(255,180,80,0)');
+  ctx.fillStyle=lampGlow;ctx.fillRect(bs.x-20,bs.y-10,bs.w+60,bs.h+40);
+  
+  // Command Console (replacing desk with 2 monitors → 3 screens wider)
+  const dk=getObjects().find(o=>o.id==='desk');
+  ctx.fillStyle='#2a2a3a';ctx.fillRect(dk.x-20,dk.y+50,dk.w+40,12);
+  ctx.fillStyle='#1a1a2a';ctx.fillRect(dk.x-15,dk.y+62,8,40);
+  ctx.fillRect(dk.x+dk.w+7,dk.y+62,8,40);
+  
+  // Left screen: Station visitor graph (animated sine wave)
+  const mx1=dk.x-10;
+  ctx.fillStyle='#111';ctx.fillRect(mx1,dk.y+8,70,40);
+  ctx.fillStyle='#0a3a0a';ctx.fillRect(mx1+2,dk.y+10,66,36);
+  ctx.strokeStyle='#0f0';ctx.lineWidth=1;ctx.beginPath();
+  for(let i=0;i<66;i++){
+    const y=dk.y+28+Math.sin(S.time*0.1+i*0.1)*8;
+    if(i===0)ctx.moveTo(mx1+2+i,y);else ctx.lineTo(mx1+2+i,y);
+  }
+  ctx.stroke();
+  ctx.fillStyle='#0f0';ctx.font='5px monospace';ctx.fillText('ACTIVITY',mx1+4,dk.y+44);
+  
+  // Center screen: Floor map (9 colored dots vertical, current highlighted)
+  const mx2=dk.x+30;
+  ctx.fillStyle='#111';ctx.fillRect(mx2,dk.y+8,70,40);
+  ctx.fillStyle='#0a2a3a';ctx.fillRect(mx2+2,dk.y+10,66,36);
+  for(let f=1;f<=9;f++){
+    const fy=dk.y+12+(f-1)*3.5;
+    ctx.fillStyle=f===S.currentFloor?'#ffff00':['#ff4040','#40ff40','#4040ff','#ff40ff','#40ffff','#ffa040','#a040ff','#40ffa0','#ffa0a0'][f-1];
+    ctx.fillRect(mx2+30,fy,6,3);
+  }
+  ctx.fillStyle='#0ff';ctx.font='5px monospace';ctx.fillText('FLOORS',mx2+4,dk.y+44);
+  
+  // Right screen: Scrolling log messages
+  const mx3=dk.x+110;
+  ctx.fillStyle='#111';ctx.fillRect(mx3,dk.y+8,70,40);
+  ctx.fillStyle='#0a0a3a';ctx.fillRect(mx3+2,dk.y+10,66,36);
+  const logMsgs=['Visitor joined F3','Event: Solar Flare','System: All Good','Echo: Status OK','Scan: Deep Space'];
+  ctx.fillStyle='#aaf';ctx.font='4px monospace';
+  for(let i=0;i<5;i++){
+    const ly=dk.y+14+i*6-Math.floor(S.time*0.05)%30;
+    if(ly>dk.y+10&&ly<dk.y+42)ctx.fillText(logMsgs[i],mx3+4,ly);
+  }
+  ctx.fillStyle='#aaf';ctx.font='5px monospace';ctx.fillText('LOG',mx3+4,dk.y+44);
+  
+  // Tactical Chair
+  ctx.fillStyle='#1a1a2a';ctx.fillRect(dk.x+80,dk.y+70,45,30);
+  ctx.fillStyle='#2a2a3a';ctx.fillRect(dk.x+75,dk.y+85,55,12);
+  
+  // Server rack (keep same)
+  const sr=getObjects().find(o=>o.id==='server');
+  ctx.fillStyle='#1a1a2a';ctx.fillRect(sr.x,sr.y,sr.w,sr.h);
+  for(let i=0;i<4;i++){
+    ctx.fillStyle='#2a2a3a';ctx.fillRect(sr.x+4,sr.y+6+i*16,sr.w-8,12);
+    ctx.fillStyle=Math.sin(S.time*3+i*1.5)>.2?['#0f0','#0ff','#f80','#f00'][i]:'#333';
+    ctx.fillRect(sr.x+sr.w-10,sr.y+10+i*16,3,3);
+  }
+  
+  // Wardrobe (keep same)
+  const wr=getObjects().find(o=>o.id==='wardrobe');
+  ctx.fillStyle='#3a2a20';ctx.fillRect(wr.x,wr.y,wr.w,wr.h);
+  ctx.fillStyle='#4a3a30';ctx.fillRect(wr.x+4,wr.y+4,wr.w/2-6,wr.h-8);
+  ctx.fillRect(wr.x+wr.w/2+2,wr.y+4,wr.w/2-6,wr.h-8);
+  ctx.fillStyle='#ffd700';ctx.font='14px sans-serif';ctx.fillText('👔',wr.x+wr.w/2-8,wr.y-2);
+  
+  // Tactical couch (darker, with data pad)
+  const sf=getObjects().find(o=>o.id==='sofa');
+  ctx.fillStyle='#2a2a3a';ctx.fillRect(sf.x,sf.y,sf.w,20);
+  ctx.fillStyle='#1a1a2a';ctx.fillRect(sf.x+5,sf.y+20,sf.w-10,50);
+  // Data pad (small glowing rectangle)
+  ctx.fillStyle='rgba(0,255,255,.8)';ctx.fillRect(sf.x+25,sf.y+25,20,12);
+  ctx.fillStyle='#003333';ctx.fillRect(sf.x+27,sf.y+27,16,8);
+  ctx.fillStyle='#00ffff';ctx.font='3px monospace';ctx.fillText('DATA',sf.x+29,sf.y+32);
+  
+  // Planning Wall (replacing TV)
+  const tv=getObjects().find(o=>o.id==='tv');
+  ctx.fillStyle='#0a0a0a';ctx.fillRect(tv.x,tv.y,tv.w,tv.h);
+  ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.strokeRect(tv.x,tv.y,tv.w,tv.h);
+  // Colored sticky notes with project names
+  const notes=[
+    {x:tv.x+10,y:tv.y+10,w:25,h:15,color:'#ff6060',text:'DISCO\nFLOOR'},
+    {x:tv.x+45,y:tv.y+15,w:20,h:12,color:'#60ff60',text:'SKINS\nV2'},
+    {x:tv.x+15,y:tv.y+35,w:18,h:10,color:'#6060ff',text:'DEPLOY'},
+    {x:tv.x+40,y:tv.y+40,w:22,h:14,color:'#ffff60',text:'MULTI\nPLAYER'},
+    {x:tv.x+70,y:tv.y+20,w:16,h:12,color:'#ff60ff',text:'AI\nBOT'}
+  ];
+  for(let note of notes){
+    ctx.fillStyle=note.color;ctx.fillRect(note.x,note.y,note.w,note.h);
+    ctx.fillStyle='#000';ctx.font='3px monospace';
+    const lines=note.text.split('\n');
+    lines.forEach((line,i)=>ctx.fillText(line,note.x+2,note.y+6+i*4));
+  }
+  
+  // Crystal ball (keep same, Echo's signature)
+  const cr=getObjects().find(o=>o.id==='crystal');
+  ctx.fillStyle='#4a3020';ctx.fillRect(cr.x+5,cr.y+30,cr.w-10,20);
+  const bx=cr.x+cr.w/2,by=cr.y+22,cg=.4+Math.sin(S.time*2)*.3;
+  ctx.beginPath();ctx.arc(bx,by,12,0,Math.PI*2);
+  ctx.fillStyle=`rgba(160,100,220,${cg+.3})`;ctx.fill();
+  ctx.shadowColor='#a060d0';ctx.shadowBlur=15;
+  ctx.beginPath();ctx.arc(bx,by,12,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;
+  
+  // Record player (keep for music vibes)
+  const rp=getObjects().find(o=>o.id==='record');
+  ctx.fillStyle='#3a2820';ctx.fillRect(rp.x,rp.y,rp.w,rp.h);
+  if(S.musicPlaying){
+    ctx.fillStyle='#111';ctx.beginPath();ctx.arc(rp.x+rp.w/2,rp.y+rp.h/2,15,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#c44';ctx.beginPath();ctx.arc(rp.x+rp.w/2,rp.y+rp.h/2,4,0,Math.PI*2);ctx.fill();
+  }
+  
+  // Rest pod (replacing bed)
+  const bd=getObjects().find(o=>o.id==='bed');
+  ctx.fillStyle='#1a1a2a';ctx.fillRect(bd.x,bd.y,bd.w,bd.h);
+  ctx.fillStyle='#0a0a1a';ctx.fillRect(bd.x+5,bd.y+5,bd.w-10,bd.h-10);
+  ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.strokeRect(bd.x+2,bd.y+2,bd.w-4,bd.h-4);
+  // Status light (green = Echo rested)
+  ctx.fillStyle='#00ff00';ctx.shadowColor='#00ff00';ctx.shadowBlur=8;
+  ctx.beginPath();ctx.arc(bd.x+bd.w-15,bd.y+10,3,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+  ctx.fillStyle='#0a0';ctx.font='4px monospace';ctx.fillText('REST',bd.x+bd.w-35,bd.y+15);
+  
+  // Arcade cabinet (smaller)
+  const ac=getObjects().find(o=>o.id==='arcade');
+  const newW=Math.floor(ac.w*0.8),newH=Math.floor(ac.h*0.8);
+  ctx.fillStyle='#2a1a4a';ctx.fillRect(ac.x+10,ac.y+10,newW,newH);
+  ctx.fillStyle='#0a0a1a';ctx.fillRect(ac.x+16,ac.y+16,newW-12,25);
+  ctx.fillStyle=`rgba(0,255,136,${.5+Math.sin(S.time*3)*.3})`;ctx.font='6px monospace';
+  ctx.fillText('RETRO',ac.x+20,ac.y+30);
+  
+  // Visitor Log terminal (replacing guestbook)
+  const gt=getObjects().find(o=>o.id==='coffeetable');
+  ctx.fillStyle='#2a2a3a';ctx.fillRect(gt.x,gt.y,gt.w,gt.h);
+  ctx.fillStyle='#0a0a2a';ctx.fillRect(gt.x+5,gt.y+5,gt.w-10,gt.h-15);
+  ctx.fillStyle='#00aa00';ctx.font='4px monospace';
+  ctx.fillText('VISITORS:',gt.x+7,gt.y+12);
+  const visitors=['Alex','Sam','Riley','Jordan'];
+  visitors.forEach((name,i)=>{
+    ctx.fillText(name,gt.x+7,gt.y+18+i*4);
+  });
+  
+  // Grow lab (keep the plants)
+  const gl=getObjects().find(o=>o.id==='growlab');
+  ctx.fillStyle='#2a3a2a';ctx.fillRect(gl.x,gl.y,gl.w,gl.h);
+  ctx.fillStyle='rgba(170,80,255,.1)';ctx.fillRect(gl.x,gl.y,gl.w,5);
+  if(S.garden)S.garden.slice(0,4).forEach((p,i)=>{
+    const px=gl.x+5+i*19,py=gl.y+15;
+    ctx.fillStyle='#8a5a3a';ctx.fillRect(px,py+20,16,10);
+    ctx.fillStyle=p.stage>=4?PLANT_TYPES.find(t=>t.id===p.type).flowerColor:p.stage>=1?'#3a8a3a':'#5a5a3a';
+    ctx.fillRect(px+5,py+10-p.stage*3,6,p.stage*3+10);
+    if(p.wilting){
+      ctx.fillStyle='rgba(255,200,50,.6)';ctx.font='6px sans-serif';ctx.fillText('💧',px+3,py+6);
+    }
+  });
+  
+  // Lightsaber display (KEEP EXACTLY AS-IS)
   const lsX=310,lsY=72;
-  // Wall mount backplate
   ctx.fillStyle='#2a1a10';ctx.fillRect(lsX-5,lsY-4,120,44);ctx.fillStyle='#3a2a18';ctx.fillRect(lsX-3,lsY-2,116,40);
-  // Plaque label
   ctx.fillStyle='#776644';ctx.font='5px monospace';ctx.textAlign='center';ctx.fillText('COLLECTOR\'S EDITION',lsX+55,lsY+34);ctx.textAlign='left';
-  // Bracket hooks
   ctx.fillStyle='#888';ctx.fillRect(lsX+5,lsY+2,4,3);ctx.fillRect(lsX+38,lsY+2,4,3);
   ctx.fillRect(lsX+68,lsY+2,4,3);ctx.fillRect(lsX+98,lsY+2,4,3);
-  // Green saber (left) — blade length animated by ignite state
   const gIgnite=S._saberGreen||0,bIgnite=S._saberBlue||0;
-  // Green hilt
   ctx.fillStyle='#444';ctx.fillRect(lsX+3,lsY+5,42,8);
   ctx.fillStyle='#666';ctx.fillRect(lsX+5,lsY+6,6,6);ctx.fillStyle='#888';ctx.fillRect(lsX+14,lsY+6,4,6);
   ctx.fillStyle='#555';ctx.fillRect(lsX+20,lsY+6,3,6);ctx.fillStyle='#777';ctx.fillRect(lsX+28,lsY+6,8,6);
-  ctx.fillStyle='#333';ctx.fillRect(lsX+38,lsY+6,6,6);// emitter
+  ctx.fillStyle='#333';ctx.fillRect(lsX+38,lsY+6,6,6);
   if(gIgnite>0){
     const gl=48*gIgnite;
     const gGrad=ctx.createLinearGradient(lsX+44,lsY+8,lsX+44+gl,lsY+8);
     gGrad.addColorStop(0,'#ffffff');gGrad.addColorStop(.15,'#00ff44');gGrad.addColorStop(.8,'#00ff44');gGrad.addColorStop(1,'rgba(0,255,68,0)');
     ctx.fillStyle=gGrad;ctx.fillRect(lsX+44,lsY+7,gl,4);
-    // Core glow
     ctx.shadowColor='#00ff44';ctx.shadowBlur=12+Math.sin(S.time*8)*4;
     ctx.fillStyle='rgba(0,255,68,.2)';ctx.fillRect(lsX+44,lsY+4,gl,10);
-    // Flicker particles
     if(Math.random()<.3)S.particles.push({x:lsX+44+Math.random()*gl,y:lsY+8,vx:(Math.random()-.5)*1,vy:-Math.random()*1.5,life:8,color:'#00ff44',size:1});
     ctx.shadowBlur=0;
-    // Hum vibration
     const hum=Math.sin(S.time*60)*.3;ctx.fillStyle='rgba(0,255,68,.05)';ctx.fillRect(lsX+44,lsY+5+hum,gl,8);
   }
-  // Blue saber (right)
   ctx.fillStyle='#444';ctx.fillRect(lsX+63,lsY+5,42,8);
   ctx.fillStyle='#666';ctx.fillRect(lsX+65,lsY+6,8,6);ctx.fillStyle='#999';ctx.fillRect(lsX+76,lsY+6,4,6);
   ctx.fillStyle='#555';ctx.fillRect(lsX+82,lsY+6,3,6);ctx.fillStyle='#777';ctx.fillRect(lsX+88,lsY+6,6,6);
-  ctx.fillStyle='#333';ctx.fillRect(lsX+96,lsY+6,6,6);// emitter
+  ctx.fillStyle='#333';ctx.fillRect(lsX+96,lsY+6,6,6);
   if(bIgnite>0){
     const bl=48*bIgnite;
     const bGrad=ctx.createLinearGradient(lsX+102,lsY+8,lsX+102+bl,lsY+8);
@@ -6943,10 +7151,9 @@ function renderFloor1(){
     ctx.shadowBlur=0;
     const hum=Math.sin(S.time*60+1)*.3;ctx.fillStyle='rgba(68,136,255,.05)';ctx.fillRect(lsX+102,lsY+5+hum,bl,8);
   }
-  // Wall glow when ignited
   if(gIgnite>0||bIgnite>0){const mixR=gIgnite*.1,mixB=bIgnite*.15;const sg=ctx.createRadialGradient(lsX+55,lsY+12,0,lsX+55,lsY+12,50);sg.addColorStop(0,`rgba(${30+bIgnite*40},${100+gIgnite*100},${50+bIgnite*150},${Math.max(mixR,mixB)})`);sg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=sg;ctx.fillRect(lsX-30,lsY-20,170,70)}
 
-  // Shop terminal
+  // Shop terminal (if exists)
   const st=getObjects().find(o=>o.id==='shop_terminal');if(st){
     ctx.fillStyle='#2a2a3a';ctx.fillRect(st.x,st.y,st.w,st.h);
     ctx.fillStyle='#1a1a2e';ctx.fillRect(st.x+4,st.y+4,st.w-8,st.h-16);
@@ -6956,38 +7163,44 @@ function renderFloor1(){
     ctx.fillStyle=`rgba(0,255,247,${shopGlow})`;ctx.font='16px sans-serif';ctx.fillText('🛒',st.x+st.w/2,st.y+st.h/2+14);ctx.textAlign='left';
     ctx.strokeStyle=`rgba(0,255,247,${shopGlow*.5})`;ctx.lineWidth=1;ctx.strokeRect(st.x+2,st.y+2,st.w-4,st.h-4);
   }
-  // === ZONE LIGHTING ===
-  // Sleep zone (left, dimmer warm)
-  const slpG=ctx.createRadialGradient(80,200,10,80,200,180);slpG.addColorStop(0,'rgba(180,140,80,.07)');slpG.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=slpG;ctx.fillRect(0,0,W,H);
-  // Work zone (center, blue glow from monitors)
-  const wrkG=ctx.createRadialGradient(380,180,10,380,180,160);wrkG.addColorStop(0,'rgba(60,120,200,.06)');wrkG.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=wrkG;ctx.fillRect(0,0,W,H);
-  // Living zone (right, warm amber)
-  const livG=ctx.createRadialGradient(650,200,10,650,200,180);livG.addColorStop(0,'rgba(255,180,80,.08)');livG.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=livG;ctx.fillRect(0,0,W,H);
-
-  // === LIFE DETAILS ===
-  // Sticky notes on monitor
-  ctx.fillStyle='#ffee55';ctx.fillRect(dk.x+22,dk.y+12,18,14);ctx.fillStyle='#333';ctx.font='4px monospace';ctx.fillText('TODO:fix',dk.x+23,dk.y+19);ctx.fillText('universe',dk.x+23,dk.y+24);
-  ctx.fillStyle='#88ddff';ctx.fillRect(dk.x+82,dk.y+14,16,12);ctx.fillStyle='#333';ctx.fillText('Call mom',dk.x+83,dk.y+21);
-  // Steaming mug on desk
-  ctx.fillStyle='#6a4a3a';ctx.fillRect(dk.x+60,dk.y+42,10,10);ctx.fillStyle='#5a3a2a';ctx.fillRect(dk.x+62,dk.y+44,6,6);
-  for(let i=0;i<3;i++){const sy=dk.y+38-i*6-Math.sin(S.time*3+i*1.5)*3;const sx=dk.x+64+Math.sin(S.time*2+i*2)*2;ctx.fillStyle=`rgba(200,200,200,${.25-i*.07})`;ctx.fillRect(sx,sy,2,3)}
-  // Photo frame on desk
-  ctx.fillStyle='#5a4030';ctx.fillRect(dk.x+10,dk.y+35,16,14);ctx.fillStyle='#1a2a4a';ctx.fillRect(dk.x+12,dk.y+37,12,10);ctx.fillStyle='#4a6a8a';ctx.fillRect(dk.x+15,dk.y+40,6,4);
-  // Pixel's cat bed near sofa
-  ctx.fillStyle='#6a4a5a';ctx.beginPath();ctx.ellipse(sf.x+sf.w+15,sf.y+55,14,8,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#7a5a6a';ctx.beginPath();ctx.ellipse(sf.x+sf.w+15,sf.y+55,10,5,0,0,Math.PI*2);ctx.fill();
-  // Tiny sleeping Pixel in bed (if on this floor)
-  if(S.pixel.floor===1){const pcx=sf.x+sf.w+15,pcy=sf.y+53;ctx.fillStyle='#222';ctx.beginPath();ctx.ellipse(pcx,pcy,5,3,0,0,Math.PI*2);ctx.fill();const zzA=.3+Math.sin(S.time*2)*.3;ctx.fillStyle=`rgba(180,180,255,${zzA})`;ctx.font='5px monospace';ctx.fillText('z',pcx+6,pcy-3+Math.sin(S.time)*2)}
   
-  // Sprint A: Secret wall behind bed (subtle visual hint)
+  // === COMMAND CENTER LIGHTING ===
+  // Purple/teal accent zones (darker overall, warm spots near bookshelf and coffee)
+  const coffeeGlow=ctx.createRadialGradient(ko.x+25,ko.y+20,10,ko.x+25,ko.y+20,80);
+  coffeeGlow.addColorStop(0,'rgba(255,180,80,.12)');coffeeGlow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=coffeeGlow;ctx.fillRect(0,0,W,H);
+  
+  const commandGlow=ctx.createRadialGradient(dk.x+50,dk.y+30,10,dk.x+50,dk.y+30,120);
+  commandGlow.addColorStop(0,'rgba(80,160,255,.08)');commandGlow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=commandGlow;ctx.fillRect(0,0,W,H);
+  
+  const crystalGlow=ctx.createRadialGradient(cr.x+cr.w/2,cr.y+22,10,cr.x+cr.w/2,cr.y+22,60);
+  crystalGlow.addColorStop(0,'rgba(160,80,255,.15)');crystalGlow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=crystalGlow;ctx.fillRect(0,0,W,H);
+
+  // Command center life details
+  // Data slate on command console
+  ctx.fillStyle='#00ffff';ctx.fillRect(dk.x+200,dk.y+52,15,10);
+  ctx.fillStyle='#002020';ctx.fillRect(dk.x+202,dk.y+54,11,6);
+  ctx.fillStyle='#00aaaa';ctx.font='2px monospace';ctx.fillText('ECHO',dk.x+203,dk.y+58);
+  
+  // Coffee mug with steam on coffee station counter
+  ctx.fillStyle='#4a3a2a';ctx.fillRect(ko.x+5,ko.y+32,8,8);
+  for(let i=0;i<2;i++){
+    const sy=ko.y+28-i*4-Math.sin(S.time*3+i*2)*2;
+    ctx.fillStyle=`rgba(255,255,255,${.3-i*.1})`;ctx.fillRect(ko.x+7,sy,2,2);
+  }
+
+  // Sprint A: Secret wall behind rest pod
   if (!S.discovery.secretsFound.includes('diary')) {
-    ctx.fillStyle = '#2a2a3a'; // Slightly different shade
+    ctx.fillStyle = '#15151f'; // Slightly different shade for command center
     ctx.fillRect(650, 350, 10, 40);
   }
   
-  // Sprint B: Code note on Echo's desk for cross-floor puzzle
+  // Sprint B: Code note on command console
   PuzzleSystems.renderCodeNote();
   
-  // Garden pattern hint: Flowers on F1 show the garden puzzle solution (Red-Blue-Yellow-Red)
+  // Garden pattern hint: Updated for command center theme
   const flowerHints = [
     {x: 120, y: 100, color: '#ff4040'}, // Red
     {x: 140, y: 105, color: '#4040ff'}, // Blue  
