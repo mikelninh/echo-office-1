@@ -9942,7 +9942,7 @@ function render(){
   for(const id in S.otherPlayers){const op=S.otherPlayers[id];if(op.floor===S.floor)chars.push({y:op.y,r:()=>renderRemotePlayer(ctx,id,op)})}
   if(AIFighter.active)chars.push({y:AIFighter.y,r:()=>AIFighter.render(ctx)});
   // Object shadows (skip on mobile for performance)
-  if(!S._isMobile)for(const o of getObjects()){if(o.w>10&&o.h>10)drawObjectShadow(o.x,o.y,o.w,o.h)}
+  if(!S._isMobile)for(const o of getObjects()){if(o.w>10&&o.h>10&&!o.id.startsWith('dancefloor_'))drawObjectShadow(o.x,o.y,o.w,o.h)}
   chars.sort((a,b)=>a.y-b.y);chars.forEach(c=>c.r());
   Echo4thWall.render();
   renderKittens();renderSeasonalEffects();StationEvents.render();
@@ -25988,7 +25988,7 @@ render = function() {
   if(AIFighter.active)chars.push({y:AIFighter.y,r:()=>AIFighter.render(ctx)});
   
   // Object shadows
-  for(const o of getObjects()){if(o.w>10&&o.h>10)drawObjectShadow(o.x,o.y,o.w,o.h)}
+  for(const o of getObjects()){if(o.w>10&&o.h>10&&!o.id.startsWith('dancefloor_'))drawObjectShadow(o.x,o.y,o.w,o.h)}
   chars.sort((a,b)=>a.y-b.y);chars.forEach(c=>c.r());
   
   Echo4thWall.render();
@@ -30011,7 +30011,7 @@ const Minimap = {
       ctx.fillStyle='#00ff88';
       ctx.beginPath(); ctx.arc(mx+target.x*scale, my+target.y*scale, 3, 0, Math.PI*2); ctx.fill();
     }
-    const objs = FLOOR_OBJECTS[S.floor]||[];
+    const objs = (FLOOR_OBJECTS[S.floor]||[]).filter(o=>!o.id.startsWith('dancefloor_'));
     ctx.fillStyle='rgba(255,255,100,0.5)';
     objs.forEach(o=>{
       ctx.fillRect(mx+o.x*scale, my+o.y*scale, Math.max(2,o.w*scale), Math.max(2,o.h*scale));
