@@ -1009,10 +1009,10 @@ const DuelSystem = {
     // Move player 80px in direction
     const moveDistance = 80;
     switch (direction) {
-      case 'up': S.visitor.y = Math.max(60, S.visitor.y - moveDistance); break;
-      case 'down': S.visitor.y = Math.min(H - 20, S.visitor.y + moveDistance); break;
+      case 'up': S.visitor.y = Math.max(20, S.visitor.y - moveDistance); break;
+      case 'down': { const fH=(typeof FLOOR_SIZES!=='undefined'&&FLOOR_SIZES[S.floor])?FLOOR_SIZES[S.floor].h:H; S.visitor.y = Math.min(fH - 20, S.visitor.y + moveDistance); break; }
       case 'left': S.visitor.x = Math.max(20, S.visitor.x - moveDistance); break;
-      case 'right': S.visitor.x = Math.min(W - 20, S.visitor.x + moveDistance); break;
+      case 'right': { const fW=(typeof FLOOR_SIZES!=='undefined'&&FLOOR_SIZES[S.floor])?FLOOR_SIZES[S.floor].w:W; S.visitor.x = Math.min(fW - 20, S.visitor.x + moveDistance); break; }
     }
     
     // Afterimage trail effect — 3 ghost copies
@@ -10240,8 +10240,11 @@ function updateVisitor(dt){
   if(dx||dy){
     const len=Math.sqrt(dx*dx+dy*dy);dx/=len;dy/=len;
     const nx=v.x+dx*spd*dt,ny=v.y+dy*spd*dt;
-    if(nx>20&&nx<W-20)v.x=nx;
-    if(ny>60&&ny<H-20)v.y=ny;
+    const _fs=window.FLOOR_SIZES;
+    const floorW=(_fs&&_fs[S.floor])?_fs[S.floor].w:W;
+    const floorH=(_fs&&_fs[S.floor])?_fs[S.floor].h:H;
+    if(nx>20&&nx<floorW-20)v.x=nx;
+    if(ny>20&&ny<floorH-20)v.y=ny;
     v.moving=true;v.frameTimer+=dt;if(v.frameTimer>.15){v.frameTimer=0;v.frame=(v.frame+1)%3}
     if(typeof DanceSystem!=='undefined'&&DanceSystem.active)DanceSystem.stop();
   } else {v.moving=false;v.frame=0}
@@ -10548,15 +10551,18 @@ function renderVisitor(ctx){
   const c=skin.color,d=adjustBrightness(c,-20),l=adjustBrightness(c,20);
   
   // v24: Specialist aura
-  if(typeof SpecialistSystem!=='undefined')SpecialistSystem.renderAura(ctx);
-  // v24: Enhancement glow on equipped weapon
+  if(typeof SpecialistSystem!=='undefined'){ctx.save();SpecialistSystem.renderAura(ctx);ctx.restore();}
+  // v24: Enhancement glow on equipped weapon (wrapped in save/restore to prevent state leaks)
   if(typeof EnhancementSystem!=='undefined'&&typeof WeaponSystem!=='undefined'&&WeaponSystem.equipped){
+    ctx.save();
     const eLvl=LS.get('enhance_'+WeaponSystem.equipped._id,{level:0}).level;
     const eGlow=EnhancementSystem.getGlowColor(eLvl);
-    if(eGlow){const pulse=eGlow.intensity*(0.5+Math.sin(S.time*eGlow.pulseSpeed)*0.3);const g=ctx.createRadialGradient(v.x,v.y-15,2,v.x,v.y-15,20+eLvl);g.addColorStop(0,eGlow.color+Math.floor(pulse*200).toString(16).padStart(2,'0'));g.addColorStop(1,eGlow.color+'00');ctx.fillStyle=g;ctx.beginPath();ctx.arc(v.x,v.y-15,20+eLvl,0,Math.PI*2);ctx.fill()}}
-  // Render aura behind avatar
+    if(eGlow){const pulse=eGlow.intensity*(0.5+Math.sin(S.time*eGlow.pulseSpeed)*0.3);const g=ctx.createRadialGradient(v.x,v.y-15,2,v.x,v.y-15,20+eLvl);g.addColorStop(0,eGlow.color+Math.floor(pulse*200).toString(16).padStart(2,'0'));g.addColorStop(1,eGlow.color+'00');ctx.fillStyle=g;ctx.beginPath();ctx.arc(v.x,v.y-15,20+eLvl,0,Math.PI*2);ctx.fill()}
+    ctx.restore();}
+  // Render aura behind avatar (wrapped in save/restore)
   const eqAcc=LS.get('equippedAccessories',{hat:null,trail:null,aura:null,pet:null,shoes:null,held:null,chain:null,glasses:null,watch:null});
   if(eqAcc.aura){const auraItem=ACCESSORY_ITEMS.find(a=>a.id===eqAcc.aura);if(auraItem){
+    ctx.save();
     const pulse=.35+Math.sin(S.time*2.5)*.15;const auraR=auraItem.auraSize*2;
     // Outer glow ring
     const g=ctx.createRadialGradient(v.x,v.y-sz*sc/2,4,v.x,v.y-sz*sc/2,auraR);
@@ -10566,12 +10572,17 @@ function renderVisitor(ctx){
     const g2=ctx.createRadialGradient(v.x,v.y-sz*sc/2,0,v.x,v.y-sz*sc/2,12);
     g2.addColorStop(0,auraItem.auraColor+(pulse)+')');g2.addColorStop(1,auraItem.auraColor+'0)');
     ctx.fillStyle=g2;ctx.beginPath();ctx.arc(v.x,v.y-sz*sc/2,12,0,Math.PI*2);ctx.fill();
+    ctx.restore();
     // Floating particles
     if(Math.random()<.3){S.particles.push({x:v.x+(Math.random()-.5)*auraR,y:v.y-sz*sc/2+(Math.random()-.5)*auraR,vx:(Math.random()-.5)*.5,vy:-Math.random()*.8,life:20,color:auraItem.auraColor+'.6)',size:1+Math.random()*2})}}}
+
+  // Defensive state reset before sprite rendering
+  ctx.globalAlpha=1;ctx.filter='none';
 
   // Sprite-based skins (v19)
   if(skin.hasSprite){
     const sprGrid=getVisitorSprite(skin.id,v.dir||0,v.frame||0);
+    if(!sprGrid&&!window._spriteWarn){window._spriteWarn=true;console.warn('NULL sprite for:',skin.id,'dir:',v.dir,'frame:',v.frame)}
     if(sprGrid){
       const gw=sprGrid[0].length,gh=sprGrid.length;
       const sprScale=sc;
@@ -15250,6 +15261,7 @@ function openElevator(){
   requestAnimationFrame(()=>{elevatorReady=true;});
   function elevatorKeyHandler(e){
     if(!elevatorReady)return;
+    e.stopImmediatePropagation();
     if(e.key==='ArrowUp'||e.key==='w'||e.key==='W'){e.preventDefault();updateSelection(menuIdx-1)}
     else if(e.key==='ArrowDown'||e.key==='s'||e.key==='S'){e.preventDefault();updateSelection(menuIdx+1)}
     else if(e.key==='Enter'||e.key===' '){e.preventDefault();allBtns[menuIdx].click()}
@@ -20980,7 +20992,11 @@ const BRAND_CLUBS = {
   cantina:{name:"Mos Eisley Cantina",brand:"Star Wars",zone:{x:50,y:100,w:200,h:250},genre:'latin',colors:{primary:'#8B7355',accent:'#FFD700',glow:'#4a9eff'},desc:"A wretched hive of scum and villainy... and great music."},
   tower:{name:"Avengers Tower Lounge",brand:"Marvel",zone:{x:280,y:100,w:200,h:250},genre:'house',colors:{primary:'#1a1a8a',accent:'#cc0000',glow:'#4488ff'},desc:"Earth's mightiest dance floor."},
   batcave:{name:"The Batcave Club",brand:"DC",zone:{x:510,y:100,w:200,h:250},genre:'techno',colors:{primary:'#1a1a2a',accent:'#FFD700',glow:'#4444aa'},desc:"Dark. Brooding. Excellent bass."},
-  dojo:{name:"World Warrior Dojo",brand:"Street Fighter",zone:{x:560,y:380,w:200,h:180},genre:'dnb',colors:{primary:'#8B0000',accent:'#FFD700',glow:'#ff4444'},desc:"Round 1... DANCE!"}
+  dojo:{name:"World Warrior Dojo",brand:"Street Fighter",zone:{x:560,y:380,w:200,h:180},genre:'dnb',colors:{primary:'#8B0000',accent:'#FFD700',glow:'#ff4444'},desc:"Round 1... DANCE!"},
+  tron:{name:"The Grid",brand:"Tron",zone:{x:50,y:100,w:200,h:250},genre:'techno',colors:{primary:'#001a33',accent:'#00ffff',glow:'#0088cc'},desc:"Welcome to the Grid. The system is the DJ."},
+  hyrule:{name:"Lon Lon Lounge",brand:"Zelda",zone:{x:280,y:100,w:200,h:250},genre:'ambient',colors:{primary:'#1a3a1a',accent:'#88ff44',glow:'#44aa22'},desc:"Epona's favorite chill spot. Ocarina vibes only."},
+  wakanda:{name:"Wakanda Forever Club",brand:"Marvel",zone:{x:510,y:100,w:200,h:250},genre:'house',colors:{primary:'#2a1a4a',accent:'#aa66ff',glow:'#7733cc'},desc:"The most technologically advanced dance floor on the station."},
+  raccoon:{name:"Raccoon City Underground",brand:"Resident Evil",zone:{x:560,y:380,w:200,h:180},genre:'dnb',colors:{primary:'#1a0a0a',accent:'#ff2222',glow:'#880000'},desc:"Dance like there's no tomorrow. Because there might not be."}
 };
 
 // Club room entry detection
@@ -21001,7 +21017,7 @@ const BRAND_CLUBS = {
       const club=BRAND_CLUBS[foundClub];
       currentClub=foundClub;
       showNotification('Entering '+club.name);
-      if(typeof DISCO_GENRES!=='undefined'&&DISCO_GENRES[club.genre]){DiscoFloor.genre=club.genre;}
+      if(typeof DISCO_GENRES!=='undefined'&&DISCO_GENRES[club.genre]){DiscoFloor.genre=club.genre;if(typeof DiscoMusic!=='undefined'&&DiscoMusic.playing)DiscoMusic.playGenre(club.genre);}
       // Entry particle burst
       for(let i=0;i<12;i++){
         S.particles.push({x:px,y:py,vx:(Math.random()-.5)*3,vy:(Math.random()-.5)*3,life:20+Math.random()*15,color:club.colors.accent,size:1.5+Math.random()*2});
@@ -24447,7 +24463,7 @@ function showDJBooth(){
       DiscoFloor._djName=visitorName;
       if(typeof DiscoMusic!=='undefined')DiscoMusic.playGenre(gk);
       showNotification(`🎧 ${visitorName} is now DJ-ing: ${DISCO_GENRES[gk].name}!`);
-      p.remove();
+      p.closest('.popup-overlay').remove();
     };
   });
 }
@@ -24456,6 +24472,10 @@ function showDJBooth(){
 SeedData.seed();
 PeacefulCoins.init();
 QuestTracker.init();
+
+// URL param: ?floor=10 to start on a specific floor
+// URL param: ?floor=N — handled after full load
+window.addEventListener('load',function(){const fp=new URLSearchParams(window.location.search).get('floor');if(fp){const f=parseInt(fp);if(f>=1&&f<=10){function tryFloor(attempts){if(attempts<=0)return;try{if(typeof changeFloor==='function'&&S.visitor){changeFloor(f);S.visitor.x=f===10?590:400;S.visitor.y=f===10?100:300;console.log('Floor param: warped to floor '+f)}else{setTimeout(function(){tryFloor(attempts-1)},1000)}}catch(e){console.error('Floor param error:',e)}}setTimeout(function(){tryFloor(10)},2000);}}});
 
 // If returning visitor, check if onboarding was never completed
 if(LS.get('visitorName')&&!LS.get('hasCompletedOnboarding')&&LS.get('onboardingStep',0)<6){
@@ -29319,20 +29339,19 @@ const AtmosphereSystem = {
     },
     
     playHullCreak() {
-      if (!S.audioCtx) return;
-      
+      try{
+      if (!S.audioCtx || !S.masterGain || S.audioCtx.state !== 'running') return;
       const creak = S.audioCtx.createOscillator();
       const creakGain = S.audioCtx.createGain();
-      
       creak.type = 'sawtooth';
       creak.frequency.value = 60 + Math.random() * 40;
       creakGain.gain.setValueAtTime(0.02 * S.volume, S.audioCtx.currentTime);
       creakGain.gain.exponentialRampToValueAtTime(0.001, S.audioCtx.currentTime + 1.5);
-      
       creak.connect(creakGain);
       creakGain.connect(S.masterGain);
       creak.start();
       creak.stop(S.audioCtx.currentTime + 1.5);
+      }catch(e){}
     },
     
     createSteamBurst() {
@@ -29758,17 +29777,18 @@ const DiscoMusic = {
 
 // Expose for skin gallery
 window.getVisitorSprite = getVisitorSprite;
+window.S = S;
 window.VISITOR_SKINS = VISITOR_SKINS;
 
 // ═══════════════════════════════════════
 // CAMERA SYSTEM + MINIMAP + FLOOR 10 ENLARGEMENT
 // ═══════════════════════════════════════
 
-const FLOOR_SIZES = {
+const FLOOR_SIZES = window.FLOOR_SIZES = {
   1:{w:800,h:600}, 2:{w:800,h:600}, 3:{w:800,h:600},
   4:{w:800,h:600}, 5:{w:800,h:600}, 6:{w:800,h:600},
   7:{w:800,h:600}, 8:{w:800,h:600}, 9:{w:800,h:600},
-  10:{w:1600,h:1200}
+  10:{w:2400,h:1800}
 };
 
 const Camera = {
@@ -29995,9 +30015,9 @@ function getFeaturedGenre(){
   // to account for camera, so downstream handlers get world coordinates.
   // We compute: worldX = screenX + Camera.x, so adjustedClientX = e.clientX + Camera.x * (rect.width/W)
   
-  const gameCanvas = document.getElementById('gameCanvas');
+  const gameCanvas = document.getElementById('game');
   
-  ['click','mousemove','mousedown','touchstart','touchmove'].forEach(evtType => {
+  if(gameCanvas) ['click','mousemove','mousedown','touchstart','touchmove'].forEach(evtType => {
     gameCanvas.addEventListener(evtType, function(e){
       if(Camera.x === 0 && Camera.y === 0) return;
       const rect = gameCanvas.getBoundingClientRect();
@@ -30018,14 +30038,13 @@ function getFeaturedGenre(){
 // --- Patch WALLS for larger floors ---
 (function(){
   const _origCanMoveTo = canMoveTo;
-  canMoveTo = function(x, y){
+  window.canMoveTo = canMoveTo = function(x, y){
     const floorW = (FLOOR_SIZES[S.floor]||{w:800}).w;
     const floorH = (FLOOR_SIZES[S.floor]||{h:600}).h;
     if(floorW > W || floorH > H){
-      // Use floor bounds instead of WALLS for larger floors
-      const hw=8, hh=4;
-      if(x-hw < 12 || x+hw > floorW-12 || y-hh < 12 || y > floorH-12) return false;
-      for(const o of getObjects()){ if(!o.collide) continue; if(x+hw>o.x&&x-hw<o.x+o.w&&y>o.y&&y-hh<o.y+o.h) return false; }
+      // Use floor bounds for larger floors — only block edges and collide objects
+      if(x < 20 || x > floorW-20 || y < 20 || y > floorH-20) return false;
+      for(const o of getObjects()){ if(!o.collide) continue; if(x+8>o.x&&x-8<o.x+o.w&&y>o.y&&y-4<o.y+o.h) return false; }
       return true;
     }
     return _origCanMoveTo(x, y);
@@ -30034,28 +30053,41 @@ function getFeaturedGenre(){
 
 // --- Update Floor 10 layout for larger size ---
 FLOOR_OBJECTS[10] = [
-  {id:'elevator', x:420, y:30, w:60, h:50, label:'🛗 Elevator', interact:true, collide:true},
-  {id:'dancefloor_cantina', x:80, y:150, w:350, h:300, label:'', interact:false, collide:false},
-  {id:'dancefloor_tower', x:530, y:150, w:350, h:300, label:'', interact:false, collide:false},
-  {id:'dancefloor_batcave', x:80, y:650, w:350, h:300, label:'', interact:false, collide:false},
-  {id:'dancefloor_dojo', x:530, y:650, w:350, h:300, label:'', interact:false, collide:false},
-  {id:'info_board', x:380, y:100, w:80, h:40, label:'📋 Timetable', interact:true, collide:true},
-  {id:'dj_booth', x:700, y:500, w:100, h:60, label:'🎧 DJ Booth', interact:true, collide:true},
-  {id:'bar', x:1100, y:100, w:100, h:50, label:'🍹 Bar', interact:true, collide:true},
+  {id:'elevator', x:560, y:30, w:60, h:50, label:'🛗 Elevator', interact:true, collide:true},
+  // Row 1 dancefloors
+  {id:'dancefloor_cantina', x:80, y:180, w:320, h:280, label:'', interact:false, collide:false},
+  {id:'dancefloor_tower', x:480, y:180, w:320, h:280, label:'', interact:false, collide:false},
+  {id:'dancefloor_tron', x:880, y:180, w:320, h:280, label:'', interact:false, collide:false},
+  {id:'dancefloor_hyrule', x:1280, y:180, w:320, h:280, label:'', interact:false, collide:false},
+  // Row 2 dancefloors
+  {id:'dancefloor_batcave', x:80, y:700, w:320, h:280, label:'', interact:false, collide:false},
+  {id:'dancefloor_dojo', x:480, y:700, w:320, h:280, label:'', interact:false, collide:false},
+  {id:'dancefloor_wakanda', x:880, y:700, w:320, h:280, label:'', interact:false, collide:false},
+  {id:'dancefloor_raccoon', x:1280, y:700, w:320, h:280, label:'', interact:false, collide:false},
+  // Hub objects (central corridor between rows)
+  {id:'info_board', x:540, y:540, w:80, h:40, label:'📋 Timetable', interact:true, collide:true},
+  {id:'dj_booth', x:700, y:540, w:100, h:60, label:'🎧 DJ Booth', interact:true, collide:true},
+  {id:'bar', x:880, y:540, w:100, h:50, label:'🍹 Bar', interact:true, collide:true},
 ];
 
 // Update BRAND_CLUBS zones for the larger floor
 if(typeof BRAND_CLUBS !== 'undefined'){
-  BRAND_CLUBS.cantina.zone = {x:80, y:150, w:350, h:300};
-  BRAND_CLUBS.tower.zone = {x:530, y:150, w:350, h:300};
-  BRAND_CLUBS.batcave.zone = {x:80, y:650, w:350, h:300};
-  BRAND_CLUBS.dojo.zone = {x:530, y:650, w:350, h:300};
+  // Row 1: top clubs
+  BRAND_CLUBS.cantina.zone = {x:80, y:180, w:320, h:280};
+  BRAND_CLUBS.tower.zone = {x:480, y:180, w:320, h:280};
+  BRAND_CLUBS.tron.zone = {x:880, y:180, w:320, h:280};
+  BRAND_CLUBS.hyrule.zone = {x:1280, y:180, w:320, h:280};
+  // Row 2: bottom clubs
+  BRAND_CLUBS.batcave.zone = {x:80, y:700, w:320, h:280};
+  BRAND_CLUBS.dojo.zone = {x:480, y:700, w:320, h:280};
+  BRAND_CLUBS.wakanda.zone = {x:880, y:700, w:320, h:280};
+  BRAND_CLUBS.raccoon.zone = {x:1280, y:700, w:320, h:280};
 }
 
 // --- Enhanced Floor 10 rendering with club rooms ---
 (function(){
   const _origRenderFloor10 = renderFloor10;
-  renderFloor10 = function(){
+  window.renderFloor10 = renderFloor10 = function(){
     const floorW = FLOOR_SIZES[10].w, floorH = FLOOR_SIZES[10].h;
     
     // Extended dark background for larger floor
@@ -30086,10 +30118,8 @@ if(typeof BRAND_CLUBS !== 'undefined'){
     ctx.fillRect(floorW-12, 0, 12, floorH); // right
     ctx.fillRect(0, floorH-12, floorW, 12); // bottom
     
-    // Corridor / lobby area
-    ctx.fillStyle = '#0c0c18';
-    ctx.fillRect(430, 150, 100, 800); // vertical corridor
-    ctx.fillRect(80, 450, 800, 100); // horizontal corridor (changed to 100 height for gap between upper/lower clubs)
+    // Subtle corridor floor between club rows (no dark rectangles — keep it open)
+    
     
     // Draw club room borders and neon signs
     const beat = Math.sin((S.time||0) * Math.PI * 2 * 0.5);
@@ -30111,12 +30141,15 @@ if(typeof BRAND_CLUBS !== 'undefined'){
       // Entrance gap (opening in border)
       ctx.fillStyle = '#08080e';
       const entranceX = z.x + z.w/2 - 30;
-      // Bottom entrance for top rooms, top entrance for bottom rooms
+      // Bottom entrance for top row (y<500), top entrance for bottom row
       if(z.y < 500){
         ctx.fillRect(entranceX, z.y + z.h - 1, 60, 4);
       } else {
         ctx.fillRect(entranceX, z.y - 2, 60, 4);
       }
+      // Also side entrances for middle access
+      ctx.fillRect(z.x - 2, z.y + z.h/2 - 25, 4, 50);
+      ctx.fillRect(z.x + z.w - 1, z.y + z.h/2 - 25, 4, 50);
       
       // Neon sign above entrance
       const signX = z.x + z.w/2;
@@ -30228,20 +30261,49 @@ if(typeof BRAND_CLUBS !== 'undefined'){
 // --- NOW PLAYING HUD (drawn after camera restore) ---
 (function(){
   Camera._nowPlaying = null;
+  Camera._currentClubKey = null;
   const _npRender = render;
   render = function(){
     Camera._nowPlaying = null;
+    Camera._currentClubKey = null;
     _npRender();
-    // Draw "NOW PLAYING" indicator in screen space
-    if(Camera._nowPlaying && S.floor === 10){
-      ctx.fillStyle = 'rgba(0,0,0,0.7)';
-      ctx.fillRect(W/2 - 120, 8, 240, 22);
-      ctx.fillStyle = '#00ff88';
-      ctx.font = 'bold 10px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('♪ NOW PLAYING: ' + Camera._nowPlaying, W/2, 23);
-      ctx.textAlign = 'left';
+    if(S.floor !== 10) return;
+    // Always show what's playing on Floor 10
+    const genre = DiscoFloor.genre || 'house';
+    const genreInfo = (typeof DISCO_GENRES !== 'undefined' && DISCO_GENRES[genre]) || {name: genre, color: '#00ff88', bpm: 120};
+    const clubName = Camera._nowPlaying || null;
+    
+    // Main banner — always visible
+    const bannerW = 280, bannerH = clubName ? 36 : 26;
+    const bx = W/2 - bannerW/2, by = 6;
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bannerW, bannerH, 6);
+    ctx.fill();
+    ctx.strokeStyle = genreInfo.color || '#00ff88';
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bannerW, bannerH, 6);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    
+    // Genre + BPM
+    ctx.fillStyle = genreInfo.color || '#00ff88';
+    ctx.font = 'bold 11px monospace';
+    ctx.textAlign = 'center';
+    ctx.shadowColor = genreInfo.color || '#00ff88';
+    ctx.shadowBlur = 6;
+    ctx.fillText('♪ ' + (genreInfo.name || genre).toUpperCase() + ' · ' + (genreInfo.bpm || 120) + ' BPM', W/2, by + 16);
+    ctx.shadowBlur = 0;
+    
+    // Club name if in one
+    if(clubName){
+      ctx.fillStyle = '#aaa';
+      ctx.font = '9px monospace';
+      ctx.fillText('📍 ' + clubName, W/2, by + 30);
     }
+    ctx.textAlign = 'left';
   };
 })();
 
@@ -30830,7 +30892,7 @@ console.log('🔄 Deploy Wednesday: The Hook features loaded');
 // §MOBILE: MOBILE EXPERIENCE OVERHAUL
 // ═══════════════════════════════════════════════════
 (function MobileOverhaul() {
-  if (!S._isMobile) return;
+  if (typeof S === 'undefined' || !S._isMobile) return;
   console.log('📱 Mobile Experience Overhaul loading...');
 
   // ── 1. Canvas Resolution Scaling ──
@@ -31114,6 +31176,11 @@ console.log('🔄 Deploy Wednesday: The Hook features loaded');
 
   console.log('📱 Mobile Experience Overhaul loaded!');
 })();
+
+// === FLOOR SIZE AWARE MOVEMENT (final override) ===
+window.addEventListener('load', function(){
+  console.log('🔧 Floor-size movement patch applied. FLOOR_SIZES:', typeof FLOOR_SIZES !== 'undefined' ? JSON.stringify(FLOOR_SIZES) : 'NOT FOUND');
+});
 </script>
 </body>
 </html>

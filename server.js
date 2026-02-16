@@ -1275,7 +1275,7 @@ const server = http.createServer((req, res) => {
   const ext = path.extname(filePath);
   fs.readFile(filePath, (err, data) => {
     if (err) { res.writeHead(404); res.end('Not found'); return; }
-    const cacheControl = (ext === '.html') ? 'public, max-age=3600' : 'no-cache, no-store, must-revalidate';
+    const cacheControl = (ext === '.html') ? 'no-cache, no-store, must-revalidate' : 'no-cache, no-store, must-revalidate';
     res.writeHead(200, { 
       'Content-Type': MIME[ext] || 'application/octet-stream',
       'Cache-Control': cacheControl
