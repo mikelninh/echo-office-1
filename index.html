@@ -9205,13 +9205,30 @@ function renderFloor1(){
   ctx.fillStyle=`rgba(255,140,60,${stripPulse*.5})`;ctx.shadowColor='#ff8833';ctx.shadowBlur=8;
   ctx.fillRect(0,11,W,2);ctx.shadowBlur=0;
   
-  // Neon "ECHO BAR" sign
-  ctx.font='bold 18px monospace';const echoGlow=.7+Math.sin(S.time*2.5)*.3;
-  ctx.fillStyle=`rgba(255,100,200,${echoGlow})`;ctx.shadowColor='#ff6ec7';ctx.shadowBlur=25;
-  ctx.fillText('ECHO BAR',180,38);ctx.shadowBlur=0;
-  // Smaller subtitle
-  ctx.font='8px monospace';ctx.fillStyle=`rgba(255,180,100,${echoGlow*.6})`;
-  ctx.fillText('est. 2026 · drinks · vibes · adventure',170,50);
+  // ═══ NEON "ECHO BAR" SIGN — triple-layer glow ═══
+  const echoGlow=.7+Math.sin(S.time*2.5)*.3;
+  ctx.save();
+  ctx.textAlign='center';
+  // Layer 1: Wide ambient glow
+  ctx.shadowColor='#ff6ec7';ctx.shadowBlur=40;
+  ctx.fillStyle=`rgba(255,80,180,${echoGlow*0.3})`;
+  ctx.font='bold 22px monospace';
+  ctx.fillText('ECHO BAR',W/2-50,38);
+  // Layer 2: Core neon
+  ctx.shadowBlur=20;ctx.fillStyle=`rgba(255,110,199,${echoGlow})`;
+  ctx.fillText('ECHO BAR',W/2-50,38);
+  // Layer 3: White-hot center
+  ctx.shadowBlur=0;ctx.fillStyle=`rgba(255,220,240,${echoGlow*0.6})`;
+  ctx.font='bold 22px monospace';
+  ctx.fillText('ECHO BAR',W/2-50,38);
+  // Decorative stars flanking
+  const starFlicker=Math.sin(S.time*5)>0.3?1:0.4;
+  ctx.fillStyle=`rgba(255,200,100,${starFlicker})`;ctx.font='12px monospace';
+  ctx.fillText('✦',W/2-120,38);ctx.fillText('✦',W/2+20,38);
+  // Subtitle
+  ctx.font='7px monospace';ctx.fillStyle=`rgba(255,200,150,${echoGlow*0.5})`;
+  ctx.fillText('est. 2026 · cocktails · vibes · adventure',W/2-50,50);
+  ctx.restore();ctx.textAlign='left';
   
   // Floating particles (purple/teal dots drifting upward)
   for(let i=0;i<3;i++){
@@ -9295,47 +9312,267 @@ function renderFloor1(){
     ctx.stroke();
   }
   
-  // ═══ BAR COUNTER ═══
+  // ═══ THE STATION BAR — Most Beautiful Digital Bar in Existence ═══
   const bar=getObjects().find(o=>o.id==='bar_counter');
   if(bar){
-    // Main counter (dark wood)
-    ctx.fillStyle='#2a1a10';ctx.fillRect(bar.x,bar.y,bar.w,bar.h);
-    ctx.fillStyle='#3a2515';ctx.fillRect(bar.x,bar.y,bar.w,8); // polished top
-    ctx.fillStyle='#1a0e08';ctx.fillRect(bar.x,bar.y+bar.h-4,bar.w,4); // base
-    // Bar stools (3)
+    const bT=S.time; // shorthand
+
+    // ── BACK WALL: Illuminated bottle shelf with LED strips ──
+    const shelfY=bar.y-25;
+    // Back wall panel (dark mahogany)
+    ctx.fillStyle='#1a0e08';ctx.fillRect(bar.x-5,shelfY-40,bar.w+10,bar.h+65);
+    // LED strip behind bottles (color-shifting)
+    const ledHue=(bT*20)%360;
+    for(let i=0;i<bar.w;i+=2){
+      const h=(ledHue+i*0.5)%360;
+      ctx.fillStyle=`hsla(${h},80%,50%,0.08)`;
+      ctx.fillRect(bar.x+i,shelfY-35,2,30);
+    }
+
+    // ── THREE SHELVES with detailed bottles ──
+    const bottles=[
+      // Shelf 1 (top): Premium spirits
+      {x:0,c:'#1a5a1a',h:22,neck:6,label:'🥃',glow:'#2a8a2a'},  // Absinthe (green)
+      {x:38,c:'#6a1a1a',h:20,neck:5,label:'🍷',glow:'#aa2a2a'},  // Red wine
+      {x:72,c:'#1a2a6a',h:24,neck:7,label:'🫗',glow:'#4466cc'},  // Vodka (blue)
+      {x:106,c:'#8a5a0a',h:18,neck:4,label:'🥃',glow:'#cc8822'},  // Whiskey
+      {x:140,c:'#5a1a5a',h:21,neck:6,label:'🍸',glow:'#9944aa'},  // Gin (purple)
+      {x:174,c:'#0a5a5a',h:23,neck:5,label:'🧊',glow:'#22aaaa'},  // Tequila (teal)
+      {x:208,c:'#8a6a1a',h:19,neck:4,label:'🍯',glow:'#ddaa22'},  // Mead
+      {x:242,c:'#cc3300',h:22,neck:6,label:'🌶️',glow:'#ff4400'},  // Echo's Secret
+      {x:276,c:'#1a4a6a',h:20,neck:5,label:'🫧',glow:'#4488cc'},  // Champagne
+      {x:310,c:'#3a1a0a',h:24,neck:7,label:'☕',glow:'#6a3a1a'},  // Coffee liqueur
+    ];
+
+    // Three glass shelves
+    for(let shelf=0;shelf<3;shelf++){
+      const sy=shelfY-28+shelf*14;
+      // Glass shelf (translucent with edge highlight)
+      ctx.fillStyle='rgba(100,150,200,0.06)';ctx.fillRect(bar.x+8,sy,bar.w-16,3);
+      ctx.fillStyle='rgba(200,230,255,0.15)';ctx.fillRect(bar.x+8,sy,bar.w-16,1);
+    }
+
+    // Render bottles on shelf 1 (top shelf only — main display)
+    bottles.forEach((b,i)=>{
+      const bx=bar.x+18+b.x;
+      const sy=shelfY-28;
+      // Bottle body
+      ctx.fillStyle=b.c;
+      ctx.fillRect(bx,sy-b.h,10,b.h);
+      // Bottle neck
+      ctx.fillStyle=b.c;
+      ctx.fillRect(bx+2,sy-b.h-b.neck,6,b.neck);
+      // Cap
+      ctx.fillStyle='#888';ctx.fillRect(bx+3,sy-b.h-b.neck-2,4,2);
+      // Glass highlight (left edge reflection)
+      ctx.fillStyle='rgba(255,255,255,0.18)';ctx.fillRect(bx+1,sy-b.h+2,2,b.h-4);
+      // Liquid level (slightly transparent showing color)
+      const liquidH=b.h*0.7;
+      ctx.fillStyle=b.glow+'44';ctx.fillRect(bx+1,sy-liquidH,8,liquidH);
+      // Bottle glow on shelf (ambient light from LED)
+      const bg=ctx.createRadialGradient(bx+5,sy-b.h/2,0,bx+5,sy-b.h/2,18);
+      bg.addColorStop(0,b.glow+'22');bg.addColorStop(1,'transparent');
+      ctx.fillStyle=bg;ctx.beginPath();ctx.arc(bx+5,sy-b.h/2,18,0,Math.PI*2);ctx.fill();
+      // Label (tiny text)
+      ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillRect(bx+1,sy-b.h/2-2,8,5);
+    });
+
+    // ── MAIN COUNTER: Polished mahogany with epoxy resin top ──
+    // Counter shadow
+    ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(bar.x+3,bar.y+bar.h,bar.w-3,6);
+    // Counter body (dark mahogany with wood grain)
+    const woodGrad=ctx.createLinearGradient(bar.x,bar.y,bar.x,bar.y+bar.h);
+    woodGrad.addColorStop(0,'#3a2515');woodGrad.addColorStop(0.3,'#2a1a10');woodGrad.addColorStop(0.7,'#2a1a10');woodGrad.addColorStop(1,'#1a0e08');
+    ctx.fillStyle=woodGrad;ctx.fillRect(bar.x,bar.y,bar.w,bar.h);
+    // Wood grain lines
+    for(let i=0;i<bar.w;i+=12){
+      ctx.fillStyle='rgba(60,40,25,0.3)';
+      ctx.fillRect(bar.x+i+Math.sin(i*0.1)*3,bar.y,1,bar.h);
+    }
+    // Epoxy resin top (glossy, slightly blue-tinted, reflective)
+    const epoxyGrad=ctx.createLinearGradient(bar.x,bar.y,bar.x+bar.w,bar.y);
+    epoxyGrad.addColorStop(0,'rgba(40,60,80,0.4)');epoxyGrad.addColorStop(0.3,'rgba(20,40,60,0.5)');
+    epoxyGrad.addColorStop(0.5,'rgba(60,80,100,0.3)');epoxyGrad.addColorStop(0.7,'rgba(20,40,60,0.5)');
+    epoxyGrad.addColorStop(1,'rgba(40,60,80,0.4)');
+    ctx.fillStyle=epoxyGrad;ctx.fillRect(bar.x,bar.y,bar.w,10);
+    // Glossy light reflection stripe across epoxy
+    ctx.fillStyle=`rgba(255,255,255,${0.06+Math.sin(bT*0.8)*0.03})`;
+    ctx.fillRect(bar.x+20,bar.y+2,bar.w-40,2);
+    // Front edge trim (brass/copper strip)
+    ctx.fillStyle='#8a6a30';ctx.fillRect(bar.x,bar.y+bar.h-3,bar.w,3);
+    ctx.fillStyle='rgba(255,200,100,0.15)';ctx.fillRect(bar.x,bar.y+bar.h-3,bar.w,1);
+    // Foot rail (brass)
+    ctx.fillStyle='#6a5020';ctx.fillRect(bar.x+15,bar.y+bar.h+20,bar.w-30,3);
+    ctx.fillStyle='rgba(255,200,100,0.2)';ctx.fillRect(bar.x+15,bar.y+bar.h+20,bar.w-30,1);
+
+    // ── BAR STOOLS (5, with cushions + chrome legs) ──
     for(let i=0;i<5;i++){
-      const sx=bar.x+30+i*70;
-      ctx.fillStyle='#333';ctx.fillRect(sx,bar.y+bar.h+5,4,20); // leg
-      ctx.fillStyle='#4a3020';ctx.fillRect(sx-6,bar.y+bar.h+2,16,6); // seat
+      const sx=bar.x+35+i*65;
+      // Chrome legs (cross pattern)
+      ctx.strokeStyle='#555';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(sx-4,bar.y+bar.h+28);ctx.lineTo(sx+4,bar.y+bar.h+6);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(sx+12,bar.y+bar.h+28);ctx.lineTo(sx+4,bar.y+bar.h+6);ctx.stroke();
+      // Seat cushion (leather)
+      ctx.fillStyle='#3a2018';ctx.fillRect(sx-6,bar.y+bar.h+3,20,7);
+      // Cushion highlight
+      ctx.fillStyle='rgba(255,200,150,0.12)';ctx.fillRect(sx-4,bar.y+bar.h+4,16,2);
+      // Stool connector to foot rail
+      ctx.fillStyle='#444';ctx.fillRect(sx+3,bar.y+bar.h+10,2,10);
     }
-    // Bottles on shelf behind bar
-    const bottleColors=['#2a6a2a','#6a2a2a','#2a2a6a','#8a6a2a','#4a2a4a','#2a5a5a','#6a4a1a','#1a4a6a'];
-    const shelfY=bar.y-20;
-    ctx.fillStyle='#2a1a10';ctx.fillRect(bar.x+10,shelfY,bar.w-20,4);
-    for(let i=0;i<8;i++){
-      const bx=bar.x+20+i*42;
-      ctx.fillStyle=bottleColors[i];ctx.fillRect(bx,shelfY-18,8,18);
-      ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(bx+2,shelfY-16,2,14); // glass highlight
-      // Bottle glow
-      ctx.fillStyle=bottleColors[i]+'33';ctx.beginPath();ctx.arc(bx+4,shelfY-8,8,0,Math.PI*2);ctx.fill();
+
+    // ── DRINKS ON THE COUNTER (animated, alive) ──
+    // Cocktail glass 1: Aperol Nebula (orange sunset gradient)
+    const cx1=bar.x+60;
+    ctx.fillStyle='rgba(255,100,50,0.4)';
+    ctx.beginPath();ctx.moveTo(cx1-6,bar.y+4);ctx.lineTo(cx1+6,bar.y+4);ctx.lineTo(cx1+3,bar.y-10);ctx.lineTo(cx1-3,bar.y-10);ctx.fill();
+    const sunGrad=ctx.createLinearGradient(cx1,bar.y-10,cx1,bar.y+4);
+    sunGrad.addColorStop(0,'rgba(255,80,30,0.7)');sunGrad.addColorStop(1,'rgba(255,180,50,0.5)');
+    ctx.fillStyle=sunGrad;
+    ctx.beginPath();ctx.moveTo(cx1-5,bar.y+3);ctx.lineTo(cx1+5,bar.y+3);ctx.lineTo(cx1+2,bar.y-8);ctx.lineTo(cx1-2,bar.y-8);ctx.fill();
+    // Orange slice garnish
+    ctx.fillStyle='#ff8c00';ctx.beginPath();ctx.arc(cx1+5,bar.y-6,3,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#ffaa33';ctx.beginPath();ctx.arc(cx1+5,bar.y-6,2,0,Math.PI*2);ctx.fill();
+    // Stem
+    ctx.fillStyle='rgba(200,200,200,0.4)';ctx.fillRect(cx1-1,bar.y+4,2,6);
+    // Base
+    ctx.fillStyle='rgba(200,200,200,0.3)';ctx.fillRect(cx1-4,bar.y+10,8,2);
+
+    // Cocktail glass 2: Zen Matcha (green, steaming)
+    const cx2=bar.x+160;
+    // Mug shape
+    ctx.fillStyle='#f5f0e8';ctx.fillRect(cx2-5,bar.y-6,10,16);
+    ctx.fillStyle='#88cc44';ctx.fillRect(cx2-4,bar.y-4,8,12);
+    // Handle
+    ctx.strokeStyle='#e8e0d0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx2+7,bar.y+2,4,-.5,Math.PI*.8);ctx.stroke();
+    // Steam wisps
+    for(let s=0;s<3;s++){
+      const sy2=bar.y-8-s*6-Math.sin(bT*3+s*2)*3;
+      const sx2=cx2+Math.sin(bT*2+s*1.5)*3;
+      ctx.fillStyle=`rgba(200,255,200,${0.25-s*0.07})`;ctx.fillRect(sx2-1,sy2,2,4);
     }
-    // Glass on counter (animated condensation)
-    ctx.fillStyle='rgba(100,200,255,0.3)';ctx.fillRect(bar.x+150,bar.y+5,10,20);
-    ctx.fillStyle='rgba(200,230,255,0.5)';ctx.fillRect(bar.x+150,bar.y+3,10,4);
-    // "DRINKS" neon
-    ctx.font='bold 8px monospace';ctx.fillStyle=`rgba(255,100,200,${.6+Math.sin(S.time*3)*.2})`;
-    ctx.shadowColor='#ff6ec7';ctx.shadowBlur=8;
-    ctx.fillText('DRINKS',bar.x+bar.w/2-18,bar.y-28);ctx.shadowBlur=0;
+
+    // Cocktail glass 3: Stardust Shot (gold, sparkling)
+    const cx3=bar.x+250;
+    ctx.fillStyle='rgba(255,215,0,0.3)';ctx.fillRect(cx3-4,bar.y-2,8,12);
+    ctx.fillStyle='rgba(255,215,0,0.6)';ctx.fillRect(cx3-3,bar.y,6,8);
+    // Sparkles rising from shot
+    for(let sp=0;sp<4;sp++){
+      const spX=cx3+Math.sin(bT*4+sp*1.7)*4;
+      const spY=bar.y-4-(bT*15+sp*8)%20;
+      const spA=1-(((bT*15+sp*8)%20)/20);
+      ctx.fillStyle=`rgba(255,215,0,${spA*0.7})`;
+      ctx.fillRect(spX,spY,sp%2?2:1,sp%2?2:1);
+    }
+
+    // Cocktail glass 4: Hyperdrive Espresso (dark, crema on top)
+    const cx4=bar.x+320;
+    ctx.fillStyle='#ddd';ctx.fillRect(cx4-4,bar.y-2,8,12);
+    ctx.fillStyle='#1a0a00';ctx.fillRect(cx4-3,bar.y,6,8);
+    ctx.fillStyle='#c8a070';ctx.fillRect(cx4-3,bar.y,6,2); // crema
+    // Handle
+    ctx.strokeStyle='#ccc';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx4+6,bar.y+4,3,-.5,Math.PI*.8);ctx.stroke();
+
+    // ── LED UNDERGLOW (pulsing color under counter edge) ──
+    const underGlow=ctx.createLinearGradient(bar.x,bar.y+bar.h,bar.x,bar.y+bar.h+15);
+    const ugh=(bT*30)%360;
+    underGlow.addColorStop(0,`hsla(${ugh},70%,50%,0.15)`);
+    underGlow.addColorStop(1,'transparent');
+    ctx.fillStyle=underGlow;ctx.fillRect(bar.x,bar.y+bar.h,bar.w,15);
+
+    // ── NEON "DRINKS" SIGN (behind bar, glowing) ──
+    const neonPulse=0.7+Math.sin(bT*2.5)*0.3;
+    ctx.save();
+    ctx.shadowColor='#ff6ec7';ctx.shadowBlur=20;
+    ctx.fillStyle=`rgba(255,110,199,${neonPulse})`;
+    ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText('✦ D R I N K S ✦',bar.x+bar.w/2,bar.y-32);
+    ctx.shadowBlur=35;ctx.globalAlpha=0.3;
+    ctx.fillText('✦ D R I N K S ✦',bar.x+bar.w/2,bar.y-32);
+    ctx.restore();ctx.textAlign='left';
+
+    // ── MENU BOARD (chalkboard above bar with drink names) ──
+    ctx.fillStyle='#1a2a1a';ctx.fillRect(bar.x+bar.w-120,shelfY-38,115,30);
+    ctx.strokeStyle='#5a4a3a';ctx.lineWidth=1;ctx.strokeRect(bar.x+bar.w-120,shelfY-38,115,30);
+    ctx.font='6px monospace';ctx.fillStyle='#e8e0c8';
+    ctx.fillText('TODAY\'S SPECIALS:',bar.x+bar.w-115,shelfY-28);
+    const specials=['Aperol Nebula  5◈','Echo\'s Secret 12◈','Stardust Shot  3◈'];
+    specials.forEach((s,i)=>{
+      ctx.fillStyle=['#ff6633','#ff4400','#ffd700'][i];
+      ctx.fillText(s,bar.x+bar.w-115,shelfY-20+i*7);
+    });
+
+    // ── COASTERS on counter (round cork with rings) ──
+    for(let i=0;i<4;i++){
+      const coX=bar.x+80+i*75;
+      ctx.fillStyle='#8a7050';ctx.beginPath();ctx.arc(coX,bar.y+6,5,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='rgba(100,70,40,0.5)';ctx.lineWidth=0.5;ctx.beginPath();ctx.arc(coX,bar.y+6,3,0,Math.PI*2);ctx.stroke();
+    }
+
+    // ── BAR COUNTER REFLECTION (mirror-like epoxy reflects bottles faintly) ──
+    ctx.save();ctx.globalAlpha=0.04;
+    bottles.slice(0,5).forEach((b,i)=>{
+      const bx=bar.x+18+b.x;
+      ctx.fillStyle=b.glow;
+      ctx.fillRect(bx,bar.y+3,10,6);
+    });
+    ctx.restore();
+
+    // ── AMBIENT BAR PARTICLES (warm golden dust motes) ──
+    for(let i=0;i<6;i++){
+      const px2=bar.x+20+Math.sin(bT*0.3+i*1.1)*150+i*40;
+      const py2=bar.y-30+Math.sin(bT*0.5+i*0.8)*15;
+      const pa=0.15+Math.sin(bT*1.5+i*2)*0.1;
+      ctx.fillStyle=`rgba(255,200,100,${pa})`;
+      ctx.beginPath();ctx.arc(px2,py2,1.5,0,Math.PI*2);ctx.fill();
+    }
+
+    // ── COCKTAIL SHAKER (animated when near bar) ──
+    const nearBar=S.visitor&&Math.abs(S.visitor.y-bar.y-bar.h)<40&&S.visitor.x>bar.x&&S.visitor.x<bar.x+bar.w;
+    const shakerX=bar.x+bar.w-40;
+    const shakerShake=nearBar?Math.sin(bT*12)*2:0;
+    ctx.fillStyle='#aaa';ctx.fillRect(shakerX+shakerShake,bar.y-8,8,16);
+    ctx.fillStyle='#888';ctx.fillRect(shakerX+shakerShake,bar.y-10,8,4);
+    ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(shakerX+2+shakerShake,bar.y-6,2,12);
+
+    // ── ICE BUCKET ──
+    ctx.fillStyle='#334';ctx.fillRect(bar.x+10,bar.y+3,14,10);
+    ctx.fillStyle='rgba(180,220,255,0.3)';
+    for(let ic=0;ic<3;ic++){ctx.fillRect(bar.x+12+ic*3,bar.y+1-ic,3,3);}
+
+    // ── BAR NAPKINS (small stack) ──
+    ctx.fillStyle='#f0e8d8';ctx.fillRect(bar.x+bar.w-20,bar.y+5,12,4);
+    ctx.fillStyle='#e8e0d0';ctx.fillRect(bar.x+bar.w-19,bar.y+4,10,3);
+
+    // ── DRIP TRAY (catches spills, animated drips) ──
+    ctx.fillStyle='#222';ctx.fillRect(bar.x+100,bar.y+8,80,3);
+    if(Math.sin(bT*2)>0.8){
+      ctx.fillStyle='rgba(100,200,255,0.2)';
+      ctx.fillRect(bar.x+120+Math.sin(bT*5)*10,bar.y+8,2,2);
+    }
   }
-  
-  // Tip jar
+
+  // ── TIP JAR (glass jar with visible coins) ──
   const tj=getObjects().find(o=>o.id==='tip_jar');
   if(tj){
-    ctx.fillStyle='rgba(255,215,0,0.15)';ctx.fillRect(tj.x,tj.y,tj.w,tj.h);
-    ctx.strokeStyle='rgba(255,215,0,0.4)';ctx.lineWidth=1;ctx.strokeRect(tj.x,tj.y,tj.w,tj.h);
-    ctx.fillStyle='#ffd700';ctx.font='10px sans-serif';ctx.textAlign='center';
-    ctx.fillText('💰',tj.x+tj.w/2,tj.y+tj.h/2+4);ctx.textAlign='left';
-    ctx.font='5px monospace';ctx.fillStyle='#ffd70088';ctx.fillText('TIPS',tj.x+tj.w/2-8,tj.y+tj.h+8);
+    // Glass jar body
+    ctx.fillStyle='rgba(200,220,240,0.12)';ctx.fillRect(tj.x+2,tj.y+2,tj.w-4,tj.h-2);
+    ctx.strokeStyle='rgba(200,220,240,0.25)';ctx.lineWidth=1;ctx.strokeRect(tj.x+2,tj.y+2,tj.w-4,tj.h-2);
+    // Coins inside (stacked)
+    const totalTips=LS.get('tipsReceived',0);
+    const coinCount=Math.min(8,Math.floor(totalTips/5)+2);
+    for(let c=0;c<coinCount;c++){
+      const cy2=tj.y+tj.h-4-c*3;
+      ctx.fillStyle=c%2?'#ffd700':'#daa520';
+      ctx.fillRect(tj.x+4+Math.sin(c*1.5)*2,cy2,tj.w-8,2);
+    }
+    // Glass highlight
+    ctx.fillStyle='rgba(255,255,255,0.1)';ctx.fillRect(tj.x+3,tj.y+4,2,tj.h-8);
+    // Label
+    ctx.fillStyle='#ffd700';ctx.font='8px monospace';ctx.textAlign='center';
+    ctx.fillText('TIPS',tj.x+tj.w/2,tj.y+tj.h+10);
+    ctx.font='6px monospace';ctx.fillStyle='#ffd70088';
+    ctx.fillText(totalTips>0?totalTips+'◈':'',tj.x+tj.w/2,tj.y+tj.h+18);
+    ctx.textAlign='left';
   }
 
   // Welcome board
@@ -15540,6 +15777,44 @@ function renderVisitorAccessories(cx,v){
         size:2+Math.random()*3
       });
     }
+  }
+
+  // ── DRINK IN HAND (visible when drink effect active) ──
+  if(v._drinkEffect && v._drinkTimer > 0){
+    const handX = v.dir === 2 ? v.x + sprW/2 + 2 : v.x - sprW/2 - 6;
+    const handY = midY + 4;
+    const drinkEffects = {
+      sparkle:  { glass:'martini', liquid:'#ff6ec7', garnish:'#ff6633' },
+      speed:    { glass:'mug',     liquid:'#6a3a1a', garnish:null },
+      glow:     { glass:'tall',    liquid:'#00ffff', garnish:null },
+      wobbly:   { glass:'pint',    liquid:'#ffaa00', garnish:null },
+      calm:     { glass:'mug',     liquid:'#88cc44', garnish:null },
+      luck:     { glass:'shot',    liquid:'#ffd700', garnish:null },
+      echo_special:{ glass:'martini', liquid:'#ff4400', garnish:'#ffd700' },
+      heal:     { glass:'tall',    liquid:'#88ccff', garnish:null }
+    };
+    const de = drinkEffects[v._drinkEffect] || drinkEffects.heal;
+    cx.save();
+    if(de.glass === 'martini'){
+      // V-shaped martini glass
+      cx.fillStyle = de.liquid + '99';
+      cx.beginPath();cx.moveTo(handX,handY-5);cx.lineTo(handX+6,handY-5);cx.lineTo(handX+3,handY+2);cx.fill();
+      cx.fillStyle = 'rgba(200,200,200,0.4)';cx.fillRect(handX+2,handY+2,2,4);
+      cx.fillRect(handX,handY+6,6,1);
+      if(de.garnish){cx.fillStyle=de.garnish;cx.beginPath();cx.arc(handX+5,handY-6,2,0,Math.PI*2);cx.fill();}
+    } else if(de.glass === 'mug'){
+      cx.fillStyle = '#f0e8d8';cx.fillRect(handX,handY-4,6,8);
+      cx.fillStyle = de.liquid;cx.fillRect(handX+1,handY-2,4,5);
+      cx.strokeStyle='#e0d8c8';cx.lineWidth=1;cx.beginPath();cx.arc(handX+7,handY,2,-0.5,Math.PI*0.8);cx.stroke();
+    } else if(de.glass === 'shot'){
+      cx.fillStyle = 'rgba(200,200,200,0.3)';cx.fillRect(handX,handY-2,5,6);
+      cx.fillStyle = de.liquid + 'bb';cx.fillRect(handX+1,handY,3,3);
+    } else {
+      // Tall glass
+      cx.fillStyle = 'rgba(200,220,240,0.2)';cx.fillRect(handX,handY-6,5,10);
+      cx.fillStyle = de.liquid + '88';cx.fillRect(handX+1,handY-4,3,7);
+    }
+    cx.restore();
   }
 }
 
