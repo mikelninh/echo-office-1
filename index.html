@@ -30338,6 +30338,116 @@ if(typeof BRAND_CLUBS !== 'undefined'){
       }
     });
     
+    // ═══ DANCING NPCs IN CLUBS ═══
+    if(!window._clubNPCs){
+      // Generate persistent NPCs for each club (seeded, not random each frame)
+      window._clubNPCs = {};
+      const npcNames = ['Luna','Kai','Zoe','Rex','Nova','Pip','Ash','Jay','Sol','Max','Rio','Sky','Dot','Leo','Ivy','Ace','Bex','Kit','Val','Wyn'];
+      const npcColors = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff6fff','#ff9f43','#a55eea','#26de81','#fd79a8','#00cec9','#e17055','#74b9ff','#55efc4','#fdcb6e','#e056fd','#7ed6df','#f8a5c2','#778beb','#cf6a87','#63cdda'];
+      let nameIdx = 0;
+      Object.entries(BRAND_CLUBS).forEach(([key, club]) => {
+        const z = club.zone;
+        const npcs = [];
+        const count = 4 + Math.floor(key.length * 1.3) % 4; // 4-7 per club, deterministic
+        for(let i = 0; i < count; i++){
+          npcs.push({
+            name: npcNames[nameIdx % npcNames.length],
+            color: npcColors[nameIdx % npcColors.length],
+            x: z.x + 40 + (i % 3) * 90 + (Math.sin(i * 7.3) * 0.5 + 0.5) * 40,
+            y: z.y + 80 + Math.floor(i / 3) * 70 + (Math.cos(i * 4.1) * 0.5 + 0.5) * 30,
+            phase: i * 1.7, // unique dance phase
+            style: i % 5,  // dance style
+            dir: i % 2,    // facing
+            size: 8 + (i % 3), // slight size variety
+          });
+          nameIdx++;
+        }
+        window._clubNPCs[key] = npcs;
+      });
+    }
+    // Render dancing NPCs
+    const _t = S.time || 0;
+    Object.entries(BRAND_CLUBS).forEach(([key, club]) => {
+      const npcs = window._clubNPCs[key]; if(!npcs) return;
+      const gc = club.colors.glow;
+      npcs.forEach(npc => {
+        const p = npc.phase, st = npc.style, sz = npc.size;
+        // Dance motion per style
+        let bx = 0, by = 0, rot = 0, scX = 1, scY = 1;
+        if(st === 0){ // bounce
+          by = -Math.abs(Math.sin(_t * 4 + p)) * 8;
+          scY = 1 + Math.sin(_t * 4 + p) * 0.1;
+          scX = 1 - Math.sin(_t * 4 + p) * 0.05;
+        } else if(st === 1){ // sway
+          bx = Math.sin(_t * 3 + p) * 6;
+          rot = Math.sin(_t * 3 + p) * 0.15;
+        } else if(st === 2){ // jump
+          const jt = (_t * 2 + p) % 2;
+          by = jt < 0.5 ? -Math.sin(jt * Math.PI * 2) * 12 : 0;
+          scY = jt < 0.5 ? 0.85 : 1 + Math.sin(jt * Math.PI) * 0.05;
+        } else if(st === 3){ // headbang
+          by = Math.sin(_t * 6 + p) > 0.3 ? -2 : 2;
+          rot = Math.sin(_t * 6 + p) * 0.08;
+        } else { // arms up wave
+          bx = Math.sin(_t * 2.5 + p) * 4;
+          by = -2 - Math.abs(Math.sin(_t * 3 + p)) * 5;
+        }
+        const nx = npc.x + bx, ny = npc.y + by;
+
+        ctx.save();
+        ctx.translate(nx, ny);
+        ctx.rotate(rot);
+        ctx.scale(scX, scY);
+
+        // Simple pixel NPC body
+        const hs = sz * 0.4; // head size
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        ctx.beginPath(); ctx.ellipse(0, sz + 2, sz * 0.5, 2, 0, 0, Math.PI * 2); ctx.fill();
+        // Body
+        ctx.fillStyle = npc.color;
+        ctx.fillRect(-sz * 0.35, 0, sz * 0.7, sz);
+        // Head
+        ctx.fillStyle = '#ffcc99';
+        ctx.fillRect(-hs, -hs * 2, hs * 2, hs * 2);
+        // Hair (matches body color)
+        ctx.fillStyle = npc.color;
+        ctx.fillRect(-hs - 1, -hs * 2 - 2, hs * 2 + 2, 3);
+        // Eyes
+        ctx.fillStyle = '#111';
+        ctx.fillRect(-hs * 0.5, -hs * 1.3, 2, 2);
+        ctx.fillRect(hs * 0.3, -hs * 1.3, 2, 2);
+        // Arms (animated based on dance)
+        ctx.fillStyle = '#ffcc99';
+        const armAng = st === 4 ? -1.2 - Math.sin(_t * 3 + p) * 0.5 : -0.3 + Math.sin(_t * 3 + p) * 0.4;
+        // Left arm
+        ctx.save(); ctx.translate(-sz * 0.35, 2); ctx.rotate(armAng);
+        ctx.fillRect(-2, 0, 3, sz * 0.55); ctx.restore();
+        // Right arm
+        ctx.save(); ctx.translate(sz * 0.35, 2); ctx.rotate(-armAng);
+        ctx.fillRect(-1, 0, 3, sz * 0.55); ctx.restore();
+        // Legs with step
+        const legOff = Math.sin(_t * 4 + p) * 2;
+        ctx.fillRect(-sz * 0.25, sz, 3, sz * 0.4);
+        ctx.fillRect(sz * 0.1, sz, 3, sz * 0.4);
+
+        // Glow ring on floor
+        ctx.globalAlpha = 0.15 + Math.sin(_t * 2 + p) * 0.05;
+        ctx.fillStyle = gc;
+        ctx.beginPath(); ctx.ellipse(0, sz + 3, sz * 0.7, 3, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
+
+        ctx.restore();
+
+        // Name tag (small, above head)
+        ctx.fillStyle = '#ffffff88';
+        ctx.font = '6px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(npc.name, nx, ny - hs * 2 - 6 + by);
+        ctx.textAlign = 'left';
+      });
+    });
+
     // "NOW PLAYING" indicator
     if(S.visitor && S.floor === 10){
       const px = S.visitor.x, py = S.visitor.y;
