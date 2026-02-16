@@ -16493,7 +16493,7 @@ const IdleAnims = {
     const sk = skinId || '';
     if (sk === 'psychic_girl') return { offsetY: 0, squashX: 1, squashY: 1 + Math.sin(pn * 2) * 0.03, rotation: 0, swayX: 0 };
     if (sk === 'turbo_runner') return { offsetY: 0, squashX: 1, squashY: 1, rotation: 0, swayX: (Math.random() - 0.5) * 1.5 };
-    if (sk === 'spirit_granny') return { offsetY: Math.sin(pn * 1.5) * 4, squashX: 1, squashY: 1, rotation: 0, swayX: 0, alpha: 0.4 + (Math.sin(pn * 2.5) * 0.5 + 0.5) * 0.6 };
+    if (sk === 'spirit_granny') return { offsetY: Math.sin(pn * 1.5) * 4, squashX: 1, squashY: 1, rotation: 0, swayX: 0, alpha: 0.7 + Math.sin(pn * 2.5) * 0.2 };
     if (sk === 'street_warrior') return { offsetY: 0, squashX: 1, squashY: 1 + Math.sin(pn * 1.8) * 0.03, rotation: 0, swayX: 0 };
     if (sk === 'kick_fighter') return { offsetY: 0, squashX: 1, squashY: 1, rotation: 0, swayX: Math.sin(pn * 1.2) * 1.5 };
     if (sk === 'turtle_blue') return { offsetY: 0, squashX: 1, squashY: 1 + Math.sin(pn * 1.5) * 0.02, rotation: 0, swayX: Math.sin(pn * 0.8) * 1 };
@@ -17703,6 +17703,9 @@ function initInput(){
       }
     }
     if(k==='i'||k==='I'){e.preventDefault();toggleInventoryPanel()}
+    if(k==='b'||k==='B'){e.preventDefault();if(typeof showItemShop==='function')showItemShop()}
+    if(k==='m'||k==='M'){e.preventDefault();if(typeof showItemShop==='function')showItemShop('accessories')}
+    if(k==='j'||k==='J'){e.preventDefault();if(typeof QuestTracker!=='undefined'&&typeof QuestTracker.showPanel==='function')QuestTracker.showPanel()}
     if((k==='q'||k==='Q')){
       e.preventDefault();
       if(DuelSystem.active){
