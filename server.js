@@ -624,6 +624,12 @@ const server = http.createServer((req, res) => {
         index.push(summary);
         fs.writeFileSync(logFile, JSON.stringify(index, null, 2));
         console.log(`🐛 Bug report #${id}: "${summary.description.slice(0, 60)}..." from ${summary.visitor} on F${summary.floor}`);
+        // Write to unread queue for Echo to pick up
+        const unreadFile = path.join(reportsDir, 'unread.json');
+        let unread = [];
+        try { unread = JSON.parse(fs.readFileSync(unreadFile, 'utf8')); } catch {}
+        unread.push(summary);
+        fs.writeFileSync(unreadFile, JSON.stringify(unread, null, 2));
         res.writeHead(200, jsonH);
         res.end(JSON.stringify({ ok: true, id }));
       } catch (e) {
