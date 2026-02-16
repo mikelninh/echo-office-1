@@ -17792,13 +17792,16 @@ function initInput(){
     
     const startX=v.x, startY=v.y;
     
-    // Calculate target
+    // Calculate target (respect floor dimensions, not just viewport)
+    const _fs=window.FLOOR_SIZES;
+    const _fw=(_fs&&_fs[S.floor])?_fs[S.floor].w:W;
+    const _fh=(_fs&&_fs[S.floor])?_fs[S.floor].h:H;
     let tx=v.x, ty=v.y;
     const dist=DASH_DISTANCE;
     if(dir==='up')ty=Math.max(60,v.y-dist);
-    if(dir==='down')ty=Math.min(H-20,v.y+dist);
+    if(dir==='down')ty=Math.min(_fh-20,v.y+dist);
     if(dir==='left')tx=Math.max(20,v.x-dist);
-    if(dir==='right')tx=Math.min(W-20,v.x+dist);
+    if(dir==='right')tx=Math.min(_fw-20,v.x+dist);
     
     // Set direction
     if(dir==='up')v.dir=3;
