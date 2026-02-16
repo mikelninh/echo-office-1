@@ -29613,115 +29613,273 @@ const DiscoMusic = {
   _hat(t, open) {
     this._noise(open ? 0.12 : 0.03, 8000, 2, open ? 0.15 : 0.12, t);
   },
+  _barCount: 0,
+  _chord(freqs, dur, vol, t, type) {
+    freqs.forEach(f => this._osc(type || 'square', f, dur, vol, t));
+  },
+  _clap(t, vol) {
+    // Layered clap: 3 short noise bursts
+    for (let i = 0; i < 3; i++) this._noise(0.04, 2500, 1.5, (vol||0.25) * (1 - i*0.25), t + i*0.008);
+  },
+  _tom(t, freq, vol) {
+    const c = this.ctx, o = c.createOscillator(), g2 = c.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(freq || 120, t);
+    o.frequency.exponentialRampToValueAtTime(50, t + 0.15);
+    g2.gain.setValueAtTime(vol || 0.3, t); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+    o.connect(g2); g2.connect(this.master); o.start(t); o.stop(t + 0.25); this.nodes.push(o);
+  },
+  _sub(t, freq, dur, vol) {
+    // Sub bass with slight pitch envelope
+    const c = this.ctx, o = c.createOscillator(), g2 = c.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(freq * 1.05, t);
+    o.frequency.exponentialRampToValueAtTime(freq, t + 0.05);
+    g2.gain.setValueAtTime(vol || 0.35, t); g2.gain.setValueAtTime(vol || 0.35, t + dur * 0.8);
+    g2.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g2); g2.connect(this.master); o.start(t); o.stop(t + dur + 0.05); this.nodes.push(o);
+  },
+  _filteredOsc(type, freq, dur, vol, t, cutoff, Q) {
+    const c = this.ctx, o = c.createOscillator(), g2 = c.createGain();
+    const flt = c.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = cutoff || 1000; flt.Q.value = Q || 4;
+    o.type = type; o.frequency.value = freq;
+    g2.gain.setValueAtTime(vol, t); g2.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(flt); flt.connect(g2); g2.connect(this.master);
+    o.start(t); o.stop(t + dur + 0.05); this.nodes.push(o);
+    return { osc: o, gain: g2, filter: flt };
+  },
   _scheduleLoop() {
     if (!this.playing) return;
     const g = DISCO_GENRES[this.genre]; if (!g) return;
     const bpm = g.bpm, beatDur = 60 / bpm, barDur = beatDur * 4;
     const t0 = this.ctx.currentTime + 0.05;
-    const penta = [0,2,4,7,9]; // pentatonic intervals
+    const bar = this._barCount++ % 8; // 8-bar phrase for variation
     const noteFreq = (base, semi) => base * Math.pow(2, semi / 12);
 
     if (this.genre === 'house') {
-      for (let b = 0; b < 4; b++) { // 4 beats per bar
+      // Classic 4-on-the-floor house with groove
+      for (let b = 0; b < 4; b++) {
         const bt = t0 + b * beatDur;
         this._kick(bt, false);
         this._hat(bt + beatDur * 0.5, false); // offbeat hat
-        if (b === 0 || b === 2) this._hat(bt, true); // open hat on 1,3
+        if (b === 1 || b === 3) this._hat(bt, true); // open hat
+        // Shuffled ghost hats for groove
+        if (b < 3) this._hat(bt + beatDur * 0.75, false);
       }
-      // bass line - pentatonic walk
-      const bassNotes = [55, 65.4, 73.4, 82.4]; // A1 C2 D2 E2
+      // Clap on 2 and 4
+      this._clap(t0 + beatDur, 0.2); this._clap(t0 + beatDur * 3, 0.2);
+      // Disco-style walking bass with groove
+      const houseKeys = [[55,65.4,73.4,82.4],[65.4,73.4,82.4,98],[55,82.4,73.4,65.4],[73.4,65.4,55,82.4]];
+      const bassLine = houseKeys[bar % 4];
       for (let b = 0; b < 4; b++) {
-        this._osc('triangle', bassNotes[b % bassNotes.length], beatDur * 0.8, 0.25, t0 + b * beatDur);
+        this._sub(t0 + b * beatDur, bassLine[b], beatDur * 0.7, 0.3);
+        // Octave ghost note for funk
+        if (b === 1 || b === 3) this._osc('triangle', bassLine[b] * 2, beatDur * 0.15, 0.08, t0 + b * beatDur + beatDur * 0.5);
       }
-      // chord stab on beat 2
-      [261.6, 329.6, 392].forEach(f => this._osc('square', f, 0.08, 0.06, t0 + beatDur));
+      // Chord stabs — classic house piano chords
+      const chordProg = [[261.6,329.6,392],[293.7,349.2,440],[261.6,329.6,392],[246.9,311.1,370]];
+      const ch = chordProg[bar % 4];
+      // Stab on offbeats (the "untz-TSS-untz-TSS" feel)
+      this._chord(ch, 0.08, 0.05, t0 + beatDur * 0.5, 'square');
+      this._chord(ch, 0.08, 0.05, t0 + beatDur * 1.5, 'square');
+      this._chord(ch, 0.12, 0.06, t0 + beatDur * 2.5, 'square');
+      if (bar % 4 === 3) this._chord(ch, 0.06, 0.04, t0 + beatDur * 3.5, 'square'); // extra stab on phrase end
+      // Melody hook every 2 bars
+      if (bar % 2 === 0) {
+        const melNotes = [523,587,659,784,659,587]; const mel = melNotes[bar % 6];
+        this._osc('sine', mel, beatDur * 0.4, 0.06, t0 + beatDur * 2);
+        this._osc('sine', mel * 1.5, beatDur * 0.3, 0.03, t0 + beatDur * 2.5);
+      }
     }
     else if (this.genre === 'techno') {
+      // Industrial techno — relentless, dark, hypnotic
       for (let b = 0; b < 4; b++) {
         const bt = t0 + b * beatDur;
         this._kick(bt, true);
-        this._hat(bt + beatDur * 0.25, false);
-        this._hat(bt + beatDur * 0.5, false);
-        this._hat(bt + beatDur * 0.75, b % 2 === 0);
+        // 16th note hi-hat barrage
+        for (let s = 0; s < 4; s++) {
+          const vol = s === 0 ? 0.12 : s === 2 ? 0.10 : 0.06;
+          this._hat(bt + s * beatDur * 0.25, s === 2 && b % 2 === 0);
+        }
+        // Clap on 2 and 4
+        if (b === 1 || b === 3) this._clap(bt, 0.22);
       }
-      // acid bass with filter sweep
+      // Acid bass with evolving filter sweep
+      const acidNote = [55, 55, 73.4, 55, 55, 82.4, 55, 65.4][bar];
       const o = this.ctx.createOscillator(), g2 = this.ctx.createGain();
-      const flt = this.ctx.createBiquadFilter(); flt.type = 'lowpass'; flt.Q.value = 12;
-      flt.frequency.setValueAtTime(200, t0); flt.frequency.exponentialRampToValueAtTime(3000, t0 + barDur * 0.7);
-      flt.frequency.exponentialRampToValueAtTime(200, t0 + barDur);
-      o.type = 'sawtooth'; o.frequency.value = 55;
-      g2.gain.setValueAtTime(0.2, t0); g2.gain.setValueAtTime(0.001, t0 + barDur);
+      const flt = this.ctx.createBiquadFilter(); flt.type = 'lowpass'; flt.Q.value = 15;
+      const sweepTarget = 800 + (bar % 4) * 600 + Math.sin(bar * 0.7) * 1000;
+      flt.frequency.setValueAtTime(150, t0);
+      flt.frequency.exponentialRampToValueAtTime(Math.max(200, sweepTarget), t0 + barDur * 0.6);
+      flt.frequency.exponentialRampToValueAtTime(150, t0 + barDur * 0.95);
+      o.type = 'sawtooth'; o.frequency.value = acidNote;
+      // Accent slides
+      if (bar % 2 === 1) o.frequency.exponentialRampToValueAtTime(acidNote * 1.5, t0 + beatDur);
+      g2.gain.setValueAtTime(0.22, t0); g2.gain.setValueAtTime(0.001, t0 + barDur);
       o.connect(flt); flt.connect(g2); g2.connect(this.master);
       o.start(t0); o.stop(t0 + barDur + 0.05); this.nodes.push(o);
+      // Sub layer
+      this._sub(t0, acidNote * 0.5, barDur * 0.9, 0.2);
+      // Industrial noise hit on bar 4,8
+      if (bar === 3 || bar === 7) this._noise(0.3, 1500, 2, 0.15, t0 + beatDur * 3);
+      // Dark pad (every 4 bars)
+      if (bar % 4 === 0) {
+        [110, 164.8, 220].forEach(f => {
+          this._filteredOsc('sawtooth', f, barDur * 0.9, 0.04, t0, 600, 2);
+        });
+      }
     }
     else if (this.genre === 'hiphop') {
-      // boom bap: kick on 1,3 snare on 2,4
+      // Boom bap with swing and soul
+      const swing = beatDur * 0.08; // swing offset
+      const patterns = [[1,0,1,0],[1,0,0,1],[1,0,1,0],[1,0,1,1]]; // kick patterns
+      const kp = patterns[bar % 4];
       for (let b = 0; b < 4; b++) {
         const bt = t0 + b * beatDur;
-        if (b === 0 || b === 2) this._kick(bt, false);
-        if (b === 1 || b === 3) this._snare(bt, 0.25);
-        this._hat(bt, false); this._hat(bt + beatDur * 0.5, false);
+        if (kp[b]) this._kick(bt, false);
+        if (b === 1 || b === 3) this._snare(bt + swing, 0.25);
+        this._hat(bt, false);
+        this._hat(bt + beatDur * 0.33 + swing, false); // swung hat = triplet feel
+        if (b === 2) this._hat(bt + beatDur * 0.66, true); // open hat
       }
-      // vinyl crackle
-      this._noise(barDur, 4000, 0.5, 0.04, t0);
-      // deep sub
-      this._osc('sine', 40, barDur * 0.9, 0.3, t0);
+      // Vinyl crackle throughout
+      this._noise(barDur, 5000, 0.5, 0.03, t0);
+      // Deep sub bass
+      const hipBass = [41.2, 49, 55, 49, 41.2, 36.7, 41.2, 49][bar];
+      this._sub(t0, hipBass, barDur * 0.85, 0.35);
+      // Rhodes-style chord
+      const hipChords = [[261.6,311.1,392],[293.7,349.2,440],[261.6,329.6,392],[233,293.7,349.2]];
+      const hc = hipChords[bar % 4];
+      hc.forEach(f => {
+        const o2 = this._osc('sine', f, beatDur * 1.8, 0.04, t0 + (bar % 2 === 0 ? 0 : beatDur));
+      });
+      // Soul sample-style melody every 4 bars
+      if (bar % 4 === 0) {
+        [392, 440, 523, 440].forEach((f, i) => {
+          this._osc('sine', f, beatDur * 0.5, 0.04, t0 + i * beatDur);
+        });
+      }
     }
     else if (this.genre === 'dnb') {
-      // breakbeat: kick 1, snare 2.5, kick 3.25, snare 4
-      this._kick(t0, true);
-      this._snare(t0 + beatDur * 1.5, 0.3);
-      this._kick(t0 + beatDur * 2.25, true);
-      this._snare(t0 + beatDur * 3, 0.3);
-      for (let i = 0; i < 8; i++) this._hat(t0 + i * beatDur * 0.5, i % 3 === 0);
-      // reese bass (detuned saws)
-      this._osc('sawtooth', 55, barDur * 0.9, 0.15, t0, 0);
-      this._osc('sawtooth', 55, barDur * 0.9, 0.15, t0, 15);
+      // Fast breakbeat jungle with amen-style patterns
+      const dnbPatterns = [
+        [0, 1.5, 2.25, 3],    // classic 2-step
+        [0, 1.25, 2, 3.5],    // variation
+        [0, 0.75, 1.5, 2.25, 3], // choppy
+        [0, 1.5, 2, 2.75, 3.5],  // roller
+      ];
+      const kicks = dnbPatterns[bar % 4].filter((_,i) => i % 2 === 0);
+      const snares = dnbPatterns[bar % 4].filter((_,i) => i % 2 === 1);
+      kicks.forEach(b => this._kick(t0 + b * beatDur, true));
+      snares.forEach(b => this._snare(t0 + b * beatDur, 0.3));
+      // Rapid hi-hats (16ths)
+      for (let i = 0; i < 16; i++) {
+        const vol = i % 4 === 0 ? 0.12 : 0.06;
+        this._hat(t0 + i * beatDur * 0.25, i % 6 === 0);
+      }
+      // Reese bass (detuned saws) with movement
+      const reeseNote = [55, 55, 73.4, 55, 65.4, 55, 73.4, 82.4][bar];
+      this._osc('sawtooth', reeseNote, barDur * 0.9, 0.13, t0, 0);
+      this._osc('sawtooth', reeseNote, barDur * 0.9, 0.13, t0, 18);
+      this._sub(t0, reeseNote * 0.5, barDur * 0.85, 0.25);
+      // Stab hits on bar 4,8
+      if (bar === 3 || bar === 7) {
+        [440, 554, 659].forEach(f => this._osc('square', f, 0.05, 0.08, t0));
+        [440, 554, 659].forEach(f => this._osc('square', f, 0.05, 0.08, t0 + beatDur * 2));
+      }
+      // Atmospheric pad underneath
+      if (bar % 4 === 0) {
+        [220, 277, 330].forEach(f => {
+          this._filteredOsc('sawtooth', f, barDur * 2, 0.03, t0, 800, 1);
+        });
+      }
     }
     else if (this.genre === 'ambient') {
-      // pad drones with slow LFO
-      [174.6, 220, 261.6, 329.6].forEach(f => {
-        const o = this.ctx.createOscillator(), g2 = this.ctx.createGain();
-        const lfo = this.ctx.createOscillator(), lfoG = this.ctx.createGain();
-        lfo.frequency.value = 0.3 + Math.random() * 0.5; lfoG.gain.value = 0.04;
+      // Ethereal, evolving, crystalline
+      const ambientScales = [[174.6,220,261.6,329.6],[196,246.9,293.7,370],[164.8,207.7,261.6,311.1],[185,233,277.2,349.2]];
+      const scale = ambientScales[bar % 4];
+      // Pad drones with slow evolving LFO
+      scale.forEach((f, i) => {
+        const c = this.ctx;
+        const o = c.createOscillator(), g2 = c.createGain();
+        const lfo = c.createOscillator(), lfoG = c.createGain();
+        lfo.frequency.value = 0.15 + i * 0.1; lfoG.gain.value = 0.03;
         lfo.connect(lfoG); lfoG.connect(g2.gain);
-        o.type = 'sine'; o.frequency.value = f * (1 + Math.random() * 0.003);
-        g2.gain.setValueAtTime(0.06, t0); g2.gain.setValueAtTime(0.06, t0 + barDur * 1.8);
+        o.type = i % 2 === 0 ? 'sine' : 'triangle';
+        o.frequency.value = f * (1 + Math.random() * 0.004);
+        const fadeIn = barDur * 0.3, fadeOut = barDur * 0.3;
+        g2.gain.setValueAtTime(0.001, t0);
+        g2.gain.exponentialRampToValueAtTime(0.055, t0 + fadeIn);
+        g2.gain.setValueAtTime(0.055, t0 + barDur * 2 - fadeOut);
         g2.gain.exponentialRampToValueAtTime(0.001, t0 + barDur * 2);
         o.connect(g2); g2.connect(this.master);
         o.start(t0); o.stop(t0 + barDur * 2 + 0.1);
         lfo.start(t0); lfo.stop(t0 + barDur * 2 + 0.1);
         this.nodes.push(o, lfo);
       });
-      // soft bell
-      if (Math.random() < 0.5) {
-        const bellF = [523, 659, 784, 1047][Math.random() * 4 | 0];
-        this._osc('sine', bellF, 1.5, 0.03, t0 + beatDur * (Math.random() * 3 | 0));
+      // Crystal bell melodies (sparse, random)
+      const bells = [523, 659, 784, 1047, 1318, 1568];
+      for (let i = 0; i < 2 + (bar % 3); i++) {
+        const bTime = t0 + Math.random() * barDur * 1.8;
+        const bFreq = bells[Math.random() * bells.length | 0];
+        this._osc('sine', bFreq, 2 + Math.random(), 0.025, bTime);
+        // Octave shimmer
+        if (Math.random() < 0.3) this._osc('sine', bFreq * 2, 1.5, 0.01, bTime + 0.1);
+      }
+      // Deep sub drone (barely audible, felt more than heard)
+      if (bar % 2 === 0) this._sub(t0, 55, barDur * 1.8, 0.08);
+      // Reverse-style swell every 8 bars
+      if (bar === 7) {
+        const sw = this._filteredOsc('sawtooth', 220, barDur * 1.5, 0.001, t0, 300, 2);
+        sw.gain.gain.exponentialRampToValueAtTime(0.06, t0 + barDur * 1.5);
+        sw.filter.frequency.exponentialRampToValueAtTime(2000, t0 + barDur * 1.5);
       }
     }
     else if (this.genre === 'latin') {
-      // clave: 3-2 son clave
+      // Hot salsa/reggaeton hybrid with layered percussion
+      // Clave: 3-2 son clave
       [0, 0.75, 1.5, 2.5, 3].forEach(b => {
-        this._osc('triangle', 1200, 0.02, 0.2, t0 + b * beatDur);
+        this._osc('triangle', 1200, 0.015, 0.18, t0 + b * beatDur);
       });
-      this._kick(t0, false); this._kick(t0 + beatDur * 2, false);
-      // conga hits (filtered noise)
-      [0.5, 1, 1.5, 2.5, 3, 3.5].forEach(b => {
-        this._noise(0.06, 600, 3, 0.15, t0 + b * beatDur);
+      // Kick with reggaeton bounce
+      this._kick(t0, false);
+      this._kick(t0 + beatDur * 0.75, false);
+      this._kick(t0 + beatDur * 2, false);
+      this._kick(t0 + beatDur * 2.75, false);
+      // Snare/clap on 2 and 4
+      this._clap(t0 + beatDur, 0.2); this._clap(t0 + beatDur * 3, 0.2);
+      // Conga pattern (different pitches)
+      [0.5, 1, 1.5, 2, 2.5, 3, 3.5].forEach((b, i) => {
+        const pitch = i % 2 === 0 ? 800 : 500;
+        this._noise(0.05, pitch, 4, 0.12, t0 + b * beatDur);
       });
-      // bass line
-      [130.8, 146.8, 164.8, 146.8].forEach((f, i) => {
-        this._osc('triangle', f, beatDur * 0.7, 0.2, t0 + i * beatDur);
-      });
-      // bright chord stab
-      if (Math.random() < 0.6) {
-        [523, 659, 784].forEach(f => this._osc('square', f, 0.06, 0.04, t0 + beatDur * 1.5));
+      // Timbale rolls on phrase ends
+      if (bar === 3 || bar === 7) {
+        for (let i = 0; i < 6; i++) this._tom(t0 + beatDur * 3 + i * 0.06, 300 + i * 50, 0.12);
       }
+      // Synth bass line — bouncy
+      const latinBass = [[130.8,146.8,164.8,146.8],[146.8,164.8,196,164.8],[130.8,110,130.8,146.8],[164.8,146.8,130.8,110]];
+      const lb = latinBass[bar % 4];
+      for (let b = 0; b < 4; b++) {
+        this._sub(t0 + b * beatDur, lb[b], beatDur * 0.5, 0.28);
+        this._osc('triangle', lb[b] * 2, beatDur * 0.3, 0.1, t0 + b * beatDur); // mid bass
+      }
+      // Brass stab chord
+      const latinChords = [[349.2,440,523],[392,493.9,587],[349.2,440,523],[330,415.3,493.9]];
+      const lc = latinChords[bar % 4];
+      if (bar % 2 === 0) {
+        this._chord(lc, 0.12, 0.05, t0 + beatDur * 1.5, 'sawtooth');
+        this._chord(lc, 0.08, 0.04, t0 + beatDur * 3.5, 'sawtooth');
+      }
+      // Piano montuno pattern
+      const montuno = [0, 0.5, 1, 1.75, 2.25, 2.75, 3.25, 3.75];
+      montuno.forEach((b, i) => {
+        const f = lc[i % lc.length] * (i % 2 === 0 ? 1 : 2);
+        this._osc('sine', f, 0.08, 0.04, t0 + b * beatDur);
+      });
     }
 
-    // Clean up stopped nodes
-    this.nodes = this.nodes.filter(n => { try { return n.context && n.context.state !== 'closed'; } catch(e) { return false; } });
-    // Schedule next bar (ambient uses 2 bars)
+    // Clean up stopped nodes periodically
+    if (bar % 4 === 0) this.nodes = this.nodes.filter(n => { try { return n.context && n.context.state !== 'closed'; } catch(e) { return false; } });
+    // Schedule next bar (ambient uses 2 bars for longer drones)
     const loopDur = this.genre === 'ambient' ? barDur * 2 : barDur;
     this.loopId = setTimeout(() => this._scheduleLoop(), loopDur * 1000 - 50);
   }
