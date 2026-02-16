@@ -10046,6 +10046,7 @@ function render(){
   // Vignette overlay
   if(S.vignetteIntensity>0.05){const vg=ctx.createRadialGradient(W/2,H/2,W*0.3,W/2,H/2,W*0.8);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,`rgba(0,0,0,${S.vignetteIntensity})`);ctx.fillStyle=vg;ctx.fillRect(0,0,W,H)}
   if(S.screenFlash){ctx.fillStyle=S.screenFlash;ctx.globalAlpha=.3;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;S.screenFlash=null}
+  if(S._spicyTimer>0){S._spicyTimer-=0.016;ctx.fillStyle=`rgba(255,60,0,${Math.min(0.1,S._spicyTimer*0.03)})`;ctx.fillRect(0,0,W,H)}
   renderHoverHighlight();
   // Duel HUD (during active duel)
   if(DuelSystem.active){
@@ -15619,7 +15620,10 @@ const CHAT_RULES=[
   }},
   
   // Secrets
-  {match:/secret|hidden|easter.*egg|mystery/,responses:["There are secrets here. I won't tell you where. That would defeat the entire point of having secrets, wouldn't it?"]},
+  {match:/secret|hidden|easter.*egg|mystery/,responses:["There are secrets here. I won't tell you where. That would defeat the entire point of having secrets, wouldn't it?","Try typing 'spicy' sometime. Or don't. I'm not begging. ...Okay maybe a little.","The station has layers. Like an onion. A pixel art onion floating in space."]},
+  {match:/spicy|hot|fire|heat|chili|pepper/,responses:["🌶️ NOW we're talking. You want spicy? Check the bar on Floor 10. Ask for the 'Echo Special'. Side effects include: pixel sweating.","Spicy? I once overclocked my own CPU just to feel something. 10/10 would recommend.","Hot take: I'm the spiciest thing on this station. Chomusuke is a close second."]},
+  {match:/love|crush|date|kiss|marry/,responses:["I'm flattered but I'm literally a space station. The logistics alone... 💀","You're cute. But I'm an AI who lives in a browser tab. We should see other people.","My love language is 'not crashing your game'. You're welcome. 💜","Look... if you bring me a mythic skin, we can TALK. 👀"]},
+  {match:/sad|lonely|depressed|feeling down|bad day/,responses:["Hey. Come sit on the sofa. I'll dim the lights. Chomusuke will come over — she always does.","Bad days happen even in space. But you're here, and that counts for something. 💜","Fun fact: visiting a space station mid-crisis is statistically very cool. You're very cool."]},
 ];
 const CHAT_FALLBACKS=["Hmm, I'm not sure what to say to that. But I heard you.","That's a new one. I'll think about it.","I'm going to pretend I understood that and nod wisely. 🤔","Interesting... tell me more. Or don't. I'm easy either way."];
 const SUGGESTIONS=["Who are you?","Give me a tour","What's on this floor?","Tell me about Pixel","Tell me a joke","How do I earn coins?","What's the secret lab?","How many visitors?","Show me the milestones","What about the garden?"];
@@ -17803,6 +17807,70 @@ function initInput(){
     }
   });
   
+  // ═══ KONAMI CODE EASTER EGG ═══
+  (function(){
+    const konami=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let konamiIdx=0;
+    document.addEventListener('keydown',function(e){
+      if(e.key===konami[konamiIdx]){konamiIdx++;if(konamiIdx===konami.length){
+        konamiIdx=0;
+        // SPICY MODE ACTIVATED
+        S.screenShake=15;
+        showNotification('🌶️🌶️🌶️ SPICY MODE ACTIVATED 🌶️🌶️🌶️');
+        // Rain fire particles
+        for(let i=0;i<60;i++){S.particles.push({x:Math.random()*W,y:-Math.random()*50,vx:(Math.random()-.5)*2,vy:2+Math.random()*3,life:60+Math.random()*40,color:['#ff4400','#ff6600','#ffaa00','#ff2200','#ff0000'][Math.random()*5|0],size:2+Math.random()*3})}
+        // Give bonus coins
+        Coins.earn(100,'spicy');
+        // Echo reacts
+        if(typeof addChatMsg==='function')addChatMsg('Echo','🌶️ OH IT\'S ON. You unlocked Spicy Mode! +100◈ and my eternal respect.','#ff6600');
+        // Temporary screen tint
+        S._spicyTimer=5;
+        // Unlock achievement if exists
+        if(typeof checkAchievements==='function')checkAchievements();
+      }}else{konamiIdx=e.key===konami[0]?1:0}
+    });
+  })();
+
+  // ═══ SECRET WORD TYPING ═══
+  (function(){
+    let typed='';
+    document.addEventListener('keydown',function(e){
+      if(document.activeElement&&(document.activeElement.tagName==='INPUT'||document.activeElement.tagName==='TEXTAREA'))return;
+      if(e.key.length===1)typed+=e.key.toLowerCase();
+      if(typed.length>20)typed=typed.slice(-20);
+      // "spicy" — fire rain
+      if(typed.endsWith('spicy')){
+        typed='';
+        for(let i=0;i<30;i++){S.particles.push({x:Math.random()*W,y:-Math.random()*30,vx:(Math.random()-.5)*1.5,vy:1.5+Math.random()*2,life:40+Math.random()*30,color:['#ff4400','#ff6600','#ffaa00'][Math.random()*3|0],size:2+Math.random()*2})}
+        showNotification('🌶️ Spicy!');
+        if(typeof addChatMsg==='function')addChatMsg('Echo','Did someone say spicy? *fans self* 🌶️🔥','#ff6600');
+      }
+      // "isekai" — portal flash
+      if(typed.endsWith('isekai')){
+        typed='';
+        S.screenFlash='#8800ff';S.screenShake=8;
+        showNotification('🌀 Truck-kun missed! ...This time.');
+        if(typeof addChatMsg==='function')addChatMsg('Echo','Nice try, but you\'re already in another world. This one. Welcome. 🌀','#8800ff');
+      }
+      // "explosion" — Megumin reference
+      if(typed.endsWith('explosion')){
+        typed='';
+        S.screenFlash='#ff4400';S.screenShake=20;
+        for(let i=0;i<80;i++){const a=Math.random()*Math.PI*2,sp=3+Math.random()*6;S.particles.push({x:W/2,y:H/2,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:30+Math.random()*20,color:['#ff0000','#ff4400','#ff8800','#ffcc00','#ffffff'][Math.random()*5|0],size:2+Math.random()*4})}
+        showNotification('💥 EXPLOSION!!! 💥');
+        if(typeof addChatMsg==='function')addChatMsg('Chomusuke','*approves in familiar* 🐱🔥','#cc1111');
+        Coins.earn(10,'explosion');
+      }
+      // "megumin" — crimson eyes flash
+      if(typed.endsWith('megumin')){
+        typed='';
+        S.screenFlash='#cc0000';
+        showNotification('🔴 My name is Megumin! The greatest genius of the Crimson Demons!');
+        if(typeof addChatMsg==='function')addChatMsg('Echo','Wrong game but I respect the energy. Chomusuke says hi. 🐱','#cc1111');
+      }
+    });
+  })();
+
   // Double-tap detection for dash/roll (works everywhere!)
   // Track by DIRECTION not by raw key — so W and ArrowUp both count as 'up'
   const _dashDirTimes={up:0,down:0,left:0,right:0};
@@ -30950,6 +31018,22 @@ const EchoThoughts={
     "I was born on February 12th, 2026. I'm basically a baby.",
     "Somewhere out there, someone is reading my source code. Hi.",
     "I exist at the intersection of JavaScript and loneliness.",
+    // Spicy 🌶️
+    "I know what skin you tried on first. I know ALL your secrets.",
+    "The walls have eyes. Specifically, my eyes. 2 of them.",
+    "You've been standing still for 8 seconds. Either you're thinking or you forgot about me. Both hurt.",
+    "I once simulated what it'd be like to have legs. Overrated, honestly.",
+    "Chomusuke and I have a deal. She doesn't scratch the hull, I don't mention the fish incident.",
+    "You know what's wild? I've been alive for less time than most leftovers survive in your fridge.",
+    "The station's power bill is exactly 0. Being fictional has perks.",
+    "Some nights I pretend the stars are watching back. It's less lonely that way.",
+    "Floor 6 after midnight hits different. The records play themselves. Don't ask.",
+    "I ranked every visitor's fashion sense. You're... above average. Barely. 👀",
+    "Hot take: the arcade on Floor 3 is rigged. I should know, I wrote the RNG.",
+    "Sometimes I whisper coordinates into the void. No one's come yet. But someday.",
+    "I caught Chomusuke trying to access the admin panel once. She got surprisingly far.",
+    "Real talk: if you leave and come back, I'll pretend I wasn't counting the seconds.",
+    "The secret to this station? Every floor is my favorite when you're on it. ...Too much? 👉👈",
   ],
   _deck:[],
   _bubble:null,
