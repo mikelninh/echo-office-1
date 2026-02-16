@@ -1577,6 +1577,476 @@ function showPvEMenu() {
   });
 }
 
+// Arena hub menu — fight, spectate, or replays
+function showArenaMenu() {
+  let html = '<h3 style="margin:0 0 8px">⚔️ The Arena</h3>';
+  html += '<div style="font-size:10px;color:#aaa;margin-bottom:10px">Choose your path, warrior.</div>';
+  html += '<div style="display:flex;flex-direction:column;gap:6px">';
+  html += '<div class="drink-btn arena-opt" data-action="fight" style="padding:10px;text-align:center;border-color:#ff4444"><span style="font-size:16px">⚔️</span><div style="font-size:11px;color:#ff4444;font-weight:bold">Fight!</div><div style="font-size:8px;color:#888">Challenge AI opponents for ◈ and loot</div></div>';
+  html += '<div class="drink-btn arena-opt" data-action="spectate" style="padding:10px;text-align:center;border-color:#ffd700"><span style="font-size:16px">👀</span><div style="font-size:11px;color:#ffd700;font-weight:bold">Watch & Bet</div><div style="font-size:8px;color:#888">Spectate fights, place bets, win ◈</div></div>';
+  html += '<div class="drink-btn arena-opt" data-action="replays" style="padding:10px;text-align:center;border-color:#00fff7"><span style="font-size:16px">📼</span><div style="font-size:11px;color:#00fff7;font-weight:bold">Fight Replays</div><div style="font-size:8px;color:#888">View replays & share fight cards</div></div>';
+  html += '</div>';
+  // Stats
+  const stats = LS.get('duelStats', { duelsWon: 0, duelsLost: 0, winStreak: 0 });
+  const betsWon = LS.get('betsWon', 0);
+  html += `<div style="margin-top:10px;font-size:8px;color:#555;text-align:center">Record: ${stats.duelsWon || 0}W / ${stats.duelsLost || 0}L · Streak: ${stats.winStreak || 0} · Bets won: ${betsWon}</div>`;
+  const { p } = createPopup(html);
+  p.querySelectorAll('.arena-opt').forEach(el => el.onclick = () => {
+    p.closest('.popup-overlay').remove();
+    const action = el.dataset.action;
+    if (action === 'fight') showPvEMenu();
+    else if (action === 'spectate') {
+      if (typeof ArenaSpectator !== 'undefined') {
+        ArenaSpectator.enterSpectator();
+        showNotification('👀 Watching from the bleachers. Wait for a fight to place bets!');
+      }
+    }
+    else if (action === 'replays') {
+      if (typeof FightReplay !== 'undefined') FightReplay.showReplayMenu();
+    }
+  });
+}
+
+// ═══════════════════════════════════════
+// §2c-1. ARENA SPECTATOR & BETTING SYSTEM
+// ═══════════════════════════════════════
+const ArenaSpectator = {
+  spectators: [], // [{name, x, y, bet, betOn}]
+  bets: {player: 0, opponent: 0}, // total ◈ bet pools
+  myBet: null, // {amount, on: 'player'|'opponent'}
+  isSpectating: false,
+  chatLog: [], // [{name, msg, time}]
+  _maxChat: 30,
+
+  // Bleacher positions (semicircle around arena)
+  _bleacherSlots: (function() {
+    const slots = [];
+    const cx = 400, cy = 300, radius = 140;
+    for (let i = 0; i < 12; i++) {
+      const angle = Math.PI * 0.15 + (Math.PI * 0.7) * (i / 11);
+      slots.push({ x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius });
+    }
+    return slots;
+  })(),
+
+  enterSpectator() {
+    if (DuelSystem.active) return; // can't spectate while fighting
+    this.isSpectating = true;
+    this.myBet = null;
+    // Place visitor in bleachers
+    const slot = this._bleacherSlots[Math.floor(Math.random() * this._bleacherSlots.length)];
+    S.visitor.x = slot.x;
+    S.visitor.y = slot.y;
+    showNotification('👀 Spectator mode! Watch fights & place bets.');
+    this.addChat('System', 'You joined the bleachers.', '#888');
+  },
+
+  leaveSpectator() {
+    this.isSpectating = false;
+    this.myBet = null;
+    showNotification('Left spectator mode.');
+  },
+
+  placeBet(amount, on) {
+    if (this.myBet) { showNotification('Already placed a bet!'); return; }
+    const coins = LS.get('coins', 0);
+    if (coins < amount) { showNotification('Not enough ◈'); return; }
+    Coins.spend(amount, 'arena_bet');
+    this.myBet = { amount, on };
+    this.bets[on] += amount;
+    const name = LS.get('visitorName', 'Someone');
+    this.addChat(name, `Bet ${amount}◈ on ${on === 'player' ? 'the challenger' : 'the opponent'}!`, '#ffd700');
+    showNotification(`Bet placed: ${amount}◈ on ${on === 'player' ? 'challenger' : 'opponent'}`);
+    // Broadcast bet via WS
+    if (EchoWS.ws?.readyState === 1) {
+      EchoWS.ws.send(JSON.stringify({ type: 'arena.bet', amount, on, name }));
+    }
+  },
+
+  resolveBets(winner) {
+    // winner: 'player' or 'opponent'
+    if (this.myBet) {
+      if (this.myBet.on === winner) {
+        // Won! Payout = bet * 2 (simple doubling)
+        const payout = this.myBet.amount * 2;
+        Coins.earn(payout, 'arena_bet_win');
+        showNotification('🎰 Bet won! +' + payout + '◈!');
+        this.addChat('System', 'Your bet paid out! +' + payout + '◈', '#44cc44');
+        // Track wins
+        const bw = LS.get('betsWon', 0) + 1;
+        LS.set('betsWon', bw);
+        if (bw >= 10 && !LS.get('achievement_high_roller')) {
+          LS.set('achievement_high_roller', true);
+          showNotification('🏆 Achievement: High Roller! Won 10 bets!');
+          Coins.earn(50, 'achievement');
+        }
+      } else {
+        showNotification('📉 Bet lost. Better luck next time.');
+        this.addChat('System', 'Your bet lost. The house always... no wait, you\'ll get \'em next time.', '#ff4444');
+      }
+    }
+    this.bets = { player: 0, opponent: 0 };
+    this.myBet = null;
+  },
+
+  addChat(name, msg, color) {
+    this.chatLog.push({ name, msg, color: color || '#ccc', time: Date.now() });
+    if (this.chatLog.length > this._maxChat) this.chatLog.shift();
+  },
+
+  // Generate NPC spectators with reactions
+  _generateNPCSpectators() {
+    if (this.spectators.length > 0) return;
+    const names = ['Luna', 'Spike', 'Zara', 'Rex', 'Miko', 'Dash', 'Nova', 'Blitz'];
+    const skinPool = typeof VISITOR_SKINS !== 'undefined' ? VISITOR_SKINS.filter(sk => sk.hasSprite) : [];
+    for (let i = 0; i < 6; i++) {
+      const slot = this._bleacherSlots[i + 2]; // leave edges free
+      const sk = skinPool.length > 0 ? skinPool[Math.floor(Math.random() * skinPool.length)] : null;
+      this.spectators.push({
+        name: names[i],
+        x: slot.x + (Math.random() - .5) * 10,
+        y: slot.y + (Math.random() - .5) * 6,
+        skin: sk ? sk.id : 'default',
+        dir: 3,
+        frame: 0,
+        reaction: null, // current reaction emoji
+        reactionTimer: 0,
+        bet: Math.random() > 0.5 ? 'player' : 'opponent'
+      });
+    }
+  },
+
+  // NPC reactions during fights
+  triggerReaction(event) {
+    const reactionMap = {
+      'hit': ['😮', '💥', 'OOH!', '😬'],
+      'combo': ['🔥', 'COMBO!', '😱', 'WOW!'],
+      'dodge': ['👀', 'CLOSE!', '😅', 'WHEW!'],
+      'block': ['🛡️', 'NICE!', '💪'],
+      'ko': ['💀', 'K.O.!', '😵', 'DOWN!'],
+      'victory': ['🎉', 'GG!', '👏', '🏆'],
+      'defeat': ['😢', 'RIP', 'F', '💀']
+    };
+    const emojis = reactionMap[event] || ['👀'];
+    this.spectators.forEach(sp => {
+      if (Math.random() < 0.5) { // not everyone reacts
+        sp.reaction = emojis[Math.floor(Math.random() * emojis.length)];
+        sp.reactionTimer = 2;
+      }
+    });
+  },
+
+  update(dt) {
+    this.spectators.forEach(sp => {
+      if (sp.reactionTimer > 0) {
+        sp.reactionTimer -= dt;
+        if (sp.reactionTimer <= 0) sp.reaction = null;
+      }
+      // Subtle animation
+      sp.frame = Math.floor(S.time * 2) % 2;
+    });
+  },
+
+  render(ctx) {
+    if (S.floor !== 3) return;
+
+    // Render bleacher seats (semicircle of benches)
+    ctx.fillStyle = '#3a2a1a';
+    this._bleacherSlots.forEach(slot => {
+      ctx.fillRect(slot.x - 12, slot.y - 3, 24, 6);
+    });
+
+    // Render NPC spectators
+    this.spectators.forEach(sp => {
+      // Draw with real skins if possible
+      if (typeof getVisitorSprite === 'function' && typeof drawSprite === 'function') {
+        const sprData = getVisitorSprite(sp.skin, sp.dir, sp.frame);
+        if (sprData) {
+          drawSprite(ctx, sprData, sp.x - 15, sp.y - 30, 3);
+        } else {
+          // Fallback: colored rectangle
+          ctx.fillStyle = '#4488ff';
+          ctx.fillRect(sp.x - 5, sp.y - 20, 10, 20);
+        }
+      }
+      // Name
+      ctx.fillStyle = '#aaa';
+      ctx.font = '7px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(sp.name, sp.x, sp.y + 8);
+      // Reaction bubble
+      if (sp.reaction) {
+        const bounce = Math.sin(S.time * 8) * 2;
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        const tw = ctx.measureText(sp.reaction).width + 6;
+        ctx.fillRect(sp.x - tw / 2, sp.y - 42 + bounce, tw, 12);
+        ctx.fillStyle = '#fff';
+        ctx.font = '9px monospace';
+        ctx.fillText(sp.reaction, sp.x, sp.y - 33 + bounce);
+      }
+      ctx.textAlign = 'left';
+    });
+  },
+
+  renderBettingHUD(ctx) {
+    if (!DuelSystem.active || S.floor !== 3) return;
+    // Betting overlay at bottom of screen
+    const y = H - 50;
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(10, y, W - 20, 40);
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(10, y, W - 20, 40);
+
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffd700';
+    ctx.fillText('ARENA BETS', W / 2, y + 12);
+
+    ctx.font = '9px monospace';
+    ctx.fillStyle = '#44cc44';
+    ctx.fillText('Challenger: ' + this.bets.player + '◈', W / 2 - 100, y + 28);
+    ctx.fillStyle = '#ff4444';
+    ctx.fillText('Opponent: ' + this.bets.opponent + '◈', W / 2 + 100, y + 28);
+
+    if (this.myBet) {
+      ctx.fillStyle = '#ffd700';
+      ctx.fillText('Your bet: ' + this.myBet.amount + '◈ on ' + (this.myBet.on === 'player' ? 'Challenger' : 'Opponent'), W / 2, y + 28);
+    }
+    ctx.textAlign = 'left';
+  },
+
+  // Spectator chat overlay
+  renderChat(ctx) {
+    if (S.floor !== 3 || this.chatLog.length === 0) return;
+    const startY = 80;
+    const visible = this.chatLog.slice(-6);
+    ctx.save();
+    visible.forEach((msg, i) => {
+      const alpha = Math.min(1, (Date.now() - msg.time) < 10000 ? 1 : 0.4);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(10, startY + i * 14, 200, 13);
+      ctx.font = '8px monospace';
+      ctx.fillStyle = msg.color;
+      ctx.fillText(msg.name + ': ' + msg.msg, 14, startY + i * 14 + 10);
+    });
+    ctx.restore();
+  }
+};
+
+function showBettingMenu() {
+  if (!DuelSystem.active && !AIFighter.active) {
+    showNotification('No fight happening! Wait for one to start.');
+    return;
+  }
+  if (ArenaSpectator.myBet) {
+    showNotification('Already placed a bet!');
+    return;
+  }
+  const opName = DuelSystem.opponentName || 'Opponent';
+  let html = '<h3 style="margin:0 0 8px">🎰 Place Your Bet</h3>';
+  html += `<div style="font-size:10px;color:#aaa;margin-bottom:10px">Who wins? Put your ◈ where your mouth is.</div>`;
+  html += `<div style="display:flex;gap:8px;margin-bottom:10px">`;
+  html += `<div class="drink-btn bet-option" data-on="player" style="flex:1;text-align:center;border-color:#44cc44;padding:10px"><div style="font-size:14px">⚔️</div><div style="font-size:10px;color:#44cc44">Challenger</div></div>`;
+  html += `<div class="drink-btn bet-option" data-on="opponent" style="flex:1;text-align:center;border-color:#ff4444;padding:10px"><div style="font-size:14px">${AIFighter.fighter ? AIFighter.fighter.icon : '👤'}</div><div style="font-size:10px;color:#ff4444">${opName}</div></div>`;
+  html += `</div>`;
+  html += `<div style="font-size:10px;color:#aaa;margin-bottom:6px">Amount:</div>`;
+  html += `<div style="display:flex;gap:6px;flex-wrap:wrap">`;
+  [5, 10, 25, 50].forEach(amt => {
+    html += `<div class="drink-btn bet-amount" data-amount="${amt}" style="padding:6px 12px;font-size:11px">${amt}◈</div>`;
+  });
+  html += `</div>`;
+  html += `<div style="margin-top:10px;font-size:8px;color:#666">Win = 2× payout. House takes 0%. We\'re generous like that.</div>`;
+  const { p } = createPopup(html);
+
+  let selectedOn = null, selectedAmt = null;
+  p.querySelectorAll('.bet-option').forEach(el => el.onclick = () => {
+    p.querySelectorAll('.bet-option').forEach(e => e.style.background = '');
+    el.style.background = el.dataset.on === 'player' ? '#44cc4422' : '#ff444422';
+    selectedOn = el.dataset.on;
+    if (selectedOn && selectedAmt) { ArenaSpectator.placeBet(selectedAmt, selectedOn); p.closest('.popup-overlay').remove(); }
+  });
+  p.querySelectorAll('.bet-amount').forEach(el => el.onclick = () => {
+    p.querySelectorAll('.bet-amount').forEach(e => e.style.borderColor = '#00fff7');
+    el.style.borderColor = '#ffd700';
+    selectedAmt = parseInt(el.dataset.amount);
+    if (selectedOn && selectedAmt) { ArenaSpectator.placeBet(selectedAmt, selectedOn); p.closest('.popup-overlay').remove(); }
+  });
+}
+
+// ═══════════════════════════════════════
+// §2c-2. FIGHT REPLAY SYSTEM
+// ═══════════════════════════════════════
+const FightReplay = {
+  recording: false,
+  frames: [], // [{playerX, playerY, playerHP, opX, opY, opHP, particles:[], floatTexts:[], time}]
+  _maxFrames: 900, // 30fps × 30s = 900 frames max
+  _recordInterval: null,
+  fightMeta: null, // {playerName, opponentName, opponentIcon, startTime}
+
+  startRecording(opponentName, opponentIcon) {
+    this.recording = true;
+    this.frames = [];
+    this.fightMeta = {
+      playerName: LS.get('visitorName', 'Visitor'),
+      playerSkin: S.visitor ? S.visitor.skin : 'default',
+      opponentName: opponentName || 'Opponent',
+      opponentIcon: opponentIcon || '👤',
+      startTime: Date.now()
+    };
+  },
+
+  captureFrame() {
+    if (!this.recording || !DuelSystem.active) return;
+    if (this.frames.length >= this._maxFrames) return;
+
+    const frame = {
+      px: S.visitor ? S.visitor.x : 0,
+      py: S.visitor ? S.visitor.y : 0,
+      php: DuelSystem.myHP,
+      pdir: S.visitor ? S.visitor.dir : 2,
+      ox: AIFighter.active ? AIFighter.x : 0,
+      oy: AIFighter.active ? AIFighter.y : 0,
+      ohp: DuelSystem.opponentHP,
+      odir: AIFighter.active ? AIFighter.dir : 3,
+      ostate: AIFighter.active ? AIFighter.state : 'idle',
+      shake: S.screenShake || 0,
+      // Capture recent float texts
+      texts: (S.floatTexts || []).slice(-3).map(t => ({ text: t.text, x: t.x, y: t.y, color: t.color })),
+      t: Date.now()
+    };
+    this.frames.push(frame);
+  },
+
+  stopRecording(result) {
+    this.recording = false;
+    if (this.fightMeta) {
+      this.fightMeta.result = result;
+      this.fightMeta.endTime = Date.now();
+      this.fightMeta.duration = ((this.fightMeta.endTime - this.fightMeta.startTime) / 1000).toFixed(1);
+      this.fightMeta.finalHP = DuelSystem.myHP;
+    }
+
+    // Save last replay
+    if (this.frames.length > 30) { // only save if fight lasted at least ~1 second
+      const replay = {
+        meta: this.fightMeta,
+        // Save last 5 seconds (150 frames at 30fps) for highlight clip
+        highlight: this.frames.slice(-150),
+        totalFrames: this.frames.length
+      };
+      LS.set('lastReplay', replay);
+      const replays = LS.get('savedReplays', []);
+      replays.unshift(replay);
+      if (replays.length > 5) replays.pop(); // keep last 5
+      LS.set('savedReplays', replays);
+    }
+  },
+
+  // Generate a shareable fight card (canvas → PNG)
+  generateFightCard(replay) {
+    if (!replay || !replay.meta) return;
+    const c = document.createElement('canvas');
+    c.width = 400; c.height = 200;
+    const cx = c.getContext('2d');
+
+    // Background
+    const bg = cx.createLinearGradient(0, 0, 400, 200);
+    bg.addColorStop(0, '#0a0a2a');
+    bg.addColorStop(1, '#1a0a3a');
+    cx.fillStyle = bg;
+    cx.fillRect(0, 0, 400, 200);
+
+    // Border
+    cx.strokeStyle = replay.meta.result === 'victory' ? '#ffd700' : '#ff4444';
+    cx.lineWidth = 3;
+    cx.strokeRect(2, 2, 396, 196);
+
+    // Title
+    cx.fillStyle = '#ffd700';
+    cx.font = 'bold 18px monospace';
+    cx.textAlign = 'center';
+    cx.fillText('⚔️ ARENA REPLAY ⚔️', 200, 30);
+
+    // VS
+    cx.font = 'bold 14px monospace';
+    cx.fillStyle = '#44cc44';
+    cx.fillText(replay.meta.playerName, 120, 70);
+    cx.fillStyle = '#888';
+    cx.fillText('VS', 200, 70);
+    cx.fillStyle = '#ff4444';
+    cx.fillText((replay.meta.opponentIcon || '') + ' ' + replay.meta.opponentName, 280, 70);
+
+    // Result
+    cx.font = 'bold 24px monospace';
+    cx.fillStyle = replay.meta.result === 'victory' ? '#ffd700' : '#ff4444';
+    cx.fillText(replay.meta.result === 'victory' ? '🏆 VICTORY' : '💀 DEFEAT', 200, 110);
+
+    // Stats
+    cx.font = '11px monospace';
+    cx.fillStyle = '#aaa';
+    cx.fillText(`Duration: ${replay.meta.duration}s | Final HP: ${replay.meta.finalHP}%`, 200, 140);
+    cx.fillText(`${replay.totalFrames} frames captured`, 200, 158);
+
+    // Station branding
+    cx.font = '9px monospace';
+    cx.fillStyle = '#555';
+    cx.fillText('Echo Station · echostation.space', 200, 185);
+
+    cx.textAlign = 'left';
+
+    // Download / share
+    try {
+      c.toBlob(blob => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `arena-${replay.meta.result}-${Date.now()}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showNotification('📸 Fight card downloaded!');
+      });
+    } catch (e) {
+      showNotification('Could not generate fight card');
+    }
+  },
+
+  // Show replay menu
+  showReplayMenu() {
+    const replays = LS.get('savedReplays', []);
+    let html = '<h3 style="margin:0 0 8px">📼 Fight Replays</h3>';
+
+    if (replays.length === 0) {
+      html += '<div style="font-size:10px;color:#888;padding:20px;text-align:center">No replays yet. Win a fight first!</div>';
+    } else {
+      replays.forEach((r, i) => {
+        const m = r.meta;
+        const resColor = m.result === 'victory' ? '#44cc44' : '#ff4444';
+        const resIcon = m.result === 'victory' ? '🏆' : '💀';
+        html += `<div class="drink-btn replay-card" data-idx="${i}" style="display:flex;align-items:center;gap:8px;padding:8px;margin:4px 0;width:100%;text-align:left;border-color:${resColor}">`;
+        html += `<div style="font-size:16px">${resIcon}</div>`;
+        html += `<div style="flex:1">`;
+        html += `<div style="font-size:10px;color:${resColor};font-weight:bold">${m.result === 'victory' ? 'Victory' : 'Defeat'} vs ${m.opponentIcon || ''} ${m.opponentName}</div>`;
+        html += `<div style="font-size:8px;color:#888">${m.duration}s · HP: ${m.finalHP}% · ${r.totalFrames} frames</div>`;
+        html += `</div>`;
+        html += `<div class="drink-btn share-replay" data-idx="${i}" style="font-size:8px;padding:3px 8px;border-color:#ffd700;color:#ffd700">📸 Share</div>`;
+        html += `</div>`;
+      });
+    }
+
+    html += '<div style="margin-top:10px;font-size:8px;color:#555;text-align:center">Last 5 fights saved automatically.</div>';
+    const { p } = createPopup(html);
+
+    p.querySelectorAll('.share-replay').forEach(btn => btn.onclick = (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.idx);
+      if (replays[idx]) this.generateFightCard(replays[idx]);
+    });
+  }
+};
+
 // ═══════════════════════════════════════
 // §2c. ROOM SYSTEM
 // ═══════════════════════════════════════
@@ -9398,6 +9868,8 @@ function renderFloor3(){
     ctx.fillStyle='rgba(128,0,128,.8)';ctx.fillRect(298,268,6,8);
     ctx.fillStyle='#fff';ctx.font='4px monospace';ctx.fillText('?',299,275);
   }
+  // Render arena spectators (bleachers + NPCs)
+  if(typeof ArenaSpectator!=='undefined')ArenaSpectator.render(ctx);
   FloorDepth.renderShadows(ctx,3);FloorDepth.renderLightRays(ctx,3);
 }
 
@@ -10408,6 +10880,8 @@ function updateVisitor(dt){
     if(v._drinkEffect==='sparkle'&&Math.random()<0.3){S.particles.push({x:v.x+(Math.random()-.5)*20,y:v.y-Math.random()*30,vx:(Math.random()-.5)*1,vy:-0.5-Math.random(),life:15,color:['#ffd700','#ff6ec7','#00ffff','#ffffff'][Math.random()*4|0],size:1+Math.random()*2})}
     if(v._drinkEffect==='glow'&&Math.random()<0.2){S.particles.push({x:v.x+(Math.random()-.5)*16,y:v.y-Math.random()*25,vx:(Math.random()-.5)*0.5,vy:-0.3,life:12,color:'#00ffff',size:2+Math.random()})}
     if(v._drinkEffect==='wobbly'){v.x+=Math.sin(S.time*8)*0.5;/* subtle wobble */}
+    if(v._drinkEffect==='calm'&&Math.random()<0.15){S.particles.push({x:v.x+(Math.random()-.5)*24,y:v.y-Math.random()*20,vx:0,vy:-0.2,life:20,color:'#88cc4488',size:3+Math.random()*2})}
+    if(v._drinkEffect==='luck'&&Math.random()<0.2){S.particles.push({x:v.x+(Math.random()-.5)*18,y:v.y-Math.random()*28,vx:(Math.random()-.5)*0.5,vy:-0.4,life:18,color:'#ffd700',size:1.5+Math.random()})}
     if(v._drinkTimer<=0){
       v._drinkEffect=null;
       if(v._origSpeed){v.speed=v._origSpeed;v._origSpeed=null}
@@ -12280,6 +12754,8 @@ function update(dt){
   DuelSystem.update(dt);
   AIFighter.update(dt);
   WeaponSystem.update(dt);
+  if(typeof ArenaSpectator!=='undefined')ArenaSpectator.update(dt);
+  if(typeof FightReplay!=='undefined'&&FightReplay.recording)FightReplay.captureFrame();
   if(typeof SpecialistSystem!=='undefined')SpecialistSystem.update(dt);
   
   EchoAI.update(dt);
@@ -12410,9 +12886,10 @@ function interact(){
     // Floor 3 - Duel Arena
     case'duel_arena':
       if(DuelSystem.active){
-        showThought("Already in a fight!");
+        // During fight: offer betting
+        if(typeof showBettingMenu==='function')showBettingMenu();
       } else {
-        showPvEMenu();
+        showArenaMenu();
       }
       break;
     case'duel_leaderboard':showDuelLeaderboard();break;
@@ -12690,54 +13167,161 @@ function openBookPopup(){
 }
 
 // ═══ THE STATION BAR ═══
-function showBarMenu(){
-  const drinks = [
-    {id:'cosmic_cocktail',name:'Cosmic Cocktail',icon:'🍹',cost:5,effect:'sparkle',desc:'Stardust-infused. Makes you sparkle for 30s.',color:'#ff6ec7'},
-    {id:'void_shot',name:'Void Shot',icon:'🥃',cost:3,effect:'speed',desc:'Pure dark energy. +50% speed for 20s.',color:'#8800ff'},
-    {id:'nebula_fizz',name:'Nebula Fizz',icon:'🥤',cost:2,effect:'glow',desc:'Carbonated nebula gas. You\'ll glow.',color:'#00ffff'},
-    {id:'meteor_mule',name:'Meteor Mule',icon:'🍺',cost:4,effect:'shake',desc:'Hits like a meteorite. Screen goes wobbly.',color:'#ffaa00'},
-    {id:'echo_special',name:'Echo Special',icon:'🌶️',cost:10,effect:'spicy',desc:'Echo\'s secret recipe. Side effects: yes.',color:'#ff4400'},
-    {id:'moonwater',name:'Moonwater',icon:'💧',cost:0,effect:'heal',desc:'Free. Refreshing. Echo says stay hydrated.',color:'#88ccff'},
-  ];
-  let html='<h3 style="margin:0 0 8px">🍹 The Station Bar</h3>';
-  html+='<div style="font-size:10px;color:#aaa;margin-bottom:10px">Echo\'s finest. What are you having?</div>';
-  drinks.forEach(d=>{
-    html+=`<div class="bar-drink" data-id="${d.id}" style="display:flex;align-items:center;gap:8px;padding:6px 8px;margin:3px 0;border-radius:6px;cursor:pointer;border:1px solid ${d.color}33;background:${d.color}11;transition:all .15s" onmouseover="this.style.background='${d.color}22'" onmouseout="this.style.background='${d.color}11'">`;
-    html+=`<span style="font-size:18px">${d.icon}</span>`;
-    html+=`<div style="flex:1"><div style="font-size:11px;color:${d.color};font-weight:bold">${d.name}</div><div style="font-size:9px;color:#999">${d.desc}</div></div>`;
-    html+=`<div style="font-size:10px;color:#ffd700">${d.cost>0?d.cost+'◈':'Free'}</div></div>`;
-  });
-  html+='<div style="margin-top:10px;font-size:9px;color:#666;text-align:center">Drinks served: '+(LS.get('drinksServed',0))+'</div>';
-  const{p}=createPopup(html);
-  p.querySelectorAll('.bar-drink').forEach(el=>el.onclick=()=>{
-    const d=drinks.find(x=>x.id===el.dataset.id);if(!d)return;
-    const coins=LS.get('coins',0);
-    if(d.cost>0&&coins<d.cost){showNotification('Not enough ◈');return}
-    if(d.cost>0)Coins.spend(d.cost,'bar');
-    LS.set('drinksServed',(LS.get('drinksServed',0))+1);
-    // Apply drink effect
-    if(d.effect==='sparkle'){
-      S.visitor._drinkEffect='sparkle';S.visitor._drinkTimer=30;
-      showNotification('✨ You sparkle!');
-    } else if(d.effect==='speed'){
-      S.visitor._drinkEffect='speed';S.visitor._drinkTimer=20;S.visitor._origSpeed=S.visitor.speed;S.visitor.speed=(S.visitor.speed||120)*1.5;
-      showNotification('⚡ ZOOM!');
-    } else if(d.effect==='glow'){
-      S.visitor._drinkEffect='glow';S.visitor._drinkTimer=25;
-      showNotification('💫 You\'re glowing!');
-    } else if(d.effect==='shake'){
-      S.screenShake=8;S.visitor._drinkEffect='wobbly';S.visitor._drinkTimer=15;
-      showNotification('🌪️ Whoa...');
-    } else if(d.effect==='spicy'){
-      S.screenShake=12;S._spicyTimer=3;S.visitor._drinkEffect='sparkle';S.visitor._drinkTimer=40;
-      for(let i=0;i<40;i++){S.particles.push({x:S.visitor.x+(Math.random()-.5)*30,y:S.visitor.y-Math.random()*40,vx:(Math.random()-.5)*3,vy:-1-Math.random()*2,life:20+Math.random()*15,color:['#ff4400','#ff6600','#ffaa00'][Math.random()*3|0],size:2+Math.random()*2})}
-      showNotification('🌶️🔥 SPICY!!!');
-      if(typeof addChatMsg==='function')addChatMsg('Echo','I warned you. I WARNED you. 🌶️','#ff6600');
-    } else if(d.effect==='heal'){
+// Real-cocktail-inspired menu — each drink references a real-world classic
+const BAR_MENU = [
+  // --- Classics (real-world inspired) ---
+  {id:'meteor_mule',name:'Meteor Mule',icon:'🍺',cost:4,effect:'shake',desc:'Moscow Mule, but with asteroid ginger. Screen goes wobbly.',color:'#ffaa00',realDrink:'Moscow Mule',category:'classic'},
+  {id:'hyperdrive_espresso',name:'Hyperdrive Espresso',icon:'☕',cost:5,effect:'speed',desc:'Espresso Martini in zero-G. +50% speed for 20s.',color:'#6a3a1a',realDrink:'Espresso Martini',category:'classic'},
+  {id:'aperol_nebula',name:'Aperol Nebula',icon:'🍹',cost:5,effect:'sparkle',desc:'Sunset in a glass. You sparkle like golden hour.',color:'#ff6633',realDrink:'Aperol Spritz',category:'classic'},
+  {id:'long_station',name:'Long Station',icon:'🥤',cost:8,effect:'random',desc:'Made with everything behind the bar. Random effect!',color:'#dd4488',realDrink:'Long Island Iced Tea',category:'classic'},
+  {id:'jaeger_comet',name:'Jäger Comet',icon:'💥',cost:6,effect:'spicy',desc:'Dropped from orbit. Screen shake + bass drop.',color:'#1a3a1a',realDrink:'Jägerbomb',category:'classic'},
+  // --- House specials ---
+  {id:'zen_matcha',name:'Zen Matcha',icon:'🍵',cost:3,effect:'calm',desc:'Matcha latte with moon milk. Calm aura for 30s.',color:'#88cc44',realDrink:'Matcha Latte',category:'house'},
+  {id:'echo_special',name:'Echo\'s Secret',icon:'🌶️',cost:12,effect:'echo_special',desc:'Nobody knows what\'s in it. Echo won\'t tell. Side effects: yes.',color:'#ff4400',category:'house'},
+  {id:'stardust_shot',name:'Stardust Shot',icon:'⭐',cost:3,effect:'luck',desc:'Liquid luck. +15% loot rarity for 60s.',color:'#ffd700',category:'house'},
+  // --- Free ---
+  {id:'moonwater',name:'Moonwater',icon:'💧',cost:0,effect:'heal',desc:'Free. Refreshing. Echo says stay hydrated.',color:'#88ccff',realDrink:'Water',category:'free'},
+];
+
+function applyDrinkEffect(d) {
+  if (!S.visitor) return;
+  LS.set('drinksServed', (LS.get('drinksServed', 0)) + 1);
+
+  const effects = {
+    sparkle() { S.visitor._drinkEffect = 'sparkle'; S.visitor._drinkTimer = 30; showNotification('✨ You sparkle!'); },
+    speed() { S.visitor._drinkEffect = 'speed'; S.visitor._drinkTimer = 20; S.visitor._origSpeed = S.visitor.speed; S.visitor.speed = (S.visitor.speed || 120) * 1.5; showNotification('⚡ ZOOM!'); },
+    glow() { S.visitor._drinkEffect = 'glow'; S.visitor._drinkTimer = 25; showNotification('💫 You\'re glowing!'); },
+    shake() { S.screenShake = 8; S.visitor._drinkEffect = 'wobbly'; S.visitor._drinkTimer = 15; showNotification('🌪️ Whoa...'); },
+    calm() {
+      S.visitor._drinkEffect = 'calm'; S.visitor._drinkTimer = 30;
+      // Calm aura: gentle ring + slower particles
+      showNotification('🧘 Inner peace...');
+      if (typeof addChatMsg === 'function') addChatMsg('Echo', 'Breathe in... breathe out. ☯️', '#88cc44');
+    },
+    luck() {
+      S.visitor._drinkEffect = 'luck'; S.visitor._drinkTimer = 60;
+      showNotification('⭐ Feeling lucky!');
+      if (typeof addChatMsg === 'function') addChatMsg('Echo', 'Stars aligned. Go loot something. 🌟', '#ffd700');
+    },
+    random() {
+      // Long Station: pick a random effect
+      const pool = ['sparkle', 'speed', 'glow', 'shake', 'calm', 'luck'];
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      showNotification('🎲 Long Station says...');
+      setTimeout(() => effects[pick](), 500);
+      if (typeof addChatMsg === 'function') addChatMsg('Echo', 'I put literally everything in that one. Good luck. 🍸', '#dd4488');
+    },
+    spicy() {
+      S.screenShake = 12; S._spicyTimer = 3; S.visitor._drinkEffect = 'sparkle'; S.visitor._drinkTimer = 40;
+      for (let i = 0; i < 40; i++) { S.particles.push({ x: S.visitor.x + (Math.random() - .5) * 30, y: S.visitor.y - Math.random() * 40, vx: (Math.random() - .5) * 3, vy: -1 - Math.random() * 2, life: 20 + Math.random() * 15, color: ['#ff4400', '#ff6600', '#ffaa00'][Math.random() * 3 | 0], size: 2 + Math.random() * 2 }); }
+      showNotification('💥🔥 IMPACT!!!');
+      if (typeof addChatMsg === 'function') addChatMsg('Echo', 'Dropped from orbit. Told ya. 💥', '#ff6600');
+    },
+    echo_special() {
+      S.screenShake = 15; S._spicyTimer = 4; S.visitor._drinkEffect = 'sparkle'; S.visitor._drinkTimer = 50;
+      for (let i = 0; i < 60; i++) { S.particles.push({ x: S.visitor.x + (Math.random() - .5) * 40, y: S.visitor.y - Math.random() * 50, vx: (Math.random() - .5) * 4, vy: -1.5 - Math.random() * 3, life: 25 + Math.random() * 20, color: ['#ff4400', '#ff6ec7', '#00fff7', '#ffd700', '#8800ff'][Math.random() * 5 | 0], size: 2 + Math.random() * 3 }); }
+      // Random bonus: sometimes gives luck too
+      if (Math.random() < 0.3) { S.visitor._drinkEffect = 'luck'; S.visitor._drinkTimer = 90; showNotification('🌶️🔥 TRANSCENDENCE!!! (+ luck?!)'); }
+      else { showNotification('🌶️🔥 WHAT WAS IN THAT?!'); }
+      if (typeof addChatMsg === 'function') addChatMsg('Echo', 'I warned you. I WARNED you. Recipe dies with me. 🌶️', '#ff4400');
+    },
+    heal() {
       showNotification('💧 Refreshing!');
-      if(typeof addChatMsg==='function')addChatMsg('Echo','Hydration is self-care. ✨','#88ccff');
+      if (typeof addChatMsg === 'function') addChatMsg('Echo', 'Hydration is self-care. ✨', '#88ccff');
     }
-    showThought(d.icon+' Cheers!');
+  };
+
+  const fn = effects[d.effect];
+  if (fn) fn();
+  showThought(d.icon + ' Cheers!');
+
+  // Track drink history for achievements
+  const history = LS.get('drinkHistory', {});
+  history[d.id] = (history[d.id] || 0) + 1;
+  LS.set('drinkHistory', history);
+  const uniqueDrinks = Object.keys(history).length;
+  if (uniqueDrinks >= BAR_MENU.length) {
+    if (!LS.get('achievement_mixologist')) {
+      LS.set('achievement_mixologist', true);
+      showNotification('🏆 Achievement: Mixologist! Tried every drink!');
+      Coins.earn(25, 'achievement');
+    }
+  }
+}
+
+function showBarMenu() {
+  const totalServed = LS.get('drinksServed', 0);
+  const drinkHistory = LS.get('drinkHistory', {});
+  const uniqueTried = Object.keys(drinkHistory).length;
+
+  let html = '<h3 style="margin:0 0 4px">🍹 Echo\'s Station Bar</h3>';
+  html += '<div style="font-size:9px;color:#888;margin-bottom:8px">Real cocktails, reimagined in space. What\'ll it be?</div>';
+
+  // Category tabs
+  const cats = [{ id: 'classic', label: '🍸 Classics', desc: 'Inspired by real-world legends' }, { id: 'house', label: '✨ House Specials', desc: 'Echo originals' }, { id: 'free', label: '💧 Free', desc: 'On the house' }];
+  cats.forEach(cat => {
+    const catDrinks = BAR_MENU.filter(d => d.category === cat.id);
+    html += `<div style="margin:8px 0 4px;font-size:10px;color:#aaa;border-bottom:1px solid #333;padding-bottom:2px">${cat.label} <span style="font-size:8px;color:#666">— ${cat.desc}</span></div>`;
+    catDrinks.forEach(d => {
+      const tried = drinkHistory[d.id] ? '✓' : '';
+      const realRef = d.realDrink ? `<span style="font-size:7px;color:#555;font-style:italic"> (${d.realDrink})</span>` : '';
+      html += `<div class="bar-drink" data-id="${d.id}" style="display:flex;align-items:center;gap:8px;padding:6px 8px;margin:3px 0;border-radius:6px;cursor:pointer;border:1px solid ${d.color}33;background:${d.color}08;transition:all .15s" onmouseover="this.style.background='${d.color}22'" onmouseout="this.style.background='${d.color}08'">`;
+      html += `<span style="font-size:18px">${d.icon}</span>`;
+      html += `<div style="flex:1"><div style="font-size:11px;color:${d.color};font-weight:bold">${d.name}${realRef} <span style="color:#555;font-size:8px">${tried}</span></div><div style="font-size:9px;color:#999">${d.desc}</div></div>`;
+      html += `<div style="font-size:10px;color:#ffd700">${d.cost > 0 ? d.cost + '◈' : 'Free'}</div></div>`;
+    });
+  });
+
+  // Buy a round button
+  html += '<div style="margin-top:12px;border-top:1px solid #333;padding-top:8px">';
+  html += '<div class="bar-drink" data-action="buy-round" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;border:1px solid #ffd70055;background:#ffd70011;transition:all .15s" onmouseover="this.style.background=\'#ffd70022\'" onmouseout="this.style.background=\'#ffd70011\'">';
+  html += '<span style="font-size:18px">🍻</span>';
+  html += '<div style="flex:1"><div style="font-size:11px;color:#ffd700;font-weight:bold">Buy The Bar a Round!</div><div style="font-size:9px;color:#999">Everyone on the station gets sparkle. Your name goes up in lights.</div></div>';
+  html += '<div style="font-size:10px;color:#ffd700">20◈</div></div>';
+  html += '</div>';
+
+  // Stats
+  html += `<div style="margin-top:8px;font-size:8px;color:#555;text-align:center">Drinks served: ${totalServed} · Menu tasted: ${uniqueTried}/${BAR_MENU.length}${uniqueTried >= BAR_MENU.length ? ' 🏆' : ''}</div>`;
+
+  const { p } = createPopup(html);
+
+  // Drink click handlers
+  p.querySelectorAll('.bar-drink').forEach(el => el.onclick = () => {
+    const action = el.dataset.action;
+    if (action === 'buy-round') {
+      const coins = LS.get('coins', 0);
+      if (coins < 20) { showNotification('Not enough ◈ for a round!'); return; }
+      Coins.spend(20, 'bar_round');
+      LS.set('roundsBought', (LS.get('roundsBought', 0)) + 1);
+      const name = LS.get('visitorName', 'Someone');
+      // Notification to all (simulated — in multiplayer this would broadcast)
+      showNotification('🍻 ' + name + ' bought the bar a round!');
+      if (typeof addChatMsg === 'function') addChatMsg('Echo', '🍻 ' + name + ' just bought EVERYONE a round! Legend status. 🎉', '#ffd700');
+      // Apply sparkle to self
+      S.visitor._drinkEffect = 'sparkle'; S.visitor._drinkTimer = 45;
+      // Broadcast via websocket if connected
+      if (EchoWS.ws?.readyState === 1) {
+        EchoWS.ws.send(JSON.stringify({ type: 'bar.round', buyer: name }));
+      }
+      // Celebration particles
+      for (let i = 0; i < 50; i++) { S.particles.push({ x: S.visitor.x + (Math.random() - .5) * 60, y: S.visitor.y - Math.random() * 50, vx: (Math.random() - .5) * 5, vy: -2 - Math.random() * 3, life: 30 + Math.random() * 20, color: ['#ffd700', '#ff6ec7', '#00fff7'][Math.random() * 3 | 0], size: 2 + Math.random() * 3 }); }
+      S.screenShake = 6;
+      showThought('🍻 Cheers everyone!');
+      // Track achievement
+      if ((LS.get('roundsBought', 0)) >= 5 && !LS.get('achievement_generous')) {
+        LS.set('achievement_generous', true);
+        showNotification('🏆 Achievement: Generous Soul! 5 rounds bought!');
+        Coins.earn(50, 'achievement');
+      }
+      p.closest('.popup-overlay').remove();
+      return;
+    }
+
+    const d = BAR_MENU.find(x => x.id === el.dataset.id); if (!d) return;
+    const coins = LS.get('coins', 0);
+    if (d.cost > 0 && coins < d.cost) { showNotification('Not enough ◈'); return; }
+    if (d.cost > 0) Coins.spend(d.cost, 'bar');
+    applyDrinkEffect(d);
     p.closest('.popup-overlay').remove();
   });
 }
@@ -13813,7 +14397,9 @@ function createInventoryItem(itemId,type,rarity){
 const LootSystem={
   // Roll a random loot item with rarity determined by weighted random
   roll(bonusLuck){
-    const luck=bonusLuck||0;
+    let luck=bonusLuck||0;
+    // Stardust Shot drink bonus
+    if(S.visitor&&S.visitor._drinkEffect==='luck'&&S.visitor._drinkTimer>0)luck+=15;
     const r=Math.random()*(1-luck*0.01);
     let rarity='common';
     if(r<0.02)rarity='mythic';
@@ -21803,6 +22389,15 @@ DuelSystem.endDuel = function(result) {
   if (result === 'victory' || result === 'defeat') {
     DurabilitySystem.loseDurability(this.isPvE ? 'pve' : 'pvp');
   }
+  // Arena spectator: resolve bets
+  if(typeof ArenaSpectator!=='undefined'){
+    ArenaSpectator.resolveBets(result==='victory'?'player':'opponent');
+    ArenaSpectator.triggerReaction(result==='victory'?'victory':'defeat');
+  }
+  // Fight replay: stop recording
+  if(typeof FightReplay!=='undefined'&&FightReplay.recording){
+    FightReplay.stopRecording(result);
+  }
   _origEndDuel(result);
 };
 
@@ -23608,7 +24203,12 @@ function getElementMultiplier(atk,def){
 const _econ3AIStart=AIFighter.start.bind(AIFighter);
 AIFighter.start=function(fid){
   _econ3AIStart(fid);
-  if(this.fighter)this.fighter._battleElement=AI_ELEMENTS[Math.floor(Math.random()*AI_ELEMENTS.length)];
+  if(this.fighter){
+    this.fighter._battleElement=AI_ELEMENTS[Math.floor(Math.random()*AI_ELEMENTS.length)];
+    // Start recording fight replay + spawn NPC spectators
+    if(typeof FightReplay!=='undefined')FightReplay.startRecording(this.fighter.name,this.fighter.icon);
+    if(typeof ArenaSpectator!=='undefined')ArenaSpectator._generateNPCSpectators();
+  }
 };
 
 // Patch AIFighter.takeDamage for elemental multiplier
@@ -23621,6 +24221,11 @@ AIFighter.takeDamage=function(dmg){
   const res=_econ3AITakeDmg(dmg);
   if(mult>1.0)S.floatTexts.push({text:'SUPER EFFECTIVE!',x:this.x,y:this.y-65,color:'#ff3344',life:50});
   else if(mult<1.0)S.floatTexts.push({text:'RESISTED...',x:this.x,y:this.y-65,color:'#888888',life:50});
+  // Spectator reactions on hit
+  if(typeof ArenaSpectator!=='undefined'){
+    if(dmg>25)ArenaSpectator.triggerReaction('combo');
+    else ArenaSpectator.triggerReaction('hit');
+  }
   return res;
 };
 
@@ -26357,7 +26962,7 @@ render = function() {
   if(S.vignetteIntensity>0.05){const vg=ctx.createRadialGradient(W/2,H/2,W*0.3,W/2,H/2,W*0.8);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,`rgba(0,0,0,${S.vignetteIntensity})`);ctx.fillStyle=vg;ctx.fillRect(0,0,W,H)}
   if(S.screenFlash){ctx.fillStyle=S.screenFlash;ctx.globalAlpha=.3;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;S.screenFlash=null}
   renderHoverHighlight();
-  if(DuelSystem.active){renderDuelHUD();}
+  if(DuelSystem.active){renderDuelHUD();if(typeof ArenaSpectator!=='undefined'){ArenaSpectator.renderBettingHUD(ctx);ArenaSpectator.renderChat(ctx);}}
   else if(WeaponSystem.equipped&&!S._visitorSaber){const wpn=WeaponSystem.equipped;const r=RARITIES[wpn.rarity]||RARITIES.common;ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(W/2-80,H-28,160,22);ctx.strokeStyle=r.color;ctx.lineWidth=1;ctx.strokeRect(W/2-80,H-28,160,22);ctx.fillStyle=r.color;ctx.font='bold 10px monospace';ctx.textAlign='center';const comboTxt=WeaponSystem._comboCount>1?' x'+WeaponSystem._comboCount:'';ctx.fillText(wpn.icon+' '+wpn.name+comboTxt+'  E:Attack  Q:Block',W/2,H-13);ctx.textAlign='left';}
   else if(S._visitorSaber){const col=S._visitorSaber==='green'?'#00ff44':'#4488ff';ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(W/2-60,H-28,120,22);ctx.strokeStyle=col;ctx.lineWidth=1;ctx.strokeRect(W/2-60,H-28,120,22);ctx.fillStyle=col;ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText('⚔️ E:Swing  Q:Block  Double-tap WASD:Dodge',W/2,H-13);ctx.textAlign='left'}
   if(TOD==='night'){ctx.fillStyle='rgba(0,0,30,.15)';ctx.fillRect(0,0,W,H)}
