@@ -6341,52 +6341,99 @@ function getVisitorSprite(skinId,dir,frame){
   }
 
   else if(skinId==='ironsuit-v'){
-    // Ironsuit-v — red/gold armor, glowing chest reactor
-    const R='#cc2222',G='#ffdd00',Gd='#cc9900',C='#00ddff',S1='#ffaa77',E='#444',B='#333',Bt='#222';
-    if(dir===0){
+    // Ironsuit-v — red/gold armor, arc reactor chest, helmet - 16×20 HD sprite
+    const R='#cc2222',Rd='#aa1111',Rl='#dd4444',G='#ffdd00',Gd='#ccaa00',Gl='#fff055',C='#00ddff',Cd='#00bbcc',Cl='#22eeff',S1='#ffaa77',S1d='#dd8855',S1l='#ffcc99',E='#444',Ed='#333',Ep='#666',B='#333',Bd='#222',Bl='#444',Bt='#aa1111',Btl='#bb2222',Btd='#880000';
+    if(dir===0 && frame===0){
       grid=[
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, R, R, G, G, G, R, R, T, T],
-        [T, R, S1,S1,S1,S1,S1,R, T, T],
-        [T, T, S1,E, S1,E, S1,T, T, T],
-        [T, T, S1,S1,S1,S1,S1,T, T, T],
-        [T, T, R, C, C, C, R, T, T, T],
-        [T, R, R, G, G, G, R, R, T, T],
-        [T, R, R, G, G, G, R, R, T, T],
-        [T, T, R, B, B, R, T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, R, R, Rl,R, R, Rl,R, R, T, T, T, T, T],
+        [T, T, R, R, Rl,G, Gl,Gl,G, Rl,R, R, T, T, T, T],
+        [T, R, R, Rl,G, Gl,G, G, Gl,G, Rl,R, R, T, T, T],
+        [T, R, R, G, Gl,G, G, G, G, Gl,G, R, R, T, T, T],
+        [T, T, R, G, S1,S1l,S1,S1,S1l,S1,G, R, T, T, T, T],
+        [T, T, R, S1,S1,S1d,S1,S1,S1d,S1,S1,R, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, R, R, C, Cl,Cl,C, R, R, T, T, T, T, T],
+        [T, T, R, R, Rl,C, C, C, C, Rl,R, R, T, T, T, T],
+        [T, R, R, Rl,G, G, C, C, G, G, Rl,R, R, T, T, T],
+        [T, R, R, G, Gd,G, G, G, G, Gd,G, R, R, T, T, T],
+        [T, R, R, G, G, G, G, G, G, G, G, R, R, T, T, T],
+        [T, T, R, R, G, G, G, G, G, G, R, R, T, T, T, T],
+        [T, T, T, R, R, B, Bl,B, Bl,R, R, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
+      ];
+    } else if(dir===0 && frame===1){
+      grid=[
+        [T, T, T, R, R, Rl,R, R, Rl,R, R, T, T, T, T, T],
+        [T, T, R, R, Rl,G, Gl,Gl,G, Rl,R, R, T, T, T, T],
+        [T, R, R, Rl,G, Gl,G, G, Gl,G, Rl,R, R, T, T, T],
+        [T, R, R, G, Gl,G, G, G, G, Gl,G, R, R, T, T, T],
+        [T, T, R, G, S1,S1l,S1,S1,S1l,S1,G, R, T, T, T, T],
+        [T, T, R, S1,S1,S1d,S1,S1,S1d,S1,S1,R, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, R, R, C, Cl,Cl,C, R, R, T, T, T, T, T],
+        [T, T, R, R, Rl,C, C, C, C, Rl,R, R, T, T, T, T],
+        [T, R, R, Rl,G, G, C, C, G, G, Rl,R, R, T, T, T],
+        [T, R, R, G, Gd,G, G, G, G, Gd,G, R, R, T, T, T],
+        [T, R, R, G, G, G, G, G, G, G, G, R, R, T, T, T],
+        [T, T, R, R, G, G, G, G, G, G, R, R, T, T, T, T],
+        [T, T, T, R, R, B, Bl,B, Bl,R, R, T, T, T, T, T],
+        [T, T, T, B, B, B, T, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, B, B, T, T, T, T, T],
+        [T, T, T, T, Bt,Btl,Bt,T, Bt,Btl,Bt,T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else if(dir===3){
       grid=[
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, R, R, G, G, G, R, R, T, T],
-        [T, R, R, R, R, R, R, R, T, T],
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, R, R, G, G, G, R, R, T, T],
-        [T, R, R, G, G, G, R, R, T, T],
-        [T, T, R, B, B, R, T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, R, R, Rl,R, R, Rl,R, R, T, T, T, T, T],
+        [T, T, R, R, Rl,G, Gl,Gl,G, Rl,R, R, T, T, T, T],
+        [T, R, R, Rl,G, Gl,G, G, Gl,G, Rl,R, R, T, T, T],
+        [T, R, R, G, Gl,G, G, G, G, Gl,G, R, R, T, T, T],
+        [T, T, R, R, R, R, R, R, R, R, R, R, T, T, T, T],
+        [T, T, R, R, R, R, R, R, R, R, R, R, T, T, T, T],
+        [T, T, T, R, R, R, R, R, R, R, R, T, T, T, T, T],
+        [T, T, T, R, R, R, R, R, R, R, R, T, T, T, T, T],
+        [T, T, T, T, R, R, R, R, R, R, T, T, T, T, T, T],
+        [T, T, T, R, R, R, R, R, R, R, R, T, T, T, T, T],
+        [T, T, R, R, Rl,G, G, G, G, Rl,R, R, T, T, T, T],
+        [T, R, R, Rl,G, G, G, G, G, G, Rl,R, R, T, T, T],
+        [T, R, R, G, Gd,G, G, G, G, Gd,G, R, R, T, T, T],
+        [T, R, R, G, G, G, G, G, G, G, G, R, R, T, T, T],
+        [T, T, R, R, G, G, G, G, G, G, R, R, T, T, T, T],
+        [T, T, T, R, R, B, Bl,B, Bl,R, R, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else {
       grid=[
-        [T, T, R, R, R, R, T, T, T, T],
-        [T, R, R, G, G, R, R, T, T, T],
-        [T, R, S1,S1,S1,R, T, T, T, T],
-        [T, T, S1,E, S1,T, T, T, T, T],
-        [T, T, S1,S1,S1,T, T, T, T, T],
-        [T, T, R, C, R, T, T, T, T, T],
-        [T, R, R, G, R, R, T, T, T, T],
-        [T, R, R, G, R, R, T, T, T, T],
-        [T, T, R, B, R, T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+        [T, T, T, R, R, Rl,R, R, T, T, T, T, T, T, T, T],
+        [T, T, R, R, Rl,G, Gl,G, R, T, T, T, T, T, T, T],
+        [T, R, R, Rl,G, Gl,G, Gl,R, R, T, T, T, T, T, T],
+        [T, R, R, G, Gl,G, G, G, R, R, T, T, T, T, T, T],
+        [T, T, R, G, S1,S1l,S1,G, R, T, T, T, T, T, T, T],
+        [T, T, R, S1,S1,S1d,S1,R, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1d,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, R, R, C, Cl,R, R, T, T, T, T, T, T, T],
+        [T, T, R, R, Rl,C, C, Rl,R, R, T, T, T, T, T, T],
+        [T, R, R, Rl,G, G, C, G, Rl,R, R, T, T, T, T, T],
+        [T, R, R, G, Gd,G, G, Gd,G, R, R, T, T, T, T, T],
+        [T, R, R, G, G, G, G, G, G, R, R, T, T, T, T, T],
+        [T, T, R, R, G, G, G, G, R, R, T, T, T, T, T, T],
+        [T, T, T, R, R, B, Bl,R, R, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, T, T, T, T, T, T, T, T],
       ];
       if(dir===2)grid=grid.map(r=>[...r].reverse());
     }
@@ -6498,156 +6545,297 @@ function getVisitorSprite(skinId,dir,frame){
   }
 
   else if(skinId==='web_slinger'){
-    // Web Slinger — red/blue spider suit with web pattern, big white eye shapes
-    const R='#cc2020',Bl='#0044aa',W='#ffffff',E='#000',B='#333',Bt='#222';
-    if(dir===0){
+    // Web Slinger — red/blue spider suit with web pattern, mask eyes - 16×20 HD sprite
+    const R='#cc2020',Rd='#aa1515',Rl='#dd4444',Bl='#0044aa',Bld='#003388',Bll='#2266cc',W='#ffffff',Wd='#eeeeee',Wl='#ffffff',E='#000',Ed='#222',B='#333',Bd='#222',Blt='#444',Bt='#222',Btl='#333',Btd='#111';
+    if(dir===0 && frame===0){
       grid=[
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, R, R, R, R, R, R, R, T, T],
-        [T, R, W, W, R, W, W, R, T, T],
-        [T, T, W, E, R, E, W, T, T, T],
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, T, Bl,R, R, R, Bl,T, T, T],
-        [T, Bl,Bl,R, R, R, Bl,Bl,T, T],
-        [T, Bl,Bl,R, R, R, Bl,Bl,T, T],
-        [T, T, Bl,B, B, Bl,T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, R, R, Rl,R, R, Rl,R, R, T, T, T, T, T],
+        [T, T, R, R, Rl,R, R, R, R, Rl,R, R, T, T, T, T],
+        [T, R, R, Rl,R, R, R, R, R, R, Rl,R, R, T, T, T],
+        [T, R, R, R, R, R, R, R, R, R, R, R, R, T, T, T],
+        [T, T, R, R, W, Wl,R, R, Wl,W, R, R, T, T, T, T],
+        [T, T, R, W, W, W, R, R, W, W, W, R, T, T, T, T],
+        [T, T, T, W, E, Ed,R, R, E, Ed,W, T, T, T, T, T],
+        [T, T, T, R, W, W, Rd,Rd,W, W, R, T, T, T, T, T],
+        [T, T, T, T, R, R, R, R, R, R, T, T, T, T, T, T],
+        [T, T, T, Bl,Bl,Bll,R, R, Bll,Bl,Bl,T, T, T, T, T],
+        [T, T, Bl,Bl,Bll,Bl,R, R, Bl,Bll,Bl,Bl,T, T, T, T],
+        [T, Bl,Bl,Bll,Bl,Bl,R, R, Bl,Bl,Bll,Bl,Bl,T, T, T],
+        [T, Bl,Bl,Bl,Bld,Bl,R, R, Bl,Bld,Bl,Bl,Bl,T, T, T],
+        [T, Bl,Bl,Bl,Bl,Bl,R, R, Bl,Bl,Bl,Bl,Bl,T, T, T],
+        [T, T, Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,T, T, T, T],
+        [T, T, T, Bl,Bl,Blt,Blt,Blt,Blt,Bl,Bl,T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
+      ];
+    } else if(dir===0 && frame===1){
+      grid=[
+        [T, T, T, R, R, Rl,R, R, Rl,R, R, T, T, T, T, T],
+        [T, T, R, R, Rl,R, R, R, R, Rl,R, R, T, T, T, T],
+        [T, R, R, Rl,R, R, R, R, R, R, Rl,R, R, T, T, T],
+        [T, R, R, R, R, R, R, R, R, R, R, R, R, T, T, T],
+        [T, T, R, R, W, Wl,R, R, Wl,W, R, R, T, T, T, T],
+        [T, T, R, W, W, W, R, R, W, W, W, R, T, T, T, T],
+        [T, T, T, W, E, Ed,R, R, E, Ed,W, T, T, T, T, T],
+        [T, T, T, R, W, W, Rd,Rd,W, W, R, T, T, T, T, T],
+        [T, T, T, T, R, R, R, R, R, R, T, T, T, T, T, T],
+        [T, T, T, Bl,Bl,Bll,R, R, Bll,Bl,Bl,T, T, T, T, T],
+        [T, T, Bl,Bl,Bll,Bl,R, R, Bl,Bll,Bl,Bl,T, T, T, T],
+        [T, Bl,Bl,Bll,Bl,Bl,R, R, Bl,Bl,Bll,Bl,Bl,T, T, T],
+        [T, Bl,Bl,Bl,Bld,Bl,R, R, Bl,Bld,Bl,Bl,Bl,T, T, T],
+        [T, Bl,Bl,Bl,Bl,Bl,R, R, Bl,Bl,Bl,Bl,Bl,T, T, T],
+        [T, T, Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,T, T, T, T],
+        [T, T, T, Bl,Bl,Blt,Blt,Blt,Blt,Bl,Bl,T, T, T, T, T],
+        [T, T, T, B, B, B, T, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, B, B, T, T, T, T, T],
+        [T, T, T, T, Bt,Btl,Bt,T, Bt,Btl,Bt,T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else if(dir===3){
       grid=[
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, R, R, R, R, R, R, R, T, T],
-        [T, R, R, R, R, R, R, R, T, T],
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, T, Bl,R, R, R, Bl,T, T, T],
-        [T, Bl,Bl,R, R, R, Bl,Bl,T, T],
-        [T, Bl,Bl,R, R, R, Bl,Bl,T, T],
-        [T, T, Bl,B, B, Bl,T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, R, R, Rl,R, R, Rl,R, R, T, T, T, T, T],
+        [T, T, R, R, Rl,R, R, R, R, Rl,R, R, T, T, T, T],
+        [T, R, R, Rl,R, R, R, R, R, R, Rl,R, R, T, T, T],
+        [T, R, R, R, R, R, R, R, R, R, R, R, R, T, T, T],
+        [T, T, R, R, R, R, R, R, R, R, R, R, T, T, T, T],
+        [T, T, R, R, R, R, R, R, R, R, R, R, T, T, T, T],
+        [T, T, T, R, R, R, Rd,Rd,R, R, R, T, T, T, T, T],
+        [T, T, T, R, R, R, R, R, R, R, R, T, T, T, T, T],
+        [T, T, T, T, R, R, R, R, R, R, T, T, T, T, T, T],
+        [T, T, T, Bl,Bl,Bll,R, R, Bll,Bl,Bl,T, T, T, T, T],
+        [T, T, Bl,Bl,Bll,Bl,R, R, Bl,Bll,Bl,Bl,T, T, T, T],
+        [T, Bl,Bl,Bll,Bl,Bl,R, R, Bl,Bl,Bll,Bl,Bl,T, T, T],
+        [T, Bl,Bl,Bl,Bld,Bl,R, R, Bl,Bld,Bl,Bl,Bl,T, T, T],
+        [T, Bl,Bl,Bl,Bl,Bl,R, R, Bl,Bl,Bl,Bl,Bl,T, T, T],
+        [T, T, Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,T, T, T, T],
+        [T, T, T, Bl,Bl,Blt,Blt,Blt,Blt,Bl,Bl,T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else {
       grid=[
-        [T, T, R, R, R, R, T, T, T, T],
-        [T, R, R, R, R, R, R, T, T, T],
-        [T, R, W, W, R, R, T, T, T, T],
-        [T, T, W, E, R, T, T, T, T, T],
-        [T, T, R, R, R, T, T, T, T, T],
-        [T, T, Bl,R, Bl,T, T, T, T, T],
-        [T, Bl,Bl,R, Bl,Bl,T, T, T, T],
-        [T, Bl,Bl,R, Bl,Bl,T, T, T, T],
-        [T, T, Bl,B, Bl,T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+        [T, T, T, R, R, Rl,R, R, T, T, T, T, T, T, T, T],
+        [T, T, R, R, Rl,R, R, R, R, T, T, T, T, T, T, T],
+        [T, R, R, Rl,R, R, R, R, R, R, T, T, T, T, T, T],
+        [T, R, R, R, R, R, R, R, R, R, T, T, T, T, T, T],
+        [T, T, R, R, W, Wl,R, R, R, T, T, T, T, T, T, T],
+        [T, T, R, W, W, W, R, R, T, T, T, T, T, T, T, T],
+        [T, T, T, W, E, Ed,R, R, T, T, T, T, T, T, T, T],
+        [T, T, T, R, W, W, Rd,R, T, T, T, T, T, T, T, T],
+        [T, T, T, T, R, R, R, R, T, T, T, T, T, T, T, T],
+        [T, T, T, Bl,Bl,Bll,R, Bl,Bl,T, T, T, T, T, T, T],
+        [T, T, Bl,Bl,Bll,Bl,R, Bll,Bl,Bl,T, T, T, T, T, T],
+        [T, Bl,Bl,Bll,Bl,Bl,R, Bl,Bll,Bl,Bl,T, T, T, T, T],
+        [T, Bl,Bl,Bl,Bld,Bl,R, Bl,Bl,Bl,Bl,T, T, T, T, T],
+        [T, Bl,Bl,Bl,Bl,Bl,R, Bl,Bl,Bl,Bl,T, T, T, T, T],
+        [T, T, Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,T, T, T, T, T, T],
+        [T, T, T, Bl,Bl,Blt,Blt,Bl,Bl,T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, T, T, T, T, T, T, T, T],
       ];
       if(dir===2)grid=grid.map(r=>[...r].reverse());
     }
   }
 
   else if(skinId==='wakandan'){
-    // Wakandan — black suit, purple #9966ff accents, mask with cat ears
-    const Bk='#222222',P='#9966ff',S1='#ffaa77',E='#444',B='#333',Bt='#222';
-    if(dir===0){
+    // Wakandan — black suit, purple highlights, mask with cat ears - 16×20 HD sprite
+    const Bk='#222222',Bkd='#111111',Bkl='#333333',P='#9966ff',Pd='#8855cc',Pl='#aa77ff',S1='#ffaa77',S1d='#dd8855',S1l='#ffcc99',E='#444',Ed='#333',Ep='#666',B='#333',Bd='#222',Bl='#444',Bt='#222',Btl='#333',Btd='#111';
+    if(dir===0 && frame===0){
       grid=[
-        [T, P, Bk,Bk,Bk,Bk,Bk,P, T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
-        [T, Bk,S1,S1,S1,S1,S1,Bk,T, T],
-        [T, T, S1,E, S1,E, S1,T, T, T],
-        [T, T, S1,S1,S1,S1,S1,T, T, T],
-        [T, T, Bk,P, P, P, Bk,T, T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
-        [T, T, Bk,B, B, Bk,T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, P, Bk,Bk,Bkl,Bk,Bk,Bkl,Bk,Bk,P, T, T, T, T],
+        [T, P, Pl,Bk,Bkl,Bk,Bk,Bk,Bk,Bkl,Bk,Pl,P, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,Bk,Bk,Bk,Bk,Bkl,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,S1,S1l,S1,S1,S1l,S1,Bk,Bk,T, T, T, T],
+        [T, T, Bk,S1,S1,S1d,S1,S1,S1d,S1,S1,Bk,T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, Bk,Bk,P, Pl,Pl,P, Bk,Bk,T, T, T, T, T],
+        [T, T, Bk,Bk,Bkl,P, P, P, P, Bkl,Bk,Bk,T, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,P, P, Bk,Bk,Bkl,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bkd,Bk,Bk,Bk,Bk,Bkd,Bk,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, T, Bk,Bk,B, Bl,B, Bl,Bk,Bk,T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
+      ];
+    } else if(dir===0 && frame===1){
+      grid=[
+        [T, T, P, Bk,Bk,Bkl,Bk,Bk,Bkl,Bk,Bk,P, T, T, T, T],
+        [T, P, Pl,Bk,Bkl,Bk,Bk,Bk,Bk,Bkl,Bk,Pl,P, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,Bk,Bk,Bk,Bk,Bkl,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,S1,S1l,S1,S1,S1l,S1,Bk,Bk,T, T, T, T],
+        [T, T, Bk,S1,S1,S1d,S1,S1,S1d,S1,S1,Bk,T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, Bk,Bk,P, Pl,Pl,P, Bk,Bk,T, T, T, T, T],
+        [T, T, Bk,Bk,Bkl,P, P, P, P, Bkl,Bk,Bk,T, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,P, P, Bk,Bk,Bkl,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bkd,Bk,Bk,Bk,Bk,Bkd,Bk,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, T, Bk,Bk,B, Bl,B, Bl,Bk,Bk,T, T, T, T, T],
+        [T, T, T, B, B, B, T, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, B, B, T, T, T, T, T],
+        [T, T, T, T, Bt,Btl,Bt,T, Bt,Btl,Bt,T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else if(dir===3){
       grid=[
-        [T, P, Bk,Bk,Bk,Bk,Bk,P, T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
-        [T, T, Bk,Bk,Bk,Bk,Bk,T, T, T],
-        [T, T, Bk,Bk,Bk,Bk,Bk,T, T, T],
-        [T, T, Bk,P, P, P, Bk,T, T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
-        [T, T, Bk,B, B, Bk,T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, P, Bk,Bk,Bkl,Bk,Bk,Bkl,Bk,Bk,P, T, T, T, T],
+        [T, P, Pl,Bk,Bkl,Bk,Bk,Bk,Bk,Bkl,Bk,Pl,P, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,Bk,Bk,Bk,Bk,Bkl,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T],
+        [T, T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T],
+        [T, T, T, T, Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T, T],
+        [T, T, T, Bk,Bk,P, Pl,Pl,P, Bk,Bk,T, T, T, T, T],
+        [T, T, Bk,Bk,Bkl,P, P, P, P, Bkl,Bk,Bk,T, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,P, P, Bk,Bk,Bkl,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bkd,Bk,Bk,Bk,Bk,Bkd,Bk,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, T, Bk,Bk,B, Bl,B, Bl,Bk,Bk,T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else {
       grid=[
-        [T, P, Bk,Bk,Bk,Bk,T, T, T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
-        [T, Bk,S1,S1,S1,Bk,T, T, T, T],
-        [T, T, S1,E, S1,T, T, T, T, T],
-        [T, T, S1,S1,S1,T, T, T, T, T],
-        [T, T, Bk,P, Bk,T, T, T, T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,T, T, T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,T, T, T, T],
-        [T, T, Bk,B, Bk,T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+        [T, T, P, Bk,Bk,Bkl,Bk,Bk,T, T, T, T, T, T, T, T],
+        [T, P, Pl,Bk,Bkl,Bk,Bk,Bk,Pl,T, T, T, T, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,Bk,Bkl,Bk,Bk,T, T, T, T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T, T],
+        [T, T, Bk,Bk,S1,S1l,S1,Bk,Bk,T, T, T, T, T, T, T],
+        [T, T, Bk,S1,S1,S1d,S1,Bk,T, T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1d,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bk,Bk,P, Pl,Bk,Bk,T, T, T, T, T, T, T],
+        [T, T, Bk,Bk,Bkl,P, P, Bkl,Bk,Bk,T, T, T, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,P, Bk,Bkl,Bk,Bk,T, T, T, T, T],
+        [T, Bk,Bk,Bk,Bkd,Bk,Bk,Bkd,Bk,Bk,Bk,T, T, T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T, T],
+        [T, T, T, Bk,Bk,B, Bl,Bk,Bk,T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, T, T, T, T, T, T, T, T],
       ];
       if(dir===2)grid=grid.map(r=>[...r].reverse());
     }
   }
 
   else if(skinId==='mjolnir_wielder'){
-    // Mjolnir Wielder — red cape, silver armor, winged helmet
-    const S='#c0c0c0',R='#cc2222',G='#ffdd00',S1='#ffaa77',E='#444',B='#333',Bt='#222',W='#888';
-    if(dir===0){
+    // Mjolnir Wielder — red cape, silver armor, blonde hair, hammer - 16×20 HD sprite
+    const S='#c0c0c0',Sd='#999999',Sl='#dddddd',R='#cc2222',Rd='#aa1111',Rl='#dd4444',G='#ffdd00',Gd='#ccaa00',Gl='#fff055',S1='#ffaa77',S1d='#dd8855',S1l='#ffcc99',H='#ffdd88',Hd='#ddbb66',Hl='#fff0aa',E='#444',Ed='#333',Ep='#666',B='#333',Bd='#222',Bl='#444',Bt='#666',Btl='#777',Btd='#555',W='#888',Wd='#666',Wl='#999';
+    if(dir===0 && frame===0){
       grid=[
-        [T, W, S, S, S, S, S, W, T, T],
-        [T, S, S, S, S, S, S, S, T, T],
-        [T, S, S1,S1,S1,S1,S1,S, T, T],
-        [T, T, S1,E, S1,E, S1,T, T, T],
-        [T, T, S1,S1,S1,S1,S1,T, T, T],
-        [T, T, S, G, G, G, S, T, T, T],
-        [R, S, S, S, S, S, S, S, R, T],
-        [T, S, S, S, S, S, S, S, T, T],
-        [T, T, S, B, B, S, T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, W, Wl,S, S, S, S, S, Wl,W, T, T, T, T, T],
+        [T, W, Wl,S, S, S, S, S, S, S, Wl,W, T, T, T, T],
+        [T, S, S, S, S, S, S, S, S, S, S, S, T, T, T, T],
+        [T, S, S, S, S, S, S, S, S, S, S, S, T, T, T, T],
+        [T, T, S, S, H, Hl,H, H, Hl,H, S, S, T, T, T, T],
+        [T, T, S, H, H, Hd,H, H, Hd,H, H, S, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, S, S, G, Gl,Gl,G, S, S, T, T, T, T, T],
+        [R, Rl,S, S, Sl,G, G, G, G, Sl,S, S, Rl,R, T, T],
+        [T, R, S, Sl,S, S, G, G, S, S, Sl,S, R, T, T, T],
+        [T, S, S, S, Sd,S, S, S, S, Sd,S, S, S, T, T, T],
+        [T, S, S, S, S, S, S, S, S, S, S, S, S, T, T, T],
+        [T, T, S, S, S, S, S, S, S, S, S, S, T, T, T, T],
+        [T, T, T, S, S, B, Bl,B, Bl,S, S, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
+      ];
+    } else if(dir===0 && frame===1){
+      grid=[
+        [T, T, W, Wl,S, S, S, S, S, Wl,W, T, T, T, T, T],
+        [T, W, Wl,S, S, S, S, S, S, S, Wl,W, T, T, T, T],
+        [T, S, S, S, S, S, S, S, S, S, S, S, T, T, T, T],
+        [T, S, S, S, S, S, S, S, S, S, S, S, T, T, T, T],
+        [T, T, S, S, H, Hl,H, H, Hl,H, S, S, T, T, T, T],
+        [T, T, S, H, H, Hd,H, H, Hd,H, H, S, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, S, S, G, Gl,Gl,G, S, S, T, T, T, T, T],
+        [R, Rl,S, S, Sl,G, G, G, G, Sl,S, S, Rl,R, T, T],
+        [T, R, S, Sl,S, S, G, G, S, S, Sl,S, R, T, T, T],
+        [T, S, S, S, Sd,S, S, S, S, Sd,S, S, S, T, T, T],
+        [T, S, S, S, S, S, S, S, S, S, S, S, S, T, T, T],
+        [T, T, S, S, S, S, S, S, S, S, S, S, T, T, T, T],
+        [T, T, T, S, S, B, Bl,B, Bl,S, S, T, T, T, T, T],
+        [T, T, T, B, B, B, T, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, B, B, T, T, T, T, T],
+        [T, T, T, T, Bt,Btl,Bt,T, Bt,Btl,Bt,T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else if(dir===3){
       grid=[
-        [T, W, S, S, S, S, S, W, T, T],
-        [T, S, S, S, S, S, S, S, T, T],
-        [T, S, S, S, S, S, S, S, T, T],
-        [T, T, S, S, S, S, S, T, T, T],
-        [T, T, S, S, S, S, S, T, T, T],
-        [T, T, S, S, S, S, S, T, T, T],
-        [R, S, S, S, S, S, S, S, R, T],
-        [T, S, S, S, S, S, S, S, T, T],
-        [T, T, S, B, B, S, T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, W, Wl,S, S, S, S, S, Wl,W, T, T, T, T, T],
+        [T, W, Wl,S, S, S, S, S, S, S, Wl,W, T, T, T, T],
+        [T, S, S, S, S, S, S, S, S, S, S, S, T, T, T, T],
+        [T, S, S, S, S, S, S, S, S, S, S, S, T, T, T, T],
+        [T, T, S, S, S, S, S, S, S, S, S, S, T, T, T, T],
+        [T, T, S, S, S, S, S, S, S, S, S, S, T, T, T, T],
+        [T, T, T, S, S, S, S, S, S, S, S, T, T, T, T, T],
+        [T, T, T, S, S, S, S, S, S, S, S, T, T, T, T, T],
+        [T, T, T, T, S, S, S, S, S, S, T, T, T, T, T, T],
+        [T, T, T, S, S, S, S, S, S, S, S, T, T, T, T, T],
+        [R, Rl,S, S, Sl,S, S, S, S, Sl,S, S, Rl,R, T, T],
+        [T, R, S, Sl,S, S, S, S, S, S, Sl,S, R, T, T, T],
+        [T, S, S, S, Sd,S, S, S, S, Sd,S, S, S, T, T, T],
+        [T, S, S, S, S, S, S, S, S, S, S, S, S, T, T, T],
+        [T, T, S, S, S, S, S, S, S, S, S, S, T, T, T, T],
+        [T, T, T, S, S, B, Bl,B, Bl,S, S, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else {
       grid=[
-        [T, W, S, S, S, S, T, T, T, T],
-        [T, S, S, S, S, S, S, T, T, T],
-        [T, S, S1,S1,S1,S, T, T, T, T],
-        [T, T, S1,E, S1,T, T, T, T, T],
-        [T, T, S1,S1,S1,T, T, T, T, T],
-        [T, T, S, G, S, T, T, T, T, T],
-        [R, S, S, S, S, S, T, T, T, T],
-        [T, S, S, S, S, S, T, T, T, T],
-        [T, T, S, B, S, T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+        [T, T, W, Wl,S, S, S, S, T, T, T, T, T, T, T, T],
+        [T, W, Wl,S, S, S, S, S, S, T, T, T, T, T, T, T],
+        [T, S, S, S, S, S, S, S, S, S, T, T, T, T, T, T],
+        [T, S, S, S, S, S, S, S, S, S, T, T, T, T, T, T],
+        [T, T, S, S, H, Hl,H, S, S, T, T, T, T, T, T, T],
+        [T, T, S, H, H, Hd,H, S, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1d,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, S, S, G, Gl,S, S, T, T, T, T, T, T, T],
+        [R, Rl,S, S, Sl,G, G, Sl,S, S, T, T, T, T, T, T],
+        [T, R, S, Sl,S, S, G, S, Sl,S, T, T, T, T, T, T],
+        [T, S, S, S, Sd,S, S, Sd,S, S, T, T, T, T, T, T],
+        [T, S, S, S, S, S, S, S, S, S, T, T, T, T, T, T],
+        [T, T, S, S, S, S, S, S, S, S, T, T, T, T, T, T],
+        [T, T, T, S, S, B, Bl,S, S, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, T, T, T, T, T, T, T, T],
       ];
       if(dir===2)grid=grid.map(r=>[...r].reverse());
     }
@@ -6730,104 +6918,198 @@ function getVisitorSprite(skinId,dir,frame){
   }
 
   else if(skinId==='scarlet_witch'){
-    // Scarlet Witch — red outfit, tiara, red energy
-    const R='#cc2244',Rd='#aa1133',T='#ffdd00',S1='#ffaa77',E='#444',Re='#ff6666',B='#333',Bt='#222';
-    if(dir===0){
+    // Scarlet Witch — red outfit, headpiece, magical glow - 16×20 HD sprite
+    const R='#cc2244',Rd='#aa1133',Rl='#dd4466',T_tiara='#ffdd00',Td='#ccaa00',Tl='#fff055',S1='#ffaa77',S1d='#dd8855',S1l='#ffcc99',H='#8b4513',Hd='#654321',Hl='#aa6644',E='#444',Ed='#333',Ep='#666',Re='#ff6666',Red='#cc4444',Rel='#ff8888',B='#333',Bd='#222',Bl='#444',Bt='#222',Btl='#333',Btd='#111';
+    if(dir===0 && frame===0){
       grid=[
-        [T, T, T, T, T, T, T, T, T, T],
-        [T, R, R, R, R, R, R, R, T, T],
-        [T, R, S1,S1,S1,S1,S1,R, T, T],
-        [T, T, S1,E, S1,E, S1,T, T, T],
-        [T, T, S1,S1,S1,S1,S1,T, T, T],
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, R, R, R, R, R, R, R, T, T],
-        [T, R, R, R, R, R, R, R, T, T],
-        [T, T, R, B, B, R, T, T, T, T],
-        [T, Re,B, B, T, B, B, Re,T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, T_tiara,Tl,T_tiara,T_tiara,T_tiara,Tl,T_tiara,T, T, T, T, T, T],
+        [T, T, T_tiara,T_tiara,Tl,T_tiara,T_tiara,T_tiara,T_tiara,Tl,T_tiara,T, T, T, T, T],
+        [T, R, R, Rl,H, Hl,H, H, Hl,H, Rl,R, R, T, T, T],
+        [T, R, R, H, H, H, H, H, H, H, H, R, R, T, T, T],
+        [T, T, R, H, S1,S1l,S1,S1,S1l,S1,H, R, T, T, T, T],
+        [T, T, R, S1,S1,S1d,S1,S1,S1d,S1,S1,R, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, R, R, Rl,R, R, Rl,R, R, T, T, T, T, T],
+        [Re,Rel,R, R, Rl,R, R, R, R, Rl,R, R, Rel,Re,T, T],
+        [T, Re,R, Rl,R, R, R, R, R, R, Rl,R, Re,T, T, T],
+        [T, R, R, R, Rd,R, R, R, R, Rd,R, R, R, T, T, T],
+        [T, R, R, R, R, R, R, R, R, R, R, R, R, T, T, T],
+        [T, T, R, R, R, R, R, R, R, R, R, R, T, T, T, T],
+        [T, T, T, R, R, B, Bl,B, Bl,R, R, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [Re,Rel,T, T, B, B, B, T, B, B, B, T, Rel,Re,T, T],
+        [T, Re,Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,Re,T, T, T, T],
+        [T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T, T],
+      ];
+    } else if(dir===0 && frame===1){
+      grid=[
+        [T, T, T, T_tiara,Tl,T_tiara,T_tiara,T_tiara,Tl,T_tiara,T, T, T, T, T, T],
+        [T, T, T_tiara,T_tiara,Tl,T_tiara,T_tiara,T_tiara,T_tiara,Tl,T_tiara,T, T, T, T, T],
+        [T, R, R, Rl,H, Hl,H, H, Hl,H, Rl,R, R, T, T, T],
+        [T, R, R, H, H, H, H, H, H, H, H, R, R, T, T, T],
+        [T, T, R, H, S1,S1l,S1,S1,S1l,S1,H, R, T, T, T, T],
+        [T, T, R, S1,S1,S1d,S1,S1,S1d,S1,S1,R, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, R, R, Rl,R, R, Rl,R, R, T, T, T, T, T],
+        [Re,Rel,R, R, Rl,R, R, R, R, Rl,R, R, Rel,Re,T, T],
+        [T, Re,R, Rl,R, R, R, R, R, R, Rl,R, Re,T, T, T],
+        [T, R, R, R, Rd,R, R, R, R, Rd,R, R, R, T, T, T],
+        [T, R, R, R, R, R, R, R, R, R, R, R, R, T, T, T],
+        [T, T, R, R, R, R, R, R, R, R, R, R, T, T, T, T],
+        [T, T, T, R, R, B, Bl,B, Bl,R, R, T, T, T, T, T],
+        [Re,Rel,T, B, B, B, T, T, B, B, B, T, Rel,Re,T, T],
+        [T, Re,T, T, B, B, B, T, T, B, B, T, Re,T, T, T],
+        [T, T, T, Bt,Btl,Bt,T, Bt,Btl,Bt,T, T, T, T, T, T],
+        [T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T, T],
       ];
     } else if(dir===3){
       grid=[
-        [T, T, T, T, T, T, T, T, T, T],
-        [T, R, R, R, R, R, R, R, T, T],
-        [T, R, R, R, R, R, R, R, T, T],
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, R, R, R, R, R, R, R, T, T],
-        [T, R, R, R, R, R, R, R, T, T],
-        [T, T, R, B, B, R, T, T, T, T],
-        [T, Re,B, B, T, B, B, Re,T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, T_tiara,Tl,T_tiara,T_tiara,T_tiara,Tl,T_tiara,T, T, T, T, T, T],
+        [T, T, T_tiara,T_tiara,Tl,T_tiara,T_tiara,T_tiara,T_tiara,Tl,T_tiara,T, T, T, T, T],
+        [T, R, R, R, R, R, R, R, R, R, R, R, R, T, T, T],
+        [T, R, R, R, R, R, R, R, R, R, R, R, R, T, T, T],
+        [T, T, R, R, R, R, R, R, R, R, R, R, T, T, T, T],
+        [T, T, R, R, R, R, R, R, R, R, R, R, T, T, T, T],
+        [T, T, T, R, R, R, R, R, R, R, R, T, T, T, T, T],
+        [T, T, T, R, R, R, R, R, R, R, R, T, T, T, T, T],
+        [T, T, T, T, R, R, R, R, R, R, T, T, T, T, T, T],
+        [T, T, T, R, R, Rl,R, R, Rl,R, R, T, T, T, T, T],
+        [Re,Rel,R, R, Rl,R, R, R, R, Rl,R, R, Rel,Re,T, T],
+        [T, Re,R, Rl,R, R, R, R, R, R, Rl,R, Re,T, T, T],
+        [T, R, R, R, Rd,R, R, R, R, Rd,R, R, R, T, T, T],
+        [T, R, R, R, R, R, R, R, R, R, R, R, R, T, T, T],
+        [T, T, R, R, R, R, R, R, R, R, R, R, T, T, T, T],
+        [T, T, T, R, R, B, Bl,B, Bl,R, R, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [Re,Rel,T, T, B, B, B, T, B, B, B, T, Rel,Re,T, T],
+        [T, Re,Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,Re,T, T, T, T],
+        [T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T, T],
       ];
     } else {
       grid=[
-        [T, T, T, T, T, T, T, T, T, T],
-        [T, R, R, R, R, R, R, T, T, T],
-        [T, R, S1,S1,S1,R, T, T, T, T],
-        [T, T, S1,E, S1,T, T, T, T, T],
-        [T, T, S1,S1,S1,T, T, T, T, T],
-        [T, T, R, R, R, T, T, T, T, T],
-        [T, R, R, R, R, R, T, T, T, T],
-        [T, R, R, R, R, R, T, T, T, T],
-        [T, T, R, B, R, T, T, T, T, T],
-        [T, Re,B, B, T, T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+        [T, T, T, T_tiara,Tl,T_tiara,T_tiara,T_tiara,T, T, T, T, T, T, T, T],
+        [T, T, T_tiara,T_tiara,Tl,T_tiara,T_tiara,Tl,T_tiara,T, T, T, T, T, T, T],
+        [T, R, R, Rl,H, Hl,H, Rl,R, R, T, T, T, T, T, T],
+        [T, R, R, H, H, H, H, R, R, T, T, T, T, T, T, T],
+        [T, T, R, H, S1,S1l,S1,R, T, T, T, T, T, T, T, T],
+        [T, T, R, S1,S1,S1d,S1,R, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1d,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, R, R, Rl,R, R, R, T, T, T, T, T, T, T],
+        [Re,Rel,R, R, Rl,R, R, Rl,R, R, T, T, T, T, T, T],
+        [T, Re,R, Rl,R, R, R, R, Rl,R, T, T, T, T, T, T],
+        [T, R, R, R, Rd,R, R, Rd,R, R, T, T, T, T, T, T],
+        [T, R, R, R, R, R, R, R, R, R, T, T, T, T, T, T],
+        [T, T, R, R, R, R, R, R, R, R, T, T, T, T, T, T],
+        [T, T, T, R, R, B, Bl,R, R, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [Re,Rel,T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, Re,Bt,Bt,Btl,Bt,T, T, T, T, T, T, T, T, T, T],
+        [T, T, Bt,Bt,Bt,Bt,T, T, T, T, T, T, T, T, T, T],
       ];
       if(dir===2)grid=grid.map(r=>[...r].reverse());
     }
   }
 
   else if(skinId==='winter_soldier'){
-    // Winter Soldier — grey/black tactical, one silver arm
-    const G='#555555',Bk='#333333',S='#c0c0c0',S1='#ffaa77',E='#444',B='#333',Bt='#222';
-    if(dir===0){
+    // Winter Soldier — grey/black tactical gear, metal arm, mask - 16×20 HD sprite
+    const G='#555555',Gd='#444444',Gl='#666666',Bk='#333333',Bkd='#222222',Bkl='#444444',S='#c0c0c0',Sd='#999999',Sl='#dddddd',M='#888888',Md='#666666',Ml='#aaaaaa',S1='#ffaa77',S1d='#dd8855',S1l='#ffcc99',E='#444',Ed='#333',Ep='#666',B='#333',Bd='#222',Bl='#444',Bt='#222',Btl='#333',Btd='#111';
+    if(dir===0 && frame===0){
       grid=[
-        [T, T, Bk,Bk,Bk,Bk,Bk,T, T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
-        [T, Bk,S1,S1,S1,S1,S1,Bk,T, T],
-        [T, T, S1,E, S1,E, S1,T, T, T],
-        [T, T, S1,S1,S1,S1,S1,T, T, T],
-        [T, T, G, G, G, G, G, T, T, T],
-        [T, S, G, G, G, G, G, G, T, T],
-        [T, S, G, G, G, G, G, G, T, T],
-        [T, T, G, B, B, G, T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, Bk,Bk,Bkl,Bk,Bk,Bkl,Bk,Bk,T, T, T, T, T],
+        [T, T, Bk,Bk,Bkl,Bk,Bk,Bk,Bk,Bkl,Bk,Bk,T, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,Bk,Bk,Bk,Bk,Bkl,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,S1,S1l,Bk,Bk,S1l,S1,Bk,Bk,T, T, T, T],
+        [T, T, Bk,S1,S1,S1d,Bk,Bk,S1d,S1,S1,Bk,T, T, T, T],
+        [T, T, T, S1,E, Ed,Bk,Bk,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,Bkd,Bkd,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,Bk,Bk,S1,S1,T, T, T, T, T, T],
+        [T, T, T, G, G, Gl,G, G, Gl,G, G, T, T, T, T, T],
+        [T, S, Sl,G, G, Gd,G, G, Gd,G, G, Gl,G, T, T, T],
+        [T, S, S, G, G, G, G, G, G, G, G, G, G, T, T, T],
+        [T, M, S, G, Gd,G, G, G, G, Gd,G, G, G, T, T, T],
+        [T, M, G, G, G, G, G, G, G, G, G, G, G, T, T, T],
+        [T, T, G, G, G, G, G, G, G, G, G, G, T, T, T, T],
+        [T, T, T, G, G, B, Bl,B, Bl,G, G, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
+      ];
+    } else if(dir===0 && frame===1){
+      grid=[
+        [T, T, T, Bk,Bk,Bkl,Bk,Bk,Bkl,Bk,Bk,T, T, T, T, T],
+        [T, T, Bk,Bk,Bkl,Bk,Bk,Bk,Bk,Bkl,Bk,Bk,T, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,Bk,Bk,Bk,Bk,Bkl,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,S1,S1l,Bk,Bk,S1l,S1,Bk,Bk,T, T, T, T],
+        [T, T, Bk,S1,S1,S1d,Bk,Bk,S1d,S1,S1,Bk,T, T, T, T],
+        [T, T, T, S1,E, Ed,Bk,Bk,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,Bkd,Bkd,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,Bk,Bk,S1,S1,T, T, T, T, T, T],
+        [T, T, T, G, G, Gl,G, G, Gl,G, G, T, T, T, T, T],
+        [T, S, Sl,G, G, Gd,G, G, Gd,G, G, Gl,G, T, T, T],
+        [T, S, S, G, G, G, G, G, G, G, G, G, G, T, T, T],
+        [T, M, S, G, Gd,G, G, G, G, Gd,G, G, G, T, T, T],
+        [T, M, G, G, G, G, G, G, G, G, G, G, G, T, T, T],
+        [T, T, G, G, G, G, G, G, G, G, G, G, T, T, T, T],
+        [T, T, T, G, G, B, Bl,B, Bl,G, G, T, T, T, T, T],
+        [T, T, T, B, B, B, T, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, B, B, T, T, T, T, T],
+        [T, T, T, T, Bt,Btl,Bt,T, Bt,Btl,Bt,T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else if(dir===3){
       grid=[
-        [T, T, Bk,Bk,Bk,Bk,Bk,T, T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
-        [T, T, Bk,Bk,Bk,Bk,Bk,T, T, T],
-        [T, T, Bk,Bk,Bk,Bk,Bk,T, T, T],
-        [T, T, G, G, G, G, G, T, T, T],
-        [T, G, G, G, G, G, G, G, T, T],
-        [T, G, G, G, G, G, G, G, T, T],
-        [T, T, G, B, B, G, T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, Bk,Bk,Bkl,Bk,Bk,Bkl,Bk,Bk,T, T, T, T, T],
+        [T, T, Bk,Bk,Bkl,Bk,Bk,Bk,Bk,Bkl,Bk,Bk,T, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,Bk,Bk,Bk,Bk,Bkl,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T],
+        [T, T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T],
+        [T, T, T, T, Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T, T],
+        [T, T, T, G, G, Gl,G, G, Gl,G, G, T, T, T, T, T],
+        [T, G, Gl,G, G, Gd,G, G, Gd,G, G, Gl,G, T, T, T],
+        [T, G, G, G, G, G, G, G, G, G, G, G, G, T, T, T],
+        [T, G, G, G, Gd,G, G, G, G, Gd,G, G, G, T, T, T],
+        [T, G, G, G, G, G, G, G, G, G, G, G, G, T, T, T],
+        [T, T, G, G, G, G, G, G, G, G, G, G, T, T, T, T],
+        [T, T, T, G, G, B, Bl,B, Bl,G, G, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else {
       grid=[
-        [T, T, Bk,Bk,Bk,Bk,T, T, T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
-        [T, Bk,S1,S1,S1,Bk,T, T, T, T],
-        [T, T, S1,E, S1,T, T, T, T, T],
-        [T, T, S1,S1,S1,T, T, T, T, T],
-        [T, T, G, G, G, T, T, T, T, T],
-        [T, S, G, G, G, G, T, T, T, T],
-        [T, S, G, G, G, G, T, T, T, T],
-        [T, T, G, B, G, T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+        [T, T, T, Bk,Bk,Bkl,Bk,Bk,T, T, T, T, T, T, T, T],
+        [T, T, Bk,Bk,Bkl,Bk,Bk,Bk,Bk,T, T, T, T, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,Bk,Bkl,Bk,Bk,T, T, T, T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T, T],
+        [T, T, Bk,Bk,S1,S1l,Bk,Bk,T, T, T, T, T, T, T, T],
+        [T, T, Bk,S1,S1,S1d,Bk,T, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,Bk,T, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1,Bkd,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,Bk,T, T, T, T, T, T, T, T, T],
+        [T, T, T, G, G, Gl,G, G, G, T, T, T, T, T, T, T],
+        [T, S, Sl,G, G, Gd,G, Gl,G, T, T, T, T, T, T, T],
+        [T, S, S, G, G, G, G, G, G, G, T, T, T, T, T, T],
+        [T, M, S, G, Gd,G, G, G, G, G, T, T, T, T, T, T],
+        [T, M, G, G, G, G, G, G, G, G, T, T, T, T, T, T],
+        [T, T, G, G, G, G, G, G, G, G, T, T, T, T, T, T],
+        [T, T, T, G, G, B, Bl,G, G, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, T, T, T, T, T, T, T, T],
       ];
       if(dir===2)grid=grid.map(r=>[...r].reverse());
     }
@@ -6910,104 +7192,198 @@ function getVisitorSprite(skinId,dir,frame){
   }
 
   else if(skinId==='titan_shifter'){
-    // Titan Shifter — brown jacket, white pants, green cape
-    const Br='#8b4513',W='#ffffff',G='#228833',S1='#ffaa77',E='#444',B='#333',Bt='#222';
-    if(dir===0){
+    // Titan Shifter — brown jacket, white pants, green cape, ODM gear - 16×20 HD sprite
+    const Br='#8b4513',Brd='#654321',Brl='#aa6644',W='#ffffff',Wd='#eeeeee',Wl='#ffffff',G='#228833',Gd='#117722',Gl='#33aa44',S1='#ffaa77',S1d='#dd8855',S1l='#ffcc99',H='#8b4513',Hd='#654321',Hl='#aa6644',E='#444',Ed='#333',Ep='#666',O='#666666',Od='#444444',Ol='#888888',B='#333',Bd='#222',Bl='#444',Bt='#222',Btl='#333',Btd='#111';
+    if(dir===0 && frame===0){
       grid=[
-        [T, T, Br,Br,Br,Br,Br,T, T, T],
-        [T, Br,Br,Br,Br,Br,Br,Br,T, T],
-        [T, Br,S1,S1,S1,S1,S1,Br,T, T],
-        [T, T, S1,E, S1,E, S1,T, T, T],
-        [T, T, S1,S1,S1,S1,S1,T, T, T],
-        [T, T, Br,Br,Br,Br,Br,T, T, T],
-        [G, Br,Br,Br,Br,Br,Br,Br,G, T],
-        [T, Br,Br,Br,Br,Br,Br,Br,T, T],
-        [T, T, W, W, W, W, T, T, T, T],
-        [T, T, W, W, T, W, W, T, T, T],
-        [T, T, W, W, T, W, W, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, Br,Br,Brl,Br,Br,Brl,Br,Br,T, T, T, T, T],
+        [T, T, Br,Br,Brl,Br,Br,Br,Br,Brl,Br,Br,T, T, T, T],
+        [T, Br,Br,Brl,Br,Br,Br,Br,Br,Br,Brl,Br,Br,T, T, T],
+        [T, Br,Br,Br,Br,Br,Br,Br,Br,Br,Br,Br,Br,T, T, T],
+        [T, T, Br,Br,H, Hl,H, H, Hl,H, Br,Br,T, T, T, T],
+        [T, T, Br,H, H, Hd,H, H, Hd,H, H, Br,T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, Br,Br,Brl,O, O, Brl,Br,Br,T, T, T, T, T],
+        [G, Gl,Br,Br,Brl,Br,O, O, Br,Brl,Br,Br,Gl,G, T, T],
+        [T, G, Br,Brl,Br,Br,Br,Br,Br,Br,Brl,Br,G, T, T, T],
+        [T, Br,Br,Br,Brd,Br,Br,Br,Br,Brd,Br,Br,Br,T, T, T],
+        [T, T, Br,Br,W, Wl,W, W, Wl,W, Br,Br,T, T, T, T],
+        [T, T, W, W, W, W, W, W, W, W, W, W, T, T, T, T],
+        [T, T, T, W, W, B, Bl,B, Bl,W, W, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
+      ];
+    } else if(dir===0 && frame===1){
+      grid=[
+        [T, T, T, Br,Br,Brl,Br,Br,Brl,Br,Br,T, T, T, T, T],
+        [T, T, Br,Br,Brl,Br,Br,Br,Br,Brl,Br,Br,T, T, T, T],
+        [T, Br,Br,Brl,Br,Br,Br,Br,Br,Br,Brl,Br,Br,T, T, T],
+        [T, Br,Br,Br,Br,Br,Br,Br,Br,Br,Br,Br,Br,T, T, T],
+        [T, T, Br,Br,H, Hl,H, H, Hl,H, Br,Br,T, T, T, T],
+        [T, T, Br,H, H, Hd,H, H, Hd,H, H, Br,T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, Br,Br,Brl,O, O, Brl,Br,Br,T, T, T, T, T],
+        [G, Gl,Br,Br,Brl,Br,O, O, Br,Brl,Br,Br,Gl,G, T, T],
+        [T, G, Br,Brl,Br,Br,Br,Br,Br,Br,Brl,Br,G, T, T, T],
+        [T, Br,Br,Br,Brd,Br,Br,Br,Br,Brd,Br,Br,Br,T, T, T],
+        [T, T, Br,Br,W, Wl,W, W, Wl,W, Br,Br,T, T, T, T],
+        [T, T, W, W, W, W, W, W, W, W, W, W, T, T, T, T],
+        [T, T, T, W, W, B, Bl,B, Bl,W, W, T, T, T, T, T],
+        [T, T, T, B, B, B, T, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, B, B, T, T, T, T, T],
+        [T, T, T, T, Bt,Btl,Bt,T, Bt,Btl,Bt,T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else if(dir===3){
       grid=[
-        [T, T, Br,Br,Br,Br,Br,T, T, T],
-        [T, Br,Br,Br,Br,Br,Br,Br,T, T],
-        [T, Br,Br,Br,Br,Br,Br,Br,T, T],
-        [T, T, Br,Br,Br,Br,Br,T, T, T],
-        [T, T, Br,Br,Br,Br,Br,T, T, T],
-        [T, T, Br,Br,Br,Br,Br,T, T, T],
-        [G, Br,Br,Br,Br,Br,Br,Br,G, T],
-        [T, Br,Br,Br,Br,Br,Br,Br,T, T],
-        [T, T, W, W, W, W, T, T, T, T],
-        [T, T, W, W, T, W, W, T, T, T],
-        [T, T, W, W, T, W, W, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, Br,Br,Brl,Br,Br,Brl,Br,Br,T, T, T, T, T],
+        [T, T, Br,Br,Brl,Br,Br,Br,Br,Brl,Br,Br,T, T, T, T],
+        [T, Br,Br,Brl,Br,Br,Br,Br,Br,Br,Brl,Br,Br,T, T, T],
+        [T, Br,Br,Br,Br,Br,Br,Br,Br,Br,Br,Br,Br,T, T, T],
+        [T, T, Br,Br,Br,Br,Br,Br,Br,Br,Br,Br,T, T, T, T],
+        [T, T, Br,Br,Br,Br,Br,Br,Br,Br,Br,Br,T, T, T, T],
+        [T, T, T, Br,Br,Br,Br,Br,Br,Br,Br,T, T, T, T, T],
+        [T, T, T, Br,Br,Br,Br,Br,Br,Br,Br,T, T, T, T, T],
+        [T, T, T, T, Br,Br,Br,Br,Br,Br,T, T, T, T, T, T],
+        [T, T, T, Br,Br,Brl,O, O, Brl,Br,Br,T, T, T, T, T],
+        [G, Gl,Br,Br,Brl,Br,O, O, Br,Brl,Br,Br,Gl,G, T, T],
+        [T, G, Br,Brl,Br,Br,Br,Br,Br,Br,Brl,Br,G, T, T, T],
+        [T, Br,Br,Br,Brd,Br,Br,Br,Br,Brd,Br,Br,Br,T, T, T],
+        [T, T, Br,Br,W, Wl,W, W, Wl,W, Br,Br,T, T, T, T],
+        [T, T, W, W, W, W, W, W, W, W, W, W, T, T, T, T],
+        [T, T, T, W, W, B, Bl,B, Bl,W, W, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else {
       grid=[
-        [T, T, Br,Br,Br,Br,T, T, T, T],
-        [T, Br,Br,Br,Br,Br,Br,T, T, T],
-        [T, Br,S1,S1,S1,Br,T, T, T, T],
-        [T, T, S1,E, S1,T, T, T, T, T],
-        [T, T, S1,S1,S1,T, T, T, T, T],
-        [T, T, Br,Br,Br,T, T, T, T, T],
-        [G, Br,Br,Br,Br,Br,T, T, T, T],
-        [T, Br,Br,Br,Br,Br,T, T, T, T],
-        [T, T, W, W, W, T, T, T, T, T],
-        [T, T, W, W, T, T, T, T, T, T],
-        [T, T, W, W, T, T, T, T, T, T],
-        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+        [T, T, T, Br,Br,Brl,Br,Br,T, T, T, T, T, T, T, T],
+        [T, T, Br,Br,Brl,Br,Br,Br,Br,T, T, T, T, T, T, T],
+        [T, Br,Br,Brl,Br,Br,Br,Brl,Br,Br,T, T, T, T, T, T],
+        [T, Br,Br,Br,Br,Br,Br,Br,Br,Br,T, T, T, T, T, T],
+        [T, T, Br,Br,H, Hl,H, Br,Br,T, T, T, T, T, T, T],
+        [T, T, Br,H, H, Hd,H, Br,T, T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1d,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, Br,Br,Brl,O, Br,Br,T, T, T, T, T, T, T],
+        [G, Gl,Br,Br,Brl,Br,O, Brl,Br,Br,T, T, T, T, T, T],
+        [T, G, Br,Brl,Br,Br,Br,Br,Brl,Br,T, T, T, T, T, T],
+        [T, Br,Br,Br,Brd,Br,Br,Brd,Br,Br,T, T, T, T, T, T],
+        [T, T, Br,Br,W, Wl,W, Br,Br,T, T, T, T, T, T, T],
+        [T, T, W, W, W, W, W, W, W, W, T, T, T, T, T, T],
+        [T, T, T, W, W, B, Bl,W, W, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, T, T, T, T, T, T, T, T],
       ];
       if(dir===2)grid=grid.map(r=>[...r].reverse());
     }
   }
 
   else if(skinId==='straw_hat'){
-    // Straw Hat — straw hat, red vest, blue shorts
-    const St='#daa520',R='#cc2222',Bl='#3366cc',S1='#ffaa77',E='#444',B='#333',Bt='#222';
-    if(dir===0){
+    // Straw Hat — straw hat, red vest, blue shorts (One Piece Luffy) - 16×20 HD sprite
+    const St='#daa520',Std='#b8941c',Stl='#e6c74d',R='#cc2222',Rd='#aa1111',Rl='#dd4444',Bl='#3366cc',Bld='#2244aa',Bll='#4477dd',S1='#ffaa77',S1d='#dd8855',S1l='#ffcc99',H='#8b4513',Hd='#654321',Hl='#aa6644',E='#222',Ed='#111',Ep='#444',B='#333',Bd='#222',Bt='#222',Btl='#333',Btd='#111';
+    if(dir===0 && frame===0){
       grid=[
-        [T, T, St,St,St,St,St,T, T, T],
-        [T, St,St,St,St,St,St,St,T, T],
-        [T, St,S1,S1,S1,S1,S1,St,T, T],
-        [T, T, S1,E, S1,E, S1,T, T, T],
-        [T, T, S1,S1,S1,S1,S1,T, T, T],
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, S1,R, R, R, R, R, S1,T, T],
-        [T, S1,R, R, R, R, R, S1,T, T],
-        [T, T, Bl,Bl,Bl,Bl,T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, St,St,Stl,St,St,Stl,St,St,T, T, T, T, T],
+        [T, T, St,St,Stl,St,St,St,St,Stl,St,St,T, T, T, T],
+        [T, St,St,Stl,St,St,St,St,St,St,Stl,St,St,T, T, T],
+        [T, St,St,St,St,St,St,St,St,St,St,St,St,T, T, T],
+        [T, T, St,St,H, Hl,H, H, Hl,H, St,St,T, T, T, T],
+        [T, T, St,H, H, Hd,H, H, Hd,H, H, St,T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, R, R, Rl,R, R, Rl,R, R, T, T, T, T, T],
+        [T, S1l,S1,R, R, Rd,R, R, Rd,R, R, S1,S1l,T, T, T],
+        [T, S1,S1l,R, R, R, R, R, R, R, R, S1l,S1,T, T, T],
+        [T, S1,S1,R, Rd,R, R, R, R, Rd,R, S1,S1,T, T, T],
+        [T, T, S1,S1,Bl,Bll,Bl,Bl,Bll,Bl,S1,S1,T, T, T, T],
+        [T, T, Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,T, T, T, T],
+        [T, T, T, Bl,Bl,B, Btl,B, Btl,Bl,Bl,T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
+      ];
+    } else if(dir===0 && frame===1){
+      grid=[
+        [T, T, T, St,St,Stl,St,St,Stl,St,St,T, T, T, T, T],
+        [T, T, St,St,Stl,St,St,St,St,Stl,St,St,T, T, T, T],
+        [T, St,St,Stl,St,St,St,St,St,St,Stl,St,St,T, T, T],
+        [T, St,St,St,St,St,St,St,St,St,St,St,St,T, T, T],
+        [T, T, St,St,H, Hl,H, H, Hl,H, St,St,T, T, T, T],
+        [T, T, St,H, H, Hd,H, H, Hd,H, H, St,T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, R, R, Rl,R, R, Rl,R, R, T, T, T, T, T],
+        [T, S1l,S1,R, R, Rd,R, R, Rd,R, R, S1,S1l,T, T, T],
+        [T, S1,S1l,R, R, R, R, R, R, R, R, S1l,S1,T, T, T],
+        [T, S1,S1,R, Rd,R, R, R, R, Rd,R, S1,S1,T, T, T],
+        [T, T, S1,S1,Bl,Bll,Bl,Bl,Bll,Bl,S1,S1,T, T, T, T],
+        [T, T, Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,T, T, T, T],
+        [T, T, T, Bl,Bl,B, Btl,B, Btl,Bl,Bl,T, T, T, T, T],
+        [T, T, T, B, B, B, T, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, B, B, T, T, T, T, T],
+        [T, T, T, T, Bt,Btl,Bt,T, Bt,Btl,Bt,T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else if(dir===3){
       grid=[
-        [T, T, St,St,St,St,St,T, T, T],
-        [T, St,St,St,St,St,St,St,T, T],
-        [T, St,St,St,St,St,St,St,T, T],
-        [T, T, St,St,St,St,St,T, T, T],
-        [T, T, St,St,St,St,St,T, T, T],
-        [T, T, R, R, R, R, R, T, T, T],
-        [T, R, R, R, R, R, R, R, T, T],
-        [T, R, R, R, R, R, R, R, T, T],
-        [T, T, Bl,Bl,Bl,Bl,T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, St,St,Stl,St,St,Stl,St,St,T, T, T, T, T],
+        [T, T, St,St,Stl,St,St,St,St,Stl,St,St,T, T, T, T],
+        [T, St,St,Stl,St,St,St,St,St,St,Stl,St,St,T, T, T],
+        [T, St,St,St,St,St,St,St,St,St,St,St,St,T, T, T],
+        [T, T, St,St,St,St,St,St,St,St,St,St,T, T, T, T],
+        [T, T, St,St,St,St,St,St,St,St,St,St,T, T, T, T],
+        [T, T, T, St,St,St,St,St,St,St,St,T, T, T, T, T],
+        [T, T, T, St,St,St,St,St,St,St,St,T, T, T, T, T],
+        [T, T, T, T, St,St,St,St,St,St,T, T, T, T, T, T],
+        [T, T, T, R, R, Rl,R, R, Rl,R, R, T, T, T, T, T],
+        [T, R, Rl,R, R, Rd,R, R, Rd,R, R, Rl,R, T, T, T],
+        [T, R, R, R, R, R, R, R, R, R, R, R, R, T, T, T],
+        [T, R, R, R, Rd,R, R, R, R, Rd,R, R, R, T, T, T],
+        [T, T, R, R, Bl,Bll,Bl,Bl,Bll,Bl,R, R, T, T, T, T],
+        [T, T, Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,T, T, T, T],
+        [T, T, T, Bl,Bl,B, Btl,B, Btl,Bl,Bl,T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else {
       grid=[
-        [T, T, St,St,St,St,T, T, T, T],
-        [T, St,St,St,St,St,St,T, T, T],
-        [T, St,S1,S1,S1,St,T, T, T, T],
-        [T, T, S1,E, S1,T, T, T, T, T],
-        [T, T, S1,S1,S1,T, T, T, T, T],
-        [T, T, R, R, R, T, T, T, T, T],
-        [T, S1,R, R, R, S1,T, T, T, T],
-        [T, S1,R, R, R, S1,T, T, T, T],
-        [T, T, Bl,Bl,Bl,T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+        [T, T, T, St,St,Stl,St,St,T, T, T, T, T, T, T, T],
+        [T, T, St,St,Stl,St,St,St,St,T, T, T, T, T, T, T],
+        [T, St,St,Stl,St,St,St,Stl,St,St,T, T, T, T, T, T],
+        [T, St,St,St,St,St,St,St,St,St,T, T, T, T, T, T],
+        [T, T, St,St,H, Hl,H, St,St,T, T, T, T, T, T, T],
+        [T, T, St,H, H, Hd,H, St,T, T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1d,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, R, R, Rl,R, R, R, T, T, T, T, T, T, T],
+        [T, S1l,S1,R, R, Rd,R, R, R, S1,T, T, T, T, T, T],
+        [T, S1,S1l,R, R, R, R, R, R, S1l,T, T, T, T, T, T],
+        [T, S1,S1,R, Rd,R, R, Rd,R, S1,T, T, T, T, T, T],
+        [T, T, S1,S1,Bl,Bll,Bl,S1,S1,T, T, T, T, T, T, T],
+        [T, T, Bl,Bl,Bl,Bl,Bl,Bl,Bl,Bl,T, T, T, T, T, T],
+        [T, T, T, Bl,Bl,B, Btl,Bl,Bl,T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, T, T, T, T, T, T, T, T],
       ];
       if(dir===2)grid=grid.map(r=>[...r].reverse());
     }
@@ -7090,104 +7466,198 @@ function getVisitorSprite(skinId,dir,frame){
   }
 
   else if(skinId==='plus_ultra'){
-    // Plus Ultra — green outfit, white gloves, spiky hair
-    const G='#228833',H='#2a4a2a',W='#ffffff',S1='#ffaa77',E='#444',B='#333',Bt='#222';
-    if(dir===0){
+    // Plus Ultra — green outfit, white gloves, spiky hair (My Hero Academia) - 16×20 HD sprite
+    const G='#228833',Gd='#117722',Gl='#33aa44',H='#2a4a2a',Hd='#1a3a1a',Hl='#3a5a3a',W='#ffffff',Wd='#eeeeee',Wl='#ffffff',S1='#ffaa77',S1d='#dd8855',S1l='#ffcc99',E='#222',Ed='#111',Ep='#444',B='#333',Bd='#222',Bl='#444',Bt='#222',Btl='#333',Btd='#111',Or='#ff6600',Ord='#cc4400',Orl='#ff8844';
+    if(dir===0 && frame===0){
       grid=[
-        [T, H, H, H, H, H, H, H, T, T],
-        [T, H, H, H, H, H, H, H, T, T],
-        [T, G, S1,S1,S1,S1,S1,G, T, T],
-        [T, T, S1,E, S1,E, S1,T, T, T],
-        [T, T, S1,S1,S1,S1,S1,T, T, T],
-        [T, T, G, G, G, G, G, T, T, T],
-        [T, W, G, G, G, G, G, W, T, T],
-        [T, W, G, G, G, G, G, W, T, T],
-        [T, T, G, B, B, G, T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, H, Hl,H, H, H, H, H, Hl,H, T, T, T, T, T],
+        [T, H, Hl,H, H, Hd,H, H, Hd,H, Hl,H, T, T, T, T],
+        [T, H, H, Hl,H, H, H, H, H, Hl,H, H, T, T, T, T],
+        [T, G, G, G, G, G, G, G, G, G, G, G, T, T, T, T],
+        [T, T, G, G, S1,S1l,S1,S1,S1l,S1,G, G, T, T, T, T],
+        [T, T, G, S1,S1,S1d,S1,S1,S1d,S1,S1,G, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, G, G, Gl,G, G, Gl,G, G, T, T, T, T, T],
+        [T, W, Wl,G, G, Gd,G, G, Gd,G, G, Wl,W, T, T, T],
+        [T, W, W, G, G, G, G, G, G, G, G, W, W, T, T, T],
+        [T, W, W, G, Gd,G, Or,Or,G, Gd,G, W, W, T, T, T],
+        [T, W, W, G, G, G, Orl,Orl,G, G, G, W, W, T, T, T],
+        [T, T, G, G, G, G, G, G, G, G, G, G, T, T, T, T],
+        [T, T, T, G, G, B, Bl,B, Bl,G, G, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
+      ];
+    } else if(dir===0 && frame===1){
+      grid=[
+        [T, T, H, Hl,H, H, H, H, H, Hl,H, T, T, T, T, T],
+        [T, H, Hl,H, H, Hd,H, H, Hd,H, Hl,H, T, T, T, T],
+        [T, H, H, Hl,H, H, H, H, H, Hl,H, H, T, T, T, T],
+        [T, G, G, G, G, G, G, G, G, G, G, G, T, T, T, T],
+        [T, T, G, G, S1,S1l,S1,S1,S1l,S1,G, G, T, T, T, T],
+        [T, T, G, S1,S1,S1d,S1,S1,S1d,S1,S1,G, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, G, G, Gl,G, G, Gl,G, G, T, T, T, T, T],
+        [T, W, Wl,G, G, Gd,G, G, Gd,G, G, Wl,W, T, T, T],
+        [T, W, W, G, G, G, G, G, G, G, G, W, W, T, T, T],
+        [T, W, W, G, Gd,G, Or,Or,G, Gd,G, W, W, T, T, T],
+        [T, W, W, G, G, G, Orl,Orl,G, G, G, W, W, T, T, T],
+        [T, T, G, G, G, G, G, G, G, G, G, G, T, T, T, T],
+        [T, T, T, G, G, B, Bl,B, Bl,G, G, T, T, T, T, T],
+        [T, T, T, B, B, B, T, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, B, B, T, T, T, T, T],
+        [T, T, T, T, Bt,Btl,Bt,T, Bt,Btl,Bt,T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else if(dir===3){
       grid=[
-        [T, H, H, H, H, H, H, H, T, T],
-        [T, H, H, H, H, H, H, H, T, T],
-        [T, G, G, G, G, G, G, G, T, T],
-        [T, T, G, G, G, G, G, T, T, T],
-        [T, T, G, G, G, G, G, T, T, T],
-        [T, T, G, G, G, G, G, T, T, T],
-        [T, W, G, G, G, G, G, W, T, T],
-        [T, W, G, G, G, G, G, W, T, T],
-        [T, T, G, B, B, G, T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, H, Hl,H, H, H, H, H, Hl,H, T, T, T, T, T],
+        [T, H, Hl,H, H, Hd,H, H, Hd,H, Hl,H, T, T, T, T],
+        [T, H, H, Hl,H, H, H, H, H, Hl,H, H, T, T, T, T],
+        [T, G, G, G, G, G, G, G, G, G, G, G, T, T, T, T],
+        [T, T, G, G, G, G, G, G, G, G, G, G, T, T, T, T],
+        [T, T, G, G, G, G, G, G, G, G, G, G, T, T, T, T],
+        [T, T, T, G, G, G, G, G, G, G, G, T, T, T, T, T],
+        [T, T, T, G, G, G, G, G, G, G, G, T, T, T, T, T],
+        [T, T, T, T, G, G, G, G, G, G, T, T, T, T, T, T],
+        [T, T, T, G, G, Gl,G, G, Gl,G, G, T, T, T, T, T],
+        [T, W, Wl,G, G, Gd,G, G, Gd,G, G, Wl,W, T, T, T],
+        [T, W, W, G, G, G, G, G, G, G, G, W, W, T, T, T],
+        [T, W, W, G, Gd,G, G, G, G, Gd,G, W, W, T, T, T],
+        [T, W, W, G, G, G, G, G, G, G, G, W, W, T, T, T],
+        [T, T, G, G, G, G, G, G, G, G, G, G, T, T, T, T],
+        [T, T, T, G, G, B, Bl,B, Bl,G, G, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, B, B, B, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else {
       grid=[
-        [T, H, H, H, H, H, T, T, T, T],
-        [T, H, H, H, H, H, H, T, T, T],
-        [T, G, S1,S1,S1,G, T, T, T, T],
-        [T, T, S1,E, S1,T, T, T, T, T],
-        [T, T, S1,S1,S1,T, T, T, T, T],
-        [T, T, G, G, G, T, T, T, T, T],
-        [T, W, G, G, G, W, T, T, T, T],
-        [T, W, G, G, G, W, T, T, T, T],
-        [T, T, G, B, G, T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+        [T, T, H, Hl,H, H, H, H, T, T, T, T, T, T, T, T],
+        [T, H, Hl,H, H, Hd,H, Hl,H, T, T, T, T, T, T, T],
+        [T, H, H, Hl,H, H, H, H, H, T, T, T, T, T, T, T],
+        [T, G, G, G, G, G, G, G, G, G, T, T, T, T, T, T],
+        [T, T, G, G, S1,S1l,S1,G, G, T, T, T, T, T, T, T],
+        [T, T, G, S1,S1,S1d,S1,G, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1d,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, G, G, Gl,G, G, G, T, T, T, T, T, T, T],
+        [T, W, Wl,G, G, Gd,G, Wl,W, T, T, T, T, T, T, T],
+        [T, W, W, G, G, G, G, W, W, T, T, T, T, T, T, T],
+        [T, W, W, G, Gd,G, Or,W, W, T, T, T, T, T, T, T],
+        [T, W, W, G, G, G, Orl,W, W, T, T, T, T, T, T, T],
+        [T, T, G, G, G, G, G, G, G, T, T, T, T, T, T, T],
+        [T, T, T, G, G, B, Bl,G, G, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, B, B, B, T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, T, T, T, T, T, T, T, T],
       ];
       if(dir===2)grid=grid.map(r=>[...r].reverse());
     }
   }
 
   else if(skinId==='streetking'){
-    // Streetking — black outfit, orange highlights, crown
-    const Bk='#222222',Or='#ff6600',Cr='#ffdd00',S1='#ffaa77',E='#444',B='#333',Bt='#222';
-    if(dir===0){
+    // Streetking — black outfit, orange highlights, crown (Street style) - 16×20 HD sprite
+    const Bk='#222222',Bkd='#111111',Bkl='#333333',Or='#ff6600',Ord='#cc4400',Orl='#ff8844',Cr='#ffdd00',Crd='#ccaa00',Crl='#fff055',S1='#ffaa77',S1d='#dd8855',S1l='#ffcc99',H='#8b4513',Hd='#654321',Hl='#aa6644',E='#444',Ed='#333',Ep='#666',Sn='#000000',Snd='#111111',Snl='#222222',B='#333',Bd='#222',Bl='#444',Bt='#222',Btl='#333',Btd='#111';
+    if(dir===0 && frame===0){
       grid=[
-        [T, T, Cr,Cr,Cr,Cr,Cr,T, T, T],
-        [T, Cr,Cr,Cr,Cr,Cr,Cr,Cr,T, T],
-        [T, Bk,S1,S1,S1,S1,S1,Bk,T, T],
-        [T, T, S1,E, S1,E, S1,T, T, T],
-        [T, T, S1,S1,S1,S1,S1,T, T, T],
-        [T, T, Bk,Or,Or,Or,Bk,T, T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
-        [T, Bk,Bk,Or,Bk,Or,Bk,Bk,T, T],
-        [T, T, Bk,B, B, Bk,T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, Cr,Cr,Crl,Cr,Cr,Crl,Cr,Cr,T, T, T, T, T],
+        [T, T, Cr,Cr,Crl,Cr,Cr,Cr,Cr,Crl,Cr,Cr,T, T, T, T],
+        [T, Cr,Cr,Crl,Cr,Cr,Cr,Cr,Cr,Cr,Crl,Cr,Cr,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,H, Hl,H, H, Hl,H, Bk,Bk,T, T, T, T],
+        [T, T, Bk,H, H, Hd,H, H, Hd,H, H, Bk,T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, Bk,Bk,Or,Orl,Orl,Or,Bk,Bk,T, T, T, T, T],
+        [T, T, Bk,Bk,Bkl,Or,Or,Or,Or,Bkl,Bk,Bk,T, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,Or,Or,Bk,Bk,Bkl,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bkd,Bk,Or,Or,Bk,Bkd,Bk,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, T, Bk,Sn,Sn,Snl,Snl,Sn,Sn,Bk,T, T, T, T, T],
+        [T, T, T, T, Sn,Sn,Sn,T, Sn,Sn,Sn,T, T, T, T, T],
+        [T, T, T, T, Sn,Sn,Sn,T, Sn,Sn,Sn,T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
+      ];
+    } else if(dir===0 && frame===1){
+      grid=[
+        [T, T, T, Cr,Cr,Crl,Cr,Cr,Crl,Cr,Cr,T, T, T, T, T],
+        [T, T, Cr,Cr,Crl,Cr,Cr,Cr,Cr,Crl,Cr,Cr,T, T, T, T],
+        [T, Cr,Cr,Crl,Cr,Cr,Cr,Cr,Cr,Cr,Crl,Cr,Cr,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,H, Hl,H, H, Hl,H, Bk,Bk,T, T, T, T],
+        [T, T, Bk,H, H, Hd,H, H, Hd,H, H, Bk,T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,S1,E, Ed,S1,T, T, T, T, T],
+        [T, T, T, S1,S1,S1,S1d,S1d,S1,S1,S1,T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,S1,S1,S1,T, T, T, T, T, T],
+        [T, T, T, Bk,Bk,Or,Orl,Orl,Or,Bk,Bk,T, T, T, T, T],
+        [T, T, Bk,Bk,Bkl,Or,Or,Or,Or,Bkl,Bk,Bk,T, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,Or,Or,Bk,Bk,Bkl,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bkd,Bk,Or,Or,Bk,Bkd,Bk,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, T, Bk,Sn,Sn,Snl,Snl,Sn,Sn,Bk,T, T, T, T, T],
+        [T, T, T, Sn,Sn,Sn,T, T, Sn,Sn,Sn,T, T, T, T, T],
+        [T, T, T, T, Sn,Sn,Sn,T, T, Sn,Sn,T, T, T, T, T],
+        [T, T, T, T, Bt,Btl,Bt,T, Bt,Btl,Bt,T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else if(dir===3){
       grid=[
-        [T, T, Cr,Cr,Cr,Cr,Cr,T, T, T],
-        [T, Cr,Cr,Cr,Cr,Cr,Cr,Cr,T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
-        [T, T, Bk,Bk,Bk,Bk,Bk,T, T, T],
-        [T, T, Bk,Bk,Bk,Bk,Bk,T, T, T],
-        [T, T, Bk,Or,Or,Or,Bk,T, T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T],
-        [T, Bk,Bk,Or,Bk,Or,Bk,Bk,T, T],
-        [T, T, Bk,B, B, Bk,T, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, T, B, B, T, B, B, T, T, T],
-        [T, Bt,Bt,Bt,T, Bt,Bt,Bt,T, T],
+        [T, T, T, Cr,Cr,Crl,Cr,Cr,Crl,Cr,Cr,T, T, T, T, T],
+        [T, T, Cr,Cr,Crl,Cr,Cr,Cr,Cr,Crl,Cr,Cr,T, T, T, T],
+        [T, Cr,Cr,Crl,Cr,Cr,Cr,Cr,Cr,Cr,Crl,Cr,Cr,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T],
+        [T, T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T],
+        [T, T, T, T, Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T, T],
+        [T, T, T, Bk,Bk,Or,Orl,Orl,Or,Bk,Bk,T, T, T, T, T],
+        [T, T, Bk,Bk,Bkl,Or,Or,Or,Or,Bkl,Bk,Bk,T, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,Or,Or,Bk,Bk,Bkl,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bkd,Bk,Or,Or,Bk,Bkd,Bk,Bk,Bk,T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T],
+        [T, T, T, Bk,Sn,Sn,Snl,Snl,Sn,Sn,Bk,T, T, T, T, T],
+        [T, T, T, T, Sn,Sn,Sn,T, Sn,Sn,Sn,T, T, T, T, T],
+        [T, T, T, T, Sn,Sn,Sn,T, Sn,Sn,Sn,T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, Bt,Btl,Bt,Bt,T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, Bt,Bt,Bt,Bt,T, T, T, T],
       ];
     } else {
       grid=[
-        [T, T, Cr,Cr,Cr,Cr,T, T, T, T],
-        [T, Cr,Cr,Cr,Cr,Cr,Cr,T, T, T],
-        [T, Bk,S1,S1,S1,Bk,T, T, T, T],
-        [T, T, S1,E, S1,T, T, T, T, T],
-        [T, T, S1,S1,S1,T, T, T, T, T],
-        [T, T, Bk,Or,Bk,T, T, T, T, T],
-        [T, Bk,Bk,Bk,Bk,Bk,T, T, T, T],
-        [T, Bk,Bk,Or,Bk,Bk,T, T, T, T],
-        [T, T, Bk,B, Bk,T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, T, B, B, T, T, T, T, T, T],
-        [T, Bt,Bt,Bt,T, T, T, T, T, T],
+        [T, T, T, Cr,Cr,Crl,Cr,Cr,T, T, T, T, T, T, T, T],
+        [T, T, Cr,Cr,Crl,Cr,Cr,Cr,Cr,T, T, T, T, T, T, T],
+        [T, Cr,Cr,Crl,Cr,Cr,Cr,Crl,Cr,Cr,T, T, T, T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T, T],
+        [T, T, Bk,Bk,H, Hl,H, Bk,Bk,T, T, T, T, T, T, T],
+        [T, T, Bk,H, H, Hd,H, Bk,T, T, T, T, T, T, T, T],
+        [T, T, T, S1,E, Ed,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, S1,S1,S1d,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, S1,S1,S1,T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bk,Bk,Or,Orl,Bk,Bk,T, T, T, T, T, T, T],
+        [T, T, Bk,Bk,Bkl,Or,Or,Bkl,Bk,Bk,T, T, T, T, T, T],
+        [T, Bk,Bk,Bkl,Bk,Bk,Or,Bk,Bkl,Bk,Bk,T, T, T, T, T],
+        [T, Bk,Bk,Bk,Bkd,Bk,Or,Bkd,Bk,Bk,Bk,T, T, T, T, T],
+        [T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T],
+        [T, T, Bk,Bk,Bk,Bk,Bk,Bk,Bk,Bk,T, T, T, T, T, T],
+        [T, T, T, Bk,Sn,Sn,Snl,Bk,T, T, T, T, T, T, T, T],
+        [T, T, T, T, Sn,Sn,Sn,T, T, T, T, T, T, T, T, T],
+        [T, T, T, T, Sn,Sn,Sn,T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Btl,Bt,T, T, T, T, T, T, T, T, T],
+        [T, T, T, Bt,Bt,Bt,Bt,T, T, T, T, T, T, T, T, T],
       ];
       if(dir===2)grid=grid.map(r=>[...r].reverse());
     }
@@ -9334,7 +9804,7 @@ function renderFloor1(){
       // Shelf 1 (top): Premium spirits
       {x:0,c:'#1a5a1a',h:22,neck:6,label:'🥃',glow:'#2a8a2a'},  // Absinthe (green)
       {x:38,c:'#6a1a1a',h:20,neck:5,label:'🍷',glow:'#aa2a2a'},  // Red wine
-      {x:72,c:'#1a2a6a',h:24,neck:7,label:'🫗',glow:'#4466cc'},  // Vodka (blue)
+      {x:72,c:'#e8e0d0',h:26,neck:8,label:'S',glow:'#3355bb',isSane:true},  // ★ SANE® Vodka (Berlin)
       {x:106,c:'#8a5a0a',h:18,neck:4,label:'🥃',glow:'#cc8822'},  // Whiskey
       {x:140,c:'#5a1a5a',h:21,neck:6,label:'🍸',glow:'#9944aa'},  // Gin (purple)
       {x:174,c:'#0a5a5a',h:23,neck:5,label:'🧊',glow:'#22aaaa'},  // Tequila (teal)
@@ -9356,25 +9826,60 @@ function renderFloor1(){
     bottles.forEach((b,i)=>{
       const bx=bar.x+18+b.x;
       const sy=shelfY-28;
-      // Bottle body
-      ctx.fillStyle=b.c;
-      ctx.fillRect(bx,sy-b.h,10,b.h);
-      // Bottle neck
-      ctx.fillStyle=b.c;
-      ctx.fillRect(bx+2,sy-b.h-b.neck,6,b.neck);
-      // Cap
-      ctx.fillStyle='#888';ctx.fillRect(bx+3,sy-b.h-b.neck-2,4,2);
-      // Glass highlight (left edge reflection)
-      ctx.fillStyle='rgba(255,255,255,0.18)';ctx.fillRect(bx+1,sy-b.h+2,2,b.h-4);
-      // Liquid level (slightly transparent showing color)
-      const liquidH=b.h*0.7;
-      ctx.fillStyle=b.glow+'44';ctx.fillRect(bx+1,sy-liquidH,8,liquidH);
-      // Bottle glow on shelf (ambient light from LED)
-      const bg=ctx.createRadialGradient(bx+5,sy-b.h/2,0,bx+5,sy-b.h/2,18);
-      bg.addColorStop(0,b.glow+'22');bg.addColorStop(1,'transparent');
-      ctx.fillStyle=bg;ctx.beginPath();ctx.arc(bx+5,sy-b.h/2,18,0,Math.PI*2);ctx.fill();
-      // Label (tiny text)
-      ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillRect(bx+1,sy-b.h/2-2,8,5);
+
+      if(b.isSane){
+        // ★ SANE® VODKA — Premium custom render (clear glass, white label, blue text)
+        const bH=b.h, nH=b.neck;
+        // Clear glass bottle body (slightly tinted, taller than others)
+        ctx.fillStyle='rgba(200,210,220,0.15)';ctx.fillRect(bx-1,sy-bH,12,bH);
+        // Glass edges
+        ctx.fillStyle='rgba(255,255,255,0.12)';ctx.fillRect(bx-1,sy-bH,1,bH);ctx.fillRect(bx+10,sy-bH,1,bH);
+        // Narrow neck (clear glass)
+        ctx.fillStyle='rgba(200,210,220,0.12)';ctx.fillRect(bx+2,sy-bH-nH,6,nH);
+        ctx.fillStyle='rgba(255,255,255,0.1)';ctx.fillRect(bx+2,sy-bH-nH,1,nH);
+        // Silver cap
+        ctx.fillStyle='#bbb';ctx.fillRect(bx+2,sy-bH-nH-2,6,3);
+        ctx.fillStyle='#ddd';ctx.fillRect(bx+2,sy-bH-nH-2,6,1);
+        // White label (lower 60% of bottle)
+        const labelTop=sy-bH*0.65, labelH=bH*0.55;
+        ctx.fillStyle='#f0ece6';ctx.fillRect(bx,labelTop,10,labelH);
+        // "VODKA" tiny text (blue, above sane text)
+        ctx.fillStyle='#3355bb';ctx.font='3px monospace';ctx.textAlign='center';
+        ctx.fillText('VODKA',bx+5,labelTop+5);
+        // "sane" text (blue, larger, distinctive)
+        ctx.fillStyle='#2244aa';ctx.font='bold 5px sans-serif';
+        ctx.fillText('sane',bx+5,labelTop+12);
+        // "Berlin" subtitle
+        ctx.fillStyle='#6677aa';ctx.font='2px monospace';
+        ctx.fillText('BERLIN',bx+5,labelTop+16);
+        ctx.textAlign='left';
+        // Liquid inside (clear vodka — very subtle)
+        ctx.fillStyle='rgba(200,220,240,0.08)';
+        ctx.fillRect(bx+1,sy-bH*0.3,8,bH*0.28);
+        // Premium glow — blue/white shimmer (pulsing)
+        const saneGlow=0.12+Math.sin(bT*1.8)*0.06;
+        const sg=ctx.createRadialGradient(bx+5,sy-bH/2,0,bx+5,sy-bH/2,22);
+        sg.addColorStop(0,`rgba(50,80,180,${saneGlow})`);sg.addColorStop(1,'transparent');
+        ctx.fillStyle=sg;ctx.beginPath();ctx.arc(bx+5,sy-bH/2,22,0,Math.PI*2);ctx.fill();
+        // Subtle spotlight on SANE bottle (it's the featured one)
+        const spotG=ctx.createRadialGradient(bx+5,sy-bH-10,0,bx+5,sy-bH-10,30);
+        spotG.addColorStop(0,'rgba(255,255,255,0.04)');spotG.addColorStop(1,'transparent');
+        ctx.fillStyle=spotG;ctx.fillRect(bx-15,sy-bH-25,40,bH+30);
+      } else {
+        // Standard bottle render
+        ctx.fillStyle=b.c;
+        ctx.fillRect(bx,sy-b.h,10,b.h);
+        ctx.fillStyle=b.c;
+        ctx.fillRect(bx+2,sy-b.h-b.neck,6,b.neck);
+        ctx.fillStyle='#888';ctx.fillRect(bx+3,sy-b.h-b.neck-2,4,2);
+        ctx.fillStyle='rgba(255,255,255,0.18)';ctx.fillRect(bx+1,sy-b.h+2,2,b.h-4);
+        const liquidH=b.h*0.7;
+        ctx.fillStyle=b.glow+'44';ctx.fillRect(bx+1,sy-liquidH,8,liquidH);
+        const bg=ctx.createRadialGradient(bx+5,sy-b.h/2,0,bx+5,sy-b.h/2,18);
+        bg.addColorStop(0,b.glow+'22');bg.addColorStop(1,'transparent');
+        ctx.fillStyle=bg;ctx.beginPath();ctx.arc(bx+5,sy-b.h/2,18,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillRect(bx+1,sy-b.h/2-2,8,5);
+      }
     });
 
     // ── MAIN COUNTER: Polished mahogany with epoxy resin top ──
@@ -9472,6 +9977,26 @@ function renderFloor1(){
     // Handle
     ctx.strokeStyle='#ccc';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx4+6,bar.y+4,3,-.5,Math.PI*.8);ctx.stroke();
 
+    // ── SANE® BOTTLE ON COUNTER (featured display) ──
+    const saneX=bar.x+130;
+    // Clear glass bottle (larger, prominent)
+    ctx.fillStyle='rgba(200,210,225,0.12)';ctx.fillRect(saneX,bar.y-18,8,22);
+    ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(saneX,bar.y-18,1,22);ctx.fillRect(saneX+7,bar.y-18,1,22);
+    // Neck
+    ctx.fillStyle='rgba(200,210,225,0.10)';ctx.fillRect(saneX+2,bar.y-24,4,6);
+    // Silver cap
+    ctx.fillStyle='#bbb';ctx.fillRect(saneX+2,bar.y-26,4,2);
+    // White label
+    ctx.fillStyle='#f0ece6';ctx.fillRect(saneX+1,bar.y-12,6,10);
+    // "sane" text on label
+    ctx.fillStyle='#2244aa';ctx.font='bold 4px sans-serif';ctx.textAlign='center';
+    ctx.fillText('sane',saneX+4,bar.y-5);
+    ctx.textAlign='left';
+    // Blue glow around SANE bottle
+    const sbGlow=ctx.createRadialGradient(saneX+4,bar.y-8,0,saneX+4,bar.y-8,16);
+    sbGlow.addColorStop(0,`rgba(50,80,180,${0.08+Math.sin(bT*2)*0.04})`);sbGlow.addColorStop(1,'transparent');
+    ctx.fillStyle=sbGlow;ctx.beginPath();ctx.arc(saneX+4,bar.y-8,16,0,Math.PI*2);ctx.fill();
+
     // ── LED UNDERGLOW (pulsing color under counter edge) ──
     const underGlow=ctx.createLinearGradient(bar.x,bar.y+bar.h,bar.x,bar.y+bar.h+15);
     const ugh=(bT*30)%360;
@@ -9495,9 +10020,9 @@ function renderFloor1(){
     ctx.strokeStyle='#5a4a3a';ctx.lineWidth=1;ctx.strokeRect(bar.x+bar.w-120,shelfY-38,115,30);
     ctx.font='6px monospace';ctx.fillStyle='#e8e0c8';
     ctx.fillText('TODAY\'S SPECIALS:',bar.x+bar.w-115,shelfY-28);
-    const specials=['Aperol Nebula  5◈','Echo\'s Secret 12◈','Stardust Shot  3◈'];
+    const specials=['★ SANE Blue    8◈','Aperol Nebula  5◈','SANE Shot      3◈'];
     specials.forEach((s,i)=>{
-      ctx.fillStyle=['#ff6633','#ff4400','#ffd700'][i];
+      ctx.fillStyle=['#2244aa','#ff6633','#3355bb'][i];
       ctx.fillText(s,bar.x+bar.w-115,shelfY-20+i*7);
     });
 
@@ -11119,6 +11644,8 @@ function updateVisitor(dt){
     if(v._drinkEffect==='wobbly'){v.x+=Math.sin(S.time*8)*0.5;/* subtle wobble */}
     if(v._drinkEffect==='calm'&&Math.random()<0.15){S.particles.push({x:v.x+(Math.random()-.5)*24,y:v.y-Math.random()*20,vx:0,vy:-0.2,life:20,color:'#88cc4488',size:3+Math.random()*2})}
     if(v._drinkEffect==='luck'&&Math.random()<0.2){S.particles.push({x:v.x+(Math.random()-.5)*18,y:v.y-Math.random()*28,vx:(Math.random()-.5)*0.5,vy:-0.4,life:18,color:'#ffd700',size:1.5+Math.random()})}
+    if(v._drinkEffect==='sane_clean'&&Math.random()<0.12){S.particles.push({x:v.x+(Math.random()-.5)*16,y:v.y-Math.random()*22,vx:0,vy:-0.3,life:15,color:Math.random()>.5?'#3355bb':'#ffffff',size:1.5})}
+    if(v._drinkEffect==='sane_premium'&&Math.random()<0.25){const a=(S.time*3+Math.random()*6);S.particles.push({x:v.x+Math.cos(a)*10,y:v.y-15+Math.sin(a)*8,vx:Math.cos(a)*0.5,vy:-0.3+Math.sin(a)*0.3,life:20,color:['#2244aa','#ffffff','#5577dd','#88aaff'][Math.random()*4|0],size:1.5+Math.random()*1.5})}
     if(v._drinkTimer<=0){
       v._drinkEffect=null;
       if(v._origSpeed){v.speed=v._origSpeed;v._origSpeed=null}
@@ -13416,6 +13943,9 @@ const BAR_MENU = [
   {id:'zen_matcha',name:'Zen Matcha',icon:'🍵',cost:3,effect:'calm',desc:'Matcha latte with moon milk. Calm aura for 30s.',color:'#88cc44',realDrink:'Matcha Latte',category:'house'},
   {id:'echo_special',name:'Echo\'s Secret',icon:'🌶️',cost:12,effect:'echo_special',desc:'Nobody knows what\'s in it. Echo won\'t tell. Side effects: yes.',color:'#ff4400',category:'house'},
   {id:'stardust_shot',name:'Stardust Shot',icon:'⭐',cost:3,effect:'luck',desc:'Liquid luck. +15% loot rarity for 60s.',color:'#ffd700',category:'house'},
+  // --- SANE® Collab (Berlin) ---
+  {id:'sane_shot',name:'SANE Shot',icon:'🫗',cost:3,effect:'sane_clean',desc:'Pure Berlin vodka. Clean, smooth, no nonsense. The "a" is iconic.',color:'#3355bb',realDrink:'sane® vodka',category:'collab'},
+  {id:'sane_blue',name:'SANE Blue',icon:'💎',cost:8,effect:'sane_premium',desc:'Premium SANE cocktail — blue swirl, white frost, Berlin night energy.',color:'#2244aa',realDrink:'sane® signature',category:'collab'},
   // --- Free ---
   {id:'moonwater',name:'Moonwater',icon:'💧',cost:0,effect:'heal',desc:'Free. Refreshing. Echo says stay hydrated.',color:'#88ccff',realDrink:'Water',category:'free'},
 ];
@@ -13462,6 +13992,27 @@ function applyDrinkEffect(d) {
       else { showNotification('🌶️🔥 WHAT WAS IN THAT?!'); }
       if (typeof addChatMsg === 'function') addChatMsg('Echo', 'I warned you. I WARNED you. Recipe dies with me. 🌶️', '#ff4400');
     },
+    sane_clean() {
+      S.visitor._drinkEffect = 'sane_clean'; S.visitor._drinkTimer = 25;
+      showNotification('🫗 Clean. Smooth. Berlin.');
+      if (typeof addChatMsg === 'function') addChatMsg('Echo', 'sane® — distilled in Berlin. That "a" really is iconic. 💎', '#3355bb');
+      // Blue/white particle burst
+      for (let i = 0; i < 15; i++) { S.particles.push({ x: S.visitor.x + (Math.random() - .5) * 20, y: S.visitor.y - Math.random() * 30, vx: (Math.random() - .5) * 1.5, vy: -0.5 - Math.random(), life: 18, color: ['#3355bb', '#ffffff', '#5577cc'][Math.random() * 3 | 0], size: 1.5 + Math.random() }); }
+    },
+    sane_premium() {
+      S.visitor._drinkEffect = 'sane_premium'; S.visitor._drinkTimer = 40;
+      // Blue swirl + frost effect
+      S.screenShake = 3;
+      showNotification('💎 SANE Blue — Berlin Night Energy');
+      if (typeof addChatMsg === 'function') addChatMsg('Echo', 'The premium sane® experience. Blue swirl, white frost, pure Berlin. You look expensive. 🌊', '#2244aa');
+      // Big blue/white swirl burst
+      for (let i = 0; i < 30; i++) {
+        const angle = (i / 30) * Math.PI * 2;
+        S.particles.push({ x: S.visitor.x + Math.cos(angle) * 15, y: S.visitor.y - 15 + Math.sin(angle) * 10, vx: Math.cos(angle) * 2, vy: Math.sin(angle) * 2 - 1, life: 25 + Math.random() * 15, color: i % 3 === 0 ? '#ffffff' : i % 3 === 1 ? '#2244aa' : '#5577dd', size: 2 + Math.random() * 2 });
+      }
+      // Frost ring effect
+      if (typeof addImpactRing === 'function') addImpactRing(S.visitor.x, S.visitor.y - 15, '#4466cc', 60, 3);
+    },
     heal() {
       showNotification('💧 Refreshing!');
       if (typeof addChatMsg === 'function') addChatMsg('Echo', 'Hydration is self-care. ✨', '#88ccff');
@@ -13495,7 +14046,7 @@ function showBarMenu() {
   html += '<div style="font-size:9px;color:#888;margin-bottom:8px">Real cocktails, reimagined in space. What\'ll it be?</div>';
 
   // Category tabs
-  const cats = [{ id: 'classic', label: '🍸 Classics', desc: 'Inspired by real-world legends' }, { id: 'house', label: '✨ House Specials', desc: 'Echo originals' }, { id: 'free', label: '💧 Free', desc: 'On the house' }];
+  const cats = [{ id: 'collab', label: '🤝 sane® vodka', desc: 'Distilled & bottled in Berlin — real brand collab' }, { id: 'classic', label: '🍸 Classics', desc: 'Inspired by real-world legends' }, { id: 'house', label: '✨ House Specials', desc: 'Echo originals' }, { id: 'free', label: '💧 Free', desc: 'On the house' }];
   cats.forEach(cat => {
     const catDrinks = BAR_MENU.filter(d => d.category === cat.id);
     html += `<div style="margin:8px 0 4px;font-size:10px;color:#aaa;border-bottom:1px solid #333;padding-bottom:2px">${cat.label} <span style="font-size:8px;color:#666">— ${cat.desc}</span></div>`;
@@ -15791,6 +16342,8 @@ function renderVisitorAccessories(cx,v){
       calm:     { glass:'mug',     liquid:'#88cc44', garnish:null },
       luck:     { glass:'shot',    liquid:'#ffd700', garnish:null },
       echo_special:{ glass:'martini', liquid:'#ff4400', garnish:'#ffd700' },
+      sane_clean:{ glass:'shot',   liquid:'#dde8f0', garnish:null },
+      sane_premium:{ glass:'martini', liquid:'#2244aa', garnish:'#ffffff' },
       heal:     { glass:'tall',    liquid:'#88ccff', garnish:null }
     };
     const de = drinkEffects[v._drinkEffect] || drinkEffects.heal;
