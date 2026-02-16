@@ -20991,16 +20991,31 @@ update = function(dt) {
 // §40B. BRAND-THEMED CLUB ROOMS + OMI ECONOMY BRIDGE
 // ═══════════════════════════════════════
 
+const _ALL_GENRES = ['house','techno','hiphop','dnb','ambient','latin'];
 const BRAND_CLUBS = {
-  cantina:{name:"Mos Eisley Cantina",brand:"Star Wars",zone:{x:50,y:100,w:200,h:250},genre:'latin',colors:{primary:'#8B7355',accent:'#FFD700',glow:'#4a9eff'},desc:"A wretched hive of scum and villainy... and great music."},
-  tower:{name:"Avengers Tower Lounge",brand:"Marvel",zone:{x:280,y:100,w:200,h:250},genre:'house',colors:{primary:'#1a1a8a',accent:'#cc0000',glow:'#4488ff'},desc:"Earth's mightiest dance floor."},
-  batcave:{name:"The Batcave Club",brand:"DC",zone:{x:510,y:100,w:200,h:250},genre:'techno',colors:{primary:'#1a1a2a',accent:'#FFD700',glow:'#4444aa'},desc:"Dark. Brooding. Excellent bass."},
-  dojo:{name:"World Warrior Dojo",brand:"Street Fighter",zone:{x:560,y:380,w:200,h:180},genre:'dnb',colors:{primary:'#8B0000',accent:'#FFD700',glow:'#ff4444'},desc:"Round 1... DANCE!"},
-  tron:{name:"The Grid",brand:"Tron",zone:{x:50,y:100,w:200,h:250},genre:'techno',colors:{primary:'#001a33',accent:'#00ffff',glow:'#0088cc'},desc:"Welcome to the Grid. The system is the DJ."},
-  hyrule:{name:"Lon Lon Lounge",brand:"Zelda",zone:{x:280,y:100,w:200,h:250},genre:'ambient',colors:{primary:'#1a3a1a',accent:'#88ff44',glow:'#44aa22'},desc:"Epona's favorite chill spot. Ocarina vibes only."},
-  wakanda:{name:"Wakanda Forever Club",brand:"Marvel",zone:{x:510,y:100,w:200,h:250},genre:'house',colors:{primary:'#2a1a4a',accent:'#aa66ff',glow:'#7733cc'},desc:"The most technologically advanced dance floor on the station."},
-  raccoon:{name:"Raccoon City Underground",brand:"Resident Evil",zone:{x:560,y:380,w:200,h:180},genre:'dnb',colors:{primary:'#1a0a0a',accent:'#ff2222',glow:'#880000'},desc:"Dance like there's no tomorrow. Because there might not be."}
+  cantina:{name:"Mos Eisley Cantina",brand:"Star Wars",zone:{x:50,y:100,w:200,h:250},genreOffset:5,colors:{primary:'#8B7355',accent:'#FFD700',glow:'#4a9eff'},desc:"A wretched hive of scum and villainy... and great music."},
+  tower:{name:"Avengers Tower Lounge",brand:"Marvel",zone:{x:280,y:100,w:200,h:250},genreOffset:0,colors:{primary:'#1a1a8a',accent:'#cc0000',glow:'#4488ff'},desc:"Earth's mightiest dance floor."},
+  batcave:{name:"The Batcave Club",brand:"DC",zone:{x:510,y:100,w:200,h:250},genreOffset:1,colors:{primary:'#1a1a2a',accent:'#FFD700',glow:'#4444aa'},desc:"Dark. Brooding. Excellent bass."},
+  dojo:{name:"World Warrior Dojo",brand:"Street Fighter",zone:{x:560,y:380,w:200,h:180},genreOffset:3,colors:{primary:'#8B0000',accent:'#FFD700',glow:'#ff4444'},desc:"Round 1... DANCE!"},
+  tron:{name:"The Grid",brand:"Tron",zone:{x:50,y:100,w:200,h:250},genreOffset:1,colors:{primary:'#001a33',accent:'#00ffff',glow:'#0088cc'},desc:"Welcome to the Grid. The system is the DJ."},
+  hyrule:{name:"Lon Lon Lounge",brand:"Zelda",zone:{x:280,y:100,w:200,h:250},genreOffset:4,colors:{primary:'#1a3a1a',accent:'#88ff44',glow:'#44aa22'},desc:"Epona's favorite chill spot. Ocarina vibes only."},
+  wakanda:{name:"Wakanda Forever Club",brand:"Marvel",zone:{x:510,y:100,w:200,h:250},genreOffset:2,colors:{primary:'#2a1a4a',accent:'#aa66ff',glow:'#7733cc'},desc:"The most technologically advanced dance floor on the station."},
+  raccoon:{name:"Raccoon City Underground",brand:"Resident Evil",zone:{x:560,y:380,w:200,h:180},genreOffset:3,colors:{primary:'#1a0a0a',accent:'#ff2222',glow:'#880000'},desc:"Dance like there's no tomorrow. Because there might not be."}
 };
+// Each club's genre rotates based on timetable slot + its offset, so every club plays something different
+function getClubGenre(club){
+  if(typeof getScheduledGenre!=='function'||typeof DJ_TIMETABLE==='undefined') return _ALL_GENRES[club.genreOffset % _ALL_GENRES.length];
+  const slot = getScheduledGenre();
+  const slotIdx = slot ? DJ_TIMETABLE.indexOf(slot) : 0;
+  return _ALL_GENRES[(slotIdx + (club.genreOffset||0)) % _ALL_GENRES.length];
+}
+// Add .genre getter that's always current
+Object.values(BRAND_CLUBS).forEach(club => {
+  Object.defineProperty(club, 'genre', {
+    get(){ return getClubGenre(club); },
+    enumerable: true, configurable: true
+  });
+});
 
 // Club room entry detection
 (function(){
