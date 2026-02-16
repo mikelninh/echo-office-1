@@ -9099,6 +9099,83 @@ function renderFloor1(){
     ctx.fill();
   }
   FloorDepth.renderShadows(ctx,1);FloorDepth.renderLightRays(ctx,1);
+
+  // ═══ COZY WARM AMBIENT LIGHTING ═══
+  // Time-based: warmer at night, cooler during day
+  const hr = new Date().getHours();
+  const isNight = hr >= 20 || hr < 7;
+  const isEvening = hr >= 17 && hr < 20;
+  const warmth = isNight ? 0.18 : isEvening ? 0.12 : 0.05;
+
+  // Warm overlay tint (golden hour feel)
+  if(warmth > 0.03){
+    ctx.fillStyle = `rgba(255,180,80,${warmth * 0.5})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // Desk lamp pool — warm circle of light from the desk area
+  const dk2 = getObjects().find(o=>o.id==='desk');
+  if(dk2){
+    const lx = dk2.x + dk2.w/2, ly = dk2.y + 10;
+    const lampR = isNight ? 80 : 50;
+    const lampG = ctx.createRadialGradient(lx, ly, 5, lx, ly, lampR);
+    lampG.addColorStop(0, `rgba(255,200,100,${isNight ? 0.25 : 0.12})`);
+    lampG.addColorStop(0.5, `rgba(255,180,80,${isNight ? 0.12 : 0.05})`);
+    lampG.addColorStop(1, 'rgba(255,160,60,0)');
+    ctx.fillStyle = lampG; ctx.fillRect(lx-lampR, ly-lampR, lampR*2, lampR*2);
+    // Lamp itself (small yellow dot)
+    ctx.fillStyle = `rgba(255,220,140,${0.7+Math.sin(S.time*2)*0.15})`;
+    ctx.beginPath(); ctx.arc(lx, ly-8, 3, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = `rgba(255,200,100,${0.3+Math.sin(S.time*2)*0.1})`;
+    ctx.beginPath(); ctx.arc(lx, ly-8, 6, 0, Math.PI*2); ctx.fill();
+  }
+
+  // Sofa area — warm ambient from a side lamp
+  const sf2 = getObjects().find(o=>o.id==='sofa');
+  if(sf2){
+    const sx = sf2.x - 10, sy = sf2.y + sf2.h/2;
+    const sofaG = ctx.createRadialGradient(sx, sy, 3, sx, sy, isNight ? 60 : 35);
+    sofaG.addColorStop(0, `rgba(255,190,120,${isNight ? 0.2 : 0.08})`);
+    sofaG.addColorStop(1, 'rgba(255,160,80,0)');
+    ctx.fillStyle = sofaG; ctx.fillRect(sx-60, sy-60, 120, 120);
+  }
+
+  // Crystal glow (always warm, pulsing gently)
+  const cr2 = getObjects().find(o=>o.id==='crystal');
+  if(cr2){
+    const cx2 = cr2.x + cr2.w/2, cy2 = cr2.y + cr2.h/2;
+    const crPulse = 0.1 + Math.sin(S.time * 1.5) * 0.05;
+    const crG = ctx.createRadialGradient(cx2, cy2, 2, cx2, cy2, 45);
+    crG.addColorStop(0, `rgba(200,120,255,${crPulse + (isNight ? 0.1 : 0)})`);
+    crG.addColorStop(1, 'rgba(160,80,255,0)');
+    ctx.fillStyle = crG; ctx.fillRect(cx2-45, cy2-45, 90, 90);
+  }
+
+  // Bookshelf reading lamp (small warm spot)
+  const bs2 = getObjects().find(o=>o.id==='bookshelf');
+  if(bs2){
+    const blx = bs2.x + bs2.w + 5, bly = bs2.y + 20;
+    const blG = ctx.createRadialGradient(blx, bly, 2, blx, bly, isNight ? 40 : 25);
+    blG.addColorStop(0, `rgba(255,210,130,${isNight ? 0.18 : 0.07})`);
+    blG.addColorStop(1, 'rgba(255,180,80,0)');
+    ctx.fillStyle = blG; ctx.fillRect(blx-40, bly-40, 80, 80);
+  }
+
+  // Window moonlight/sunlight spill
+  const wo2 = {x:350,y:6,w:250,h:100};
+  if(isNight){
+    // Cool moonlight spill onto floor
+    const moonG = ctx.createRadialGradient(wo2.x+wo2.w/2, wo2.y+wo2.h+30, 10, wo2.x+wo2.w/2, wo2.y+wo2.h+80, 150);
+    moonG.addColorStop(0, 'rgba(140,160,220,0.08)');
+    moonG.addColorStop(1, 'rgba(100,120,180,0)');
+    ctx.fillStyle = moonG; ctx.fillRect(wo2.x-50, wo2.y+wo2.h, wo2.w+100, 200);
+  } else {
+    // Warm sunlight beam from window
+    const sunG = ctx.createRadialGradient(wo2.x+wo2.w/2, wo2.y+wo2.h+20, 5, wo2.x+wo2.w/2, wo2.y+wo2.h+60, 120);
+    sunG.addColorStop(0, `rgba(255,240,200,${isEvening ? 0.1 : 0.06})`);
+    sunG.addColorStop(1, 'rgba(255,220,160,0)');
+    ctx.fillStyle = sunG; ctx.fillRect(wo2.x-30, wo2.y+wo2.h, wo2.w+60, 150);
+  }
 }
 
 // --- FLOOR 2: The Observatory ---
