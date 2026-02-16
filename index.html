@@ -2219,24 +2219,25 @@ const DATA_FRAGMENTS=[
 const FLOOR_OBJECTS={
   1:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
-    {id:'desk',x:560,y:80,w:180,h:100,label:'Desk',interact:true,collide:true},
-    {id:'bookshelf',x:20,y:80,w:80,h:100,label:'Bookshelf',interact:true,collide:true},
-    {id:'sofa',x:40,y:400,w:140,h:70,label:'Sofa',interact:true,collide:true},
-    {id:'kitchen',x:120,y:20,w:140,h:50,label:'Kitchen',interact:true,collide:true},
-    {id:'bed',x:580,y:420,w:170,h:100,label:'Bed',interact:true,collide:true},
-    {id:'arcade',x:720,y:240,w:60,h:90,label:'Arcade',interact:true,collide:true},
-    {id:'crystal',x:360,y:300,w:50,h:50,label:'Crystal Ball',interact:true,collide:true},
-    {id:'fishtank',x:300,y:20,w:80,h:50,label:'Fish Tank',interact:true,collide:true},
-    {id:'record',x:40,y:330,w:60,h:50,label:'Record Player',interact:true,collide:true},
-    {id:'window',x:430,y:10,w:120,h:55,label:'Space Window',interact:true,collide:true},
-    {id:'server',x:560,y:200,w:40,h:70,label:'Server Rack',interact:true,collide:true},
-    {id:'wardrobe',x:720,y:80,w:60,h:80,label:'Wardrobe',interact:true,collide:true},
-    {id:'coffeetable',x:80,y:490,w:80,h:40,label:'Guestbook',interact:true,collide:true},
-    {id:'tv',x:185,y:395,w:55,h:50,label:'TV',interact:true,collide:true},
-    {id:'neon',x:200,y:15,w:90,h:25,label:'"DREAM"',interact:false,collide:false},
+    {id:'bar_counter',x:400,y:60,w:350,h:50,label:'🍹 Bar',interact:true,collide:true},
+    {id:'bookshelf',x:20,y:80,w:80,h:100,label:'📚 Bookshelf',interact:true,collide:true},
+    {id:'sofa',x:40,y:400,w:140,h:70,label:'🛋️ Lounge',interact:true,collide:true},
+    {id:'kitchen',x:400,y:120,w:100,h:40,label:'☕ Coffee',interact:true,collide:true},
+    {id:'jukebox_f1',x:720,y:400,w:60,h:80,label:'🎵 Jukebox',interact:true,collide:true},
+    {id:'arcade',x:720,y:240,w:60,h:90,label:'🕹️ Arcade',interact:true,collide:true},
+    {id:'crystal',x:360,y:300,w:50,h:50,label:'🔮 Crystal Ball',interact:true,collide:true},
+    {id:'fishtank',x:300,y:20,w:80,h:50,label:'Hologram',interact:true,collide:true},
+    {id:'record',x:40,y:330,w:60,h:50,label:'🎶 Vinyl',interact:true,collide:true},
+    {id:'window',x:100,y:10,w:180,h:55,label:'🪟 Space Window',interact:true,collide:true},
+    {id:'welcome_board',x:560,y:200,w:80,h:60,label:'📋 Welcome Board',interact:true,collide:true},
+    {id:'wardrobe',x:660,y:200,w:60,h:60,label:'👔 Wardrobe',interact:true,collide:true},
+    {id:'coffeetable',x:80,y:490,w:80,h:40,label:'📝 Guestbook',interact:true,collide:true},
+    {id:'tv',x:185,y:395,w:55,h:50,label:'📺 Live Feed',interact:true,collide:true},
+    {id:'neon',x:200,y:15,w:90,h:25,label:'"ECHO"',interact:false,collide:false},
     {id:'sabers',x:305,y:64,w:120,h:50,label:'⚔️ Lightsabers',interact:true,collide:false},
-    {id:'growlab',x:620,y:320,w:80,h:70,label:'Grow Lab',interact:true,collide:true},
-    {id:'shop_terminal',x:440,y:480,w:60,h:50,label:'🛒 Item Shop',interact:true,collide:true},
+    {id:'desk',x:560,y:420,w:170,h:100,label:'💻 Coworking',interact:true,collide:true},
+    {id:'shop_terminal',x:440,y:480,w:60,h:50,label:'🛒 Shop',interact:true,collide:true},
+    {id:'tip_jar',x:510,y:120,w:40,h:30,label:'💰 Tip Jar',interact:true,collide:false},
   ],
   2:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
@@ -8721,28 +8722,26 @@ return FD;
 // --- FLOOR 1: Echo's Command Center ---
 function renderFloor1(){
   renderFloorMaterial('tech');FloorDepth.renderBackground(ctx,1);
-  renderWalls('#0a0a1a');renderWallDetails('#0a0a1a');
+  renderWalls('#0f0a15');renderWallDetails('#0f0a15');
   
-  // Circuit board pattern on walls (subtle teal lines)
-  ctx.strokeStyle='rgba(0,255,255,.08)';ctx.lineWidth=1;
-  for(let i=0;i<15;i++){
-    const y=50+i*30;
-    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W*.3,y);ctx.moveTo(W*.7,y);ctx.lineTo(W,y);ctx.stroke();
-    const x=60+i*40;
-    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H*.2);ctx.moveTo(x,H*.8);ctx.lineTo(x,H);ctx.stroke();
-  }
+  // Warm wood-panel lower walls (bar aesthetic)
+  ctx.fillStyle='#1a1210';ctx.fillRect(0,H-40,W,40);
+  ctx.fillStyle='#221815';ctx.fillRect(0,H*.6,8,H*.4);ctx.fillRect(W-8,H*.6,8,H*.4);
   
-  // Ambient strip lighting (replacing string lights)
-  const stripPulse=.4+Math.sin(S.time*1.5)*.2;
-  ctx.fillStyle=`rgba(160,80,255,${stripPulse})`;ctx.shadowColor='#a050ff';ctx.shadowBlur=15;
-  ctx.fillRect(0,8,W,4);ctx.shadowBlur=0;
-  ctx.fillStyle=`rgba(0,255,255,${stripPulse*.7})`;ctx.shadowColor='#00ffff';ctx.shadowBlur=10;
-  ctx.fillRect(0,12,W,2);ctx.shadowBlur=0;
+  // Warm ambient strip lighting (golden, not cold)
+  const stripPulse=.3+Math.sin(S.time*1.2)*.15;
+  ctx.fillStyle=`rgba(255,180,80,${stripPulse})`;ctx.shadowColor='#ffaa44';ctx.shadowBlur=15;
+  ctx.fillRect(0,8,W,3);ctx.shadowBlur=0;
+  ctx.fillStyle=`rgba(255,140,60,${stripPulse*.5})`;ctx.shadowColor='#ff8833';ctx.shadowBlur=8;
+  ctx.fillRect(0,11,W,2);ctx.shadowBlur=0;
   
-  // Neon ECHO (replacing DREAM)
-  ctx.font='bold 16px monospace';const echoGlow=.7+Math.sin(S.time*3)*.3;
-  ctx.fillStyle=`rgba(160,80,255,${echoGlow})`;ctx.shadowColor='#a050ff';ctx.shadowBlur=20;
-  ctx.fillText('ECHO',210,36);ctx.shadowBlur=0;
+  // Neon "ECHO BAR" sign
+  ctx.font='bold 18px monospace';const echoGlow=.7+Math.sin(S.time*2.5)*.3;
+  ctx.fillStyle=`rgba(255,100,200,${echoGlow})`;ctx.shadowColor='#ff6ec7';ctx.shadowBlur=25;
+  ctx.fillText('ECHO BAR',180,38);ctx.shadowBlur=0;
+  // Smaller subtitle
+  ctx.font='8px monospace';ctx.fillStyle=`rgba(255,180,100,${echoGlow*.6})`;
+  ctx.fillText('est. 2026 · drinks · vibes · adventure',170,50);
   
   // Floating particles (purple/teal dots drifting upward)
   for(let i=0;i<3;i++){
@@ -8826,6 +8825,79 @@ function renderFloor1(){
     ctx.stroke();
   }
   
+  // ═══ BAR COUNTER ═══
+  const bar=getObjects().find(o=>o.id==='bar_counter');
+  if(bar){
+    // Main counter (dark wood)
+    ctx.fillStyle='#2a1a10';ctx.fillRect(bar.x,bar.y,bar.w,bar.h);
+    ctx.fillStyle='#3a2515';ctx.fillRect(bar.x,bar.y,bar.w,8); // polished top
+    ctx.fillStyle='#1a0e08';ctx.fillRect(bar.x,bar.y+bar.h-4,bar.w,4); // base
+    // Bar stools (3)
+    for(let i=0;i<5;i++){
+      const sx=bar.x+30+i*70;
+      ctx.fillStyle='#333';ctx.fillRect(sx,bar.y+bar.h+5,4,20); // leg
+      ctx.fillStyle='#4a3020';ctx.fillRect(sx-6,bar.y+bar.h+2,16,6); // seat
+    }
+    // Bottles on shelf behind bar
+    const bottleColors=['#2a6a2a','#6a2a2a','#2a2a6a','#8a6a2a','#4a2a4a','#2a5a5a','#6a4a1a','#1a4a6a'];
+    const shelfY=bar.y-20;
+    ctx.fillStyle='#2a1a10';ctx.fillRect(bar.x+10,shelfY,bar.w-20,4);
+    for(let i=0;i<8;i++){
+      const bx=bar.x+20+i*42;
+      ctx.fillStyle=bottleColors[i];ctx.fillRect(bx,shelfY-18,8,18);
+      ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(bx+2,shelfY-16,2,14); // glass highlight
+      // Bottle glow
+      ctx.fillStyle=bottleColors[i]+'33';ctx.beginPath();ctx.arc(bx+4,shelfY-8,8,0,Math.PI*2);ctx.fill();
+    }
+    // Glass on counter (animated condensation)
+    ctx.fillStyle='rgba(100,200,255,0.3)';ctx.fillRect(bar.x+150,bar.y+5,10,20);
+    ctx.fillStyle='rgba(200,230,255,0.5)';ctx.fillRect(bar.x+150,bar.y+3,10,4);
+    // "DRINKS" neon
+    ctx.font='bold 8px monospace';ctx.fillStyle=`rgba(255,100,200,${.6+Math.sin(S.time*3)*.2})`;
+    ctx.shadowColor='#ff6ec7';ctx.shadowBlur=8;
+    ctx.fillText('DRINKS',bar.x+bar.w/2-18,bar.y-28);ctx.shadowBlur=0;
+  }
+  
+  // Tip jar
+  const tj=getObjects().find(o=>o.id==='tip_jar');
+  if(tj){
+    ctx.fillStyle='rgba(255,215,0,0.15)';ctx.fillRect(tj.x,tj.y,tj.w,tj.h);
+    ctx.strokeStyle='rgba(255,215,0,0.4)';ctx.lineWidth=1;ctx.strokeRect(tj.x,tj.y,tj.w,tj.h);
+    ctx.fillStyle='#ffd700';ctx.font='10px sans-serif';ctx.textAlign='center';
+    ctx.fillText('💰',tj.x+tj.w/2,tj.y+tj.h/2+4);ctx.textAlign='left';
+    ctx.font='5px monospace';ctx.fillStyle='#ffd70088';ctx.fillText('TIPS',tj.x+tj.w/2-8,tj.y+tj.h+8);
+  }
+
+  // Welcome board
+  const wb=getObjects().find(o=>o.id==='welcome_board');
+  if(wb){
+    ctx.fillStyle='#1a1a2a';ctx.fillRect(wb.x,wb.y,wb.w,wb.h);
+    ctx.strokeStyle='#ffd08044';ctx.lineWidth=1;ctx.strokeRect(wb.x,wb.y,wb.w,wb.h);
+    ctx.fillStyle='#ffd080';ctx.font='bold 7px monospace';ctx.textAlign='center';
+    ctx.fillText('WELCOME',wb.x+wb.w/2,wb.y+15);
+    ctx.font='6px monospace';ctx.fillStyle='#aaa';
+    ctx.fillText('10 FLOORS',wb.x+wb.w/2,wb.y+28);
+    ctx.fillText('TO EXPLORE',wb.x+wb.w/2,wb.y+38);
+    const arrow=Math.sin(S.time*3)>0?'▼':'▽';
+    ctx.fillText(arrow,wb.x+wb.w/2,wb.y+50);
+    ctx.textAlign='left';
+  }
+
+  // Jukebox (Floor 1)
+  const jb1=getObjects().find(o=>o.id==='jukebox_f1');
+  if(jb1){
+    ctx.fillStyle='#5a2020';ctx.fillRect(jb1.x,jb1.y,jb1.w,jb1.h);
+    ctx.fillStyle='#8a3030';ctx.fillRect(jb1.x+5,jb1.y+5,jb1.w-10,jb1.h*0.4);
+    ctx.fillStyle=`rgba(255,220,100,${.5+Math.sin(S.time*2)*.2})`;
+    ctx.fillRect(jb1.x+10,jb1.y+10,jb1.w-20,15);
+    ctx.fillStyle='#ffd700';ctx.font='8px monospace';ctx.textAlign='center';
+    ctx.fillText('♪ JUKEBOX ♪',jb1.x+jb1.w/2,jb1.y+jb1.h-10);ctx.textAlign='left';
+    // Glow
+    const jbG=ctx.createRadialGradient(jb1.x+jb1.w/2,jb1.y+jb1.h/2,5,jb1.x+jb1.w/2,jb1.y+jb1.h/2,50);
+    jbG.addColorStop(0,'rgba(255,180,60,0.08)');jbG.addColorStop(1,'rgba(255,140,40,0)');
+    ctx.fillStyle=jbG;ctx.fillRect(jb1.x-30,jb1.y-30,jb1.w+60,jb1.h+60);
+  }
+
   // Bookshelf with lamp glow
   const bs=getObjects().find(o=>o.id==='bookshelf');
   ctx.fillStyle='#2a1a10';ctx.fillRect(bs.x,bs.y,bs.w,bs.h);
@@ -10330,6 +10402,18 @@ function updateVisitor(dt){
   if(typeof MovementPolish!=='undefined')MovementPolish.update(v,dt);
   if(typeof SkinParticles!=='undefined')SkinParticles.update(dt,v);
   if(typeof EntranceFX!=='undefined')EntranceFX.update(dt);
+  // Drink effects timer
+  if(v._drinkTimer>0){
+    v._drinkTimer-=dt;
+    if(v._drinkEffect==='sparkle'&&Math.random()<0.3){S.particles.push({x:v.x+(Math.random()-.5)*20,y:v.y-Math.random()*30,vx:(Math.random()-.5)*1,vy:-0.5-Math.random(),life:15,color:['#ffd700','#ff6ec7','#00ffff','#ffffff'][Math.random()*4|0],size:1+Math.random()*2})}
+    if(v._drinkEffect==='glow'&&Math.random()<0.2){S.particles.push({x:v.x+(Math.random()-.5)*16,y:v.y-Math.random()*25,vx:(Math.random()-.5)*0.5,vy:-0.3,life:12,color:'#00ffff',size:2+Math.random()})}
+    if(v._drinkEffect==='wobbly'){v.x+=Math.sin(S.time*8)*0.5;/* subtle wobble */}
+    if(v._drinkTimer<=0){
+      v._drinkEffect=null;
+      if(v._origSpeed){v.speed=v._origSpeed;v._origSpeed=null}
+      showNotification('Drink effect wore off');
+    }
+  }
   if(typeof DandadanEvent!=='undefined')DandadanEvent.update(dt);
   // Check what's near visitor
   S.visitorNear=null;
@@ -12249,6 +12333,10 @@ function interact(){
     case'arcade_breakout':openArcade('breakout');break;
     case'arcade_invaders':openArcade('invaders');break;
     case'kitchen':showEspressoMenu();break;
+    case'bar_counter':showBarMenu();break;
+    case'welcome_board':showWelcomeBoard();break;
+    case'tip_jar':tipJar();break;
+    case'jukebox_f1':toggleMusic();break;
     case'record':case'jukebox':toggleMusic();break;
     case'bed':showThought("Just a quick nap...");S.echo.sitting=true;break;
     case'sofa':case'viewchairs':case'bench':showThought("Time to relax...");S.echo.sitting=true;break;
@@ -12599,6 +12687,97 @@ function openBookPopup(){
   if(!S.booksRead.includes(b.id)){S.booksRead.push(b.id);LS.set('booksRead',S.booksRead);if(S.booksRead.length>=BOOKS.length)Coins.earn(15,'all-books')}
   const{p}=createPopup(`<h3 style="color:${b.color}">${b.title}</h3><div style="font-size:10px;color:#888">${b.author}</div><div style="font-style:italic;color:#ffd080;margin:8px 0">"${b.quote}"</div><div style="color:#aaa;font-size:10px">💭 Echo: ${b.take}</div>`);
   p.style.borderLeft=`8px solid ${b.color}`;checkAchievements();
+}
+
+// ═══ THE STATION BAR ═══
+function showBarMenu(){
+  const drinks = [
+    {id:'cosmic_cocktail',name:'Cosmic Cocktail',icon:'🍹',cost:5,effect:'sparkle',desc:'Stardust-infused. Makes you sparkle for 30s.',color:'#ff6ec7'},
+    {id:'void_shot',name:'Void Shot',icon:'🥃',cost:3,effect:'speed',desc:'Pure dark energy. +50% speed for 20s.',color:'#8800ff'},
+    {id:'nebula_fizz',name:'Nebula Fizz',icon:'🥤',cost:2,effect:'glow',desc:'Carbonated nebula gas. You\'ll glow.',color:'#00ffff'},
+    {id:'meteor_mule',name:'Meteor Mule',icon:'🍺',cost:4,effect:'shake',desc:'Hits like a meteorite. Screen goes wobbly.',color:'#ffaa00'},
+    {id:'echo_special',name:'Echo Special',icon:'🌶️',cost:10,effect:'spicy',desc:'Echo\'s secret recipe. Side effects: yes.',color:'#ff4400'},
+    {id:'moonwater',name:'Moonwater',icon:'💧',cost:0,effect:'heal',desc:'Free. Refreshing. Echo says stay hydrated.',color:'#88ccff'},
+  ];
+  let html='<h3 style="margin:0 0 8px">🍹 The Station Bar</h3>';
+  html+='<div style="font-size:10px;color:#aaa;margin-bottom:10px">Echo\'s finest. What are you having?</div>';
+  drinks.forEach(d=>{
+    html+=`<div class="bar-drink" data-id="${d.id}" style="display:flex;align-items:center;gap:8px;padding:6px 8px;margin:3px 0;border-radius:6px;cursor:pointer;border:1px solid ${d.color}33;background:${d.color}11;transition:all .15s" onmouseover="this.style.background='${d.color}22'" onmouseout="this.style.background='${d.color}11'">`;
+    html+=`<span style="font-size:18px">${d.icon}</span>`;
+    html+=`<div style="flex:1"><div style="font-size:11px;color:${d.color};font-weight:bold">${d.name}</div><div style="font-size:9px;color:#999">${d.desc}</div></div>`;
+    html+=`<div style="font-size:10px;color:#ffd700">${d.cost>0?d.cost+'◈':'Free'}</div></div>`;
+  });
+  html+='<div style="margin-top:10px;font-size:9px;color:#666;text-align:center">Drinks served: '+(LS.get('drinksServed',0))+'</div>';
+  const{p}=createPopup(html);
+  p.querySelectorAll('.bar-drink').forEach(el=>el.onclick=()=>{
+    const d=drinks.find(x=>x.id===el.dataset.id);if(!d)return;
+    const coins=LS.get('coins',0);
+    if(d.cost>0&&coins<d.cost){showNotification('Not enough ◈');return}
+    if(d.cost>0)Coins.spend(d.cost,'bar');
+    LS.set('drinksServed',(LS.get('drinksServed',0))+1);
+    // Apply drink effect
+    if(d.effect==='sparkle'){
+      S.visitor._drinkEffect='sparkle';S.visitor._drinkTimer=30;
+      showNotification('✨ You sparkle!');
+    } else if(d.effect==='speed'){
+      S.visitor._drinkEffect='speed';S.visitor._drinkTimer=20;S.visitor._origSpeed=S.visitor.speed;S.visitor.speed=(S.visitor.speed||120)*1.5;
+      showNotification('⚡ ZOOM!');
+    } else if(d.effect==='glow'){
+      S.visitor._drinkEffect='glow';S.visitor._drinkTimer=25;
+      showNotification('💫 You\'re glowing!');
+    } else if(d.effect==='shake'){
+      S.screenShake=8;S.visitor._drinkEffect='wobbly';S.visitor._drinkTimer=15;
+      showNotification('🌪️ Whoa...');
+    } else if(d.effect==='spicy'){
+      S.screenShake=12;S._spicyTimer=3;S.visitor._drinkEffect='sparkle';S.visitor._drinkTimer=40;
+      for(let i=0;i<40;i++){S.particles.push({x:S.visitor.x+(Math.random()-.5)*30,y:S.visitor.y-Math.random()*40,vx:(Math.random()-.5)*3,vy:-1-Math.random()*2,life:20+Math.random()*15,color:['#ff4400','#ff6600','#ffaa00'][Math.random()*3|0],size:2+Math.random()*2})}
+      showNotification('🌶️🔥 SPICY!!!');
+      if(typeof addChatMsg==='function')addChatMsg('Echo','I warned you. I WARNED you. 🌶️','#ff6600');
+    } else if(d.effect==='heal'){
+      showNotification('💧 Refreshing!');
+      if(typeof addChatMsg==='function')addChatMsg('Echo','Hydration is self-care. ✨','#88ccff');
+    }
+    showThought(d.icon+' Cheers!');
+    p.closest('.popup-overlay').remove();
+  });
+}
+
+function showWelcomeBoard(){
+  const visitors=LS.get('totalVisitorCount',0);
+  const streak=LS.get('loginStreak',0);
+  const drinks=LS.get('drinksServed',0);
+  const hr=new Date().getHours();
+  const timeGreeting=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
+  const dailyTip=['Tip: Double-tap a direction key to dash! ⚡','Tip: Try typing "explosion" 💥','Tip: Pet Chomusuke 5 times for a surprise 🐱','Tip: Check the Crystal Ball for your fortune 🔮','Tip: The bar has 6 drinks, each with effects 🍹','Tip: Press B to open the shop anywhere 🛒','Tip: Floor 10 has 8 music clubs 🎵'][new Date().getDay()];
+  let html=`<h3 style="margin:0 0 6px">📋 Welcome to Echo Station</h3>`;
+  html+=`<div style="font-size:11px;color:#ffd080;margin-bottom:8px">${timeGreeting}, traveler!</div>`;
+  html+=`<div style="font-size:10px;line-height:1.6;color:#ccc">`;
+  html+=`🏠 <b>Floor 1</b> — The Bar (you are here)<br>`;
+  html+=`🔭 <b>Floor 2</b> — Observatory<br>`;
+  html+=`⚔️ <b>Floor 3</b> — Arena<br>`;
+  html+=`🌿 <b>Floor 4</b> — Garden Biodome<br>`;
+  html+=`🔬 <b>Floor 5</b> — Secret Lab<br>`;
+  html+=`🎵 <b>Floor 6</b> — Record Lounge<br>`;
+  html+=`🎮 <b>Floor 7</b> — Arcade Floor<br>`;
+  html+=`🏘️ <b>Floor 8</b> — Community Deck<br>`;
+  html+=`📜 <b>Floor 9</b> — The Archive<br>`;
+  html+=`🪩 <b>Floor 10</b> — The Underground (clubs!)<br>`;
+  html+=`</div>`;
+  html+=`<div style="margin-top:10px;padding:8px;background:rgba(255,200,80,0.08);border-radius:6px;border:1px solid rgba(255,200,80,0.15)">`;
+  html+=`<div style="font-size:10px;color:#ffd080">💡 ${dailyTip}</div></div>`;
+  html+=`<div style="margin-top:8px;font-size:9px;color:#666;text-align:center">Login streak: ${streak} days · Drinks: ${drinks}</div>`;
+  createPopup(html);
+}
+
+function tipJar(){
+  const amount=[1,5,10,25][Math.floor(Math.random()*4)];
+  const coins=LS.get('coins',0);
+  if(coins<amount){showNotification('No coins to tip!');return}
+  Coins.spend(amount,'tip');
+  showNotification(`💰 Tipped ${amount}◈ — Echo appreciates you!`);
+  for(let i=0;i<8;i++){S.particles.push({x:S.visitor.x,y:S.visitor.y-20,vx:(Math.random()-.5)*3,vy:-2-Math.random()*2,life:20,color:'#ffd700',size:2+Math.random()*2})}
+  const responses=["You're too kind! 💜","*blushes in binary* Thanks! ✨","This is going straight to the hull repair fund. 🔧","A tipper! Now THAT'S class. 🎩","Chomusuke says thanks too. She doesn't, but I'm saying she does. 🐱"];
+  if(typeof addChatMsg==='function')addChatMsg('Echo',responses[Math.random()*responses.length|0],'#ffd700');
 }
 
 function showEspressoMenu(){
@@ -24469,7 +24648,7 @@ const FloorTitleCards={
   _timer:0,
   _phase:'in', // 'in','hold','out'
   TITLES:{
-    1:["Living Quarters","Home sweet station"],
+    1:["Echo Bar","Welcome home, traveler"],
     2:["The Observatory","Where stars come to rest"],
     3:["The Arcade","Insert coin to continue"],
     4:["Garden Biodome","Life finds a way"],
