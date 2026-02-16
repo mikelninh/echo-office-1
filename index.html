@@ -31520,6 +31520,204 @@ console.log('🔄 Deploy Wednesday: The Hook features loaded');
 window.addEventListener('load', function(){
   console.log('🔧 Floor-size movement patch applied. FLOOR_SIZES:', typeof FLOOR_SIZES !== 'undefined' ? JSON.stringify(FLOOR_SIZES) : 'NOT FOUND');
 });
+
+// ═══════════════════════════════════════
+// DEPLOY FEATURES: Starter Gift, Greeting, Music Prompt, Share, Ambient NPCs
+// ═══════════════════════════════════════
+
+// === 1. FREE STARTER SKIN GIFT ===
+(function starterSkinGift(){
+  if(LS.get('starterGiftGiven'))return;
+  var owned=LS.get('visitorSkinsOwned',[]);
+  if(owned.length>0)return; // not a new visitor
+  var curated=['ninja','shadow_ninja','cherry_blossom','ice_queen','turbo_runner'];
+  var pick=curated[Math.floor(Math.random()*curated.length)];
+  var sk=VISITOR_SKINS.find(function(s){return s.id===pick})||VISITOR_SKINS[0];
+  owned.push(pick);
+  LS.set('visitorSkinsOwned',owned);
+  LS.set('starterGiftGiven',true);
+  // Apply the skin
+  if(S.visitor){S.visitor.skin=pick;LS.set('visitorSkin',pick)}
+  // Show popup
+  setTimeout(function(){
+    var ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .3s';
+    var box=document.createElement('div');
+    box.style.cssText='background:#1a1a2e;border:2px solid #ff6ec7;border-radius:12px;padding:24px 32px;text-align:center;color:#fff;font-family:monospace;max-width:320px';
+    box.innerHTML='<div style="font-size:28px;margin-bottom:8px">\ud83c\udf81</div><div style="font-size:16px;font-weight:bold;color:#ff6ec7;margin-bottom:8px">Welcome Gift!</div><div style="font-size:13px;margin-bottom:12px">You received <b style="color:'+sk.color+'">'+sk.label+'</b>!</div><div style="margin-bottom:16px"><canvas id="starter-gift-preview" width="60" height="60" style="image-rendering:pixelated"></canvas></div><button style="background:#ff6ec7;color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px">Awesome!</button>';
+    ov.appendChild(box);
+    document.body.appendChild(ov);
+    // Draw preview
+    try{
+      var cv=document.getElementById('starter-gift-preview');
+      var cx=cv.getContext('2d');
+      var grid=getVisitorSprite(pick,0,0);
+      if(grid)drawSprite(cx,10,10,grid,3);
+    }catch(e){}
+    box.querySelector('button').onclick=function(){ov.remove()};
+    ov.onclick=function(e){if(e.target===ov)ov.remove()};
+  },2000);
+})();
+
+// === 2. ECHO PERSONAL GREETING ===
+(function echoGreeting(){
+  if(LS.get('echoGreetingDone'))return;
+  var _greetCF=changeFloor;
+  changeFloor=function(f){
+    _greetCF(f);
+    if(f===1&&!LS.get('echoGreetingDone')){
+      LS.set('echoGreetingDone',true);
+      var skinId=S.visitor?S.visitor.skin:'hooded';
+      var sk=VISITOR_SKINS.find(function(s){return s.id===skinId})||VISITOR_SKINS[0];
+      setTimeout(function(){
+        // Walk Echo toward visitor
+        if(S.echo&&S.visitor){
+          S.echo.targetX=S.visitor.x-40;
+          S.echo.targetY=S.visitor.y;
+          S.echo.moving=true;
+        }
+        setTimeout(function(){
+          EchoReactions.trigger('welcome_greeting','Hey! Welcome to the station \ud83d\udc4b I\'m Echo. That '+sk.label+' looks great on you! Look around \u2014 sparkly things are interactive.');
+        },1500);
+      },2000);
+    }
+  };
+})();
+
+// === 3. MUSIC ENABLE PROMPT ON FLOOR 10 ===
+(function musicPrompt(){
+  var _mpCF=changeFloor;
+  changeFloor=function(f){
+    _mpCF(f);
+    if(f===10&&!LS.get('musicPrompted')){
+      LS.set('musicPrompted',true);
+      var ov=document.createElement('div');
+      ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9998;display:flex;align-items:center;justify-content:center';
+      var box=document.createElement('div');
+      box.style.cssText='background:#1a1a2e;border:2px solid #ff6ec7;border-radius:12px;padding:24px 32px;text-align:center;color:#fff;font-family:monospace';
+      box.innerHTML='<div style="font-size:24px;margin-bottom:8px">\ud83c\udfb5</div><div style="font-size:15px;margin-bottom:16px">Enable Music?</div><div><button id="music-yes" style="background:#ff6ec7;color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;font-family:inherit;margin:0 6px">Yes</button><button id="music-no" style="background:#333;color:#aaa;border:1px solid #555;padding:8px 20px;border-radius:6px;cursor:pointer;font-family:inherit;margin:0 6px">No</button></div>';
+      ov.appendChild(box);
+      document.body.appendChild(ov);
+      document.getElementById('music-yes').onclick=function(){
+        ov.remove();
+        if(!S.audioCtx)initAudio();
+        if(typeof DiscoMusic!=='undefined')DiscoMusic.playGenre(DiscoFloor.genre||'synthwave');
+      };
+      document.getElementById('music-no').onclick=function(){ov.remove()};
+      ov.onclick=function(e){if(e.target===ov)ov.remove()};
+    }
+  };
+})();
+
+// === 4. SHAREABLE FLOOR LINKS ===
+(function shareableLinks(){
+  // Add share button to elevator
+  var _origShowElev=typeof showElevator==='function'?showElevator:null;
+  if(!_origShowElev){
+    // Find and patch elevator popup builder
+    var _origHTML=null;
+  }
+  // Simpler: add a persistent share button in floor HUD
+  setTimeout(function(){
+    var hud=document.getElementById('floor-hud');
+    if(!hud)return;
+    var btn=document.createElement('span');
+    btn.textContent=' \ud83d\udcce';
+    btn.title='Share this floor';
+    btn.style.cssText='cursor:pointer;margin-left:6px;font-size:12px';
+    btn.onclick=function(e){
+      e.stopPropagation();
+      var url=location.origin+'/?floor='+S.floor;
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(url).then(function(){showNotification('Link copied!')});
+      }else{
+        var ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
+        showNotification('Link copied!');
+      }
+    };
+    hud.appendChild(btn);
+  },3000);
+})();
+
+// === 5. NPC AMBIENT LIFE ON FLOORS 1-5 ===
+var AmbientNPCs={
+  _npcs:null,
+  _names:['Kai','Luna','Axel','Nova','Zara','Finn','Iris','Milo','Sage','Cleo','Theo','Wren','Nyx','Jett','Pip'],
+  _skins:['hooded','astronaut','robot','ghost','star','pirate','ninja','angel'],
+  init:function(){
+    if(this._npcs)return;
+    this._npcs={};
+    for(var f=1;f<=5;f++){
+      var count=2+Math.floor(Math.random()*2); // 2-3
+      var arr=[];
+      for(var i=0;i<count;i++){
+        var nameIdx=(f*3+i*7)%this._names.length;
+        var skinIdx=(f*5+i*3)%this._skins.length;
+        arr.push({
+          name:this._names[nameIdx],
+          skin:this._skins[skinIdx],
+          x:120+i*180+Math.random()*60,
+          y:280+Math.random()*40,
+          dir:Math.random()>.5?1:0,
+          breathPhase:Math.random()*Math.PI*2,
+          lookTimer:Math.random()*200,
+          lookDir:0
+        });
+      }
+      this._npcs[f]=arr;
+    }
+  },
+  render:function(floor){
+    if(!this._npcs)this.init();
+    var npcs=this._npcs[floor];
+    if(!npcs)return;
+    for(var i=0;i<npcs.length;i++){
+      var n=npcs[i];
+      // Idle animation
+      var breathe=Math.sin(S.time*2+n.breathPhase)*1.5;
+      // Look around
+      n.lookTimer--;
+      if(n.lookTimer<=0){
+        n.lookDir=Math.random()>.5?1:0;
+        n.lookTimer=100+Math.random()*200;
+      }
+      var grid=getVisitorSprite(n.skin,n.lookDir,0);
+      if(grid){
+        var scale=3;
+        var sw=grid[0].length*scale;
+        var sh=grid.length*scale;
+        drawSprite(ctx,n.x-sw/2,n.y-sh+breathe,grid,scale);
+      }
+      // Name above
+      ctx.save();
+      ctx.font='7px monospace';
+      ctx.textAlign='center';
+      ctx.fillStyle='rgba(255,255,255,0.6)';
+      ctx.fillText(n.name,n.x,n.y-(grid?grid.length*3:36)-4+breathe);
+      ctx.restore();
+    }
+  }
+};
+
+// Patch render functions
+(function patchFloorRenders(){
+  var floors=[1,2,3,4,5];
+  var renderFns={1:renderFloor1,2:renderFloor2,3:renderFloor3,4:renderFloor4,5:renderFloor5};
+  floors.forEach(function(f){
+    var orig=renderFns[f];
+    var fnName='renderFloor'+f;
+    window[fnName]=function(){
+      orig();
+      AmbientNPCs.render(f);
+    };
+  });
+  // Also patch the overridden renderFloor2 if it exists
+  if(typeof _origRenderFloor2!=='undefined'){
+    var patched2=renderFloor2;
+    renderFloor2=function(){patched2();AmbientNPCs.render(2)};
+  }
+})();
+
 </script>
 </body>
 </html>
