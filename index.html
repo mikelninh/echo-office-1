@@ -30391,48 +30391,90 @@ if(typeof BRAND_CLUBS !== 'undefined'){
     Object.entries(BRAND_CLUBS).forEach(([key, club]) => {
       const npcs = window._clubNPCs[key]; if(!npcs) return;
       const gc = club.colors.glow;
+      const clubGenre = club.genre; // dynamic per timetable
+      const isAmbient = clubGenre === 'ambient';
       npcs.forEach(npc => {
         const p = npc.phase, st = npc.style;
-        // Animate walk frame for sprite animation
+        // Animate walk frame (slower for ambient)
         npc._frameTimer += 0.016;
-        if(npc._frameTimer > 0.2){ npc._frameTimer = 0; npc.frame = (npc.frame + 1) % 3; }
-        // Occasionally change facing direction
-        if(Math.random() < 0.002) npc.dir = [0,1,2,3][Math.random()*4|0];
+        const frameSpeed = isAmbient ? 0.6 : 0.2;
+        if(npc._frameTimer > frameSpeed){ npc._frameTimer = 0; npc.frame = (npc.frame + 1) % 3; }
+        // Occasionally change facing direction (less in ambient — they're settled)
+        if(Math.random() < (isAmbient ? 0.0005 : 0.002)) npc.dir = [0,1,2,3][Math.random()*4|0];
 
-        // Dance motion per style
+        // Genre-aware animation
         let bx = 0, by = 0, rot = 0, scX = 1, scY = 1;
-        if(st === 0){ // bounce
-          by = -Math.abs(Math.sin(_t * 4 + p)) * 8;
-          scY = 1 + Math.sin(_t * 4 + p) * 0.1;
-          scX = 1 - Math.sin(_t * 4 + p) * 0.05;
-        } else if(st === 1){ // sway
-          bx = Math.sin(_t * 3 + p) * 6;
-          rot = Math.sin(_t * 3 + p) * 0.12;
-        } else if(st === 2){ // jump
-          const jt = (_t * 2 + p) % 2;
-          by = jt < 0.5 ? -Math.sin(jt * Math.PI * 2) * 12 : 0;
-          scY = jt < 0.5 ? 0.85 : 1 + Math.sin(jt * Math.PI) * 0.05;
-        } else if(st === 3){ // headbang
-          by = Math.sin(_t * 6 + p) > 0.3 ? -3 : 1;
-          rot = Math.sin(_t * 6 + p) * 0.06;
-        } else { // side-step groove
-          bx = Math.sin(_t * 2.5 + p) * 8;
-          by = -Math.abs(Math.sin(_t * 5 + p)) * 4;
+        let sitting = false, activity = null;
+
+        if(isAmbient){
+          // Chill animations: sitting, reading, meditating, nodding, swaying gently
+          const chillStyle = st % 5;
+          if(chillStyle === 0){ // sitting cross-legged (no vertical movement, squashed)
+            sitting = true; by = 8; scY = 0.75; scX = 1.1;
+            // Gentle breathing
+            scY += Math.sin(_t * 1.5 + p) * 0.02;
+            activity = '📖';
+          } else if(chillStyle === 1){ // meditation — hover float
+            sitting = true; by = 4 - Math.sin(_t * 1.2 + p) * 3; scY = 0.8; scX = 1.05;
+            activity = '🧘';
+          } else if(chillStyle === 2){ // laptop studying
+            sitting = true; by = 8; scY = 0.75; scX = 1.1;
+            // Slight head nod (typing)
+            rot = Math.sin(_t * 2 + p) * 0.03;
+            activity = '💻';
+          } else if(chillStyle === 3){ // head nod to music (standing but gentle)
+            by = Math.sin(_t * 1.8 + p) > 0.5 ? -1 : 0;
+            bx = Math.sin(_t * 0.8 + p) * 1.5;
+            activity = '🎧';
+          } else { // lying back / stargazing
+            sitting = true; by = 10; scY = 0.6; scX = 1.2;
+            // Slow breathing
+            scY += Math.sin(_t * 1 + p) * 0.03;
+            activity = '✨';
+          }
+        } else {
+          // Dance animations (all other genres)
+          if(st === 0){ // bounce
+            by = -Math.abs(Math.sin(_t * 4 + p)) * 8;
+            scY = 1 + Math.sin(_t * 4 + p) * 0.1;
+            scX = 1 - Math.sin(_t * 4 + p) * 0.05;
+          } else if(st === 1){ // sway
+            bx = Math.sin(_t * 3 + p) * 6;
+            rot = Math.sin(_t * 3 + p) * 0.12;
+          } else if(st === 2){ // jump
+            const jt = (_t * 2 + p) % 2;
+            by = jt < 0.5 ? -Math.sin(jt * Math.PI * 2) * 12 : 0;
+            scY = jt < 0.5 ? 0.85 : 1 + Math.sin(jt * Math.PI) * 0.05;
+          } else if(st === 3){ // headbang
+            by = Math.sin(_t * 6 + p) > 0.3 ? -3 : 1;
+            rot = Math.sin(_t * 6 + p) * 0.06;
+          } else { // side-step groove
+            bx = Math.sin(_t * 2.5 + p) * 8;
+            by = -Math.abs(Math.sin(_t * 5 + p)) * 4;
+          }
         }
 
-        // Get sprite
-        const sprGrid = npc.skinId && typeof getVisitorSprite === 'function' ? getVisitorSprite(npc.skinId, npc.dir, npc.frame) : null;
+        // Get sprite (use frame 0 for sitting to look still)
+        const useFrame = sitting ? 0 : npc.frame;
+        const sprGrid = npc.skinId && typeof getVisitorSprite === 'function' ? getVisitorSprite(npc.skinId, npc.dir, useFrame) : null;
         const sc = 3;
         const gw = sprGrid ? sprGrid[0].length : 10;
         const gh = sprGrid ? sprGrid.length : 12;
         const sprW = gw * sc, sprH = gh * sc;
         const nx = npc.x + bx, ny = npc.y + by;
 
-        // Shadow
+        // Shadow (wider for sitting)
+        const shadowW = sitting ? sprW * 0.45 : sprW * 0.35;
         ctx.fillStyle = 'rgba(0,0,0,0.2)';
-        ctx.beginPath(); ctx.ellipse(npc.x, npc.y + 3, sprW * 0.35, 3, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(npc.x, npc.y + 3, shadowW, sitting ? 5 : 3, 0, 0, Math.PI * 2); ctx.fill();
 
-        // Dance transform + sprite
+        // Draw cushion/mat for sitting NPCs
+        if(sitting){
+          ctx.fillStyle = isAmbient ? 'rgba(100,80,200,0.15)' : 'rgba(80,80,80,0.15)';
+          ctx.beginPath(); ctx.ellipse(npc.x, npc.y + 6, sprW * 0.45, 6, 0, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Transform + sprite
         ctx.save();
         ctx.translate(nx, ny);
         ctx.rotate(rot);
@@ -30442,7 +30484,6 @@ if(typeof BRAND_CLUBS !== 'undefined'){
         if(sprGrid){
           drawSprite(ctx, nx - sprW/2, ny - sprH, sprGrid, sc);
         } else {
-          // Fallback colored block if no sprite
           ctx.fillStyle = npc.skinColor;
           ctx.fillRect(nx - 6, ny - 24, 12, 24);
           ctx.fillStyle = '#ffcc99';
@@ -30451,8 +30492,17 @@ if(typeof BRAND_CLUBS !== 'undefined'){
 
         ctx.restore();
 
-        // Club glow ring under dancer
-        ctx.globalAlpha = 0.12 + Math.sin(_t * 2 + p) * 0.05;
+        // Activity icon floating above sitting NPCs
+        if(activity){
+          const iconY = ny - sprH * scY - 8 + Math.sin(_t * 1.5 + p) * 2;
+          ctx.font = '10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(activity, npc.x, iconY);
+          ctx.textAlign = 'left';
+        }
+
+        // Club glow ring (softer for ambient)
+        ctx.globalAlpha = isAmbient ? 0.06 + Math.sin(_t * 1 + p) * 0.02 : 0.12 + Math.sin(_t * 2 + p) * 0.05;
         ctx.fillStyle = gc;
         ctx.beginPath(); ctx.ellipse(npc.x, npc.y + 4, sprW * 0.4, 4, 0, 0, Math.PI * 2); ctx.fill();
         ctx.globalAlpha = 1;
@@ -30461,7 +30511,7 @@ if(typeof BRAND_CLUBS !== 'undefined'){
         ctx.fillStyle = '#ffffffaa';
         ctx.font = '7px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(npc.name, npc.x, ny - sprH - 4);
+        ctx.fillText(npc.name, npc.x, ny - sprH * scY - (activity ? 16 : 4));
         ctx.textAlign = 'left';
       });
     });
