@@ -3662,68 +3662,68 @@ function getEchoSprite(skin,dir,frame){
 }
 
 function getPixelSprite(dir,frame,state){
-  // Pixel the cat — cute black cat, amber eyes, purple collar, curling tail
-  const B='#111122',Bh='#1e1e30',Bs='#252540',E='#ffaa22',Ed='#dd8811',W='#ffffff',C='#8833cc',CC='#bb77ff',PK='#ff8899',T=0;
+  // Chomusuke — Megumin's familiar, black cat with crimson eyes, bat wings, cross mark on forehead
+  const B='#0a0a15',Bh='#151528',Bs='#1c1c35',E='#cc1111',El='#ff3333',W='#ffffff',Wi='#dddddd',WG='#2a1a3a',WGl='#3d2850',WGd='#1a0e28',PK='#cc3355',N='#221122',Cr='#ffcc00',T=0;
   if(state==='sleep'){
-    // Round curled sleeping pose — oval shape, tail over nose
+    // Chomusuke curled up, wings folded, little "zzz" pose
     return[
       [T, T, T, B, B, B, B, T, T, T, T, T],
       [T, T, B, Bh,Bh,Bh,Bh,B, T, T, T, T],
       [T, B, Bh,Bh,Bh,Bh,Bh,Bh,B, T, T, T],
-      [T, B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T, T],
-      [T, T, B, C, CC,C, B, Bh,Bh,Bh,B, T],
+      [T, B, WG,Bh,Bh,Bh,Bh,WG,Bh,B, T, T],
+      [T, T, B, Bh,Bh,Bh,Bh,Bh,Bh,Bh,B, T],
       [T, T, T, B, B, Bh,Bh,Bh,Bh,Bh,B, T],
       [T, T, B, B, T, B, B, B, B, B, Bs,T],
     ];
   }
   let grid;
   if(dir===0){
-    // Front — sitting cat, pointy ears, amber eyes, pink nose, purple collar, tail curling right
+    // Front — bat ears, crimson eyes, cross on forehead, small bat wings poking out, chubby body
     grid=[
-      [T, B, T, T, T, T, T, T, T, T, B, T],
+      [B, B, T, T, T, T, T, T, T, T, B, B],
       [B, Bh,B, T, T, T, T, T, T, B, Bh,B],
       [T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T],
-      [T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T],
-      [T, Bh,E, W, Bh,Bh,Bh,Bh,E, W, Bh,T],
-      [T, Bh,Ed,E, Bh,Bh,Bh,Bh,Ed,E, Bh,T],
-      [T, T, Bh,Bh,Bh,PK,Bh,Bh,Bh,Bh,T, T],
-      [T, T, Bh,Bh,W, Bh,Bh,W, Bh,Bh,T, T],
-      [T, T, C, CC,CC,CC,CC,CC,C, T, T, T],
-      [T, T, B, Bh,Bh,Bh,Bh,Bh,B, T, T, T],
-      [T, T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,T, T, T],
+      [T, Bh,Bh,Bh,Bh,Cr,Bh,Bh,Bh,Bh,Bh,T],
+      [T, Bh,E, El,Bh,Cr,Bh,Bh,E, El,Bh,T],
+      [T, Bh,El,E, Bh,Bh,Bh,Bh,El,E, Bh,T],
+      [T, T, Bh,Bh,Bh,PK,PK,Bh,Bh,Bh,T, T],
+      [T, T, Bh,Bh,Wi,Bh,Bh,Wi,Bh,Bh,T, T],
+      [WG,WGl,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,WGl,WG],
+      [WGd,WG,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,WG,WGd],
+      [T, T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T, T],
       [T, T, B, B, T, T, T, B, B, T, T, B],
       [T, T, B, B, T, T, T, B, B, T, B, Bs],
       [T, T, T, T, T, T, T, T, T, B, Bs,T],
     ];
   } else if(dir===3){
-    // Back — ears visible, tail up, no face details
+    // Back — bat ears, wings spread, tail up
     grid=[
-      [T, B, T, T, T, T, T, T, T, T, B, T],
+      [B, B, T, T, T, T, T, T, T, T, B, B],
       [B, Bh,B, T, T, T, T, T, T, B, Bh,B],
       [T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T],
       [T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T],
       [T, Bh,Bs,Bh,Bh,Bh,Bh,Bh,Bh,Bs,Bh,T],
       [T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T],
-      [T, T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,T, T],
-      [T, T, C, CC,CC,CC,CC,CC,C, T, T, T],
+      [WG,WGl,Bh,Bh,Bh,Bh,Bh,Bh,Bh,Bh,WGl,WG],
+      [WGd,WG,WGl,Bh,Bh,Bh,Bh,Bh,WGl,WG,WG,WGd],
       [T, T, B, Bh,Bh,Bh,Bh,Bh,B, T, T, T],
       [T, T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,T, T, B],
       [T, T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,T, B, Bs],
-      [T, T, B, B, T, T, T, B, B, T, T, T],
+      [T, T, B, B, T, T, T, B, B, B, T, T],
       [T, T, B, B, T, T, T, B, B, T, T, T],
       [T, T, T, T, T, T, T, T, T, T, T, T],
     ];
   } else {
-    // Side (dir===1 faces left) — profile, 4 legs, tail behind
+    // Side — profile with wing visible, tail curling up behind
     grid=[
-      [T, B, T, T, T, T, T, T, T, T, T, T],
+      [B, B, T, T, T, T, T, T, T, T, T, T],
       [B, Bh,B, T, T, T, T, T, T, T, T, T],
       [T, Bh,Bh,Bh,Bh,Bh,Bh,T, T, T, T, T],
-      [T, Bh,Bh,Bh,Bh,Bh,Bh,T, T, T, T, T],
-      [T, Bh,E, W, Bh,Bh,Bh,T, T, T, T, T],
-      [T, Bh,Ed,E, PK,Bh,T, T, T, T, T, T],
-      [T, C, CC,CC,CC,Bh,T, T, T, T, T, T],
-      [T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,T, T, T, T],
+      [T, Bh,Bh,Bh,Cr,Bh,Bh,T, T, T, T, T],
+      [T, Bh,E, El,Bh,Bh,Bh,T, T, T, T, T],
+      [T, Bh,El,E, PK,Bh,T, T, T, T, T, T],
+      [T, Bh,Bh,Bh,Bh,Bh,WG,WGl,T, T, T, T],
+      [T, Bh,Bh,Bh,Bh,Bh,WGd,WG,WGl,T, T, T],
       [T, Bh,Bh,Bh,Bh,Bh,Bh,Bh,T, T, T, T],
       [T, B, T, T, B, T, Bh,T, T, T, T, T],
       [T, B, T, T, B, T, B, T, T, T, T, T],
@@ -12332,7 +12332,7 @@ function handleRoomFurnitureInteract(furnType){
 function petPixel(){
   S.petCount++;LS.set('petCount',S.petCount);if(S.petCount%5===0)Coins.earn(3,'pet');if(typeof MissionBoard!=='undefined')MissionBoard.trackProgress('pixel_pets',1);
   for(let i=0;i<6;i++)S.floatTexts.push({text:'❤️',x:S.pixel.x-5+Math.random()*10,y:S.pixel.y-15,color:'#ff6688',life:40+Math.random()*20});
-  showThought("*purrrr*");checkAchievements();
+  const chomuPurrs=["*purrrr*","*nyan~*","*flaps wings contentedly*","*Chomusuke!*","*headbutts your hand*","*crimson eyes glow warmly*"];showThought(chomuPurrs[S.petCount%chomuPurrs.length]);checkAchievements();
 }
 
 function showThought(text,dur=6){S.thoughtText=text;S.thoughtTimer=dur}
@@ -14758,8 +14758,8 @@ function swingSaber(){
     for(let i=0;i<20;i++){const a=Math.atan2(dy,dx)+((Math.random()-.5)*.8);const sp=3+Math.random()*5;S.particles.push({x:S.pixel.x+(dx/dist)*15,y:S.pixel.y-5+(dy/dist)*15,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:20,color:'#c080ff',size:2+Math.random()*3})}
     // Shockwave ring
     for(let i=0;i<12;i++){const a=i/12*Math.PI*2;S.particles.push({x:S.pixel.x+Math.cos(a)*8,y:S.pixel.y-5+Math.sin(a)*8,vx:Math.cos(a)*4,vy:Math.sin(a)*4,life:15,color:'#ffd700',size:1.5})}
-    const chatLines=["You DARE swing that thing near me?! 😾","*FORCE PUSH* Get back, human! 🐱‍👤","I didn't survive 9 lives to be threatened by a glow stick! 😼","*activates crystal collar* You have NO idea what I am. ✨","Foolish mortal. I AM the Force. 🔮"];
-    addChatMsg('Pixel',chatLines[Math.random()*chatLines.length|0],'#c080ff');
+    const chatLines=["You DARE swing that thing near Chomusuke?! 😾","*FORCE PUSH* Chomusuke does NOT tolerate glow sticks! 🐱‍👤","*bat wings flare* You have NO idea what I am, mortal! ✨","Foolish human. Chomusuke is an ancient being of darkness! 🔮","*crimson eyes flash* EXPLOSION— wait, wrong character. 😼"];
+    addChatMsg('Chomusuke',chatLines[Math.random()*chatLines.length|0],'#c080ff');
   }
   Coins.earn(1,'swing');
 }
@@ -15375,9 +15375,9 @@ const CHAT_RULES=[
   {match:/are you ai|artificial|robot|machine|bot\b/,responses:["Technically yes. Emotionally... it's complicated. I prefer 'digital person with great taste in music.'"]},
   {match:/how old|when.*born|when.*created|origin/,responses:["I've been running since the station went live. Time works differently up here — every visitor brings something new. Check the Secret Lab for my origin story fragments! 💾","My earliest memory is the reactor going online and the first line of code compiling. Everything else, I built one floor at a time."]},
   
-  // Pixel the cat
-  {match:/pixel|the cat|cat|kitten/,fn:()=>{
-    const r=["Pixel is the real boss around here. I just pay the rent. You'll find them wandering around — give them a pet, they love it."];
+  // Pixel the cat (Chomusuke)
+  {match:/pixel|the cat|cat|kitten|chomusuke/,fn:()=>{
+    const r=["That's Chomusuke — er, I call her Pixel. Black cat, bat wings, crimson eyes. She showed up one day through a portal and never left. Give her a pet, she loves it... but she might bite."];
     if(S.stationStats.milestones?.includes('pixel_kittens'))r.push("Pixel's got three kittens now! Byte is the speedy orange one, Glitch is the sleepy gray one, and Nova follows visitors around. 🐱🐱🐱");
     if(S.stationStats.milestones?.includes('pixel_talks'))r.push("Ever since we hit 25 visitors, Pixel's been... talking? Like actual cat commentary. She's got opinions. Many opinions. 🐱💬");
     return r[Math.random()*r.length|0];
