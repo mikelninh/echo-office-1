@@ -30555,90 +30555,125 @@ const BarVibes = {
   _atmosParticles: [],
 
   records: [
-    {
-      id:'smooth_operator', title:'Smooth Operator', artist:'Echo Ensemble',
-      genre:'Soul / R&B', color:'#d4820a', coverColors:['#d4820a','#8B4513','#FFD700','#2a1a00'],
-      bpm:72, swing:0.12,
-      chords:[
-        {n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},
-        {n:[110,130.81,164.81,196],b:55,nm:'Am7'},
-        {n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},
-        {n:[98,123.47,146.83,174.61],b:49,nm:'G7'}
-      ],
-      rhodesVol:.045, bassVol:.07, drumVol:.025, melodyChance:.2
-    },
-    {
-      id:'sade_nights', title:'Sade Nights', artist:'The Vinyl Club',
-      genre:'Smooth Jazz', color:'#c42020', coverColors:['#c42020','#1a0a0a','#ff6ec7','#3a0a1a'],
-      bpm:66, swing:0.18,
-      chords:[
-        {n:[123.47,146.83,185,220],b:61.74,nm:'Bm7'},
-        {n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},
-        {n:[185,220,277.18,329.63],b:92.5,nm:'F♯m7'},
-        {n:[123.47,146.83,185,220],b:61.74,nm:'Bm7'}
-      ],
-      rhodesVol:.04, bassVol:.065, drumVol:.02, melodyChance:.25
-    },
-    {
-      id:'midnight_silk', title:'Midnight Silk', artist:'D\'Vibes',
-      genre:'Neo-Soul', color:'#9b59b6', coverColors:['#9b59b6','#1a0a2a','#ff6ec7','#4a2a6a'],
-      bpm:68, swing:0.15,
-      chords:[
-        {n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},
-        {n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},
-        {n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},
-        {n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'}
-      ],
-      rhodesVol:.04, bassVol:.06, drumVol:.03, melodyChance:.15
-    },
-    {
-      id:'golden_hour', title:'Golden Hour', artist:'Amber Wave',
-      genre:'Soul Ballad', color:'#ffd700', coverColors:['#ffd700','#8B6508','#FFF8DC','#4a3a00'],
-      bpm:58, swing:0.2,
-      chords:[
-        {n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},
-        {n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},
-        {n:[220,261.63,329.63,392],b:110,nm:'Am7'},
-        {n:[146.83,185,220,261.63],b:73.42,nm:'D7'}
-      ],
-      rhodesVol:.05, bassVol:.055, drumVol:.015, melodyChance:.3
-    },
-    {
-      id:'velvet_dusk', title:'Velvet Dusk', artist:'Noir Sessions',
-      genre:'Smoky Jazz', color:'#4a2a3a', coverColors:['#4a2a3a','#1a0a10','#c06080','#2a1a20'],
-      bpm:62, swing:0.22,
-      chords:[
-        {n:[155.56,196,233.08,293.66],b:77.78,nm:'E♭maj7'},
-        {n:[130.81,155.56,196,233.08],b:65.41,nm:'Cm7'},
-        {n:[207.65,261.63,311.13,392],b:103.83,nm:'A♭maj7'},
-        {n:[116.54,146.83,174.61,207.65],b:58.27,nm:'B♭7'}
-      ],
-      rhodesVol:.035, bassVol:.07, drumVol:.018, melodyChance:.2
-    },
-    {
-      id:'neon_rain', title:'Neon Rain', artist:'Purple Coast',
-      genre:'Downtempo R&B', color:'#00fff7', coverColors:['#00fff7','#0a1a2a','#ff6ec7','#1a3a4a'],
-      bpm:75, swing:0.1,
-      chords:[
-        {n:[110,130.81,164.81,196],b:55,nm:'Am7'},
-        {n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},
-        {n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},
-        {n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'}
-      ],
-      rhodesVol:.04, bassVol:.06, drumVol:.035, melodyChance:.18
-    },
-    {
-      id:'station_after_dark', title:'Station After Dark', artist:'Echo & Friends',
-      genre:'Lo-fi Soul', color:'#ff6ec7', coverColors:['#ff6ec7','#2a0a1a','#ffd080','#4a1a2a'],
-      bpm:70, swing:0.14,
-      chords:[
-        {n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},
-        {n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},
-        {n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},
-        {n:[110,130.81,164.81,196],b:55,nm:'Am7'}
-      ],
-      rhodesVol:.042, bassVol:.065, drumVol:.028, melodyChance:.22
-    }
+    // ═══ SOUL / R&B ═══
+    {id:'smooth_operator',title:'Smooth Operator',artist:'Echo Ensemble',genre:'Soul / R&B',color:'#d4820a',
+      coverColors:['#d4820a','#8B4513','#FFD700','#2a1a00'],bpm:72,swing:0.12,
+      chords:[{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[110,130.81,164.81,196],b:55,nm:'Am7'},{n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},{n:[98,123.47,146.83,174.61],b:49,nm:'G7'}],
+      rhodesVol:.045,bassVol:.07,drumVol:.025,melodyChance:.2},
+    {id:'sade_nights',title:'Sade Nights',artist:'The Vinyl Club',genre:'Smooth R&B',color:'#c42020',
+      coverColors:['#c42020','#1a0a0a','#ff6ec7','#3a0a1a'],bpm:66,swing:0.18,
+      chords:[{n:[123.47,146.83,185,220],b:61.74,nm:'Bm7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[185,220,277.18,329.63],b:92.5,nm:'F♯m7'},{n:[123.47,146.83,185,220],b:61.74,nm:'Bm7'}],
+      rhodesVol:.04,bassVol:.065,drumVol:.02,melodyChance:.25},
+    {id:'midnight_silk',title:'Midnight Silk',artist:'D\'Vibes',genre:'Neo-Soul',color:'#9b59b6',
+      coverColors:['#9b59b6','#1a0a2a','#ff6ec7','#4a2a6a'],bpm:68,swing:0.15,
+      chords:[{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'}],
+      rhodesVol:.04,bassVol:.06,drumVol:.03,melodyChance:.15},
+    {id:'golden_hour',title:'Golden Hour',artist:'Amber Wave',genre:'Soul Ballad',color:'#ffd700',
+      coverColors:['#ffd700','#8B6508','#FFF8DC','#4a3a00'],bpm:58,swing:0.2,
+      chords:[{n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[220,261.63,329.63,392],b:110,nm:'Am7'},{n:[146.83,185,220,261.63],b:73.42,nm:'D7'}],
+      rhodesVol:.05,bassVol:.055,drumVol:.015,melodyChance:.3},
+    {id:'erykah',title:'Brown Sugar Dreams',artist:'Solange Station',genre:'Neo-Soul',color:'#8B4513',
+      coverColors:['#8B4513','#2a1a00','#ffd080','#5a3a10'],bpm:78,swing:0.16,
+      chords:[{n:[146.83,185,220,277.18],b:73.42,nm:'Dm9'},{n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[164.81,196,246.94,329.63],b:82.41,nm:'Em9'}],
+      rhodesVol:.04,bassVol:.07,drumVol:.032,melodyChance:.22},
+
+    // ═══ JAZZ ═══
+    {id:'velvet_dusk',title:'Velvet Dusk',artist:'Noir Sessions',genre:'Smoky Jazz',color:'#4a2a3a',
+      coverColors:['#4a2a3a','#1a0a10','#c06080','#2a1a20'],bpm:62,swing:0.22,
+      chords:[{n:[155.56,196,233.08,293.66],b:77.78,nm:'E♭maj7'},{n:[130.81,155.56,196,233.08],b:65.41,nm:'Cm7'},{n:[207.65,261.63,311.13,392],b:103.83,nm:'A♭maj7'},{n:[116.54,146.83,174.61,207.65],b:58.27,nm:'B♭7'}],
+      rhodesVol:.035,bassVol:.07,drumVol:.018,melodyChance:.2},
+    {id:'blue_note',title:'Blue Note After Hours',artist:'Miles & Co.',genre:'Cool Jazz',color:'#1a3a6a',
+      coverColors:['#1a3a6a','#0a1a3a','#4488cc','#2a4a8a'],bpm:56,swing:0.25,
+      chords:[{n:[146.83,174.61,220,277.18],b:73.42,nm:'Dm7'},{n:[196,233.08,293.66,349.23],b:98,nm:'G7♭9'},{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[110,138.59,164.81,207.65],b:55,nm:'A7'}],
+      rhodesVol:.035,bassVol:.065,drumVol:.015,melodyChance:.3},
+    {id:'bebop_cafe',title:'Bebop Café',artist:'Charlie\'s Ghost',genre:'Bebop',color:'#cc8800',
+      coverColors:['#cc8800','#3a2a00','#ffd700','#6a4a00'],bpm:140,swing:0.08,
+      chords:[{n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},{n:[196,246.94,293.66,349.23],b:98,nm:'G7'},{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[110,130.81,164.81,207.65],b:55,nm:'A7'}],
+      rhodesVol:.03,bassVol:.06,drumVol:.025,melodyChance:.4},
+    {id:'autumn_leaves',title:'Autumn Leaves',artist:'Station Jazz Trio',genre:'Jazz Standard',color:'#cc6633',
+      coverColors:['#cc6633','#4a2a10','#ffa040','#2a1a00'],bpm:64,swing:0.2,
+      chords:[{n:[130.81,155.56,196,233.08],b:65.41,nm:'Cm7'},{n:[174.61,207.65,261.63,311.13],b:87.31,nm:'F7'},{n:[116.54,146.83,174.61,220],b:58.27,nm:'B♭maj7'},{n:[155.56,196,233.08,293.66],b:77.78,nm:'E♭maj7'}],
+      rhodesVol:.04,bassVol:.06,drumVol:.02,melodyChance:.28},
+
+    // ═══ LO-FI / CHILL HOP ═══
+    {id:'station_after_dark',title:'Station After Dark',artist:'Echo & Friends',genre:'Lo-fi Soul',color:'#ff6ec7',
+      coverColors:['#ff6ec7','#2a0a1a','#ffd080','#4a1a2a'],bpm:70,swing:0.14,
+      chords:[{n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},{n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[110,130.81,164.81,196],b:55,nm:'Am7'}],
+      rhodesVol:.042,bassVol:.065,drumVol:.028,melodyChance:.22},
+    {id:'rainy_windows',title:'Rainy Windows',artist:'Nujabes Memorial',genre:'Lo-fi Hip Hop',color:'#6688aa',
+      coverColors:['#6688aa','#1a2a3a','#aaccdd','#3a4a5a'],bpm:82,swing:0.1,
+      chords:[{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[220,261.63,329.63,392],b:110,nm:'Am7'},{n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'}],
+      rhodesVol:.035,bassVol:.055,drumVol:.035,melodyChance:.15},
+    {id:'study_beats',title:'Late Night Study',artist:'Chill Station',genre:'Lo-fi Beats',color:'#88aa66',
+      coverColors:['#88aa66','#2a3a1a','#bbddaa','#4a5a3a'],bpm:76,swing:0.12,
+      chords:[{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'}],
+      rhodesVol:.03,bassVol:.05,drumVol:.03,melodyChance:.12},
+
+    // ═══ BOSSA NOVA / LATIN ═══
+    {id:'ipanema_nights',title:'Ipanema Nights',artist:'Rio Collective',genre:'Bossa Nova',color:'#22aa66',
+      coverColors:['#22aa66','#0a3a1a','#66ddaa','#1a4a2a'],bpm:72,swing:0.08,
+      chords:[{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[196,233.08,293.66,349.23],b:98,nm:'G7'},{n:[220,261.63,329.63,392],b:110,nm:'Am7'},{n:[207.65,261.63,311.13,369.99],b:103.83,nm:'A♭dim'}],
+      rhodesVol:.04,bassVol:.05,drumVol:.02,melodyChance:.25},
+    {id:'cafe_havana',title:'Café Havana',artist:'Luna Tropical',genre:'Latin Jazz',color:'#dd4422',
+      coverColors:['#dd4422','#3a0a00','#ffaa44','#6a2a10'],bpm:88,swing:0.1,
+      chords:[{n:[110,138.59,164.81,207.65],b:55,nm:'Am7'},{n:[146.83,185,220,277.18],b:73.42,nm:'Dm9'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[110,138.59,164.81,207.65],b:55,nm:'Am7'}],
+      rhodesVol:.04,bassVol:.065,drumVol:.035,melodyChance:.2},
+
+    // ═══ FUNK / GROOVE ═══
+    {id:'space_funk',title:'Space Funk',artist:'The Mothership',genre:'Funk',color:'#ff4488',
+      coverColors:['#ff4488','#2a0a1a','#ffaa00','#4a1a2a'],bpm:100,swing:0.06,
+      chords:[{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[110,130.81,164.81,196],b:55,nm:'Am7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'}],
+      rhodesVol:.045,bassVol:.08,drumVol:.04,melodyChance:.15},
+    {id:'groove_machine',title:'Groove Machine',artist:'Pixel Funk Band',genre:'Funk / Disco',color:'#ffaa00',
+      coverColors:['#ffaa00','#3a2a00','#ff6ec7','#6a4a00'],bpm:112,swing:0.05,
+      chords:[{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'}],
+      rhodesVol:.04,bassVol:.08,drumVol:.04,melodyChance:.12},
+
+    // ═══ AMBIENT / CHILL ═══
+    {id:'deep_space_drift',title:'Deep Space Drift',artist:'Brian Eno\'s Ghost',genre:'Ambient',color:'#223355',
+      coverColors:['#223355','#0a0a2a','#4466aa','#1a2a4a'],bpm:45,swing:0.0,
+      chords:[{n:[130.81,196,261.63,392],b:65.41,nm:'C5ths'},{n:[110,164.81,220,329.63],b:55,nm:'A5ths'},{n:[146.83,220,293.66,440],b:73.42,nm:'D5ths'},{n:[130.81,196,261.63,392],b:65.41,nm:'C5ths'}],
+      rhodesVol:.03,bassVol:.035,drumVol:.005,melodyChance:.35},
+    {id:'crystal_caves',title:'Crystal Caves',artist:'Meditation Station',genre:'Ambient Chill',color:'#66ccdd',
+      coverColors:['#66ccdd','#1a3a4a','#aaeeff','#2a5a6a'],bpm:50,swing:0.0,
+      chords:[{n:[174.61,261.63,329.63,440],b:87.31,nm:'Fmaj9'},{n:[196,293.66,392,523.25],b:98,nm:'Gsus4'},{n:[220,329.63,440,523.25],b:110,nm:'Am9'},{n:[174.61,261.63,329.63,440],b:87.31,nm:'Fmaj9'}],
+      rhodesVol:.025,bassVol:.03,drumVol:.008,melodyChance:.3},
+
+    // ═══ DOWNTEMPO / TRIP-HOP ═══
+    {id:'neon_rain',title:'Neon Rain',artist:'Purple Coast',genre:'Downtempo',color:'#00fff7',
+      coverColors:['#00fff7','#0a1a2a','#ff6ec7','#1a3a4a'],bpm:75,swing:0.1,
+      chords:[{n:[110,130.81,164.81,196],b:55,nm:'Am7'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'}],
+      rhodesVol:.04,bassVol:.06,drumVol:.035,melodyChance:.18},
+    {id:'massive_attack',title:'Teardrops in Zero-G',artist:'Bristol Sound System',genre:'Trip-Hop',color:'#333366',
+      coverColors:['#333366','#0a0a2a','#6666aa','#2a2a4a'],bpm:68,swing:0.14,
+      chords:[{n:[110,130.81,164.81,196],b:55,nm:'Am7'},{n:[164.81,207.65,246.94,311.13],b:82.41,nm:'E♭/E'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[110,130.81,164.81,196],b:55,nm:'Am7'}],
+      rhodesVol:.035,bassVol:.075,drumVol:.028,melodyChance:.15},
+
+    // ═══ REGGAE / DUB ═══
+    {id:'dub_station',title:'Dub Station',artist:'Kingston Satellites',genre:'Dub Reggae',color:'#228833',
+      coverColors:['#228833','#0a2a0a','#44cc44','#1a3a1a'],bpm:70,swing:0.08,
+      chords:[{n:[130.81,164.81,196,261.63],b:65.41,nm:'C'},{n:[196,246.94,293.66,392],b:98,nm:'G'},{n:[110,130.81,164.81,220],b:55,nm:'Am'},{n:[174.61,220,261.63,349.23],b:87.31,nm:'F'}],
+      rhodesVol:.035,bassVol:.08,drumVol:.03,melodyChance:.1},
+
+    // ═══ CLASSICAL / PIANO ═══
+    {id:'moonlight',title:'Moonlight Station',artist:'Ludwig Van Echo',genre:'Classical Piano',color:'#aaaacc',
+      coverColors:['#aaaacc','#2a2a3a','#ddddff','#4a4a5a'],bpm:52,swing:0.0,
+      chords:[{n:[130.81,155.56,196,261.63],b:65.41,nm:'Cm'},{n:[207.65,261.63,311.13,415.3],b:103.83,nm:'A♭'},{n:[196,246.94,293.66,392],b:98,nm:'G'},{n:[130.81,155.56,196,261.63],b:65.41,nm:'Cm'}],
+      rhodesVol:.05,bassVol:.04,drumVol:.0,melodyChance:.35},
+    {id:'nocturne',title:'Nocturne No. 9',artist:'Chopin\'s Satellite',genre:'Romantic Piano',color:'#bb88aa',
+      coverColors:['#bb88aa','#3a1a2a','#ddaacc','#5a3a4a'],bpm:48,swing:0.05,
+      chords:[{n:[155.56,196,233.08,311.13],b:77.78,nm:'E♭'},{n:[116.54,146.83,174.61,233.08],b:58.27,nm:'B♭'},{n:[130.81,155.56,196,261.63],b:65.41,nm:'Cm'},{n:[207.65,261.63,311.13,415.3],b:103.83,nm:'A♭'}],
+      rhodesVol:.05,bassVol:.035,drumVol:.0,melodyChance:.4},
+
+    // ═══ ELECTRONIC / HOUSE ═══
+    {id:'deep_house',title:'Deep Inside',artist:'Satellite House Crew',genre:'Deep House',color:'#8844cc',
+      coverColors:['#8844cc','#1a0a2a','#bb66ff','#3a1a5a'],bpm:122,swing:0.02,
+      chords:[{n:[110,130.81,164.81,220],b:55,nm:'Am'},{n:[174.61,220,261.63,349.23],b:87.31,nm:'F'},{n:[130.81,164.81,196,261.63],b:65.41,nm:'C'},{n:[196,246.94,293.66,392],b:98,nm:'G'}],
+      rhodesVol:.03,bassVol:.075,drumVol:.04,melodyChance:.1},
+    {id:'synthwave_cruise',title:'Synthwave Cruise',artist:'Neon Driver',genre:'Synthwave',color:'#ff44aa',
+      coverColors:['#ff44aa','#2a0a2a','#44ffff','#4a1a4a'],bpm:108,swing:0.0,
+      chords:[{n:[110,130.81,164.81,220],b:55,nm:'Am'},{n:[174.61,220,261.63,349.23],b:87.31,nm:'F'},{n:[130.81,164.81,196,261.63],b:65.41,nm:'C'},{n:[164.81,196,246.94,329.63],b:82.41,nm:'Em'}],
+      rhodesVol:.04,bassVol:.07,drumVol:.038,melodyChance:.12},
   ],
 
   // --- FM Synthesis Rhodes Piano ---
@@ -30822,10 +30857,20 @@ const BarVibes = {
         if(self.barInChord>=2){ // 2 bars per chord
           self.barInChord=0;
           self.currentChordIdx=(self.currentChordIdx+1)%rec.chords.length;
-          // After full progression, check votes for next record
+          // After full progression (2 cycles), check votes or shuffle
           if(self.currentChordIdx===0){
-            const next=self.getNextByVotes();
-            if(next&&next!==rec.id){self.start(next);return;}
+            self._progressionCount=(self._progressionCount||0)+1;
+            if(self._progressionCount>=2){ // switch after 2 full progressions
+              self._progressionCount=0;
+              const next=self.getNextByVotes();
+              if(next&&next!==rec.id){self.start(next);return;}
+              // Shuffle mode: auto-pick random next
+              if(self._shuffleMode){
+                const pool=self.records.filter(r=>r.id!==rec.id);
+                const pick=pool[Math.floor(Math.random()*pool.length)];
+                if(pick){showThought(`🔀 Next: "${pick.title}"`);self.start(pick.id);return;}
+              }
+            }
           }
         }
       }
@@ -30951,43 +30996,59 @@ const BarVibes = {
 function showVinylSelector(){
   if(!S.audioCtx) initAudio();
   const cur=BarVibes.currentRecord;
-  let html='<h3 style="color:#ffd080">💿 Vinyl Collection</h3>';
-  html+='<p style="font-size:10px;color:#888;margin-bottom:8px">Pick a record. Vote for the next vibe. Most votes wins.</p>';
+  // Group records by genre category
+  const categories=[
+    {label:'🎤 Soul & R&B',filter:r=>/Soul|R&B|Neo/.test(r.genre)},
+    {label:'🎷 Jazz',filter:r=>/Jazz|Bebop|Standard/.test(r.genre)},
+    {label:'🎧 Lo-fi & Chill',filter:r=>/Lo-fi|Chill|Beats/.test(r.genre)},
+    {label:'🌴 Bossa & Latin',filter:r=>/Bossa|Latin/.test(r.genre)},
+    {label:'🕺 Funk & Groove',filter:r=>/Funk|Disco|Groove/.test(r.genre)},
+    {label:'🌌 Ambient',filter:r=>/Ambient/.test(r.genre)},
+    {label:'🌊 Downtempo',filter:r=>/Downtempo|Trip|Dub|Reggae/.test(r.genre)},
+    {label:'🎹 Classical',filter:r=>/Classical|Piano|Romantic/.test(r.genre)},
+    {label:'⚡ Electronic',filter:r=>/House|Synth|Electronic/.test(r.genre)},
+  ];
+  let html='<h3 style="color:#ffd080">💿 Vinyl Collection <span style="color:#888;font-size:11px;font-weight:normal">('+BarVibes.records.length+' records)</span></h3>';
   if(cur){
-    html+=`<div style="background:rgba(255,180,80,0.08);border:1px solid #ffd080;border-radius:6px;padding:8px;margin-bottom:10px">`;
-    html+=`<div style="color:#ffd080;font-size:9px;text-transform:uppercase;letter-spacing:1px">Now Spinning</div>`;
-    html+=`<div style="color:#fff;font-size:13px;font-weight:bold;margin:2px 0">${cur.title}</div>`;
-    html+=`<div style="color:#aaa;font-size:10px">${cur.artist} — ${cur.genre}</div>`;
-    html+=`</div>`;
+    html+=`<div style="background:rgba(255,180,80,0.08);border:1px solid #ffd080;border-radius:6px;padding:6px 8px;margin-bottom:8px;display:flex;align-items:center;gap:8px">`;
+    html+=`<div style="width:24px;height:24px;border-radius:50%;background:radial-gradient(circle,${cur.color},#111);border:2px solid #ffd080;flex-shrink:0;animation:spin 3s linear infinite"></div>`;
+    html+=`<div><div style="color:#ffd080;font-size:8px;text-transform:uppercase;letter-spacing:1px">Now Spinning</div>`;
+    html+=`<div style="color:#fff;font-size:11px;font-weight:bold">${cur.title} <span style="color:#888;font-weight:normal">— ${cur.artist}</span></div></div>`;
+    html+=`</div><style>@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}</style>`;
   }
-  html+='<div style="max-height:280px;overflow-y:auto">';
+  // Genre filter tabs
+  html+=`<div id="genre-tabs" style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px">`;
+  html+=`<div class="drink-btn genre-tab active" data-cat="all" style="font-size:8px;padding:2px 8px;border-color:#ffd080;color:#ffd080">All</div>`;
+  categories.forEach((cat,i)=>{
+    const count=BarVibes.records.filter(cat.filter).length;
+    if(count>0) html+=`<div class="drink-btn genre-tab" data-cat="${i}" style="font-size:8px;padding:2px 8px">${cat.label} (${count})</div>`;
+  });
+  html+=`</div>`;
+  html+='<div id="vinyl-list" style="max-height:220px;overflow-y:auto">';
   BarVibes.records.forEach(rec=>{
     const isCur=cur&&cur.id===rec.id;
     const isVoted=BarVibes.myVote===rec.id;
     const votes=BarVibes.votes[rec.id]||0;
     const border=isCur?'#ffd080':isVoted?'#ff6ec7':'#444';
     const bg=isCur?'rgba(255,180,80,0.1)':isVoted?'rgba(255,110,199,0.08)':'rgba(30,20,40,0.6)';
-    html+=`<div class="drink-btn vinyl-pick" data-rid="${rec.id}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin:4px 0;border-color:${border};background:${bg};width:100%;text-align:left;cursor:pointer">`;
-    // Mini vinyl disc (CSS)
-    html+=`<div style="width:32px;height:32px;border-radius:50%;background:radial-gradient(circle at 30% 30%,${rec.color},#111 70%);border:2px solid #333;flex-shrink:0;position:relative"><div style="width:8px;height:8px;border-radius:50%;background:${rec.color};position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"></div></div>`;
+    // Find category index for filtering
+    const catIdx=categories.findIndex(c=>c.filter(rec));
+    html+=`<div class="drink-btn vinyl-pick" data-rid="${rec.id}" data-cat="${catIdx}" style="display:flex;align-items:center;gap:8px;padding:6px 8px;margin:3px 0;border-color:${border};background:${bg};width:100%;text-align:left;cursor:pointer">`;
+    html+=`<div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 30% 30%,${rec.color},#111 70%);border:2px solid #333;flex-shrink:0;position:relative"><div style="width:6px;height:6px;border-radius:50%;background:${rec.color};position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"></div></div>`;
     html+=`<div style="flex:1;min-width:0">`;
-    html+=`<div style="color:#fff;font-size:11px;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${rec.title}</div>`;
-    html+=`<div style="color:#888;font-size:9px">${rec.artist}</div>`;
-    html+=`<div style="color:#666;font-size:8px">${rec.genre} · ${rec.bpm} BPM</div>`;
+    html+=`<div style="color:#fff;font-size:10px;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${rec.title}</div>`;
+    html+=`<div style="color:#888;font-size:8px">${rec.artist} · <span style="color:#666">${rec.genre} · ${rec.bpm}bpm</span></div>`;
     html+=`</div>`;
-    html+=`<div style="text-align:center;flex-shrink:0">`;
-    if(isCur){
-      html+=`<div style="color:#ffd080;font-size:16px">🎵</div><div style="font-size:8px;color:#ffd080">Playing</div>`;
-    } else {
-      html+=`<div style="font-size:14px">${isVoted?'🔥':'🗳️'}</div>`;
-      html+=`<div style="font-size:9px;color:${isVoted?'#ff6ec7':'#888'}">${votes>0?votes+' vote'+(votes>1?'s':''):'Vote'}</div>`;
-    }
+    html+=`<div style="text-align:center;flex-shrink:0;width:32px">`;
+    if(isCur) html+=`<div style="color:#ffd080;font-size:14px">🎵</div>`;
+    else html+=`<div style="font-size:12px">${isVoted?'🔥':'🗳️'}</div><div style="font-size:8px;color:${isVoted?'#ff6ec7':'#666'}">${votes>0?votes:''}</div>`;
     html+=`</div></div>`;
   });
   html+='</div>';
-  html+=`<div style="display:flex;gap:6px;margin-top:8px">`;
-  html+=`<button class="drink-btn" id="vinyl-stop" style="flex:1;border-color:#ff4444;color:#ff4444">⏹ Stop</button>`;
-  html+=`<button class="drink-btn" id="vinyl-random" style="flex:1;border-color:#00fff7;color:#00fff7">🎲 Surprise Me</button>`;
+  html+=`<div style="display:flex;gap:6px;margin-top:6px">`;
+  html+=`<button class="drink-btn" id="vinyl-stop" style="flex:1;border-color:#ff4444;color:#ff4444;font-size:10px">⏹ Stop</button>`;
+  html+=`<button class="drink-btn" id="vinyl-random" style="flex:1;border-color:#00fff7;color:#00fff7;font-size:10px">🎲 Surprise Me</button>`;
+  html+=`<button class="drink-btn" id="vinyl-shuffle" style="flex:1;border-color:#ffd700;color:#ffd700;font-size:10px">🔀 Shuffle All</button>`;
   html+=`</div>`;
   const{p}=createPopup(html);
   // Click handlers
@@ -31004,6 +31065,17 @@ function showVinylSelector(){
       p.closest('.popup-overlay').remove();
     };
   });
+  // Genre tab filtering
+  p.querySelectorAll('.genre-tab').forEach(tab=>{
+    tab.onclick=()=>{
+      p.querySelectorAll('.genre-tab').forEach(t=>{t.classList.remove('active');t.style.borderColor='';t.style.color='';});
+      tab.classList.add('active');tab.style.borderColor='#ffd080';tab.style.color='#ffd080';
+      const cat=tab.dataset.cat;
+      p.querySelectorAll('.vinyl-pick').forEach(vp=>{
+        vp.style.display=(cat==='all'||vp.dataset.cat===cat)?'flex':'none';
+      });
+    };
+  });
   const stopBtn=p.querySelector('#vinyl-stop');
   if(stopBtn) stopBtn.onclick=()=>{ BarVibes.stop();S.musicPlaying=false;$('#btn-music').classList.remove('active');showThought('Music stopped.');p.closest('.popup-overlay').remove(); };
   const randBtn=p.querySelector('#vinyl-random');
@@ -31012,6 +31084,15 @@ function showVinylSelector(){
     const pick=pool[Math.floor(Math.random()*pool.length)];
     BarVibes.start(pick.id);S.musicPlaying=true;$('#btn-music').classList.add('active');
     showThought(`🎲 "${pick.title}" — ${pick.genre}`);
+    p.closest('.popup-overlay').remove();
+  };
+  // Shuffle All: auto-advance through random records
+  const shuffleBtn=p.querySelector('#vinyl-shuffle');
+  if(shuffleBtn) shuffleBtn.onclick=()=>{
+    BarVibes._shuffleMode=true;
+    const pick=BarVibes.records[Math.floor(Math.random()*BarVibes.records.length)];
+    BarVibes.start(pick.id);S.musicPlaying=true;$('#btn-music').classList.add('active');
+    showThought(`🔀 Shuffle mode ON — "${pick.title}"`);
     p.closest('.popup-overlay').remove();
   };
 }
