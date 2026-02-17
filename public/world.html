@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Echo World</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a14;color:#eee;font-family:'Courier New',monospace;overflow:hidden}
+canvas{display:block;image-rendering:pixelated}
+#ui{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:10}
+#ui>*{pointer-events:auto}
+#hud{position:absolute;top:8px;left:8px;font-size:11px;color:#00fff7;text-shadow:0 0 6px #00fff788}
+#room-name{font-size:14px;font-weight:bold;color:#ffd080}
+#player-count{color:#888;font-size:10px}
+#chat-panel{position:absolute;bottom:60px;left:8px;width:320px;max-height:200px;overflow-y:auto;background:rgba(10,10,20,.85);border:1px solid #333;border-radius:8px;padding:8px;font-size:11px;scrollbar-width:thin}
+.chat-msg{margin:2px 0;line-height:1.4}
+.chat-msg .name{font-weight:bold;margin-right:4px}
+.chat-msg.discord .name{color:#7289da}
+.chat-msg.room .name{color:#00fff7}
+#chat-input-wrap{position:absolute;bottom:8px;left:8px;width:320px;display:flex;gap:4px}
+#chat-input{flex:1;background:#1a1a2e;border:1px solid #444;color:#eee;padding:6px 10px;border-radius:6px;font-size:12px;font-family:inherit;outline:none}
+#chat-input:focus{border-color:#00fff7}
+#chat-send{background:#00fff7;color:#0a0a14;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:11px}
+#room-list{position:absolute;top:8px;right:8px;width:180px;background:rgba(10,10,20,.9);border:1px solid #333;border-radius:8px;padding:8px;font-size:10px}
+#room-list h3{color:#ffd080;font-size:11px;margin-bottom:6px}
+.room-item{padding:4px 6px;margin:2px 0;border-radius:4px;cursor:pointer;display:flex;justify-content:space-between;transition:background .15s}
+.room-item:hover{background:#ffffff15}
+.room-item.active{background:#00fff720;border:1px solid #00fff744}
+.room-item .pop{color:#888;font-size:9px}
+#minimap{position:absolute;bottom:70px;right:8px;width:140px;height:90px;background:rgba(10,10,20,.85);border:1px solid #333;border-radius:6px;overflow:hidden}
+#action-bar{position:absolute;bottom:8px;right:8px;display:flex;gap:4px}
+#action-bar button{background:#1a1a2e;border:1px solid #444;color:#ddd;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:16px;transition:all .15s}
+#action-bar button:hover{background:#2a2a3e;border-color:#00fff7}
+#loading{position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0a14;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100}
+#loading h1{color:#00fff7;font-size:20px;margin-bottom:12px}
+#loading p{color:#888;font-size:12px}
+.hidden{display:none!important}
+</style>
+</head><body>
+<div id="loading">
+  <h1>🌍 Entering Echo World...</h1>
+  <p>Connecting to server...</p>
+</div>
+
+<canvas id="game"></canvas>
+
+<div id="ui" class="hidden">
+  <div id="hud">
+    <div id="room-name">Loading...</div>
+    <div id="player-count">0 players</div>
+  </div>
+
+  <div id="room-list">
+    <h3>🚪 Rooms</h3>
+    <div id="rooms"></div>
+  </div>
+
+  <div id="chat-panel"></div>
+  <div id="chat-input-wrap">
+    <input id="chat-input" placeholder="Say something..." maxlength="500">
+    <button id="chat-send">↑</button>
+  </div>
+
+  <canvas id="minimap"></canvas>
+
+  <div id="action-bar">
+    <button title="Emote" onclick="showEmotes()">😊</button>
+    <button title="Profile" onclick="showProfile()">👤</button>
+    <button title="Research Lab" onclick="enterLab()">🔬</button>
+    <button title="Settings" onclick="showSettings()">⚙️</button>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+// ═══ ECHO WORLDS CLIENT ═══
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const minimapCanvas = document.getElementById('minimap');
+const minimapCtx = minimapCanvas.getContext('2d');
+
+// Get server ID from URL
+const serverId = window.location.pathname.split('/world/')[1]?.split('?')[0];
+const params = new URLSearchParams(window.location.search);
+
+// ═══ STATE ═══
+const S = {
+  connected: false,
+  player: null,
+  server: null,
+  rooms: [],
+  currentRoom: null,
+  players: new Map(), // socketId -> player data
+  messages: [],
+  keys: {},
+  animFrame: 0,
+};
+
+// ═══ CONNECT ═══
+const socket = io({ path: '/worlds', transports: ['websocket'] });
+
+socket.on('connect', () => {
+  // For now, generate a simple user ID (in production: Discord OAuth)
+  const userId = localStorage.getItem('echoWorldsUserId') || 'user_' + Math.random().toString(36).slice(2, 10);
+  localStorage.setItem('echoWorldsUserId', userId);
+  const username = localStorage.getItem('echoWorldsUsername') || 'Visitor_' + userId.slice(-4);
+
+  socket.emit('auth', {
+    userId, username, serverId,
+    roomId: params.get('room') ? parseInt(params.get('room')) : null,
+  }, (response) => {
+    if (response.error) {
+      document.querySelector('#loading p').textContent = '❌ ' + response.error;
+      return;
+    }
+
+    S.connected = true;
+    S.player = response.player;
+    S.server = response.server;
+    S.rooms = response.rooms;
+    S.currentRoom = response.rooms.find(r => r.id === response.currentRoom);
+
+    // Add existing players
+    response.playersInRoom.forEach(p => S.players.set(p.id, p));
+
+    // Show UI
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('ui').classList.remove('hidden');
+    updateRoomUI();
+    renderRoomList();
+    resizeCanvas();
+    gameLoop();
+  });
+});
+
+// ═══ SOCKET EVENTS ═══
+socket.on('player:join', p => {
+  S.players.set(p.id, p);
+  updatePlayerCount();
+  addChatMsg('system', `${p.username} entered the room`, '#888');
+});
+
+socket.on('player:leave', data => {
+  const p = S.players.get(data.id);
+  if (p) addChatMsg('system', `${p.username} left`, '#555');
+  S.players.delete(data.id);
+  updatePlayerCount();
+});
+
+socket.on('player:move', data => {
+  const p = S.players.get(data.id);
+  if (p) { p.x = data.x; p.y = data.y; p.dir = data.dir || p.dir; }
+});
+
+socket.on('player:emote', data => {
+  const p = S.players.get(data.id);
+  if (p) p._emote = { type: data.emote, timer: 120 };
+});
+
+socket.on('player:skin', data => {
+  const p = S.players.get(data.id);
+  if (p) p.skin = data.skin;
+});
+
+socket.on('player:speaking', data => {
+  const p = S.players.get(data.id);
+  if (p) p.speaking = data.speaking;
+});
+
+socket.on('chat', msg => {
+  addChatMsg(msg.username, msg.content, msg.source === 'discord' ? '#7289da' : '#00fff7', msg.source);
+});
+
+socket.on('tip', data => {
+  addChatMsg('system', `💰 ${data.from} tipped ${data.to} ${data.amount}◈!`, '#ffd700');
+});
+
+socket.on('room:populations', pops => {
+  S.rooms.forEach(r => r._pop = pops[r.id] || 0);
+  renderRoomList();
+});
+
+// ═══ INPUT ═══
+document.addEventListener('keydown', e => { S.keys[e.key] = true; });
+document.addEventListener('keyup', e => { S.keys[e.key] = false; });
+
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.value.trim()) {
+    socket.emit('chat', { content: e.target.value.trim() });
+    e.target.value = '';
+  }
+});
+document.getElementById('chat-send').onclick = () => {
+  const input = document.getElementById('chat-input');
+  if (input.value.trim()) {
+    socket.emit('chat', { content: input.value.trim() });
+    input.value = '';
+  }
+};
+
+// ═══ MOVEMENT ═══
+const SPEED = 3;
+function updateMovement() {
+  if (!S.player || !S.currentRoom) return;
+  if (document.activeElement === document.getElementById('chat-input')) return;
+  let dx = 0, dy = 0;
+  if (S.keys['ArrowLeft'] || S.keys['a']) dx = -1;
+  if (S.keys['ArrowRight'] || S.keys['d']) dx = 1;
+  if (S.keys['ArrowUp'] || S.keys['w']) dy = -1;
+  if (S.keys['ArrowDown'] || S.keys['s']) dy = 1;
+  if (dx === 0 && dy === 0) return;
+
+  const newX = Math.max(10, Math.min(S.currentRoom.width - 10, S.player.x + dx * SPEED));
+  const newY = Math.max(10, Math.min(S.currentRoom.height - 10, S.player.y + dy * SPEED));
+  if (newX !== S.player.x || newY !== S.player.y) {
+    S.player.x = newX;
+    S.player.y = newY;
+    S.player.dir = dx < 0 ? 'left' : dx > 0 ? 'right' : dy < 0 ? 'up' : 'down';
+    socket.emit('move', { x: S.player.x, y: S.player.y, dir: S.player.dir });
+  }
+}
+
+// ═══ RENDERING ═══
+const THEMES = {
+  default:  { floor: '#1a1a2e', wall: '#2a2a3e', accent: '#00fff7' },
+  plaza:    { floor: '#1a2a1a', wall: '#2a3a2a', accent: '#44cc44' },
+  arcade:   { floor: '#2a1a2a', wall: '#3a2a3a', accent: '#ff44aa' },
+  lounge:   { floor: '#2a1a1a', wall: '#3a2a2a', accent: '#ffd080' },
+  gallery:  { floor: '#1a1a1a', wall: '#2a2a2a', accent: '#ffffff' },
+  campfire: { floor: '#2a2010', wall: '#3a3020', accent: '#ff8844' },
+  townhall: { floor: '#1a1a2a', wall: '#2a2a3a', accent: '#ffd700' },
+  park:     { floor: '#1a2a14', wall: '#2a3a24', accent: '#66cc44' },
+  lab:      { floor: '#0a1a14', wall: '#1a2a24', accent: '#00ff88' },
+  library:  { floor: '#2a1a10', wall: '#3a2a20', accent: '#cc8844' },
+  bazaar:   { floor: '#2a2a1a', wall: '#3a3a2a', accent: '#ffaa00' },
+  underground: { floor: '#141414', wall: '#1a1a1a', accent: '#ff4444' },
+  'space-station': { floor: '#0a0a14', wall: '#1a1a2e', accent: '#00fff7' },
+};
+
+function render() {
+  if (!S.currentRoom) return;
+  const room = S.currentRoom;
+  const theme = THEMES[room.theme] || THEMES.default;
+
+  // Camera (follow player)
+  const camX = Math.max(0, Math.min(room.width - canvas.width, S.player.x - canvas.width / 2));
+  const camY = Math.max(0, Math.min(room.height - canvas.height, S.player.y - canvas.height / 2));
+
+  ctx.save();
+  ctx.translate(-camX, -camY);
+
+  // Floor
+  ctx.fillStyle = theme.floor;
+  ctx.fillRect(0, 0, room.width, room.height);
+
+  // Grid
+  ctx.strokeStyle = theme.wall;
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < room.width; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, room.height); ctx.stroke(); }
+  for (let y = 0; y < room.height; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(room.width, y); ctx.stroke(); }
+
+  // Walls
+  ctx.fillStyle = theme.wall;
+  ctx.fillRect(0, 0, room.width, 4);
+  ctx.fillRect(0, 0, 4, room.height);
+  ctx.fillRect(room.width - 4, 0, 4, room.height);
+  ctx.fillRect(0, room.height - 4, room.width, 4);
+
+  // Objects
+  (room.objects || []).forEach(obj => {
+    ctx.fillStyle = theme.accent + '33';
+    ctx.strokeStyle = theme.accent + '66';
+    ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+    ctx.strokeRect(obj.x, obj.y, obj.w, obj.h);
+    if (obj.label) {
+      ctx.fillStyle = '#fff';
+      ctx.font = '9px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(obj.label, obj.x + obj.w / 2, obj.y + obj.h / 2 + 3);
+    }
+  });
+
+  // Other players
+  S.players.forEach(p => {
+    drawAvatar(p.x, p.y, p.username, p.skin, theme.accent, p.speaking, p._emote);
+  });
+
+  // Self
+  if (S.player) {
+    drawAvatar(S.player.x, S.player.y, S.player.username, S.player.skin, '#00fff7', false, null, true);
+  }
+
+  ctx.restore();
+
+  // Minimap
+  renderMinimap(camX, camY);
+
+  S.animFrame++;
+}
+
+function drawAvatar(x, y, name, skin, color, speaking, emote, isSelf) {
+  // Simple pixel avatar
+  const size = 16;
+  ctx.fillStyle = isSelf ? '#00fff7' : color;
+  ctx.fillRect(x - size / 2, y - size, size, size);
+  // Head
+  ctx.fillStyle = '#ffd080';
+  ctx.fillRect(x - 5, y - size - 8, 10, 8);
+  // Name
+  ctx.fillStyle = isSelf ? '#00fff7' : '#ccc';
+  ctx.font = '9px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(name, x, y - size - 12);
+  // Speaking indicator
+  if (speaking) {
+    ctx.fillStyle = '#44ff44';
+    ctx.beginPath();
+    ctx.arc(x + 10, y - size - 6, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Emote
+  if (emote && emote.timer > 0) {
+    ctx.font = '16px sans-serif';
+    ctx.fillText(emote.type, x, y - size - 22);
+    emote.timer--;
+  }
+}
+
+function renderMinimap(camX, camY) {
+  if (!S.currentRoom) return;
+  const mc = minimapCtx;
+  const room = S.currentRoom;
+  const scale = Math.min(140 / room.width, 90 / room.height);
+
+  mc.fillStyle = '#0a0a14';
+  mc.fillRect(0, 0, 140, 90);
+  mc.fillStyle = '#1a1a2e';
+  mc.fillRect(0, 0, room.width * scale, room.height * scale);
+
+  // Viewport
+  mc.strokeStyle = '#00fff744';
+  mc.strokeRect(camX * scale, camY * scale, canvas.width * scale, canvas.height * scale);
+
+  // Players
+  S.players.forEach(p => {
+    mc.fillStyle = '#888';
+    mc.fillRect(p.x * scale - 1, p.y * scale - 1, 2, 2);
+  });
+  if (S.player) {
+    mc.fillStyle = '#00fff7';
+    mc.fillRect(S.player.x * scale - 1, S.player.y * scale - 1, 3, 3);
+  }
+}
+
+// ═══ UI ═══
+function updateRoomUI() {
+  if (!S.currentRoom) return;
+  document.getElementById('room-name').textContent = `${S.currentRoom.name}`;
+  document.title = `${S.currentRoom.name} — ${S.server?.name || 'Echo World'}`;
+  updatePlayerCount();
+}
+
+function updatePlayerCount() {
+  document.getElementById('player-count').textContent = `${S.players.size + 1} players`;
+}
+
+function renderRoomList() {
+  const el = document.getElementById('rooms');
+  el.innerHTML = S.rooms.map(r => `
+    <div class="room-item ${r.id === S.currentRoom?.id ? 'active' : ''}" onclick="enterRoom(${r.id})">
+      <span>${r.name}</span>
+      <span class="pop">${r._pop || 0}👤</span>
+    </div>
+  `).join('');
+}
+
+function addChatMsg(name, text, color, source) {
+  const panel = document.getElementById('chat-panel');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + (source || 'system');
+  div.innerHTML = name === 'system' ? `<span style="color:${color}">${text}</span>` :
+    `<span class="name" style="color:${color}">${name}:</span> ${text}`;
+  panel.appendChild(div);
+  panel.scrollTop = panel.scrollHeight;
+  S.messages.push({ name, text });
+  if (panel.children.length > 100) panel.removeChild(panel.firstChild);
+}
+
+function enterRoom(roomId) {
+  if (roomId === S.currentRoom?.id) return;
+  socket.emit('room:enter', { roomId }, (res) => {
+    if (res.error) return addChatMsg('system', '❌ ' + res.error, '#ff4444');
+    S.currentRoom = res.room;
+    S.players.clear();
+    res.playersInRoom.forEach(p => S.players.set(p.id, p));
+    S.player.x = 400;
+    S.player.y = 300;
+    S.player.roomId = roomId;
+    updateRoomUI();
+    renderRoomList();
+  });
+}
+
+function showEmotes() {
+  const emotes = ['👋', '🎉', '❤️', '😂', '🤔', '👏', '🔥', '💀', '✨', '🎵'];
+  const chosen = emotes[Math.floor(Math.random() * emotes.length)];
+  socket.emit('emote', { emote: chosen });
+  if (S.player) S.player._emote = { type: chosen, timer: 120 };
+}
+
+function showProfile() { addChatMsg('system', 'Profile panel coming in Sprint 8!', '#ffd080'); }
+function enterLab() { window.open('/research/synapse-spotter', '_blank'); }
+function showSettings() { addChatMsg('system', 'Settings panel coming in Sprint 8!', '#ffd080'); }
+
+// ═══ RESIZE ═══
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  minimapCanvas.width = 140;
+  minimapCanvas.height = 90;
+}
+window.addEventListener('resize', resizeCanvas);
+
+// ═══ GAME LOOP ═══
+function gameLoop() {
+  updateMovement();
+  render();
+  requestAnimationFrame(gameLoop);
+}
+</script>
+</body></html>

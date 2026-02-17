@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Echo Worlds — Room Editor</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   ECHO WORLDS ROOM EDITOR — Styles
+   ═══════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+@font-face{font-family:'Pixel';src:local('Courier New');} /* fallback monospace pixel feel */
+
+:root{
+  --bg:#0a0a14;--bg2:#10101e;--bg3:#181830;--bg4:#20203a;
+  --fg:#e0e0f0;--fg2:#a0a0c0;--accent:#7c5cbf;--accent2:#a97cf8;
+  --danger:#e74c4c;--success:#4cde80;--warn:#f0c040;
+  --border:#2a2a44;--hover:#2e2e50;
+  --radius:6px;--font:'Courier New',monospace;
+  --panel-w:260px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:13px}
+button{font-family:var(--font);font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--fg);border-radius:var(--radius);padding:4px 10px;transition:background .15s}
+button:hover{background:var(--hover)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{background:var(--accent2)}
+button.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+input,select,textarea{font-family:var(--font);font-size:12px;background:var(--bg2);color:var(--fg);border:1px solid var(--border);border-radius:var(--radius);padding:4px 8px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+label{color:var(--fg2);font-size:11px;display:block;margin-bottom:2px}
+textarea{resize:vertical}
+
+/* Layout */
+#app{display:flex;height:100vh;width:100vw}
+
+/* Left Panel — Object Palette */
+#palette{width:var(--panel-w);min-width:var(--panel-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+#palette-header{padding:12px;border-bottom:1px solid var(--border)}
+#palette-header h2{font-size:14px;color:var(--accent2);margin-bottom:8px;letter-spacing:1px}
+.palette-section{padding:8px 12px}
+.palette-section h3{font-size:11px;color:var(--fg2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+#object-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;overflow-y:auto;padding:8px 12px;flex:1}
+.obj-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);cursor:grab;transition:all .15s;user-select:none}
+.obj-btn:hover{border-color:var(--accent);background:var(--bg3)}
+.obj-btn canvas{image-rendering:pixelated;border-radius:2px}
+.obj-btn span{font-size:9px;color:var(--fg2);text-align:center;line-height:1.1}
+
+/* Centre — Canvas Viewport */
+#viewport{flex:1;position:relative;overflow:hidden;background:var(--bg)}
+#editor-canvas{position:absolute;top:0;left:0;image-rendering:pixelated;cursor:crosshair}
+#toolbar{position:absolute;top:8px;left:8px;right:8px;display:flex;gap:6px;align-items:center;z-index:10;flex-wrap:wrap}
+#toolbar .spacer{flex:1}
+#toolbar .group{display:flex;gap:4px;align-items:center;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:3px 6px}
+#toolbar .group label{margin:0;font-size:11px}
+
+/* Minimap */
+#minimap-wrap{position:absolute;bottom:12px;right:12px;border:2px solid var(--border);border-radius:var(--radius);background:var(--bg2);z-index:10;overflow:hidden}
+#minimap{image-rendering:pixelated;display:block}
+
+/* Zoom controls */
+#zoom-controls{position:absolute;bottom:12px;left:12px;display:flex;gap:4px;z-index:10}
+
+/* Status bar */
+#status-bar{position:absolute;bottom:0;left:0;right:0;height:24px;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 12px;font-size:11px;color:var(--fg2);gap:16px;z-index:10}
+
+/* Right Panel — Properties */
+#properties{width:var(--panel-w);min-width:var(--panel-w);background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+#properties-header{padding:12px;border-bottom:1px solid var(--border)}
+#properties-header h2{font-size:14px;color:var(--accent2);letter-spacing:1px}
+.prop-section{padding:8px 12px;border-bottom:1px solid var(--border)}
+.prop-section h3{font-size:11px;color:var(--fg2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.prop-row{margin-bottom:6px}
+.prop-row input,.prop-row select,.prop-row textarea{width:100%}
+.prop-row.inline{display:flex;gap:8px;align-items:center}
+.prop-row.inline label{margin:0;min-width:48px}
+.prop-row.inline input[type=number]{width:64px}
+.checkbox-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.checkbox-row input[type=checkbox]{width:14px;height:14px;accent-color:var(--accent)}
+.no-selection{padding:40px 20px;text-align:center;color:var(--fg2);font-size:12px}
+
+/* Preview overlay */
+#preview-overlay{position:absolute;inset:0;z-index:100;display:none}
+#preview-overlay.active{display:block}
+#preview-canvas{width:100%;height:100%;image-rendering:pixelated}
+#preview-hud{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(10,10,20,.85);border:1px solid var(--accent);border-radius:var(--radius);padding:8px 16px;color:var(--fg);font-size:12px;display:flex;gap:12px;align-items:center}
+
+/* Modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:center;justify-content:center}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px;min-width:360px;max-width:500px}
+.modal h3{color:var(--accent2);margin-bottom:12px}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.modal textarea{width:100%;height:200px;font-size:11px}
+
+/* Toast */
+#toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:8px 20px;border-radius:20px;font-size:12px;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.show{opacity:1}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══ LEFT PANEL — OBJECT PALETTE ═══ -->
+  <div id="palette">
+    <div id="palette-header">
+      <h2>⬡ ECHO EDITOR</h2>
+      <div class="prop-row">
+        <label>Room Size</label>
+        <select id="sel-size">
+          <option value="800,600">800 × 600</option>
+          <option value="1200,800" selected>1200 × 800</option>
+          <option value="1600,1000">1600 × 1000</option>
+          <option value="2000,1200">2000 × 1200</option>
+          <option value="4000,1600">4000 × 1600</option>
+        </select>
+      </div>
+      <div class="prop-row" style="margin-top:4px">
+        <label>Theme</label>
+        <select id="sel-theme">
+          <option value="default">Default</option>
+          <option value="plaza">Plaza</option>
+          <option value="arcade">Arcade</option>
+          <option value="lounge">Lounge</option>
+          <option value="gallery">Gallery</option>
+          <option value="campfire">Campfire</option>
+          <option value="townhall">Town Hall</option>
+          <option value="park">Park</option>
+          <option value="lab">Lab</option>
+          <option value="library">Library</option>
+          <option value="bazaar">Bazaar</option>
+          <option value="underground">Underground</option>
+          <option value="space-station">Space Station</option>
+        </select>
+      </div>
+    </div>
+    <div class="palette-section"><h3>Objects</h3></div>
+    <div id="object-grid"></div>
+  </div>
+
+  <!-- ═══ CENTRE — CANVAS VIEWPORT ═══ -->
+  <div id="viewport">
+    <div id="toolbar">
+      <div class="group">
+        <button id="btn-grid" title="Toggle Grid (G)">Grid</button>
+        <button id="btn-snap" title="Toggle Snap">Snap</button>
+      </div>
+      <div class="group">
+        <button id="btn-undo" title="Undo (Ctrl+Z)">↶</button>
+        <button id="btn-redo" title="Redo (Ctrl+Y)">↷</button>
+      </div>
+      <div class="group">
+        <button id="btn-delete" title="Delete Selected (Del)">🗑</button>
+        <button id="btn-duplicate" title="Duplicate (Ctrl+D)">⧉</button>
+      </div>
+      <span class="spacer"></span>
+      <div class="group">
+        <button id="btn-save" class="primary">💾 Save</button>
+        <button id="btn-load">📂 Load</button>
+        <button id="btn-export" class="primary">🚀 Export</button>
+      </div>
+      <div class="group">
+        <button id="btn-preview" style="background:#2a6040;border-color:#2a6040">▶ Preview</button>
+      </div>
+    </div>
+
+    <canvas id="editor-canvas"></canvas>
+
+    <div id="minimap-wrap"><canvas id="minimap" width="180" height="120"></canvas></div>
+
+    <div id="zoom-controls">
+      <button id="btn-zout" title="Zoom Out (-)">−</button>
+      <button id="btn-zreset" title="Reset Zoom">⊙</button>
+      <button id="btn-zin" title="Zoom In (+)">+</button>
+    </div>
+
+    <div id="status-bar">
+      <span id="stat-pos">0, 0</span>
+      <span id="stat-zoom">100%</span>
+      <span id="stat-objects">0 objects</span>
+      <span id="stat-size">1200×800</span>
+    </div>
+
+    <!-- Preview overlay -->
+    <div id="preview-overlay">
+      <canvas id="preview-canvas"></canvas>
+      <div id="preview-hud">
+        <span>WASD / Arrow keys to move</span>
+        <span>|</span>
+        <span>E to interact</span>
+        <span>|</span>
+        <button id="btn-exit-preview" class="danger">✕ Exit Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT PANEL — PROPERTIES ═══ -->
+  <div id="properties">
+    <div id="properties-header"><h2>Properties</h2></div>
+    <div id="props-content">
+      <div class="no-selection">Select an object to edit its properties</div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   ECHO WORLDS — ROOM EDITOR   (single-file, zero dependencies)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+// ───────── THEMES ─────────
+const THEMES = {
+  default:        { floorColor:'#1a1a2e', wallColor:'#16213e', accentColor:'#0f3460', ambientColor:'#e2e2e2' },
+  plaza:          { floorColor:'#2d2d3f', wallColor:'#3b3b5c', accentColor:'#7c5cbf', ambientColor:'#ffeedd' },
+  arcade:         { floorColor:'#0d0d1a', wallColor:'#1a0a2e', accentColor:'#ff00ff', ambientColor:'#ff44cc' },
+  lounge:         { floorColor:'#1e1e2f', wallColor:'#2a1f3d', accentColor:'#e67e22', ambientColor:'#ffcc88' },
+  gallery:        { floorColor:'#f5f0e8', wallColor:'#e8e0d0', accentColor:'#c0392b', ambientColor:'#ffffff' },
+  campfire:       { floorColor:'#1a1207', wallColor:'#2d1f0e', accentColor:'#ff6b35', ambientColor:'#ff9944' },
+  townhall:       { floorColor:'#1c1c2b', wallColor:'#28283d', accentColor:'#3498db', ambientColor:'#aaccff' },
+  park:           { floorColor:'#1a3a1a', wallColor:'#2d5a2d', accentColor:'#7dcea0', ambientColor:'#ddffd0' },
+  lab:            { floorColor:'#0f1923', wallColor:'#182634', accentColor:'#00e676', ambientColor:'#ccffee' },
+  library:        { floorColor:'#1a1410', wallColor:'#2d2418', accentColor:'#d4a574', ambientColor:'#fff4e0' },
+  bazaar:         { floorColor:'#2a1a0a', wallColor:'#3d2a14', accentColor:'#f1c40f', ambientColor:'#ffeeaa' },
+  underground:    { floorColor:'#0a0a0f', wallColor:'#141420', accentColor:'#9b59b6', ambientColor:'#bb88ff' },
+  'space-station':{ floorColor:'#05050f', wallColor:'#0a0a1e', accentColor:'#00d4ff', ambientColor:'#88eeff' },
+};
+
+// ───────── OBJECT TYPES ─────────
+const OBJ_TYPES = [
+  { type:'table',          label:'Table',          w:80, h:48, collide:true,  interact:false },
+  { type:'chair',          label:'Chair',          w:32, h:32, collide:true,  interact:false },
+  { type:'sofa',           label:'Sofa',           w:80, h:40, collide:true,  interact:false },
+  { type:'plant',          label:'Plant',          w:32, h:48, collide:false, interact:false },
+  { type:'screen',         label:'Screen/TV',      w:64, h:48, collide:true,  interact:true  },
+  { type:'stage',          label:'Stage',          w:160,h:64, collide:false, interact:false },
+  { type:'bar',            label:'Bar',            w:120,h:40, collide:true,  interact:true  },
+  { type:'bookshelf',      label:'Bookshelf',      w:48, h:96, collide:true,  interact:true  },
+  { type:'arcade-cabinet', label:'Arcade Cabinet', w:48, h:64, collide:true,  interact:true  },
+  { type:'candle',         label:'Candle',         w:16, h:24, collide:false, interact:false },
+  { type:'neon-sign',      label:'Neon Sign',      w:96, h:32, collide:false, interact:false },
+  { type:'pool-table',     label:'Pool Table',     w:96, h:56, collide:true,  interact:true  },
+  { type:'dj-booth',       label:'DJ Booth',       w:96, h:56, collide:true,  interact:true  },
+  { type:'podium',         label:'Podium',         w:48, h:56, collide:true,  interact:true  },
+  { type:'fountain',       label:'Fountain',       w:80, h:80, collide:true,  interact:true  },
+  { type:'wall',           label:'Wall/Divider',   w:16, h:80, collide:true,  interact:false },
+];
+
+// ───────── PIXEL ART SPRITE RENDERER ─────────
+// Draws tiny pixel art on a mini canvas for each object type, themed with accent colour.
+function drawSprite(type, w, h, theme, destW, destH) {
+  const c = document.createElement('canvas');
+  c.width = destW || w; c.height = destH || h;
+  const ctx = c.getContext('2d');
+  const t = THEMES[theme] || THEMES.default;
+  const ac = t.accentColor;
+  const wc = t.wallColor;
+  const fl = t.floorColor;
+
+  // Helpers
+  const fill = (color, x, y, pw, ph) => { ctx.fillStyle=color; ctx.fillRect(x,y,pw,ph); };
+  const scaleX = c.width / w;
+  const scaleY = c.height / h;
+  ctx.save();
+  ctx.scale(scaleX, scaleY);
+
+  switch(type){
+    case 'table':
+      fill(wc, 4,8, w-8, h-16);
+      fill(ac, 8,4, w-16, h-8);
+      fill('#594433', 8, h-8, 8, 8);
+      fill('#594433', w-16, h-8, 8, 8);
+      break;
+    case 'chair':
+      fill(ac, 4, 0, w-8, 8);
+      fill(wc, 4, 8, w-8, h-12);
+      fill('#594433', 6, h-6, 6, 6);
+      fill('#594433', w-12, h-6, 6, 6);
+      break;
+    case 'sofa':
+      fill(ac, 0, 8, w, h-12);
+      fill(lighten(ac,.15), 4, 4, w-8, h-12);
+      fill(wc, 0, 8, 8, h-12);
+      fill(wc, w-8, 8, 8, h-12);
+      break;
+    case 'plant':
+      fill('#2d8a4e', w/2-6, 0, 12, 12);
+      fill('#23703e', w/2-10,10, 20, 14);
+      fill('#1a5c30', w/2-8, 20, 16, 10);
+      fill('#6b4226', w/2-4, 30, 8, h-30);
+      break;
+    case 'screen':
+      fill('#111', 4, 4, w-8, h-16);
+      fill(ac, 6, 6, w-12, h-20);
+      fill(wc, w/2-6, h-12, 12, 8);
+      fill('#333', w/2-10, h-6, 20, 4);
+      break;
+    case 'stage':
+      fill(wc, 0, h/2, w, h/2);
+      fill(ac, 2, h/2-4, w-4, 8);
+      fill(lighten(wc,.1), 4, h/2+4, w-8, h/2-8);
+      break;
+    case 'bar':
+      fill('#3a2a1a', 0, 4, w, h-8);
+      fill(ac, 2, 0, w-4, 8);
+      fill(lighten(wc,.2), 4, 8, w-8, h-16);
+      // bottles
+      for(let i=0;i<5;i++) fill(lighten(ac,.1+i*.05), 10+i*22, 10, 6, 14);
+      break;
+    case 'bookshelf':
+      fill('#3a2a1a', 0, 0, w, h);
+      for(let r=0;r<4;r++){
+        fill('#2a1a0a', 2, 4+r*24, w-4, 2);
+        for(let b=0;b<3;b++){
+          const bc = ['#c04040','#4080c0','#40a060','#c0a040','#a060c0'][(r*3+b)%5];
+          fill(bc, 4+b*14, 8+r*24, 10, 18);
+        }
+      }
+      break;
+    case 'arcade-cabinet':
+      fill('#222', 4, 0, w-8, h);
+      fill(ac, 8, 6, w-16, 24);
+      fill('#111', 10, 8, w-20, 20);
+      fill(lighten(ac,.2), 14, 12, w-28, 12);
+      fill('#444', w/2-6, 36, 12, 8);
+      fill(wc, w/2-4, 38, 8, 4);
+      break;
+    case 'candle':
+      fill('#d4a040', w/2-3, h-14, 6, 10);
+      fill('#ff8800', w/2-2, h-18, 4, 6);
+      fill('#ffcc00', w/2-1, h-20, 2, 4);
+      break;
+    case 'neon-sign':
+      fill('rgba(0,0,0,0.3)', 0, 0, w, h);
+      ctx.fillStyle = ac;
+      ctx.font = `bold ${Math.min(h-4,20)}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = ac;
+      ctx.shadowBlur = 8;
+      ctx.fillText('NEON', w/2, h/2);
+      ctx.shadowBlur = 0;
+      break;
+    case 'pool-table':
+      fill('#1a5c30', 4, 4, w-8, h-8);
+      fill('#3a2a1a', 0, 0, w, 4);
+      fill('#3a2a1a', 0, h-4, w, 4);
+      fill('#3a2a1a', 0, 0, 4, h);
+      fill('#3a2a1a', w-4, 0, 4, h);
+      fill('#111', 6, 6, 6, 6); fill('#111', w-12, 6, 6, 6);
+      fill('#111', 6, h-12, 6, 6); fill('#111', w-12, h-12, 6, 6);
+      fill('#fff', w/2-2, h/2-2, 4, 4);
+      break;
+    case 'dj-booth':
+      fill('#222', 0, 8, w, h-8);
+      fill(ac, 4, 0, w-8, 12);
+      fill('#111', 8, 14, 24, 24);
+      fill('#333', 12, 18, 16, 16);
+      fill(ac, 18, 24, 4, 4);
+      fill('#111', w-32, 14, 24, 24);
+      fill('#333', w-28, 18, 16, 16);
+      fill(ac, w-22, 24, 4, 4);
+      fill(lighten(ac,.2), w/2-12, 16, 24, 6);
+      break;
+    case 'podium':
+      fill(wc, w/2-16, 0, 32, 16);
+      fill('#3a2a1a', w/2-12, 16, 24, h-20);
+      fill('#4a3a2a', w/2-18, h-8, 36, 8);
+      fill(ac, w/2-4, 4, 8, 8);
+      break;
+    case 'fountain':
+      fill('#4488bb', w/2-20, h/2-8, 40, 16);
+      fill('#336699', w/2-28, h/2+4, 56, 8);
+      fill('#88bbdd', w/2-2, h/2-20, 4, 16);
+      fill('#88bbdd', w/2-6, h/2-24, 12, 6);
+      fill('#aaddee', w/2-4, h/2-22, 8, 4);
+      fill(wc, w/2-32, h/2+10, 64, 8);
+      break;
+    case 'wall':
+      fill(wc, 0, 0, w, h);
+      fill(lighten(wc,.08), 2, 2, w-4, h-4);
+      for(let y=0;y<h;y+=16) fill(wc, 0, y, w, 2);
+      break;
+    default:
+      fill(ac, 0, 0, w, h);
+  }
+  ctx.restore();
+  return c;
+}
+
+function lighten(hex, amt) {
+  let r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  r = Math.min(255, r + Math.round(255*amt));
+  g = Math.min(255, g + Math.round(255*amt));
+  b = Math.min(255, b + Math.round(255*amt));
+  return `rgb(${r},${g},${b})`;
+}
+
+// ───────── STATE ─────────
+let roomW = 1200, roomH = 800;
+let theme = 'default';
+let objects = [];      // { id, type, x, y, w, h, label, collide, interact, interactionType, content }
+let selectedId = null;
+let nextId = 1;
+let showGrid = true;
+let snapToGrid = true;
+let gridSize = 16;
+
+// Camera / zoom
+let camX = 0, camY = 0, zoom = 1;
+const ZOOM_MIN = 0.15, ZOOM_MAX = 4;
+
+// Drag state
+let dragging = null;     // { id, offX, offY }
+let panning = false;
+let panStart = { x:0, y:0 };
+let resizing = null;     // { id, edge, startX, startY, startW, startH, startOX, startOY }
+
+// Undo / Redo
+let undoStack = [], redoStack = [];
+const MAX_UNDO = 80;
+
+// DOM refs
+const canvas = document.getElementById('editor-canvas');
+const ctx = canvas.getContext('2d');
+const minimapCanvas = document.getElementById('minimap');
+const minimapCtx = minimapCanvas.getContext('2d');
+const viewport = document.getElementById('viewport');
+
+// Sprite cache
+let spriteCache = {};
+function getSprite(type, w, h) {
+  const key = `${type}_${w}_${h}_${theme}`;
+  if (!spriteCache[key]) spriteCache[key] = drawSprite(type, w, h, theme, w, h);
+  return spriteCache[key];
+}
+function clearSpriteCache() { spriteCache = {}; }
+
+// ───────── UNDO SYSTEM ─────────
+function saveUndo() {
+  undoStack.push(JSON.stringify(objects));
+  if (undoStack.length > MAX_UNDO) undoStack.shift();
+  redoStack = [];
+}
+function undo() {
+  if (!undoStack.length) return;
+  redoStack.push(JSON.stringify(objects));
+  objects = JSON.parse(undoStack.pop());
+  selectedId = null;
+  render();
+  updateProps();
+}
+function redo() {
+  if (!redoStack.length) return;
+  undoStack.push(JSON.stringify(objects));
+  objects = JSON.parse(redoStack.pop());
+  selectedId = null;
+  render();
+  updateProps();
+}
+
+// ───────── TOAST ─────────
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ───────── PALETTE ─────────
+function buildPalette() {
+  const grid = document.getElementById('object-grid');
+  grid.innerHTML = '';
+  OBJ_TYPES.forEach(def => {
+    const btn = document.createElement('div');
+    btn.className = 'obj-btn';
+    btn.draggable = true;
+    btn.dataset.type = def.type;
+    const preview = drawSprite(def.type, def.w, def.h, theme, 40, 32);
+    btn.appendChild(preview);
+    const sp = document.createElement('span');
+    sp.textContent = def.label;
+    btn.appendChild(sp);
+    btn.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', def.type);
+      e.dataTransfer.effectAllowed = 'copy';
+    });
+    btn.addEventListener('click', () => addObjectAtCenter(def.type));
+    grid.appendChild(btn);
+  });
+}
+
+function addObjectAtCenter(type) {
+  const def = OBJ_TYPES.find(d => d.type === type);
+  if (!def) return;
+  saveUndo();
+  const cx = camX + (viewport.clientWidth / 2) / zoom;
+  const cy = camY + (viewport.clientHeight / 2) / zoom;
+  const obj = {
+    id: nextId++,
+    type: def.type,
+    x: Math.round((cx - def.w/2) / gridSize) * gridSize,
+    y: Math.round((cy - def.h/2) / gridSize) * gridSize,
+    w: def.w, h: def.h,
+    label: def.label,
+    collide: def.collide,
+    interact: def.interact,
+    interactionType: 'info',
+    content: '',
+  };
+  objects.push(obj);
+  selectedId = obj.id;
+  render();
+  updateProps();
+  toast(`Added ${def.label}`);
+}
+
+// ───────── RENDER ─────────
+function render() {
+  const vw = viewport.clientWidth;
+  const vh = viewport.clientHeight - 24; // status bar
+  canvas.width = vw;
+  canvas.height = vh;
+  canvas.style.width = vw + 'px';
+  canvas.style.height = vh + 'px';
+  ctx.clearRect(0, 0, vw, vh);
+  ctx.save();
+  ctx.translate(-camX * zoom, -camY * zoom);
+  ctx.scale(zoom, zoom);
+
+  const t = THEMES[theme] || THEMES.default;
+
+  // Floor
+  ctx.fillStyle = t.floorColor;
+  ctx.fillRect(0, 0, roomW, roomH);
+
+  // Floor pattern (subtle tile lines)
+  ctx.strokeStyle = lighten(t.floorColor, 0.04);
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= roomW; x += 32) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, roomH); ctx.stroke();
+  }
+  for (let y = 0; y <= roomH; y += 32) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(roomW, y); ctx.stroke();
+  }
+
+  // Walls (border)
+  ctx.strokeStyle = t.wallColor;
+  ctx.lineWidth = 8;
+  ctx.strokeRect(4, 4, roomW - 8, roomH - 8);
+  ctx.strokeStyle = t.accentColor;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(8, 8, roomW - 16, roomH - 16);
+
+  // Grid overlay
+  if (showGrid) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 0.5;
+    for (let x = 0; x <= roomW; x += gridSize) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, roomH); ctx.stroke();
+    }
+    for (let y = 0; y <= roomH; y += gridSize) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(roomW, y); ctx.stroke();
+    }
+  }
+
+  // Objects
+  objects.forEach(obj => {
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.fillRect(obj.x + 3, obj.y + 3, obj.w, obj.h);
+
+    // Sprite
+    const sprite = getSprite(obj.type, obj.w, obj.h);
+    ctx.drawImage(sprite, obj.x, obj.y, obj.w, obj.h);
+
+    // Selection highlight
+    if (obj.id === selectedId) {
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(obj.x - 2, obj.y - 2, obj.w + 4, obj.h + 4);
+      ctx.setLineDash([]);
+      // Resize handles
+      const hs = 6;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(obj.x + obj.w - hs/2, obj.y + obj.h - hs/2, hs, hs);
+      ctx.fillRect(obj.x - hs/2, obj.y + obj.h - hs/2, hs, hs);
+      ctx.fillRect(obj.x + obj.w - hs/2, obj.y - hs/2, hs, hs);
+    }
+
+    // Interaction indicator
+    if (obj.interact) {
+      ctx.fillStyle = t.accentColor;
+      ctx.beginPath();
+      ctx.arc(obj.x + obj.w - 4, obj.y + 4, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = '6px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⚡', obj.x + obj.w - 4, obj.y + 5);
+    }
+
+    // Label
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(obj.label, obj.x + obj.w/2, obj.y - 4);
+  });
+
+  // Room boundary indicator
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([8,8]);
+  ctx.strokeRect(0, 0, roomW, roomH);
+  ctx.setLineDash([]);
+
+  ctx.restore();
+
+  updateStatusBar();
+  renderMinimap();
+}
+
+// ───────── MINIMAP ─────────
+function renderMinimap() {
+  const mw = minimapCanvas.width;
+  const mh = minimapCanvas.height;
+  const scale = Math.min(mw / roomW, mh / roomH);
+  minimapCtx.clearRect(0, 0, mw, mh);
+  const t = THEMES[theme] || THEMES.default;
+
+  // Floor
+  minimapCtx.fillStyle = t.floorColor;
+  minimapCtx.fillRect(0, 0, roomW * scale, roomH * scale);
+
+  // Objects
+  objects.forEach(obj => {
+    minimapCtx.fillStyle = obj.id === selectedId ? '#fff' : t.accentColor;
+    minimapCtx.fillRect(obj.x * scale, obj.y * scale, Math.max(2, obj.w * scale), Math.max(2, obj.h * scale));
+  });
+
+  // Viewport rect
+  const vw = viewport.clientWidth;
+  const vh = viewport.clientHeight - 24;
+  minimapCtx.strokeStyle = '#fff';
+  minimapCtx.lineWidth = 1.5;
+  minimapCtx.strokeRect(
+    camX * scale,
+    camY * scale,
+    (vw / zoom) * scale,
+    (vh / zoom) * scale
+  );
+}
+
+// ───────── STATUS BAR ─────────
+function updateStatusBar() {
+  document.getElementById('stat-zoom').textContent = Math.round(zoom * 100) + '%';
+  document.getElementById('stat-objects').textContent = objects.length + ' objects';
+  document.getElementById('stat-size').textContent = roomW + '×' + roomH;
+}
+
+// ───────── PROPERTIES PANEL ─────────
+function updateProps() {
+  const container = document.getElementById('props-content');
+  const obj = objects.find(o => o.id === selectedId);
+  if (!obj) {
+    container.innerHTML = '<div class="no-selection">Select an object to edit its properties</div>';
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="prop-section">
+      <h3>${obj.type}</h3>
+      <div class="prop-row">
+        <label>Label</label>
+        <input type="text" id="prop-label" value="${esc(obj.label)}">
+      </div>
+      <div class="prop-row inline">
+        <label>X</label><input type="number" id="prop-x" value="${obj.x}" step="${gridSize}">
+        <label>Y</label><input type="number" id="prop-y" value="${obj.y}" step="${gridSize}">
+      </div>
+      <div class="prop-row inline">
+        <label>W</label><input type="number" id="prop-w" value="${obj.w}" min="8" step="${gridSize}">
+        <label>H</label><input type="number" id="prop-h" value="${obj.h}" min="8" step="${gridSize}">
+      </div>
+    </div>
+    <div class="prop-section">
+      <h3>Behaviour</h3>
+      <div class="checkbox-row">
+        <input type="checkbox" id="prop-collide" ${obj.collide ? 'checked' : ''}>
+        <label for="prop-collide">Solid (collide)</label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="prop-interact" ${obj.interact ? 'checked' : ''}>
+        <label for="prop-interact">Interactive</label>
+      </div>
+    </div>
+    <div class="prop-section" id="interact-section" style="display:${obj.interact ? 'block' : 'none'}">
+      <h3>Interaction</h3>
+      <div class="prop-row">
+        <label>Type</label>
+        <select id="prop-itype">
+          <option value="info" ${obj.interactionType==='info'?'selected':''}>Info</option>
+          <option value="chat" ${obj.interactionType==='chat'?'selected':''}>Chat</option>
+          <option value="shop" ${obj.interactionType==='shop'?'selected':''}>Shop</option>
+          <option value="teleport" ${obj.interactionType==='teleport'?'selected':''}>Teleport</option>
+        </select>
+      </div>
+      <div class="prop-row">
+        <label>Link / Content</label>
+        <textarea id="prop-content" rows="3">${esc(obj.content || '')}</textarea>
+      </div>
+    </div>
+    <div class="prop-section">
+      <button id="btn-prop-dup" style="width:100%;margin-bottom:4px">⧉ Duplicate</button>
+      <button id="btn-prop-del" class="danger" style="width:100%">🗑 Delete</button>
+    </div>
+  `;
+
+  // Bind events
+  const bind = (id, evt, fn) => { const el = document.getElementById(id); if(el) el.addEventListener(evt, fn); };
+  bind('prop-label', 'input', e => { saveUndo(); obj.label = e.target.value; render(); });
+  bind('prop-x', 'change', e => { saveUndo(); obj.x = +e.target.value; render(); });
+  bind('prop-y', 'change', e => { saveUndo(); obj.y = +e.target.value; render(); });
+  bind('prop-w', 'change', e => { saveUndo(); obj.w = Math.max(8,+e.target.value); clearSpriteCache(); render(); });
+  bind('prop-h', 'change', e => { saveUndo(); obj.h = Math.max(8,+e.target.value); clearSpriteCache(); render(); });
+  bind('prop-collide', 'change', e => { saveUndo(); obj.collide = e.target.checked; render(); });
+  bind('prop-interact', 'change', e => {
+    saveUndo(); obj.interact = e.target.checked;
+    document.getElementById('interact-section').style.display = obj.interact ? 'block' : 'none';
+    render();
+  });
+  bind('prop-itype', 'change', e => { saveUndo(); obj.interactionType = e.target.value; });
+  bind('prop-content', 'input', e => { obj.content = e.target.value; });
+  bind('btn-prop-dup', 'click', () => duplicateSelected());
+  bind('btn-prop-del', 'click', () => deleteSelected());
+}
+
+function esc(s) { return String(s).replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+// ───────── OBJECT OPERATIONS ─────────
+function deleteSelected() {
+  if (selectedId == null) return;
+  saveUndo();
+  objects = objects.filter(o => o.id !== selectedId);
+  selectedId = null;
+  updateProps();
+  render();
+  toast('Object deleted');
+}
+
+function duplicateSelected() {
+  const obj = objects.find(o => o.id === selectedId);
+  if (!obj) return;
+  saveUndo();
+  const dup = { ...obj, id: nextId++, x: obj.x + 32, y: obj.y + 32 };
+  objects.push(dup);
+  selectedId = dup.id;
+  updateProps();
+  render();
+  toast('Duplicated');
+}
+
+// ───────── MOUSE HANDLING ─────────
+function screenToWorld(sx, sy) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (sx - rect.left) / zoom + camX,
+    y: (sy - rect.top) / zoom + camY,
+  };
+}
+
+function objectAt(wx, wy) {
+  for (let i = objects.length - 1; i >= 0; i--) {
+    const o = objects[i];
+    if (wx >= o.x && wx <= o.x + o.w && wy >= o.y && wy <= o.y + o.h) return o;
+  }
+  return null;
+}
+
+function resizeHandleAt(wx, wy) {
+  const obj = objects.find(o => o.id === selectedId);
+  if (!obj) return null;
+  const hs = 8 / zoom;
+  // Bottom-right
+  if (Math.abs(wx - (obj.x + obj.w)) < hs && Math.abs(wy - (obj.y + obj.h)) < hs) return 'br';
+  return null;
+}
+
+canvas.addEventListener('mousedown', e => {
+  if (e.button === 1 || (e.button === 0 && e.altKey)) {
+    panning = true;
+    panStart = { x: e.clientX, y: e.clientY };
+    canvas.style.cursor = 'grabbing';
+    return;
+  }
+
+  const { x: wx, y: wy } = screenToWorld(e.clientX, e.clientY);
+
+  // Check resize handle first
+  const handle = resizeHandleAt(wx, wy);
+  if (handle) {
+    const obj = objects.find(o => o.id === selectedId);
+    saveUndo();
+    resizing = { id: obj.id, edge: handle, startX: wx, startY: wy, startW: obj.w, startH: obj.h, startOX: obj.x, startOY: obj.y };
+    return;
+  }
+
+  const hit = objectAt(wx, wy);
+  if (hit) {
+    selectedId = hit.id;
+    saveUndo();
+    dragging = { id: hit.id, offX: wx - hit.x, offY: wy - hit.y };
+    // Move to front
+    objects = objects.filter(o => o.id !== hit.id);
+    objects.push(hit);
+  } else {
+    selectedId = null;
+  }
+  updateProps();
+  render();
+});
+
+canvas.addEventListener('mousemove', e => {
+  const { x: wx, y: wy } = screenToWorld(e.clientX, e.clientY);
+  document.getElementById('stat-pos').textContent = `${Math.round(wx)}, ${Math.round(wy)}`;
+
+  if (panning) {
+    camX -= (e.clientX - panStart.x) / zoom;
+    camY -= (e.clientY - panStart.y) / zoom;
+    panStart = { x: e.clientX, y: e.clientY };
+    render();
+    return;
+  }
+
+  if (resizing) {
+    const obj = objects.find(o => o.id === resizing.id);
+    if (!obj) return;
+    const dx = wx - resizing.startX;
+    const dy = wy - resizing.startY;
+    obj.w = Math.max(8, snapToGrid ? Math.round((resizing.startW + dx) / gridSize) * gridSize : resizing.startW + dx);
+    obj.h = Math.max(8, snapToGrid ? Math.round((resizing.startH + dy) / gridSize) * gridSize : resizing.startH + dy);
+    clearSpriteCache();
+    render();
+    return;
+  }
+
+  if (dragging) {
+    const obj = objects.find(o => o.id === dragging.id);
+    if (!obj) return;
+    let nx = wx - dragging.offX;
+    let ny = wy - dragging.offY;
+    if (snapToGrid) {
+      nx = Math.round(nx / gridSize) * gridSize;
+      ny = Math.round(ny / gridSize) * gridSize;
+    }
+    obj.x = nx;
+    obj.y = ny;
+    render();
+    return;
+  }
+
+  // Cursor
+  const handle = resizeHandleAt(wx, wy);
+  if (handle) {
+    canvas.style.cursor = 'nwse-resize';
+  } else if (objectAt(wx, wy)) {
+    canvas.style.cursor = 'move';
+  } else {
+    canvas.style.cursor = 'crosshair';
+  }
+});
+
+canvas.addEventListener('mouseup', () => {
+  dragging = null;
+  resizing = null;
+  panning = false;
+  canvas.style.cursor = 'crosshair';
+});
+
+canvas.addEventListener('mouseleave', () => {
+  dragging = null;
+  resizing = null;
+  panning = false;
+});
+
+// Zoom with wheel
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const { x: wx, y: wy } = screenToWorld(e.clientX, e.clientY);
+  const factor = e.deltaY > 0 ? 0.9 : 1.1;
+  const newZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom * factor));
+  // Zoom toward cursor
+  camX = wx - (e.clientX - canvas.getBoundingClientRect().left) / newZoom;
+  camY = wy - (e.clientY - canvas.getBoundingClientRect().top) / newZoom;
+  zoom = newZoom;
+  render();
+}, { passive: false });
+
+// Drop from palette
+viewport.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+viewport.addEventListener('drop', e => {
+  e.preventDefault();
+  const type = e.dataTransfer.getData('text/plain');
+  const def = OBJ_TYPES.find(d => d.type === type);
+  if (!def) return;
+  saveUndo();
+  const { x: wx, y: wy } = screenToWorld(e.clientX, e.clientY);
+  const obj = {
+    id: nextId++,
+    type: def.type,
+    x: snapToGrid ? Math.round((wx - def.w/2) / gridSize) * gridSize : Math.round(wx - def.w/2),
+    y: snapToGrid ? Math.round((wy - def.h/2) / gridSize) * gridSize : Math.round(wy - def.h/2),
+    w: def.w, h: def.h,
+    label: def.label,
+    collide: def.collide,
+    interact: def.interact,
+    interactionType: 'info',
+    content: '',
+  };
+  objects.push(obj);
+  selectedId = obj.id;
+  updateProps();
+  render();
+  toast(`Placed ${def.label}`);
+});
+
+// ───────── MINIMAP CLICK TO PAN ─────────
+minimapCanvas.addEventListener('mousedown', e => {
+  const rect = minimapCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const scale = Math.min(minimapCanvas.width / roomW, minimapCanvas.height / roomH);
+  const vw = viewport.clientWidth;
+  const vh = viewport.clientHeight - 24;
+  camX = mx / scale - (vw / zoom) / 2;
+  camY = my / scale - (vh / zoom) / 2;
+  render();
+});
+
+// ───────── KEYBOARD ─────────
+document.addEventListener('keydown', e => {
+  // Don't capture when typing in inputs
+  if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+
+  if (e.key === 'Delete' || e.key === 'Backspace') { deleteSelected(); e.preventDefault(); }
+  if (e.key === 'g' || e.key === 'G') { showGrid = !showGrid; render(); document.getElementById('btn-grid').style.background = showGrid ? 'var(--accent)' : ''; }
+  if (e.key === 's' && !e.ctrlKey && !e.metaKey) { snapToGrid = !snapToGrid; document.getElementById('btn-snap').style.background = snapToGrid ? 'var(--accent)' : ''; }
+  if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey) && !e.shiftKey) { undo(); e.preventDefault(); }
+  if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey) && e.shiftKey) { redo(); e.preventDefault(); }
+  if ((e.key === 'y' || e.key === 'Y') && (e.ctrlKey || e.metaKey)) { redo(); e.preventDefault(); }
+  if ((e.key === 'd' || e.key === 'D') && (e.ctrlKey || e.metaKey)) { duplicateSelected(); e.preventDefault(); }
+  if (e.key === '+' || e.key === '=') { zoomIn(); }
+  if (e.key === '-') { zoomOut(); }
+  if (e.key === 'Escape') {
+    if (previewActive) exitPreview();
+    else { selectedId = null; updateProps(); render(); }
+  }
+
+  // Arrow nudge
+  if (selectedId && ['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
+    const obj = objects.find(o => o.id === selectedId);
+    if (!obj) return;
+    saveUndo();
+    const step = e.shiftKey ? 1 : gridSize;
+    if (e.key === 'ArrowUp') obj.y -= step;
+    if (e.key === 'ArrowDown') obj.y += step;
+    if (e.key === 'ArrowLeft') obj.x -= step;
+    if (e.key === 'ArrowRight') obj.x += step;
+    render();
+    updateProps();
+    e.preventDefault();
+  }
+});
+
+// ───────── ZOOM BUTTONS ─────────
+function zoomIn() { zoom = Math.min(ZOOM_MAX, zoom * 1.2); render(); }
+function zoomOut() { zoom = Math.max(ZOOM_MIN, zoom / 1.2); render(); }
+function zoomReset() { zoom = 1; camX = 0; camY = 0; render(); }
+document.getElementById('btn-zin').addEventListener('click', zoomIn);
+document.getElementById('btn-zout').addEventListener('click', zoomOut);
+document.getElementById('btn-zreset').addEventListener('click', zoomReset);
+
+// ───────── TOOLBAR BUTTONS ─────────
+document.getElementById('btn-grid').addEventListener('click', () => {
+  showGrid = !showGrid;
+  document.getElementById('btn-grid').style.background = showGrid ? 'var(--accent)' : '';
+  render();
+});
+document.getElementById('btn-snap').addEventListener('click', () => {
+  snapToGrid = !snapToGrid;
+  document.getElementById('btn-snap').style.background = snapToGrid ? 'var(--accent)' : '';
+});
+document.getElementById('btn-undo').addEventListener('click', undo);
+document.getElementById('btn-redo').addEventListener('click', redo);
+document.getElementById('btn-delete').addEventListener('click', deleteSelected);
+document.getElementById('btn-duplicate').addEventListener('click', duplicateSelected);
+
+// ───────── SAVE / LOAD / EXPORT ─────────
+function getRoomConfig() {
+  return {
+    version: 1,
+    roomW, roomH, theme,
+    objects: objects.map(o => ({
+      id: o.id, type: o.type,
+      x: o.x, y: o.y, w: o.w, h: o.h,
+      label: o.label,
+      collide: o.collide,
+      interact: o.interact,
+      interactionType: o.interactionType || 'info',
+      content: o.content || '',
+    })),
+  };
+}
+
+function loadRoomConfig(cfg) {
+  if (!cfg || !cfg.objects) return;
+  roomW = cfg.roomW || 1200;
+  roomH = cfg.roomH || 800;
+  theme = cfg.theme || 'default';
+  objects = cfg.objects.map(o => ({ ...o }));
+  nextId = Math.max(...objects.map(o => o.id), 0) + 1;
+  selectedId = null;
+  clearSpriteCache();
+  document.getElementById('sel-size').value = roomW + ',' + roomH;
+  document.getElementById('sel-theme').value = theme;
+  buildPalette();
+  updateProps();
+  render();
+}
+
+document.getElementById('btn-save').addEventListener('click', () => {
+  const json = JSON.stringify(getRoomConfig(), null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `echo-room-${theme}-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Room saved to file!');
+});
+
+document.getElementById('btn-load').addEventListener('click', () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.addEventListener('change', () => {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const cfg = JSON.parse(reader.result);
+        loadRoomConfig(cfg);
+        toast('Room loaded!');
+      } catch (err) {
+        toast('Error loading file: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  });
+  input.click();
+});
+
+document.getElementById('btn-export').addEventListener('click', () => {
+  const roomId = prompt('Enter Room ID for export:', 'my-room');
+  if (!roomId) return;
+  const cfg = getRoomConfig();
+  fetch(`/api/rooms/${encodeURIComponent(roomId)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(cfg),
+  })
+    .then(r => {
+      if (r.ok) toast(`Exported to /api/rooms/${roomId} ✓`);
+      else toast(`Export failed: ${r.status} ${r.statusText}`);
+    })
+    .catch(err => toast('Export error: ' + err.message));
+});
+
+// ───────── SIZE / THEME SELECTORS ─────────
+document.getElementById('sel-size').addEventListener('change', e => {
+  const [w, h] = e.target.value.split(',').map(Number);
+  roomW = w; roomH = h;
+  camX = 0; camY = 0;
+  render();
+});
+
+document.getElementById('sel-theme').addEventListener('change', e => {
+  theme = e.target.value;
+  clearSpriteCache();
+  buildPalette();
+  render();
+  toast(`Theme: ${theme}`);
+});
+
+// ───────── PREVIEW MODE ─────────
+let previewActive = false;
+let avatar = { x: 100, y: 100, w: 24, h: 32, vx: 0, vy: 0, speed: 3, dir: 0, frame: 0 };
+let previewKeys = {};
+let previewRAF = null;
+const previewCanvas = document.getElementById('preview-canvas');
+const previewCtx = previewCanvas.getContext('2d');
+
+function enterPreview() {
+  previewActive = true;
+  document.getElementById('preview-overlay').classList.add('active');
+  avatar.x = roomW / 2 - 12;
+  avatar.y = roomH / 2 - 16;
+  previewKeys = {};
+  previewLoop();
+}
+
+function exitPreview() {
+  previewActive = false;
+  document.getElementById('preview-overlay').classList.remove('active');
+  if (previewRAF) cancelAnimationFrame(previewRAF);
+}
+
+document.getElementById('btn-preview').addEventListener('click', enterPreview);
+document.getElementById('btn-exit-preview').addEventListener('click', exitPreview);
+
+document.addEventListener('keydown', e => {
+  if (previewActive) previewKeys[e.key] = true;
+});
+document.addEventListener('keyup', e => {
+  if (previewActive) previewKeys[e.key] = false;
+});
+
+function previewLoop() {
+  if (!previewActive) return;
+  previewRAF = requestAnimationFrame(previewLoop);
+
+  // Movement
+  let dx = 0, dy = 0;
+  if (previewKeys['ArrowLeft'] || previewKeys['a'] || previewKeys['A']) dx -= avatar.speed;
+  if (previewKeys['ArrowRight'] || previewKeys['d'] || previewKeys['D']) dx += avatar.speed;
+  if (previewKeys['ArrowUp'] || previewKeys['w'] || previewKeys['W']) dy -= avatar.speed;
+  if (previewKeys['ArrowDown'] || previewKeys['s'] || previewKeys['S']) dy += avatar.speed;
+
+  if (dx !== 0 || dy !== 0) avatar.frame++;
+
+  // Direction
+  if (dx < 0) avatar.dir = 2;
+  if (dx > 0) avatar.dir = 3;
+  if (dy < 0) avatar.dir = 1;
+  if (dy > 0) avatar.dir = 0;
+
+  // Collision
+  const newX = avatar.x + dx;
+  const newY = avatar.y + dy;
+
+  let canMoveX = true, canMoveY = true;
+  objects.forEach(o => {
+    if (!o.collide) return;
+    if (rectOverlap(newX, avatar.y, avatar.w, avatar.h, o.x, o.y, o.w, o.h)) canMoveX = false;
+    if (rectOverlap(avatar.x, newY, avatar.w, avatar.h, o.x, o.y, o.w, o.h)) canMoveY = false;
+  });
+  // Room bounds
+  if (newX < 12 || newX + avatar.w > roomW - 12) canMoveX = false;
+  if (newY < 12 || newY + avatar.h > roomH - 12) canMoveY = false;
+
+  if (canMoveX) avatar.x = newX;
+  if (canMoveY) avatar.y = newY;
+
+  // Interaction
+  if (previewKeys['e'] || previewKeys['E']) {
+    previewKeys['e'] = false;
+    previewKeys['E'] = false;
+    const nearby = objects.find(o => o.interact && rectOverlap(
+      avatar.x - 16, avatar.y - 16, avatar.w + 32, avatar.h + 32,
+      o.x, o.y, o.w, o.h
+    ));
+    if (nearby) {
+      toast(`[${nearby.interactionType}] ${nearby.label}: ${nearby.content || '(no content)'}`);
+    }
+  }
+
+  // Render preview
+  const vw = viewport.clientWidth;
+  const vh = viewport.clientHeight;
+  previewCanvas.width = vw;
+  previewCanvas.height = vh;
+  const t = THEMES[theme] || THEMES.default;
+
+  // Camera follow
+  const pcx = avatar.x + avatar.w/2 - vw/2;
+  const pcy = avatar.y + avatar.h/2 - vh/2;
+
+  previewCtx.save();
+  previewCtx.translate(-pcx, -pcy);
+
+  // Floor
+  previewCtx.fillStyle = t.floorColor;
+  previewCtx.fillRect(0, 0, roomW, roomH);
+
+  // Floor tiles
+  previewCtx.strokeStyle = lighten(t.floorColor, 0.04);
+  previewCtx.lineWidth = 1;
+  for (let x = 0; x <= roomW; x += 32) {
+    previewCtx.beginPath(); previewCtx.moveTo(x, 0); previewCtx.lineTo(x, roomH); previewCtx.stroke();
+  }
+  for (let y = 0; y <= roomH; y += 32) {
+    previewCtx.beginPath(); previewCtx.moveTo(0, y); previewCtx.lineTo(roomW, y); previewCtx.stroke();
+  }
+
+  // Walls
+  previewCtx.strokeStyle = t.wallColor;
+  previewCtx.lineWidth = 8;
+  previewCtx.strokeRect(4, 4, roomW - 8, roomH - 8);
+  previewCtx.strokeStyle = t.accentColor;
+  previewCtx.lineWidth = 2;
+  previewCtx.strokeRect(8, 8, roomW - 16, roomH - 16);
+
+  // Objects (sorted by y for depth)
+  const sorted = [...objects].sort((a, b) => (a.y + a.h) - (b.y + b.h));
+  sorted.forEach(obj => {
+    previewCtx.fillStyle = 'rgba(0,0,0,0.2)';
+    previewCtx.fillRect(obj.x + 2, obj.y + 2, obj.w, obj.h);
+    const sprite = getSprite(obj.type, obj.w, obj.h);
+    previewCtx.drawImage(sprite, obj.x, obj.y, obj.w, obj.h);
+
+    // Interaction glow
+    if (obj.interact) {
+      const near = rectOverlap(
+        avatar.x - 16, avatar.y - 16, avatar.w + 32, avatar.h + 32,
+        obj.x, obj.y, obj.w, obj.h
+      );
+      if (near) {
+        previewCtx.strokeStyle = t.accentColor;
+        previewCtx.lineWidth = 2;
+        previewCtx.setLineDash([4,4]);
+        previewCtx.strokeRect(obj.x - 2, obj.y - 2, obj.w + 4, obj.h + 4);
+        previewCtx.setLineDash([]);
+        previewCtx.fillStyle = 'rgba(255,255,255,0.8)';
+        previewCtx.font = '10px monospace';
+        previewCtx.textAlign = 'center';
+        previewCtx.fillText('Press E', obj.x + obj.w/2, obj.y - 6);
+      }
+    }
+  });
+
+  // Avatar
+  drawAvatar(previewCtx, avatar.x, avatar.y, avatar.dir, avatar.frame);
+
+  previewCtx.restore();
+}
+
+function drawAvatar(ctx, x, y, dir, frame) {
+  const t = THEMES[theme] || THEMES.default;
+  // Simple pixel avatar
+  ctx.fillStyle = t.accentColor;
+  // Body
+  ctx.fillRect(x + 6, y + 10, 12, 14);
+  // Head
+  ctx.fillStyle = '#ffcc88';
+  ctx.fillRect(x + 7, y + 2, 10, 10);
+  // Eyes
+  ctx.fillStyle = '#222';
+  if (dir === 2) { ctx.fillRect(x+8, y+5, 2, 2); ctx.fillRect(x+8, y+8, 2, 2); }
+  else if (dir === 3) { ctx.fillRect(x+14, y+5, 2, 2); ctx.fillRect(x+14, y+8, 2, 2); }
+  else { ctx.fillRect(x+9, y+6, 2, 2); ctx.fillRect(x+13, y+6, 2, 2); }
+  // Legs - animated
+  const step = Math.floor(frame / 8) % 2;
+  ctx.fillStyle = '#334';
+  if (step === 0) {
+    ctx.fillRect(x + 7, y + 24, 4, 8);
+    ctx.fillRect(x + 13, y + 24, 4, 8);
+  } else {
+    ctx.fillRect(x + 8, y + 24, 4, 8);
+    ctx.fillRect(x + 12, y + 24, 4, 8);
+  }
+  // Feet
+  ctx.fillStyle = '#222';
+  ctx.fillRect(x + 6, y + 30, 5, 2);
+  ctx.fillRect(x + 13, y + 30, 5, 2);
+}
+
+function rectOverlap(x1,y1,w1,h1, x2,y2,w2,h2) {
+  return x1 < x2+w2 && x1+w1 > x2 && y1 < y2+h2 && y1+h1 > y2;
+}
+
+// ───────── INIT ─────────
+function init() {
+  // Initial button states
+  document.getElementById('btn-grid').style.background = 'var(--accent)';
+  document.getElementById('btn-snap').style.background = 'var(--accent)';
+  buildPalette();
+  zoomReset();
+  render();
+}
+
+window.addEventListener('resize', render);
+init();
+</script>
+</body>
+</html>

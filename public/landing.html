@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Echo Worlds — Every Community Deserves a Place</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a14;color:#eee;font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+a{color:#00fff7;text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 30%,#00fff710 0%,transparent 60%)}
+.hero h1{font-size:clamp(2.5rem,6vw,5rem);font-weight:900;margin-bottom:16px;line-height:1.1}
+.hero h1 span{color:#00fff7;text-shadow:0 0 30px #00fff744}
+.hero p{font-size:clamp(1rem,2vw,1.3rem);color:#aaa;max-width:600px;margin:0 auto 32px;line-height:1.6}
+.cta{display:inline-block;background:linear-gradient(135deg,#00fff7,#0088ff);color:#0a0a14;padding:14px 36px;border-radius:50px;font-weight:700;font-size:1.1rem;transition:transform .2s,box-shadow .2s;text-decoration:none}
+.cta:hover{transform:translateY(-2px);box-shadow:0 8px 30px #00fff733;text-decoration:none}
+.cta-secondary{display:inline-block;border:1px solid #444;color:#ddd;padding:12px 28px;border-radius:50px;font-size:1rem;margin-left:12px;transition:all .2s}
+.cta-secondary:hover{border-color:#00fff7;color:#00fff7;text-decoration:none}
+
+/* Features */
+.features{padding:80px 20px;max-width:1100px;margin:0 auto}
+.features h2{text-align:center;font-size:2rem;margin-bottom:48px;color:#ffd080}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.feature{background:#12121e;border:1px solid #222;border-radius:12px;padding:28px;transition:border-color .2s}
+.feature:hover{border-color:#00fff744}
+.feature .icon{font-size:2rem;margin-bottom:12px}
+.feature h3{font-size:1.1rem;margin-bottom:8px;color:#fff}
+.feature p{font-size:.9rem;color:#999;line-height:1.6}
+
+/* How it works */
+.how{padding:80px 20px;background:#0d0d18}
+.how h2{text-align:center;font-size:2rem;margin-bottom:48px;color:#ffd080}
+.steps{max-width:700px;margin:0 auto}
+.step{display:flex;gap:20px;margin-bottom:32px;align-items:flex-start}
+.step-num{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#00fff7,#0088ff);color:#0a0a14;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;flex-shrink:0}
+.step-content h3{margin-bottom:4px;color:#fff}
+.step-content p{color:#999;font-size:.9rem;line-height:1.5}
+
+/* Mission */
+.mission{padding:80px 20px;text-align:center;background:linear-gradient(180deg,#0a0a14,#0a1418,#0a0a14)}
+.mission h2{font-size:2rem;margin-bottom:16px;color:#ffd700}
+.mission p{max-width:700px;margin:0 auto 24px;color:#bbb;line-height:1.7;font-size:1rem}
+.mission .stat-grid{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;margin-top:32px}
+.mission .stat{text-align:center}
+.mission .stat .num{font-size:2rem;font-weight:900;color:#00fff7}
+.mission .stat .label{font-size:.8rem;color:#888;margin-top:4px}
+
+/* Footer */
+footer{padding:40px 20px;text-align:center;color:#555;font-size:.8rem;border-top:1px solid #1a1a2e}
+footer a{color:#888}
+</style>
+</head><body>
+
+<section class="hero">
+  <h1>Every Community<br>Deserves a <span>Place</span></h1>
+  <p>Turn your Discord server into a living pixel world. Walk, talk, play, and solve real problems together.</p>
+  <div>
+    <a href="#" class="cta">Add to Discord</a>
+    <a href="#how" class="cta-secondary">How it works</a>
+  </div>
+</section>
+
+<section class="features">
+  <h2>Why Echo Worlds?</h2>
+  <div class="feature-grid">
+    <div class="feature">
+      <div class="icon">🌍</div>
+      <h3>Your Discord, Visualized</h3>
+      <p>Every channel becomes a room. Walk between them. See your community as pixel avatars moving through a living space.</p>
+    </div>
+    <div class="feature">
+      <div class="icon">🎙️</div>
+      <h3>Proximity Voice</h3>
+      <p>Walk up to someone — hear them talk. Walk away — they fade out. The most natural voice experience on the internet.</p>
+    </div>
+    <div class="feature">
+      <div class="icon">🎨</div>
+      <h3>Creator Tools</h3>
+      <p>Design custom rooms, create skins, host events. Earn from everything your community loves. 70% creator cut.</p>
+    </div>
+    <div class="feature">
+      <div class="icon">🔬</div>
+      <h3>Citizen Science</h3>
+      <p>Play research games in The Lab that contribute to curing neurodegenerative diseases. Your playtime has meaning.</p>
+    </div>
+    <div class="feature">
+      <div class="icon">🎮</div>
+      <h3>Real Game Mechanics</h3>
+      <p>Skins, coins, crafting, quests, tournaments. Not a meeting tool. A world your members actually want to be in.</p>
+    </div>
+    <div class="feature">
+      <div class="icon">💰</div>
+      <h3>Creator Economy</h3>
+      <p>Sell custom skins, charge for VIP rooms, receive tips. Build a revenue stream from your community's world.</p>
+    </div>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <h2>How It Works</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Add the Bot</h3>
+        <p>Invite Echo Worlds to your Discord server. One click. No config needed.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Rooms Auto-Generate</h3>
+        <p>Your channels become rooms instantly. #general → Central Plaza, #music → Listening Lounge, and so on.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Members Enter</h3>
+        <p>Type <code>/enter</code> in Discord or click the link. Your world opens in the browser. No download.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Walk, Talk, Play</h3>
+        <p>See each other as avatars. Chat syncs both ways. Voice is spatial. Games are real. Your community comes alive.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mission">
+  <h2>🧬 The Mission: Cure MSA</h2>
+  <p>Multiple System Atrophy is a rare, devastating neurodegenerative disease with no cure. Echo Worlds dedicates 5% of all platform revenue to MSA research, and every player can contribute directly through citizen science games in The Lab.</p>
+  <p>Research Points can never be bought — only earned through genuine contribution. Every protein you fold, every scan you classify, adds up.</p>
+  <p style="color:#ffd700;font-style:italic">"The game you play for fun on a Tuesday night might contain the data point that leads to a breakthrough."</p>
+  <div class="stat-grid">
+    <div class="stat"><div class="num" id="stat-players">0</div><div class="label">Players</div></div>
+    <div class="stat"><div class="num" id="stat-research">0</div><div class="label">Research Contributions</div></div>
+    <div class="stat"><div class="num" id="stat-msa">5%</div><div class="label">Revenue to MSA Research</div></div>
+  </div>
+</section>
+
+<footer>
+  <p>Echo Worlds © 2026 · <a href="https://github.com/hallochupi-sketch/echo-office">GitHub</a> · <a href="https://discord.gg/echoworlds">Discord</a> · Built with ❤️ in Berlin</p>
+</footer>
+
+<script>
+// Load live stats
+fetch('/api/platform/stats').then(r=>r.json()).then(s=>{
+  document.getElementById('stat-players').textContent=s.totalUsers||'0';
+  document.getElementById('stat-research').textContent=s.totalResearchContributions||'0';
+}).catch(()=>{});
+</script>
+</body></html>
