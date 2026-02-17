@@ -2689,7 +2689,7 @@ const DATA_FRAGMENTS=[
 const FLOOR_OBJECTS={
   1:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
-    {id:'bar_counter',x:400,y:60,w:350,h:50,label:'🍹 Bar',interact:true,collide:true},
+    {id:'bar_counter',x:350,y:60,w:350,h:50,label:'🍹 Bar',interact:true,collide:true},
     {id:'bookshelf',x:20,y:80,w:80,h:100,label:'📚 Bookshelf',interact:true,collide:true},
     {id:'sofa',x:40,y:400,w:140,h:70,label:'🛋️ Lounge',interact:true,collide:true},
     {id:'kitchen',x:400,y:120,w:100,h:40,label:'☕ Coffee',interact:true,collide:true},
@@ -21188,7 +21188,9 @@ function init(){
   // Start Echo at time-appropriate spot
   const startSpots={morning:'bed',afternoon:'desk',evening:'sofa',night:'bed'};
   const startAct=startSpots[TOD]||'desk';const startSpot=ACTIVITY_SPOTS[startAct];
-  if(startSpot){S.echo.x=startSpot.x;S.echo.y=startSpot.y;S.echo.dir=startSpot.dir;S.echo.floor=startSpot.floor;S.floor=startSpot.floor;LS.set('floor',S.floor)}
+  if(startSpot){S.echo.x=startSpot.x;S.echo.y=startSpot.y;S.echo.dir=startSpot.dir;S.echo.floor=startSpot.floor||1;S.floor=startSpot.floor||1;LS.set('floor',S.floor)}
+  // Always ensure Echo and Pixel start on floor 1 for visitors to see them
+  S.echo.floor=1;S.pixel.floor=1;S.floor=1;
   S.pixel.floor=S.echo.floor;S.pixel.x=S.echo.x+20;S.pixel.y=S.echo.y+10;
   EchoAI.currentActivity=startAct;EchoAI.state='activity';EchoAI.activityTimer=0;
   $('#floor-hud').textContent=`F${S.floor} · ${FLOOR_NAMES[S.floor]}`;
