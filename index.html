@@ -31084,18 +31084,42 @@ const BarVibes = {
         [[369.99,0,2.0],[329.63,2.5,1.5]],
         [[293.66,0,0.8],[246.94,1,0.8],[220,2,0.6],[246.94,3,1.0]],
       ],_barCounter:0},
+    // D'Angelo — "Untitled (How Does It Feel)" — sensual, suspended, Eb minor haze
     {id:'midnight_silk',title:'Midnight Silk',artist:'D\'Vibes',genre:'Neo-Soul',color:'#9b59b6',
-      coverColors:['#9b59b6','#1a0a2a','#ff6ec7','#4a2a6a'],bpm:68,swing:0.15,
-      chords:[{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'}],
-      rhodesVol:.035,bassVol:.05,drumVol:.018,melodyChance:.12,padVol:.015},
+      coverColors:['#9b59b6','#1a0a2a','#ff6ec7','#4a2a6a'],bpm:68,swing:0.18,
+      chords:[
+        {n:[155.56,185,233.08,293.66],b:77.78,nm:'E♭m9'},
+        {n:[207.65,246.94,311.13,369.99],b:103.83,nm:'A♭7'},
+        {n:[185,233.08,277.18,349.23],b:92.5,nm:'F♯m7'},
+        {n:[155.56,185,233.08,293.66],b:77.78,nm:'E♭m9'}
+      ],
+      rhodesVol:.04,bassVol:.06,drumVol:.015,melodyChance:.1,padVol:.025},
+    // Al Green — "Let's Stay Together" — warm Ab major, Sunday morning soul
     {id:'golden_hour',title:'Golden Hour',artist:'Amber Wave',genre:'Soul Ballad',color:'#ffd700',
-      coverColors:['#ffd700','#8B6508','#FFF8DC','#4a3a00'],bpm:58,swing:0.2,
-      chords:[{n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[220,261.63,329.63,392],b:110,nm:'Am7'},{n:[146.83,185,220,261.63],b:73.42,nm:'D7'}],
-      rhodesVol:.04,bassVol:.045,drumVol:.01,melodyChance:.2,padVol:.02},
+      coverColors:['#ffd700','#8B6508','#FFF8DC','#4a3a00'],bpm:60,swing:0.2,
+      chords:[
+        {n:[207.65,261.63,311.13,392],b:103.83,nm:'A♭maj7'},
+        {n:[174.61,207.65,261.63,311.13],b:87.31,nm:'Fm7'},
+        {n:[185,233.08,277.18,349.23],b:92.5,nm:'Gm7'},
+        {n:[207.65,261.63,311.13,415.3],b:103.83,nm:'A♭6'}
+      ],
+      rhodesVol:.045,bassVol:.045,drumVol:.01,melodyChance:.15,padVol:.025,saxVol:.03,
+      _saxPattern:[
+        [[415.3,0,1.5],[392,2,0.8],[349.23,3,1.0]],
+        [[311.13,0.5,1.2],[349.23,2,1.0],[392,3.2,0.8]],
+        [[415.3,0,2.5]],
+        [[392,0,0.6],[349.23,0.8,0.6],[311.13,1.5,0.8],[261.63,2.5,1.5]],
+      ],_barCounter:0},
+    // Erykah Badu — "On & On" — trippy Dm, head-nodding hip-hop-soul groove
     {id:'erykah',title:'Brown Sugar Dreams',artist:'Solange Station',genre:'Neo-Soul',color:'#8B4513',
-      coverColors:['#8B4513','#2a1a00','#ffd080','#5a3a10'],bpm:78,swing:0.16,
-      chords:[{n:[146.83,185,220,277.18],b:73.42,nm:'Dm9'},{n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[164.81,196,246.94,329.63],b:82.41,nm:'Em9'}],
-      rhodesVol:.04,bassVol:.07,drumVol:.032,melodyChance:.22},
+      coverColors:['#8B4513','#2a1a00','#ffd080','#5a3a10'],bpm:82,swing:0.22,
+      chords:[
+        {n:[146.83,185,220,277.18],b:73.42,nm:'Dm9'},
+        {n:[155.56,196,233.08,293.66],b:77.78,nm:'E♭maj7'},
+        {n:[146.83,185,220,277.18],b:73.42,nm:'Dm9'},
+        {n:[130.81,164.81,196,261.63],b:65.41,nm:'Cm7'}
+      ],
+      rhodesVol:.04,bassVol:.065,drumVol:.028,melodyChance:.18,padVol:.02},
     {id:'smooth_tribute',title:'Smooth Like Sade',artist:'Echo & The Velvet Horns',genre:'Smooth Soul',color:'#b8860b',
       coverColors:['#b8860b','#1a0a00','#ffd700','#3a2a00'],bpm:96,swing:0.15,
       chords:[
@@ -31129,102 +31153,283 @@ const BarVibes = {
     },
 
     // ═══ JAZZ ═══
+    // Chet Baker / Bill Evans — "My Funny Valentine" — intimate, fragile, smoke-filled room
     {id:'velvet_dusk',title:'Velvet Dusk',artist:'Noir Sessions',genre:'Smoky Jazz',color:'#4a2a3a',
-      coverColors:['#4a2a3a','#1a0a10','#c06080','#2a1a20'],bpm:62,swing:0.22,
-      chords:[{n:[155.56,196,233.08,293.66],b:77.78,nm:'E♭maj7'},{n:[130.81,155.56,196,233.08],b:65.41,nm:'Cm7'},{n:[207.65,261.63,311.13,392],b:103.83,nm:'A♭maj7'},{n:[116.54,146.83,174.61,207.65],b:58.27,nm:'B♭7'}],
-      rhodesVol:.035,bassVol:.07,drumVol:.018,melodyChance:.2},
+      coverColors:['#4a2a3a','#1a0a10','#c06080','#2a1a20'],bpm:58,swing:0.22,
+      chords:[
+        {n:[130.81,155.56,196,233.08],b:65.41,nm:'Cm(maj7)'},
+        {n:[130.81,155.56,207.65,246.94],b:65.41,nm:'Cm7'},
+        {n:[207.65,261.63,311.13,392],b:103.83,nm:'A♭maj7'},
+        {n:[174.61,220,261.63,349.23],b:87.31,nm:'Fm9'}
+      ],
+      rhodesVol:.04,bassVol:.05,drumVol:.01,melodyChance:.2,padVol:.02,saxVol:.03,
+      // Muted trumpet-like melody — fragile, intimate
+      _saxPattern:[
+        [[311.13,0,2.0],[293.66,2.5,1.5]],
+        [[261.63,0.5,1.0],[233.08,2,1.0],[207.65,3.2,0.8]],
+        [[261.63,0,2.5]],
+        [[233.08,0,0.8],[207.65,1,0.8],[196,2,0.6],[185,3,1.0]],
+      ],_barCounter:0},
+    // Miles Davis — "So What" / "Kind of Blue" — modal jazz, Dorian, spacious, cool
     {id:'blue_note',title:'Blue Note After Hours',artist:'Miles & Co.',genre:'Cool Jazz',color:'#1a3a6a',
       coverColors:['#1a3a6a','#0a1a3a','#4488cc','#2a4a8a'],bpm:56,swing:0.25,
-      chords:[{n:[146.83,174.61,220,277.18],b:73.42,nm:'Dm7'},{n:[196,233.08,293.66,349.23],b:98,nm:'G7♭9'},{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[110,138.59,164.81,207.65],b:55,nm:'A7'}],
-      rhodesVol:.035,bassVol:.065,drumVol:.015,melodyChance:.3},
+      chords:[
+        {n:[146.83,174.61,220,277.18],b:73.42,nm:'Dm7'},
+        {n:[146.83,174.61,220,277.18],b:73.42,nm:'Dm7'},
+        {n:[155.56,185,233.08,293.66],b:77.78,nm:'E♭m7'},
+        {n:[146.83,174.61,220,277.18],b:73.42,nm:'Dm7'}
+      ],
+      rhodesVol:.03,bassVol:.055,drumVol:.012,melodyChance:.25,padVol:.02,saxVol:.035,
+      // Miles-style: spare, modal, lots of space between phrases
+      _saxPattern:[
+        [[293.66,0,2.5]],
+        [[261.63,1,1.0],[293.66,2.5,1.5]],
+        [],
+        [[349.23,0,1.0],[329.63,1.5,0.8],[293.66,2.5,1.5]],
+        [[261.63,0.5,2.0]],
+        [],
+        [[293.66,0,0.6],[329.63,0.8,0.6],[349.23,1.5,2.0]],
+        [[329.63,0,0.8],[293.66,1,0.8],[261.63,2,0.8],[220,3,1.0]],
+      ],_barCounter:0},
+    // Charlie Parker — "Anthropology" — blistering bebop, lightning runs, pure Bird energy
     {id:'bebop_cafe',title:'Bebop Café',artist:'Charlie\'s Ghost',genre:'Bebop',color:'#cc8800',
-      coverColors:['#cc8800','#3a2a00','#ffd700','#6a4a00'],bpm:140,swing:0.08,
-      chords:[{n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},{n:[196,246.94,293.66,349.23],b:98,nm:'G7'},{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[110,130.81,164.81,207.65],b:55,nm:'A7'}],
-      rhodesVol:.03,bassVol:.06,drumVol:.025,melodyChance:.4},
+      coverColors:['#cc8800','#3a2a00','#ffd700','#6a4a00'],bpm:160,swing:0.12,
+      chords:[
+        {n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},
+        {n:[196,246.94,293.66,349.23],b:98,nm:'G7'},
+        {n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},
+        {n:[110,138.59,164.81,220],b:55,nm:'A7♯9'}
+      ],
+      rhodesVol:.025,bassVol:.055,drumVol:.03,melodyChance:.5,padVol:0},
+    // "Autumn Leaves" — the eternal standard, Cm → F7 → Bbmaj7, melancholy beauty
     {id:'autumn_leaves',title:'Autumn Leaves',artist:'Station Jazz Trio',genre:'Jazz Standard',color:'#cc6633',
-      coverColors:['#cc6633','#4a2a10','#ffa040','#2a1a00'],bpm:64,swing:0.2,
-      chords:[{n:[130.81,155.56,196,233.08],b:65.41,nm:'Cm7'},{n:[174.61,207.65,261.63,311.13],b:87.31,nm:'F7'},{n:[116.54,146.83,174.61,220],b:58.27,nm:'B♭maj7'},{n:[155.56,196,233.08,293.66],b:77.78,nm:'E♭maj7'}],
-      rhodesVol:.04,bassVol:.06,drumVol:.02,melodyChance:.28},
+      coverColors:['#cc6633','#4a2a10','#ffa040','#2a1a00'],bpm:62,swing:0.2,
+      chords:[
+        {n:[130.81,155.56,196,233.08],b:65.41,nm:'Cm7'},
+        {n:[174.61,207.65,261.63,311.13],b:87.31,nm:'F7'},
+        {n:[116.54,146.83,174.61,220],b:58.27,nm:'B♭maj7'},
+        {n:[155.56,196,233.08,293.66],b:77.78,nm:'E♭maj7'}
+      ],
+      rhodesVol:.04,bassVol:.055,drumVol:.015,melodyChance:.22,padVol:.018},
 
     // ═══ LO-FI / CHILL HOP ═══
+    // J Dilla — "Don't Cry" — off-kilter timing, warm MPC chops, thick bass, drunk swing
     {id:'station_after_dark',title:'Station After Dark',artist:'Echo & Friends',genre:'Lo-fi Soul',color:'#ff6ec7',
-      coverColors:['#ff6ec7','#2a0a1a','#ffd080','#4a1a2a'],bpm:70,swing:0.14,
-      chords:[{n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},{n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[110,130.81,164.81,196],b:55,nm:'Am7'}],
-      rhodesVol:.042,bassVol:.065,drumVol:.028,melodyChance:.22},
+      coverColors:['#ff6ec7','#2a0a1a','#ffd080','#4a1a2a'],bpm:74,swing:0.24,
+      chords:[
+        {n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},
+        {n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},
+        {n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},
+        {n:[110,138.59,164.81,207.65],b:55,nm:'Am9'}
+      ],
+      rhodesVol:.04,bassVol:.07,drumVol:.028,melodyChance:.15,padVol:.015},
+    // Nujabes (R.I.P.) — "Feather" / "Aruarian Dance" — jazz samples over boom-bap, melancholic beauty
     {id:'rainy_windows',title:'Rainy Windows',artist:'Nujabes Memorial',genre:'Lo-fi Hip Hop',color:'#6688aa',
-      coverColors:['#6688aa','#1a2a3a','#aaccdd','#3a4a5a'],bpm:82,swing:0.1,
-      chords:[{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[220,261.63,329.63,392],b:110,nm:'Am7'},{n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'}],
-      rhodesVol:.035,bassVol:.055,drumVol:.035,melodyChance:.15},
+      coverColors:['#6688aa','#1a2a3a','#aaccdd','#3a4a5a'],bpm:85,swing:0.14,
+      chords:[
+        {n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},
+        {n:[164.81,196,246.94,329.63],b:82.41,nm:'Em9'},
+        {n:[220,261.63,329.63,415.3],b:110,nm:'Am9'},
+        {n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'}
+      ],
+      rhodesVol:.038,bassVol:.055,drumVol:.03,melodyChance:.2,padVol:.015,saxVol:.025,
+      // Nujabes-style piano flourish — jazzy, ascending, hopeful
+      _saxPattern:[
+        [[329.63,0,0.6],[392,0.8,0.6],[440,1.5,1.0],[523.25,3,1.0]],
+        [[440,0.5,1.5],[392,2.5,1.5]],
+        [[523.25,0,0.8],[493.88,1,0.8],[440,2,0.8],[392,3,1.0]],
+        [[440,0,2.0],[392,2.5,1.5]],
+      ],_barCounter:0},
+    // Lo-fi Girl / ChilledCow — simple, dusty, warm, the sound of 3am studying
     {id:'study_beats',title:'Late Night Study',artist:'Chill Station',genre:'Lo-fi Beats',color:'#88aa66',
-      coverColors:['#88aa66','#2a3a1a','#bbddaa','#4a5a3a'],bpm:76,swing:0.12,
-      chords:[{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'}],
-      rhodesVol:.03,bassVol:.05,drumVol:.03,melodyChance:.12},
+      coverColors:['#88aa66','#2a3a1a','#bbddaa','#4a5a3a'],bpm:75,swing:0.12,
+      chords:[
+        {n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},
+        {n:[110,130.81,164.81,207.65],b:55,nm:'Am9'},
+        {n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},
+        {n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'}
+      ],
+      rhodesVol:.03,bassVol:.05,drumVol:.025,melodyChance:.08,padVol:.02},
 
     // ═══ BOSSA NOVA / LATIN ═══
+    // Jobim — "The Girl from Ipanema" — Fmaj7 to G7, that famous chromatic shift, Rio sunset
     {id:'ipanema_nights',title:'Ipanema Nights',artist:'Rio Collective',genre:'Bossa Nova',color:'#22aa66',
-      coverColors:['#22aa66','#0a3a1a','#66ddaa','#1a4a2a'],bpm:72,swing:0.08,
-      chords:[{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[196,233.08,293.66,349.23],b:98,nm:'G7'},{n:[220,261.63,329.63,392],b:110,nm:'Am7'},{n:[207.65,261.63,311.13,369.99],b:103.83,nm:'A♭dim'}],
-      rhodesVol:.04,bassVol:.05,drumVol:.02,melodyChance:.25},
+      coverColors:['#22aa66','#0a3a1a','#66ddaa','#1a4a2a'],bpm:140,swing:0.05,
+      chords:[
+        {n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},
+        {n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},
+        {n:[196,246.94,293.66,369.99],b:98,nm:'G13'},
+        {n:[196,233.08,293.66,349.23],b:98,nm:'G7♭5'}
+      ],
+      rhodesVol:.035,bassVol:.04,drumVol:.018,melodyChance:.2,padVol:.012},
+    // Buena Vista Social Club — "Chan Chan" — Cuban son, montuno piano, warm Havana nights
     {id:'cafe_havana',title:'Café Havana',artist:'Luna Tropical',genre:'Latin Jazz',color:'#dd4422',
-      coverColors:['#dd4422','#3a0a00','#ffaa44','#6a2a10'],bpm:88,swing:0.1,
-      chords:[{n:[110,138.59,164.81,207.65],b:55,nm:'Am7'},{n:[146.83,185,220,277.18],b:73.42,nm:'Dm9'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[110,138.59,164.81,207.65],b:55,nm:'Am7'}],
-      rhodesVol:.04,bassVol:.065,drumVol:.035,melodyChance:.2},
+      coverColors:['#dd4422','#3a0a00','#ffaa44','#6a2a10'],bpm:92,swing:0.08,
+      chords:[
+        {n:[164.81,207.65,246.94,329.63],b:82.41,nm:'E7'},
+        {n:[110,138.59,164.81,220],b:55,nm:'Am'},
+        {n:[146.83,185,220,293.66],b:73.42,nm:'Dm'},
+        {n:[164.81,207.65,246.94,329.63],b:82.41,nm:'E7'}
+      ],
+      rhodesVol:.042,bassVol:.06,drumVol:.032,melodyChance:.25,padVol:.01},
 
     // ═══ FUNK / GROOVE ═══
+    // Parliament-Funkadelic — "Flashlight" / "Mothership Connection" — one-chord Em7 vamp, synth bass, HEAVY pocket
     {id:'space_funk',title:'Space Funk',artist:'The Mothership',genre:'Funk',color:'#ff4488',
-      coverColors:['#ff4488','#2a0a1a','#ffaa00','#4a1a2a'],bpm:100,swing:0.06,
-      chords:[{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[110,130.81,164.81,196],b:55,nm:'Am7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'}],
-      rhodesVol:.045,bassVol:.08,drumVol:.04,melodyChance:.15},
+      coverColors:['#ff4488','#2a0a1a','#ffaa00','#4a1a2a'],bpm:104,swing:0.08,
+      chords:[
+        {n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},
+        {n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},
+        {n:[110,138.59,164.81,220],b:55,nm:'Am7'},
+        {n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'}
+      ],
+      rhodesVol:.04,bassVol:.085,drumVol:.04,melodyChance:.12,padVol:0},
+    // Earth Wind & Fire / Daft Punk — "September" meets "Get Lucky" — bright disco-funk, joy incarnate
     {id:'groove_machine',title:'Groove Machine',artist:'Pixel Funk Band',genre:'Funk / Disco',color:'#ffaa00',
-      coverColors:['#ffaa00','#3a2a00','#ff6ec7','#6a4a00'],bpm:112,swing:0.05,
-      chords:[{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'}],
-      rhodesVol:.04,bassVol:.08,drumVol:.04,melodyChance:.12},
+      coverColors:['#ffaa00','#3a2a00','#ff6ec7','#6a4a00'],bpm:116,swing:0.04,
+      chords:[
+        {n:[146.83,185,220,277.18],b:73.42,nm:'Dm7'},
+        {n:[164.81,207.65,246.94,329.63],b:82.41,nm:'E7'},
+        {n:[110,138.59,164.81,220],b:55,nm:'Am7'},
+        {n:[130.81,164.81,196,261.63],b:65.41,nm:'C'}
+      ],
+      rhodesVol:.04,bassVol:.075,drumVol:.042,melodyChance:.15,padVol:0},
 
     // ═══ AMBIENT / CHILL ═══
+    // Brian Eno — "Music for Airports" — suspended in space, no rhythm, pure atmosphere, open intervals
     {id:'deep_space_drift',title:'Deep Space Drift',artist:'Brian Eno\'s Ghost',genre:'Ambient',color:'#223355',
-      coverColors:['#223355','#0a0a2a','#4466aa','#1a2a4a'],bpm:45,swing:0.0,
-      chords:[{n:[130.81,196,261.63,392],b:65.41,nm:'C5ths'},{n:[110,164.81,220,329.63],b:55,nm:'A5ths'},{n:[146.83,220,293.66,440],b:73.42,nm:'D5ths'},{n:[130.81,196,261.63,392],b:65.41,nm:'C5ths'}],
-      rhodesVol:.03,bassVol:.035,drumVol:.005,melodyChance:.35},
+      coverColors:['#223355','#0a0a2a','#4466aa','#1a2a4a'],bpm:40,swing:0.0,
+      chords:[
+        {n:[130.81,196,293.66,440],b:65.41,nm:'C(add9)'},
+        {n:[110,164.81,246.94,369.99],b:55,nm:'A(add9)'},
+        {n:[123.47,185,277.18,415.3],b:61.74,nm:'B(add9)'},
+        {n:[146.83,220,329.63,493.88],b:73.42,nm:'D(add9)'}
+      ],
+      rhodesVol:.025,bassVol:.02,drumVol:.0,melodyChance:.3,padVol:.04},
+    // Tangerine Dream / meditation — crystalline tones, shimmering, weightless
     {id:'crystal_caves',title:'Crystal Caves',artist:'Meditation Station',genre:'Ambient Chill',color:'#66ccdd',
-      coverColors:['#66ccdd','#1a3a4a','#aaeeff','#2a5a6a'],bpm:50,swing:0.0,
-      chords:[{n:[174.61,261.63,329.63,440],b:87.31,nm:'Fmaj9'},{n:[196,293.66,392,523.25],b:98,nm:'Gsus4'},{n:[220,329.63,440,523.25],b:110,nm:'Am9'},{n:[174.61,261.63,329.63,440],b:87.31,nm:'Fmaj9'}],
-      rhodesVol:.025,bassVol:.03,drumVol:.008,melodyChance:.3},
+      coverColors:['#66ccdd','#1a3a4a','#aaeeff','#2a5a6a'],bpm:48,swing:0.0,
+      chords:[
+        {n:[261.63,329.63,392,523.25],b:130.81,nm:'C/E'},
+        {n:[293.66,392,493.88,587.33],b:146.83,nm:'Dm/F'},
+        {n:[261.63,329.63,440,523.25],b:130.81,nm:'Am/C'},
+        {n:[246.94,329.63,392,493.88],b:123.47,nm:'Em/B'}
+      ],
+      rhodesVol:.022,bassVol:.02,drumVol:.0,melodyChance:.35,padVol:.035},
 
     // ═══ DOWNTEMPO / TRIP-HOP ═══
+    // Bonobo — "Kerala" — organic electronics, lush pads, gentle groove, nature meets technology
     {id:'neon_rain',title:'Neon Rain',artist:'Purple Coast',genre:'Downtempo',color:'#00fff7',
-      coverColors:['#00fff7','#0a1a2a','#ff6ec7','#1a3a4a'],bpm:75,swing:0.1,
-      chords:[{n:[110,130.81,164.81,196],b:55,nm:'Am7'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'}],
-      rhodesVol:.04,bassVol:.06,drumVol:.035,melodyChance:.18},
+      coverColors:['#00fff7','#0a1a2a','#ff6ec7','#1a3a4a'],bpm:78,swing:0.1,
+      chords:[
+        {n:[110,138.59,164.81,220],b:55,nm:'Am9'},
+        {n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},
+        {n:[130.81,164.81,207.65,261.63],b:65.41,nm:'C6'},
+        {n:[164.81,196,246.94,329.63],b:82.41,nm:'Em9'}
+      ],
+      rhodesVol:.035,bassVol:.055,drumVol:.025,melodyChance:.18,padVol:.025},
+    // Massive Attack — "Teardrop" — dark, brooding, harpsichord-like melody, HEAVY bass, haunting
     {id:'massive_attack',title:'Teardrops in Zero-G',artist:'Bristol Sound System',genre:'Trip-Hop',color:'#333366',
-      coverColors:['#333366','#0a0a2a','#6666aa','#2a2a4a'],bpm:68,swing:0.14,
-      chords:[{n:[110,130.81,164.81,196],b:55,nm:'Am7'},{n:[164.81,207.65,246.94,311.13],b:82.41,nm:'E♭/E'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[110,130.81,164.81,196],b:55,nm:'Am7'}],
-      rhodesVol:.035,bassVol:.075,drumVol:.028,melodyChance:.15},
+      coverColors:['#333366','#0a0a2a','#6666aa','#2a2a4a'],bpm:76,swing:0.12,
+      chords:[
+        {n:[110,130.81,164.81,220],b:55,nm:'Am'},
+        {n:[196,246.94,293.66,392],b:98,nm:'G'},
+        {n:[174.61,220,261.63,349.23],b:87.31,nm:'F'},
+        {n:[174.61,220,261.63,349.23],b:87.31,nm:'F'}
+      ],
+      rhodesVol:.03,bassVol:.08,drumVol:.022,melodyChance:.1,padVol:.03,saxVol:.035,
+      // Teardrop's haunting harpsichord-like melody — Am pentatonic
+      _saxPattern:[
+        [[440,0,0.5],[392,0.6,0.5],[349.23,1.2,0.5],[329.63,1.8,0.5],[293.66,2.4,1.6]],
+        [[329.63,0,1.0],[349.23,1.2,1.0],[392,2.5,1.5]],
+        [[440,0,2.0],[392,2.5,1.5]],
+        [[349.23,0,0.8],[329.63,1,0.8],[293.66,2,0.6],[261.63,2.8,1.2]],
+        [[329.63,0.5,1.5],[349.23,2.5,1.5]],
+        [[392,0,0.8],[440,1,0.8],[392,2,0.5],[349.23,2.8,1.2]],
+        [[329.63,0,2.5]],
+        [[293.66,0,0.5],[329.63,0.6,0.5],[349.23,1.2,0.5],[392,1.8,0.5],[440,2.5,1.5]],
+      ],_barCounter:0},
 
     // ═══ REGGAE / DUB ═══
+    // King Tubby / Lee "Scratch" Perry — deep dub, MASSIVE bass, offbeat skank, echo chamber
     {id:'dub_station',title:'Dub Station',artist:'Kingston Satellites',genre:'Dub Reggae',color:'#228833',
-      coverColors:['#228833','#0a2a0a','#44cc44','#1a3a1a'],bpm:70,swing:0.08,
-      chords:[{n:[130.81,164.81,196,261.63],b:65.41,nm:'C'},{n:[196,246.94,293.66,392],b:98,nm:'G'},{n:[110,130.81,164.81,220],b:55,nm:'Am'},{n:[174.61,220,261.63,349.23],b:87.31,nm:'F'}],
-      rhodesVol:.035,bassVol:.08,drumVol:.03,melodyChance:.1},
+      coverColors:['#228833','#0a2a0a','#44cc44','#1a3a1a'],bpm:72,swing:0.06,
+      chords:[
+        {n:[130.81,164.81,196,261.63],b:65.41,nm:'C'},
+        {n:[196,246.94,293.66,392],b:98,nm:'G'},
+        {n:[110,138.59,164.81,220],b:55,nm:'Am'},
+        {n:[174.61,220,261.63,349.23],b:87.31,nm:'F'}
+      ],
+      rhodesVol:.03,bassVol:.09,drumVol:.032,melodyChance:.08,padVol:.015},
 
     // ═══ CLASSICAL / PIANO ═══
+    // Beethoven — "Moonlight Sonata" 1st mvt — C# minor arpeggios, devastating beauty, no drums
     {id:'moonlight',title:'Moonlight Station',artist:'Ludwig Van Echo',genre:'Classical Piano',color:'#aaaacc',
-      coverColors:['#aaaacc','#2a2a3a','#ddddff','#4a4a5a'],bpm:52,swing:0.0,
-      chords:[{n:[130.81,155.56,196,261.63],b:65.41,nm:'Cm'},{n:[207.65,261.63,311.13,415.3],b:103.83,nm:'A♭'},{n:[196,246.94,293.66,392],b:98,nm:'G'},{n:[130.81,155.56,196,261.63],b:65.41,nm:'Cm'}],
-      rhodesVol:.05,bassVol:.04,drumVol:.0,melodyChance:.35},
+      coverColors:['#aaaacc','#2a2a3a','#ddddff','#4a4a5a'],bpm:54,swing:0.0,
+      chords:[
+        {n:[138.59,164.81,207.65,277.18],b:69.3,nm:'C♯m'},
+        {n:[110,138.59,164.81,220],b:55,nm:'A'},
+        {n:[146.83,185,220,293.66],b:73.42,nm:'D'},
+        {n:[103.83,130.81,164.81,207.65],b:51.91,nm:'G♯'}
+      ],
+      rhodesVol:.055,bassVol:.035,drumVol:.0,melodyChance:.35,padVol:.03,saxVol:.03,
+      // The iconic triplet arpeggio pattern — haunting, relentless
+      _saxPattern:[
+        [[277.18,0,0.4],[207.65,0.5,0.4],[164.81,1,0.4],[207.65,1.5,0.4],[277.18,2,0.4],[207.65,2.5,0.4],[164.81,3,0.4],[207.65,3.5,0.4]],
+        [[220,0,0.4],[164.81,0.5,0.4],[138.59,1,0.4],[164.81,1.5,0.4],[220,2,0.4],[164.81,2.5,0.4],[138.59,3,0.4],[164.81,3.5,0.4]],
+        [[293.66,0,0.4],[220,0.5,0.4],[185,1,0.4],[220,1.5,0.4],[293.66,2,0.4],[220,2.5,0.4],[185,3,0.4],[220,3.5,0.4]],
+        [[277.18,0,0.4],[207.65,0.5,0.4],[164.81,1,0.4],[207.65,1.5,0.4],[277.18,2,2.0]],
+      ],_barCounter:0},
+    // Chopin — Nocturne Op.9 No.2 in Eb major — flowing melody, tender, left hand broken chords
     {id:'nocturne',title:'Nocturne No. 9',artist:'Chopin\'s Satellite',genre:'Romantic Piano',color:'#bb88aa',
-      coverColors:['#bb88aa','#3a1a2a','#ddaacc','#5a3a4a'],bpm:48,swing:0.05,
-      chords:[{n:[155.56,196,233.08,311.13],b:77.78,nm:'E♭'},{n:[116.54,146.83,174.61,233.08],b:58.27,nm:'B♭'},{n:[130.81,155.56,196,261.63],b:65.41,nm:'Cm'},{n:[207.65,261.63,311.13,415.3],b:103.83,nm:'A♭'}],
-      rhodesVol:.05,bassVol:.035,drumVol:.0,melodyChance:.4},
+      coverColors:['#bb88aa','#3a1a2a','#ddaacc','#5a3a4a'],bpm:50,swing:0.05,
+      chords:[
+        {n:[155.56,196,233.08,311.13],b:77.78,nm:'E♭maj'},
+        {n:[116.54,155.56,185,233.08],b:58.27,nm:'B♭7'},
+        {n:[155.56,196,233.08,311.13],b:77.78,nm:'E♭maj'},
+        {n:[130.81,155.56,207.65,261.63],b:65.41,nm:'Cm'}
+      ],
+      rhodesVol:.055,bassVol:.03,drumVol:.0,melodyChance:.3,padVol:.025,saxVol:.028,
+      // The famous Nocturne melody — tender, singing, with ornamental turns
+      _saxPattern:[
+        [[311.13,0,1.0],[349.23,1.2,0.8],[311.13,2.2,1.8]],
+        [[293.66,0,0.6],[311.13,0.8,0.6],[349.23,1.5,0.6],[392,2.2,0.6],[349.23,3,1.0]],
+        [[311.13,0,2.5]],
+        [[293.66,0,0.8],[261.63,1,0.8],[233.08,2,0.6],[261.63,2.8,1.2]],
+        [[311.13,0,0.4],[349.23,0.5,0.4],[392,1,0.4],[440,1.5,0.4],[392,2,0.4],[349.23,2.5,0.4],[311.13,3,1.0]],
+        [[349.23,0,1.5],[311.13,2,0.8],[293.66,3,1.0]],
+        [[311.13,0,3.0]],
+        [[349.23,0,0.6],[311.13,0.8,0.6],[293.66,1.5,0.6],[261.63,2.2,0.6],[233.08,3,1.0]],
+      ],_barCounter:0},
 
     // ═══ ELECTRONIC / HOUSE ═══
+    // Larry Heard / Frankie Knuckles — "Can You Feel It" — the soul of house, Rhodes stabs, 4-on-floor warmth
     {id:'deep_house',title:'Deep Inside',artist:'Satellite House Crew',genre:'Deep House',color:'#8844cc',
       coverColors:['#8844cc','#1a0a2a','#bb66ff','#3a1a5a'],bpm:122,swing:0.02,
-      chords:[{n:[110,130.81,164.81,220],b:55,nm:'Am'},{n:[174.61,220,261.63,349.23],b:87.31,nm:'F'},{n:[130.81,164.81,196,261.63],b:65.41,nm:'C'},{n:[196,246.94,293.66,392],b:98,nm:'G'}],
-      rhodesVol:.03,bassVol:.075,drumVol:.04,melodyChance:.1},
+      chords:[
+        {n:[110,138.59,164.81,220],b:55,nm:'Am9'},
+        {n:[174.61,220,261.63,349.23],b:87.31,nm:'Fmaj7'},
+        {n:[130.81,164.81,207.65,261.63],b:65.41,nm:'C6'},
+        {n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'}
+      ],
+      rhodesVol:.03,bassVol:.07,drumVol:.04,melodyChance:.1,padVol:.02},
+    // Kavinsky / The Midnight — "Nightcall" — arpeggiated synths, neon-drenched, 80s pulse
     {id:'synthwave_cruise',title:'Synthwave Cruise',artist:'Neon Driver',genre:'Synthwave',color:'#ff44aa',
       coverColors:['#ff44aa','#2a0a2a','#44ffff','#4a1a4a'],bpm:108,swing:0.0,
-      chords:[{n:[110,130.81,164.81,220],b:55,nm:'Am'},{n:[174.61,220,261.63,349.23],b:87.31,nm:'F'},{n:[130.81,164.81,196,261.63],b:65.41,nm:'C'},{n:[164.81,196,246.94,329.63],b:82.41,nm:'Em'}],
-      rhodesVol:.04,bassVol:.07,drumVol:.038,melodyChance:.12},
+      chords:[
+        {n:[110,138.59,164.81,220],b:55,nm:'Am'},
+        {n:[174.61,220,261.63,349.23],b:87.31,nm:'F'},
+        {n:[130.81,164.81,196,261.63],b:65.41,nm:'C'},
+        {n:[164.81,207.65,246.94,329.63],b:82.41,nm:'Em'}
+      ],
+      rhodesVol:.038,bassVol:.075,drumVol:.038,melodyChance:.15,padVol:.018,saxVol:.025,
+      // Arpeggiated synth melody — pulsing, neon, driving
+      _saxPattern:[
+        [[220,0,0.3],[261.63,0.5,0.3],[329.63,1,0.3],[440,1.5,0.3],[329.63,2,0.3],[261.63,2.5,0.3],[220,3,0.3],[261.63,3.5,0.3]],
+        [[174.61,0,0.3],[220,0.5,0.3],[261.63,1,0.3],[349.23,1.5,0.3],[261.63,2,0.3],[220,2.5,0.3],[174.61,3,0.3],[220,3.5,0.3]],
+        [[130.81,0,0.3],[164.81,0.5,0.3],[196,1,0.3],[261.63,1.5,0.3],[196,2,0.3],[164.81,2.5,0.3],[130.81,3,0.3],[164.81,3.5,0.3]],
+        [[164.81,0,0.3],[207.65,0.5,0.3],[246.94,1,0.3],[329.63,1.5,0.3],[246.94,2,0.3],[207.65,2.5,0.3],[164.81,3,0.3],[207.65,3.5,0.3]],
+      ],_barCounter:0},
   ],
 
   // --- Reverb Bus (lush hall reverb via feedback delay network) ---
