@@ -22411,11 +22411,8 @@ function initInput(){
     }
   };
   
-  // Hook into performDash to trigger combo text, scorch, sonic boom, tint
-  const _origPerformDash=performDash;
-  // We can't easily wrap performDash since it's in a closure,
-  // so we hook into dash-end detection and dash-start via state changes.
-  // Use a frame-check approach instead:
+  // Hook into dash state to trigger combo text, scorch, sonic boom, tint
+  // performDash is inside a closure, so we use frame-check instead:
   let _prevDashChain=0;
   let _prevDashing=false;
   const _dashHookInterval=setInterval(()=>{
