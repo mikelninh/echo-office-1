@@ -10803,38 +10803,41 @@ function renderFloor1(){
   window.renderFloor1 = renderFloor1 = function renderFloor1(){
     const FW = RF1_FW, FH = RF1_FH;
 
-    // ═══ FLOOR: Rich dark hardwood with warm sheen ═══
-    ctx.fillStyle = '#1a140e';
+    // ═══ FLOOR: Warm hardwood — visible, rich, inviting ═══
+    ctx.fillStyle = '#3a2c1e';
     ctx.fillRect(0, 0, FW, FH);
-    // Plank pattern
+    // Plank pattern (visible grain)
     for(let py = 0; py < FH; py += 20) {
       for(let px = 0; px < FW; px += 80) {
         const offset = (Math.floor(py/20) % 2) * 40;
-        const shade = ((px + py) * 7 % 11) / 300;
-        ctx.fillStyle = `rgba(180,140,90,${0.03 + shade})`;
+        const shade = ((px + py) * 7 % 11) / 120;
+        ctx.fillStyle = `rgba(180,140,90,${0.08 + shade})`;
         ctx.fillRect(px + offset, py, 78, 18);
+        // Subtle plank edge
+        ctx.fillStyle = 'rgba(0,0,0,0.08)';
+        ctx.fillRect(px + offset, py + 18, 78, 2);
       }
     }
 
-    // ═══ WALLS: Dark mahogany with wainscoting ═══
-    ctx.fillStyle = '#12100a';
+    // ═══ WALLS: Mahogany with wainscoting ═══
+    ctx.fillStyle = '#2a2018';
     ctx.fillRect(0, 0, FW, 50);
     ctx.fillRect(0, FH - 20, FW, 20);
-    ctx.fillStyle = '#1a140e';
+    ctx.fillStyle = '#2a2018';
     ctx.fillRect(0, 0, 20, FH);
     ctx.fillRect(FW - 20, 0, 20, FH);
     // Wainscoting trim
-    ctx.fillStyle = '#3a2a18';
+    ctx.fillStyle = '#5a4530';
     ctx.fillRect(20, 48, FW - 40, 3);
     ctx.fillRect(20, FH - 22, FW - 40, 2);
     // Crown molding (gold)
-    ctx.fillStyle = 'rgba(200,170,100,0.3)';
+    ctx.fillStyle = 'rgba(200,170,100,0.5)';
     ctx.fillRect(20, 46, FW - 40, 2);
 
     // ═══ PANORAMIC SPACE WINDOW (full width, top) ═══
     const win = getObjects().find(o => o.id === 'window');
     if(win) {
-      ctx.fillStyle = '#010412';
+      ctx.fillStyle = '#060a1a';
       ctx.fillRect(win.x, win.y, win.w, win.h);
       // 200+ stars in 4 layers
       for(let i = 0; i < 80; i++) {
@@ -10932,12 +10935,13 @@ function renderFloor1(){
         ctx.quadraticCurveTo(fx + Math.sin(S.time * 3 + fi) * 3, fy, fx + 5, fp.y + fp.h);
         ctx.fill();
       }
-      // Warm glow from fireplace
-      const warmGlow = ctx.createRadialGradient(fp.x + fp.w/2, fp.y + fp.h, 0, fp.x + fp.w/2, fp.y + fp.h, 200);
-      warmGlow.addColorStop(0, 'rgba(255,150,50,0.06)');
+      // Warm glow from fireplace (major light source)
+      const warmGlow = ctx.createRadialGradient(fp.x + fp.w/2, fp.y + fp.h, 0, fp.x + fp.w/2, fp.y + fp.h, 300);
+      warmGlow.addColorStop(0, 'rgba(255,150,50,0.18)');
+      warmGlow.addColorStop(0.4, 'rgba(255,120,40,0.10)');
       warmGlow.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = warmGlow;
-      ctx.fillRect(fp.x - 150, fp.y - 100, fp.w + 300, fp.h + 300);
+      ctx.fillRect(fp.x - 250, fp.y - 200, fp.w + 500, fp.h + 500);
       // Mantle
       ctx.fillStyle = '#5a4a38';
       ctx.fillRect(fp.x - 10, fp.y - 5, fp.w + 20, 12);
@@ -10961,14 +10965,14 @@ function renderFloor1(){
       ctx.strokeRect(tv.x, tv.y, tv.w, tv.h);
     }
 
-    // Sofas (leather look)
+    // Sofas (leather look — warm brown)
     getObjects().filter(o => o.id.startsWith('sofa')).forEach(s => {
-      ctx.fillStyle = '#4a2a2a';
+      ctx.fillStyle = '#5a3530';
       ctx.fillRect(s.x, s.y, s.w, s.h);
-      ctx.fillStyle = '#5a3a3a';
+      ctx.fillStyle = '#6a4540';
       ctx.fillRect(s.x + 5, s.y + 5, s.w - 10, s.h - 10);
       // Cushion lines
-      ctx.strokeStyle = '#3a2020';
+      ctx.strokeStyle = '#4a2a25';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(s.x + s.w * 0.33, s.y + 8);
@@ -10997,11 +11001,11 @@ function renderFloor1(){
     // Bookshelf
     const bs = getObjects().find(o => o.id === 'bookshelf');
     if(bs) {
-      ctx.fillStyle = '#3a2a18';
+      ctx.fillStyle = '#4a3a25';
       ctx.fillRect(bs.x, bs.y, bs.w, bs.h);
       // Shelves
       for(let sh = 0; sh < 3; sh++) {
-        ctx.fillStyle = '#4a3a28';
+        ctx.fillStyle = '#5a4a35';
         ctx.fillRect(bs.x + 5, bs.y + 10 + sh * 25, bs.w - 10, 3);
         // Books
         const bookColors = ['#cc2222','#2266cc','#22aa44','#ddaa22','#8844aa','#cc6622','#2288aa','#aa2266'];
@@ -11133,11 +11137,12 @@ function renderFloor1(){
       ctx.fillStyle = '#0a1a2a';
       ctx.fillRect(dsk.x + 23, dsk.y - 27, 54, 29);
       // Screen glow
-      const scrGlow = ctx.createRadialGradient(dsk.x + 50, dsk.y - 12, 0, dsk.x + 50, dsk.y - 12, 50);
-      scrGlow.addColorStop(0, 'rgba(0,150,255,0.04)');
+      const scrGlow = ctx.createRadialGradient(dsk.x + 50, dsk.y - 12, 0, dsk.x + 50, dsk.y - 12, 80);
+      scrGlow.addColorStop(0, 'rgba(0,150,255,0.12)');
+      scrGlow.addColorStop(0.5, 'rgba(0,120,220,0.05)');
       scrGlow.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = scrGlow;
-      ctx.fillRect(dsk.x - 20, dsk.y - 50, 120, 100);
+      ctx.fillRect(dsk.x - 40, dsk.y - 60, 160, 130);
     }
 
     // Server rack
@@ -11207,30 +11212,51 @@ function renderFloor1(){
       }
     }
 
-    // ═══ PENDANT LIGHTS (throughout) ═══
+    // ═══ PENDANT LIGHTS (throughout — key ambient sources) ═══
     getObjects().filter(o => o.id.startsWith('pendant_')).forEach((p, i) => {
-      const glow = 0.5 + Math.sin(S.time * 1.5 + i * 2) * 0.15;
+      const glow = 0.6 + Math.sin(S.time * 1.5 + i * 2) * 0.15;
+      // Light pool on floor below
+      const floorGlow = ctx.createRadialGradient(p.x + 15, p.y + 120, 0, p.x + 15, p.y + 120, 140);
+      floorGlow.addColorStop(0, `rgba(255,200,100,${glow * 0.12})`);
+      floorGlow.addColorStop(0.6, `rgba(255,180,80,${glow * 0.05})`);
+      floorGlow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = floorGlow;
+      ctx.fillRect(p.x - 120, p.y - 20, 270, 300);
       // Chain
-      ctx.fillStyle = '#555';
+      ctx.fillStyle = '#666';
       ctx.fillRect(p.x + 13, p.y - 30, 2, 30);
       // Shade
-      ctx.fillStyle = '#2a2a2a';
+      ctx.fillStyle = '#3a3530';
       ctx.beginPath();
       ctx.moveTo(p.x, p.y + 15);
       ctx.lineTo(p.x + 8, p.y);
       ctx.lineTo(p.x + 22, p.y);
       ctx.lineTo(p.x + 30, p.y + 15);
       ctx.fill();
-      // Bulb glow
-      const lg = ctx.createRadialGradient(p.x + 15, p.y + 10, 0, p.x + 15, p.y + 10, 80);
-      lg.addColorStop(0, `rgba(255,200,100,${glow * 0.08})`);
+      // Inner shade glow
+      ctx.fillStyle = `rgba(255,200,100,${glow * 0.3})`;
+      ctx.beginPath();
+      ctx.moveTo(p.x + 4, p.y + 14);
+      ctx.lineTo(p.x + 10, p.y + 2);
+      ctx.lineTo(p.x + 20, p.y + 2);
+      ctx.lineTo(p.x + 26, p.y + 14);
+      ctx.fill();
+      // Bulb glow halo
+      const lg = ctx.createRadialGradient(p.x + 15, p.y + 10, 0, p.x + 15, p.y + 10, 100);
+      lg.addColorStop(0, `rgba(255,200,100,${glow * 0.2})`);
+      lg.addColorStop(0.4, `rgba(255,180,80,${glow * 0.08})`);
       lg.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = lg;
-      ctx.fillRect(p.x - 60, p.y - 40, 150, 150);
+      ctx.fillRect(p.x - 80, p.y - 60, 190, 180);
       // Warm bulb
       ctx.fillStyle = `rgba(255,220,150,${glow})`;
       ctx.beginPath();
-      ctx.arc(p.x + 15, p.y + 5, 4, 0, Math.PI * 2);
+      ctx.arc(p.x + 15, p.y + 5, 5, 0, Math.PI * 2);
+      ctx.fill();
+      // Bulb core
+      ctx.fillStyle = `rgba(255,255,220,${glow * 0.8})`;
+      ctx.beginPath();
+      ctx.arc(p.x + 15, p.y + 5, 2, 0, Math.PI * 2);
       ctx.fill();
     });
 
@@ -11256,18 +11282,22 @@ function renderFloor1(){
 
     // ═══ DINING TABLES ═══
     getObjects().filter(o => o.id.startsWith('table_') && !o.id.includes('coffee')).forEach(t => {
-      ctx.fillStyle = '#3a2a1a';
+      ctx.fillStyle = '#4a3a25';
       ctx.fillRect(t.x, t.y, t.w, t.h);
-      ctx.fillStyle = '#4a3a2a';
+      ctx.fillStyle = '#5a4a35';
       ctx.fillRect(t.x + 3, t.y + 3, t.w - 6, t.h - 6);
       // Candle
       ctx.fillStyle = '#eee';
       ctx.fillRect(t.x + t.w/2 - 2, t.y + 10, 4, 12);
-      const candleGlow = 0.5 + Math.sin(S.time * 6) * 0.2;
+      const candleGlow = 0.6 + Math.sin(S.time * 6) * 0.2;
       ctx.fillStyle = `rgba(255,200,50,${candleGlow})`;
       ctx.beginPath();
-      ctx.arc(t.x + t.w/2, t.y + 8, 3, 0, Math.PI * 2);
+      ctx.arc(t.x + t.w/2, t.y + 8, 4, 0, Math.PI * 2);
       ctx.fill();
+      // Candle light pool on table
+      const cg = ctx.createRadialGradient(t.x+t.w/2,t.y+t.h/2,0,t.x+t.w/2,t.y+t.h/2,60);
+      cg.addColorStop(0,`rgba(255,200,80,${candleGlow*0.12})`);cg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=cg;ctx.fillRect(t.x-30,t.y-30,t.w+60,t.h+60);
     });
 
     // ═══ VINYL PLAYER (detailed) ═══
@@ -11326,19 +11356,34 @@ function renderFloor1(){
     }
 
     // ═══ AMBIENT: Warm light pools, dust motes, candle flicker ═══
-    // Warm ambient overlay
+    // Warm ambient overlay (overall room warmth)
     const ambientG = ctx.createRadialGradient(FW/2, FH/2, 0, FW/2, FH/2, FW * 0.6);
-    ambientG.addColorStop(0, 'rgba(255,200,120,0.02)');
+    ambientG.addColorStop(0, 'rgba(255,200,120,0.06)');
+    ambientG.addColorStop(0.6, 'rgba(255,180,100,0.03)');
     ambientG.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = ambientG;
     ctx.fillRect(0, 0, FW, FH);
 
+    // Secondary warm pool (living room area)
+    const ambientG2 = ctx.createRadialGradient(400, FH/2, 0, 400, FH/2, 400);
+    ambientG2.addColorStop(0, 'rgba(255,160,80,0.05)');
+    ambientG2.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = ambientG2;
+    ctx.fillRect(0, 0, FW, FH);
+
+    // Bar area amber accent
+    const ambientG3 = ctx.createRadialGradient(1200, FH/2, 0, 1200, FH/2, 350);
+    ambientG3.addColorStop(0, 'rgba(200,160,60,0.04)');
+    ambientG3.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = ambientG3;
+    ctx.fillRect(0, 0, FW, FH);
+
     // Floating dust motes in light beams
-    for(let d = 0; d < 15; d++) {
+    for(let d = 0; d < 25; d++) {
       const dx = (S.time * 0.3 + d * 170) % FW;
-      const dy = 200 + Math.sin(S.time * 0.2 + d * 2) * 100 + d * 50;
+      const dy = 200 + Math.sin(S.time * 0.2 + d * 2) * 100 + d * 40;
       if(dy > 0 && dy < FH) {
-        ctx.fillStyle = `rgba(255,220,150,${0.15 + Math.sin(S.time + d) * 0.08})`;
+        ctx.fillStyle = `rgba(255,220,150,${0.2 + Math.sin(S.time + d) * 0.1})`;
         ctx.fillRect(dx, dy, 2, 2);
       }
     }
