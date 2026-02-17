@@ -3739,7 +3739,7 @@ const PuzzleSystems = {
 // ═══════════════════════════════════════
 // §7. AUDIO / DYNAMIC MUSIC
 // ═══════════════════════════════════════
-function initAudio(){if(S.audioCtx)return;try{S.audioCtx=new(window.AudioContext||window.webkitAudioContext)();S.masterGain=S.audioCtx.createGain();S.masterGain.gain.value=S.volume;S.masterGain.connect(S.audioCtx.destination)}catch(e){console.warn('Audio init failed:',e)}}
+function initAudio(){if(S.audioCtx){if(S.audioCtx.state==='suspended')S.audioCtx.resume();return;}try{S.audioCtx=new(window.AudioContext||window.webkitAudioContext)();S.masterGain=S.audioCtx.createGain();S.masterGain.gain.value=S.volume;S.masterGain.connect(S.audioCtx.destination);if(S.audioCtx.state==='suspended')S.audioCtx.resume()}catch(e){console.warn('Audio init failed:',e)}}
 function _safeConnect(node,dest){try{if(node&&dest)node.connect(dest)}catch(e){/*audio not ready*/}}
 
 let lofiInterval=null,currentMusicFloor=0;
@@ -31385,6 +31385,7 @@ const BarVibes = {
   // --- Main Beat Loop ---
   start(recordId) {
     if(!S.audioCtx) initAudio();
+    if(S.audioCtx&&S.audioCtx.state==='suspended') S.audioCtx.resume();
     const rec=this.records.find(r=>r.id===recordId);
     if(!rec) return;
     this.stop();
