@@ -14507,6 +14507,63 @@ const SpriteEnhancements = {
       
       ctx.restore();
     }
+  },
+
+  // Enhanced directional shadow: shadow shifts based on movement direction
+  renderDirectionalShadow(ctx, visitorX, visitorY, spriteWidth, spriteHeight, direction, moving) {
+    ctx.save();
+    
+    // Shadow properties
+    const shadowY = visitorY + 2; // Slightly below feet
+    const baseWidth = spriteWidth / 2.5;
+    const baseHeight = 4;
+    
+    // Movement-based shadow displacement
+    let shadowOffsetX = 0;
+    let shadowOffsetY = 0;
+    let shadowSkew = 0;
+    
+    if (moving && direction !== undefined) {
+      // Shadow shifts opposite to movement direction for realistic lighting
+      const intensity = 2; // pixels of displacement
+      switch (direction) {
+        case 1: // Right - shadow shifts left
+          shadowOffsetX = -intensity;
+          shadowSkew = -0.1;
+          break;
+        case 2: // Left - shadow shifts right
+          shadowOffsetX = intensity;
+          shadowSkew = 0.1;
+          break;
+        case 3: // Down - shadow shifts up (becomes rounder)
+          shadowOffsetY = -intensity * 0.5;
+          break;
+        case 0: // Up - shadow shifts down (becomes more elongated)
+          shadowOffsetY = intensity * 0.5;
+          break;
+      }
+    }
+    
+    // Draw enhanced shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.25)'; // Slightly darker than original
+    ctx.save();
+    ctx.translate(visitorX + shadowOffsetX, shadowY + shadowOffsetY);
+    
+    if (shadowSkew !== 0) {
+      // Apply horizontal skew for left/right movement
+      ctx.transform(1, 0, shadowSkew, 1, 0, 0);
+    }
+    
+    // Draw elliptical shadow with movement-based deformation
+    const widthMod = moving ? 1 + Math.abs(shadowSkew) * 0.3 : 1;
+    const heightMod = moving && (direction === 0 || direction === 3) ? 1.2 : 1;
+    
+    ctx.beginPath();
+    ctx.ellipse(0, 0, baseWidth * widthMod, baseHeight * heightMod, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.restore();
+    ctx.restore();
   }
 };
 
@@ -14616,9 +14673,14 @@ function renderVisitor(ctx){
       if(typeof IdleAnims!=='undefined'){IdleAnims.update(v);const ia=IdleAnims.getTransform(v.skin);if(ia){danceOffY+=ia.offsetY||0;danceSwayX+=ia.swayX||0;danceRot+=ia.rotation||0;squashX*=ia.squashX||1;squashY*=ia.squashY||1;if(ia.alpha!==undefined)ctx.globalAlpha=ia.alpha;}}
       // Premium: Movement bounce + squash
       if(typeof MovementPolish!=='undefined'){danceOffY-=MovementPolish.bounceOffset;squashX*=MovementPolish.squashX;squashY*=MovementPolish.squashY;}
-      // Shadow (pulses with dance)
-      const shadowW=DanceSystem.active?sprW/2.5+Math.sin(S.time*8)*3:sprW/2.5;
-      ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(v.x,v.y+2,shadowW,4,0,0,Math.PI*2);ctx.fill();
+      // Enhanced directional shadow (replaces simple ellipse)
+      if (typeof SpriteEnhancements !== 'undefined') {
+        SpriteEnhancements.renderDirectionalShadow(ctx, v.x, v.y, sprW, sprH, v.dir, v.moving);
+      } else {
+        // Fallback to original shadow
+        const shadowW=DanceSystem.active?sprW/2.5+Math.sin(S.time*8)*3:sprW/2.5;
+        ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(v.x,v.y+2,shadowW,4,0,0,Math.PI*2);ctx.fill();
+      }
       // Hurt flash (iFrames)
       if(DuelSystem.active&&DuelSystem.iFrames>0){ctx.globalAlpha=0.5+Math.sin(S.time*30)*0.5;if(Math.floor(S.time*15)%2===0){ctx.filter='brightness(3) saturate(0)'}else{ctx.filter='brightness(1.5) hue-rotate(340deg)'}}
       // Attack lean
