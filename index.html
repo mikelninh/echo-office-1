@@ -31643,12 +31643,10 @@ function showVinylSelector(){
     el.onclick=()=>{
       const rid=el.dataset.rid;
       if(BarVibes.currentRecord&&BarVibes.currentRecord.id===rid) return;
-      if(!BarVibes.active){
-        BarVibes.start(rid);
-        S.musicPlaying=true;$('#btn-music').classList.add('active');
-      } else {
-        BarVibes.vote(rid);
-      }
+      BarVibes.start(rid);
+      S.musicPlaying=true;$('#btn-music').classList.add('active');
+      const rec=BarVibes.records.find(r=>r.id===rid);
+      if(rec) showThought(`🎵 Now playing: "${rec.title}"`);
       p.closest('.popup-overlay').remove();
     };
   });
