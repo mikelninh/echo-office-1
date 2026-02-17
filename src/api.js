@@ -160,6 +160,17 @@ function createAPI(bot) {
     res.json(top);
   });
 
+  // ═══ REPORTS (public) ═══
+  router.post('/api/report', express.json(), (req, res) => {
+    try {
+      const Moderation = require('./admin/moderation');
+      const { reporterId, reportedName, reason } = req.body;
+      if (!reporterId || !reason) return res.status(400).json({ error: 'Missing fields' });
+      Moderation.report(reporterId, reportedName || 'unknown', null, null, reason);
+      res.json({ ok: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
+  });
+
   // ═══ PLATFORM STATS ═══
   router.get('/api/platform/stats', (req, res) => {
     res.json(Economy.getPlatformStats());

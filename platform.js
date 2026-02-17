@@ -16,6 +16,14 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const app = express();
 const server = http.createServer(app);
 
+// ═══ SECURITY ═══
+const { RateLimiter, securityHeaders, cors } = require('./src/security');
+const apiLimiter = new RateLimiter(60000, 100); // 100 req/min
+const authLimiter = new RateLimiter(60000, 20);  // 20 auth/min
+
+app.use(securityHeaders);
+app.use(cors());
+
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
@@ -51,7 +59,12 @@ if (DISCORD_TOKEN) {
 
 // ═══ API ROUTES ═══
 const createAPI = require('./src/api');
+app.use(apiLimiter.middleware());
 app.use(createAPI(bot));
+
+// ═══ ADMIN ROUTES ═══
+const createAdminAPI = require('./src/admin/routes');
+app.use('/admin', createAdminAPI());
 
 // ═══ SERVE ORIGINAL GAME ═══
 // The original Echo Office game is still served at /

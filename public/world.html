@@ -35,6 +35,36 @@ canvas{display:block;image-rendering:pixelated}
 #loading h1{color:#00fff7;font-size:20px;margin-bottom:12px}
 #loading p{color:#888;font-size:12px}
 .hidden{display:none!important}
+
+/* ═══ MOBILE RESPONSIVE ═══ */
+@media (max-width: 768px) {
+  #room-list{display:none}
+  #chat-panel{width:calc(100% - 16px);bottom:54px;max-height:140px;font-size:10px}
+  #chat-input-wrap{width:calc(100% - 16px);bottom:4px}
+  #chat-input{font-size:14px;padding:8px 10px} /* prevent iOS zoom */
+  #minimap{width:100px;height:65px;bottom:58px}
+  #action-bar{bottom:4px;right:4px}
+  #action-bar button{padding:8px 12px;font-size:18px}
+  #hud{font-size:10px}
+}
+@media (max-width: 480px) {
+  #chat-panel{max-height:100px}
+  #minimap{display:none}
+  #action-bar button{padding:6px 8px;font-size:16px}
+}
+/* Touch: prevent pull-to-refresh */
+body{overscroll-behavior:none;touch-action:none}
+/* Mobile joystick zone */
+#mobile-controls{display:none;position:fixed;bottom:60px;left:8px;z-index:15}
+@media (max-width: 768px) {
+  #mobile-controls{display:block}
+}
+.dpad{width:120px;height:120px;position:relative;opacity:0.5}
+.dpad button{position:absolute;width:36px;height:36px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:#fff;font-size:16px;cursor:pointer}
+.dpad .up{top:0;left:42px}
+.dpad .down{bottom:0;left:42px}
+.dpad .left{top:42px;left:0}
+.dpad .right{top:42px;right:0}
 </style>
 </head><body>
 <div id="loading">
@@ -65,13 +95,25 @@ canvas{display:block;image-rendering:pixelated}
 
   <div id="action-bar">
     <button title="Emote" onclick="showEmotes()">😊</button>
+    <button title="Rooms" onclick="toggleRooms()" id="rooms-btn">🚪</button>
     <button title="Profile" onclick="showProfile()">👤</button>
     <button title="Research Lab" onclick="enterLab()">🔬</button>
+    <button title="Report" onclick="showReport()">🚩</button>
     <button title="Settings" onclick="showSettings()">⚙️</button>
+  </div>
+
+  <div id="mobile-controls">
+    <div class="dpad">
+      <button class="up" ontouchstart="S.keys.ArrowUp=true" ontouchend="S.keys.ArrowUp=false">▲</button>
+      <button class="down" ontouchstart="S.keys.ArrowDown=true" ontouchend="S.keys.ArrowDown=false">▼</button>
+      <button class="left" ontouchstart="S.keys.ArrowLeft=true" ontouchend="S.keys.ArrowLeft=false">◄</button>
+      <button class="right" ontouchstart="S.keys.ArrowRight=true" ontouchend="S.keys.ArrowRight=false">►</button>
+    </div>
   </div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="/onboarding.js"></script>
 <script>
 // ═══ ECHO WORLDS CLIENT ═══
 const canvas = document.getElementById('game');
@@ -130,6 +172,9 @@ socket.on('connect', () => {
     renderRoomList();
     resizeCanvas();
     gameLoop();
+
+    // Onboarding for first-time users
+    if (window.Onboarding) Onboarding.start();
   });
 });
 
@@ -408,9 +453,36 @@ function showEmotes() {
   if (S.player) S.player._emote = { type: chosen, timer: 120 };
 }
 
-function showProfile() { addChatMsg('system', 'Profile panel coming in Sprint 8!', '#ffd080'); }
+function showProfile() {
+  if (!S.player) return;
+  addChatMsg('system', `👤 ${S.player.username} | Coins: ${S.player.coins || 0}◈ | RP: ${S.player.rp || 0}`, '#ffd080');
+}
 function enterLab() { window.open('/research/synapse-spotter', '_blank'); }
-function showSettings() { addChatMsg('system', 'Settings panel coming in Sprint 8!', '#ffd080'); }
+function showSettings() {
+  const name = prompt('Change your display name:', S.player?.username);
+  if (name && name.trim() && name !== S.player?.username) {
+    S.player.username = name.trim().slice(0, 20);
+    localStorage.setItem('echoWorldsUsername', S.player.username);
+    addChatMsg('system', `Name changed to ${S.player.username}`, '#00fff7');
+  }
+}
+function toggleRooms() {
+  const rl = document.getElementById('room-list');
+  rl.style.display = rl.style.display === 'none' ? 'block' : 'none';
+}
+function showReport() {
+  if (!S.players.size) return addChatMsg('system', 'No players nearby to report.', '#888');
+  const names = [...S.players.values()].map(p => p.username).join(', ');
+  const who = prompt(`Report who? Players here: ${names}`);
+  if (!who) return;
+  const reason = prompt('Reason for report:');
+  if (!reason) return;
+  fetch('/api/report', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ reporterId: S.player.userId, reportedName: who, reason })
+  }).then(() => addChatMsg('system', '✅ Report submitted. Thanks for keeping the community safe.', '#44cc44'))
+    .catch(() => addChatMsg('system', '❌ Could not submit report.', '#ff4444'));
+}
 
 // ═══ RESIZE ═══
 function resizeCanvas() {

@@ -8,7 +8,13 @@
     "game": "node server.js",
     "dev": "node platform.js"
   },
-  "keywords": ["pixel-art", "social", "discord", "citizen-science", "msa"],
+  "keywords": [
+    "pixel-art",
+    "social",
+    "discord",
+    "citizen-science",
+    "msa"
+  ],
   "author": "hallochupi-sketch",
   "license": "ISC",
   "type": "commonjs",
