@@ -2802,6 +2802,8 @@ const FLOOR_OBJECTS={
     {id:'neonbar',x:850,y:280,w:200,h:30,label:'',interact:false,collide:false},
     // Crystal ball on bar
     {id:'crystal_ball',x:1050,y:340,w:30,h:30,label:'🔮',interact:true,collide:false},
+    // Drink menu board (visible, clickable)
+    {id:'drink_menu',x:1270,y:260,w:80,h:140,label:'📋 Drink Menu',interact:true,collide:true},
     // Back bar bottles & shelves
     {id:'bottle_shelf',x:770,y:250,w:460,h:40,label:'',interact:false,collide:true},
     {id:'plant_2',x:700,y:290,w:30,h:50,label:'🌿',interact:false,collide:false},
@@ -11119,6 +11121,54 @@ function renderFloor6(){
       ctx.fillStyle=glow;ctx.fillRect(cx2-40,bar.y-35,80,80);
     });
 
+    // "ORDER HERE" glow text on bar front
+    ctx.save();
+    const orderGlow=0.7+Math.sin(S.time*2)*0.2;
+    ctx.shadowColor='#ffd080';ctx.shadowBlur=12*orderGlow;
+    ctx.fillStyle=`rgba(255,208,128,${orderGlow})`;ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText('— TAP TO ORDER —',bar.x+bar.w/2,bar.y+bar.h+12);
+    ctx.textAlign='left';ctx.restore();
+
+    // Drink menu board
+    const dm=getObjects().find(o=>o.id==='drink_menu');
+    if(dm){
+      // Chalkboard frame
+      ctx.fillStyle='#2a1a0a';ctx.fillRect(dm.x-3,dm.y-3,dm.w+6,dm.h+6);
+      ctx.fillStyle='#1a2a1a';ctx.fillRect(dm.x,dm.y,dm.w,dm.h);
+      // Title
+      ctx.fillStyle='#ffd080';ctx.font='bold 8px monospace';ctx.textAlign='center';
+      ctx.fillText('DRINKS',dm.x+dm.w/2,dm.y+12);
+      // Menu items (abbreviated)
+      ctx.font='6px monospace';
+      const menuItems=[
+        {name:'sane® Shot',price:'3◈',color:'#3355bb'},
+        {name:'sane® Blue',price:'8◈',color:'#2244aa'},
+        {name:'Meteor Mule',price:'4◈',color:'#ffaa00'},
+        {name:'Aperol Nebula',price:'5◈',color:'#ff6633'},
+        {name:'Espresso Martini',price:'5◈',color:'#6a3a1a'},
+        {name:'Jäger Comet',price:'6◈',color:'#1a3a1a'},
+        {name:'Long Station',price:'8◈',color:'#dd4488'},
+        {name:'Zen Matcha',price:'3◈',color:'#88cc44'},
+        {name:'Echo\'s Secret',price:'12◈',color:'#ff4400'},
+        {name:'Stardust Shot',price:'3◈',color:'#ffd700'},
+        {name:'Moonwater',price:'Free',color:'#88ccff'},
+      ];
+      menuItems.forEach((item,i)=>{
+        const iy=dm.y+20+i*10;
+        if(iy>dm.y+dm.h-5) return;
+        ctx.fillStyle=item.color;ctx.textAlign='left';
+        ctx.fillText(item.name,dm.x+4,iy);
+        ctx.fillStyle='#ffd080';ctx.textAlign='right';
+        ctx.fillText(item.price,dm.x+dm.w-4,iy);
+      });
+      ctx.textAlign='left';
+      // "Tap for full menu" at bottom
+      const tapGlow=0.5+Math.sin(S.time*3)*0.3;
+      ctx.fillStyle=`rgba(255,208,128,${tapGlow})`;ctx.font='5px monospace';ctx.textAlign='center';
+      ctx.fillText('TAP FOR MENU',dm.x+dm.w/2,dm.y+dm.h-4);
+      ctx.textAlign='left';
+    }
+
     // Bar stools (round seats)
     getObjects().filter(o=>o.id.startsWith('barstool_')).forEach(st=>{
       ctx.fillStyle='#444';ctx.fillRect(st.x+12,st.y+15,6,15);
@@ -14282,6 +14332,7 @@ function interact(){
     case'recordplayer':case'vinyl_player':
       if(S.floor===6){showVinylSelector();}else{toggleMusic();}
       break;
+    case'drink_menu':showBarMenu();break;
     case'bar':case'bar_vip':
       // Floor 6 bar serves the full menu + starts music
       if(S.floor===6){
