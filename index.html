@@ -2690,45 +2690,54 @@ const DATA_FRAGMENTS=[
 // ═══════════════════════════════════════
 const FLOOR_OBJECTS={
   1:[
-    // ═══ ECHO'S BAR — Prince Berlin Inspired ═══
-    {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
-    // Golden Round Bar (center)
-    {id:'bar_counter',x:280,y:220,w:240,h:180,label:'🍸 Bar',interact:true,collide:true},
-    {id:'tip_jar',x:370,y:195,w:40,h:25,label:'💰 Tips',interact:true,collide:false},
-    // Bar stools (around the bar)
-    {id:'barstool_1',x:250,y:260,w:25,h:25,label:'Seat',interact:true,collide:false},
-    {id:'barstool_2',x:250,y:330,w:25,h:25,label:'Seat',interact:true,collide:false},
-    {id:'barstool_3',x:530,y:260,w:25,h:25,label:'Seat',interact:true,collide:false},
-    {id:'barstool_4',x:530,y:330,w:25,h:25,label:'Seat',interact:true,collide:false},
-    {id:'barstool_5',x:350,y:410,w:25,h:25,label:'Seat',interact:true,collide:false},
-    {id:'barstool_6',x:430,y:410,w:25,h:25,label:'Seat',interact:true,collide:false},
-    // Vinyl Corner (left)
-    {id:'vinyl_player',x:80,y:80,w:80,h:60,label:'🎵 Vinyl',interact:true,collide:true},
-    {id:'record',x:80,y:150,w:80,h:50,label:'🎶 Records',interact:true,collide:true},
-    // Comic & Card Shelf (left-center)
-    {id:'bookshelf',x:180,y:80,w:80,h:60,label:'📚 Comics & Cards',interact:true,collide:true},
-    // Space Window (top right)
-    {id:'window',x:550,y:15,w:230,h:100,label:'🪟 Space Window',interact:true,collide:false},
-    // Window seats
-    {id:'window_seat_1',x:580,y:120,w:50,h:40,label:'Window Seat',interact:true,collide:false},
-    {id:'window_seat_2',x:660,y:120,w:50,h:40,label:'Window Seat',interact:true,collide:false},
-    // Lounge areas
-    {id:'sofa',x:80,y:440,w:120,h:60,label:'🛋️ Lounge',interact:true,collide:true},
-    {id:'sofa_right',x:600,y:440,w:120,h:60,label:'🛋️ Lounge',interact:true,collide:true},
-    // Dining tables
-    {id:'table_1',x:300,y:480,w:50,h:40,label:'Table',interact:true,collide:false},
-    {id:'table_2',x:450,y:480,w:50,h:40,label:'Table',interact:true,collide:false},
-    // Plants
-    {id:'plant_1',x:75,y:360,w:20,h:30,label:'',interact:false,collide:false},
-    {id:'plant_2',x:710,y:360,w:20,h:30,label:'',interact:false,collide:false},
-    {id:'plant_3',x:220,y:440,w:20,h:30,label:'',interact:false,collide:false},
-    // Crystal ball on bar
-    {id:'crystal',x:380,y:280,w:30,h:30,label:'🔮 Crystal Ball',interact:true,collide:false},
-    // Pendant lights (non-collide, decorative)
-    {id:'pendant_1',x:300,y:180,w:30,h:30,label:'',interact:false,collide:false},
-    {id:'pendant_2',x:460,y:180,w:30,h:30,label:'',interact:false,collide:false},
-    {id:'pendant_3',x:150,y:300,w:30,h:30,label:'',interact:false,collide:false},
-    {id:'pendant_4',x:620,y:300,w:30,h:30,label:'',interact:false,collide:false},
+    // ═══ ECHO'S PENTHOUSE — 2400×1200 — Prince Berlin Inspired ═══
+    {id:'elevator',x:40,y:400,w:60,h:120,label:'Elevator',interact:true,collide:true},
+    // Zone 1: Living Room (left, 0-800)
+    {id:'sofa',x:200,y:500,w:200,h:80,label:'🛋️ Lounge',interact:true,collide:true},
+    {id:'sofa_right',x:500,y:500,w:200,h:80,label:'🛋️ Lounge',interact:true,collide:true},
+    {id:'coffee_table',x:350,y:600,w:120,h:60,label:'Coffee Table',interact:true,collide:true},
+    {id:'bookshelf',x:150,y:200,w:200,h:80,label:'📚 Comics & Cards',interact:true,collide:true},
+    {id:'vinyl_player',x:150,y:350,w:120,h:80,label:'🎵 Vinyl',interact:true,collide:true},
+    {id:'record',x:300,y:350,w:100,h:80,label:'🎶 Records',interact:true,collide:true},
+    {id:'fireplace',x:400,y:200,w:150,h:100,label:'🔥 Fireplace',interact:true,collide:true},
+    {id:'tv_wall',x:200,y:100,w:400,h:60,label:'📺 Display Wall',interact:true,collide:true},
+    // Zone 2: Bar (center, 800-1600)
+    {id:'bar_counter',x:900,y:400,w:300,h:200,label:'🍸 Bar',interact:true,collide:true},
+    {id:'tip_jar',x:1020,y:370,w:40,h:25,label:'💰 Tips',interact:true,collide:false},
+    {id:'barstool_1',x:870,y:440,w:25,h:25,label:'Seat',interact:true,collide:false},
+    {id:'barstool_2',x:870,y:530,w:25,h:25,label:'Seat',interact:true,collide:false},
+    {id:'barstool_3',x:1210,y:440,w:25,h:25,label:'Seat',interact:true,collide:false},
+    {id:'barstool_4',x:1210,y:530,w:25,h:25,label:'Seat',interact:true,collide:false},
+    {id:'barstool_5',x:980,y:610,w:25,h:25,label:'Seat',interact:true,collide:false},
+    {id:'barstool_6',x:1080,y:610,w:25,h:25,label:'Seat',interact:true,collide:false},
+    {id:'crystal',x:1030,y:480,w:30,h:30,label:'🔮 Crystal Ball',interact:true,collide:false},
+    // Zone 3: Bedroom (right, 1600-2400)
+    {id:'bed',x:1800,y:300,w:200,h:150,label:'🛏️ Bed',interact:true,collide:true},
+    {id:'wardrobe',x:2100,y:200,w:120,h:100,label:'👔 Wardrobe',interact:true,collide:true},
+    {id:'desk',x:1700,y:600,w:150,h:80,label:'💻 Desk',interact:true,collide:true},
+    {id:'server',x:2100,y:600,w:80,h:100,label:'🖥️ Server',interact:true,collide:true},
+    {id:'growlab',x:2100,y:400,w:100,h:80,label:'🌱 Grow Lab',interact:true,collide:true},
+    // Panoramic Window (full width along top)
+    {id:'window',x:100,y:30,w:2200,h:120,label:'🪟 Space Window',interact:true,collide:false},
+    {id:'window_seat_1',x:700,y:155,w:80,h:40,label:'Window Seat',interact:true,collide:false},
+    {id:'window_seat_2',x:1400,y:155,w:80,h:40,label:'Window Seat',interact:true,collide:false},
+    // Bottom: Dining & Social
+    {id:'table_1',x:700,y:800,w:120,h:60,label:'Dining Table',interact:true,collide:true},
+    {id:'table_2',x:1100,y:800,w:120,h:60,label:'Dining Table',interact:true,collide:true},
+    {id:'collection_wall',x:800,y:200,w:300,h:100,label:'🏆 Collection Wall',interact:true,collide:true},
+    // Balcony area (bottom center)
+    {id:'balcony_door',x:1050,y:1000,w:200,h:80,label:'🌃 Balcony',interact:true,collide:true},
+    {id:'balcony_chair_1',x:1000,y:1100,w:60,h:50,label:'Chair',interact:true,collide:false},
+    {id:'balcony_chair_2',x:1200,y:1100,w:60,h:50,label:'Chair',interact:true,collide:false},
+    // Plants & Decor (spread throughout)
+    {id:'plant_1',x:140,y:480,w:25,h:40,label:'',interact:false,collide:false},
+    {id:'plant_2',x:750,y:380,w:25,h:40,label:'',interact:false,collide:false},
+    {id:'plant_3',x:1600,y:380,w:25,h:40,label:'',interact:false,collide:false},
+    {id:'plant_4',x:2200,y:380,w:25,h:40,label:'',interact:false,collide:false},
+    // Pendant lights
+    {id:'pendant_1',x:400,y:350,w:30,h:30,label:'',interact:false,collide:false},
+    {id:'pendant_2',x:1050,y:350,w:30,h:30,label:'',interact:false,collide:false},
+    {id:'pendant_3',x:1900,y:350,w:30,h:30,label:'',interact:false,collide:false},
   ],
   2:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
@@ -10721,6 +10730,557 @@ function renderFloor1(){
   ctx.fillStyle = moodColors[TOD_NOW] || moodColors.evening;
   ctx.fillRect(0, 0, W, H);
 }
+
+// ═══ FLOOR 1 PENTHOUSE OVERLAY (2400×1200) ═══
+// Called AFTER the original renderFloor1 for expanded penthouse rendering
+(function(){
+  const _origRF1 = window.renderFloor1 || renderFloor1;
+  const RF1_FW = 2400, RF1_FH = 1200;
+
+  window.renderFloor1 = renderFloor1 = function renderFloor1(){
+    const FW = RF1_FW, FH = RF1_FH;
+
+    // ═══ FLOOR: Rich dark hardwood with warm sheen ═══
+    ctx.fillStyle = '#1a140e';
+    ctx.fillRect(0, 0, FW, FH);
+    // Plank pattern
+    for(let py = 0; py < FH; py += 20) {
+      for(let px = 0; px < FW; px += 80) {
+        const offset = (Math.floor(py/20) % 2) * 40;
+        const shade = ((px + py) * 7 % 11) / 300;
+        ctx.fillStyle = `rgba(180,140,90,${0.03 + shade})`;
+        ctx.fillRect(px + offset, py, 78, 18);
+      }
+    }
+
+    // ═══ WALLS: Dark mahogany with wainscoting ═══
+    ctx.fillStyle = '#12100a';
+    ctx.fillRect(0, 0, FW, 50);
+    ctx.fillRect(0, FH - 20, FW, 20);
+    ctx.fillStyle = '#1a140e';
+    ctx.fillRect(0, 0, 20, FH);
+    ctx.fillRect(FW - 20, 0, 20, FH);
+    // Wainscoting trim
+    ctx.fillStyle = '#3a2a18';
+    ctx.fillRect(20, 48, FW - 40, 3);
+    ctx.fillRect(20, FH - 22, FW - 40, 2);
+    // Crown molding (gold)
+    ctx.fillStyle = 'rgba(200,170,100,0.3)';
+    ctx.fillRect(20, 46, FW - 40, 2);
+
+    // ═══ PANORAMIC SPACE WINDOW (full width, top) ═══
+    const win = getObjects().find(o => o.id === 'window');
+    if(win) {
+      ctx.fillStyle = '#010412';
+      ctx.fillRect(win.x, win.y, win.w, win.h);
+      // 200+ stars in 4 layers
+      for(let i = 0; i < 80; i++) {
+        const sx = win.x + ((i * 47 + 13) % win.w);
+        const sy = win.y + ((i * 31 + 7) % win.h);
+        ctx.fillStyle = `rgba(255,255,255,${0.1 + Math.sin(S.time * 0.5 + i) * 0.08})`;
+        ctx.fillRect(sx, sy, 1, 1);
+      }
+      for(let i = 0; i < 60; i++) {
+        ctx.fillStyle = `rgba(255,255,240,${0.25 + Math.sin(S.time * 0.8 + i * 0.7) * 0.15})`;
+        ctx.fillRect(win.x + ((i * 37 + 19) % win.w), win.y + ((i * 23 + 11) % win.h), 1, 1);
+      }
+      for(let i = 0; i < 30; i++) {
+        ctx.fillStyle = `rgba(255,255,250,${0.5 + Math.sin(S.time + i * 1.3) * 0.2})`;
+        const sz = i % 4 === 0 ? 2 : 1;
+        ctx.fillRect(win.x + ((i * 67 + 29) % win.w), win.y + ((i * 43 + 3) % win.h), sz, sz);
+      }
+      // Nebula
+      const nebX = win.x + 600 + Math.sin(S.time * 0.03) * 40;
+      const nebY = win.y + 50 + Math.cos(S.time * 0.02) * 15;
+      const ng = ctx.createRadialGradient(nebX, nebY, 0, nebX, nebY, 120);
+      ng.addColorStop(0, 'rgba(100,40,150,0.12)');
+      ng.addColorStop(0.5, 'rgba(60,20,120,0.05)');
+      ng.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = ng;
+      ctx.fillRect(win.x, win.y, win.w, win.h);
+      // Earth (right side)
+      const earthX = win.x + win.w - 200, earthY = win.y + 60;
+      const earthG = ctx.createRadialGradient(earthX, earthY, 0, earthX, earthY, 35);
+      earthG.addColorStop(0, 'rgba(50,120,200,0.8)');
+      earthG.addColorStop(0.5, 'rgba(30,100,180,0.6)');
+      earthG.addColorStop(0.8, 'rgba(20,60,140,0.3)');
+      earthG.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = earthG;
+      ctx.beginPath(); ctx.arc(earthX, earthY, 35, 0, Math.PI * 2); ctx.fill();
+      // Continents
+      ctx.fillStyle = 'rgba(50,150,80,0.4)';
+      ctx.beginPath();
+      ctx.arc(earthX - 8 + Math.sin(S.time * 0.01) * 2, earthY - 5, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(earthX + 12 + Math.sin(S.time * 0.01) * 2, earthY + 5, 7, 0, Math.PI * 2);
+      ctx.fill();
+      // Atmosphere glow
+      ctx.strokeStyle = 'rgba(100,180,255,0.2)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(earthX, earthY, 37, 0, Math.PI * 2); ctx.stroke();
+      // Shooting star (occasional)
+      const shootPhase = (S.time % 600) / 600;
+      if(shootPhase < 0.05) {
+        const sp = shootPhase / 0.05;
+        const stX = win.x + 200 + sp * 800, stY = win.y + 20 + sp * 60;
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.beginPath(); ctx.arc(stX, stY, 1.5, 0, Math.PI * 2); ctx.fill();
+        for(let t = 1; t < 6; t++) {
+          ctx.fillStyle = `rgba(200,220,255,${0.5 - t * 0.08})`;
+          ctx.fillRect(stX - t * 8, stY + t * 0.5, 5, 1);
+        }
+      }
+      // Window frame
+      ctx.strokeStyle = '#3a3a4a';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(win.x, win.y, win.w, win.h);
+      // Support beams
+      for(let i = 1; i < 6; i++) {
+        ctx.fillStyle = '#2a2a3a';
+        ctx.fillRect(win.x + i * (win.w / 6), win.y, 4, win.h);
+      }
+    }
+
+    // ═══ ZONE 1: LIVING ROOM (0-800) ═══
+    // Fireplace
+    const fp = getObjects().find(o => o.id === 'fireplace');
+    if(fp) {
+      // Stone surround
+      ctx.fillStyle = '#3a3028';
+      ctx.fillRect(fp.x, fp.y, fp.w, fp.h);
+      ctx.fillStyle = '#4a4038';
+      ctx.fillRect(fp.x + 10, fp.y + 10, fp.w - 20, fp.h - 10);
+      // Fire opening
+      ctx.fillStyle = '#0a0808';
+      ctx.fillRect(fp.x + 20, fp.y + 30, fp.w - 40, fp.h - 30);
+      // Flames (animated)
+      for(let fi = 0; fi < 5; fi++) {
+        const fx = fp.x + 35 + fi * 18 + Math.sin(S.time * 5 + fi * 2) * 4;
+        const fh = 20 + Math.sin(S.time * 7 + fi * 1.5) * 10;
+        const fy = fp.y + fp.h - fh;
+        const fGrad = ctx.createLinearGradient(fx, fp.y + fp.h, fx, fy);
+        fGrad.addColorStop(0, 'rgba(255,100,20,0.8)');
+        fGrad.addColorStop(0.4, 'rgba(255,180,40,0.6)');
+        fGrad.addColorStop(1, 'rgba(255,220,100,0)');
+        ctx.fillStyle = fGrad;
+        ctx.beginPath();
+        ctx.moveTo(fx - 5, fp.y + fp.h);
+        ctx.quadraticCurveTo(fx + Math.sin(S.time * 3 + fi) * 3, fy, fx + 5, fp.y + fp.h);
+        ctx.fill();
+      }
+      // Warm glow from fireplace
+      const warmGlow = ctx.createRadialGradient(fp.x + fp.w/2, fp.y + fp.h, 0, fp.x + fp.w/2, fp.y + fp.h, 200);
+      warmGlow.addColorStop(0, 'rgba(255,150,50,0.06)');
+      warmGlow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = warmGlow;
+      ctx.fillRect(fp.x - 150, fp.y - 100, fp.w + 300, fp.h + 300);
+      // Mantle
+      ctx.fillStyle = '#5a4a38';
+      ctx.fillRect(fp.x - 10, fp.y - 5, fp.w + 20, 12);
+    }
+
+    // Display wall
+    const tv = getObjects().find(o => o.id === 'tv_wall');
+    if(tv) {
+      ctx.fillStyle = '#111';
+      ctx.fillRect(tv.x, tv.y, tv.w, tv.h);
+      // Ambient display (shifting colors)
+      const hue = (S.time * 10) % 360;
+      const tvGrad = ctx.createLinearGradient(tv.x, tv.y, tv.x + tv.w, tv.y + tv.h);
+      tvGrad.addColorStop(0, `hsla(${hue},40%,15%,0.5)`);
+      tvGrad.addColorStop(0.5, `hsla(${(hue + 60) % 360},40%,20%,0.5)`);
+      tvGrad.addColorStop(1, `hsla(${(hue + 120) % 360},40%,15%,0.5)`);
+      ctx.fillStyle = tvGrad;
+      ctx.fillRect(tv.x + 3, tv.y + 3, tv.w - 6, tv.h - 6);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(tv.x, tv.y, tv.w, tv.h);
+    }
+
+    // Sofas (leather look)
+    getObjects().filter(o => o.id.startsWith('sofa')).forEach(s => {
+      ctx.fillStyle = '#4a2a2a';
+      ctx.fillRect(s.x, s.y, s.w, s.h);
+      ctx.fillStyle = '#5a3a3a';
+      ctx.fillRect(s.x + 5, s.y + 5, s.w - 10, s.h - 10);
+      // Cushion lines
+      ctx.strokeStyle = '#3a2020';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(s.x + s.w * 0.33, s.y + 8);
+      ctx.lineTo(s.x + s.w * 0.33, s.y + s.h - 8);
+      ctx.moveTo(s.x + s.w * 0.66, s.y + 8);
+      ctx.lineTo(s.x + s.w * 0.66, s.y + s.h - 8);
+      ctx.stroke();
+      // Back rest
+      ctx.fillStyle = '#3a2020';
+      ctx.fillRect(s.x, s.y, s.w, 12);
+    });
+
+    // Coffee table
+    const ct = getObjects().find(o => o.id === 'coffee_table');
+    if(ct) {
+      ctx.fillStyle = '#2a1a0a';
+      ctx.fillRect(ct.x, ct.y, ct.w, ct.h);
+      ctx.fillStyle = '#3a2a1a';
+      ctx.fillRect(ct.x + 3, ct.y + 3, ct.w - 6, ct.h - 6);
+      // Legs
+      ctx.fillStyle = '#1a0a00';
+      ctx.fillRect(ct.x + 5, ct.y + ct.h, 4, 8);
+      ctx.fillRect(ct.x + ct.w - 9, ct.y + ct.h, 4, 8);
+    }
+
+    // Bookshelf
+    const bs = getObjects().find(o => o.id === 'bookshelf');
+    if(bs) {
+      ctx.fillStyle = '#3a2a18';
+      ctx.fillRect(bs.x, bs.y, bs.w, bs.h);
+      // Shelves
+      for(let sh = 0; sh < 3; sh++) {
+        ctx.fillStyle = '#4a3a28';
+        ctx.fillRect(bs.x + 5, bs.y + 10 + sh * 25, bs.w - 10, 3);
+        // Books
+        const bookColors = ['#cc2222','#2266cc','#22aa44','#ddaa22','#8844aa','#cc6622','#2288aa','#aa2266'];
+        for(let b = 0; b < 8; b++) {
+          const bx = bs.x + 8 + b * 23;
+          const bh = 15 + (b * 3 % 7);
+          ctx.fillStyle = bookColors[b];
+          ctx.fillRect(bx, bs.y + 13 + sh * 25 - bh, 18, bh);
+        }
+      }
+    }
+
+    // ═══ ZONE 2: BAR (800-1600) ═══
+    const bar = getObjects().find(o => o.id === 'bar_counter');
+    if(bar) {
+      // Bar base (golden oval shape)
+      ctx.fillStyle = '#3a2a18';
+      ctx.beginPath();
+      ctx.ellipse(bar.x + bar.w/2, bar.y + bar.h/2, bar.w/2, bar.h/2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Bar top
+      const barGrad = ctx.createLinearGradient(bar.x, bar.y, bar.x + bar.w, bar.y);
+      barGrad.addColorStop(0, 'rgba(180,140,60,0.4)');
+      barGrad.addColorStop(0.5, 'rgba(200,160,80,0.6)');
+      barGrad.addColorStop(1, 'rgba(180,140,60,0.4)');
+      ctx.fillStyle = barGrad;
+      ctx.beginPath();
+      ctx.ellipse(bar.x + bar.w/2, bar.y + bar.h/2, bar.w/2 - 5, bar.h/2 - 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Gold rail
+      ctx.strokeStyle = 'rgba(200,170,80,0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(bar.x + bar.w/2, bar.y + bar.h/2, bar.w/2 + 3, bar.h/2 + 3, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      // Bottle shelf (behind bar, inside oval)
+      const bottleColors = ['#cc2222','#228822','#2244aa','#aa8822','#882288','#cc6622','#226688','#aa2244','#44aa22','#8844aa','#cc8844','#448888'];
+      for(let b = 0; b < 12; b++) {
+        const angle = (b / 12) * Math.PI * 2 - Math.PI / 2;
+        const bx = bar.x + bar.w/2 + Math.cos(angle) * (bar.w/2 - 30);
+        const by = bar.y + bar.h/2 + Math.sin(angle) * (bar.h/2 - 30);
+        ctx.fillStyle = bottleColors[b];
+        ctx.fillRect(bx - 4, by - 12, 8, 18);
+        ctx.fillStyle = '#ddd';
+        ctx.fillRect(bx - 3, by - 14, 6, 4);
+      }
+      // Mirror behind bar (top of oval)
+      ctx.fillStyle = 'rgba(180,200,220,0.08)';
+      ctx.beginPath();
+      ctx.ellipse(bar.x + bar.w/2, bar.y + 30, 80, 20, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Bar stools
+    getObjects().filter(o => o.id.startsWith('barstool_')).forEach(st => {
+      ctx.fillStyle = '#555';
+      ctx.fillRect(st.x + 4, st.y + 15, 2, 10); // leg
+      ctx.fillRect(st.x + 18, st.y + 15, 2, 10); // leg
+      ctx.fillStyle = '#4a2a2a';
+      ctx.beginPath();
+      ctx.arc(st.x + 12, st.y + 10, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#5a3a3a';
+      ctx.beginPath();
+      ctx.arc(st.x + 12, st.y + 10, 7, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Collection Wall
+    const cw = getObjects().find(o => o.id === 'collection_wall');
+    if(cw) {
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(cw.x, cw.y, cw.w, cw.h);
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(cw.x, cw.y, cw.w, cw.h);
+      // Trophy/card display slots
+      for(let i = 0; i < 6; i++) {
+        const sx = cw.x + 15 + i * 47;
+        ctx.fillStyle = '#2a2a3e';
+        ctx.fillRect(sx, cw.y + 10, 40, 75);
+        ctx.strokeStyle = '#ffd70066';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(sx, cw.y + 10, 40, 75);
+        // Placeholder item shimmer
+        const shimmer = 0.1 + Math.sin(S.time * 2 + i) * 0.05;
+        ctx.fillStyle = `rgba(255,215,0,${shimmer})`;
+        ctx.fillRect(sx + 5, cw.y + 15, 30, 65);
+      }
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('COLLECTION', cw.x + cw.w/2, cw.y - 5);
+      ctx.textAlign = 'left';
+    }
+
+    // ═══ ZONE 3: BEDROOM (1600-2400) ═══
+    // Bed
+    const bed = getObjects().find(o => o.id === 'bed');
+    if(bed) {
+      // Bed frame
+      ctx.fillStyle = '#3a2a18';
+      ctx.fillRect(bed.x - 5, bed.y - 5, bed.w + 10, bed.h + 10);
+      // Mattress
+      ctx.fillStyle = '#eee';
+      ctx.fillRect(bed.x, bed.y, bed.w, bed.h);
+      // Duvet (dark blue/purple)
+      ctx.fillStyle = '#2a2a5a';
+      ctx.fillRect(bed.x + 5, bed.y + 20, bed.w - 10, bed.h - 25);
+      // Pillow
+      ctx.fillStyle = '#ddd';
+      ctx.fillRect(bed.x + 15, bed.y + 5, 70, 18);
+      ctx.fillRect(bed.x + bed.w - 85, bed.y + 5, 70, 18);
+      // Headboard
+      ctx.fillStyle = '#4a3a28';
+      ctx.fillRect(bed.x, bed.y - 15, bed.w, 15);
+    }
+
+    // Desk
+    const dsk = getObjects().find(o => o.id === 'desk');
+    if(dsk) {
+      ctx.fillStyle = '#3a3a3a';
+      ctx.fillRect(dsk.x, dsk.y, dsk.w, dsk.h);
+      ctx.fillStyle = '#4a4a4a';
+      ctx.fillRect(dsk.x + 3, dsk.y + 3, dsk.w - 6, dsk.h - 6);
+      // Monitor
+      ctx.fillStyle = '#111';
+      ctx.fillRect(dsk.x + 20, dsk.y - 30, 60, 35);
+      ctx.fillStyle = '#0a1a2a';
+      ctx.fillRect(dsk.x + 23, dsk.y - 27, 54, 29);
+      // Screen glow
+      const scrGlow = ctx.createRadialGradient(dsk.x + 50, dsk.y - 12, 0, dsk.x + 50, dsk.y - 12, 50);
+      scrGlow.addColorStop(0, 'rgba(0,150,255,0.04)');
+      scrGlow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = scrGlow;
+      ctx.fillRect(dsk.x - 20, dsk.y - 50, 120, 100);
+    }
+
+    // Server rack
+    const srv = getObjects().find(o => o.id === 'server');
+    if(srv) {
+      ctx.fillStyle = '#2a2a2a';
+      ctx.fillRect(srv.x, srv.y, srv.w, srv.h);
+      ctx.fillStyle = '#3a3a3a';
+      ctx.fillRect(srv.x + 5, srv.y + 5, srv.w - 10, srv.h - 10);
+      // Blinking LEDs
+      for(let led = 0; led < 8; led++) {
+        const on = Math.sin(S.time * 3 + led * 1.7) > 0.3;
+        ctx.fillStyle = on ? '#00ff44' : '#113311';
+        ctx.fillRect(srv.x + 10, srv.y + 15 + led * 10, 4, 3);
+        ctx.fillStyle = on ? '#ff4444' : '#331111';
+        ctx.fillRect(srv.x + 18, srv.y + 15 + led * 10, 4, 3);
+      }
+    }
+
+    // Wardrobe
+    const wr = getObjects().find(o => o.id === 'wardrobe');
+    if(wr) {
+      ctx.fillStyle = '#3a2a18';
+      ctx.fillRect(wr.x, wr.y, wr.w, wr.h);
+      ctx.fillStyle = '#4a3a28';
+      ctx.fillRect(wr.x + 5, wr.y + 5, wr.w/2 - 8, wr.h - 10);
+      ctx.fillRect(wr.x + wr.w/2 + 3, wr.y + 5, wr.w/2 - 8, wr.h - 10);
+      // Handles
+      ctx.fillStyle = '#c0a060';
+      ctx.fillRect(wr.x + wr.w/2 - 6, wr.y + wr.h/2 - 5, 4, 10);
+      ctx.fillRect(wr.x + wr.w/2 + 2, wr.y + wr.h/2 - 5, 4, 10);
+    }
+
+    // ═══ BALCONY AREA (bottom center) ═══
+    const balcony = getObjects().find(o => o.id === 'balcony_door');
+    if(balcony) {
+      // Glass door
+      ctx.fillStyle = 'rgba(100,150,200,0.1)';
+      ctx.fillRect(balcony.x, balcony.y, balcony.w, balcony.h);
+      ctx.strokeStyle = '#4a4a5a';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(balcony.x, balcony.y, balcony.w, balcony.h);
+      ctx.strokeRect(balcony.x + balcony.w/2, balcony.y, 2, balcony.h);
+      // Balcony beyond door — city skyline hint
+      ctx.fillStyle = '#040812';
+      ctx.fillRect(balcony.x, balcony.y + balcony.h, balcony.w, FH - balcony.y - balcony.h);
+      // City buildings silhouette
+      const buildings = [30,60,45,80,35,55,70,40,90,50,65,38,75,42];
+      for(let bi = 0; bi < buildings.length; bi++) {
+        const bx = balcony.x + 10 + bi * 13;
+        const bh = buildings[bi];
+        ctx.fillStyle = '#0a1020';
+        ctx.fillRect(bx, balcony.y + balcony.h + 60 - bh, 11, bh);
+        // Window lights
+        for(let wy = 0; wy < bh - 5; wy += 8) {
+          if(Math.sin(bi * 7 + wy * 3 + S.time * 0.1) > 0.3) {
+            ctx.fillStyle = 'rgba(255,220,100,0.6)';
+            ctx.fillRect(bx + 2, balcony.y + balcony.h + 60 - bh + wy + 2, 3, 3);
+          }
+        }
+      }
+      // Balcony railing
+      ctx.fillStyle = '#3a3a4a';
+      ctx.fillRect(balcony.x, balcony.y + balcony.h + 55, balcony.w, 4);
+      for(let ri = 0; ri < 10; ri++) {
+        ctx.fillRect(balcony.x + 10 + ri * 20, balcony.y + balcony.h, 2, 55);
+      }
+    }
+
+    // ═══ PENDANT LIGHTS (throughout) ═══
+    getObjects().filter(o => o.id.startsWith('pendant_')).forEach((p, i) => {
+      const glow = 0.5 + Math.sin(S.time * 1.5 + i * 2) * 0.15;
+      // Chain
+      ctx.fillStyle = '#555';
+      ctx.fillRect(p.x + 13, p.y - 30, 2, 30);
+      // Shade
+      ctx.fillStyle = '#2a2a2a';
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y + 15);
+      ctx.lineTo(p.x + 8, p.y);
+      ctx.lineTo(p.x + 22, p.y);
+      ctx.lineTo(p.x + 30, p.y + 15);
+      ctx.fill();
+      // Bulb glow
+      const lg = ctx.createRadialGradient(p.x + 15, p.y + 10, 0, p.x + 15, p.y + 10, 80);
+      lg.addColorStop(0, `rgba(255,200,100,${glow * 0.08})`);
+      lg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = lg;
+      ctx.fillRect(p.x - 60, p.y - 40, 150, 150);
+      // Warm bulb
+      ctx.fillStyle = `rgba(255,220,150,${glow})`;
+      ctx.beginPath();
+      ctx.arc(p.x + 15, p.y + 5, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // ═══ PLANTS (lush, detailed) ═══
+    getObjects().filter(o => o.id.startsWith('plant_')).forEach((pl, i) => {
+      // Pot
+      ctx.fillStyle = '#5a3a2a';
+      ctx.fillRect(pl.x + 3, pl.y + pl.h - 15, 18, 15);
+      ctx.fillStyle = '#6a4a3a';
+      ctx.fillRect(pl.x + 1, pl.y + pl.h - 17, 22, 4);
+      // Leaves (layered)
+      const leafG = '#2a6a2a';
+      for(let li = 0; li < 5; li++) {
+        const angle = li * 1.2 - 2.4 + Math.sin(S.time * 0.5 + i + li) * 0.1;
+        const lx = pl.x + 12 + Math.cos(angle) * (8 + li * 3);
+        const ly = pl.y + pl.h - 20 - li * 5;
+        ctx.fillStyle = li % 2 === 0 ? '#2a7a2a' : '#3a8a3a';
+        ctx.beginPath();
+        ctx.ellipse(lx, ly, 8, 4, angle, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+
+    // ═══ DINING TABLES ═══
+    getObjects().filter(o => o.id.startsWith('table_') && !o.id.includes('coffee')).forEach(t => {
+      ctx.fillStyle = '#3a2a1a';
+      ctx.fillRect(t.x, t.y, t.w, t.h);
+      ctx.fillStyle = '#4a3a2a';
+      ctx.fillRect(t.x + 3, t.y + 3, t.w - 6, t.h - 6);
+      // Candle
+      ctx.fillStyle = '#eee';
+      ctx.fillRect(t.x + t.w/2 - 2, t.y + 10, 4, 12);
+      const candleGlow = 0.5 + Math.sin(S.time * 6) * 0.2;
+      ctx.fillStyle = `rgba(255,200,50,${candleGlow})`;
+      ctx.beginPath();
+      ctx.arc(t.x + t.w/2, t.y + 8, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // ═══ VINYL PLAYER (detailed) ═══
+    const vp = getObjects().find(o => o.id === 'vinyl_player');
+    if(vp) {
+      ctx.fillStyle = '#2a2a2a';
+      ctx.fillRect(vp.x, vp.y, vp.w, vp.h);
+      ctx.fillStyle = '#3a3a3a';
+      ctx.fillRect(vp.x + 5, vp.y + 5, vp.w - 10, vp.h - 10);
+      // Record on turntable
+      ctx.fillStyle = '#111';
+      ctx.beginPath();
+      ctx.arc(vp.x + vp.w/2, vp.y + vp.h/2, 25, 0, Math.PI * 2);
+      ctx.fill();
+      // Record grooves
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth = 0.5;
+      for(let r = 8; r < 25; r += 3) {
+        ctx.beginPath();
+        ctx.arc(vp.x + vp.w/2, vp.y + vp.h/2, r, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      // Label
+      ctx.fillStyle = '#cc4444';
+      ctx.beginPath();
+      ctx.arc(vp.x + vp.w/2, vp.y + vp.h/2, 6, 0, Math.PI * 2);
+      ctx.fill();
+      // Tonearm
+      const armAngle = S.time * 0.05;
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(vp.x + vp.w - 10, vp.y + 10);
+      ctx.lineTo(vp.x + vp.w/2 + 15 + Math.sin(armAngle) * 3, vp.y + vp.h/2 - 10);
+      ctx.stroke();
+    }
+
+    // ═══ ELEVATOR ═══
+    const elev = getObjects().find(o => o.id === 'elevator');
+    if(elev) {
+      ctx.fillStyle = '#2a2a3a';
+      ctx.fillRect(elev.x, elev.y, elev.w, elev.h);
+      ctx.fillStyle = '#3a3a4a';
+      ctx.fillRect(elev.x + 5, elev.y + 5, elev.w - 10, elev.h - 10);
+      ctx.strokeStyle = '#666';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(elev.x + 5, elev.y + 5, elev.w - 10, elev.h - 10);
+      ctx.fillStyle = '#ffd080';
+      ctx.font = 'bold 12px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('🛗', elev.x + elev.w/2, elev.y + elev.h/2 + 4);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#ffa040';
+      ctx.font = '8px monospace';
+      ctx.fillText('F1', elev.x + elev.w/2 - 6, elev.y - 5);
+    }
+
+    // ═══ AMBIENT: Warm light pools, dust motes, candle flicker ═══
+    // Warm ambient overlay
+    const ambientG = ctx.createRadialGradient(FW/2, FH/2, 0, FW/2, FH/2, FW * 0.6);
+    ambientG.addColorStop(0, 'rgba(255,200,120,0.02)');
+    ambientG.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = ambientG;
+    ctx.fillRect(0, 0, FW, FH);
+
+    // Floating dust motes in light beams
+    for(let d = 0; d < 15; d++) {
+      const dx = (S.time * 0.3 + d * 170) % FW;
+      const dy = 200 + Math.sin(S.time * 0.2 + d * 2) * 100 + d * 50;
+      if(dy > 0 && dy < FH) {
+        ctx.fillStyle = `rgba(255,220,150,${0.15 + Math.sin(S.time + d) * 0.08})`;
+        ctx.fillRect(dx, dy, 2, 2);
+      }
+    }
+  };
+})();
 
 // --- FLOOR 2: The Observatory ---
 function renderFloor2(){
@@ -35344,9 +35904,9 @@ window.showVinylSelector = showVinylSelector;
 // ═══════════════════════════════════════
 
 const FLOOR_SIZES = window.FLOOR_SIZES = {
-  1:{w:800,h:600}, 2:{w:800,h:600}, 3:{w:800,h:600},
-  4:{w:800,h:600}, 5:{w:800,h:600}, 6:{w:4000,h:1600},
-  7:{w:800,h:600}, 8:{w:800,h:600}, 9:{w:800,h:600},
+  1:{w:2400,h:1200}, 2:{w:2400,h:1600}, 3:{w:2400,h:1400},
+  4:{w:2000,h:1400}, 5:{w:1600,h:1200}, 6:{w:4000,h:1600},
+  7:{w:2800,h:1400}, 8:{w:1600,h:1000}, 9:{w:3000,h:1500},
   10:{w:2400,h:1800}, 11:{w:3200,h:1400}, 12:{w:5000,h:2000}
 };
 
