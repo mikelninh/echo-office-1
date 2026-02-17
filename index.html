@@ -13859,13 +13859,16 @@ function updateVisitor(dt){
   // Dash cooldown
   if(S._dashCooldown>0)S._dashCooldown-=dt;
   
-  // Chain dash window countdown (after first dash ends, brief window to chain)
+  // Chain/triple dash window countdown
   if(v._dashChainWindow>0&&!v._dashing){
     v._dashChainWindow-=dt;
     if(v._dashChainWindow<=0){
-      // Chain window expired — apply single dash cooldown
+      // Window expired — apply appropriate cooldown
       if(v._dashChain===1){
         S._dashCooldown=DASH_COOLDOWN;
+        v._dashChain=0;
+      } else if(v._dashChain===2){
+        S._dashCooldown=DASH_CHAIN_COOLDOWN;
         v._dashChain=0;
       }
     }
@@ -13876,23 +13879,35 @@ function updateVisitor(dt){
     v._dashTimer-=dt;
     const totalDur=v._dashDuration||0.18;
     const progress=1-(v._dashTimer/totalDur);
-    // Chain dash uses sharper ease (quartic) for snappier feel
-    const eased = v._dashIsChain
-      ? 1-Math.pow(1-Math.min(progress,1),4)
-      : 1-Math.pow(1-Math.min(progress,1),3);
+    // Each tier gets sharper easing: cubic → quartic → quintic
+    const eased = v._dashIsTriple
+      ? 1-Math.pow(1-Math.min(progress,1),5)
+      : v._dashIsChain
+        ? 1-Math.pow(1-Math.min(progress,1),4)
+        : 1-Math.pow(1-Math.min(progress,1),3);
     v.x=v._dashStartX+(v._dashTargetX-v._dashStartX)*eased;
     v.y=v._dashStartY+(v._dashTargetY-v._dashStartY)*eased;
     v.moving=true;
-    // Trail particles during dash (chain = much denser, gold-tinted, twin streams)
-    const trailChance = v._dashIsChain ? 1.0 : 0.6;
-    const trailSize = v._dashIsChain ? 4+Math.random()*4 : 3+Math.random()*2;
+    // Trail particles during dash — escalating per tier
+    const trailTier = v._dashTier||1;
+    const trailChance = trailTier===3 ? 1.0 : trailTier===2 ? 1.0 : 0.6;
     if(Math.random()<trailChance){
-      if(v._dashIsChain){
-        // Dual gold/white particle streams for chain
+      if(trailTier===3){
+        // TRIPLE: dense red/orange fire trail + white hot sparks + embers
+        const trailSize=5+Math.random()*5;
+        S.particles.push({x:v.x+(Math.random()-.5)*14,y:v.y+(Math.random()-.5)*8,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2,life:16,color:`rgba(255,${40+Math.random()*80|0},${Math.random()*30|0},0.6)`,size:trailSize});
+        // Hot white core particles
+        S.particles.push({x:v.x+(Math.random()-.5)*8,y:v.y-5+(Math.random()-.5)*6,vx:(Math.random()-.5)*1,vy:(Math.random()-.5)*1,life:10,color:'rgba(255,255,200,0.8)',size:2+Math.random()*2});
+        // Rising embers
+        if(Math.random()<0.5)S.particles.push({x:v.x+(Math.random()-.5)*20,y:v.y,vx:(Math.random()-.5)*0.8,vy:-1-Math.random()*1.5,life:25,color:`rgba(255,${80+Math.random()*60|0},0,${0.4+Math.random()*0.2})`,size:1+Math.random()});
+      } else if(trailTier===2){
+        // CHAIN: dual gold/white streams
+        const trailSize=4+Math.random()*4;
         S.particles.push({x:v.x+(Math.random()-.5)*12,y:v.y+(Math.random()-.5)*6,vx:(Math.random()-.5)*1.5,vy:(Math.random()-.5)*1.5,life:14,color:`rgba(255,${200+Math.random()*55|0},${60+Math.random()*60|0},0.5)`,size:trailSize});
-        // Sparkle particles (white, smaller, faster fade)
         if(Math.random()<0.6)S.particles.push({x:v.x+(Math.random()-.5)*16,y:v.y-10+(Math.random()-.5)*10,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2,life:8,color:'rgba(255,255,255,0.7)',size:1+Math.random()*1.5});
       } else {
+        // SINGLE: subtle cyan
+        const trailSize=3+Math.random()*2;
         S.particles.push({x:v.x+(Math.random()-.5)*10,y:v.y+(Math.random()-.5)*5,vx:(Math.random()-.5)*1,vy:(Math.random()-.5)*1,life:8,color:'rgba(0,255,247,0.3)',size:trailSize});
       }
     }
@@ -13900,56 +13915,120 @@ function updateVisitor(dt){
       v._dashing=false;
       v.x=v._dashTargetX;
       v.y=v._dashTargetY;
-      // If first dash just ended, open chain window
+      
       if(v._dashChain===1){
+        // First dash ended → open chain window
         v._dashChainWindow=DASH_CHAIN_WINDOW;
       } else if(v._dashChain===2){
-        // Chain dash finished — reset everything, apply cooldown
-        v._dashChain=0;
-        v._dashChainWindow=0;
-        S._dashCooldown=DASH_CHAIN_COOLDOWN;
+        // Chain dash ended → open TRIPLE window
+        v._dashChainWindow=DASH_TRIPLE_WINDOW;
         
-        // === CHAIN LANDING BURST — the payoff ===
+        // Chain landing burst
         if(v._chainLandingPending){
           v._chainLandingPending=false;
-          // Landing impact ring
-          if(typeof addImpactRing==='function'){
-            addImpactRing(v.x,v.y-5,'rgba(255,200,60,0.7)',60,3.5);
-          }
-          // Landing particles (radial explosion)
+          if(typeof addImpactRing==='function')addImpactRing(v.x,v.y-5,'rgba(255,200,60,0.7)',60,3.5);
           for(let i=0;i<16;i++){
-            const ang=(Math.PI*2/16)*i;
-            const spd3=1.5+Math.random()*2;
+            const ang=(Math.PI*2/16)*i;const spd3=1.5+Math.random()*2;
             S.particles.push({x:v.x,y:v.y,vx:Math.cos(ang)*spd3,vy:Math.sin(ang)*spd3*0.6-0.5,life:20+Math.random()*8,color:`rgba(255,${180+Math.random()*60|0},${40+Math.random()*40|0},0.6)`,size:2+Math.random()*2});
           }
-          // Dust puff at feet
-          for(let i=0;i<6;i++){
-            S.particles.push({x:v.x+(Math.random()-.5)*20,y:v.y+2,vx:(Math.random()-.5)*1.5,vy:-0.5-Math.random()*1,life:18,color:'rgba(200,190,170,0.3)',size:3+Math.random()*3});
-          }
-          // Landing screen shake
+          for(let i=0;i<6;i++){S.particles.push({x:v.x+(Math.random()-.5)*20,y:v.y+2,vx:(Math.random()-.5)*1.5,vy:-0.5-Math.random()*1,life:18,color:'rgba(200,190,170,0.3)',size:3+Math.random()*3})}
           S.screenShake=Math.max(S.screenShake||0,3);
-          // Landing sound: satisfying thud
+          if(S.audioCtx&&S.masterGain){try{const c=S.audioCtx,n=c.currentTime;const o4=c.createOscillator(),g4=c.createGain();o4.connect(g4);g4.connect(S.masterGain);o4.type='sine';o4.frequency.setValueAtTime(80,n);o4.frequency.exponentialRampToValueAtTime(25,n+0.12);g4.gain.setValueAtTime(S.volume*0.15,n);g4.gain.exponentialRampToValueAtTime(0.001,n+0.12);o4.start(n);o4.stop(n+0.12);const o5=c.createOscillator(),g5=c.createGain();o5.connect(g5);g5.connect(S.masterGain);o5.type='square';o5.frequency.setValueAtTime(2000,n);o5.frequency.exponentialRampToValueAtTime(200,n+0.03);g5.gain.setValueAtTime(S.volume*0.05,n);g5.gain.exponentialRampToValueAtTime(0.001,n+0.03);o5.start(n);o5.stop(n+0.03)}catch(e){}}
+          v._squashTimer=0.12;
+        }
+      } else if(v._dashChain===3){
+        // === TRIPLE DASH LANDED — THE BIG PAYOFF ===
+        v._dashChain=0;
+        v._dashChainWindow=0;
+        S._dashCooldown=DASH_TRIPLE_COOLDOWN;
+        
+        if(v._tripleLandingPending){
+          v._tripleLandingPending=false;
+          
+          // Slow-mo on LANDING (the cinematic moment)
+          if(typeof triggerSlowMo==='function')triggerSlowMo(0.15, 0.12);
+          
+          // MASSIVE impact rings (3 staggered)
+          if(typeof addImpactRing==='function'){
+            addImpactRing(v.x,v.y-5,'rgba(255,40,20,0.9)',120,6);
+            setTimeout(()=>{if(typeof addImpactRing==='function')addImpactRing(v.x,v.y-5,'rgba(255,100,40,0.7)',90,4)},20);
+            setTimeout(()=>{if(typeof addImpactRing==='function')addImpactRing(v.x,v.y-5,'rgba(255,180,60,0.5)',65,2.5)},45);
+          }
+          
+          // Radial EXPLOSION (24 particles)
+          for(let i=0;i<24;i++){
+            const ang=(Math.PI*2/24)*i;
+            const spd3=2.5+Math.random()*3;
+            S.particles.push({x:v.x,y:v.y,vx:Math.cos(ang)*spd3,vy:Math.sin(ang)*spd3*0.6-1,life:28+Math.random()*10,color:`rgba(255,${40+Math.random()*80|0},${Math.random()*30|0},0.7)`,size:3+Math.random()*3});
+          }
+          // Inner white-hot core burst
+          for(let i=0;i<8;i++){
+            const ang=Math.random()*Math.PI*2;
+            S.particles.push({x:v.x,y:v.y-5,vx:Math.cos(ang)*1.5,vy:Math.sin(ang)*1.5-0.5,life:12,color:'rgba(255,255,220,0.9)',size:4+Math.random()*3});
+          }
+          // Heavy dust cloud
+          for(let i=0;i<12;i++){
+            S.particles.push({x:v.x+(Math.random()-.5)*30,y:v.y+2,vx:(Math.random()-.5)*2.5,vy:-0.8-Math.random()*1.5,life:25,color:`rgba(${180+Math.random()*40|0},${160+Math.random()*40|0},${140+Math.random()*40|0},0.35)`,size:4+Math.random()*5});
+          }
+          // Embers rising from crater
+          for(let i=0;i<15;i++){
+            S.particles.push({x:v.x+(Math.random()-.5)*40,y:v.y,vx:(Math.random()-.5)*1,vy:-2-Math.random()*3,life:45+Math.random()*25,color:`rgba(255,${60+Math.random()*80|0},0,${0.3+Math.random()*0.3})`,size:1+Math.random()*1.5});
+          }
+          
+          // HEAVY screen shake
+          S.screenShake=Math.max(S.screenShake||0,10);
+          
+          // RED flash
+          S.screenFlash='rgba(255,30,10,0.25)';
+          
+          // Chromatic aberration spike
+          S.chromaticAberration=Math.max(S.chromaticAberration||0,6);
+          
+          // Camera zoom snap
+          S.cameraZoom=1.06;S._cameraZoomTimer=0.2;
+          
+          // Landing sound: BOOM
           if(S.audioCtx&&S.masterGain){try{
             const c=S.audioCtx,n=c.currentTime;
-            // Low thump
-            const o4=c.createOscillator(),g4=c.createGain();
-            o4.connect(g4);g4.connect(S.masterGain);
-            o4.type='sine';o4.frequency.setValueAtTime(80,n);
-            o4.frequency.exponentialRampToValueAtTime(25,n+0.12);
-            g4.gain.setValueAtTime(S.volume*0.15,n);
-            g4.gain.exponentialRampToValueAtTime(0.001,n+0.12);
-            o4.start(n);o4.stop(n+0.12);
-            // Crispy impact click
-            const o5=c.createOscillator(),g5=c.createGain();
-            o5.connect(g5);g5.connect(S.masterGain);
-            o5.type='square';o5.frequency.setValueAtTime(2000,n);
-            o5.frequency.exponentialRampToValueAtTime(200,n+0.03);
-            g5.gain.setValueAtTime(S.volume*0.05,n);
-            g5.gain.exponentialRampToValueAtTime(0.001,n+0.03);
-            o5.start(n);o5.stop(n+0.03);
+            // Deep boom
+            const o6=c.createOscillator(),g6=c.createGain();
+            o6.connect(g6);g6.connect(S.masterGain);
+            o6.type='sine';o6.frequency.setValueAtTime(60,n);
+            o6.frequency.exponentialRampToValueAtTime(15,n+0.2);
+            g6.gain.setValueAtTime(S.volume*0.22,n);
+            g6.gain.exponentialRampToValueAtTime(0.001,n+0.2);
+            o6.start(n);o6.stop(n+0.2);
+            // Crunch
+            const o7=c.createOscillator(),g7=c.createGain();
+            o7.connect(g7);g7.connect(S.masterGain);
+            o7.type='square';o7.frequency.setValueAtTime(3000,n);
+            o7.frequency.exponentialRampToValueAtTime(100,n+0.05);
+            g7.gain.setValueAtTime(S.volume*0.08,n);
+            g7.gain.exponentialRampToValueAtTime(0.001,n+0.05);
+            o7.start(n);o7.stop(n+0.05);
+            // Sub-bass rumble
+            const o8=c.createOscillator(),g8=c.createGain();
+            o8.connect(g8);g8.connect(S.masterGain);
+            o8.type='sine';o8.frequency.setValueAtTime(30,n+0.02);
+            o8.frequency.exponentialRampToValueAtTime(12,n+0.3);
+            g8.gain.setValueAtTime(S.volume*0.15,n+0.02);
+            g8.gain.exponentialRampToValueAtTime(0.001,n+0.3);
+            o8.start(n+0.02);o8.stop(n+0.3);
+            // White noise impact
+            try{
+              const buf=c.createBuffer(1,c.sampleRate*0.1|0,c.sampleRate);
+              const d=buf.getChannelData(0);
+              for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*0.2;
+              const nSrc=c.createBufferSource(),nGain=c.createGain();
+              nSrc.buffer=buf;nSrc.connect(nGain);nGain.connect(S.masterGain);
+              nGain.gain.setValueAtTime(S.volume*0.15,n);
+              nGain.gain.exponentialRampToValueAtTime(0.001,n+0.1);
+              nSrc.start(n);
+            }catch(e2){}
           }catch(e){}}
-          // Brief squash on landing
-          v._squashTimer=0.12;
+          
+          // Heavy squash on landing
+          v._squashTimer=0.18;
         }
       }
     }
@@ -14340,14 +14419,18 @@ function renderVisitor(ctx){
       if(!v.moving&&v._wasMoving){if(!v._squashTimer)v._squashTimer=0.15;v._wasMoving=false}
       if(v.moving)v._wasMoving=true;
       if(v._squashTimer>0){v._squashTimer-=0.016;squashX=1.15;squashY=0.85;if(v._squashTimer<=0){squashX=1;squashY=1}}
-      // Dash stretch — elongate in movement direction (chain dash = EXTREME stretch)
+      // Dash stretch — elongate in movement direction (escalating per tier)
       if(v._dashing){
-        const chn=v._dashIsChain;
+        const tier=v._dashTier||1;
         const prog=v._dashTimer/(v._dashDuration||0.18); // 1→0 during dash
-        // Dynamic stretch: peaks mid-dash, slightly lessens at end
-        const stretchMul=chn?(0.8+Math.sin((1-prog)*Math.PI)*0.8):(0.8+Math.sin((1-prog)*Math.PI)*0.5);
-        if(v._dashDir==='left'||v._dashDir==='right'){squashX=1+stretchMul*(chn?0.7:0.4);squashY=1-stretchMul*(chn?0.45:0.3);}
-        else{squashX=1-stretchMul*(chn?0.45:0.3);squashY=1+stretchMul*(chn?0.7:0.4);}
+        // Dynamic stretch: peaks mid-dash — triple is INSANE
+        const baseStr=tier===3?1.0:tier===2?0.8:0.5;
+        const peakStr=tier===3?1.2:tier===2?0.8:0.5;
+        const stretchMul=baseStr+Math.sin((1-prog)*Math.PI)*peakStr;
+        const stretchAmt=tier===3?0.9:tier===2?0.7:0.4;
+        const squishAmt=tier===3?0.55:tier===2?0.45:0.3;
+        if(v._dashDir==='left'||v._dashDir==='right'){squashX=1+stretchMul*stretchAmt;squashY=1-stretchMul*squishAmt;}
+        else{squashX=1-stretchMul*squishAmt;squashY=1+stretchMul*stretchAmt;}
       }
       // Dance animation transforms
       let danceOffY=0, danceSwayX=0, danceRot=0;
@@ -16508,7 +16591,7 @@ function showWelcomeBoard(){
   const drinks=LS.get('drinksServed',0);
   const hr=new Date().getHours();
   const timeGreeting=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
-  const dailyTip=['Tip: Double-tap to dash, tap again mid-dash for a CHAIN DASH! ⚡⚡','Tip: Try typing "explosion" 💥','Tip: Pet Chomusuke 5 times for a surprise 🐱','Tip: Check the Crystal Ball for your fortune 🔮','Tip: The bar has 6 drinks, each with effects 🍹','Tip: Press B to open the shop anywhere 🛒','Tip: Floor 10 has 8 music clubs 🎵'][new Date().getDay()];
+  const dailyTip=['Tip: Double-tap → CHAIN → TRIPLE dash! Cyan ⚡ Gold 🌟 RED 🔥','Tip: Try typing "explosion" 💥','Tip: Pet Chomusuke 5 times for a surprise 🐱','Tip: Check the Crystal Ball for your fortune 🔮','Tip: The bar has 6 drinks, each with effects 🍹','Tip: Press B to open the shop anywhere 🛒','Tip: Floor 10 has 8 music clubs 🎵'][new Date().getDay()];
   let html=`<h3 style="margin:0 0 6px">📋 Welcome to Echo Station</h3>`;
   html+=`<div style="font-size:11px;color:#ffd080;margin-bottom:8px">${timeGreeting}, traveler!</div>`;
   html+=`<div style="font-size:10px;line-height:1.6;color:#ccc">`;
@@ -21875,18 +21958,21 @@ function initInput(){
   S._dashCooldown=0;
   const DASH_DISTANCE=150; // base dash distance (was 100)
   const DASH_CHAIN_DISTANCE=180; // second dash goes further
+  const DASH_TRIPLE_DISTANCE=220; // third dash — the big one
   const DASH_COOLDOWN=0.3; // cooldown after single dash
   const DASH_CHAIN_COOLDOWN=0.5; // cooldown after chain dash
+  const DASH_TRIPLE_COOLDOWN=0.8; // cooldown after triple dash (earned it)
   const DASH_DOUBLE_TAP_MS=350; // window for initial double-tap trigger
   const DASH_CHAIN_WINDOW=0.28; // seconds after dash ends to chain a second
+  const DASH_TRIPLE_WINDOW=0.25; // seconds after chain ends to triple
   
   // Dash state for smooth animation
   S.visitor._dashing=false;
   S.visitor._dashTimer=0;
   S.visitor._dashDir=null;
   S.visitor._dashTrail=[];
-  S.visitor._dashChain=0; // 0=none, 1=first dash, 2=chain dash
-  S.visitor._dashChainWindow=0; // time left to trigger chain
+  S.visitor._dashChain=0; // 0=none, 1=first dash, 2=chain dash, 3=TRIPLE
+  S.visitor._dashChainWindow=0; // time left to trigger chain/triple
   S.visitor._dashChainDir=null; // direction of last dash (for chain input)
   
   // Map any key to a direction
@@ -21920,10 +22006,16 @@ function initInput(){
     const now=Date.now();
     const timeSinceRelease=now-(_dashDirTimes[dir]||0);
     
+    // Triple dash: during chain dash or within triple window after, tap any direction
+    if(v._dashChain===2 && (v._dashing || v._dashChainWindow>0) && !DuelSystem.active){
+      _dashDirTaps[dir]=0;
+      performDash(dir, 'triple');
+      return;
+    }
     // Chain dash: during first dash or within chain window after, tap any direction
     if(v._dashChain===1 && (v._dashing || v._dashChainWindow>0) && !DuelSystem.active){
       _dashDirTaps[dir]=0;
-      performDash(dir, true); // chain=true
+      performDash(dir, 'chain');
       return;
     }
     
@@ -21940,43 +22032,53 @@ function initInput(){
     }
   });
   
-  function performDash(dir, isChain){
+  function performDash(dir, tier){
+    // tier: false=single, 'chain'=2nd, 'triple'=3rd
     if(S.spacewalk.active)return;
     const v=S.visitor;
-    const chain = isChain && v._dashChain===1;
+    const isChain = tier==='chain';
+    const isTriple = tier==='triple';
     
     // Set chain state
-    if(chain){
-      v._dashChain=2; // consumed chain
+    if(isTriple){
+      v._dashChain=3;
       v._dashChainWindow=0;
-      S._dashCooldown=DASH_CHAIN_COOLDOWN; // longer cooldown after chain
+      S._dashCooldown=0; // applied when triple ends
+    } else if(isChain){
+      v._dashChain=2;
+      v._dashChainWindow=0;
+      S._dashCooldown=0; // allow triple input
     } else {
       v._dashChain=1; // first dash — chain available
-      v._dashChainWindow=0; // will be set when dash ends
-      S._dashCooldown=0; // no cooldown yet — allow chain input
+      v._dashChainWindow=0;
+      S._dashCooldown=0;
     }
     
     // Snap to current position if interrupting a dash mid-flight
     if(v._dashing){
-      v.x=v._dashStartX+(v._dashTargetX-v._dashStartX)*Math.min(1,(1-v._dashTimer/(v._dashDuration||0.18)));
-      v.y=v._dashStartY+(v._dashTargetY-v._dashStartY)*Math.min(1,(1-v._dashTimer/(v._dashDuration||0.18)));
+      const p=1-(v._dashTimer/(v._dashDuration||0.18));
+      v.x=v._dashStartX+(v._dashTargetX-v._dashStartX)*Math.min(1,p);
+      v.y=v._dashStartY+(v._dashTargetY-v._dashStartY)*Math.min(1,p);
     }
     
-    const dur = chain ? 0.15 : 0.18; // chain dash is snappier
+    // Duration: each tier gets snappier
+    const dur = isTriple ? 0.12 : isChain ? 0.15 : 0.18;
     v._dashing=true;
     v._dashTimer=dur;
     v._dashDuration=dur;
     v._dashDir=dir;
-    v._dashIsChain=chain;
+    v._dashIsChain=isChain;
+    v._dashIsTriple=isTriple;
+    v._dashTier=isTriple?3:isChain?2:1; // for rendering
     
     const startX=v.x, startY=v.y;
     
-    // Calculate target (respect floor dimensions, not just viewport)
+    // Calculate target
     const _fs=window.FLOOR_SIZES;
     const _fw=(_fs&&_fs[S.floor])?_fs[S.floor].w:W;
     const _fh=(_fs&&_fs[S.floor])?_fs[S.floor].h:H;
     let tx=v.x, ty=v.y;
-    const dist = chain ? DASH_CHAIN_DISTANCE : DASH_DISTANCE;
+    const dist = isTriple ? DASH_TRIPLE_DISTANCE : isChain ? DASH_CHAIN_DISTANCE : DASH_DISTANCE;
     if(dir==='up')ty=Math.max(60,v.y-dist);
     if(dir==='down')ty=Math.min(_fh-20,v.y+dist);
     if(dir==='left')tx=Math.max(20,v.x-dist);
@@ -21993,122 +22095,190 @@ function initInput(){
     v._dashStartX=startX;
     v._dashStartY=startY;
     
-    // --- Visual effects (chain gets more juice) ---
-    const ghostCount = chain ? 5 : 3;
-    const ghostColor = chain ? '255,220,100' : '0,255,247'; // gold vs cyan
-    const ghostAlpha = chain ? 0.5 : 0.35;
+    // === TIER-SCALED VISUAL EFFECTS ===
+    // Color scheme: cyan → gold → RED
+    const tierColor = isTriple ? '255,60,60' : isChain ? '255,220,100' : '0,255,247';
+    const tierColorBright = isTriple ? '255,100,80' : isChain ? '255,240,150' : '100,255,250';
+    const ghostCount = isTriple ? 7 : isChain ? 5 : 3;
+    const ghostAlpha = isTriple ? 0.7 : isChain ? 0.5 : 0.35;
     
-    // Afterimage ghosts
+    // Afterimage ghosts along path
     for(let i=0;i<ghostCount;i++){
       const t=(i+1)/(ghostCount+1);
       const px=startX+(tx-startX)*t;
       const py=startY+(ty-startY)*t;
-      S.particles.push({x:px,y:py-15,vx:0,vy:0,life:20-i*3,color:`rgba(${ghostColor},${ghostAlpha-i*0.08})`,size:chain?14-i*1.5:12-i*2});
-      S.particles.push({x:px+(Math.random()-.5)*14,y:py-15+(Math.random()-.5)*14,vx:(Math.random()-.5)*2.5,vy:(Math.random()-.5)*2.5,life:16,color:`rgba(255,255,255,${chain?0.8:0.6})`,size:chain?2.5:1.5});
+      const sz=isTriple?16-i*1.2:isChain?14-i*1.5:12-i*2;
+      S.particles.push({x:px,y:py-15,vx:0,vy:0,life:22-i*2,color:`rgba(${tierColor},${ghostAlpha-i*0.06})`,size:sz});
+      // Sparkle per ghost
+      S.particles.push({x:px+(Math.random()-.5)*14,y:py-15+(Math.random()-.5)*14,vx:(Math.random()-.5)*2.5,vy:(Math.random()-.5)*2.5,life:16,color:`rgba(255,255,255,${isTriple?0.9:isChain?0.8:0.6})`,size:isTriple?3:isChain?2.5:1.5});
     }
     
-    // Burst particles at start (chain = bigger burst)
-    const burstCount = chain ? 10 : 6;
+    // Burst particles at start
+    const burstCount = isTriple ? 18 : isChain ? 10 : 6;
     for(let i=0;i<burstCount;i++){
       const angle=Math.random()*Math.PI*2;
-      const spd=1+Math.random()*(chain?3.5:2);
-      S.particles.push({x:startX,y:startY,vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd-0.5,life:chain?20:15,color:chain?'rgba(255,200,60,0.5)':'rgba(200,200,220,0.4)',size:2+Math.random()*(chain?3:2)});
+      const spd=1+Math.random()*(isTriple?5:isChain?3.5:2);
+      const col=isTriple?`rgba(255,${60+Math.random()*80|0},${30+Math.random()*40|0},0.7)`:isChain?'rgba(255,200,60,0.5)':'rgba(200,200,220,0.4)';
+      S.particles.push({x:startX,y:startY,vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd-0.5,life:isTriple?25:isChain?20:15,color:col,size:2+Math.random()*(isTriple?4:isChain?3:2)});
     }
     
-    // Speed lines (chain = more + longer)
-    const lineCount = chain ? 16 : 10;
+    // Speed lines
+    const lineCount = isTriple ? 24 : isChain ? 16 : 10;
     for(let i=0;i<lineCount;i++){
-      const spread=(Math.random()-.5)*(chain?60:40);
+      const spread=(Math.random()-.5)*(isTriple?80:isChain?60:40);
       let lx=v.x, ly=v.y-15;
       let lvx=0,lvy=0;
-      const lineSpd = chain ? 3+Math.random()*4 : 2+Math.random()*3;
+      const lineSpd = isTriple ? 4+Math.random()*5 : isChain ? 3+Math.random()*4 : 2+Math.random()*3;
       if(dir==='left'||dir==='right'){ly+=spread;lvx=dir==='left'?lineSpd:-lineSpd;}
       else{lx+=spread;lvy=dir==='up'?lineSpd:-lineSpd;}
-      const lc = chain ? `rgba(255,220,100,${0.3+Math.random()*0.15})` : 'rgba(0,255,247,0.25)';
-      S.particles.push({x:lx,y:ly,vx:lvx,vy:lvy,life:chain?12+Math.random()*5:8+Math.random()*4,color:lc,size:chain?1.5:1});
+      const lc = isTriple ? `rgba(255,${60+Math.random()*60|0},${30+Math.random()*30|0},${0.4+Math.random()*0.2})` : isChain ? `rgba(255,220,100,${0.3+Math.random()*0.15})` : 'rgba(0,255,247,0.25)';
+      S.particles.push({x:lx,y:ly,vx:lvx,vy:lvy,life:isTriple?15+Math.random()*6:isChain?12+Math.random()*5:8+Math.random()*4,color:lc,size:isTriple?2:isChain?1.5:1});
     }
     
-    // Chain dash: impact ring at start position
-    if(chain){
-      for(let i=0;i<12;i++){
-        const angle=(Math.PI*2/12)*i;
-        S.particles.push({x:startX+Math.cos(angle)*8,y:startY-10+Math.sin(angle)*8,vx:Math.cos(angle)*3,vy:Math.sin(angle)*3,life:12,color:'rgba(255,255,255,0.6)',size:2});
+    // Impact ring at start (chain + triple)
+    if(isChain||isTriple){
+      const ringCount=isTriple?16:12;
+      for(let i=0;i<ringCount;i++){
+        const angle=(Math.PI*2/ringCount)*i;
+        const rSpd=isTriple?5:3;
+        S.particles.push({x:startX+Math.cos(angle)*8,y:startY-10+Math.sin(angle)*8,vx:Math.cos(angle)*rSpd,vy:Math.sin(angle)*rSpd,life:isTriple?16:12,color:isTriple?'rgba(255,80,60,0.8)':'rgba(255,255,255,0.6)',size:isTriple?3:2});
       }
     }
     
-    // Sound — chain gets deeper whoosh + impact hit
+    // === SOUND — escalating intensity ===
     if(S.audioCtx&&S.masterGain){try{
       const c=S.audioCtx,n=c.currentTime;
-      // Low whoosh (chain = deeper + louder)
+      // Base whoosh (deeper each tier)
       const o1=c.createOscillator(),g1=c.createGain();
       o1.connect(g1);g1.connect(S.masterGain);
       o1.type='sine';
-      o1.frequency.setValueAtTime(chain?400:300,n);
-      o1.frequency.exponentialRampToValueAtTime(chain?50:80,n+(chain?0.2:0.15));
-      g1.gain.setValueAtTime(S.volume*(chain?0.15:0.1),n);
-      g1.gain.exponentialRampToValueAtTime(0.001,n+(chain?0.2:0.15));
-      o1.start(n);o1.stop(n+(chain?0.2:0.15));
+      const whooshStart=isTriple?500:isChain?400:300;
+      const whooshEnd=isTriple?30:isChain?50:80;
+      const whooshDur=isTriple?0.25:isChain?0.2:0.15;
+      const whooshVol=isTriple?0.2:isChain?0.15:0.1;
+      o1.frequency.setValueAtTime(whooshStart,n);
+      o1.frequency.exponentialRampToValueAtTime(whooshEnd,n+whooshDur);
+      g1.gain.setValueAtTime(S.volume*whooshVol,n);
+      g1.gain.exponentialRampToValueAtTime(0.001,n+whooshDur);
+      o1.start(n);o1.stop(n+whooshDur);
       // High shimmer
       const o2=c.createOscillator(),g2=c.createGain();
       o2.connect(g2);g2.connect(S.masterGain);
       o2.type='triangle';
-      o2.frequency.setValueAtTime(chain?1200:800,n);
-      o2.frequency.exponentialRampToValueAtTime(chain?500:400,n+0.1);
-      g2.gain.setValueAtTime(S.volume*(chain?0.06:0.04),n);
-      g2.gain.exponentialRampToValueAtTime(0.001,n+0.1);
-      o2.start(n);o2.stop(n+0.1);
-      // Chain: extra impact thud
-      if(chain){
+      o2.frequency.setValueAtTime(isTriple?1600:isChain?1200:800,n);
+      o2.frequency.exponentialRampToValueAtTime(isTriple?300:isChain?500:400,n+0.1);
+      g2.gain.setValueAtTime(S.volume*(isTriple?0.08:isChain?0.06:0.04),n);
+      g2.gain.exponentialRampToValueAtTime(0.001,n+0.12);
+      o2.start(n);o2.stop(n+0.12);
+      // Chain/Triple: impact thud
+      if(isChain||isTriple){
         const o3=c.createOscillator(),g3=c.createGain();
         o3.connect(g3);g3.connect(S.masterGain);
         o3.type='sine';
-        o3.frequency.setValueAtTime(60,n);
-        o3.frequency.exponentialRampToValueAtTime(30,n+0.08);
-        g3.gain.setValueAtTime(S.volume*0.12,n);
-        g3.gain.exponentialRampToValueAtTime(0.001,n+0.08);
-        o3.start(n);o3.stop(n+0.08);
+        o3.frequency.setValueAtTime(isTriple?45:60,n);
+        o3.frequency.exponentialRampToValueAtTime(isTriple?18:30,n+(isTriple?0.12:0.08));
+        g3.gain.setValueAtTime(S.volume*(isTriple?0.18:0.12),n);
+        g3.gain.exponentialRampToValueAtTime(0.001,n+(isTriple?0.12:0.08));
+        o3.start(n);o3.stop(n+(isTriple?0.12:0.08));
+      }
+      // TRIPLE ONLY: sonic boom — distorted sawtooth burst
+      if(isTriple){
+        const o4=c.createOscillator(),g4=c.createGain();
+        const dist=c.createWaveShaper&&c.createWaveShaper();
+        if(dist){
+          // Create distortion curve
+          const curve=new Float32Array(256);
+          for(let i=0;i<256;i++){const x=i*2/256-1;curve[i]=Math.tanh(x*3);}
+          dist.curve=curve;dist.oversample='2x';
+          o4.connect(dist);dist.connect(g4);
+        } else {o4.connect(g4);}
+        g4.connect(S.masterGain);
+        o4.type='sawtooth';
+        o4.frequency.setValueAtTime(120,n);
+        o4.frequency.exponentialRampToValueAtTime(20,n+0.15);
+        g4.gain.setValueAtTime(S.volume*0.1,n);
+        g4.gain.exponentialRampToValueAtTime(0.001,n+0.15);
+        o4.start(n);o4.stop(n+0.15);
+        // White noise burst (via buffer)
+        try{
+          const buf=c.createBuffer(1,c.sampleRate*0.08|0,c.sampleRate);
+          const d=buf.getChannelData(0);
+          for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*0.3;
+          const nSrc=c.createBufferSource(),nGain=c.createGain();
+          nSrc.buffer=buf;nSrc.connect(nGain);nGain.connect(S.masterGain);
+          nGain.gain.setValueAtTime(S.volume*0.12,n);
+          nGain.gain.exponentialRampToValueAtTime(0.001,n+0.08);
+          nSrc.start(n);
+        }catch(e2){}
       }
     }catch(e){}}
     
-    // Screen shake (chain = punchier)
-    S.screenShake=Math.max(S.screenShake||0,chain?7:2.5);
+    // === SCREEN EFFECTS — escalating ===
+    // Screen shake
+    S.screenShake=Math.max(S.screenShake||0,isTriple?12:isChain?7:2.5);
     
-    // === CHAIN DASH EXTRA JUICE ===
-    if(chain){
-      // Hitstop: brief time freeze (60ms) for impact weight — the Celeste feel
-      if(typeof triggerSlowMo==='function')triggerSlowMo(0.05, 0.06);
+    if(isTriple){
+      // === TRIPLE DASH — MAXIMUM OVERDRIVE ===
+      // Hard hitstop (100ms near-freeze)
+      if(typeof triggerSlowMo==='function')triggerSlowMo(0.02, 0.1);
       
-      // Screen flash (gold for chain)
-      S.screenFlash='rgba(255,220,100,0.2)';
+      // RED screen flash
+      S.screenFlash='rgba(255,40,20,0.3)';
       
-      // Impact ring at launch point (uses existing system)
+      // Triple impact rings (3 concentric, staggered)
       if(typeof addImpactRing==='function'){
-        addImpactRing(startX,startY-10,'rgba(255,220,100,0.8)',70,4);
-        // Second ring slightly delayed via particle trick
-        setTimeout(()=>{if(typeof addImpactRing==='function')addImpactRing(startX,startY-10,'rgba(255,180,60,0.5)',50,2.5)},30);
+        addImpactRing(startX,startY-10,'rgba(255,60,40,0.9)',100,5);
+        setTimeout(()=>{if(typeof addImpactRing==='function')addImpactRing(startX,startY-10,'rgba(255,100,60,0.7)',80,3.5)},25);
+        setTimeout(()=>{if(typeof addImpactRing==='function')addImpactRing(startX,startY-10,'rgba(255,160,80,0.5)',60,2)},50);
       }
       
-      // Ground crack particles at launch point
+      // Ground CRACK particles (more + bigger)
+      for(let i=0;i<20;i++){
+        const ang=Math.random()*Math.PI*2;
+        const spd2=1+Math.random()*3;
+        S.particles.push({x:startX+Math.cos(ang)*6,y:startY+Math.sin(ang)*3,vx:Math.cos(ang)*spd2,vy:Math.sin(ang)*spd2*.5,life:35,color:`rgba(255,${40+Math.random()*60|0},${20+Math.random()*30|0},0.6)`,size:1.5+Math.random()*2});
+      }
+      // Ember particles rising from launch
+      for(let i=0;i<10;i++){
+        S.particles.push({x:startX+(Math.random()-.5)*30,y:startY,vx:(Math.random()-.5)*1,vy:-1.5-Math.random()*2,life:40+Math.random()*20,color:`rgba(255,${100+Math.random()*80|0},0,${0.4+Math.random()*0.3})`,size:1+Math.random()*2});
+      }
+      
+      // HEAVY chromatic aberration
+      S.chromaticAberration=Math.max(S.chromaticAberration||0,8);
+      
+      // Strong vignette (red-tinted via screenFlash combo)
+      S.vignetteIntensity=Math.max(S.vignetteIntensity||0,0.5);
+      
+      // Camera zoom OUT then snap back (dramatic)
+      S.cameraZoom=0.96;S._cameraZoomTimer=0.2;
+      
+      // Mark for landing burst
+      v._tripleLandingPending=true;
+      v._chainLandingPending=false;
+      
+    } else if(isChain){
+      // === CHAIN DASH — gold juice ===
+      if(typeof triggerSlowMo==='function')triggerSlowMo(0.05, 0.06);
+      S.screenFlash='rgba(255,220,100,0.2)';
+      if(typeof addImpactRing==='function'){
+        addImpactRing(startX,startY-10,'rgba(255,220,100,0.8)',70,4);
+        setTimeout(()=>{if(typeof addImpactRing==='function')addImpactRing(startX,startY-10,'rgba(255,180,60,0.5)',50,2.5)},30);
+      }
       for(let i=0;i<12;i++){
         const ang=Math.random()*Math.PI*2;
         const spd2=0.5+Math.random()*2;
         S.particles.push({x:startX+Math.cos(ang)*4,y:startY+Math.sin(ang)*2,vx:Math.cos(ang)*spd2,vy:Math.sin(ang)*spd2*.5,life:28,color:`rgba(${180+Math.random()*60|0},${140+Math.random()*60|0},${60+Math.random()*40|0},0.5)`,size:1+Math.random()*1.5});
       }
-      
-      // Chromatic aberration (uses existing system)
       S.chromaticAberration=Math.max(S.chromaticAberration||0,4);
-      
-      // Brief vignette pulse
       S.vignetteIntensity=Math.max(S.vignetteIntensity||0,0.3);
-      
-      // Camera zoom punch (slight zoom in then back)
       S.cameraZoom=1.03;S._cameraZoomTimer=0.15;
-      
-      // Landing burst scheduled when chain dash ends
       v._chainLandingPending=true;
+      v._tripleLandingPending=false;
     } else {
-      // Single dash: subtle screen flash (cyan)
+      // Single dash: subtle
       S.screenFlash='rgba(0,255,247,0.08)';
+      v._chainLandingPending=false;
+      v._tripleLandingPending=false;
     }
     
     // Brief iFrames during dash
