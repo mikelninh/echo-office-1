@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synapse Spotter — Echo Worlds Research Lab</title>
+<style>
+  /* ═══ RESET & BASE ═══ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  @font-face {
+    font-family: 'PixelFont';
+    src: local('Courier New'), local('monospace');
+  }
+
+  :root {
+    --bg: #0a1414;
+    --bg-panel: #0d1e1e;
+    --bg-card: #112222;
+    --border: #1a3a3a;
+    --border-glow: #00ff88;
+    --text: #c8e6e6;
+    --text-dim: #6a9999;
+    --text-bright: #e0ffff;
+    --accent: #00ff88;
+    --accent-dim: #00aa5a;
+    --accent-glow: rgba(0, 255, 136, 0.15);
+    --healthy: #00ff88;
+    --damaged: #ff4466;
+    --uncertain: #ffaa00;
+    --rp-gold: #ffd700;
+    --streak: #ff6600;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', 'Lucida Console', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ═══ LAYOUT ═══ */
+  .app {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 1px;
+  }
+
+  /* ═══ HEADER ═══ */
+  .header {
+    grid-column: 1 / -1;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-title h1 {
+    font-size: 18px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px var(--accent-glow);
+  }
+  .header-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E") center/contain no-repeat;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
+  .header-rp {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--rp-gold);
+  }
+  .header-rp .rp-value { font-weight: bold; font-size: 18px; }
+
+  /* ═══ MAIN GAME AREA ═══ */
+  .main {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  /* Scan viewer */
+  .scan-container {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    aspect-ratio: 4/3;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.05), inset 0 0 60px rgba(0, 0, 0, 0.5);
+  }
+  .scan-container canvas {
+    width: 100%;
+    height: 100%;
+    image-rendering: auto;
+  }
+  .scan-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    border: 1px solid rgba(0, 255, 136, 0.1);
+    border-radius: 8px;
+  }
+  .scan-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: scanline 3s linear infinite;
+    opacity: 0.4;
+  }
+  @keyframes scanline {
+    0% { top: 0; }
+    100% { top: 100%; }
+  }
+  .scan-label {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    font-size: 11px;
+    color: var(--accent);
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .scan-difficulty {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+  .diff-easy { color: var(--healthy); border-color: var(--healthy); }
+  .diff-medium { color: var(--uncertain); border-color: var(--uncertain); }
+  .diff-hard { color: var(--damaged); border-color: var(--damaged); }
+  .scan-id {
+    position: absolute;
+    bottom: 8px;
+    left: 12px;
+    font-size: 10px;
+    color: var(--text-dim);
+    opacity: 0.5;
+  }
+  .timer-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    transition: width 0.1s linear;
+    opacity: 0.8;
+  }
+
+  /* Classification buttons */
+  .classify-buttons {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    max-width: 560px;
+  }
+  .classify-btn {
+    flex: 1;
+    padding: 14px 8px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .classify-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  .classify-btn:active { transform: translateY(0); }
+  .classify-btn.btn-healthy { border-color: var(--healthy); color: var(--healthy); }
+  .classify-btn.btn-healthy:hover { background: rgba(0, 255, 136, 0.1); box-shadow: 0 0 20px rgba(0, 255, 136, 0.2); }
+  .classify-btn.btn-damaged { border-color: var(--damaged); color: var(--damaged); }
+  .classify-btn.btn-damaged:hover { background: rgba(255, 68, 102, 0.1); box-shadow: 0 0 20px rgba(255, 68, 102, 0.2); }
+  .classify-btn.btn-uncertain { border-color: var(--uncertain); color: var(--uncertain); }
+  .classify-btn.btn-uncertain:hover { background: rgba(255, 170, 0, 0.1); box-shadow: 0 0 20px rgba(255, 170, 0, 0.2); }
+  .classify-btn .hotkey {
+    display: block;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    letter-spacing: 0;
+    font-weight: normal;
+  }
+  .classify-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  /* Feedback toast */
+  .feedback {
+    width: 100%;
+    max-width: 560px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    opacity: 0;
+  }
+  .feedback.show { opacity: 1; }
+  .feedback.correct { background: rgba(0, 255, 136, 0.1); border: 1px solid var(--healthy); color: var(--healthy); }
+  .feedback.wrong { background: rgba(255, 68, 102, 0.1); border: 1px solid var(--damaged); color: var(--damaged); }
+  .feedback.pending { background: rgba(255, 170, 0, 0.08); border: 1px solid var(--uncertain); color: var(--uncertain); }
+  .feedback .rp-earned { color: var(--rp-gold); }
+
+  /* ═══ SIDEBAR ═══ */
+  .sidebar {
+    background: var(--bg-panel);
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .stat-card h3 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 13px;
+  }
+  .stat-row .label { color: var(--text-dim); }
+  .stat-row .value { color: var(--text-bright); font-weight: bold; }
+  .stat-row .value.rp { color: var(--rp-gold); }
+  .stat-row .value.streak { color: var(--streak); }
+  .stat-row .value.accuracy { color: var(--accent); }
+
+  /* Streak indicator */
+  .streak-bar {
+    display: flex;
+    gap: 3px;
+    margin-top: 6px;
+  }
+  .streak-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.3s;
+  }
+  .streak-dot.active {
+    background: var(--streak);
+    box-shadow: 0 0 8px rgba(255, 102, 0, 0.5);
+  }
+  .streak-dot.fire {
+    background: #ff3300;
+    box-shadow: 0 0 12px rgba(255, 51, 0, 0.7);
+    animation: pulse 0.5s ease-in-out infinite alternate;
+  }
+  @keyframes pulse { to { transform: scale(1.3); } }
+
+  /* Progress indicator */
+  .progress-container {
+    margin-top: 4px;
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+  .progress-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    text-align: right;
+  }
+
+  /* Science info */
+  .science-info {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .science-info h3 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .science-info p {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+  .science-info a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 11px;
+  }
+
+  /* ═══ TUTORIAL MODAL ═══ */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal {
+    background: var(--bg-panel);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    max-width: 640px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 32px;
+    box-shadow: 0 0 60px rgba(0, 255, 136, 0.1);
+    transform: scale(0.9);
+    transition: transform 0.3s;
+  }
+  .modal-overlay.active .modal { transform: scale(1); }
+  .modal h2 {
+    font-size: 22px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+    text-align: center;
+    text-shadow: 0 0 20px var(--accent-glow);
+  }
+  .modal .step {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .modal .step h3 {
+    font-size: 14px;
+    color: var(--text-bright);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .modal .step h3 .num {
+    background: var(--accent);
+    color: var(--bg);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .modal .step p {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 6px;
+  }
+  .modal .step p strong { color: var(--text-bright); }
+  .modal .step p em { color: var(--accent); font-style: normal; }
+  .modal .important {
+    background: rgba(255, 68, 102, 0.08);
+    border: 1px solid rgba(255, 68, 102, 0.3);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 20px 0;
+  }
+  .modal .important p {
+    font-size: 13px;
+    color: var(--damaged);
+    line-height: 1.6;
+  }
+  .modal .important p strong { color: #ff6688; }
+  .modal-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    background: rgba(0, 255, 136, 0.08);
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    transition: all 0.2s;
+    margin-top: 20px;
+  }
+  .modal-btn:hover {
+    background: rgba(0, 255, 136, 0.2);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+    transform: translateY(-1px);
+  }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (max-width: 768px) {
+    .app {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr auto;
+    }
+    .sidebar {
+      border-left: none;
+      border-top: 1px solid var(--border);
+      flex-direction: row;
+      flex-wrap: wrap;
+      padding: 12px;
+    }
+    .stat-card { flex: 1; min-width: 140px; }
+    .science-info { flex: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ TUTORIAL MODAL ═══ -->
+<div class="modal-overlay" id="tutorial">
+  <div class="modal">
+    <h2>⟁ Synapse Spotter</h2>
+    
+    <div class="step">
+      <h3><span class="num">1</span> The Mission</h3>
+      <p>
+        You're about to help real neuroscience research. <strong>Multiple System Atrophy (MSA)</strong> 
+        is a rare, devastating neurodegenerative disease affecting roughly 5 in 100,000 people. 
+        It progressively damages the brain's ability to control movement, blood pressure, and 
+        other automatic functions.
+      </p>
+      <p>
+        MSA is caused by the abnormal accumulation of a protein called <em>alpha-synuclein (α-syn)</em> 
+        inside brain cells called oligodendrocytes. When this protein misfolds, it forms toxic clumps 
+        known as <strong>glial cytoplasmic inclusions (GCIs)</strong> that damage and kill neurons.
+      </p>
+    </div>
+
+    <div class="step">
+      <h3><span class="num">2</span> What You'll See</h3>
+      <p>
+        Each scan shows a stylized representation of neural tissue. You'll look for patterns that 
+        distinguish <strong>healthy</strong> from <strong>damaged</strong> brain regions:
+      </p>
+      <p>
+        <strong style="color: var(--healthy);">Healthy tissue:</strong> Organized, symmetrical neural 
+        pathways with even distribution of activity. Dense, connected networks. Uniform signal brightness.
+      </p>
+      <p>
+        <strong style="color: var(--damaged);">Damaged tissue:</strong> Broken, asymmetric pathways. 
+        Irregular bright clumps (protein aggregates). Sparse connections. Dark voids where neurons 
+        have died. Visible inclusion bodies.
+      </p>
+      <p>
+        <strong style="color: var(--uncertain);">Uncertain:</strong> Use this when the scan is ambiguous. 
+        Honest uncertainty is valuable — it helps identify borderline cases that need expert review.
+      </p>
+    </div>
+
+    <div class="step">
+      <h3><span class="num">3</span> How Scoring Works</h3>
+      <p>
+        Your answer is compared against other researchers' classifications. When <strong>3+ people 
+        agree</strong>, a consensus forms and the task is resolved.
+      </p>
+      <p>
+        You earn <em>Research Points (RP)</em> — the most prestigious currency in Echo Worlds. 
+        RP cannot be bought, only earned through contributions. Bonuses for:
+      </p>
+      <p>
+        • <strong>Accuracy:</strong> Matching the consensus = full RP<br>
+        • <strong>Streaks:</strong> Consecutive correct answers multiply your RP (up to 3×)<br>
+        • <strong>Speed:</strong> Quick, confident answers earn a 25% bonus<br>
+        • <strong>Difficulty:</strong> Harder scans are worth more (1-3 RP base)
+      </p>
+    </div>
+
+    <div class="step">
+      <h3><span class="num">4</span> Controls</h3>
+      <p>
+        Click the classification buttons below each scan, or use keyboard shortcuts:<br>
+        <strong>[1]</strong> = Healthy &nbsp; <strong>[2]</strong> = Damaged &nbsp; <strong>[3]</strong> = Uncertain
+      </p>
+    </div>
+
+    <div class="important">
+      <p>
+        <strong>Why this matters:</strong> There is currently no cure for MSA. Early diagnosis 
+        is critical but difficult — symptoms overlap with Parkinson's disease and other conditions. 
+        By classifying neural patterns, you're helping train algorithms that could one day detect 
+        MSA earlier, when intervention might still help. Every single classification matters.
+      </p>
+    </div>
+
+    <button class="modal-btn" id="startBtn">Begin Research ▸</button>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div class="app">
+  <div class="header">
+    <div class="header-title">
+      <div class="header-icon"></div>
+      <h1>Synapse Spotter</h1>
+    </div>
+    <div class="header-rp">
+      <span>RP</span>
+      <span class="rp-value" id="totalRP">0</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Scan viewer -->
+    <div class="scan-container">
+      <canvas id="scanCanvas" width="560" height="420"></canvas>
+      <div class="scan-overlay"></div>
+      <div class="scan-label" id="scanLabel">Neural Scan #001</div>
+      <div class="scan-difficulty diff-easy" id="scanDifficulty">Easy</div>
+      <div class="scan-id" id="scanId">TASK-...</div>
+      <div class="timer-bar" id="timerBar" style="width: 100%"></div>
+    </div>
+
+    <!-- Classification buttons -->
+    <div class="classify-buttons">
+      <button class="classify-btn btn-healthy" id="btnHealthy" disabled>
+        ● Healthy
+        <span class="hotkey">[1]</span>
+      </button>
+      <button class="classify-btn btn-damaged" id="btnDamaged" disabled>
+        ▲ Damaged
+        <span class="hotkey">[2]</span>
+      </button>
+      <button class="classify-btn btn-uncertain" id="btnUncertain" disabled>
+        ? Uncertain
+        <span class="hotkey">[3]</span>
+      </button>
+    </div>
+
+    <!-- Feedback -->
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="sidebar">
+    <div class="stat-card">
+      <h3>Your Stats</h3>
+      <div class="stat-row"><span class="label">Contributions</span><span class="value" id="statContribs">0</span></div>
+      <div class="stat-row"><span class="label">Accuracy</span><span class="value accuracy" id="statAccuracy">—</span></div>
+      <div class="stat-row"><span class="label">Total RP</span><span class="value rp" id="statRP">0</span></div>
+      <div class="stat-row"><span class="label">Rank</span><span class="value" id="statRank">#—</span></div>
+    </div>
+
+    <div class="stat-card">
+      <h3>Current Streak</h3>
+      <div class="stat-row"><span class="label">Streak</span><span class="value streak" id="statStreak">0</span></div>
+      <div class="streak-bar" id="streakBar">
+        <div class="streak-dot"></div>
+        <div class="streak-dot"></div>
+        <div class="streak-dot"></div>
+        <div class="streak-dot"></div>
+        <div class="streak-dot"></div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <h3>Session Progress</h3>
+      <div class="stat-row"><span class="label">Scans Today</span><span class="value" id="statSession">0</span></div>
+      <div class="progress-container">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+        <div class="progress-label" id="progressLabel">0 / 50 daily goal</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <h3>Difficulty</h3>
+      <div class="stat-row"><span class="label">Current</span><span class="value" id="statDiff">Easy</span></div>
+      <div class="stat-row"><span class="label">Base RP</span><span class="value rp" id="statBaseRP">1</span></div>
+      <div class="progress-container">
+        <div class="progress-bar"><div class="progress-fill" id="diffProgress" style="width: 33%"></div></div>
+        <div class="progress-label">Unlocks at 10 correct</div>
+      </div>
+    </div>
+
+    <div class="science-info">
+      <h3>🧬 Did You Know?</h3>
+      <p id="scienceFact">Alpha-synuclein is a small protein (140 amino acids) normally found at nerve terminals. 
+      In MSA, it misfolds and aggregates inside oligodendrocytes — the cells that produce the 
+      protective myelin coating around neurons.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// SYNAPSE SPOTTER — Brain Scan Classification Game
+// ═══════════════════════════════════════════════════════════════════════════
+
+(() => {
+'use strict';
+
+// ─── Science Facts (rotate in sidebar) ─────────────────────────────────
+const SCIENCE_FACTS = [
+  `Alpha-synuclein is a small protein (140 amino acids) normally found at nerve terminals. In MSA, it misfolds and aggregates inside oligodendrocytes — the cells that produce myelin, the protective coating around neurons.`,
+  `MSA affects about 5 in 100,000 people worldwide. It typically appears between ages 50-60 and progresses rapidly. There is currently no cure, making early detection crucial.`,
+  `Unlike Parkinson's disease where α-synuclein accumulates in neurons, MSA is characterized by inclusions in glial cells. This distinction is key to diagnosis but difficult to detect in brain scans.`,
+  `The "synucleinopathies" — diseases caused by α-synuclein misfolding — include MSA, Parkinson's disease, and Dementia with Lewy Bodies. Understanding one helps understand all three.`,
+  `Oligodendrocytes don't normally produce much α-synuclein. Researchers are still investigating how the protein gets into these cells — it may be transferred from neurons through a prion-like mechanism.`,
+  `In MSA, brain regions controlling movement (cerebellum, basal ganglia) and autonomic functions (brainstem) are most affected. This causes problems with balance, blood pressure, and bladder control.`,
+  `Glial cytoplasmic inclusions (GCIs) — the hallmark of MSA — can be detected in post-mortem tissue. Developing methods to detect them in living patients could transform early diagnosis.`,
+  `The MSA Coalition funds research worldwide and connects patients with clinical trials. Every advance in pattern recognition brings us closer to earlier diagnosis and better treatments.`,
+  `Neuroinflammation plays a major role in MSA progression. When oligodendrocytes die from α-synuclein accumulation, they trigger an immune response that damages surrounding healthy neurons.`,
+  `Machine learning models trained on brain scan patterns have shown promising results in distinguishing MSA from Parkinson's. Human classification data helps train and validate these models.`,
+];
+
+// ─── State ─────────────────────────────────────────────────────────────
+const state = {
+  userId: null,
+  currentTask: null,
+  taskStartTime: 0,
+  timerInterval: null,
+  streak: 0,
+  contributions: 0,
+  totalRP: 0,
+  accuracy: 0,
+  accuracyHistory: [],
+  sessionCount: 0,
+  rank: 0,
+  difficulty: 1,
+  correctInRow: 0,
+  factIndex: 0,
+  taskQueue: [],
+  buttonsEnabled: false,
+};
+
+// ─── DOM Elements ──────────────────────────────────────────────────────
+const $ = (sel) => document.querySelector(sel);
+const canvas = $('#scanCanvas');
+const ctx = canvas.getContext('2d');
+
+// ─── Initialize ────────────────────────────────────────────────────────
+function init() {
+  // Get or create user ID
+  state.userId = localStorage.getItem('echo-user-id') || 'guest-' + Math.random().toString(36).substr(2, 9);
+  localStorage.setItem('echo-user-id', state.userId);
+
+  // Check if tutorial was seen
+  const tutorialSeen = localStorage.getItem('synapse-tutorial-seen');
+  if (!tutorialSeen) {
+    $('#tutorial').classList.add('active');
+  } else {
+    startGame();
+  }
+
+  // Load saved stats
+  const saved = localStorage.getItem('synapse-stats');
+  if (saved) {
+    const s = JSON.parse(saved);
+    state.contributions = s.contributions || 0;
+    state.totalRP = s.totalRP || 0;
+    state.streak = s.streak || 0;
+    state.accuracyHistory = s.accuracyHistory || [];
+    state.difficulty = s.difficulty || 1;
+    state.correctInRow = s.correctInRow || 0;
+    updateUI();
+  }
+
+  // Event listeners
+  $('#startBtn').addEventListener('click', () => {
+    localStorage.setItem('synapse-tutorial-seen', '1');
+    $('#tutorial').classList.remove('active');
+    startGame();
+  });
+
+  $('#btnHealthy').addEventListener('click', () => classify('healthy'));
+  $('#btnDamaged').addEventListener('click', () => classify('damaged'));
+  $('#btnUncertain').addEventListener('click', () => classify('uncertain'));
+
+  document.addEventListener('keydown', (e) => {
+    if (!state.buttonsEnabled) return;
+    if (e.key === '1') classify('healthy');
+    else if (e.key === '2') classify('damaged');
+    else if (e.key === '3') classify('uncertain');
+  });
+}
+
+// ─── Game Flow ─────────────────────────────────────────────────────────
+async function startGame() {
+  await loadNextTask();
+}
+
+async function loadNextTask() {
+  state.buttonsEnabled = false;
+  disableButtons(true);
+
+  try {
+    // Try to get task from server
+    const task = await fetchTask();
+    state.currentTask = task;
+  } catch (e) {
+    // Offline/MVP: generate task locally
+    state.currentTask = generateLocalTask();
+  }
+
+  // Render the scan
+  renderScan(state.currentTask);
+  
+  // Update UI labels
+  const diffNames = ['Easy', 'Medium', 'Hard'];
+  const diffClasses = ['diff-easy', 'diff-medium', 'diff-hard'];
+  const d = state.currentTask.difficulty - 1;
+  const diffEl = $('#scanDifficulty');
+  diffEl.textContent = diffNames[d];
+  diffEl.className = 'scan-difficulty ' + diffClasses[d];
+  $('#scanLabel').textContent = `Neural Scan #${String(state.contributions + 1).padStart(3, '0')}`;
+  $('#scanId').textContent = `TASK-${state.currentTask.id.substr(0, 8)}`;
+
+  // Start timer
+  state.taskStartTime = Date.now();
+  startTimer();
+
+  // Enable buttons
+  state.buttonsEnabled = true;
+  disableButtons(false);
+
+  // Rotate science fact
+  state.factIndex = (state.factIndex + 1) % SCIENCE_FACTS.length;
+  $('#scienceFact').textContent = SCIENCE_FACTS[state.factIndex];
+}
+
+async function classify(answer) {
+  if (!state.buttonsEnabled || !state.currentTask) return;
+  
+  state.buttonsEnabled = false;
+  disableButtons(true);
+  stopTimer();
+
+  const timeMs = Date.now() - state.taskStartTime;
+  const task = state.currentTask;
+
+  // Submit to server
+  let result;
+  try {
+    result = await submitAnswer(task.id, answer, timeMs);
+  } catch (e) {
+    // Offline scoring
+    result = scoreLocally(task, answer, timeMs);
+  }
+
+  // Update stats
+  state.contributions++;
+  state.sessionCount++;
+  state.totalRP += result.rpEarned;
+  state.streak = result.streak;
+  state.accuracyHistory.push(result.score / 100);
+  state.accuracy = state.accuracyHistory.length > 0
+    ? Math.round(state.accuracyHistory.reduce((a, b) => a + b, 0) / state.accuracyHistory.length * 100)
+    : 0;
+
+  // Difficulty progression
+  if (result.score >= 60) {
+    state.correctInRow++;
+    if (state.correctInRow >= 10 && state.difficulty < 3) {
+      state.difficulty++;
+      state.correctInRow = 0;
+    }
+  } else {
+    state.correctInRow = Math.max(0, state.correctInRow - 2);
+  }
+
+  // Show feedback
+  showFeedback(result);
+
+  // Save stats
+  saveStats();
+  updateUI();
+
+  // Load next scan after delay
+  setTimeout(() => {
+    hideFeedback();
+    loadNextTask();
+  }, 1800);
+}
+
+// ─── Scan Rendering ────────────────────────────────────────────────────
+function renderScan(task) {
+  const W = canvas.width;
+  const H = canvas.height;
+  const data = task.data;
+
+  // Use seed for reproducible generation
+  const rng = seededRandom(data.seed);
+
+  // Clear to dark background
+  ctx.fillStyle = '#020808';
+  ctx.fillRect(0, 0, W, H);
+
+  // 1. Base noise layer (subtle brain tissue texture)
+  renderNoise(ctx, W, H, rng, data);
+
+  // 2. Neural pathways (connection lines)
+  renderPathways(ctx, W, H, rng, data);
+
+  // 3. Bright spots (neural activity / protein aggregates)
+  renderBrightSpots(ctx, W, H, rng, data);
+
+  // 4. Aggregate clumps (α-synuclein inclusions in damaged tissue)
+  if (data.aggregateClumps > 0) {
+    renderAggregates(ctx, W, H, rng, data);
+  }
+
+  // 5. Subtle overlay effects
+  renderOverlayEffects(ctx, W, H, data);
+
+  // 6. Scan border vignette
+  renderVignette(ctx, W, H);
+}
+
+function renderNoise(ctx, W, H, rng, data) {
+  const imageData = ctx.getImageData(0, 0, W, H);
+  const pixels = imageData.data;
+  const scale = data.noiseScale;
+  const isHealthy = data.scanType === 'healthy';
+
+  for (let y = 0; y < H; y += 2) {
+    for (let x = 0; x < W; x += 2) {
+      // Perlin-like noise approximation
+      const nx = x / W * 8 * scale;
+      const ny = y / H * 6 * scale;
+      let noise = simplex2D(nx, ny, rng) * 0.5 + 0.5;
+
+      // Add symmetry for healthy tissue
+      if (isHealthy && data.symmetry > 0.5) {
+        const mirrorX = W - x;
+        const mnx = mirrorX / W * 8 * scale;
+        const mirrorNoise = simplex2D(mnx, ny, rng) * 0.5 + 0.5;
+        noise = noise * (1 - data.symmetry * 0.5) + mirrorNoise * data.symmetry * 0.5;
+      }
+
+      const intensity = Math.floor(noise * 30 + 5);
+      const idx = (y * W + x) * 4;
+
+      // Greenish tint for brain scan aesthetic
+      pixels[idx] = intensity * 0.3;
+      pixels[idx + 1] = intensity * 0.8;
+      pixels[idx + 2] = intensity * 0.6;
+      pixels[idx + 3] = 255;
+
+      // Fill 2x2 block
+      if (x + 1 < W) {
+        pixels[idx + 4] = pixels[idx];
+        pixels[idx + 5] = pixels[idx + 1];
+        pixels[idx + 6] = pixels[idx + 2];
+        pixels[idx + 7] = 255;
+      }
+      if (y + 1 < H) {
+        const idx2 = ((y + 1) * W + x) * 4;
+        pixels[idx2] = pixels[idx];
+        pixels[idx2 + 1] = pixels[idx + 1];
+        pixels[idx2 + 2] = pixels[idx + 2];
+        pixels[idx2 + 3] = 255;
+        if (x + 1 < W) {
+          pixels[idx2 + 4] = pixels[idx];
+          pixels[idx2 + 5] = pixels[idx + 1];
+          pixels[idx2 + 6] = pixels[idx + 2];
+          pixels[idx2 + 7] = 255;
+        }
+      }
+    }
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function renderPathways(ctx, W, H, rng, data) {
+  const numPathways = Math.floor(8 + data.connectionDensity * 20);
+  const integrity = data.pathwayIntegrity;
+
+  ctx.lineWidth = 1.5;
+  ctx.lineCap = 'round';
+
+  for (let i = 0; i < numPathways; i++) {
+    const startX = rng() * W;
+    const startY = rng() * H;
+    const length = 40 + rng() * 120;
+    const angle = rng() * Math.PI * 2;
+    const segments = Math.floor(5 + rng() * 15);
+
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+
+    let x = startX, y = startY;
+    let broken = false;
+
+    for (let s = 0; s < segments; s++) {
+      // Pathway may break in damaged tissue
+      if (!broken && rng() > integrity) {
+        broken = true;
+        ctx.stroke();
+        ctx.beginPath();
+        // Gap in pathway
+        const gap = 5 + rng() * 15;
+        x += Math.cos(angle + (rng() - 0.5) * 1.5) * gap;
+        y += Math.sin(angle + (rng() - 0.5) * 1.5) * gap;
+        ctx.moveTo(x, y);
+        broken = false;
+      }
+
+      const stepLen = length / segments;
+      const wobble = data.scanType === 'healthy' ? 0.3 : 0.8;
+      const dx = Math.cos(angle + (rng() - 0.5) * wobble) * stepLen;
+      const dy = Math.sin(angle + (rng() - 0.5) * wobble) * stepLen;
+      x += dx;
+      y += dy;
+
+      ctx.lineTo(x, y);
+    }
+
+    const alpha = 0.1 + data.connectionDensity * 0.25;
+    ctx.strokeStyle = data.scanType === 'healthy'
+      ? `rgba(0, 200, 120, ${alpha})`
+      : `rgba(100, 160, 120, ${alpha * 0.7})`;
+    ctx.stroke();
+
+    // Add small nodes at junctions for healthy tissue
+    if (data.scanType === 'healthy' && rng() > 0.5) {
+      ctx.fillStyle = `rgba(0, 255, 160, ${0.15 + rng() * 0.15})`;
+      ctx.beginPath();
+      ctx.arc(x, y, 2 + rng() * 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Symmetry: mirror some pathways for healthy scans
+  if (data.symmetry > 0.6) {
+    ctx.save();
+    ctx.globalAlpha = 0.4;
+    ctx.translate(W, 0);
+    ctx.scale(-1, 1);
+    // Re-render a few pathways on the mirrored side
+    const mirrorCount = Math.floor(numPathways * data.symmetry * 0.3);
+    const mirrorRng = seededRandom(data.seed + '_mirror');
+    for (let i = 0; i < mirrorCount; i++) {
+      const sx = mirrorRng() * W;
+      const sy = mirrorRng() * H;
+      const segs = Math.floor(3 + mirrorRng() * 8);
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      let mx = sx, my = sy;
+      for (let s = 0; s < segs; s++) {
+        mx += (mirrorRng() - 0.5) * 30;
+        my += (mirrorRng() - 0.5) * 30;
+        ctx.lineTo(mx, my);
+      }
+      ctx.strokeStyle = `rgba(0, 200, 120, 0.12)`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+function renderBrightSpots(ctx, W, H, rng, data) {
+  const spots = data.brightSpots;
+  const isHealthy = data.scanType === 'healthy';
+
+  for (let i = 0; i < spots; i++) {
+    const x = 40 + rng() * (W - 80);
+    const y = 30 + rng() * (H - 60);
+    const radius = isHealthy
+      ? 10 + rng() * 20    // Uniform, moderate size
+      : 5 + rng() * 40;    // Irregular sizes
+    const intensity = isHealthy
+      ? 0.15 + rng() * 0.15  // Even brightness
+      : 0.05 + rng() * 0.35; // Irregular brightness
+
+    // Radial gradient for glow effect
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+
+    if (isHealthy) {
+      grad.addColorStop(0, `rgba(0, 255, 180, ${intensity})`);
+      grad.addColorStop(0.5, `rgba(0, 200, 140, ${intensity * 0.5})`);
+      grad.addColorStop(1, `rgba(0, 100, 80, 0)`);
+    } else {
+      // Damaged: more varied colors, some reddish/purple (inflammation)
+      const hue = rng() > 0.5 ? '200, 100, 60' : '180, 60, 100';
+      grad.addColorStop(0, `rgba(${hue}, ${intensity})`);
+      grad.addColorStop(0.6, `rgba(${hue}, ${intensity * 0.3})`);
+      grad.addColorStop(1, `rgba(0, 0, 0, 0)`);
+    }
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+  }
+}
+
+function renderAggregates(ctx, W, H, rng, data) {
+  // Alpha-synuclein inclusions — irregular, dense clumps
+  const clumps = data.aggregateClumps;
+
+  for (let i = 0; i < clumps; i++) {
+    const cx = 60 + rng() * (W - 120);
+    const cy = 50 + rng() * (H - 100);
+    const size = 8 + rng() * 25;
+    const particles = Math.floor(5 + rng() * 15);
+
+    // Each clump is a cluster of small particles
+    for (let p = 0; p < particles; p++) {
+      const px = cx + (rng() - 0.5) * size * 2;
+      const py = cy + (rng() - 0.5) * size * 2;
+      const pr = 2 + rng() * 6;
+      const alpha = 0.15 + rng() * 0.25;
+
+      // Reddish-orange for protein aggregates
+      const grad = ctx.createRadialGradient(px, py, 0, px, py, pr);
+      grad.addColorStop(0, `rgba(255, 120, 60, ${alpha})`);
+      grad.addColorStop(0.6, `rgba(200, 80, 40, ${alpha * 0.5})`);
+      grad.addColorStop(1, 'rgba(100, 40, 20, 0)');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(px, py, pr, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Central dense core
+    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, size * 0.4);
+    coreGrad.addColorStop(0, 'rgba(255, 80, 40, 0.3)');
+    coreGrad.addColorStop(1, 'rgba(200, 60, 30, 0)');
+    ctx.fillStyle = coreGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, size * 0.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function renderOverlayEffects(ctx, W, H, data) {
+  // Subtle grid lines (brain scan aesthetic)
+  ctx.strokeStyle = 'rgba(0, 255, 136, 0.03)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < W; x += 40) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, H);
+    ctx.stroke();
+  }
+  for (let y = 0; y < H; y += 40) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
+  }
+
+  // Cross-hair in center
+  ctx.strokeStyle = 'rgba(0, 255, 136, 0.06)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([5, 10]);
+  ctx.beginPath();
+  ctx.moveTo(W / 2, 0);
+  ctx.lineTo(W / 2, H);
+  ctx.moveTo(0, H / 2);
+  ctx.lineTo(W, H / 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function renderVignette(ctx, W, H) {
+  const grad = ctx.createRadialGradient(W / 2, H / 2, W * 0.25, W / 2, H / 2, W * 0.65);
+  grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  grad.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+}
+
+// ─── Seeded Random & Noise ─────────────────────────────────────────────
+function seededRandom(seed) {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) {
+    h = ((h << 5) - h + seed.charCodeAt(i)) | 0;
+  }
+  return function() {
+    h = (h * 1103515245 + 12345) & 0x7fffffff;
+    return h / 0x7fffffff;
+  };
+}
+
+function simplex2D(x, y, rng) {
+  // Simplified 2D noise using sine waves
+  const v = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+  const n1 = v - Math.floor(v);
+  const v2 = Math.sin(x * 4.898 + y * 7.23 + 1.5) * 23421.631;
+  const n2 = v2 - Math.floor(v2);
+  return (n1 + n2) / 2 * 2 - 1;
+}
+
+// ─── Timer ─────────────────────────────────────────────────────────────
+function startTimer() {
+  const MAX_TIME = 30000; // 30 seconds
+  const timerBar = $('#timerBar');
+  
+  if (state.timerInterval) clearInterval(state.timerInterval);
+  timerBar.style.width = '100%';
+  timerBar.style.background = 'var(--accent)';
+  
+  state.timerInterval = setInterval(() => {
+    const elapsed = Date.now() - state.taskStartTime;
+    const pct = Math.max(0, 1 - elapsed / MAX_TIME);
+    timerBar.style.width = (pct * 100) + '%';
+    
+    if (pct < 0.3) timerBar.style.background = 'var(--damaged)';
+    else if (pct < 0.6) timerBar.style.background = 'var(--uncertain)';
+    
+    if (pct <= 0) {
+      stopTimer();
+      // Auto-skip after timeout
+      classify('uncertain');
+    }
+  }, 100);
+}
+
+function stopTimer() {
+  if (state.timerInterval) {
+    clearInterval(state.timerInterval);
+    state.timerInterval = null;
+  }
+}
+
+// ─── API Communication ─────────────────────────────────────────────────
+async function fetchTask() {
+  const res = await fetch(`/api/research/next?gameType=synapse_spotter&userId=${state.userId}`);
+  if (!res.ok) throw new Error('Failed to fetch task');
+  return await res.json();
+}
+
+async function submitAnswer(taskId, answer, timeMs) {
+  const res = await fetch('/api/research/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: state.userId,
+      gameType: 'synapse_spotter',
+      taskId,
+      result: { answer, timeMs },
+    }),
+  });
+  if (!res.ok) throw new Error('Failed to submit');
+  return await res.json();
+}
+
+// ─── Local/Offline Fallbacks ───────────────────────────────────────────
+function generateLocalTask() {
+  const difficulty = state.difficulty;
+  const isHealthy = Math.random() > 0.5;
+  const id = 'local-' + Math.random().toString(36).substr(2, 12);
+  
+  // Difficulty affects how obvious the differences are
+  const difficultyMod = [0, 0.3, 0.15, 0.05][difficulty]; // How extreme the differences are
+
+  return {
+    id,
+    difficulty,
+    data: {
+      seed: id,
+      scanType: isHealthy ? 'healthy' : 'damaged',
+      difficulty,
+      noiseScale: 0.3 + Math.random() * 0.7,
+      connectionDensity: isHealthy
+        ? 0.6 + difficultyMod + Math.random() * 0.4
+        : 0.1 + Math.random() * (0.4 + (3 - difficulty) * 0.1),
+      brightSpots: isHealthy
+        ? Math.floor(3 + Math.random() * 5)
+        : Math.floor(1 + Math.random() * 8),
+      symmetry: isHealthy
+        ? 0.7 + difficultyMod + Math.random() * 0.3
+        : 0.1 + Math.random() * (0.5 + (3 - difficulty) * 0.1),
+      aggregateClumps: isHealthy
+        ? 0
+        : Math.floor(1 + Math.random() * (5 - difficulty)),
+      pathwayIntegrity: isHealthy
+        ? 0.8 + difficultyMod * 0.5 + Math.random() * 0.2
+        : 0.1 + Math.random() * (0.5 + (3 - difficulty) * 0.1),
+    },
+    _trueAnswer: isHealthy ? 'healthy' : 'damaged',
+  };
+}
+
+function scoreLocally(task, answer, timeMs) {
+  const correct = task._trueAnswer ? (answer === task._trueAnswer) : (Math.random() > 0.3);
+  const score = correct ? 100 : (answer === 'uncertain' ? 50 : 20);
+  
+  const baseRP = [1, 2, 3][task.difficulty - 1] || 1;
+  const streakBonus = [1, 1.2, 1.5, 2.0, 2.5, 3.0];
+  
+  let streak = correct ? state.streak + 1 : 0;
+  const streakMult = streakBonus[Math.min(streak, streakBonus.length - 1)];
+  let rp = Math.round(baseRP * streakMult * (score / 100));
+  
+  if (timeMs < 5000 && correct) rp = Math.round(rp * 1.25);
+  rp = Math.max(1, Math.min(rp, 3));
+
+  return { score, rpEarned: rp, streak, consensus: null, taskResolved: false };
+}
+
+// ─── UI Updates ────────────────────────────────────────────────────────
+function updateUI() {
+  $('#totalRP').textContent = state.totalRP;
+  $('#statContribs').textContent = state.contributions;
+  $('#statRP').textContent = state.totalRP;
+  $('#statStreak').textContent = state.streak;
+  $('#statSession').textContent = state.sessionCount;
+
+  // Accuracy
+  if (state.accuracyHistory.length > 0) {
+    $('#statAccuracy').textContent = state.accuracy + '%';
+  }
+
+  // Rank (local estimate)
+  if (state.contributions > 0) {
+    $('#statRank').textContent = '#' + Math.max(1, Math.floor(100 / (1 + state.totalRP * 0.1)));
+  }
+
+  // Streak dots
+  const dots = document.querySelectorAll('.streak-dot');
+  dots.forEach((dot, i) => {
+    dot.className = 'streak-dot';
+    if (i < state.streak) {
+      dot.classList.add(state.streak >= 5 ? 'fire' : 'active');
+    }
+  });
+
+  // Progress
+  const dailyGoal = 50;
+  const pct = Math.min(100, (state.sessionCount / dailyGoal) * 100);
+  $('#progressFill').style.width = pct + '%';
+  $('#progressLabel').textContent = `${state.sessionCount} / ${dailyGoal} daily goal`;
+
+  // Difficulty
+  const diffNames = ['Easy', 'Medium', 'Hard'];
+  const baseRPs = [1, 2, 3];
+  $('#statDiff').textContent = diffNames[state.difficulty - 1];
+  $('#statBaseRP').textContent = baseRPs[state.difficulty - 1];
+  const diffPct = [33, 66, 100][state.difficulty - 1];
+  $('#diffProgress').style.width = diffPct + '%';
+}
+
+function showFeedback(result) {
+  const fb = $('#feedback');
+  fb.className = 'feedback show';
+
+  if (result.score >= 70) {
+    fb.classList.add('correct');
+    fb.innerHTML = `✓ Correct classification! <span class="rp-earned">+${result.rpEarned} RP</span>` +
+      (result.streak >= 3 ? ` <span style="color:var(--streak)">🔥 ×${result.streak} streak!</span>` : '');
+  } else if (result.score >= 40) {
+    fb.classList.add('pending');
+    fb.innerHTML = `⟐ Noted — awaiting consensus. <span class="rp-earned">+${result.rpEarned} RP</span>`;
+  } else {
+    fb.classList.add('wrong');
+    fb.innerHTML = `✗ Doesn't match consensus. <span class="rp-earned">+${result.rpEarned} RP</span>` +
+      ' <span style="opacity:0.7">(streak reset)</span>';
+  }
+}
+
+function hideFeedback() {
+  const fb = $('#feedback');
+  fb.className = 'feedback';
+}
+
+function disableButtons(disabled) {
+  $('#btnHealthy').disabled = disabled;
+  $('#btnDamaged').disabled = disabled;
+  $('#btnUncertain').disabled = disabled;
+}
+
+function saveStats() {
+  localStorage.setItem('synapse-stats', JSON.stringify({
+    contributions: state.contributions,
+    totalRP: state.totalRP,
+    streak: state.streak,
+    accuracyHistory: state.accuracyHistory.slice(-100),
+    difficulty: state.difficulty,
+    correctInRow: state.correctInRow,
+  }));
+}
+
+// ─── Boot ──────────────────────────────────────────────────────────────
+init();
+
+})();
+</script>
+</body>
+</html>
