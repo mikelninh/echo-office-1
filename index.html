@@ -13945,8 +13945,8 @@ function updateVisitor(dt){
         if(v._tripleLandingPending){
           v._tripleLandingPending=false;
           
-          // Slow-mo on LANDING (the cinematic moment)
-          if(typeof triggerSlowMo==='function')triggerSlowMo(0.15, 0.12);
+          // Brief slow-mo on landing (subtle beat)
+          if(typeof triggerSlowMo==='function')triggerSlowMo(0.25, 0.05);
           
           // MASSIVE impact rings (3 staggered)
           if(typeof addImpactRing==='function'){
@@ -13975,17 +13975,14 @@ function updateVisitor(dt){
             S.particles.push({x:v.x+(Math.random()-.5)*40,y:v.y,vx:(Math.random()-.5)*1,vy:-2-Math.random()*3,life:45+Math.random()*25,color:`rgba(255,${60+Math.random()*80|0},0,${0.3+Math.random()*0.3})`,size:1+Math.random()*1.5});
           }
           
-          // HEAVY screen shake
-          S.screenShake=Math.max(S.screenShake||0,10);
+          // Landing shake (firm, not violent)
+          S.screenShake=Math.max(S.screenShake||0,3);
           
-          // RED flash
-          S.screenFlash='rgba(255,30,10,0.25)';
+          // Subtle red wash
+          S.screenFlash='rgba(255,30,10,0.08)';
           
-          // Chromatic aberration spike
-          S.chromaticAberration=Math.max(S.chromaticAberration||0,6);
-          
-          // Camera zoom snap
-          S.cameraZoom=1.06;S._cameraZoomTimer=0.2;
+          // Tiny chromatic hint
+          S.chromaticAberration=Math.max(S.chromaticAberration||0,1.5);
           
           // Landing sound: BOOM
           if(S.audioCtx&&S.masterGain){try{
@@ -14419,18 +14416,16 @@ function renderVisitor(ctx){
       if(!v.moving&&v._wasMoving){if(!v._squashTimer)v._squashTimer=0.15;v._wasMoving=false}
       if(v.moving)v._wasMoving=true;
       if(v._squashTimer>0){v._squashTimer-=0.016;squashX=1.15;squashY=0.85;if(v._squashTimer<=0){squashX=1;squashY=1}}
-      // Dash stretch — elongate in movement direction (escalating per tier)
+      // Dash stretch — smooth elongation per tier
       if(v._dashing){
         const tier=v._dashTier||1;
         const prog=v._dashTimer/(v._dashDuration||0.18); // 1→0 during dash
-        // Dynamic stretch: peaks mid-dash — triple is INSANE
-        const baseStr=tier===3?1.0:tier===2?0.8:0.5;
-        const peakStr=tier===3?1.2:tier===2?0.8:0.5;
-        const stretchMul=baseStr+Math.sin((1-prog)*Math.PI)*peakStr;
-        const stretchAmt=tier===3?0.9:tier===2?0.7:0.4;
-        const squishAmt=tier===3?0.55:tier===2?0.45:0.3;
-        if(v._dashDir==='left'||v._dashDir==='right'){squashX=1+stretchMul*stretchAmt;squashY=1-stretchMul*squishAmt;}
-        else{squashX=1-stretchMul*squishAmt;squashY=1+stretchMul*stretchAmt;}
+        // Smooth sine curve, peaks mid-dash
+        const sinePeak=Math.sin((1-prog)*Math.PI);
+        const stretchAmt=tier===3?0.45:tier===2?0.35:0.25;
+        const squishAmt=tier===3?0.25:tier===2?0.2:0.15;
+        if(v._dashDir==='left'||v._dashDir==='right'){squashX=1+sinePeak*stretchAmt;squashY=1-sinePeak*squishAmt;}
+        else{squashX=1-sinePeak*squishAmt;squashY=1+sinePeak*stretchAmt;}
       }
       // Dance animation transforms
       let danceOffY=0, danceSwayX=0, danceRot=0;
@@ -22213,17 +22208,17 @@ function initInput(){
       }
     }catch(e){}}
     
-    // === SCREEN EFFECTS — escalating ===
-    // Screen shake
-    S.screenShake=Math.max(S.screenShake||0,isTriple?12:isChain?7:2.5);
+    // === SCREEN EFFECTS — smooth, not nauseating ===
+    // Screen shake (gentle — felt not seen)
+    S.screenShake=Math.max(S.screenShake||0,isTriple?3.5:isChain?2:1);
     
     if(isTriple){
-      // === TRIPLE DASH — MAXIMUM OVERDRIVE ===
-      // Hard hitstop (100ms near-freeze)
-      if(typeof triggerSlowMo==='function')triggerSlowMo(0.02, 0.1);
+      // === TRIPLE DASH — powerful but smooth ===
+      // Micro hitstop (40ms, just a beat)
+      if(typeof triggerSlowMo==='function')triggerSlowMo(0.15, 0.04);
       
-      // RED screen flash
-      S.screenFlash='rgba(255,40,20,0.3)';
+      // Subtle red screen flash
+      S.screenFlash='rgba(255,40,20,0.1)';
       
       // Triple impact rings (3 concentric, staggered)
       if(typeof addImpactRing==='function'){
@@ -22243,23 +22238,21 @@ function initInput(){
         S.particles.push({x:startX+(Math.random()-.5)*30,y:startY,vx:(Math.random()-.5)*1,vy:-1.5-Math.random()*2,life:40+Math.random()*20,color:`rgba(255,${100+Math.random()*80|0},0,${0.4+Math.random()*0.3})`,size:1+Math.random()*2});
       }
       
-      // HEAVY chromatic aberration
-      S.chromaticAberration=Math.max(S.chromaticAberration||0,8);
+      // Light chromatic aberration (just a hint)
+      S.chromaticAberration=Math.max(S.chromaticAberration||0,2);
       
-      // Strong vignette (red-tinted via screenFlash combo)
-      S.vignetteIntensity=Math.max(S.vignetteIntensity||0,0.5);
-      
-      // Camera zoom OUT then snap back (dramatic)
-      S.cameraZoom=0.96;S._cameraZoomTimer=0.2;
+      // Gentle vignette
+      S.vignetteIntensity=Math.max(S.vignetteIntensity||0,0.15);
       
       // Mark for landing burst
       v._tripleLandingPending=true;
       v._chainLandingPending=false;
       
     } else if(isChain){
-      // === CHAIN DASH — gold juice ===
-      if(typeof triggerSlowMo==='function')triggerSlowMo(0.05, 0.06);
-      S.screenFlash='rgba(255,220,100,0.2)';
+      // === CHAIN DASH — gold juice (smooth) ===
+      // Tiny hitstop (just a breath)
+      if(typeof triggerSlowMo==='function')triggerSlowMo(0.2, 0.03);
+      S.screenFlash='rgba(255,220,100,0.06)';
       if(typeof addImpactRing==='function'){
         addImpactRing(startX,startY-10,'rgba(255,220,100,0.8)',70,4);
         setTimeout(()=>{if(typeof addImpactRing==='function')addImpactRing(startX,startY-10,'rgba(255,180,60,0.5)',50,2.5)},30);
@@ -22269,14 +22262,12 @@ function initInput(){
         const spd2=0.5+Math.random()*2;
         S.particles.push({x:startX+Math.cos(ang)*4,y:startY+Math.sin(ang)*2,vx:Math.cos(ang)*spd2,vy:Math.sin(ang)*spd2*.5,life:28,color:`rgba(${180+Math.random()*60|0},${140+Math.random()*60|0},${60+Math.random()*40|0},0.5)`,size:1+Math.random()*1.5});
       }
-      S.chromaticAberration=Math.max(S.chromaticAberration||0,4);
-      S.vignetteIntensity=Math.max(S.vignetteIntensity||0,0.3);
-      S.cameraZoom=1.03;S._cameraZoomTimer=0.15;
+      S.chromaticAberration=Math.max(S.chromaticAberration||0,1.5);
+      S.vignetteIntensity=Math.max(S.vignetteIntensity||0,0.1);
       v._chainLandingPending=true;
       v._tripleLandingPending=false;
     } else {
-      // Single dash: subtle
-      S.screenFlash='rgba(0,255,247,0.08)';
+      // Single dash: no screen flash — just particles + sound
       v._chainLandingPending=false;
       v._tripleLandingPending=false;
     }
@@ -22438,11 +22429,11 @@ function initInput(){
         color:colors[tier-1]
       };
       
-      // Screen tint
+      // Screen tint (very subtle — just a hint of color)
       S._dashScreenTint={
         color:tier===3?'255,30,10':tier===2?'255,200,60':'0,240,240',
-        alpha:tier===3?0.12:tier===2?0.06:0.03,
-        timer:tier===3?0.3:tier===2?0.2:0.1
+        alpha:tier===3?0.04:tier===2?0.02:0.01,
+        timer:tier===3?0.15:tier===2?0.1:0.06
       };
       
       // Sonic boom (triple only)
