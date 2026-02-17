@@ -14282,11 +14282,14 @@ function interact(){
     case'recordplayer':case'vinyl_player':
       if(S.floor===6){showVinylSelector();}else{toggleMusic();}
       break;
-    case'bar':
-      if(S.floor===6&&typeof BarVibes!=='undefined'){
-        if(!BarVibes.active){const pick=BarVibes.records[Math.floor(Math.random()*BarVibes.records.length)];BarVibes.start(pick.id);S.musicPlaying=true;$('#btn-music').classList.add('active');showThought(`🍸 Bartender puts on "${pick.title}"...`);}
-        else showThought("🍸 The vibes are perfect...");
-        Coins.earn(1,'bar');
+    case'bar':case'bar_vip':
+      // Floor 6 bar serves the full menu + starts music
+      if(S.floor===6){
+        if(typeof BarVibes!=='undefined'&&!BarVibes.active){
+          const pick=BarVibes.records[Math.floor(Math.random()*BarVibes.records.length)];
+          BarVibes.start(pick.id);S.musicPlaying=true;$('#btn-music').classList.add('active');
+        }
+        showBarMenu();
       } else {showThought("Time for a chill drink...");Coins.earn(1,'bar');}
       break;
     case'musicqueue':
