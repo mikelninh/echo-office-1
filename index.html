@@ -31054,21 +31054,44 @@ const BarVibes = {
   records: [
     // ═══ SOUL / R&B ═══
     {id:'smooth_operator',title:'Smooth Operator',artist:'Echo Ensemble',genre:'Soul / R&B',color:'#d4820a',
-      coverColors:['#d4820a','#8B4513','#FFD700','#2a1a00'],bpm:72,swing:0.12,
-      chords:[{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},{n:[110,130.81,164.81,196],b:55,nm:'Am7'},{n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},{n:[98,123.47,146.83,174.61],b:49,nm:'G7'}],
-      rhodesVol:.045,bassVol:.07,drumVol:.025,melodyChance:.2},
+      coverColors:['#d4820a','#8B4513','#FFD700','#2a1a00'],bpm:100,swing:0.1,
+      // B minor progression — the real Smooth Operator key
+      chords:[
+        {n:[123.47,146.83,185,220],b:61.74,nm:'Bm7'},
+        {n:[164.81,207.65,246.94,311.13],b:82.41,nm:'E9'},
+        {n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},
+        {n:[110,138.59,164.81,220],b:55,nm:'A7'}
+      ],
+      rhodesVol:.035,bassVol:.055,drumVol:.015,melodyChance:.08,saxVol:.045,padVol:.02,
+      // Sax melody — B minor pentatonic, languid and breathy
+      _saxPattern:[
+        [[493.88,0,1.2],[440,1.5,0.8],[369.99,2.5,1.5]],
+        [[329.63,0,0.8],[369.99,1,1.0],[440,2.5,1.5]],
+        [[493.88,0,2.0],[440,2.5,1.5]],
+        [[369.99,0,1.0],[329.63,1.2,0.8],[293.66,2.2,0.6],[246.94,3,1.0]],
+        [[369.99,0.5,0.8],[440,1.5,1.2],[493.88,3,1.0]],
+        [[440,0,1.5],[369.99,2,0.8],[329.63,3,1.0]],
+        [[493.88,0,2.5],[440,3,1.0]],
+        [[369.99,0,0.5],[329.63,0.6,0.5],[293.66,1.2,0.5],[246.94,1.8,0.5],[220,2.5,1.5]],
+      ],_barCounter:0},
     {id:'sade_nights',title:'Sade Nights',artist:'The Vinyl Club',genre:'Smooth R&B',color:'#c42020',
       coverColors:['#c42020','#1a0a0a','#ff6ec7','#3a0a1a'],bpm:66,swing:0.18,
       chords:[{n:[123.47,146.83,185,220],b:61.74,nm:'Bm7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[185,220,277.18,329.63],b:92.5,nm:'F♯m7'},{n:[123.47,146.83,185,220],b:61.74,nm:'Bm7'}],
-      rhodesVol:.04,bassVol:.065,drumVol:.02,melodyChance:.25},
+      rhodesVol:.035,bassVol:.05,drumVol:.012,melodyChance:.15,padVol:.018,saxVol:.035,
+      _saxPattern:[
+        [[329.63,0,1.5],[293.66,2,0.8],[246.94,3,1.0]],
+        [[293.66,0.5,1.0],[329.63,2,1.5]],
+        [[369.99,0,2.0],[329.63,2.5,1.5]],
+        [[293.66,0,0.8],[246.94,1,0.8],[220,2,0.6],[246.94,3,1.0]],
+      ],_barCounter:0},
     {id:'midnight_silk',title:'Midnight Silk',artist:'D\'Vibes',genre:'Neo-Soul',color:'#9b59b6',
       coverColors:['#9b59b6','#1a0a2a','#ff6ec7','#4a2a6a'],bpm:68,swing:0.15,
       chords:[{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},{n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'}],
-      rhodesVol:.04,bassVol:.06,drumVol:.03,melodyChance:.15},
+      rhodesVol:.035,bassVol:.05,drumVol:.018,melodyChance:.12,padVol:.015},
     {id:'golden_hour',title:'Golden Hour',artist:'Amber Wave',genre:'Soul Ballad',color:'#ffd700',
       coverColors:['#ffd700','#8B6508','#FFF8DC','#4a3a00'],bpm:58,swing:0.2,
       chords:[{n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},{n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},{n:[220,261.63,329.63,392],b:110,nm:'Am7'},{n:[146.83,185,220,261.63],b:73.42,nm:'D7'}],
-      rhodesVol:.05,bassVol:.055,drumVol:.015,melodyChance:.3},
+      rhodesVol:.04,bassVol:.045,drumVol:.01,melodyChance:.2,padVol:.02},
     {id:'erykah',title:'Brown Sugar Dreams',artist:'Solange Station',genre:'Neo-Soul',color:'#8B4513',
       coverColors:['#8B4513','#2a1a00','#ffd080','#5a3a10'],bpm:78,swing:0.16,
       chords:[{n:[146.83,185,220,277.18],b:73.42,nm:'Dm9'},{n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[164.81,196,246.94,329.63],b:82.41,nm:'Em9'}],
@@ -31081,7 +31104,7 @@ const BarVibes = {
         {n:[185,220,277.18,329.63],b:92.5,nm:'F♯m7'},
         {n:[146.83,174.61,220,261.63],b:73.42,nm:'Dmaj7'}
       ],
-      rhodesVol:.035,bassVol:.06,drumVol:.022,melodyChance:.05,saxVol:.04,
+      rhodesVol:.03,bassVol:.05,drumVol:.012,melodyChance:.05,saxVol:.04,padVol:.02,
       // Sax melody patterns: each sub-array is one bar, each note is [freq, startBeat, durationBeats]
       // Inspired by smooth operator's iconic sax riff — B minor pentatonic runs
       _saxPattern:[
@@ -31204,89 +31227,172 @@ const BarVibes = {
       rhodesVol:.04,bassVol:.07,drumVol:.038,melodyChance:.12},
   ],
 
-  // --- FM Synthesis Rhodes Piano ---
+  // --- Reverb Bus (lush hall reverb via feedback delay network) ---
+  _reverbNode: null, _reverbGain: null,
+  _getReverbBus() {
+    if(this._reverbNode) return this._reverbGain;
+    const c=S.audioCtx; if(!c) return S.masterGain;
+    try {
+      // Create impulse response for a warm hall reverb (~1.8s tail)
+      const rate=c.sampleRate, len=rate*1.8;
+      const buf=c.createBuffer(2,len,rate);
+      for(let ch=0;ch<2;ch++){
+        const d=buf.getChannelData(ch);
+        for(let i=0;i<len;i++){
+          // Exponential decay with early reflections and diffusion
+          const t=i/rate;
+          d[i]=(Math.random()*2-1)*Math.exp(-t/0.6)*(1+0.3*Math.exp(-t/0.05));
+          // Subtle high-frequency rolloff simulation
+          if(i>0) d[i]=d[i]*0.7+d[i-1]*0.3;
+        }
+      }
+      this._reverbNode=c.createConvolver();
+      this._reverbNode.buffer=buf;
+      // Reverb wet/dry mix
+      this._reverbGain=c.createGain();
+      this._reverbGain.gain.value=1.0;
+      const wetGain=c.createGain();
+      wetGain.gain.value=0.35; // 35% wet signal
+      this._reverbGain.connect(S.masterGain); // dry path
+      this._reverbGain.connect(this._reverbNode);
+      this._reverbNode.connect(wetGain);
+      wetGain.connect(S.masterGain);
+      return this._reverbGain;
+    } catch(e){ return S.masterGain; }
+  },
+
+  // --- FM Synthesis Rhodes Piano (warm, with chorus & tremolo) ---
   _rhodes(freq, when, dur, vol) {
     const c=S.audioCtx; if(!c||!S.masterGain) return;
     try {
+      const dest=this._getReverbBus();
+      // Main carrier with FM modulation for bell tone
       const carrier=c.createOscillator(), mod=c.createOscillator();
       const modG=c.createGain(), env=c.createGain();
       carrier.type='sine'; carrier.frequency.value=freq;
       mod.type='sine'; mod.frequency.value=freq*2;
-      modG.gain.setValueAtTime(freq*1.2,when);
-      modG.gain.exponentialRampToValueAtTime(freq*0.05,when+dur*0.5);
+      modG.gain.setValueAtTime(freq*0.8,when);
+      modG.gain.exponentialRampToValueAtTime(freq*0.02,when+dur*0.6);
       mod.connect(modG); modG.connect(carrier.frequency);
+      // Detuned second voice for chorus warmth
+      const carrier2=c.createOscillator();
+      carrier2.type='sine'; carrier2.frequency.value=freq*1.002;
+      const env2=c.createGain();
+      env2.gain.setValueAtTime(0,when);
+      env2.gain.linearRampToValueAtTime(vol*S.volume*0.3,when+0.02);
+      env2.gain.exponentialRampToValueAtTime(0.0001,when+dur);
+      carrier2.connect(env2); env2.connect(dest);
+      // Gentle tremolo for that classic Rhodes warble
+      const trem=c.createOscillator(), tremG=c.createGain();
+      trem.type='sine'; trem.frequency.value=3.5;
+      tremG.gain.value=vol*S.volume*0.12;
+      trem.connect(tremG); tremG.connect(env.gain);
+      // Soft attack, warm sustain, gentle release
       env.gain.setValueAtTime(0,when);
-      env.gain.linearRampToValueAtTime(vol*S.volume,when+0.008);
-      env.gain.setValueAtTime(vol*S.volume*0.7,when+0.04);
+      env.gain.linearRampToValueAtTime(vol*S.volume,when+0.015);
+      env.gain.setValueAtTime(vol*S.volume*0.65,when+0.06);
       env.gain.exponentialRampToValueAtTime(0.0001,when+dur);
-      carrier.connect(env); env.connect(S.masterGain);
-      carrier.start(when); mod.start(when);
-      carrier.stop(when+dur+0.05); mod.stop(when+dur+0.05);
+      // Lowpass to tame brightness
+      const lp=c.createBiquadFilter();
+      lp.type='lowpass'; lp.frequency.value=2200; lp.Q.value=0.5;
+      carrier.connect(lp); lp.connect(env); env.connect(dest);
+      carrier.start(when); mod.start(when); carrier2.start(when); trem.start(when);
+      carrier.stop(when+dur+0.1); mod.stop(when+dur+0.1); carrier2.stop(when+dur+0.1); trem.stop(when+dur+0.1);
     } catch(e){}
   },
 
-  // --- Warm Walking Bass ---
+  // --- Warm Synth Pad (sustained background warmth) ---
+  _pad(chord, when, dur, vol) {
+    const c=S.audioCtx; if(!c||!S.masterGain) return;
+    try {
+      const dest=this._getReverbBus();
+      chord.n.forEach((freq,i)=>{
+        const osc=c.createOscillator();
+        osc.type='sine'; osc.frequency.value=freq*0.5; // one octave down
+        const filt=c.createBiquadFilter();
+        filt.type='lowpass'; filt.frequency.value=600; filt.Q.value=0.3;
+        const env=c.createGain();
+        env.gain.setValueAtTime(0,when);
+        env.gain.linearRampToValueAtTime(vol*S.volume*0.4,when+dur*0.3);
+        env.gain.setValueAtTime(vol*S.volume*0.35,when+dur*0.7);
+        env.gain.exponentialRampToValueAtTime(0.0001,when+dur);
+        osc.connect(filt); filt.connect(env); env.connect(dest);
+        osc.start(when); osc.stop(when+dur+0.1);
+      });
+    } catch(e){}
+  },
+
+  // --- Deep Round Bass (Sade-style: sine sub + filtered harmonics) ---
   _bass(freq, when, dur, vol) {
     const c=S.audioCtx; if(!c||!S.masterGain) return;
     try {
-      const osc=c.createOscillator(), filt=c.createBiquadFilter(), env=c.createGain();
-      osc.type='triangle'; osc.frequency.value=freq;
-      filt.type='lowpass'; filt.frequency.value=350; filt.Q.value=1.2;
-      env.gain.setValueAtTime(vol*S.volume,when);
-      env.gain.setValueAtTime(vol*S.volume*0.85,when+0.06);
-      env.gain.exponentialRampToValueAtTime(0.0001,when+dur);
-      osc.connect(filt); filt.connect(env); env.connect(S.masterGain);
-      osc.start(when); osc.stop(when+dur+0.05);
+      // Pure sine sub for deep bottom
+      const sub=c.createOscillator(), subEnv=c.createGain();
+      sub.type='sine'; sub.frequency.value=freq;
+      subEnv.gain.setValueAtTime(vol*S.volume*0.9,when);
+      subEnv.gain.setValueAtTime(vol*S.volume*0.7,when+0.08);
+      subEnv.gain.exponentialRampToValueAtTime(0.0001,when+dur);
+      sub.connect(subEnv); subEnv.connect(S.masterGain);
+      // Filtered triangle for warmth/presence
+      const harm=c.createOscillator(), filt=c.createBiquadFilter(), harmEnv=c.createGain();
+      harm.type='triangle'; harm.frequency.value=freq;
+      filt.type='lowpass'; filt.frequency.value=280; filt.Q.value=0.8;
+      harmEnv.gain.setValueAtTime(vol*S.volume*0.5,when);
+      harmEnv.gain.exponentialRampToValueAtTime(0.0001,when+dur);
+      harm.connect(filt); filt.connect(harmEnv); harmEnv.connect(S.masterGain);
+      sub.start(when); harm.start(when);
+      sub.stop(when+dur+0.05); harm.stop(when+dur+0.05);
     } catch(e){}
   },
 
-  // --- Brushed Snare ---
+  // --- Rim Click (subtle, not a snare) ---
   _brush(when, vol) {
     const c=S.audioCtx; if(!c||!S.masterGain) return;
     try {
-      const buf=c.createBuffer(1,c.sampleRate*0.12,c.sampleRate);
+      // Short, tight click — not a full snare brush
+      const buf=c.createBuffer(1,c.sampleRate*0.04,c.sampleRate);
       const d=buf.getChannelData(0);
-      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(c.sampleRate*0.06));
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(c.sampleRate*0.008));
       const src=c.createBufferSource(), filt=c.createBiquadFilter(), env=c.createGain();
       src.buffer=buf;
-      filt.type='bandpass'; filt.frequency.value=3000; filt.Q.value=0.4;
-      env.gain.setValueAtTime(vol*S.volume,when);
-      env.gain.exponentialRampToValueAtTime(0.0001,when+0.12);
+      filt.type='bandpass'; filt.frequency.value=2000; filt.Q.value=2.0;
+      env.gain.setValueAtTime(vol*S.volume*0.6,when);
+      env.gain.exponentialRampToValueAtTime(0.0001,when+0.04);
       src.connect(filt); filt.connect(env); env.connect(S.masterGain);
       src.start(when);
     } catch(e){}
   },
 
-  // --- Soft Hi-hat ---
+  // --- Feather Hi-hat ---
   _hat(when, vol, open) {
     const c=S.audioCtx; if(!c||!S.masterGain) return;
     try {
-      const dur=open?0.15:0.04;
+      const dur=open?0.1:0.025;
       const buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate);
       const d=buf.getChannelData(0);
-      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(c.sampleRate*(open?0.08:0.015)));
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(c.sampleRate*(open?0.05:0.008)));
       const src=c.createBufferSource(), filt=c.createBiquadFilter(), env=c.createGain();
       src.buffer=buf;
-      filt.type='highpass'; filt.frequency.value=7000; filt.Q.value=0.3;
-      env.gain.setValueAtTime(vol*S.volume*0.7,when);
+      filt.type='highpass'; filt.frequency.value=8500; filt.Q.value=0.2;
+      env.gain.setValueAtTime(vol*S.volume*0.4,when);
       env.gain.exponentialRampToValueAtTime(0.0001,when+dur);
       src.connect(filt); filt.connect(env); env.connect(S.masterGain);
       src.start(when);
     } catch(e){}
   },
 
-  // --- Soft Kick ---
+  // --- Gentle Kick (felt beater, not punchy) ---
   _kick(when, vol) {
     const c=S.audioCtx; if(!c||!S.masterGain) return;
     try {
       const osc=c.createOscillator(), env=c.createGain();
       osc.type='sine';
-      osc.frequency.setValueAtTime(120,when);
-      osc.frequency.exponentialRampToValueAtTime(40,when+0.12);
-      env.gain.setValueAtTime(vol*S.volume,when);
-      env.gain.exponentialRampToValueAtTime(0.0001,when+0.2);
+      osc.frequency.setValueAtTime(80,when);
+      osc.frequency.exponentialRampToValueAtTime(35,when+0.18);
+      env.gain.setValueAtTime(vol*S.volume*0.7,when);
+      env.gain.exponentialRampToValueAtTime(0.0001,when+0.25);
       osc.connect(env); env.connect(S.masterGain);
-      osc.start(when); osc.stop(when+0.25);
+      osc.start(when); osc.stop(when+0.3);
     } catch(e){}
   },
 
@@ -31294,54 +31400,67 @@ const BarVibes = {
   _melody(chord, when, beatLen, vol) {
     const c=S.audioCtx; if(!c||!S.masterGain) return;
     try {
+      const dest=this._getReverbBus();
       const scale=chord.n.map(f=>f*2).concat(chord.n.map(f=>f*4));
-      const noteCount=2+Math.floor(Math.random()*3);
+      const noteCount=2+Math.floor(Math.random()*2);
       for(let i=0;i<noteCount;i++){
         const freq=scale[Math.floor(Math.random()*scale.length)];
-        const t=when+i*beatLen*0.25;
-        const dur=beatLen*0.2+Math.random()*beatLen*0.2;
+        const t=when+i*beatLen*0.3;
+        const dur=beatLen*0.3+Math.random()*beatLen*0.3;
         const osc=c.createOscillator(), env=c.createGain();
         osc.type='sine';
-        osc.frequency.value=freq*(1+Math.random()*0.003);
+        osc.frequency.value=freq*(1+Math.random()*0.002);
         env.gain.setValueAtTime(0,t);
-        env.gain.linearRampToValueAtTime(vol*S.volume*0.5,t+0.01);
+        env.gain.linearRampToValueAtTime(vol*S.volume*0.35,t+0.02);
         env.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-        osc.connect(env); env.connect(S.masterGain);
+        osc.connect(env); env.connect(dest);
         osc.start(t); osc.stop(t+dur+0.05);
       }
     } catch(e){}
   },
 
-  // --- Saxophone (FM synthesis: detuned sawtooth pair + bandpass + vibrato) ---
+  // --- Saxophone (breathy, warm: filtered sawtooth pair + noise breath layer + vibrato) ---
   _sax(freq, when, dur, vol) {
     const c=S.audioCtx; if(!c||!S.masterGain) return;
     try {
+      const dest=this._getReverbBus();
       // Two slightly detuned oscillators for richness
       const osc1=c.createOscillator(), osc2=c.createOscillator();
       osc1.type='sawtooth'; osc2.type='sawtooth';
-      osc1.frequency.value=freq; osc2.frequency.value=freq*1.003;
-      // Vibrato LFO
+      osc1.frequency.value=freq; osc2.frequency.value=freq*1.002;
+      // Vibrato LFO — slow, subtle, like a human playing
       const lfo=c.createOscillator(), lfoG=c.createGain();
-      lfo.type='sine'; lfo.frequency.value=5;
-      lfoG.gain.value=freq*0.008;
+      lfo.type='sine'; lfo.frequency.value=4.5;
+      lfoG.gain.value=freq*0.006;
       lfo.connect(lfoG);
       lfoG.connect(osc1.frequency); lfoG.connect(osc2.frequency);
-      // Bandpass filter for that nasal sax quality
+      // Bandpass for warm nasal quality (lower Q = breathier)
       const filt=c.createBiquadFilter();
-      filt.type='bandpass'; filt.frequency.value=1200; filt.Q.value=1.5;
-      // Mix the two oscillators
-      const mix=c.createGain(); mix.gain.value=0.5;
-      osc1.connect(mix); osc2.connect(mix);
-      mix.connect(filt);
-      // ADSR envelope
+      filt.type='bandpass'; filt.frequency.value=1000; filt.Q.value=0.8;
+      const mix=c.createGain(); mix.gain.value=0.45;
+      osc1.connect(mix); osc2.connect(mix); mix.connect(filt);
+      // Breath noise layer — subtle air sound underneath
+      const breathBuf=c.createBuffer(1,c.sampleRate*Math.max(dur,0.01),c.sampleRate);
+      const bd=breathBuf.getChannelData(0);
+      for(let i=0;i<bd.length;i++) bd[i]=(Math.random()*2-1)*0.15;
+      const breathSrc=c.createBufferSource();
+      breathSrc.buffer=breathBuf;
+      const breathFilt=c.createBiquadFilter();
+      breathFilt.type='bandpass'; breathFilt.frequency.value=2500; breathFilt.Q.value=0.5;
+      const breathEnv=c.createGain();
+      breathEnv.gain.setValueAtTime(0,when);
+      breathEnv.gain.linearRampToValueAtTime(vol*S.volume*0.3,when+0.03);
+      breathEnv.gain.exponentialRampToValueAtTime(0.0001,when+dur);
+      breathSrc.connect(breathFilt); breathFilt.connect(breathEnv); breathEnv.connect(dest);
+      // ADSR — slow attack for legato feel
       const env=c.createGain();
       env.gain.setValueAtTime(0,when);
-      env.gain.linearRampToValueAtTime(vol*S.volume,when+0.04);
-      env.gain.setValueAtTime(vol*S.volume*0.85,when+0.08);
-      env.gain.setValueAtTime(vol*S.volume*0.7,when+dur*0.7);
+      env.gain.linearRampToValueAtTime(vol*S.volume,when+0.06);
+      env.gain.setValueAtTime(vol*S.volume*0.8,when+0.12);
+      env.gain.setValueAtTime(vol*S.volume*0.65,when+dur*0.7);
       env.gain.exponentialRampToValueAtTime(0.0001,when+dur);
-      filt.connect(env); env.connect(S.masterGain);
-      osc1.start(when); osc2.start(when); lfo.start(when);
+      filt.connect(env); env.connect(dest);
+      osc1.start(when); osc2.start(when); lfo.start(when); breathSrc.start(when);
       osc1.stop(when+dur+0.05); osc2.stop(when+dur+0.05); lfo.stop(when+dur+0.05);
     } catch(e){}
   },
@@ -31408,24 +31527,32 @@ const BarVibes = {
       const swing=self.currentBeat%2===1?rec.swing*beatLen:0;
       const t=now+swing;
 
-      // Rhodes pad (every beat, staggered voicing)
+      // Rhodes pad (every beat, staggered voicing with space)
       chord.n.forEach((freq,i)=>{
-        self._rhodes(freq,t+i*0.012,beatLen*0.9,rec.rhodesVol);
+        self._rhodes(freq,t+i*0.015,beatLen*0.85,rec.rhodesVol);
       });
 
-      // Walking bass
+      // Synth pad — sustained warmth underneath (on beat 0 of each bar)
+      if(rec.padVol&&self.currentBeat===0){
+        self._pad(chord,t,beatLen*4,rec.padVol);
+      }
+
+      // Bass — deep and round, less walking, more pocket
       let bassFreq=chord.b;
-      if(self.currentBeat===2) bassFreq=chord.n[1]*0.5;
-      if(self.currentBeat===3) bassFreq=chord.b*1.25;
-      self._bass(bassFreq,t,beatLen*0.7,rec.bassVol);
+      if(self.currentBeat===2) bassFreq=chord.n[0]*0.5;
+      if(self.currentBeat===3) bassFreq=chord.b*1.2;
+      // Skip some bass notes for space (Sade bass breathes)
+      if(self.currentBeat===0||self.currentBeat===2||Math.random()>0.3)
+        self._bass(bassFreq,t,beatLen*0.8,rec.bassVol);
 
-      // Drums: kick on 1&3, brush on 2&4, hats everywhere
+      // Drums: gentle kick on 1&3, rim click on 2&4, feather hats
       if(self.currentBeat===0||self.currentBeat===2) self._kick(t,rec.drumVol);
-      if(self.currentBeat===1||self.currentBeat===3) self._brush(t,rec.drumVol*0.8);
-      self._hat(t,rec.drumVol*0.6,self.currentBeat%2===1);
+      if(self.currentBeat===1||self.currentBeat===3) self._brush(t,rec.drumVol*0.6);
+      // Hats only on some beats — space is key
+      if(Math.random()>0.25) self._hat(t,rec.drumVol*0.4,self.currentBeat%2===1);
 
-      // Occasional melodic run
-      if(Math.random()<rec.melodyChance) self._melody(chord,t,beatLen,rec.rhodesVol*0.6);
+      // Rare melodic fills
+      if(Math.random()<rec.melodyChance) self._melody(chord,t,beatLen,rec.rhodesVol*0.5);
 
       // Sax melody for tracks with _saxPattern (plays on beat 0 of each bar)
       if(rec._saxPattern&&rec.saxVol&&self.currentBeat===0){
@@ -31473,6 +31600,9 @@ const BarVibes = {
     this.active=false;
     if(this.beatInterval){clearInterval(this.beatInterval);this.beatInterval=null;}
     this.stopCrackle();
+    // Clean up reverb node
+    try{if(this._reverbNode){this._reverbNode.disconnect();this._reverbNode=null;}
+    if(this._reverbGain){this._reverbGain.disconnect();this._reverbGain=null;}}catch(e){}
   },
 
   // --- Voting ---
