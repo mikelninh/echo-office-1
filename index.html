@@ -14262,10 +14262,12 @@ const PremiumRender = {
       }
     }
     
-    // Apply sprite enhancements (AA removed — destroys pixel art aesthetic)
+    // Apply sprite enhancements — outline first (underneath), then lighting, then animation
     if (typeof SpriteEnhancements !== 'undefined') {
+      SpriteEnhancements.addSpriteOutline(ctx, x, y, grid, scale, skinId);
       SpriteEnhancements.addRimLighting(ctx, x, y, grid, scale, skinId);
       SpriteEnhancements.addSpecularHighlight(ctx, x, y, grid, scale, skinId);
+      SpriteEnhancements.addEmissiveGlow(ctx, x, y, grid, scale, skinId);
       SpriteEnhancements.addEyeBlink(ctx, x, y, grid, scale, skinId);
     }
   },
@@ -14342,10 +14344,12 @@ const PremiumRender = {
       }
     }
     
-    // Apply sprite enhancements (AA removed — destroys pixel art aesthetic)
+    // Apply sprite enhancements — outline first (underneath), then lighting, then animation
     if (typeof SpriteEnhancements !== 'undefined') {
+      SpriteEnhancements.addSpriteOutline(ctx, x, y, grid, scale, skinId);
       SpriteEnhancements.addRimLighting(ctx, x, y, grid, scale, skinId);
       SpriteEnhancements.addSpecularHighlight(ctx, x, y, grid, scale, skinId);
+      SpriteEnhancements.addEmissiveGlow(ctx, x, y, grid, scale, skinId);
       SpriteEnhancements.addEyeBlink(ctx, x, y, grid, scale, skinId);
     }
   }
@@ -14573,55 +14577,34 @@ const SpriteEnhancements = {
     ctx.restore();
   },
 
-  // Sub-pixel smoothing: half-alpha pixels on sprite edges for anti-aliasing
-  addSubPixelSmoothing(ctx, x, y, grid, scale, skinId) {
-    if (!grid || scale < 2) return; // Only apply to scaled sprites for visible effect
+  // Sprite outline: clean 1px dark outline for readability against any background
+  // This is THE technique that makes pixel art characters "pop" (Celeste, Eastward, HLD)
+  addSpriteOutline(ctx, x, y, grid, scale, skinId) {
+    if (!grid) return;
+    
+    // Outline color: dark version of skin's main color, not pure black
+    const skin = VISITOR_SKINS.find(s => s.id === skinId);
+    const outlineColor = skin ? this._darkenColor(skin.color, 0.7) : 'rgba(10,8,15,0.8)';
     
     ctx.save();
+    ctx.fillStyle = outlineColor;
     
-    // Analyze edges and add anti-aliasing
+    // Draw 1px outline around the entire sprite silhouette (4-directional, not diagonal)
     for (let row = 0; row < grid.length; row++) {
       const r = grid[row];
       for (let col = 0; col < r.length; col++) {
         const c = r[col];
-        if (c && c !== '.') {
-          // Check all 8 directions for edge detection
-          const neighbors = [
-            { dx: -1, dy: -1 }, { dx: 0, dy: -1 }, { dx: 1, dy: -1 }, // Top row
-            { dx: -1, dy: 0  },                    { dx: 1, dy: 0  }, // Middle (skip center)
-            { dx: -1, dy: 1  }, { dx: 0, dy: 1  }, { dx: 1, dy: 1  }  // Bottom row
-          ];
-          
-          // Check each direction for edges
-          neighbors.forEach(({dx, dy}) => {
-            const checkRow = row + dy;
-            const checkCol = col + dx;
-            
-            // If neighbor is empty or out of bounds, this is an edge
-            const isEmpty = checkRow < 0 || checkRow >= grid.length || 
-                          checkCol < 0 || checkCol >= r.length || 
-                          !grid[checkRow] || !grid[checkRow][checkCol] || 
-                          grid[checkRow][checkCol] === '.';
-            
-            if (isEmpty) {
-              // Calculate edge pixel position
-              const edgeX = x + col * scale + (dx * scale * 0.5);
-              const edgeY = y + row * scale + (dy * scale * 0.5);
-              
-              // Use a lighter version of the main color with 50% alpha
-              const edgeColor = this.lightenColor(c, 0.3);
-              ctx.fillStyle = edgeColor + '80'; // 50% alpha
-              
-              // Draw sub-pixel smoothing - smaller rectangles at edge positions
-              const smoothSize = scale * 0.4; // 40% of pixel size
-              ctx.fillRect(
-                edgeX - smoothSize * 0.5, 
-                edgeY - smoothSize * 0.5, 
-                smoothSize, 
-                smoothSize
-              );
-            }
-          });
+        if (!c || c === '.') continue;
+        
+        // Check 4 cardinal neighbors — if empty, draw outline pixel there
+        const dirs = [[0,-1],[0,1],[-1,0],[1,0]];
+        for (const [dc, dr] of dirs) {
+          const nr = row + dr, nc = col + dc;
+          if (nr < 0 || nr >= grid.length || nc < 0 || nc >= r.length || 
+              !grid[nr] || !grid[nr][nc] || grid[nr][nc] === '.') {
+            // Empty neighbor — draw outline pixel
+            ctx.fillRect(x + (col + dc) * scale, y + (row + dr) * scale, scale, scale);
+          }
         }
       }
     }
@@ -14629,25 +14612,71 @@ const SpriteEnhancements = {
     ctx.restore();
   },
 
-  // Helper function to lighten colors for edge smoothing
-  lightenColor(color, factor) {
-    // Handle different color formats
-    if (color.startsWith('#')) {
-      // Hex color
-      const hex = color.slice(1);
-      const r = parseInt(hex.substr(0, 2), 16);
-      const g = parseInt(hex.substr(2, 2), 16);
-      const b = parseInt(hex.substr(4, 2), 16);
-      
-      const newR = Math.min(255, Math.floor(r + (255 - r) * factor));
-      const newG = Math.min(255, Math.floor(g + (255 - g) * factor));
-      const newB = Math.min(255, Math.floor(b + (255 - b) * factor));
-      
-      return `#${newR.toString(16).padStart(2,'0')}${newG.toString(16).padStart(2,'0')}${newB.toString(16).padStart(2,'0')}`;
+  // Emissive glow: certain pixels glow additively (eyes on energy skins, weapons, effects)
+  addEmissiveGlow(ctx, x, y, grid, scale, skinId) {
+    if (!grid) return;
+    
+    // Skins with glowing elements and their glow colors
+    const emissiveSkins = {
+      'robot': { colors: ['#0ff', '#0cf'], glowColor: '#0ff' },
+      'ironsuit-v': { colors: ['#fff', '#ff0'], glowColor: '#4df' },
+      'ironsuit_v': { colors: ['#fff', '#ff0'], glowColor: '#4df' },
+      'blue_bomber': { colors: ['#0ff', '#0cf', '#fff'], glowColor: '#0af' },
+      'shadow_ninja': { colors: ['#f00', '#c00'], glowColor: '#f22' },
+      'scarlet_witch': { colors: ['#f0f', '#f44', '#f08'], glowColor: '#f4f' },
+      'super_saiyan': { colors: ['#ff0', '#ffa', '#ff8'], glowColor: '#ff4' },
+      'speedster-v': { colors: ['#ff0', '#f80'], glowColor: '#f90' },
+      'speedster_v': { colors: ['#ff0', '#f80'], glowColor: '#f90' },
+      'proto_man': { colors: ['#ff0', '#fff'], glowColor: '#ff8' },
+      'emerald_archer': { colors: ['#0f0', '#0a0'], glowColor: '#0f4' }
+    };
+    
+    const config = emissiveSkins[skinId];
+    if (!config) return;
+    
+    const pn = performance.now() / 1000;
+    const pulse = 0.5 + 0.3 * Math.sin(pn * 3); // Gentle pulse
+    
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen'; // Additive blending for glow
+    
+    for (let row = 0; row < grid.length; row++) {
+      const r = grid[row];
+      for (let col = 0; col < r.length; col++) {
+        const c = r[col];
+        if (!c || c === '.') continue;
+        
+        // Check if this pixel matches an emissive color
+        const isEmissive = config.colors.some(ec => 
+          c.toLowerCase() === ec.toLowerCase() || 
+          c.toLowerCase().startsWith(ec.toLowerCase().slice(0, 4))
+        );
+        
+        if (isEmissive) {
+          // Inner glow (on the pixel itself)
+          ctx.fillStyle = config.glowColor + Math.floor(pulse * 128).toString(16).padStart(2, '0');
+          ctx.fillRect(x + col * scale, y + row * scale, scale, scale);
+          
+          // Outer glow halo (1px radius around the pixel, very soft)
+          const haloAlpha = pulse * 0.15;
+          ctx.fillStyle = `${config.glowColor}${Math.floor(haloAlpha * 255).toString(16).padStart(2, '0')}`;
+          ctx.fillRect(x + (col - 1) * scale, y + (row - 1) * scale, scale * 3, scale * 3);
+        }
+      }
     }
     
-    // Return original color if we can't parse it
-    return color;
+    ctx.restore();
+  },
+
+  // Helper: darken a hex color by a factor (0 = black, 1 = original)
+  _darkenColor(color, factor) {
+    if (!color || !color.startsWith('#')) return 'rgba(10,8,15,0.8)';
+    const hex = color.replace('#', '');
+    const full = hex.length === 3 ? hex.split('').map(h => h + h).join('') : hex;
+    const r = Math.floor(parseInt(full.substr(0, 2), 16) * (1 - factor));
+    const g = Math.floor(parseInt(full.substr(2, 2), 16) * (1 - factor));
+    const b = Math.floor(parseInt(full.substr(4, 2), 16) * (1 - factor));
+    return `rgba(${r},${g},${b},0.85)`;
   }
 };
 
