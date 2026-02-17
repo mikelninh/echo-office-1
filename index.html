@@ -14262,9 +14262,10 @@ const PremiumRender = {
       }
     }
     
-    // Apply rim lighting enhancement
+    // Apply sprite enhancements
     if (typeof SpriteEnhancements !== 'undefined') {
       SpriteEnhancements.addRimLighting(ctx, x, y, grid, scale, skinId);
+      SpriteEnhancements.addSpecularHighlight(ctx, x, y, grid, scale, skinId);
     }
   },
 
@@ -14340,9 +14341,10 @@ const PremiumRender = {
       }
     }
     
-    // Apply rim lighting enhancement
+    // Apply sprite enhancements
     if (typeof SpriteEnhancements !== 'undefined') {
       SpriteEnhancements.addRimLighting(ctx, x, y, grid, scale, skinId);
+      SpriteEnhancements.addSpecularHighlight(ctx, x, y, grid, scale, skinId);
     }
   }
 };
@@ -14378,6 +14380,51 @@ const SpriteEnhancements = {
             const rimX = x + col * scale + (hasEmptyLeft ? -1 : 0);
             const rimY = y + row * scale + (hasEmptyTop ? -1 : 0);
             ctx.fillRect(rimX, rimY, scale + (hasEmptyLeft ? 1 : 0), scale + (hasEmptyTop ? 1 : 0));
+          }
+        }
+      }
+    }
+    
+    ctx.restore();
+  },
+
+  // Dynamic specular highlight: moving light reflection on metallic skins
+  addSpecularHighlight(ctx, x, y, grid, scale, skinId) {
+    // Define metallic skins that should have specular highlights
+    const metallicSkins = new Set([
+      'robot', 'ironsuit-v', 'ironsuit_v', 'blue_bomber', 'megaman', 
+      'silver_surfer', 'cyborg', 'proto_man', 'steel_knight'
+    ]);
+    
+    if (!metallicSkins.has(skinId) || !grid) return;
+    
+    const pn = performance.now() / 1000;
+    
+    // Moving highlight sweep across sprite (left to right, then right to left)
+    const sweepSpeed = 1.5;
+    const sweepPhase = (pn * sweepSpeed) % 4; // 4-second cycle
+    const sweepPos = sweepPhase < 2 ? sweepPhase / 2 : 2 - sweepPhase / 2; // 0 to 1 and back
+    
+    const spriteWidth = grid[0] ? grid[0].length : 0;
+    const highlightCol = Math.floor(sweepPos * spriteWidth);
+    const highlightWidth = 2; // 2-pixel wide highlight
+    
+    ctx.save();
+    
+    // Bright white highlight with falloff
+    for (let row = 0; row < grid.length; row++) {
+      const r = grid[row];
+      for (let col = Math.max(0, highlightCol - 1); col < Math.min(r.length, highlightCol + highlightWidth + 1); col++) {
+        const c = r[col];
+        if (c && c !== '.') {
+          // Calculate highlight intensity based on distance from sweep center
+          const distFromCenter = Math.abs(col - highlightCol - 0.5);
+          let intensity = 1.0 - (distFromCenter / highlightWidth);
+          intensity = Math.max(0, intensity) * 0.7; // Cap at 70% for subtlety
+          
+          if (intensity > 0) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
+            ctx.fillRect(x + col * scale, y + row * scale, scale, scale);
           }
         }
       }
