@@ -6,14 +6,15 @@
 (function() {
   'use strict';
 
-  // Unpack block-scoped vars from main script
-  const ctx=window._ctx, W=window._W, H=window._H, S=window._S, LS=window._LS;
-  const getObjects=window._getObjects;
-
   // Override the existing renderFloor1 with this enhanced version
   window._originalRenderFloor1 = window.renderFloor1;
 
   window.renderFloor1 = function() {
+    // Read vars lazily (they're set after first script block completes)
+    const ctx=window._ctx, W=window._W, H=window._H, S=window._S, LS=window._LS;
+    const getObjects=window._getObjects;
+    if(!ctx||!S)return; // not ready yet
+
     if (typeof FloorDepth !== 'undefined') FloorDepth.renderBackground(ctx, 1);
 
     const t = S.time;
