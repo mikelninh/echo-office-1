@@ -2782,6 +2782,7 @@ const FLOOR_OBJECTS={
     {id:'furniture_catalog',x:650,y:50,w:120,h:400,label:'Furniture Catalog',interact:true,collide:true},
     {id:'wall_colors',x:100,y:50,w:100,h:60,label:'Wall Colors',interact:true,collide:true},
     {id:'floor_colors',x:100,y:120,w:100,h:60,label:'Floor Colors',interact:true,collide:true},
+    {id:'card_display_wall',x:100,y:190,w:100,h:50,label:'🎴 Card Display',interact:true,collide:true},
     {id:'save_room',x:100,y:450,w:80,h:40,label:'💾 Save Room',interact:true,collide:true},
     {id:'room_settings',x:200,y:450,w:100,h:40,label:'⚙️ Room Settings',interact:true,collide:true},
     {id:'visit_rooms',x:320,y:450,w:100,h:40,label:'🏠 Visit Rooms',interact:true,collide:true},
@@ -11344,6 +11345,24 @@ function renderFloor8(){
     }
   });
   
+  // ── Display Wall on builder view too ──
+  if (typeof DisplayWall !== 'undefined' && typeof CardCollection !== 'undefined') {
+    DisplayWall.render(ctx, { furniture: RoomSystem.furniture, wallColor: RoomSystem.wallColor });
+  }
+
+  // Card Display Wall button
+  const cdw=getObjects().find(o=>o.id==='card_display_wall');
+  if(cdw){
+    ctx.fillStyle='#2a1a3a';ctx.fillRect(cdw.x,cdw.y,cdw.w,cdw.h);
+    ctx.strokeStyle='#ffd700';ctx.lineWidth=1;ctx.strokeRect(cdw.x,cdw.y,cdw.w,cdw.h);
+    ctx.fillStyle='#ffd700';ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText('🎴 CARDS',cdw.x+cdw.w/2,cdw.y+20);
+    ctx.fillStyle='#aaa';ctx.font='7px monospace';
+    const dc=typeof CardCollection!=='undefined'?CardCollection.getDisplayed().length:0;
+    ctx.fillText(dc+'/'+DisplayWall.MAX_DISPLAY+' displayed',cdw.x+cdw.w/2,cdw.y+35);
+    ctx.textAlign='left';
+  }
+
   // Render placed furniture
   RoomSystem.furniture.forEach(furn=>{
     renderFurniture(furn);
@@ -11378,6 +11397,11 @@ function renderUserRoom(room){
   // Elevator (always present)
   renderElevator();
   
+  // ── Display Wall (holy grails + collectible cards) ──
+  if (typeof DisplayWall !== 'undefined' && typeof CardCollection !== 'undefined') {
+    DisplayWall.render(ctx, room);
+  }
+
   // Render furniture
   if(room.furniture){
     room.furniture.forEach(furn=>{
@@ -13947,6 +13971,7 @@ function interact(){
     case'furniture_catalog':showFurnitureCatalog();break;
     case'wall_colors':showWallColorPicker();break;
     case'floor_colors':showFloorColorPicker();break;
+    case'card_display_wall':showCardCollectionUI();break;
     case'save_room':saveRoom();break;
     case'room_settings':showRoomSettings();break;
     case'visit_rooms':RoomSystem.showRoomList();break;
@@ -22497,6 +22522,434 @@ const VeVeShowroom = {
     }
   }
 };
+
+// ═══════════════════════════════════════════════════════════════
+// HOLY GRAIL CARD COLLECTION & DISPLAY WALL SYSTEM
+// ═══════════════════════════════════════════════════════════════
+
+const CARD_RARITIES = {
+  common:      { name:'Common',      color:'#cccccc', glow:0,  particles:false, spotlight:false, frameColor:'#666666' },
+  rare:        { name:'Rare',        color:'#4488ff', glow:4,  particles:false, spotlight:false, frameColor:'#3366cc' },
+  super_rare:  { name:'Super Rare',  color:'#44ddff', glow:6,  particles:false, spotlight:false, frameColor:'#2288aa' },
+  ultra_rare:  { name:'Ultra Rare',  color:'#ffd700', glow:10, particles:true,  spotlight:false, frameColor:'#cc9900' },
+  secret_rare: { name:'Secret Rare', color:'rainbow',  glow:14, particles:true,  spotlight:true,  frameColor:'#ff44ff' },
+  holy_grail:  { name:'Holy Grail',  color:'#ffd700', glow:20, particles:true,  spotlight:true,  frameColor:'#ffd700' }
+};
+
+const YUGIOH_ARCHETYPES = {
+  'Blue-Eyes':     { color1:'#4488ff', color2:'#88ccff', element:'light',  icon:'🐉' },
+  'Dark Magician': { color1:'#6622aa', color2:'#bb66ff', element:'dark',   icon:'🧙' },
+  'Red-Eyes':      { color1:'#cc2222', color2:'#ff6644', element:'dark',   icon:'🐉' },
+  'Exodia':        { color1:'#ddaa00', color2:'#ffdd44', element:'dark',   icon:'✋' },
+  'God Cards':     { color1:'#dd2200', color2:'#ffcc00', element:'divine', icon:'⚡' },
+  'Stardust':      { color1:'#aaccff', color2:'#ffffff', element:'wind',   icon:'⭐' },
+  'Galaxy-Eyes':   { color1:'#2244aa', color2:'#6688ff', element:'light',  icon:'🌌' },
+};
+
+const YUGIOH_ELEMENT_COLORS = {
+  light:'#ffdd44', dark:'#8844cc', fire:'#ff4422', water:'#4488ff',
+  earth:'#aa8844', wind:'#44cc88', divine:'#ffd700'
+};
+
+// Sample holy grails for demo (real data comes from monitor.mjs)
+const SAMPLE_HOLY_GRAILS = [
+  { id:'bewed-1st', name:'Blue-Eyes White Dragon', edition:'1st Edition LOB-001', archetype:'Blue-Eyes', rarity:'holy_grail', marketPrice:85000, img:null },
+  { id:'dm-1st', name:'Dark Magician', edition:'1st Edition LOB-005', archetype:'Dark Magician', rarity:'holy_grail', marketPrice:12000, img:null },
+  { id:'red-1st', name:'Red-Eyes B. Dragon', edition:'1st Edition LOB-070', archetype:'Red-Eyes', rarity:'holy_grail', marketPrice:8500, img:null },
+  { id:'exodia-head', name:'Exodia the Forbidden One', edition:'1st Edition LOB-124', archetype:'Exodia', rarity:'holy_grail', marketPrice:25000, img:null },
+  { id:'slifer', name:'Slifer the Sky Dragon', edition:'GBI-001 Secret Rare', archetype:'God Cards', rarity:'holy_grail', marketPrice:7500, img:null },
+  { id:'obelisk', name:'Obelisk the Tormentor', edition:'GBI-002 Secret Rare', archetype:'God Cards', rarity:'holy_grail', marketPrice:6000, img:null },
+  { id:'ra', name:'The Winged Dragon of Ra', edition:'GBI-003 Secret Rare', archetype:'God Cards', rarity:'holy_grail', marketPrice:9000, img:null },
+  { id:'bls', name:'Black Luster Soldier', edition:'IOC-025 1st Edition', archetype:'Exodia', rarity:'holy_grail', marketPrice:18000, img:null },
+  { id:'stardust', name:'Stardust Dragon', edition:'Ghost Rare 1st', archetype:'Stardust', rarity:'secret_rare', marketPrice:4800, img:null },
+  { id:'galaxy', name:'Galaxy-Eyes Photon Dragon', edition:'Ghost Rare', archetype:'Galaxy-Eyes', rarity:'ultra_rare', marketPrice:2500, img:null },
+];
+
+const CardCollection = {
+  cards: [],
+
+  init() {
+    this.cards = LS.get('cardCollection', []);
+    if (!this.cards.length) {
+      // Starter pack: 3 random cards
+      const starters = [...SAMPLE_HOLY_GRAILS].sort(() => Math.random() - 0.5).slice(0, 3);
+      this.cards = starters.map(c => ({ ...c, acquired: Date.now(), displayed: false, wallSlot: -1 }));
+      LS.set('cardCollection', this.cards);
+    }
+  },
+
+  addCard(card) {
+    this.cards.push({ ...card, acquired: Date.now(), displayed: false, wallSlot: -1 });
+    LS.set('cardCollection', this.cards);
+  },
+
+  getDisplayed() { return this.cards.filter(c => c.displayed); },
+
+  toggleDisplay(cardId, slot) {
+    const card = this.cards.find(c => c.id === cardId);
+    if (!card) return;
+    card.displayed = !card.displayed;
+    card.wallSlot = card.displayed ? slot : -1;
+    LS.set('cardCollection', this.cards);
+  },
+
+  getTotalValue() {
+    return this.cards.reduce((sum, c) => sum + (c.marketPrice || 0), 0);
+  },
+
+  getHolyGrailCount() {
+    return this.cards.filter(c => c.rarity === 'holy_grail').length;
+  }
+};
+
+// ── HOLOGRAPHIC CARD RENDERER ──
+// The visual crown jewel — every card rendered as a living holographic artwork
+
+function renderHolographicCard(ctx, x, y, w, h, card, time, options = {}) {
+  const rInfo = CARD_RARITIES[card.rarity] || CARD_RARITIES.common;
+  const arch = YUGIOH_ARCHETYPES[card.archetype] || { color1:'#444', color2:'#888', element:'dark', icon:'🃏' };
+  const hover = options.hover || false;
+  const scale = options.scale || 1;
+  const tilt = options.tilt || 0;
+
+  ctx.save();
+  ctx.translate(x + w/2, y + h/2);
+  if (scale !== 1) ctx.scale(scale, scale);
+  if (tilt) ctx.rotate(tilt);
+  const cx = -w/2, cy = -h/2;
+
+  // ── Card shadow ──
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 4;
+  ctx.fillStyle = '#111';
+  ctx.fillRect(cx - 1, cy - 1, w + 2, h + 2);
+  ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+  // ── Card base gradient (archetype colors) ──
+  const baseGrad = ctx.createLinearGradient(cx, cy, cx + w, cy + h);
+  baseGrad.addColorStop(0, arch.color1);
+  baseGrad.addColorStop(0.5, arch.color2);
+  baseGrad.addColorStop(1, arch.color1);
+  ctx.fillStyle = baseGrad;
+  ctx.fillRect(cx, cy, w, h);
+
+  // ── Holographic foil overlay (animated rainbow shimmer) ──
+  if (rInfo.glow > 0) {
+    const foilHue = (time * 40 + x * 2 + y) % 360;
+    const foilAlpha = card.rarity === 'holy_grail' ? 0.35 : (rInfo.glow / 60);
+    const foilGrad = ctx.createLinearGradient(
+      cx + Math.sin(time * 1.5) * w * 0.3, cy,
+      cx + w + Math.cos(time * 1.2) * w * 0.3, cy + h
+    );
+    foilGrad.addColorStop(0, `hsla(${foilHue}, 80%, 65%, ${foilAlpha})`);
+    foilGrad.addColorStop(0.25, `hsla(${(foilHue + 60) % 360}, 80%, 65%, ${foilAlpha * 0.6})`);
+    foilGrad.addColorStop(0.5, `hsla(${(foilHue + 120) % 360}, 80%, 65%, ${foilAlpha})`);
+    foilGrad.addColorStop(0.75, `hsla(${(foilHue + 200) % 360}, 80%, 65%, ${foilAlpha * 0.6})`);
+    foilGrad.addColorStop(1, `hsla(${(foilHue + 300) % 360}, 80%, 65%, ${foilAlpha})`);
+    ctx.fillStyle = foilGrad;
+    ctx.fillRect(cx, cy, w, h);
+  }
+
+  // ── Card border (frame) ──
+  ctx.strokeStyle = rInfo.frameColor;
+  ctx.lineWidth = card.rarity === 'holy_grail' ? 3 : 2;
+  ctx.strokeRect(cx + 1, cy + 1, w - 2, h - 2);
+
+  // ── Inner frame ──
+  ctx.strokeStyle = `${rInfo.frameColor}88`;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cx + 4, cy + 4, w - 8, h - 8);
+
+  // ── Pixel art monster area (center of card) ──
+  const artY = cy + h * 0.15;
+  const artH = h * 0.4;
+  const artX = cx + 6;
+  const artW = w - 12;
+
+  // Art background
+  const artBg = ctx.createRadialGradient(cx + w/2, artY + artH/2, 0, cx + w/2, artY + artH/2, artW * 0.7);
+  artBg.addColorStop(0, arch.color2 + 'aa');
+  artBg.addColorStop(1, arch.color1 + '44');
+  ctx.fillStyle = artBg;
+  ctx.fillRect(artX, artY, artW, artH);
+
+  // Monster icon (large, centered)
+  ctx.font = `${Math.floor(artH * 0.6)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText(arch.icon, cx + w/2, artY + artH * 0.72);
+
+  // ── Element badge (top-right) ──
+  const elemColor = YUGIOH_ELEMENT_COLORS[arch.element] || '#aaa';
+  ctx.fillStyle = elemColor;
+  ctx.beginPath();
+  ctx.arc(cx + w - 10, cy + 10, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#000';
+  ctx.font = '5px sans-serif';
+  ctx.fillText(arch.element[0].toUpperCase(), cx + w - 10, cy + 12);
+
+  // ── Card name ──
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fff';
+  ctx.shadowColor = '#000';
+  ctx.shadowBlur = 3;
+  const nameSize = Math.max(5, Math.min(8, w / card.name.length * 1.2));
+  ctx.font = `bold ${nameSize}px monospace`;
+  ctx.fillText(card.name, cx + w/2, cy + 10);
+  ctx.shadowBlur = 0;
+
+  // ── Edition text ──
+  ctx.font = `${Math.max(4, nameSize - 2)}px monospace`;
+  ctx.fillStyle = '#ddd';
+  ctx.fillText(card.edition, cx + w/2, artY + artH + 12);
+
+  // ── Rarity stars ──
+  const starY = cy + h - 14;
+  const starCount = card.rarity === 'holy_grail' ? 8 : card.rarity === 'secret_rare' ? 6 : card.rarity === 'ultra_rare' ? 4 : card.rarity === 'super_rare' ? 3 : card.rarity === 'rare' ? 2 : 1;
+  ctx.fillStyle = rInfo.color === 'rainbow' ? `hsl(${(time * 60) % 360}, 100%, 65%)` : rInfo.color;
+  ctx.font = '5px sans-serif';
+  const starStr = '★'.repeat(starCount);
+  ctx.fillText(starStr, cx + w/2, starY);
+
+  // ── Market price (if holy grail) ──
+  if (card.marketPrice >= 5000) {
+    ctx.fillStyle = '#ffd700';
+    ctx.font = 'bold 6px monospace';
+    ctx.fillText('€' + card.marketPrice.toLocaleString(), cx + w/2, cy + h - 5);
+  }
+
+  ctx.textAlign = 'left';
+
+  // ── Rarity glow (outer) ──
+  if (rInfo.glow > 0) {
+    const glowPulse = rInfo.glow + Math.sin(time * 3) * (rInfo.glow * 0.3);
+    const glowColor = rInfo.color === 'rainbow' ? `hsl(${(time * 60) % 360}, 100%, 60%)` : rInfo.color;
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = glowPulse;
+    ctx.strokeStyle = glowColor + '44';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(cx, cy, w, h);
+    ctx.shadowBlur = 0;
+  }
+
+  ctx.restore();
+
+  // ── Floating particles (ultra rare+) ──
+  if (rInfo.particles) {
+    const particleCount = card.rarity === 'holy_grail' ? 8 : 4;
+    for (let i = 0; i < particleCount; i++) {
+      const pAngle = time * 1.5 + i * (Math.PI * 2 / particleCount);
+      const pDist = (w * 0.6) + Math.sin(time * 2 + i) * 8;
+      const px = x + w/2 + Math.cos(pAngle) * pDist * 0.5;
+      const py = y + h/2 + Math.sin(pAngle) * pDist * 0.7;
+      const pAlpha = 0.4 + Math.sin(time * 3 + i * 2) * 0.3;
+      const pColor = rInfo.color === 'rainbow' ? `hsla(${(time * 80 + i * 40) % 360}, 100%, 70%, ${pAlpha})` : rInfo.color;
+      ctx.fillStyle = typeof pColor === 'string' && pColor.startsWith('hsla') ? pColor : `${pColor}${Math.floor(pAlpha * 255).toString(16).padStart(2,'0')}`;
+      ctx.beginPath();
+      ctx.arc(px, py, 1.5 + Math.sin(time * 4 + i) * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+// ── DISPLAY WALL SYSTEM (for user rooms on Floor 8) ──
+
+const DisplayWall = {
+  WALL_Y: 12,       // top of wall
+  WALL_H: 56,       // wall height (above floor line)
+  CARD_W: 36,
+  CARD_H: 50,
+  MAX_DISPLAY: 5,    // max cards on wall
+
+  getSlots(roomWidth) {
+    // Evenly space card slots across the back wall
+    const slots = [];
+    const count = Math.min(this.MAX_DISPLAY, CardCollection.getDisplayed().length || this.MAX_DISPLAY);
+    const totalW = count * (this.CARD_W + 12);
+    const startX = (roomWidth || W) / 2 - totalW / 2;
+    for (let i = 0; i < count; i++) {
+      slots.push({
+        x: startX + i * (this.CARD_W + 12) + 6,
+        y: this.WALL_Y + 3
+      });
+    }
+    return slots;
+  },
+
+  render(ctx, room) {
+    const displayed = CardCollection.getDisplayed();
+    if (!displayed.length) return;
+
+    const slots = this.getSlots();
+    const t = S.time;
+    const grailCount = displayed.filter(c => c.rarity === 'holy_grail').length;
+
+    // ── Wall ambient effect based on collection ──
+    if (grailCount >= 5) {
+      // 5+ holy grails: holographic wall shimmer
+      const wallHue = (t * 15) % 360;
+      ctx.fillStyle = `hsla(${wallHue}, 40%, 30%, 0.04)`;
+      ctx.fillRect(0, 0, W, this.WALL_Y + this.WALL_H);
+    } else if (grailCount >= 3) {
+      // 3+: golden ambient glow
+      ctx.fillStyle = `rgba(255, 200, 80, 0.03)`;
+      ctx.fillRect(0, 0, W, this.WALL_Y + this.WALL_H);
+    } else if (grailCount >= 1) {
+      // 1+: subtle golden trim on wall edges
+      ctx.fillStyle = `rgba(255, 215, 0, ${0.15 + Math.sin(t * 1.5) * 0.05})`;
+      ctx.fillRect(12, this.WALL_Y + this.WALL_H - 2, W - 24, 2);
+    }
+
+    displayed.forEach((card, i) => {
+      if (i >= slots.length) return;
+      const slot = slots[i];
+      const rInfo = CARD_RARITIES[card.rarity] || CARD_RARITIES.common;
+
+      // ── Spotlight beam from above ──
+      if (rInfo.spotlight) {
+        const beamAlpha = 0.08 + Math.sin(t * 1.2 + i) * 0.03;
+        const beamGrad = ctx.createLinearGradient(slot.x + this.CARD_W/2, 0, slot.x + this.CARD_W/2, slot.y + this.CARD_H + 20);
+        const beamColor = card.rarity === 'holy_grail' ? '255,215,0' : '200,180,255';
+        beamGrad.addColorStop(0, `rgba(${beamColor},${beamAlpha * 2})`);
+        beamGrad.addColorStop(0.3, `rgba(${beamColor},${beamAlpha})`);
+        beamGrad.addColorStop(1, `rgba(${beamColor},0)`);
+        ctx.fillStyle = beamGrad;
+        // Cone shape
+        ctx.beginPath();
+        ctx.moveTo(slot.x + this.CARD_W/2 - 3, 0);
+        ctx.lineTo(slot.x - 8, slot.y + this.CARD_H + 20);
+        ctx.lineTo(slot.x + this.CARD_W + 8, slot.y + this.CARD_H + 20);
+        ctx.lineTo(slot.x + this.CARD_W/2 + 3, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        // Dust particles in spotlight beam
+        for (let d = 0; d < 4; d++) {
+          const dy = ((t * 8 + d * 30 + i * 50) % (this.CARD_H + 30));
+          const dx = Math.sin(t * 0.8 + d * 2 + i) * 6;
+          const dAlpha = 0.3 + Math.sin(t * 2 + d) * 0.15;
+          ctx.fillStyle = `rgba(255,240,200,${dAlpha})`;
+          ctx.beginPath();
+          ctx.arc(slot.x + this.CARD_W/2 + dx, slot.y - 5 + dy, 0.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // ── Ornate frame behind the card ──
+      const frameInfo = CARD_RARITIES[card.rarity] || CARD_RARITIES.common;
+      const framePad = 4;
+      ctx.fillStyle = frameInfo.frameColor + '44';
+      ctx.fillRect(slot.x - framePad, slot.y - framePad, this.CARD_W + framePad * 2, this.CARD_H + framePad * 2);
+      ctx.strokeStyle = frameInfo.frameColor;
+      ctx.lineWidth = card.rarity === 'holy_grail' ? 2 : 1;
+      ctx.strokeRect(slot.x - framePad, slot.y - framePad, this.CARD_W + framePad * 2, this.CARD_H + framePad * 2);
+
+      // Small decorative corner accents on holy grail frames
+      if (card.rarity === 'holy_grail') {
+        ctx.fillStyle = '#ffd700';
+        const corners = [
+          [slot.x - framePad, slot.y - framePad],
+          [slot.x + this.CARD_W + framePad - 3, slot.y - framePad],
+          [slot.x - framePad, slot.y + this.CARD_H + framePad - 3],
+          [slot.x + this.CARD_W + framePad - 3, slot.y + this.CARD_H + framePad - 3]
+        ];
+        corners.forEach(([cx, cy]) => ctx.fillRect(cx, cy, 3, 3));
+      }
+
+      // ── Render the card itself ──
+      renderHolographicCard(ctx, slot.x, slot.y, this.CARD_W, this.CARD_H, card, t);
+    });
+
+    // ── Collection value display (opt-in flex) ──
+    if (displayed.length > 0) {
+      const totalVal = displayed.reduce((s, c) => s + (c.marketPrice || 0), 0);
+      if (totalVal >= 5000) {
+        const valAlpha = 0.5 + Math.sin(t * 1.5) * 0.15;
+        ctx.fillStyle = `rgba(255,215,0,${valAlpha})`;
+        ctx.font = 'bold 7px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`💎 Collection: €${totalVal.toLocaleString()}`, W/2, this.WALL_Y + this.WALL_H + 10);
+        ctx.textAlign = 'left';
+      }
+    }
+  },
+
+  // Check if visitor clicked near a displayed card
+  handleClick(mx, my) {
+    const displayed = CardCollection.getDisplayed();
+    const slots = this.getSlots();
+    for (let i = 0; i < displayed.length && i < slots.length; i++) {
+      const slot = slots[i];
+      if (mx >= slot.x - 5 && mx <= slot.x + this.CARD_W + 5 && my >= slot.y - 5 && my <= slot.y + this.CARD_H + 5) {
+        this.showCardDetail(displayed[i]);
+        return true;
+      }
+    }
+    return false;
+  },
+
+  showCardDetail(card) {
+    const rInfo = CARD_RARITIES[card.rarity] || CARD_RARITIES.common;
+    const arch = YUGIOH_ARCHETYPES[card.archetype] || {};
+    const rarityName = rInfo.name;
+    const priceStr = card.marketPrice ? `€${card.marketPrice.toLocaleString()}` : 'Unknown';
+
+    let html = `<div style="text-align:center;padding:20px">`;
+    html += `<div style="font-size:48px;margin-bottom:10px">${arch.icon || '🃏'}</div>`;
+    html += `<h2 style="color:${rInfo.color === 'rainbow' ? '#ffd700' : rInfo.color};margin:0">${card.name}</h2>`;
+    html += `<p style="color:#aaa;font-size:11px;margin:5px 0">${card.edition}</p>`;
+    html += `<p style="color:${rInfo.color === 'rainbow' ? '#ff88ff' : rInfo.color};font-size:13px">★ ${rarityName}</p>`;
+    if (card.marketPrice >= 5000) {
+      html += `<p style="color:#ffd700;font-size:16px;font-weight:bold">Market Value: ${priceStr}</p>`;
+    }
+    html += `<p style="color:#888;font-size:10px;margin-top:10px">Acquired: ${new Date(card.acquired).toLocaleDateString()}</p>`;
+    html += `</div>`;
+
+    showModal('🎴 ' + card.name, html);
+  }
+};
+
+// ── CARD COLLECTION UI (manage which cards to display) ──
+
+function showCardCollectionUI() {
+  const cards = CardCollection.cards;
+  const displayed = CardCollection.getDisplayed();
+
+  let html = `<div style="padding:10px">`;
+  html += `<h3 style="color:#ffd700;margin:0 0 5px">🎴 Your Card Collection</h3>`;
+  html += `<p style="color:#888;font-size:10px;margin:0 0 10px">Tap a card to mount/unmount from your display wall. Holy Grails get spotlights!</p>`;
+  html += `<p style="color:#ffd700;font-size:11px;margin-bottom:10px">💎 Total Value: €${CardCollection.getTotalValue().toLocaleString()} · ${displayed.length}/${DisplayWall.MAX_DISPLAY} displayed</p>`;
+
+  cards.sort((a, b) => (b.marketPrice || 0) - (a.marketPrice || 0));
+
+  cards.forEach((card, i) => {
+    const rInfo = CARD_RARITIES[card.rarity] || CARD_RARITIES.common;
+    const arch = YUGIOH_ARCHETYPES[card.archetype] || {};
+    const borderColor = rInfo.color === 'rainbow' ? '#ff88ff' : rInfo.color;
+    const mounted = card.displayed;
+
+    html += `<div onclick="CardCollection.toggleDisplay('${card.id}', ${i}); showCardCollectionUI();" `;
+    html += `style="display:flex;align-items:center;gap:8px;padding:8px;margin:4px 0;border:1px solid ${mounted ? '#ffd700' : borderColor + '44'};border-radius:6px;cursor:pointer;background:${mounted ? 'rgba(255,215,0,0.08)' : 'rgba(20,20,40,0.6)'};transition:all .2s">`;
+    html += `<span style="font-size:20px">${arch.icon || '🃏'}</span>`;
+    html += `<div style="flex:1">`;
+    html += `<div style="color:#fff;font-size:11px;font-weight:bold">${card.name}</div>`;
+    html += `<div style="color:#aaa;font-size:9px">${card.edition}</div>`;
+    html += `</div>`;
+    html += `<div style="text-align:right">`;
+    html += `<div style="color:${borderColor};font-size:9px">${rInfo.name}</div>`;
+    if (card.marketPrice >= 5000) html += `<div style="color:#ffd700;font-size:10px;font-weight:bold">€${card.marketPrice.toLocaleString()}</div>`;
+    html += `</div>`;
+    html += `<span style="font-size:14px">${mounted ? '📌' : '⬜'}</span>`;
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+  showModal('🎴 Card Collection', html);
+}
+
+// ── Initialize card collection on load ──
+CardCollection.init();
 
 // ═══════════════════════════════════════════════════════════════
 // FLOOR 10: THE UNDERGROUND 🪩 — Disco Floor / Club Space
