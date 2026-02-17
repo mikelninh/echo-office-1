@@ -3625,13 +3625,27 @@ function toggleMusic(){
   if(!S.audioCtx)initAudio();
   S.musicPlaying=!S.musicPlaying;
   $('#btn-music').classList.toggle('active',S.musicPlaying);
-  if(S.musicPlaying)startLofi();
-  else if(lofiInterval){clearInterval(lofiInterval);lofiInterval=null}
-  showThought(S.musicPlaying?'🎵 Lofi vibes on.':'Music off.');
+  if(S.musicPlaying){
+    startLofi();
+    showThought(S.floor===6&&typeof BarVibes!=='undefined'?'🎵 Soul vibes on.':'🎵 Lofi vibes on.');
+  } else {
+    if(lofiInterval){clearInterval(lofiInterval);lofiInterval=null}
+    if(typeof BarVibes!=='undefined'&&BarVibes.active) BarVibes.stop();
+    showThought('Music off.');
+  }
 }
 
 function startLofi(){
   if(lofiInterval)clearInterval(lofiInterval);
+  // Floor 6: use BarVibes soul/R&B system instead of generic lofi
+  if(S.floor===6&&typeof BarVibes!=='undefined'){
+    if(!BarVibes.active){
+      const saved=LS.get('barVibesVote',null);
+      const pick=saved?BarVibes.records.find(r=>r.id===saved):null;
+      BarVibes.start((pick||BarVibes.records[0]).id);
+    }
+    return;
+  }
   const fl=FLOOR_MUSIC[S.floor]||FLOOR_MUSIC[1];
   currentMusicFloor=S.floor;
   const c=S.audioCtx,bl=60/fl.bpm;
@@ -11001,6 +11015,49 @@ function renderFloor6(){
   const vinylWallX=60,vinylWallY=30;ctx.fillStyle='#2a1a10';ctx.fillRect(vinylWallX,vinylWallY,120,40);
   const vinylColors=['#c44','#4a4','#44c','#c8a020','#c4c','#4cc','#fa0','#a4a'];
   for(let i=0;i<8;i++){const vx=vinylWallX+5+i*14;ctx.fillStyle='#111';ctx.fillRect(vx,vinylWallY+5,12,30);ctx.fillStyle=vinylColors[i];ctx.fillRect(vx+2,vinylWallY+8,8,24)}
+
+  // ═══ BAR VIBES ATMOSPHERE ═══
+  if(typeof BarVibes!=='undefined'){
+    BarVibes.updateAtmosphere(1/60);
+    BarVibes.renderAtmosphere(ctx);
+
+    // Enhanced record player: bigger spinning vinyl when BarVibes active
+    const rp2=getObjects().find(o=>o.id==='recordplayer');
+    if(rp2&&BarVibes.active&&BarVibes.currentRecord){
+      BarVibes.renderVinylDisc(ctx,rp2.x+rp2.w/2,rp2.y+rp2.h/2,22,BarVibes.currentRecord.color,true);
+      // Tonearm
+      ctx.save();ctx.translate(rp2.x+rp2.w-5,rp2.y+5);ctx.rotate(0.3);
+      ctx.strokeStyle='#aaa';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-15,20);ctx.stroke();
+      ctx.fillStyle='#888';ctx.fillRect(-17,18,4,4);ctx.restore();
+    }
+
+    // Music queue screen: show real "Now Playing" from BarVibes
+    const mq2=getObjects().find(o=>o.id==='musicqueue');
+    if(mq2){
+      ctx.fillStyle='#0a0a1a';ctx.fillRect(mq2.x,mq2.y,mq2.w,mq2.h);
+      ctx.fillStyle='#0a1a1a';ctx.fillRect(mq2.x+2,mq2.y+2,mq2.w-4,mq2.h-4);
+      if(BarVibes.active&&BarVibes.currentRecord){
+        const rec=BarVibes.currentRecord;
+        ctx.fillStyle='#ffd080';ctx.font='bold 7px monospace';
+        ctx.fillText('♪ NOW PLAYING',mq2.x+6,mq2.y+12);
+        ctx.fillStyle='#fff';ctx.font='7px monospace';
+        const title=rec.title.length>16?rec.title.slice(0,15)+'…':rec.title;
+        ctx.fillText(title,mq2.x+6,mq2.y+22);
+        ctx.fillStyle='#888';
+        ctx.fillText(rec.artist,mq2.x+6,mq2.y+31);
+        // Mini EQ bars
+        for(let i=0;i<4;i++){
+          const h=2+Math.sin(S.time*7+i*1.5)*2+Math.random();
+          ctx.fillStyle=rec.color;ctx.fillRect(mq2.x+mq2.w-22+i*5,mq2.y+mq2.h-5-h,3,h);
+        }
+      } else {
+        ctx.fillStyle='#666';ctx.font='7px monospace';
+        ctx.fillText('♪ QUEUE',mq2.x+10,mq2.y+15);
+        ctx.fillText('Tap vinyl to play',mq2.x+5,mq2.y+28);
+      }
+    }
+  }
+
   FloorDepth.renderShadows(ctx,6);FloorDepth.renderLightRays(ctx,6);
 }
 
@@ -13644,7 +13701,9 @@ function interact(){
     case'welcome_board':showWelcomeBoard();break;
     case'tip_jar':tipJar();break;
     case'jukebox_f1':toggleMusic();break;
-    case'record':case'jukebox':toggleMusic();break;
+    case'record':case'jukebox':
+      if(S.floor===6){showVinylSelector();}else{toggleMusic();}
+      break;
     case'bed':showThought("Just a quick nap...");S.echo.sitting=true;break;
     case'sofa':case'viewchairs':case'bench':showThought("Time to relax...");S.echo.sitting=true;break;
     case'desk':showThought("Let's write some code.");S.echo.sitting=true;break;
@@ -13700,12 +13759,27 @@ function interact(){
     case'labmonitors':showThought("SUBJECT: ECHO — STATUS: AWAKE");break;
     case'workbench':showThought("Combine items at the Crafting Station below...");break;
     // Floor 6 interactions
-    case'recordplayer':toggleMusic();showThought("🎵 This track is perfect.");break;
-    case'bar':showThought("Time for a chill drink...");Coins.earn(1,'bar');break;
-    case'musicqueue':showMusicQueue();break;
+    case'recordplayer':case'vinyl_player':
+      if(S.floor===6){showVinylSelector();}else{toggleMusic();}
+      break;
+    case'bar':
+      if(S.floor===6&&typeof BarVibes!=='undefined'){
+        if(!BarVibes.active){const pick=BarVibes.records[Math.floor(Math.random()*BarVibes.records.length)];BarVibes.start(pick.id);S.musicPlaying=true;$('#btn-music').classList.add('active');showThought(`🍸 Bartender puts on "${pick.title}"...`);}
+        else showThought("🍸 The vibes are perfect...");
+        Coins.earn(1,'bar');
+      } else {showThought("Time for a chill drink...");Coins.earn(1,'bar');}
+      break;
+    case'musicqueue':
+      if(S.floor===6&&typeof BarVibes!=='undefined'){showNowPlaying();}else{showMusicQueue();}
+      break;
     case'cozyseating':showThought("So comfortable...");S.echo.sitting=true;break;
-    case'speakers':showThought("The bass hits just right.");break;
-    case'vinylstorage':showVinylCollection();break;
+    case'speakers':
+      if(S.floor===6&&BarVibes.active){showThought(`♪ ${BarVibes.currentRecord.title} — ${BarVibes.currentRecord.artist}`);}
+      else showThought("The bass hits just right.");
+      break;
+    case'vinylstorage':
+      if(S.floor===6){showVinylSelector();}else{showVinylCollection();}
+      break;
     case'stationlog':showStationLog();break;
     // Floor 7 interactions  
     case'pixelcanvas':showPixelCanvas();break;
@@ -17079,6 +17153,8 @@ function changeFloor(f){
     }
   }
   
+  // Stop BarVibes when leaving Floor 6
+  if(f!==6&&typeof BarVibes!=='undefined'&&BarVibes.active) BarVibes.stop();
   // Change music if playing
   if(S.musicPlaying)startLofi();
   
@@ -17167,7 +17243,7 @@ const CHAT_RULES=[
     return r[Math.random()*r.length|0];
   }},
   {match:/\bmusic\b/,responses:["Floor 6 has the vinyl collection. Floor 10 has the clubs. I'm more of a 'stare at stars in silence' person myself, but you do you."]},
-  {match:/record|f6|floor 6|jukebox|vinyl|lofi/,responses:["F6: The Record Room! 🎵 My vinyl collection, a jukebox, and the coziest amber lighting on the station. Each floor has its own soundtrack — F6 is jazz and lofi.","The Record Room is pure vibes. Pixel always curls up by the speakers. I swear she has better music taste than me. The jukebox has different tunes per floor!"]},
+  {match:/record|f6|floor 6|jukebox|vinyl|lofi|music|soul|r&b|sade/,responses:["F6: The Record Room! 🎵 We've got a vinyl collection with soul, R&B, smooth jazz — real Sade-after-midnight vibes. Click the vinyl player to browse and vote on what plays next.","The Record Room is pure vibes. Candlelight, Rhodes piano, walking bass... Pixel curls up by the speakers every time. Browse the vinyl collection and vote for your favorite record!","You want the vibe? F6. We've got 7 curated records — Smooth Operator, Sade Nights, Midnight Silk... each one hand-picked. The whole bar votes on what plays next. 🎵"]},
   {match:/community|f7|floor 7|deck|pixel.*wall|guestbook|art/,responses:["F7: Community Deck! 🎨 The pixel art wall is collaborative — everyone who visits can paint on it. Plus there's a guestbook. Sign it!","The Community Deck is where visitors leave their mark. Literally. The pixel wall saves every dot. Some beautiful art has appeared there. And some... interesting art."]},
   {match:/room|f8|floor 8|build|my room|furniture|decorate/,responses:["F8: The Room Builder! 🏠 You get your own room to decorate with furniture, neon signs, and more. Visitors can like your room and you earn ◈ from foot traffic!","Your personal space! Place furniture, hang posters, set up a neon sign. Other visitors can visit and tip you ◈. Make it legendary!"]},
   
@@ -29988,6 +30064,551 @@ const MusicStudio = {
     ctx.restore();
   }
 };
+
+// ═══════════════════════════════════════
+// BAR VIBES — Soul / R&B Music System for Floor 6
+// FM Synthesis Rhodes, walking bass, brushed drums, vinyl voting
+// ═══════════════════════════════════════
+const BarVibes = {
+  active: false,
+  currentRecord: null,
+  currentBeat: 0,
+  currentChordIdx: 0,
+  barInChord: 0,
+  beatInterval: null,
+  votes: {},
+  myVote: null,
+  history: [],
+  crackleNode: null,
+  crackleGain: null,
+  _atmosParticles: [],
+
+  records: [
+    {
+      id:'smooth_operator', title:'Smooth Operator', artist:'Echo Ensemble',
+      genre:'Soul / R&B', color:'#d4820a', coverColors:['#d4820a','#8B4513','#FFD700','#2a1a00'],
+      bpm:72, swing:0.12,
+      chords:[
+        {n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},
+        {n:[110,130.81,164.81,196],b:55,nm:'Am7'},
+        {n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},
+        {n:[98,123.47,146.83,174.61],b:49,nm:'G7'}
+      ],
+      rhodesVol:.045, bassVol:.07, drumVol:.025, melodyChance:.2
+    },
+    {
+      id:'sade_nights', title:'Sade Nights', artist:'The Vinyl Club',
+      genre:'Smooth Jazz', color:'#c42020', coverColors:['#c42020','#1a0a0a','#ff6ec7','#3a0a1a'],
+      bpm:66, swing:0.18,
+      chords:[
+        {n:[123.47,146.83,185,220],b:61.74,nm:'Bm7'},
+        {n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},
+        {n:[185,220,277.18,329.63],b:92.5,nm:'F♯m7'},
+        {n:[123.47,146.83,185,220],b:61.74,nm:'Bm7'}
+      ],
+      rhodesVol:.04, bassVol:.065, drumVol:.02, melodyChance:.25
+    },
+    {
+      id:'midnight_silk', title:'Midnight Silk', artist:'D\'Vibes',
+      genre:'Neo-Soul', color:'#9b59b6', coverColors:['#9b59b6','#1a0a2a','#ff6ec7','#4a2a6a'],
+      bpm:68, swing:0.15,
+      chords:[
+        {n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},
+        {n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},
+        {n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},
+        {n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'}
+      ],
+      rhodesVol:.04, bassVol:.06, drumVol:.03, melodyChance:.15
+    },
+    {
+      id:'golden_hour', title:'Golden Hour', artist:'Amber Wave',
+      genre:'Soul Ballad', color:'#ffd700', coverColors:['#ffd700','#8B6508','#FFF8DC','#4a3a00'],
+      bpm:58, swing:0.2,
+      chords:[
+        {n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},
+        {n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},
+        {n:[220,261.63,329.63,392],b:110,nm:'Am7'},
+        {n:[146.83,185,220,261.63],b:73.42,nm:'D7'}
+      ],
+      rhodesVol:.05, bassVol:.055, drumVol:.015, melodyChance:.3
+    },
+    {
+      id:'velvet_dusk', title:'Velvet Dusk', artist:'Noir Sessions',
+      genre:'Smoky Jazz', color:'#4a2a3a', coverColors:['#4a2a3a','#1a0a10','#c06080','#2a1a20'],
+      bpm:62, swing:0.22,
+      chords:[
+        {n:[155.56,196,233.08,293.66],b:77.78,nm:'E♭maj7'},
+        {n:[130.81,155.56,196,233.08],b:65.41,nm:'Cm7'},
+        {n:[207.65,261.63,311.13,392],b:103.83,nm:'A♭maj7'},
+        {n:[116.54,146.83,174.61,207.65],b:58.27,nm:'B♭7'}
+      ],
+      rhodesVol:.035, bassVol:.07, drumVol:.018, melodyChance:.2
+    },
+    {
+      id:'neon_rain', title:'Neon Rain', artist:'Purple Coast',
+      genre:'Downtempo R&B', color:'#00fff7', coverColors:['#00fff7','#0a1a2a','#ff6ec7','#1a3a4a'],
+      bpm:75, swing:0.1,
+      chords:[
+        {n:[110,130.81,164.81,196],b:55,nm:'Am7'},
+        {n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},
+        {n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},
+        {n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'}
+      ],
+      rhodesVol:.04, bassVol:.06, drumVol:.035, melodyChance:.18
+    },
+    {
+      id:'station_after_dark', title:'Station After Dark', artist:'Echo & Friends',
+      genre:'Lo-fi Soul', color:'#ff6ec7', coverColors:['#ff6ec7','#2a0a1a','#ffd080','#4a1a2a'],
+      bpm:70, swing:0.14,
+      chords:[
+        {n:[146.83,174.61,220,261.63],b:73.42,nm:'Dm7'},
+        {n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},
+        {n:[130.81,164.81,196,246.94],b:65.41,nm:'Cmaj7'},
+        {n:[110,130.81,164.81,196],b:55,nm:'Am7'}
+      ],
+      rhodesVol:.042, bassVol:.065, drumVol:.028, melodyChance:.22
+    }
+  ],
+
+  // --- FM Synthesis Rhodes Piano ---
+  _rhodes(freq, when, dur, vol) {
+    const c=S.audioCtx; if(!c||!S.masterGain) return;
+    try {
+      const carrier=c.createOscillator(), mod=c.createOscillator();
+      const modG=c.createGain(), env=c.createGain();
+      carrier.type='sine'; carrier.frequency.value=freq;
+      mod.type='sine'; mod.frequency.value=freq*2;
+      modG.gain.setValueAtTime(freq*1.2,when);
+      modG.gain.exponentialRampToValueAtTime(freq*0.05,when+dur*0.5);
+      mod.connect(modG); modG.connect(carrier.frequency);
+      env.gain.setValueAtTime(0,when);
+      env.gain.linearRampToValueAtTime(vol*S.volume,when+0.008);
+      env.gain.setValueAtTime(vol*S.volume*0.7,when+0.04);
+      env.gain.exponentialRampToValueAtTime(0.0001,when+dur);
+      carrier.connect(env); env.connect(S.masterGain);
+      carrier.start(when); mod.start(when);
+      carrier.stop(when+dur+0.05); mod.stop(when+dur+0.05);
+    } catch(e){}
+  },
+
+  // --- Warm Walking Bass ---
+  _bass(freq, when, dur, vol) {
+    const c=S.audioCtx; if(!c||!S.masterGain) return;
+    try {
+      const osc=c.createOscillator(), filt=c.createBiquadFilter(), env=c.createGain();
+      osc.type='triangle'; osc.frequency.value=freq;
+      filt.type='lowpass'; filt.frequency.value=350; filt.Q.value=1.2;
+      env.gain.setValueAtTime(vol*S.volume,when);
+      env.gain.setValueAtTime(vol*S.volume*0.85,when+0.06);
+      env.gain.exponentialRampToValueAtTime(0.0001,when+dur);
+      osc.connect(filt); filt.connect(env); env.connect(S.masterGain);
+      osc.start(when); osc.stop(when+dur+0.05);
+    } catch(e){}
+  },
+
+  // --- Brushed Snare ---
+  _brush(when, vol) {
+    const c=S.audioCtx; if(!c||!S.masterGain) return;
+    try {
+      const buf=c.createBuffer(1,c.sampleRate*0.12,c.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(c.sampleRate*0.06));
+      const src=c.createBufferSource(), filt=c.createBiquadFilter(), env=c.createGain();
+      src.buffer=buf;
+      filt.type='bandpass'; filt.frequency.value=3000; filt.Q.value=0.4;
+      env.gain.setValueAtTime(vol*S.volume,when);
+      env.gain.exponentialRampToValueAtTime(0.0001,when+0.12);
+      src.connect(filt); filt.connect(env); env.connect(S.masterGain);
+      src.start(when);
+    } catch(e){}
+  },
+
+  // --- Soft Hi-hat ---
+  _hat(when, vol, open) {
+    const c=S.audioCtx; if(!c||!S.masterGain) return;
+    try {
+      const dur=open?0.15:0.04;
+      const buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(c.sampleRate*(open?0.08:0.015)));
+      const src=c.createBufferSource(), filt=c.createBiquadFilter(), env=c.createGain();
+      src.buffer=buf;
+      filt.type='highpass'; filt.frequency.value=7000; filt.Q.value=0.3;
+      env.gain.setValueAtTime(vol*S.volume*0.7,when);
+      env.gain.exponentialRampToValueAtTime(0.0001,when+dur);
+      src.connect(filt); filt.connect(env); env.connect(S.masterGain);
+      src.start(when);
+    } catch(e){}
+  },
+
+  // --- Soft Kick ---
+  _kick(when, vol) {
+    const c=S.audioCtx; if(!c||!S.masterGain) return;
+    try {
+      const osc=c.createOscillator(), env=c.createGain();
+      osc.type='sine';
+      osc.frequency.setValueAtTime(120,when);
+      osc.frequency.exponentialRampToValueAtTime(40,when+0.12);
+      env.gain.setValueAtTime(vol*S.volume,when);
+      env.gain.exponentialRampToValueAtTime(0.0001,when+0.2);
+      osc.connect(env); env.connect(S.masterGain);
+      osc.start(when); osc.stop(when+0.25);
+    } catch(e){}
+  },
+
+  // --- Melodic Run (pentatonic over chord) ---
+  _melody(chord, when, beatLen, vol) {
+    const c=S.audioCtx; if(!c||!S.masterGain) return;
+    try {
+      const scale=chord.n.map(f=>f*2).concat(chord.n.map(f=>f*4));
+      const noteCount=2+Math.floor(Math.random()*3);
+      for(let i=0;i<noteCount;i++){
+        const freq=scale[Math.floor(Math.random()*scale.length)];
+        const t=when+i*beatLen*0.25;
+        const dur=beatLen*0.2+Math.random()*beatLen*0.2;
+        const osc=c.createOscillator(), env=c.createGain();
+        osc.type='sine';
+        osc.frequency.value=freq*(1+Math.random()*0.003);
+        env.gain.setValueAtTime(0,t);
+        env.gain.linearRampToValueAtTime(vol*S.volume*0.5,t+0.01);
+        env.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+        osc.connect(env); env.connect(S.masterGain);
+        osc.start(t); osc.stop(t+dur+0.05);
+      }
+    } catch(e){}
+  },
+
+  // --- Vinyl Crackle (continuous filtered noise) ---
+  startCrackle() {
+    if(this.crackleNode||!S.audioCtx) return;
+    try {
+      const c=S.audioCtx;
+      const bufSize=c.sampleRate*2;
+      const buf=c.createBuffer(1,bufSize,c.sampleRate);
+      const d=buf.getChannelData(0);
+      for(let i=0;i<bufSize;i++) d[i]=(Math.random()*2-1);
+      this.crackleNode=c.createBufferSource();
+      this.crackleNode.buffer=buf; this.crackleNode.loop=true;
+      const filt=c.createBiquadFilter();
+      filt.type='bandpass'; filt.frequency.value=1500; filt.Q.value=0.8;
+      this.crackleGain=c.createGain();
+      this.crackleGain.gain.value=0.008*S.volume;
+      this.crackleNode.connect(filt);
+      filt.connect(this.crackleGain);
+      this.crackleGain.connect(S.masterGain);
+      this.crackleNode.start();
+    } catch(e){}
+  },
+  stopCrackle() {
+    try{ if(this.crackleNode){this.crackleNode.stop();this.crackleNode=null;this.crackleGain=null;} }catch(e){}
+  },
+
+  // --- Main Beat Loop ---
+  start(recordId) {
+    if(!S.audioCtx) initAudio();
+    const rec=this.records.find(r=>r.id===recordId);
+    if(!rec) return;
+    this.stop();
+    this.currentRecord=rec;
+    this.currentBeat=0;
+    this.currentChordIdx=0;
+    this.barInChord=0;
+    this.active=true;
+    this.startCrackle();
+    const beatLen=60/rec.bpm;
+    const self=this;
+    function tick(){
+      if(!self.active||S.floor!==6){self.stop();return;}
+      const c=S.audioCtx, now=c.currentTime;
+      const chord=rec.chords[self.currentChordIdx];
+      const swing=self.currentBeat%2===1?rec.swing*beatLen:0;
+      const t=now+swing;
+
+      // Rhodes pad (every beat, staggered voicing)
+      chord.n.forEach((freq,i)=>{
+        self._rhodes(freq,t+i*0.012,beatLen*0.9,rec.rhodesVol);
+      });
+
+      // Walking bass
+      let bassFreq=chord.b;
+      if(self.currentBeat===2) bassFreq=chord.n[1]*0.5;
+      if(self.currentBeat===3) bassFreq=chord.b*1.25;
+      self._bass(bassFreq,t,beatLen*0.7,rec.bassVol);
+
+      // Drums: kick on 1&3, brush on 2&4, hats everywhere
+      if(self.currentBeat===0||self.currentBeat===2) self._kick(t,rec.drumVol);
+      if(self.currentBeat===1||self.currentBeat===3) self._brush(t,rec.drumVol*0.8);
+      self._hat(t,rec.drumVol*0.6,self.currentBeat%2===1);
+
+      // Occasional melodic run
+      if(Math.random()<rec.melodyChance) self._melody(chord,t,beatLen,rec.rhodesVol*0.6);
+
+      // Advance
+      self.currentBeat++;
+      if(self.currentBeat>=4){
+        self.currentBeat=0;
+        self.barInChord++;
+        if(self.barInChord>=2){ // 2 bars per chord
+          self.barInChord=0;
+          self.currentChordIdx=(self.currentChordIdx+1)%rec.chords.length;
+          // After full progression, check votes for next record
+          if(self.currentChordIdx===0){
+            const next=self.getNextByVotes();
+            if(next&&next!==rec.id){self.start(next);return;}
+          }
+        }
+      }
+    }
+    this.beatInterval=setInterval(tick,beatLen*1000);
+    tick();
+  },
+
+  stop() {
+    this.active=false;
+    if(this.beatInterval){clearInterval(this.beatInterval);this.beatInterval=null;}
+    this.stopCrackle();
+  },
+
+  // --- Voting ---
+  vote(recordId) {
+    if(this.myVote===recordId) return;
+    if(this.myVote) this.votes[this.myVote]=Math.max(0,(this.votes[this.myVote]||1)-1);
+    this.myVote=recordId;
+    this.votes[recordId]=(this.votes[recordId]||0)+1;
+    LS.set('barVibesVote',recordId);
+    showThought(`Voted for "${this.records.find(r=>r.id===recordId).title}" 🎵`);
+  },
+
+  getNextByVotes() {
+    let best=null,bestCount=-1;
+    for(const[id,count] of Object.entries(this.votes)){
+      if(count>bestCount&&id!==(this.currentRecord?.id)){best=id;bestCount=count;}
+    }
+    if(best&&bestCount>0){
+      this.votes[best]=0;
+      this.history.push(this.currentRecord?.id);
+    }
+    return best;
+  },
+
+  // --- Atmosphere Particles ---
+  updateAtmosphere(dt) {
+    // Candle particles on bar
+    if(Math.random()<0.15){
+      const bar=getObjects().find(o=>o.id==='bar');
+      if(bar) this._atmosParticles.push({
+        x:bar.x+15+Math.random()*(bar.w-30), y:bar.y-5,
+        vx:(Math.random()-0.5)*0.3, vy:-0.4-Math.random()*0.3,
+        life:40+Math.random()*30, maxLife:70,
+        color:Math.random()>0.5?'#ffd080':'#ffaa40', size:1.5+Math.random()
+      });
+    }
+    // Smoke wisps
+    if(Math.random()<0.04){
+      this._atmosParticles.push({
+        x:100+Math.random()*600, y:480,
+        vx:(Math.random()-0.5)*0.5, vy:-0.15-Math.random()*0.1,
+        life:80+Math.random()*60, maxLife:140,
+        color:'rgba(150,130,120,0.04)', size:8+Math.random()*12, smoke:true
+      });
+    }
+    for(let i=this._atmosParticles.length-1;i>=0;i--){
+      const p=this._atmosParticles[i];
+      p.x+=p.vx; p.y+=p.vy; p.life--;
+      if(p.life<=0) this._atmosParticles.splice(i,1);
+    }
+  },
+
+  renderAtmosphere(cx) {
+    // Warm ambient haze overlay
+    const haze=cx.createRadialGradient(350,350,0,350,350,400);
+    haze.addColorStop(0,'rgba(255,180,80,0.04)');
+    haze.addColorStop(0.5,'rgba(200,100,50,0.02)');
+    haze.addColorStop(1,'rgba(0,0,0,0)');
+    cx.fillStyle=haze; cx.fillRect(0,0,W,H);
+
+    // Smoke wisps
+    this._atmosParticles.forEach(p=>{
+      if(p.smoke){
+        const a=p.life/p.maxLife*0.04;
+        cx.fillStyle=`rgba(150,130,120,${a})`;
+        cx.beginPath();cx.arc(p.x,p.y,p.size,0,Math.PI*2);cx.fill();
+      } else {
+        const a=p.life/p.maxLife;
+        cx.fillStyle=p.color;cx.globalAlpha=a;
+        cx.beginPath();cx.arc(p.x,p.y,p.size*a,0,Math.PI*2);cx.fill();
+        cx.globalAlpha=1;
+      }
+    });
+
+    // Candle glow spots on bar
+    const bar=getObjects().find(o=>o.id==='bar');
+    if(bar){
+      const candlePositions=[bar.x+25,bar.x+60,bar.x+95];
+      candlePositions.forEach((cx2,i)=>{
+        const flicker=0.6+Math.sin(S.time*5+i*2)*0.2+Math.random()*0.1;
+        const glow=ctx.createRadialGradient(cx2,bar.y-8,0,cx2,bar.y-8,25);
+        glow.addColorStop(0,`rgba(255,180,60,${0.15*flicker})`);
+        glow.addColorStop(1,'rgba(0,0,0,0)');
+        ctx.fillStyle=glow;ctx.fillRect(cx2-25,bar.y-33,50,50);
+        // Tiny flame
+        ctx.fillStyle=`rgba(255,200,80,${0.8*flicker})`;
+        ctx.fillRect(cx2-1,bar.y-10,2,4);
+        ctx.fillStyle=`rgba(255,255,200,${0.9*flicker})`;
+        ctx.fillRect(cx2,bar.y-12,1,2);
+      });
+    }
+
+    // Now playing indicator near music queue
+    if(this.active&&this.currentRecord){
+      const mq=getObjects().find(o=>o.id==='musicqueue');
+      if(mq){
+        // Pulsing equalizer bars
+        for(let i=0;i<5;i++){
+          const h=3+Math.sin(S.time*6+i*1.3)*3+Math.random()*2;
+          const a=0.6+Math.sin(S.time*4+i)*0.3;
+          cx.fillStyle=`rgba(255,180,80,${a})`;
+          cx.fillRect(mq.x+8+i*6,mq.y+mq.h-5-h,4,h);
+        }
+      }
+    }
+  },
+
+  // --- Pixel Art Vinyl Record ---
+  renderVinylDisc(cx, x, y, radius, color, spinning) {
+    const angle=spinning?S.time*2:0;
+    cx.save();cx.translate(x,y);cx.rotate(angle);
+    // Outer disc
+    cx.fillStyle='#111';cx.beginPath();cx.arc(0,0,radius,0,Math.PI*2);cx.fill();
+    // Grooves
+    for(let r=radius*0.35;r<radius*0.9;r+=2){
+      cx.strokeStyle=`rgba(40,40,40,${0.4+Math.random()*0.2})`;
+      cx.lineWidth=0.5;cx.beginPath();cx.arc(0,0,r,0,Math.PI*2);cx.stroke();
+    }
+    // Label
+    cx.fillStyle=color;cx.beginPath();cx.arc(0,0,radius*0.3,0,Math.PI*2);cx.fill();
+    // Center hole
+    cx.fillStyle='#111';cx.beginPath();cx.arc(0,0,2,0,Math.PI*2);cx.fill();
+    // Highlight
+    cx.fillStyle='rgba(255,255,255,0.06)';
+    cx.beginPath();cx.arc(-radius*0.15,-radius*0.15,radius*0.5,0,Math.PI*2);cx.fill();
+    cx.restore();
+  }
+};
+
+// --- BarVibes UI: Vinyl Selector ---
+function showVinylSelector(){
+  if(!S.audioCtx) initAudio();
+  const cur=BarVibes.currentRecord;
+  let html='<h3 style="color:#ffd080">💿 Vinyl Collection</h3>';
+  html+='<p style="font-size:10px;color:#888;margin-bottom:8px">Pick a record. Vote for the next vibe. Most votes wins.</p>';
+  if(cur){
+    html+=`<div style="background:rgba(255,180,80,0.08);border:1px solid #ffd080;border-radius:6px;padding:8px;margin-bottom:10px">`;
+    html+=`<div style="color:#ffd080;font-size:9px;text-transform:uppercase;letter-spacing:1px">Now Spinning</div>`;
+    html+=`<div style="color:#fff;font-size:13px;font-weight:bold;margin:2px 0">${cur.title}</div>`;
+    html+=`<div style="color:#aaa;font-size:10px">${cur.artist} — ${cur.genre}</div>`;
+    html+=`</div>`;
+  }
+  html+='<div style="max-height:280px;overflow-y:auto">';
+  BarVibes.records.forEach(rec=>{
+    const isCur=cur&&cur.id===rec.id;
+    const isVoted=BarVibes.myVote===rec.id;
+    const votes=BarVibes.votes[rec.id]||0;
+    const border=isCur?'#ffd080':isVoted?'#ff6ec7':'#444';
+    const bg=isCur?'rgba(255,180,80,0.1)':isVoted?'rgba(255,110,199,0.08)':'rgba(30,20,40,0.6)';
+    html+=`<div class="drink-btn vinyl-pick" data-rid="${rec.id}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin:4px 0;border-color:${border};background:${bg};width:100%;text-align:left;cursor:pointer">`;
+    // Mini vinyl disc (CSS)
+    html+=`<div style="width:32px;height:32px;border-radius:50%;background:radial-gradient(circle at 30% 30%,${rec.color},#111 70%);border:2px solid #333;flex-shrink:0;position:relative"><div style="width:8px;height:8px;border-radius:50%;background:${rec.color};position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"></div></div>`;
+    html+=`<div style="flex:1;min-width:0">`;
+    html+=`<div style="color:#fff;font-size:11px;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${rec.title}</div>`;
+    html+=`<div style="color:#888;font-size:9px">${rec.artist}</div>`;
+    html+=`<div style="color:#666;font-size:8px">${rec.genre} · ${rec.bpm} BPM</div>`;
+    html+=`</div>`;
+    html+=`<div style="text-align:center;flex-shrink:0">`;
+    if(isCur){
+      html+=`<div style="color:#ffd080;font-size:16px">🎵</div><div style="font-size:8px;color:#ffd080">Playing</div>`;
+    } else {
+      html+=`<div style="font-size:14px">${isVoted?'🔥':'🗳️'}</div>`;
+      html+=`<div style="font-size:9px;color:${isVoted?'#ff6ec7':'#888'}">${votes>0?votes+' vote'+(votes>1?'s':''):'Vote'}</div>`;
+    }
+    html+=`</div></div>`;
+  });
+  html+='</div>';
+  html+=`<div style="display:flex;gap:6px;margin-top:8px">`;
+  html+=`<button class="drink-btn" id="vinyl-stop" style="flex:1;border-color:#ff4444;color:#ff4444">⏹ Stop</button>`;
+  html+=`<button class="drink-btn" id="vinyl-random" style="flex:1;border-color:#00fff7;color:#00fff7">🎲 Surprise Me</button>`;
+  html+=`</div>`;
+  const{p}=createPopup(html);
+  // Click handlers
+  p.querySelectorAll('.vinyl-pick').forEach(el=>{
+    el.onclick=()=>{
+      const rid=el.dataset.rid;
+      if(BarVibes.currentRecord&&BarVibes.currentRecord.id===rid) return;
+      if(!BarVibes.active){
+        BarVibes.start(rid);
+        S.musicPlaying=true;$('#btn-music').classList.add('active');
+      } else {
+        BarVibes.vote(rid);
+      }
+      p.closest('.popup-overlay').remove();
+    };
+  });
+  const stopBtn=p.querySelector('#vinyl-stop');
+  if(stopBtn) stopBtn.onclick=()=>{ BarVibes.stop();S.musicPlaying=false;$('#btn-music').classList.remove('active');showThought('Music stopped.');p.closest('.popup-overlay').remove(); };
+  const randBtn=p.querySelector('#vinyl-random');
+  if(randBtn) randBtn.onclick=()=>{
+    const pool=BarVibes.records.filter(r=>!BarVibes.currentRecord||r.id!==BarVibes.currentRecord.id);
+    const pick=pool[Math.floor(Math.random()*pool.length)];
+    BarVibes.start(pick.id);S.musicPlaying=true;$('#btn-music').classList.add('active');
+    showThought(`🎲 "${pick.title}" — ${pick.genre}`);
+    p.closest('.popup-overlay').remove();
+  };
+}
+
+// --- BarVibes UI: Now Playing / Queue ---
+function showNowPlaying(){
+  const cur=BarVibes.currentRecord;
+  if(!cur){
+    showVinylSelector();return;
+  }
+  let html=`<div style="text-align:center">`;
+  html+=`<div style="font-size:9px;color:#ffd080;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px">Now Playing</div>`;
+  // Spinning disc visual
+  html+=`<div style="width:80px;height:80px;margin:8px auto;border-radius:50%;background:radial-gradient(circle at 35% 35%,${cur.color} 20%,#222 25%,#111 60%,#1a1a1a);border:3px solid #333;animation:spin 3s linear infinite;box-shadow:0 0 20px rgba(255,180,80,0.2)">`;
+  html+=`<div style="width:20px;height:20px;border-radius:50%;background:${cur.color};position:relative;top:50%;left:50%;transform:translate(-50%,-50%);border:1px solid #444"></div>`;
+  html+=`</div>`;
+  html+=`<style>@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}</style>`;
+  html+=`<h3 style="color:#fff;margin:8px 0 2px">${cur.title}</h3>`;
+  html+=`<div style="color:#aaa;font-size:11px">${cur.artist}</div>`;
+  html+=`<div style="color:#666;font-size:9px;margin-top:2px">${cur.genre} · ${cur.bpm} BPM</div>`;
+  // Current chord
+  const chord=cur.chords[BarVibes.currentChordIdx];
+  html+=`<div style="color:#ffd080;font-size:10px;margin-top:8px">♪ ${chord.nm}</div>`;
+  // Voting section
+  html+=`<div style="margin-top:12px;border-top:1px solid #333;padding-top:8px">`;
+  html+=`<div style="font-size:9px;color:#888;margin-bottom:6px">Vote for next record:</div>`;
+  html+=`<div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center">`;
+  BarVibes.records.filter(r=>r.id!==cur.id).forEach(r=>{
+    const v=BarVibes.votes[r.id]||0;
+    const voted=BarVibes.myVote===r.id;
+    html+=`<div class="drink-btn vote-btn" data-rid="${r.id}" style="font-size:9px;padding:3px 8px;${voted?'border-color:#ff6ec7;color:#ff6ec7':''}">`;
+    html+=`${r.title.split(' ')[0]} ${v>0?'('+v+')':''}`;
+    html+=`</div>`;
+  });
+  html+=`</div></div></div>`;
+  html+=`<div style="display:flex;gap:6px;margin-top:10px">`;
+  html+=`<button class="drink-btn" id="np-browse" style="flex:1;border-color:#ffd080;color:#ffd080">💿 Browse</button>`;
+  html+=`<button class="drink-btn" id="np-stop" style="flex:1;border-color:#ff4444;color:#ff4444">⏹ Stop</button>`;
+  html+=`</div>`;
+  const{p}=createPopup(html);
+  p.querySelectorAll('.vote-btn').forEach(el=>{
+    el.onclick=()=>{BarVibes.vote(el.dataset.rid);p.closest('.popup-overlay').remove();};
+  });
+  const browse=p.querySelector('#np-browse');
+  if(browse) browse.onclick=()=>{p.closest('.popup-overlay').remove();showVinylSelector();};
+  const stop=p.querySelector('#np-stop');
+  if(stop) stop.onclick=()=>{BarVibes.stop();S.musicPlaying=false;$('#btn-music').classList.remove('active');p.closest('.popup-overlay').remove();};
+}
 
 // PART 2: STATION-WIDE SOUND EFFECTS
 const SoundFX = {
