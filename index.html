@@ -683,7 +683,7 @@ canvas{display:block;image-rendering:pixelated;background:#1a1418}
    ═══════════════════════════════════════════════════════════════ */
 
 const $=s=>document.querySelector(s);
-const LS={get:(k,d)=>{try{const v=localStorage.getItem('echo13_'+k);return v?JSON.parse(v):d}catch{return d}},set:(k,v)=>{try{localStorage.setItem('echo13_'+k,JSON.stringify(v))}catch{}}};
+const LS={get:(k,d)=>{try{const v=localStorage.getItem('echo13_'+k);return v?JSON.parse(v):d}catch{return d}},set:(k,v)=>{try{localStorage.setItem('echo13_'+k,JSON.stringify(v))}catch{}}};window.LS=LS;
 
 // ═══════════════════════════════════════
 // §1. CANVAS & CONSTANTS
@@ -13865,10 +13865,10 @@ function updateVisitor(dt){
     if(v._dashChainWindow<=0){
       // Window expired — apply appropriate cooldown
       if(v._dashChain===1){
-        S._dashCooldown=DASH_COOLDOWN;
+        S._dashCooldown=window.DASH_COOLDOWN||0.3;
         v._dashChain=0;
       } else if(v._dashChain===2){
-        S._dashCooldown=DASH_CHAIN_COOLDOWN;
+        S._dashCooldown=window.DASH_CHAIN_COOLDOWN||0.5;
         v._dashChain=0;
       }
     }
@@ -13918,10 +13918,10 @@ function updateVisitor(dt){
       
       if(v._dashChain===1){
         // First dash ended → open chain window
-        v._dashChainWindow=DASH_CHAIN_WINDOW;
+        v._dashChainWindow=window.DASH_CHAIN_WINDOW||0.28;
       } else if(v._dashChain===2){
         // Chain dash ended → open TRIPLE window
-        v._dashChainWindow=DASH_TRIPLE_WINDOW;
+        v._dashChainWindow=window.DASH_TRIPLE_WINDOW||0.25;
         
         // Chain landing burst
         if(v._chainLandingPending){
@@ -13940,7 +13940,7 @@ function updateVisitor(dt){
         // === TRIPLE DASH LANDED — THE BIG PAYOFF ===
         v._dashChain=0;
         v._dashChainWindow=0;
-        S._dashCooldown=DASH_TRIPLE_COOLDOWN;
+        S._dashCooldown=window.DASH_TRIPLE_COOLDOWN||0.8;
         
         if(v._tripleLandingPending){
           v._tripleLandingPending=false;
@@ -21960,6 +21960,10 @@ function initInput(){
   const DASH_DOUBLE_TAP_MS=350; // window for initial double-tap trigger
   const DASH_CHAIN_WINDOW=0.28; // seconds after dash ends to chain a second
   const DASH_TRIPLE_WINDOW=0.25; // seconds after chain ends to triple
+  // Expose to window for updateVisitor (runs outside this closure)
+  window.DASH_COOLDOWN=DASH_COOLDOWN;window.DASH_CHAIN_COOLDOWN=DASH_CHAIN_COOLDOWN;
+  window.DASH_TRIPLE_COOLDOWN=DASH_TRIPLE_COOLDOWN;window.DASH_CHAIN_WINDOW=DASH_CHAIN_WINDOW;
+  window.DASH_TRIPLE_WINDOW=DASH_TRIPLE_WINDOW;
   
   // Dash state for smooth animation
   S.visitor._dashing=false;
