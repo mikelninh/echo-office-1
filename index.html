@@ -22906,7 +22906,7 @@ const DisplayWall = {
     html += `<p style="color:#888;font-size:10px;margin-top:10px">Acquired: ${new Date(card.acquired).toLocaleDateString()}</p>`;
     html += `</div>`;
 
-    showModal('🎴 ' + card.name, html);
+    createPopup(html);
   }
 };
 
@@ -22945,7 +22945,7 @@ function showCardCollectionUI() {
   });
 
   html += `</div>`;
-  showModal('🎴 Card Collection', html);
+  createPopup(html);
 }
 
 // ── Initialize card collection on load ──
