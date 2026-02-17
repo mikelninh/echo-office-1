@@ -13838,12 +13838,18 @@ function updateVisitor(dt){
     v.x=v._dashStartX+(v._dashTargetX-v._dashStartX)*eased;
     v.y=v._dashStartY+(v._dashTargetY-v._dashStartY)*eased;
     v.moving=true;
-    // Trail particles during dash (chain = denser, gold-tinted)
-    const trailChance = v._dashIsChain ? 0.85 : 0.6;
-    const trailColor = v._dashIsChain ? 'rgba(255,220,100,0.4)' : 'rgba(0,255,247,0.3)';
-    const trailSize = v._dashIsChain ? 4+Math.random()*3 : 3+Math.random()*2;
+    // Trail particles during dash (chain = much denser, gold-tinted, twin streams)
+    const trailChance = v._dashIsChain ? 1.0 : 0.6;
+    const trailSize = v._dashIsChain ? 4+Math.random()*4 : 3+Math.random()*2;
     if(Math.random()<trailChance){
-      S.particles.push({x:v.x+(Math.random()-.5)*10,y:v.y+(Math.random()-.5)*5,vx:(Math.random()-.5)*1,vy:(Math.random()-.5)*1,life:v._dashIsChain?12:8,color:trailColor,size:trailSize});
+      if(v._dashIsChain){
+        // Dual gold/white particle streams for chain
+        S.particles.push({x:v.x+(Math.random()-.5)*12,y:v.y+(Math.random()-.5)*6,vx:(Math.random()-.5)*1.5,vy:(Math.random()-.5)*1.5,life:14,color:`rgba(255,${200+Math.random()*55|0},${60+Math.random()*60|0},0.5)`,size:trailSize});
+        // Sparkle particles (white, smaller, faster fade)
+        if(Math.random()<0.6)S.particles.push({x:v.x+(Math.random()-.5)*16,y:v.y-10+(Math.random()-.5)*10,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2,life:8,color:'rgba(255,255,255,0.7)',size:1+Math.random()*1.5});
+      } else {
+        S.particles.push({x:v.x+(Math.random()-.5)*10,y:v.y+(Math.random()-.5)*5,vx:(Math.random()-.5)*1,vy:(Math.random()-.5)*1,life:8,color:'rgba(0,255,247,0.3)',size:trailSize});
+      }
     }
     if(v._dashTimer<=0){
       v._dashing=false;
@@ -13857,6 +13863,49 @@ function updateVisitor(dt){
         v._dashChain=0;
         v._dashChainWindow=0;
         S._dashCooldown=DASH_CHAIN_COOLDOWN;
+        
+        // === CHAIN LANDING BURST — the payoff ===
+        if(v._chainLandingPending){
+          v._chainLandingPending=false;
+          // Landing impact ring
+          if(typeof addImpactRing==='function'){
+            addImpactRing(v.x,v.y-5,'rgba(255,200,60,0.7)',60,3.5);
+          }
+          // Landing particles (radial explosion)
+          for(let i=0;i<16;i++){
+            const ang=(Math.PI*2/16)*i;
+            const spd3=1.5+Math.random()*2;
+            S.particles.push({x:v.x,y:v.y,vx:Math.cos(ang)*spd3,vy:Math.sin(ang)*spd3*0.6-0.5,life:20+Math.random()*8,color:`rgba(255,${180+Math.random()*60|0},${40+Math.random()*40|0},0.6)`,size:2+Math.random()*2});
+          }
+          // Dust puff at feet
+          for(let i=0;i<6;i++){
+            S.particles.push({x:v.x+(Math.random()-.5)*20,y:v.y+2,vx:(Math.random()-.5)*1.5,vy:-0.5-Math.random()*1,life:18,color:'rgba(200,190,170,0.3)',size:3+Math.random()*3});
+          }
+          // Landing screen shake
+          S.screenShake=Math.max(S.screenShake||0,3);
+          // Landing sound: satisfying thud
+          if(S.audioCtx&&S.masterGain){try{
+            const c=S.audioCtx,n=c.currentTime;
+            // Low thump
+            const o4=c.createOscillator(),g4=c.createGain();
+            o4.connect(g4);g4.connect(S.masterGain);
+            o4.type='sine';o4.frequency.setValueAtTime(80,n);
+            o4.frequency.exponentialRampToValueAtTime(25,n+0.12);
+            g4.gain.setValueAtTime(S.volume*0.15,n);
+            g4.gain.exponentialRampToValueAtTime(0.001,n+0.12);
+            o4.start(n);o4.stop(n+0.12);
+            // Crispy impact click
+            const o5=c.createOscillator(),g5=c.createGain();
+            o5.connect(g5);g5.connect(S.masterGain);
+            o5.type='square';o5.frequency.setValueAtTime(2000,n);
+            o5.frequency.exponentialRampToValueAtTime(200,n+0.03);
+            g5.gain.setValueAtTime(S.volume*0.05,n);
+            g5.gain.exponentialRampToValueAtTime(0.001,n+0.03);
+            o5.start(n);o5.stop(n+0.03);
+          }catch(e){}}
+          // Brief squash on landing
+          v._squashTimer=0.12;
+        }
       }
     }
     return; // Skip normal movement during dash
@@ -14246,11 +14295,14 @@ function renderVisitor(ctx){
       if(!v.moving&&v._wasMoving){if(!v._squashTimer)v._squashTimer=0.15;v._wasMoving=false}
       if(v.moving)v._wasMoving=true;
       if(v._squashTimer>0){v._squashTimer-=0.016;squashX=1.15;squashY=0.85;if(v._squashTimer<=0){squashX=1;squashY=1}}
-      // Dash stretch — elongate in movement direction (chain dash = more extreme)
+      // Dash stretch — elongate in movement direction (chain dash = EXTREME stretch)
       if(v._dashing){
         const chn=v._dashIsChain;
-        if(v._dashDir==='left'||v._dashDir==='right'){squashX=chn?1.5:1.3;squashY=chn?0.6:0.75;}
-        else{squashX=chn?0.6:0.75;squashY=chn?1.5:1.3;}
+        const prog=v._dashTimer/(v._dashDuration||0.18); // 1→0 during dash
+        // Dynamic stretch: peaks mid-dash, slightly lessens at end
+        const stretchMul=chn?(0.8+Math.sin((1-prog)*Math.PI)*0.8):(0.8+Math.sin((1-prog)*Math.PI)*0.5);
+        if(v._dashDir==='left'||v._dashDir==='right'){squashX=1+stretchMul*(chn?0.7:0.4);squashY=1-stretchMul*(chn?0.45:0.3);}
+        else{squashX=1-stretchMul*(chn?0.45:0.3);squashY=1+stretchMul*(chn?0.7:0.4);}
       }
       // Dance animation transforms
       let danceOffY=0, danceSwayX=0, danceRot=0;
@@ -21974,7 +22026,46 @@ function initInput(){
     }catch(e){}}
     
     // Screen shake (chain = punchier)
-    S.screenShake=Math.max(S.screenShake||0,chain?4:2);
+    S.screenShake=Math.max(S.screenShake||0,chain?7:2.5);
+    
+    // === CHAIN DASH EXTRA JUICE ===
+    if(chain){
+      // Hitstop: brief time freeze (60ms) for impact weight — the Celeste feel
+      if(typeof triggerSlowMo==='function')triggerSlowMo(0.05, 0.06);
+      
+      // Screen flash (gold for chain)
+      S.screenFlash='rgba(255,220,100,0.2)';
+      
+      // Impact ring at launch point (uses existing system)
+      if(typeof addImpactRing==='function'){
+        addImpactRing(startX,startY-10,'rgba(255,220,100,0.8)',70,4);
+        // Second ring slightly delayed via particle trick
+        setTimeout(()=>{if(typeof addImpactRing==='function')addImpactRing(startX,startY-10,'rgba(255,180,60,0.5)',50,2.5)},30);
+      }
+      
+      // Ground crack particles at launch point
+      for(let i=0;i<12;i++){
+        const ang=Math.random()*Math.PI*2;
+        const spd2=0.5+Math.random()*2;
+        S.particles.push({x:startX+Math.cos(ang)*4,y:startY+Math.sin(ang)*2,vx:Math.cos(ang)*spd2,vy:Math.sin(ang)*spd2*.5,life:28,color:`rgba(${180+Math.random()*60|0},${140+Math.random()*60|0},${60+Math.random()*40|0},0.5)`,size:1+Math.random()*1.5});
+      }
+      
+      // Chromatic aberration (uses existing system)
+      S.chromaticAberration=Math.max(S.chromaticAberration||0,4);
+      
+      // Brief vignette pulse
+      S.vignetteIntensity=Math.max(S.vignetteIntensity||0,0.3);
+      
+      // Camera zoom punch (slight zoom in then back)
+      S.cameraZoom=1.03;S._cameraZoomTimer=0.15;
+      
+      // Landing burst scheduled when chain dash ends
+      v._chainLandingPending=true;
+    } else {
+      // Single dash: subtle screen flash (cyan)
+      S.screenFlash='rgba(0,255,247,0.08)';
+    }
+    
     // Brief iFrames during dash
     if(DuelSystem.active)DuelSystem.iFrames=Math.max(DuelSystem.iFrames||0,dur);
   }
@@ -37917,18 +38008,23 @@ function renderFloor2(){
   const FW=2400, FH=1600;
   const t=S.time;
 
-  // === FLOOR: Dark observatory deck — polished stone tiles ===
-  ctx.fillStyle='#0c0c18';ctx.fillRect(0,0,FW,FH);
+  // === FLOOR: Observatory deck — polished stone tiles with warm lighting ===
+  ctx.fillStyle='#1a1830';ctx.fillRect(0,0,FW,FH);
   const seed=(x,y)=>((x*2654435761)^(y*2246822519))>>>0;
   for(let py=900;py<FH;py+=48)for(let px=0;px<FW;px+=48){
-    const s=seed(px,py);const shade=s%8;
-    ctx.fillStyle=`rgb(${18+shade},${16+shade},${28+shade})`;ctx.fillRect(px,py,48,48);
-    ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(px,py,48,1);ctx.fillRect(px,py,1,48);
-    if(s%7===0){ctx.fillStyle='rgba(80,60,120,.04)';ctx.fillRect(px+4,py+4,40,40)}
+    const s=seed(px,py);const shade=s%12;
+    ctx.fillStyle=`rgb(${38+shade},${34+shade},${52+shade})`;ctx.fillRect(px,py,48,48);
+    ctx.fillStyle='rgba(0,0,0,.15)';ctx.fillRect(px,py,48,1);ctx.fillRect(px,py,1,48);
+    if(s%5===0){ctx.fillStyle='rgba(120,90,180,.06)';ctx.fillRect(px+4,py+4,40,40)}
+    // Occasional warm tile highlight
+    if(s%11===0){ctx.fillStyle='rgba(180,140,80,.04)';ctx.fillRect(px+2,py+2,44,44)}
   }
 
-  // === GLASS DOME BACKGROUND (y:0-900) — deep space ===
-  ctx.fillStyle='#010208';ctx.fillRect(0,0,FW,900);
+  // === GLASS DOME BACKGROUND (y:0-900) — deep space with depth ===
+  const domeGrad=ctx.createLinearGradient(0,0,0,900);
+  domeGrad.addColorStop(0,'#04060f');domeGrad.addColorStop(0.4,'#080c1a');
+  domeGrad.addColorStop(0.8,'#0e1228');domeGrad.addColorStop(1,'#1a1830');
+  ctx.fillStyle=domeGrad;ctx.fillRect(0,0,FW,900);
 
   // Dome curve (glass frame)
   ctx.save();
@@ -37945,67 +38041,74 @@ function renderFloor2(){
   }
   ctx.restore();
 
-  // === STAR FIELD — 5 brightness layers, 250+ stars ===
-  // Layer 1: faintest background dust (80 stars)
-  for(let i=0;i<80;i++){
+  // === STAR FIELD — 5 brightness layers, 300+ stars, visible even on deck ===
+  // Layer 1: faintest background dust (100 stars)
+  for(let i=0;i<100;i++){
     const sx=(i*137+23)%FW,sy=(i*89+11)%880;
-    const a=.04+Math.sin(t*.3+i*.7)*.02;
+    const a=.08+Math.sin(t*.3+i*.7)*.04;
     ctx.fillStyle=`rgba(180,180,220,${a})`;ctx.fillRect(sx,sy,1,1);
   }
-  // Layer 2: dim stars (60 stars)
-  for(let i=0;i<60;i++){
+  // Layer 2: dim stars (80 stars)
+  for(let i=0;i<80;i++){
     const sx=(i*211+47)%FW,sy=(i*127+31)%860;
-    const a=.12+Math.sin(t*.6+i*.5)*.06;
+    const a=.2+Math.sin(t*.6+i*.5)*.1;
     ctx.fillStyle=`rgba(200,200,240,${a})`;ctx.fillRect(sx,sy,1,1);
   }
-  // Layer 3: medium stars (50 stars)
-  for(let i=0;i<50;i++){
+  // Layer 3: medium stars (60 stars)
+  for(let i=0;i<60;i++){
     const sx=(i*173+67)%FW,sy=(i*97+19)%840;
-    const a=.25+Math.sin(t*1.0+i*.8)*.12;
+    const a=.4+Math.sin(t*1.0+i*.8)*.15;
     ctx.fillStyle=`rgba(220,220,255,${a})`;ctx.fillRect(sx,sy,1,1);
   }
-  // Layer 4: bright stars (30 stars, some 2px)
-  for(let i=0;i<30;i++){
+  // Layer 4: bright stars (40 stars, some 2px)
+  for(let i=0;i<40;i++){
     const sx=(i*251+83)%FW,sy=(i*149+7)%800;
-    const a=.45+Math.sin(t*1.5+i*1.1)*.2;
-    const sz=i%7===0?2:1;
+    const a=.6+Math.sin(t*1.5+i*1.1)*.25;
+    const sz=i%5===0?2:1;
     ctx.fillStyle=`rgba(240,240,255,${a})`;ctx.fillRect(sx,sy,sz,sz);
   }
-  // Layer 5: brilliant stars with twinkle (15 stars, cross-shaped)
-  for(let i=0;i<15;i++){
+  // Layer 5: brilliant stars with twinkle (20 stars, cross-shaped)
+  for(let i=0;i<20;i++){
     const sx=(i*307+41)%FW,sy=(i*181+53)%750;
-    const a=.7+Math.sin(t*2.5+i*1.3)*.25;
+    const a=.8+Math.sin(t*2.5+i*1.3)*.18;
     ctx.fillStyle=`rgba(255,255,255,${a})`;
     ctx.fillRect(sx,sy,2,2);
     // Cross twinkle
     const ta=Math.sin(t*3+i*2)*.5;
     if(ta>0){
-      ctx.fillStyle=`rgba(255,255,255,${ta*.4})`;
-      ctx.fillRect(sx-1,sy+0.5,4,1);ctx.fillRect(sx+0.5,sy-1,1,4);
+      ctx.fillStyle=`rgba(255,255,255,${ta*.6})`;
+      ctx.fillRect(sx-2,sy+0.5,6,1);ctx.fillRect(sx+0.5,sy-2,1,6);
     }
   }
 
-  // === NEBULAE — 3 radial gradient clouds ===
+  // === NEBULAE — 3 radial gradient clouds (vivid) ===
   // Nebula 1: purple-violet (large, left)
   const n1x=500+Math.sin(t*.02)*40,n1y=350+Math.cos(t*.015)*25;
-  const ng1=ctx.createRadialGradient(n1x,n1y,0,n1x,n1y,250);
-  ng1.addColorStop(0,'rgba(120,40,180,.1)');ng1.addColorStop(0.3,'rgba(80,20,140,.06)');
-  ng1.addColorStop(0.7,'rgba(40,10,100,.03)');ng1.addColorStop(1,'rgba(0,0,0,0)');
+  const ng1=ctx.createRadialGradient(n1x,n1y,0,n1x,n1y,300);
+  ng1.addColorStop(0,'rgba(140,50,200,.22)');ng1.addColorStop(0.3,'rgba(100,30,160,.14)');
+  ng1.addColorStop(0.6,'rgba(60,15,120,.07)');ng1.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle=ng1;ctx.fillRect(0,0,FW,900);
 
   // Nebula 2: blue-cyan (center-right)
   const n2x=1600+Math.sin(t*.025+1)*35,n2y=300+Math.cos(t*.018+2)*20;
-  const ng2=ctx.createRadialGradient(n2x,n2y,0,n2x,n2y,200);
-  ng2.addColorStop(0,'rgba(30,80,180,.08)');ng2.addColorStop(0.4,'rgba(20,60,150,.04)');
+  const ng2=ctx.createRadialGradient(n2x,n2y,0,n2x,n2y,260);
+  ng2.addColorStop(0,'rgba(40,100,200,.18)');ng2.addColorStop(0.4,'rgba(25,70,170,.1)');
   ng2.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle=ng2;ctx.fillRect(0,0,FW,900);
 
-  // Nebula 3: rose-pink (upper right, smaller)
+  // Nebula 3: rose-pink (upper right, larger)
   const n3x=2000+Math.sin(t*.03+3)*30,n3y=200+Math.cos(t*.02+1)*15;
-  const ng3=ctx.createRadialGradient(n3x,n3y,0,n3x,n3y,140);
-  ng3.addColorStop(0,'rgba(180,60,100,.06)');ng3.addColorStop(0.5,'rgba(120,30,70,.03)');
+  const ng3=ctx.createRadialGradient(n3x,n3y,0,n3x,n3y,200);
+  ng3.addColorStop(0,'rgba(200,70,120,.15)');ng3.addColorStop(0.5,'rgba(140,40,80,.08)');
   ng3.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle=ng3;ctx.fillRect(0,0,FW,900);
+
+  // Nebula 4: warm amber glow (new — bottom center, bleeds into deck)
+  const n4x=1200+Math.sin(t*.018)*30,n4y=750+Math.cos(t*.012)*15;
+  const ng4=ctx.createRadialGradient(n4x,n4y,0,n4x,n4y,350);
+  ng4.addColorStop(0,'rgba(200,150,60,.08)');ng4.addColorStop(0.5,'rgba(160,100,40,.04)');
+  ng4.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=ng4;ctx.fillRect(0,0,FW,900);
 
   // === PLANETS ===
   // Jupiter — large, banded, Great Red Spot
@@ -38108,19 +38211,19 @@ function renderFloor2(){
     });
   });
 
-  // === AURORA BOREALIS — dancing curtains ===
+  // === AURORA BOREALIS — dancing curtains (vivid) ===
   const auroraColors=['rgba(0,255,100,','rgba(80,200,255,','rgba(160,50,255,','rgba(255,80,180,'];
   for(let i=0;i<40;i++){
     const ax=50+i*58+Math.sin(t*1.5+i*.4)*20;
     const ay=30+Math.sin(t*.8+i*.25)*35;
     const ah=80+Math.sin(t*.6+i*.3)*30;
     const ci=i%4;
-    const alpha=.04+Math.sin(t*2+i*.7)*.025;
+    const alpha=.1+Math.sin(t*2+i*.7)*.06;
     ctx.fillStyle=auroraColors[ci]+alpha+')';
-    ctx.fillRect(ax,ay,12,ah);
+    ctx.fillRect(ax,ay,14,ah);
     // Secondary shimmer band
-    ctx.fillStyle=auroraColors[(ci+1)%4]+(alpha*.5)+')';
-    ctx.fillRect(ax+4,ay+10,6,ah-20);
+    ctx.fillStyle=auroraColors[(ci+1)%4]+(alpha*.6)+')';
+    ctx.fillRect(ax+4,ay+10,8,ah-20);
   }
 
   // === SHOOTING STAR (every ~25 seconds) ===
@@ -38138,18 +38241,45 @@ function renderFloor2(){
     }
   }
 
-  // === DOME / DECK TRANSITION (y~900) — railing ===
+  // === DOME / DECK TRANSITION (y~900) — railing with running lights ===
   // Deck floor gradient
-  const deckGrad=ctx.createLinearGradient(0,880,0,920);
-  deckGrad.addColorStop(0,'rgba(20,18,35,.5)');deckGrad.addColorStop(0.5,'rgba(40,35,60,.8)');
-  deckGrad.addColorStop(1,'rgba(20,18,35,0)');
-  ctx.fillStyle=deckGrad;ctx.fillRect(0,880,FW,40);
+  const deckGrad=ctx.createLinearGradient(0,870,0,930);
+  deckGrad.addColorStop(0,'rgba(30,28,55,.3)');deckGrad.addColorStop(0.5,'rgba(55,48,80,.9)');
+  deckGrad.addColorStop(1,'rgba(30,28,55,0)');
+  ctx.fillStyle=deckGrad;ctx.fillRect(0,870,FW,60);
   // Railing
-  ctx.fillStyle='#3a3550';ctx.fillRect(0,895,FW,4);
-  ctx.fillStyle='#4a4565';ctx.fillRect(0,895,FW,2);
+  ctx.fillStyle='#4a4568';ctx.fillRect(0,895,FW,4);
+  ctx.fillStyle='#5a5578';ctx.fillRect(0,895,FW,2);
   for(let rx=60;rx<FW;rx+=60){
-    ctx.fillStyle='#3a3550';ctx.fillRect(rx,880,3,18);
-    ctx.fillStyle='#4a4565';ctx.fillRect(rx,880,2,18);
+    ctx.fillStyle='#4a4568';ctx.fillRect(rx,878,3,20);
+    ctx.fillStyle='#5a5578';ctx.fillRect(rx,878,2,20);
+    // Running lights along railing
+    const rlAlpha=.15+Math.sin(t*1.5+rx*.01)*.1;
+    ctx.fillStyle=`rgba(100,180,255,${rlAlpha})`;
+    ctx.fillRect(rx+1,893,1,2);
+  }
+  // Warm ambient pools on deck from various light sources
+  // Hot chocolate bar glow
+  const hcbObj=getObjects().find(o=>o.id==='hotchoc_bar');
+  if(hcbObj){
+    const hcGlow=ctx.createRadialGradient(hcbObj.x+hcbObj.w/2,hcbObj.y+hcbObj.h/2,0,hcbObj.x+hcbObj.w/2,hcbObj.y+hcbObj.h/2,180);
+    hcGlow.addColorStop(0,'rgba(200,150,60,.12)');hcGlow.addColorStop(0.5,'rgba(180,120,40,.06)');hcGlow.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=hcGlow;ctx.fillRect(hcbObj.x-180,hcbObj.y-180,hcbObj.w+360,hcbObj.h+360);
+  }
+  // Meditation candle glow
+  const medObj=getObjects().find(o=>o.id==='meditation_alcove');
+  if(medObj){
+    const candleGlow=ctx.createRadialGradient(medObj.x+medObj.w/2,medObj.y+40,0,medObj.x+medObj.w/2,medObj.y+40,120);
+    const cFlicker=.08+Math.sin(t*6)*.04;
+    candleGlow.addColorStop(0,`rgba(255,200,100,${cFlicker})`);candleGlow.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=candleGlow;ctx.fillRect(medObj.x-120,medObj.y-80,medObj.w+240,medObj.h+160);
+  }
+  // Planetarium projector glow
+  const projObj=getObjects().find(o=>o.id==='planetarium_projector');
+  if(projObj){
+    const pGlow=ctx.createRadialGradient(projObj.x+projObj.w/2,projObj.y+projObj.h/2,0,projObj.x+projObj.w/2,projObj.y+projObj.h/2,200);
+    pGlow.addColorStop(0,'rgba(100,150,220,.08)');pGlow.addColorStop(0.6,'rgba(60,100,180,.04)');pGlow.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=pGlow;ctx.fillRect(projObj.x-200,projObj.y-200,projObj.w+400,projObj.h+400);
   }
 
   // === VIEWING PODS (circular, scattered in middle zone) ===
@@ -38157,15 +38287,15 @@ function renderFloor2(){
     const pod=getObjects().find(o=>o.id==='viewing_pod_'+i);if(!pod)continue;
     const pcx=pod.x+pod.w/2,pcy=pod.y+pod.h/2,pr=Math.min(pod.w,pod.h)/2;
     // Pod base
-    ctx.fillStyle='#1a1830';ctx.beginPath();ctx.arc(pcx,pcy,pr+4,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#2a2545';ctx.beginPath();ctx.arc(pcx,pcy,pr,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#2a2545';ctx.beginPath();ctx.arc(pcx,pcy,pr+4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#3a3060';ctx.beginPath();ctx.arc(pcx,pcy,pr,0,Math.PI*2);ctx.fill();
     // Cushion
-    ctx.fillStyle='#3a2a5a';ctx.beginPath();ctx.arc(pcx,pcy,pr-4,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#4a3a6a';ctx.beginPath();ctx.arc(pcx,pcy,pr-8,0,Math.PI*2);ctx.fill();
-    // Subtle glow underneath
-    const podGlow=ctx.createRadialGradient(pcx,pcy,0,pcx,pcy,pr+10);
-    podGlow.addColorStop(0,'rgba(80,60,140,.05)');podGlow.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=podGlow;ctx.beginPath();ctx.arc(pcx,pcy,pr+10,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#4a3870';ctx.beginPath();ctx.arc(pcx,pcy,pr-4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#5a4880';ctx.beginPath();ctx.arc(pcx,pcy,pr-8,0,Math.PI*2);ctx.fill();
+    // Glow underneath (visible)
+    const podGlow=ctx.createRadialGradient(pcx,pcy,0,pcx,pcy,pr+20);
+    podGlow.addColorStop(0,'rgba(100,80,180,.12)');podGlow.addColorStop(0.6,'rgba(80,60,150,.06)');podGlow.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=podGlow;ctx.beginPath();ctx.arc(pcx,pcy,pr+20,0,Math.PI*2);ctx.fill();
   }
 
   // === TELESCOPE MAIN — large platform ===
@@ -38391,18 +38521,26 @@ function renderFloor2(){
     ctx.beginPath();ctx.arc(px,py,1.5,0,Math.PI*2);ctx.fill();
   }
 
-  // === AMBIENT — cool blue/purple glow ===
-  const amb1=ctx.createRadialGradient(FW/2,400,0,FW/2,400,600);
-  amb1.addColorStop(0,'rgba(40,20,80,.04)');amb1.addColorStop(1,'rgba(0,0,0,0)');
+  // === AMBIENT — warm/cool light pools across deck ===
+  const amb1=ctx.createRadialGradient(FW/2,400,0,FW/2,400,700);
+  amb1.addColorStop(0,'rgba(60,30,100,.08)');amb1.addColorStop(0.6,'rgba(40,20,80,.04)');amb1.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle=amb1;ctx.fillRect(0,0,FW,FH);
 
-  const amb2=ctx.createRadialGradient(1200,1000,0,1200,1000,500);
-  amb2.addColorStop(0,'rgba(20,10,50,.03)');amb2.addColorStop(1,'rgba(0,0,0,0)');
+  // Warm ambient on deck area
+  const amb2=ctx.createRadialGradient(1200,1100,0,1200,1100,600);
+  amb2.addColorStop(0,'rgba(180,130,60,.06)');amb2.addColorStop(0.5,'rgba(120,80,40,.03)');amb2.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle=amb2;ctx.fillRect(0,0,FW,FH);
 
-  // === WALLS ===
-  ctx.fillStyle='#0c0c18';ctx.fillRect(0,0,FW,10);ctx.fillRect(0,FH-10,FW,10);
+  // Cool accent light left side
+  const amb3=ctx.createRadialGradient(300,1200,0,300,1200,400);
+  amb3.addColorStop(0,'rgba(60,100,180,.06)');amb3.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=amb3;ctx.fillRect(0,0,FW,FH);
+
+  // === WALLS — subtle, not pitch black ===
+  ctx.fillStyle='#1a1830';ctx.fillRect(0,0,FW,10);ctx.fillRect(0,FH-10,FW,10);
   ctx.fillRect(0,0,10,FH);ctx.fillRect(FW-10,0,10,FH);
+  // Wall edge highlight
+  ctx.fillStyle='rgba(80,70,120,.3)';ctx.fillRect(0,10,FW,2);ctx.fillRect(10,0,2,FH);
 
   FloorDepth.renderShadows(ctx,2);FloorDepth.renderLightRays(ctx,2);
 }
