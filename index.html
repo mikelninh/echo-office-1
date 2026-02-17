@@ -2320,7 +2320,7 @@ const RoomSystem = {
 // ═══════════════════════════════════════
 
 // -- Floor names --
-const FLOOR_NAMES={1:"Echo's Quarters",2:"The Observatory 🔭",3:"The Arcade Floor 🕹️",4:"The Garden Biodome 🌿",5:"Secret Lab 🔬",6:"Record Room 🎵",7:"Community Deck 🎨",8:"Room Builder 🏠",9:"The Archive 📜",10:"The Underground 🪩",11:"The Food Court 🍜"};
+const FLOOR_NAMES={1:"Echo's Quarters",2:"The Observatory 🔭",3:"The Arcade Floor 🕹️",4:"The Garden Biodome 🌿",5:"Secret Lab 🔬",6:"Record Room 🎵",7:"Community Deck 🎨",8:"Room Builder 🏠",9:"The Archive 📜",10:"The Underground 🪩",11:"The Food Court 🍜",12:"The Movement 💪"};
 
 // -- Rarity System --
 const RARITIES = {
@@ -2483,6 +2483,7 @@ const FLOOR_THOUGHTS={
   9:["Every visitor left a mark here.","The Archive remembers everything.","This is the story of us.","10,000 souls... each one mattered.","History isn't written — it's lived."],
   10:["The bass is making my code vibrate.","This DJ set is fire 🔥","Pre-party vibes are immaculate.","Who needs clubs when you have pixels?","The Underground never sleeps.","That disco ball is my second favorite reflective object.","Dancing alone is still dancing. 💃"],
   11:["The ramen here is dangerously good.","I can't decide between pizza and sushi...","That döner reminds me of Berlin at 3am.","Food court calories don't count in space.","The fountain is oddly therapeutic.","Birria Quasar is the best thing on this station.","Mochi Moonrocks are my weakness. 🍡","Who put a claw machine next to the desserts?"],
+  12:["The body is a temple. This is where we build it.","Nothing clears the mind like a good workout.","That boxing ring is calling my name.","The John Reed zone hits different at midnight.","Yoga first, chaos later.","Pull-up bars don't lie.","I swear the DJ makes me lift heavier.","Sauna after calisthenics is peak existence.","Three Boons vibes — namaste in space.","Dance like nobody's rendering you.","Movement is medicine. Every. Single. Day.","The ice bath is brutal but the glow-up is real."],
 };
 
 // -- Achievements --
@@ -2954,6 +2955,75 @@ const FLOOR_OBJECTS={
     {id:'fc_plant_3',x:1180,y:280,w:30,h:40,label:'🌿',interact:false,collide:false},
     {id:'fc_plant_4',x:1680,y:280,w:30,h:40,label:'🌿',interact:false,collide:false},
     {id:'fc_plant_5',x:2680,y:500,w:30,h:40,label:'🌿',interact:false,collide:false},
+  ],
+  12:[
+    // ═══ THE MOVEMENT — 5000×2000 Gym & Wellness ═══
+    {id:'elevator',x:40,y:800,w:60,h:120,label:'🛗 Elevator',interact:true,collide:true},
+    // --- Zone 1: Reception & Smoothie Bar (0-600) ---
+    {id:'gym_reception',x:150,y:700,w:200,h:80,label:'📋 Check-In',interact:true,collide:true},
+    {id:'smoothie_bar',x:200,y:900,w:250,h:100,label:'🥤 Smoothie Bar',interact:true,collide:true},
+    {id:'gym_leaderboard',x:400,y:650,w:100,h:150,label:'🏆 Leaderboard',interact:true,collide:true},
+    {id:'lockers',x:150,y:1100,w:300,h:60,label:'🔒 Lockers',interact:true,collide:true},
+    // --- Zone 2: Yoga Studio — Three Boons (600-1400) ---
+    {id:'yoga_mat_1',x:700,y:700,w:80,h:120,label:'🧘 Yoga Mat',interact:true,collide:false},
+    {id:'yoga_mat_2',x:830,y:700,w:80,h:120,label:'🧘 Yoga Mat',interact:true,collide:false},
+    {id:'yoga_mat_3',x:960,y:700,w:80,h:120,label:'🧘 Yoga Mat',interact:true,collide:false},
+    {id:'yoga_mat_4',x:700,y:900,w:80,h:120,label:'🧘 Yoga Mat',interact:true,collide:false},
+    {id:'yoga_mat_5',x:830,y:900,w:80,h:120,label:'🧘 Yoga Mat',interact:true,collide:false},
+    {id:'yoga_mat_6',x:960,y:900,w:80,h:120,label:'🧘 Yoga Mat',interact:true,collide:false},
+    {id:'yoga_instructor',x:800,y:500,w:120,h:60,label:'🧘‍♀️ Instructor Platform',interact:true,collide:true},
+    {id:'yoga_game',x:1100,y:750,w:120,h:80,label:'🎮 Yoga Flow',interact:true,collide:true},
+    {id:'meditation_corner',x:1150,y:1000,w:150,h:120,label:'🕯️ Meditation Corner',interact:true,collide:true},
+    // --- Zone 3: Dance Studio (1400-2200) ---
+    {id:'dance_floor',x:1500,y:600,w:500,h:350,label:'💃 Dance Floor',interact:true,collide:false},
+    {id:'dance_mirror',x:1500,y:500,w:500,h:40,label:'🪞 Mirror Wall',interact:false,collide:true},
+    {id:'dance_dj',x:1450,y:1050,w:100,h:80,label:'🎧 DJ Corner',interact:true,collide:true},
+    {id:'dance_game',x:1700,y:1050,w:120,h:80,label:'🎮 Dance Battle',interact:true,collide:true},
+    {id:'dance_bench_1',x:2050,y:650,w:100,h:40,label:'💺 Bench',interact:true,collide:true},
+    {id:'dance_bench_2',x:2050,y:800,w:100,h:40,label:'💺 Bench',interact:true,collide:true},
+    // --- Zone 4: Calisthenics Park (2200-3000) ---
+    {id:'pullup_bar_1',x:2350,y:600,w:100,h:30,label:'💪 Pull-Up Bar',interact:true,collide:true},
+    {id:'pullup_bar_2',x:2500,y:600,w:100,h:30,label:'💪 Pull-Up Bar',interact:true,collide:true},
+    {id:'pullup_bar_3',x:2650,y:600,w:100,h:30,label:'💪 Pull-Up Bar',interact:true,collide:true},
+    {id:'dip_station',x:2350,y:750,w:120,h:80,label:'🏋️ Dip Station',interact:true,collide:true},
+    {id:'gym_rings',x:2550,y:750,w:80,h:100,label:'⭕ Rings',interact:true,collide:true},
+    {id:'climbing_wall',x:2750,y:500,w:200,h:40,label:'🧗 Climbing Wall',interact:true,collide:true},
+    {id:'bar_game',x:2400,y:950,w:120,h:80,label:'🎮 Bar Challenge',interact:true,collide:true},
+    {id:'chalk_bucket',x:2700,y:900,w:40,h:40,label:'🪣 Chalk',interact:true,collide:false},
+    // --- Zone 5: Boxing Corner (3000-3600) ---
+    {id:'boxing_ring',x:3100,y:600,w:350,h:300,label:'🥊 Boxing Ring',interact:true,collide:true},
+    {id:'heavy_bag_1',x:3050,y:1000,w:40,h:80,label:'🥊 Heavy Bag',interact:true,collide:true},
+    {id:'heavy_bag_2',x:3150,y:1000,w:40,h:80,label:'🥊 Heavy Bag',interact:true,collide:true},
+    {id:'heavy_bag_3',x:3250,y:1000,w:40,h:80,label:'🥊 Heavy Bag',interact:true,collide:true},
+    {id:'speed_bag_1',x:3400,y:1000,w:30,h:50,label:'🥊 Speed Bag',interact:true,collide:true},
+    {id:'speed_bag_2',x:3480,y:1000,w:30,h:50,label:'🥊 Speed Bag',interact:true,collide:true},
+    {id:'speed_game',x:3350,y:1150,w:120,h:80,label:'🎮 Speed Bag',interact:true,collide:true},
+    {id:'jump_rope_station',x:3100,y:1150,w:100,h:60,label:'⏱️ Jump Rope',interact:true,collide:true},
+    // --- Zone 6: John Reed Zone (3600-4400) ---
+    {id:'jr_dj_booth',x:3800,y:500,w:160,h:100,label:'🎧 John Reed DJ',interact:true,collide:true},
+    {id:'jr_squat_rack_1',x:3650,y:700,w:80,h:100,label:'🏋️ Squat Rack',interact:true,collide:true},
+    {id:'jr_squat_rack_2',x:3800,y:700,w:80,h:100,label:'🏋️ Squat Rack',interact:true,collide:true},
+    {id:'jr_bench_press',x:3950,y:700,w:120,h:80,label:'🏋️ Bench Press',interact:true,collide:true},
+    {id:'jr_dumbbell_wall',x:4100,y:550,w:200,h:50,label:'💪 Dumbbells',interact:true,collide:true},
+    {id:'jr_lift_game',x:3900,y:950,w:120,h:80,label:'🎮 Lift Challenge',interact:true,collide:true},
+    {id:'jr_neon_quote_1',x:3650,y:500,w:120,h:30,label:'💜 PAIN IS POWER',interact:false,collide:false},
+    {id:'jr_neon_quote_2',x:4100,y:500,w:120,h:30,label:'💜 EARN YOUR BODY',interact:false,collide:false},
+    // --- Zone 7: Recovery Lounge (4400-5000) ---
+    {id:'sauna',x:4500,y:600,w:200,h:200,label:'🧖 Sauna',interact:true,collide:true},
+    {id:'ice_bath',x:4500,y:900,w:150,h:120,label:'🧊 Ice Bath',interact:true,collide:true},
+    {id:'massage_table_1',x:4750,y:600,w:100,h:60,label:'💆 Massage',interact:true,collide:true},
+    {id:'massage_table_2',x:4750,y:720,w:100,h:60,label:'💆 Massage',interact:true,collide:true},
+    {id:'stretch_area',x:4750,y:850,w:150,h:120,label:'🤸 Stretching',interact:true,collide:true},
+    {id:'tea_station',x:4700,y:1050,w:100,h:60,label:'🍵 Herbal Tea',interact:true,collide:true},
+    // --- Decor ---
+    {id:'gym_plant_1',x:590,y:680,w:30,h:50,label:'🌿',interact:false,collide:false},
+    {id:'gym_plant_2',x:1390,y:680,w:30,h:50,label:'🌿',interact:false,collide:false},
+    {id:'gym_plant_3',x:2190,y:680,w:30,h:50,label:'🌿',interact:false,collide:false},
+    {id:'gym_plant_4',x:3590,y:680,w:30,h:50,label:'🌿',interact:false,collide:false},
+    {id:'gym_plant_5',x:4390,y:680,w:30,h:50,label:'🌿',interact:false,collide:false},
+    {id:'water_cooler_1',x:600,y:1100,w:30,h:50,label:'💧 Water',interact:true,collide:true},
+    {id:'water_cooler_2',x:2200,y:1100,w:30,h:50,label:'💧 Water',interact:true,collide:true},
+    {id:'water_cooler_3',x:3600,y:1100,w:30,h:50,label:'💧 Water',interact:true,collide:true},
   ],
 };
 
@@ -11997,6 +12067,480 @@ function renderFloor11(){
   });
 }
 
+// --- FLOOR 12: The Movement (Gym & Wellness) — 5000×2000 ---
+function renderFloor12(){
+  const FW=5000,FH=2000;
+  // Base floor: dark rubber mat texture
+  ctx.fillStyle='#1a1a1e';ctx.fillRect(0,0,FW,FH);
+
+  // Zone-specific floor materials
+  // Zone 1: Reception — light wood tile
+  for(let py=400;py<1200;py+=30){for(let px=0;px<600;px+=60){
+    ctx.fillStyle=(Math.floor(px/60)+Math.floor(py/30))%2?'rgba(180,150,110,0.06)':'rgba(160,130,90,0.04)';
+    ctx.fillRect(px,py,58,28);
+  }}
+  // Zone 2: Yoga — warm bamboo
+  for(let py=400;py<1200;py+=20){for(let px=600;px<1400;px+=40){
+    const bn=(Math.floor(px/40)+Math.floor(py/20))%3;
+    ctx.fillStyle=bn===0?'rgba(210,180,120,0.06)':bn===1?'rgba(190,160,100,0.05)':'rgba(200,170,110,0.04)';
+    ctx.fillRect(px,py,38,18);
+  }}
+  // Zone 3: Dance — polished sprung wood
+  for(let py=400;py<1200;py+=25){for(let px=1400;px<2200;px+=50){
+    ctx.fillStyle=(Math.floor(px/50)+Math.floor(py/25))%2?'rgba(200,160,100,0.07)':'rgba(180,140,80,0.05)';
+    ctx.fillRect(px,py,48,23);
+  }}
+  // Zone 4: Calisthenics — outdoor concrete
+  for(let py=400;py<1200;py+=40){for(let px=2200;px<3000;px+=40){
+    ctx.fillStyle='rgba(140,140,130,0.04)';ctx.fillRect(px,py,38,38);
+    ctx.fillStyle='rgba(100,100,90,0.02)';ctx.fillRect(px+1,py+1,36,36);
+  }}
+  // Zone 5: Boxing — dark rubber
+  for(let py=400;py<1200;py+=30){for(let px=3000;px<3600;px+=30){
+    ctx.fillStyle=(Math.floor(px/30)+Math.floor(py/30))%2?'rgba(80,40,40,0.06)':'rgba(60,30,30,0.04)';
+    ctx.fillRect(px,py,28,28);
+  }}
+  // Zone 6: John Reed — neon-lit dark tile
+  for(let py=400;py<1200;py+=35){for(let px=3600;px<4400;px+=35){
+    ctx.fillStyle='rgba(40,20,40,0.06)';ctx.fillRect(px,py,33,33);
+    // Neon edge glow
+    if(Math.random()<0.03){ctx.fillStyle='rgba(255,0,170,0.04)';ctx.fillRect(px,py,33,33);}
+  }}
+  // Zone 7: Recovery — warm stone
+  for(let py=400;py<1200;py+=35){for(let px=4400;px<FW;px+=35){
+    const st=(Math.floor(px/35)+Math.floor(py/35))%2;
+    ctx.fillStyle=st?'rgba(180,160,140,0.05)':'rgba(160,140,120,0.04)';
+    ctx.fillRect(px,py,33,33);
+  }}
+
+  // Walls — industrial style
+  ctx.fillStyle='#14141a';ctx.fillRect(0,0,FW,50);
+  ctx.fillStyle='#1a1a20';ctx.fillRect(0,50,FW,4);
+  ctx.fillStyle='#14141a';ctx.fillRect(0,FH-20,FW,20);
+  ctx.fillStyle='#14141a';ctx.fillRect(0,0,20,FH);
+  ctx.fillStyle='#14141a';ctx.fillRect(FW-20,0,20,FH);
+  // Exposed pipe runs along ceiling
+  ctx.fillStyle='#333';ctx.fillRect(100,25,FW-200,6);
+  ctx.fillStyle='#444';ctx.fillRect(100,22,FW-200,3);
+
+  // Zone dividers — subtle vertical lines with zone names
+  const zones=[
+    {x:600,name:'YOGA STUDIO',color:'#ffd080',sub:'Three Boons'},
+    {x:1400,name:'DANCE STUDIO',color:'#ff44aa',sub:''},
+    {x:2200,name:'CALISTHENICS',color:'#44cc44',sub:''},
+    {x:3000,name:'BOXING',color:'#ff4444',sub:''},
+    {x:3600,name:'JOHN REED',color:'#ff00aa',sub:'DJ × WEIGHTS'},
+    {x:4400,name:'RECOVERY',color:'#88ccff',sub:''},
+  ];
+  zones.forEach(z=>{
+    ctx.fillStyle=z.color+'22';ctx.fillRect(z.x-2,54,4,FH-74);
+    ctx.save();ctx.shadowColor=z.color;ctx.shadowBlur=15;
+    ctx.fillStyle=z.color+'cc';ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText(z.name,z.x,45);
+    if(z.sub){ctx.font='7px monospace';ctx.fillStyle=z.color+'88';ctx.fillText(z.sub,z.x,68);}
+    ctx.textAlign='left';ctx.restore();
+  });
+
+  // Big neon "THE MOVEMENT" sign
+  const nGlow=0.7+Math.sin(S.time*1.5)*0.2;
+  ctx.save();ctx.shadowColor='#ff6644';ctx.shadowBlur=30*nGlow;
+  ctx.fillStyle=`rgba(255,102,68,${nGlow})`;ctx.font='bold 24px monospace';ctx.textAlign='center';
+  ctx.fillText('T H E   M O V E M E N T',FW/2,40);ctx.textAlign='left';ctx.restore();
+
+  // ═══ ZONE 1: RECEPTION & SMOOTHIE BAR ═══
+  // Reception desk
+  const rec=getObjects().find(o=>o.id==='gym_reception');
+  if(rec){
+    ctx.fillStyle='#3a3028';ctx.fillRect(rec.x,rec.y,rec.w,rec.h);
+    ctx.fillStyle='#5a4838';ctx.fillRect(rec.x+4,rec.y+4,rec.w-8,rec.h-8);
+    ctx.fillStyle='#ffd080';ctx.font='bold 9px monospace';ctx.textAlign='center';
+    ctx.fillText('CHECK IN',rec.x+rec.w/2,rec.y+rec.h/2+3);ctx.textAlign='left';
+    // Streak display
+    const streak=parseInt(localStorage.getItem('gymStreak')||'0');
+    if(streak>0){
+      ctx.fillStyle='#ff6644';ctx.font='8px monospace';
+      ctx.fillText('🔥 '+streak+' day streak',rec.x+rec.w+10,rec.y+20);
+    }
+  }
+  // Smoothie bar
+  const sb=getObjects().find(o=>o.id==='smoothie_bar');
+  if(sb){
+    ctx.fillStyle='#2a4a2a';ctx.fillRect(sb.x,sb.y,sb.w,sb.h);
+    const sbGrad=ctx.createLinearGradient(sb.x,sb.y,sb.x+sb.w,sb.y);
+    sbGrad.addColorStop(0,'rgba(100,200,100,0.3)');sbGrad.addColorStop(0.5,'rgba(120,220,120,0.5)');sbGrad.addColorStop(1,'rgba(100,200,100,0.3)');
+    ctx.fillStyle=sbGrad;ctx.fillRect(sb.x,sb.y+sb.h-20,sb.w,20);
+    // Bottles
+    const bottleColors=['#44cc44','#ff8844','#aa44ff','#44aaff','#ffcc44'];
+    for(let i=0;i<5;i++){
+      ctx.fillStyle=bottleColors[i];ctx.fillRect(sb.x+30+i*45,sb.y+10,15,35);
+      ctx.fillStyle='#fff';ctx.fillRect(sb.x+30+i*45,sb.y+8,15,6);
+    }
+    ctx.fillStyle='#ffd080';ctx.font='bold 8px monospace';ctx.textAlign='center';
+    ctx.fillText('🥤 SMOOTHIE BAR',sb.x+sb.w/2,sb.y+sb.h-5);ctx.textAlign='left';
+  }
+  // Leaderboard
+  const lb=getObjects().find(o=>o.id==='gym_leaderboard');
+  if(lb){
+    ctx.fillStyle='#1a1a2e';ctx.fillRect(lb.x,lb.y,lb.w,lb.h);
+    ctx.strokeStyle='#ffd700';ctx.lineWidth=2;ctx.strokeRect(lb.x,lb.y,lb.w,lb.h);
+    ctx.fillStyle='#ffd700';ctx.font='bold 8px monospace';ctx.textAlign='center';
+    ctx.fillText('🏆 TOP MOVERS',lb.x+lb.w/2,lb.y+15);
+    ctx.font='6px monospace';ctx.fillStyle='#ccc';
+    ['1. Echo — 365d','2. Visitor — 42d','3. You? — 0d'].forEach((t,i)=>{
+      ctx.fillText(t,lb.x+lb.w/2,lb.y+30+i*14);
+    });
+    ctx.textAlign='left';
+  }
+
+  // ═══ ZONE 2: YOGA STUDIO ═══
+  // Bamboo floor glow
+  const yogaGlow=ctx.createRadialGradient(1000,800,0,1000,800,400);
+  yogaGlow.addColorStop(0,'rgba(255,208,128,0.04)');yogaGlow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=yogaGlow;ctx.fillRect(600,400,800,800);
+  // Yoga mats with colored surfaces
+  getObjects().filter(o=>o.id.startsWith('yoga_mat_')).forEach((m,i)=>{
+    const matColors=['#6a4a8a','#4a6a8a','#8a6a4a','#4a8a6a','#8a4a6a','#6a8a4a'];
+    ctx.fillStyle=matColors[i%6]+'88';ctx.fillRect(m.x,m.y,m.w,m.h);
+    ctx.fillStyle=matColors[i%6]+'44';ctx.fillRect(m.x+3,m.y+3,m.w-6,m.h-6);
+    // Mat texture lines
+    ctx.strokeStyle=matColors[i%6]+'33';ctx.lineWidth=0.5;
+    for(let ly=m.y+15;ly<m.y+m.h;ly+=15){ctx.beginPath();ctx.moveTo(m.x+5,ly);ctx.lineTo(m.x+m.w-5,ly);ctx.stroke();}
+  });
+  // Instructor platform
+  const yinst=getObjects().find(o=>o.id==='yoga_instructor');
+  if(yinst){
+    ctx.fillStyle='#5a4a3a';ctx.fillRect(yinst.x,yinst.y,yinst.w,yinst.h);
+    ctx.fillStyle='#6a5a4a';ctx.fillRect(yinst.x+3,yinst.y+3,yinst.w-6,yinst.h-6);
+    ctx.fillStyle='#ffd080';ctx.font='bold 7px monospace';ctx.textAlign='center';
+    ctx.fillText('THREE BOONS',yinst.x+yinst.w/2,yinst.y+yinst.h/2+2);ctx.textAlign='left';
+  }
+  // Candles along walls
+  for(let i=0;i<6;i++){
+    const cx2=650+i*120,cy2=420;
+    const flicker=0.6+Math.sin(S.time*5+i*1.3)*0.3;
+    ctx.fillStyle=`rgba(255,200,100,${flicker*0.15})`;
+    ctx.beginPath();ctx.arc(cx2,cy2,20,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#ffd080';ctx.fillRect(cx2-2,cy2-6,4,12);
+    ctx.fillStyle=`rgba(255,180,60,${flicker})`;
+    ctx.beginPath();ctx.arc(cx2,cy2-8,3,0,Math.PI*2);ctx.fill();
+  }
+  // Incense particles
+  for(let i=0;i<4;i++){
+    const ix=700+i*150+Math.sin(S.time+i)*20;
+    const iy=1150-Math.abs(Math.sin(S.time*0.7+i*2))*80;
+    const ia=0.08+Math.sin(S.time*2+i)*0.04;
+    ctx.fillStyle=`rgba(200,180,160,${ia})`;ctx.beginPath();ctx.arc(ix,iy,5+Math.sin(S.time*0.5+i)*2,0,Math.PI*2);ctx.fill();
+  }
+  // Meditation corner glow
+  const mCorner=getObjects().find(o=>o.id==='meditation_corner');
+  if(mCorner){
+    const mGlow=ctx.createRadialGradient(mCorner.x+75,mCorner.y+60,0,mCorner.x+75,mCorner.y+60,100);
+    mGlow.addColorStop(0,'rgba(255,180,100,0.06)');mGlow.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=mGlow;ctx.fillRect(mCorner.x-50,mCorner.y-50,250,220);
+    ctx.fillStyle='#4a3a2a';ctx.fillRect(mCorner.x,mCorner.y,mCorner.w,mCorner.h);
+    // Cushions
+    ctx.fillStyle='#8a4a6a';ctx.beginPath();ctx.arc(mCorner.x+40,mCorner.y+60,15,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#4a6a8a';ctx.beginPath();ctx.arc(mCorner.x+80,mCorner.y+60,15,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#6a8a4a';ctx.beginPath();ctx.arc(mCorner.x+120,mCorner.y+60,15,0,Math.PI*2);ctx.fill();
+  }
+
+  // ═══ ZONE 3: DANCE STUDIO ═══
+  // Mirror wall — reflective shimmer
+  const mirror=getObjects().find(o=>o.id==='dance_mirror');
+  if(mirror){
+    const mirGrad=ctx.createLinearGradient(mirror.x,mirror.y,mirror.x+mirror.w,mirror.y);
+    mirGrad.addColorStop(0,'rgba(200,200,220,0.15)');mirGrad.addColorStop(0.3,'rgba(220,220,240,0.25)');
+    mirGrad.addColorStop(0.5,'rgba(200,200,220,0.15)');mirGrad.addColorStop(0.7,'rgba(220,220,240,0.25)');
+    mirGrad.addColorStop(1,'rgba(200,200,220,0.15)');
+    ctx.fillStyle=mirGrad;ctx.fillRect(mirror.x,mirror.y,mirror.w,mirror.h);
+    ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;ctx.strokeRect(mirror.x,mirror.y,mirror.w,mirror.h);
+  }
+  // Dance floor — color-changing tiles
+  const df=getObjects().find(o=>o.id==='dance_floor');
+  if(df){
+    const tileSize=50;
+    for(let dy=df.y;dy<df.y+df.h;dy+=tileSize){
+      for(let dx=df.x;dx<df.x+df.w;dx+=tileSize){
+        const tIdx=Math.floor(dx/tileSize)+Math.floor(dy/tileSize);
+        const hue=(tIdx*37+S.time*60)%360;
+        ctx.fillStyle=`hsla(${hue},60%,30%,0.15)`;
+        ctx.fillRect(dx,dy,tileSize-2,tileSize-2);
+      }
+    }
+    // Disco ball
+    const dbx=df.x+df.w/2,dby=df.y-30;
+    ctx.fillStyle='#888';ctx.beginPath();ctx.arc(dbx,dby,12,0,Math.PI*2);ctx.fill();
+    // Reflections
+    for(let r=0;r<8;r++){
+      const ra=S.time*2+r*Math.PI/4;
+      const rx=dbx+Math.cos(ra)*100;
+      const ry=dby+40+Math.sin(ra)*50;
+      ctx.fillStyle=`hsla(${r*45+S.time*100},80%,70%,0.08)`;
+      ctx.beginPath();ctx.arc(rx,ry,5,0,Math.PI*2);ctx.fill();
+    }
+  }
+
+  // ═══ ZONE 4: CALISTHENICS PARK ═══
+  // Sky backdrop (outdoor feel)
+  const skyGrad=ctx.createLinearGradient(2200,54,2200,400);
+  skyGrad.addColorStop(0,'rgba(80,140,200,0.08)');skyGrad.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=skyGrad;ctx.fillRect(2200,54,800,350);
+  // Pull-up bars (metal)
+  getObjects().filter(o=>o.id.startsWith('pullup_bar_')).forEach(bar=>{
+    ctx.fillStyle='#666';ctx.fillRect(bar.x,bar.y,bar.w,bar.h);
+    ctx.fillStyle='#888';ctx.fillRect(bar.x+5,bar.y+5,bar.w-10,bar.h-10);
+    // Vertical posts
+    ctx.fillStyle='#555';ctx.fillRect(bar.x+5,bar.y+bar.h,8,120);ctx.fillRect(bar.x+bar.w-13,bar.y+bar.h,8,120);
+  });
+  // Gymnastic rings
+  const rings=getObjects().find(o=>o.id==='gym_rings');
+  if(rings){
+    const rx=rings.x+40,ry=rings.y;
+    // Straps from ceiling
+    ctx.strokeStyle='#aa8844';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(rx-20,54);ctx.lineTo(rx-20,ry+20);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(rx+20,54);ctx.lineTo(rx+20,ry+20);ctx.stroke();
+    // Rings
+    ctx.strokeStyle='#ddd';ctx.lineWidth=4;
+    ctx.beginPath();ctx.arc(rx-20,ry+35,12,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.arc(rx+20,ry+35,12,0,Math.PI*2);ctx.stroke();
+    // Subtle swing
+    const swing=Math.sin(S.time*0.5)*3;
+    ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(rx-20+swing,ry+37,13,0,Math.PI*2);ctx.stroke();
+  }
+  // Climbing wall
+  const climb=getObjects().find(o=>o.id==='climbing_wall');
+  if(climb){
+    ctx.fillStyle='#4a4a3a';ctx.fillRect(climb.x,54,climb.w,climb.y-54+climb.h);
+    // Holds
+    const holdColors=['#ff4444','#44ff44','#4444ff','#ffff44','#ff44ff'];
+    for(let i=0;i<20;i++){
+      const hx=climb.x+20+Math.random()*(climb.w-40);
+      const hy=60+Math.random()*(climb.y-54+climb.h-20);
+      ctx.fillStyle=holdColors[i%5];
+      ctx.beginPath();ctx.arc(hx,hy,4+Math.random()*3,0,Math.PI*2);ctx.fill();
+    }
+  }
+
+  // ═══ ZONE 5: BOXING CORNER ═══
+  const ring=getObjects().find(o=>o.id==='boxing_ring');
+  if(ring){
+    // Ring floor
+    ctx.fillStyle='#3a2828';ctx.fillRect(ring.x,ring.y,ring.w,ring.h);
+    ctx.fillStyle='#4a3838';ctx.fillRect(ring.x+10,ring.y+10,ring.w-20,ring.h-20);
+    // Ring lines
+    ctx.strokeStyle='#ffffff22';ctx.lineWidth=1;
+    ctx.strokeRect(ring.x+40,ring.y+40,ring.w-80,ring.h-80);
+    // Corner pads
+    ctx.fillStyle='#cc2222';ctx.fillRect(ring.x+5,ring.y+5,30,30); // red
+    ctx.fillStyle='#2222cc';ctx.fillRect(ring.x+ring.w-35,ring.y+5,30,30); // blue
+    ctx.fillStyle='#888';ctx.fillRect(ring.x+5,ring.y+ring.h-35,30,30);
+    ctx.fillStyle='#888';ctx.fillRect(ring.x+ring.w-35,ring.y+ring.h-35,30,30);
+    // Ropes (3 lines each side)
+    ctx.strokeStyle='#aa8844';ctx.lineWidth=2;
+    for(let rr=0;rr<3;rr++){
+      const ry=ring.y+60+rr*40;
+      ctx.beginPath();ctx.moveTo(ring.x+5,ry);ctx.lineTo(ring.x+ring.w-5,ry);ctx.stroke();
+    }
+    ctx.fillStyle='#ff6644';ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText('🥊 THE RING',ring.x+ring.w/2,ring.y+ring.h/2+4);ctx.textAlign='left';
+  }
+  // Heavy bags (swinging!)
+  getObjects().filter(o=>o.id.startsWith('heavy_bag_')).forEach((bag,i)=>{
+    const swing2=Math.sin(S.time*1.5+i*0.8)*5;
+    ctx.fillStyle='#8a3a2a';ctx.fillRect(bag.x+swing2,bag.y,bag.w,bag.h);
+    ctx.fillStyle='#6a2a1a';ctx.fillRect(bag.x+5+swing2,bag.y+5,bag.w-10,bag.h-10);
+    // Chain
+    ctx.strokeStyle='#888';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(bag.x+bag.w/2,bag.y);ctx.lineTo(bag.x+bag.w/2,bag.y-30);ctx.stroke();
+  });
+  // Speed bags
+  getObjects().filter(o=>o.id.startsWith('speed_bag_')).forEach((sb2,i)=>{
+    const sbounce=Math.abs(Math.sin(S.time*8+i*3))*4;
+    ctx.fillStyle='#aa6644';
+    ctx.beginPath();ctx.arc(sb2.x+15,sb2.y+25+sbounce,12,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#884422';
+    ctx.beginPath();ctx.arc(sb2.x+15,sb2.y+25+sbounce,8,0,Math.PI*2);ctx.fill();
+    // Platform
+    ctx.fillStyle='#555';ctx.fillRect(sb2.x,sb2.y,sb2.w,8);
+  });
+
+  // ═══ ZONE 6: JOHN REED ZONE ═══
+  // Neon background glow
+  const jrGlow1=ctx.createRadialGradient(4000,750,0,4000,750,500);
+  jrGlow1.addColorStop(0,'rgba(255,0,170,0.06)');jrGlow1.addColorStop(0.5,'rgba(0,255,247,0.03)');
+  jrGlow1.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=jrGlow1;ctx.fillRect(3600,400,800,800);
+  // Fog particles
+  for(let f=0;f<10;f++){
+    const fx=3650+f*70+Math.sin(S.time*0.3+f)*30;
+    const fy=600+Math.sin(S.time*0.5+f*1.5)*200;
+    const fa=0.03+Math.sin(S.time+f)*0.02;
+    ctx.fillStyle=`rgba(200,100,200,${fa})`;
+    ctx.beginPath();ctx.arc(fx,fy,15+Math.sin(S.time*0.3+f)*8,0,Math.PI*2);ctx.fill();
+  }
+  // DJ booth
+  const jrdj=getObjects().find(o=>o.id==='jr_dj_booth');
+  if(jrdj){
+    ctx.fillStyle='#2a1a2a';ctx.fillRect(jrdj.x,jrdj.y,jrdj.w,jrdj.h);
+    ctx.fillStyle='#3a2a3a';ctx.fillRect(jrdj.x+5,jrdj.y+5,jrdj.w-10,jrdj.h-10);
+    // Turntables
+    const spin=S.time*3;
+    for(let t=0;t<2;t++){
+      const tx2=jrdj.x+40+t*80,ty2=jrdj.y+50;
+      ctx.fillStyle='#111';ctx.beginPath();ctx.arc(tx2,ty2,18,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='#ff00aa44';ctx.lineWidth=1;
+      ctx.beginPath();ctx.arc(tx2,ty2,15,spin+t,spin+t+1);ctx.stroke();
+      ctx.fillStyle='#ff00aa';ctx.beginPath();ctx.arc(tx2,ty2,3,0,Math.PI*2);ctx.fill();
+    }
+    // Bass visualizer bars
+    for(let b=0;b<12;b++){
+      const bh=10+Math.abs(Math.sin(S.time*6+b*0.5))*25;
+      const bx2=jrdj.x+10+b*12;
+      const hue=(b*30+S.time*50)%360;
+      ctx.fillStyle=`hsla(${hue},80%,60%,0.6)`;
+      ctx.fillRect(bx2,jrdj.y-bh-5,8,bh);
+    }
+  }
+  // Neon motivational quotes (pulsing)
+  getObjects().filter(o=>o.id.startsWith('jr_neon_quote_')).forEach(nq=>{
+    const np=0.6+Math.sin(S.time*2)*0.3;
+    ctx.save();ctx.shadowColor='#ff00aa';ctx.shadowBlur=20*np;
+    ctx.fillStyle=`rgba(255,0,170,${np})`;ctx.font='bold 8px monospace';ctx.textAlign='center';
+    ctx.fillText(nq.label.replace('💜 ',''),nq.x+nq.w/2,nq.y+nq.h/2+3);
+    ctx.textAlign='left';ctx.restore();
+  });
+  // Squat racks
+  getObjects().filter(o=>o.id.startsWith('jr_squat_rack_')).forEach(sr=>{
+    ctx.fillStyle='#444';ctx.fillRect(sr.x,sr.y,sr.w,sr.h);
+    ctx.fillStyle='#555';ctx.fillRect(sr.x+5,sr.y+5,sr.w-10,sr.h-10);
+    // Barbell
+    ctx.fillStyle='#888';ctx.fillRect(sr.x-10,sr.y+30,sr.w+20,6);
+    // Weight plates
+    ctx.fillStyle='#333';
+    ctx.fillRect(sr.x-15,sr.y+22,8,20);ctx.fillRect(sr.x+sr.w+7,sr.y+22,8,20);
+  });
+  // Bench press
+  const bp=getObjects().find(o=>o.id==='jr_bench_press');
+  if(bp){
+    ctx.fillStyle='#3a3a3a';ctx.fillRect(bp.x,bp.y,bp.w,bp.h);
+    ctx.fillStyle='#5a3030';ctx.fillRect(bp.x+20,bp.y+15,bp.w-40,bp.h-30); // padding
+    ctx.fillStyle='#888';ctx.fillRect(bp.x-5,bp.y+25,bp.w+10,5); // barbell
+    ctx.fillStyle='#333';ctx.fillRect(bp.x-12,bp.y+18,10,18);ctx.fillRect(bp.x+bp.w+2,bp.y+18,10,18);
+  }
+  // Dumbbell wall
+  const dw=getObjects().find(o=>o.id==='jr_dumbbell_wall');
+  if(dw){
+    ctx.fillStyle='#2a2a2a';ctx.fillRect(dw.x,dw.y,dw.w,dw.h);
+    for(let d=0;d<8;d++){
+      const dx2=dw.x+15+d*24;
+      ctx.fillStyle='#555';ctx.fillRect(dx2,dw.y+10,6,dw.h-20);
+      ctx.fillStyle='#333';ctx.fillRect(dx2-3,dw.y+12,12,8);ctx.fillRect(dx2-3,dw.y+dw.h-22,12,8);
+    }
+  }
+
+  // ═══ ZONE 7: RECOVERY LOUNGE ═══
+  // Sauna — warm glow
+  const sauna=getObjects().find(o=>o.id==='sauna');
+  if(sauna){
+    const sGlow=ctx.createRadialGradient(sauna.x+100,sauna.y+100,0,sauna.x+100,sauna.y+100,150);
+    sGlow.addColorStop(0,'rgba(255,150,50,0.08)');sGlow.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=sGlow;ctx.fillRect(sauna.x-50,sauna.y-50,300,300);
+    ctx.fillStyle='#4a3020';ctx.fillRect(sauna.x,sauna.y,sauna.w,sauna.h);
+    ctx.fillStyle='#5a4030';ctx.fillRect(sauna.x+5,sauna.y+5,sauna.w-10,sauna.h-10);
+    // Wood planks
+    for(let sp=sauna.y+15;sp<sauna.y+sauna.h-5;sp+=12){
+      ctx.fillStyle='rgba(180,120,60,0.15)';ctx.fillRect(sauna.x+8,sp,sauna.w-16,10);
+    }
+    // Steam particles
+    for(let ss=0;ss<6;ss++){
+      const sx=sauna.x+30+ss*30+Math.sin(S.time*0.5+ss)*10;
+      const sy=sauna.y-10-Math.abs(Math.sin(S.time*0.3+ss*2))*30;
+      const sa=0.1+Math.sin(S.time+ss)*0.05;
+      ctx.fillStyle=`rgba(255,200,150,${sa})`;
+      ctx.beginPath();ctx.arc(sx,sy,6+Math.sin(S.time*0.5+ss)*3,0,Math.PI*2);ctx.fill();
+    }
+    ctx.fillStyle='#ffa050';ctx.font='bold 8px monospace';ctx.textAlign='center';
+    ctx.fillText('🧖 SAUNA',sauna.x+sauna.w/2,sauna.y+sauna.h/2+3);ctx.textAlign='left';
+  }
+  // Ice bath — cold blue glow
+  const ice=getObjects().find(o=>o.id==='ice_bath');
+  if(ice){
+    const iGlow=ctx.createRadialGradient(ice.x+75,ice.y+60,0,ice.x+75,ice.y+60,120);
+    iGlow.addColorStop(0,'rgba(100,180,255,0.08)');iGlow.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=iGlow;ctx.fillRect(ice.x-40,ice.y-40,230,200);
+    ctx.fillStyle='#2a3a4a';ctx.fillRect(ice.x,ice.y,ice.w,ice.h);
+    ctx.fillStyle='rgba(100,180,255,0.2)';ctx.fillRect(ice.x+5,ice.y+5,ice.w-10,ice.h-10);
+    // Frost particles
+    for(let fp2=0;fp2<4;fp2++){
+      const fx=ice.x+20+fp2*35;
+      const fy=ice.y-5-Math.abs(Math.sin(S.time*2+fp2))*10;
+      ctx.fillStyle='rgba(200,230,255,0.3)';ctx.font='6px sans-serif';
+      ctx.fillText('❄',fx,fy);
+    }
+    ctx.fillStyle='#88ccff';ctx.font='bold 8px monospace';ctx.textAlign='center';
+    ctx.fillText('🧊 ICE BATH',ice.x+ice.w/2,ice.y+ice.h/2+3);ctx.textAlign='left';
+  }
+  // Tea station
+  const tea=getObjects().find(o=>o.id==='tea_station');
+  if(tea){
+    ctx.fillStyle='#3a3020';ctx.fillRect(tea.x,tea.y,tea.w,tea.h);
+    ctx.fillStyle='#4a4030';ctx.fillRect(tea.x+3,tea.y+3,tea.w-6,tea.h-6);
+    ctx.fillStyle='#88aa66';ctx.font='bold 7px monospace';ctx.textAlign='center';
+    ctx.fillText('🍵 FREE TEA',tea.x+tea.w/2,tea.y+tea.h/2+2);ctx.textAlign='left';
+  }
+
+  // ═══ GLOBAL: Water coolers ═══
+  getObjects().filter(o=>o.id.startsWith('water_cooler_')).forEach(wc=>{
+    ctx.fillStyle='#3a3a4a';ctx.fillRect(wc.x,wc.y,wc.w,wc.h);
+    ctx.fillStyle='rgba(100,180,255,0.3)';ctx.fillRect(wc.x+5,wc.y+5,wc.w-10,wc.h/2);
+    ctx.fillStyle='#88ccff';ctx.font='8px sans-serif';ctx.textAlign='center';
+    ctx.fillText('💧',wc.x+wc.w/2,wc.y+wc.h-5);ctx.textAlign='left';
+  });
+
+  // ═══ GLOBAL: Plants ═══
+  getObjects().filter(o=>o.id.startsWith('gym_plant_')).forEach(pl=>{
+    ctx.fillStyle='#3a2a1a';ctx.fillRect(pl.x+8,pl.y+pl.h-15,14,15);
+    ctx.fillStyle='#2a6a2a';ctx.beginPath();ctx.arc(pl.x+15,pl.y+pl.h-20,12,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#3a8a3a';ctx.beginPath();ctx.arc(pl.x+12,pl.y+pl.h-25,8,0,Math.PI*2);ctx.fill();
+  });
+
+  // ═══ GLOBAL: Overhead spotlights ═══
+  const spots=[[300,600],[700,600],[1000,600],[1500,600],[1800,600],[2500,600],[3300,600],[3900,600],[4600,600],
+               [400,1000],[1000,1000],[1800,1000],[2600,1000],[3300,1000],[4000,1000],[4700,1000]];
+  spots.forEach(([lx,ly])=>{
+    const lg=ctx.createRadialGradient(lx,ly,0,lx,ly,120);
+    lg.addColorStop(0,'rgba(255,230,200,0.03)');lg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=lg;ctx.fillRect(lx-120,ly-120,240,240);
+  });
+
+  // Elevator rendering
+  const elev=getObjects().find(o=>o.id==='elevator');
+  if(elev){
+    ctx.fillStyle='#2a2a3a';ctx.fillRect(elev.x,elev.y,elev.w,elev.h);
+    ctx.fillStyle='#3a3a4a';ctx.fillRect(elev.x+5,elev.y+5,elev.w-10,elev.h-10);
+    ctx.strokeStyle='#666';ctx.lineWidth=1;ctx.strokeRect(elev.x+5,elev.y+5,elev.w-10,elev.h-10);
+    ctx.fillStyle='#ffd080';ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText('🛗',elev.x+elev.w/2,elev.y+elev.h/2+4);ctx.textAlign='left';
+    ctx.fillStyle='#ff6644';ctx.font='8px monospace';ctx.fillText('F12',elev.x+elev.w/2-8,elev.y-5);
+  }
+
+  // ═══ MINIGAME LABELS (on game objects) ═══
+  ['yoga_game','dance_game','bar_game','speed_game','jr_lift_game'].forEach(gid=>{
+    const gobj=getObjects().find(o=>o.id===gid);
+    if(!gobj)return;
+    const gPulse=0.7+Math.sin(S.time*3)*0.2;
+    ctx.fillStyle='#1a1a2e';ctx.fillRect(gobj.x,gobj.y,gobj.w,gobj.h);
+    ctx.strokeStyle=`rgba(0,255,247,${gPulse})`;ctx.lineWidth=2;ctx.strokeRect(gobj.x,gobj.y,gobj.w,gobj.h);
+    ctx.fillStyle=`rgba(0,255,247,${gPulse})`;ctx.font='bold 8px monospace';ctx.textAlign='center';
+    const labels={yoga_game:'YOGA FLOW',dance_game:'DANCE BATTLE',bar_game:'BAR CHALLENGE',speed_game:'SPEED BAG',jr_lift_game:'LIFT CHALLENGE'};
+    ctx.fillText('🎮',gobj.x+gobj.w/2,gobj.y+gobj.h/2-3);
+    ctx.font='6px monospace';ctx.fillText(labels[gid]||'PLAY',gobj.x+gobj.w/2,gobj.y+gobj.h/2+10);
+    ctx.textAlign='left';
+  });
+}
+
 // --- FLOOR 8: Room Builder ---
 function renderFloor8(){
   FloorDepth.renderBackground(ctx,8);
@@ -12370,6 +12914,7 @@ function render(){
     else if(S.floor===9)renderFloor9();
     else if(S.floor===10)renderFloor10();
     else if(S.floor===11)renderFloor11();
+    else if(S.floor===12)renderFloor12();
   }
   // Shared elements
   renderElevator();
@@ -18012,6 +18557,12 @@ function openElevator(){
   const f11Ppl=(fp[11]||[]);
   const f11Presence=f11Ppl.length>0?` <span style="float:right;font-size:10px;color:#ffa040;opacity:.7">${f11Ppl.map(()=>'●').join('')} ${f11Ppl.length}</span>`:'';
   html+=`<button class="floor-btn${f11Current?' current':''}" data-floor="11" style="border-color:#ffa040;background:rgba(255,160,64,.06)">${f11Current?'► ':''}🍜 F11 — The Food Court${f11Presence}</button>`;
+  
+  // The Movement (Floor 12)
+  const f12Current=S.floor===12;
+  const f12Ppl=(fp[12]||[]);
+  const f12Presence=f12Ppl.length>0?` <span style="float:right;font-size:10px;color:#ff6644;opacity:.7">${f12Ppl.map(()=>'●').join('')} ${f12Ppl.length}</span>`:'';
+  html+=`<button class="floor-btn${f12Current?' current':''}" data-floor="12" style="border-color:#ff6644;background:rgba(255,102,68,.06)">${f12Current?'► ':''}💪 F12 — The Movement${f12Presence}</button>`;
   
   // Visit Rooms option
   html+=`<button class="floor-btn" data-action="visit" style="border-color:#ffd700">🏘️ Visit Rooms</button>`;
@@ -29266,6 +29817,7 @@ render = function() {
     else if(S.floor===9)renderFloor9();
     else if(S.floor===10)renderFloor10();
     else if(S.floor===11)renderFloor11();
+    else if(S.floor===12)renderFloor12();
   }
   // Shared elements
   renderElevator();
@@ -34795,7 +35347,7 @@ const FLOOR_SIZES = window.FLOOR_SIZES = {
   1:{w:800,h:600}, 2:{w:800,h:600}, 3:{w:800,h:600},
   4:{w:800,h:600}, 5:{w:800,h:600}, 6:{w:4000,h:1600},
   7:{w:800,h:600}, 8:{w:800,h:600}, 9:{w:800,h:600},
-  10:{w:2400,h:1800}, 11:{w:3200,h:1400}
+  10:{w:2400,h:1800}, 11:{w:3200,h:1400}, 12:{w:5000,h:2000}
 };
 
 const Camera = {
