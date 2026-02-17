@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Molecule Sculptor — Echo Worlds Research Lab</title>
+<style>
+  /* ═══ RESET & BASE ═══ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a1414;
+    --bg-panel: #0d1e1e;
+    --bg-card: #112222;
+    --border: #1a3a3a;
+    --border-glow: #00ff88;
+    --text: #c8e6e6;
+    --text-dim: #6a9999;
+    --text-bright: #e0ffff;
+    --accent: #00ff88;
+    --accent-dim: #00aa5a;
+    --accent-glow: rgba(0, 255, 136, 0.15);
+    --hydrophobic: #ff8844;
+    --hydrophobic-bg: rgba(255, 136, 68, 0.15);
+    --hydrophilic: #44aaff;
+    --hydrophilic-bg: rgba(68, 170, 255, 0.15);
+    --special: #44ff88;
+    --special-bg: rgba(68, 255, 136, 0.15);
+    --rp-gold: #ffd700;
+    --grid-line: rgba(0, 255, 136, 0.06);
+    --grid-dot: rgba(0, 255, 136, 0.12);
+    --connection: rgba(200, 230, 230, 0.5);
+    --contact-good: rgba(255, 136, 68, 0.3);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', 'Lucida Console', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    user-select: none;
+  }
+
+  /* ═══ LAYOUT ═══ */
+  .app {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 1px;
+  }
+
+  /* ═══ HEADER ═══ */
+  .header {
+    grid-column: 1 / -1;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header-left h1 {
+    font-size: 18px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px var(--accent-glow);
+  }
+  .header-center {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .level-badge {
+    padding: 4px 12px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .header-rp {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--rp-gold);
+  }
+  .header-rp .rp-value { font-weight: bold; font-size: 18px; }
+
+  /* ═══ MAIN GAME AREA ═══ */
+  .main {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    overflow: hidden;
+  }
+
+  /* Grid canvas */
+  .grid-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    aspect-ratio: 1;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #050e0e;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.05);
+    cursor: grab;
+  }
+  .grid-container.dragging { cursor: grabbing; }
+  .grid-container canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Controls bar */
+  .controls {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 600px;
+    flex-wrap: wrap;
+  }
+  .ctrl-btn {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-card);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .ctrl-btn:hover {
+    border-color: var(--accent);
+    background: rgba(0, 255, 136, 0.05);
+    color: var(--accent);
+  }
+  .ctrl-btn:active { transform: scale(0.97); }
+  .ctrl-btn.primary {
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: bold;
+  }
+  .ctrl-btn.primary:hover {
+    background: rgba(0, 255, 136, 0.15);
+    box-shadow: 0 0 15px var(--accent-glow);
+  }
+  .ctrl-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  /* Score display */
+  .score-display {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .score-item {
+    text-align: center;
+  }
+  .score-item .label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .score-item .value {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--text-bright);
+  }
+  .score-item .value.good { color: var(--accent); }
+  .score-item .value.gold { color: var(--rp-gold); }
+  .score-item .value.orange { color: var(--hydrophobic); }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+    color: var(--text-dim);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid;
+  }
+  .legend-dot.hydrophobic { background: var(--hydrophobic-bg); border-color: var(--hydrophobic); }
+  .legend-dot.hydrophilic { background: var(--hydrophilic-bg); border-color: var(--hydrophilic); }
+  .legend-dot.special { background: var(--special-bg); border-color: var(--special); }
+
+  /* Feedback toast */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: transform 0.3s;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: rgba(0, 255, 136, 0.15); border: 1px solid var(--accent); color: var(--accent); }
+  .toast.gold { background: rgba(255, 215, 0, 0.15); border: 1px solid var(--rp-gold); color: var(--rp-gold); }
+
+  /* ═══ SIDEBAR ═══ */
+  .sidebar {
+    background: var(--bg-panel);
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+  }
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .stat-card h3 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    font-size: 12px;
+  }
+  .stat-row .label { color: var(--text-dim); }
+  .stat-row .value { color: var(--text-bright); font-weight: bold; }
+  .stat-row .value.rp { color: var(--rp-gold); }
+  .stat-row .value.good { color: var(--accent); }
+
+  /* Level selector */
+  .level-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .level-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 12px;
+  }
+  .level-item:hover { border-color: var(--accent); background: rgba(0, 255, 136, 0.03); }
+  .level-item.active { border-color: var(--accent); background: rgba(0, 255, 136, 0.08); }
+  .level-item.locked { opacity: 0.4; cursor: not-allowed; }
+  .level-item .level-name { color: var(--text); }
+  .level-item .level-chain { color: var(--text-dim); font-size: 10px; }
+  .level-item .level-best { color: var(--rp-gold); font-size: 10px; }
+
+  /* Leaderboard */
+  .leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .lb-entry {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+  .lb-entry:nth-child(1) { background: rgba(255, 215, 0, 0.08); }
+  .lb-entry:nth-child(2) { background: rgba(192, 192, 192, 0.05); }
+  .lb-entry:nth-child(3) { background: rgba(205, 127, 50, 0.05); }
+  .lb-rank {
+    width: 20px;
+    text-align: center;
+    font-weight: bold;
+    color: var(--text-dim);
+  }
+  .lb-entry:nth-child(1) .lb-rank { color: var(--rp-gold); }
+  .lb-name { flex: 1; color: var(--text); }
+  .lb-rp { color: var(--rp-gold); font-weight: bold; }
+
+  /* Science info */
+  .science-info {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .science-info h3 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .science-info p {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+
+  /* ═══ TUTORIAL MODAL ═══ */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--bg-panel);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    max-width: 640px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 32px;
+    box-shadow: 0 0 60px rgba(0, 255, 136, 0.1);
+    transform: scale(0.9);
+    transition: transform 0.3s;
+  }
+  .modal-overlay.active .modal { transform: scale(1); }
+  .modal h2 {
+    font-size: 22px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+    text-align: center;
+    text-shadow: 0 0 20px var(--accent-glow);
+  }
+  .modal .step {
+    margin-bottom: 16px;
+    padding: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .modal .step h3 {
+    font-size: 14px;
+    color: var(--text-bright);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .modal .step h3 .num {
+    background: var(--accent);
+    color: var(--bg);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .modal .step p {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 6px;
+  }
+  .modal .step p strong { color: var(--text-bright); }
+  .modal .step p em { color: var(--accent); font-style: normal; }
+  .modal .important {
+    background: rgba(255, 68, 102, 0.08);
+    border: 1px solid rgba(255, 68, 102, 0.3);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+  }
+  .modal .important p {
+    font-size: 13px;
+    color: #ff6688;
+    line-height: 1.6;
+  }
+  .modal .important p strong { color: #ff8899; }
+  .modal-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    background: rgba(0, 255, 136, 0.08);
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    transition: all 0.2s;
+    margin-top: 16px;
+  }
+  .modal-btn:hover {
+    background: rgba(0, 255, 136, 0.2);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+    transform: translateY(-1px);
+  }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (max-width: 768px) {
+    .app {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr auto;
+    }
+    .sidebar {
+      border-left: none;
+      border-top: 1px solid var(--border);
+      flex-direction: row;
+      flex-wrap: wrap;
+      padding: 12px;
+    }
+    .stat-card { flex: 1; min-width: 140px; }
+    .science-info { flex: 100%; }
+    .grid-container { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ TUTORIAL MODAL ═══ -->
+<div class="modal-overlay" id="tutorial">
+  <div class="modal">
+    <h2>⬡ Molecule Sculptor</h2>
+    
+    <div class="step">
+      <h3><span class="num">1</span> Protein Folding & MSA</h3>
+      <p>
+        Proteins are chains of amino acids that must fold into specific 3D shapes to function 
+        correctly. <strong>Alpha-synuclein (α-syn)</strong> is a 140-amino-acid protein that normally 
+        helps regulate neurotransmitter release at synapses.
+      </p>
+      <p>
+        In <strong>Multiple System Atrophy (MSA)</strong>, α-synuclein misfolds — it takes on the 
+        wrong shape. These misfolded proteins stick together, forming toxic aggregates called 
+        <em>glial cytoplasmic inclusions (GCIs)</em> that accumulate inside brain cells and 
+        eventually kill them.
+      </p>
+      <p>
+        Understanding <strong>how and why</strong> proteins misfold is one of the biggest 
+        challenges in biochemistry. Your puzzle solutions help explore folding patterns.
+      </p>
+    </div>
+
+    <div class="step">
+      <h3><span class="num">2</span> How to Play</h3>
+      <p>
+        You'll see a chain of amino acid nodes on a 2D grid. Each node is color-coded:
+      </p>
+      <p>
+        <strong style="color: var(--hydrophobic);">● Orange (Hydrophobic / H):</strong> These amino 
+        acids "fear water" and naturally want to cluster together in the protein's interior, away 
+        from the watery cell environment.
+      </p>
+      <p>
+        <strong style="color: var(--hydrophilic);">● Blue (Hydrophilic / P):</strong> These "love 
+        water" and should face outward, interacting with the cell's aqueous environment.
+      </p>
+      <p>
+        <strong style="color: var(--special);">● Green (Special / S):</strong> These can act as 
+        either — they're flexible and may be key to finding optimal folds.
+      </p>
+      <p>
+        <strong>Drag nodes</strong> to fold the chain. Nodes snap to the grid. Connected nodes must 
+        stay adjacent (horizontally or vertically — no diagonals). The chain cannot overlap itself.
+      </p>
+    </div>
+
+    <div class="step">
+      <h3><span class="num">3</span> Scoring</h3>
+      <p>
+        Your <em>stability score</em> counts how many <strong style="color: var(--hydrophobic);">
+        hydrophobic–hydrophobic (H–H) contacts</strong> you create. A "contact" forms when two 
+        H nodes are grid-adjacent but <strong>not</strong> directly connected in the chain.
+      </p>
+      <p>
+        Higher stability = better fold = more Research Points (RP). The best solutions earn 
+        up to <strong style="color: var(--rp-gold);">20 RP</strong>. Your RP scales with how 
+        close you get to the theoretical optimum.
+      </p>
+      <p>
+        This is based on the <em>HP protein folding model</em>, a simplified but scientifically 
+        meaningful model used in real computational biology research.
+      </p>
+    </div>
+
+    <div class="step">
+      <h3><span class="num">4</span> Controls</h3>
+      <p>
+        • <strong>Click & drag</strong> a node to move it<br>
+        • <strong>Reset</strong> — return to the starting layout<br>
+        • <strong>Submit</strong> — send your best fold for scoring<br>
+        • Levels unlock as you progress (5 → 10 → 15 → 20 nodes)
+      </p>
+    </div>
+
+    <div class="important">
+      <p>
+        <strong>Why this matters:</strong> The protein folding problem is NP-hard — even for small 
+        chains, finding the optimal fold is incredibly difficult for computers. Human spatial intuition 
+        can find solutions that algorithms miss. Your folds help researchers understand the energy 
+        landscapes that drive misfolding in diseases like MSA. There is no cure yet, but every 
+        insight into protein behavior brings us closer.
+      </p>
+    </div>
+
+    <button class="modal-btn" id="startBtn">Start Folding ▸</button>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══ APP ═══ -->
+<div class="app">
+  <div class="header">
+    <div class="header-left">
+      <h1>Molecule Sculptor</h1>
+    </div>
+    <div class="header-center">
+      <div class="level-badge" id="levelBadge">Level 1 • 5 nodes</div>
+    </div>
+    <div class="header-rp">
+      <span>RP</span>
+      <span class="rp-value" id="totalRP">0</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- Grid canvas -->
+    <div class="grid-container" id="gridContainer">
+      <canvas id="gridCanvas"></canvas>
+    </div>
+
+    <!-- Score display -->
+    <div class="score-display">
+      <div class="score-item">
+        <div class="label">H-H Contacts</div>
+        <div class="value orange" id="scoreContacts">0</div>
+      </div>
+      <div class="score-item">
+        <div class="label">Stability</div>
+        <div class="value good" id="scoreStability">0%</div>
+      </div>
+      <div class="score-item">
+        <div class="label">Best Score</div>
+        <div class="value good" id="scoreBest">—</div>
+      </div>
+      <div class="score-item">
+        <div class="label">RP Potential</div>
+        <div class="value gold" id="scoreRP">0</div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot hydrophobic"></div>Hydrophobic (H)</div>
+      <div class="legend-item"><div class="legend-dot hydrophilic"></div>Hydrophilic (P)</div>
+      <div class="legend-item"><div class="legend-dot special"></div>Special (S)</div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="ctrl-btn" id="btnReset">↺ Reset</button>
+      <button class="ctrl-btn" id="btnUndo">← Undo</button>
+      <button class="ctrl-btn primary" id="btnSubmit">✓ Submit Fold</button>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="stat-card">
+      <h3>Levels</h3>
+      <div class="level-list" id="levelList"></div>
+    </div>
+
+    <div class="stat-card">
+      <h3>Your Stats</h3>
+      <div class="stat-row"><span class="label">Puzzles Solved</span><span class="value" id="statSolved">0</span></div>
+      <div class="stat-row"><span class="label">Total RP</span><span class="value rp" id="statRP">0</span></div>
+      <div class="stat-row"><span class="label">Best Accuracy</span><span class="value good" id="statBestAcc">—</span></div>
+    </div>
+
+    <div class="stat-card">
+      <h3>Leaderboard</h3>
+      <div class="leaderboard-list" id="leaderboard">
+        <div class="lb-entry">
+          <div class="lb-rank">—</div>
+          <div class="lb-name" style="color: var(--text-dim)">Complete a puzzle to join</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="science-info">
+      <h3>🧬 Folding Facts</h3>
+      <p id="scienceFact">
+        The "hydrophobic collapse" — where water-fearing amino acids cluster together — is 
+        considered the primary driving force in protein folding. It happens in microseconds, 
+        but understanding it could take decades.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// MOLECULE SCULPTOR — Protein Folding Puzzle Game
+// ═══════════════════════════════════════════════════════════════════════════
+
+(() => {
+'use strict';
+
+// ─── Science Facts ─────────────────────────────────────────────────────
+const SCIENCE_FACTS = [
+  `The "hydrophobic collapse" — where water-fearing amino acids cluster together — is considered the primary driving force in protein folding. It happens in microseconds, but understanding it could take decades.`,
+  `Alpha-synuclein is "intrinsically disordered" — unlike most proteins, it doesn't have a single stable folded shape. This flexibility may be what makes it prone to misfolding and aggregation in MSA.`,
+  `The HP model you're using was introduced by Ken Dill in 1985. Despite its simplicity, it captures the essential physics of protein folding and is still used in research today.`,
+  `Levinthal's paradox: a protein with 100 amino acids could theoretically fold into 3^100 configurations. If it tried each one per nanosecond, it would take longer than the age of the universe. Yet real proteins fold in milliseconds.`,
+  `In MSA, misfolded α-synuclein forms structures called "β-sheets" — flat, stacked arrangements where the protein chains line up side by side. These structures are abnormally stable and resist the cell's cleanup machinery.`,
+  `The energy landscape theory suggests proteins fold by following a "funnel" — a landscape of decreasing energy. Misfolded proteins get trapped in local minima, like a ball stuck in a dip on a hillside.`,
+  `Prion-like spreading: in MSA, misfolded α-synuclein can act as a template, causing nearby normal proteins to misfold too. This cascade effect is why the disease progresses through connected brain regions.`,
+  `Chaperone proteins normally help other proteins fold correctly and rescue misfolded ones. In neurodegenerative diseases, this quality control system becomes overwhelmed by the flood of misfolded proteins.`,
+  `The 2024 Nobel Prize in Chemistry was awarded for computational protein structure prediction (AlphaFold). Human pattern recognition complements these AI approaches by exploring solutions AI might overlook.`,
+  `Post-translational modifications — chemical changes to a protein after it's made — can promote α-synuclein misfolding. Phosphorylation at position 129 is found in over 90% of inclusions in MSA brains.`,
+];
+
+// ─── Level Definitions ─────────────────────────────────────────────────
+const LEVELS = [
+  { id: 1, name: 'Tutorial',    chainLength: 5,  unlockAt: 0,  chain: ['H','P','H','P','H'] },
+  { id: 2, name: 'Warm Up',     chainLength: 7,  unlockAt: 1,  chain: ['H','P','P','H','H','P','H'] },
+  { id: 3, name: 'Basic Fold',  chainLength: 8,  unlockAt: 2,  chain: ['P','H','H','P','H','H','P','P'] },
+  { id: 4, name: 'Challenge',   chainLength: 10, unlockAt: 3,  chain: ['H','P','H','H','P','P','H','P','H','H'] },
+  { id: 5, name: 'Complex',     chainLength: 12, unlockAt: 5,  chain: ['P','H','P','H','H','P','H','H','P','H','P','P'] },
+  { id: 6, name: 'Advanced',    chainLength: 15, unlockAt: 7,  chain: ['H','H','P','H','P','P','H','P','H','H','P','H','P','H','H'] },
+  { id: 7, name: 'Expert',      chainLength: 18, unlockAt: 10, chain: ['P','H','H','P','H','P','H','H','P','P','H','P','H','H','P','H','P','P'] },
+  { id: 8, name: 'Master',      chainLength: 20, unlockAt: 14, chain: ['H','P','H','H','P','P','H','P','H','P','H','H','P','H','H','P','P','H','P','H'] },
+];
+
+// Precomputed known optimal H-H contacts for each level
+const OPTIMAL_CONTACTS = [2, 3, 3, 4, 5, 7, 8, 10];
+
+// ─── State ─────────────────────────────────────────────────────────────
+const state = {
+  userId: null,
+  currentLevel: 0,
+  nodes: [],         // { type: 'H'|'P'|'S', gx: gridX, gy: gridY }
+  initialNodes: [],  // snapshot for reset
+  history: [],       // undo stack
+  draggingNode: -1,
+  dragOffsetX: 0,
+  dragOffsetY: 0,
+  gridSize: 20,      // grid divisions
+  cellSize: 0,       // computed
+  bestScores: {},    // levelId -> { contacts, submitted }
+  totalRP: 0,
+  puzzlesSolved: 0,
+  factIndex: 0,
+  canvasW: 0,
+  canvasH: 0,
+};
+
+// ─── DOM ───────────────────────────────────────────────────────────────
+const $ = (sel) => document.querySelector(sel);
+const canvas = $('#gridCanvas');
+const ctx = canvas.getContext('2d');
+const container = $('#gridContainer');
+
+// ─── Initialize ────────────────────────────────────────────────────────
+function init() {
+  state.userId = localStorage.getItem('echo-user-id') || 'guest-' + Math.random().toString(36).substr(2, 9);
+  localStorage.setItem('echo-user-id', state.userId);
+
+  // Load saved progress
+  const saved = localStorage.getItem('sculptor-stats');
+  if (saved) {
+    const s = JSON.parse(saved);
+    state.bestScores = s.bestScores || {};
+    state.totalRP = s.totalRP || 0;
+    state.puzzlesSolved = s.puzzlesSolved || 0;
+    state.currentLevel = s.currentLevel || 0;
+  }
+
+  // Tutorial check
+  const tutorialSeen = localStorage.getItem('sculptor-tutorial-seen');
+  if (!tutorialSeen) {
+    $('#tutorial').classList.add('active');
+  } else {
+    startLevel(state.currentLevel);
+  }
+
+  // Resize canvas
+  resizeCanvas();
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+    render();
+  });
+
+  // Events
+  $('#startBtn').addEventListener('click', () => {
+    localStorage.setItem('sculptor-tutorial-seen', '1');
+    $('#tutorial').classList.remove('active');
+    startLevel(0);
+  });
+
+  $('#btnReset').addEventListener('click', resetLevel);
+  $('#btnUndo').addEventListener('click', undo);
+  $('#btnSubmit').addEventListener('click', submitFold);
+
+  // Mouse/touch events on canvas
+  canvas.addEventListener('mousedown', onPointerDown);
+  canvas.addEventListener('mousemove', onPointerMove);
+  canvas.addEventListener('mouseup', onPointerUp);
+  canvas.addEventListener('mouseleave', onPointerUp);
+  canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+  canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+  canvas.addEventListener('touchend', onTouchEnd);
+
+  buildLevelList();
+  updateStats();
+}
+
+function resizeCanvas() {
+  const rect = container.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const size = Math.min(rect.width, rect.height);
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  state.canvasW = size;
+  state.canvasH = size;
+  state.cellSize = size / state.gridSize;
+}
+
+// ─── Level Management ──────────────────────────────────────────────────
+function startLevel(levelIdx) {
+  const level = LEVELS[levelIdx];
+  if (!level) return;
+
+  state.currentLevel = levelIdx;
+  state.history = [];
+  state.draggingNode = -1;
+
+  // Create nodes in a straight line starting from center
+  const chain = level.chain;
+  const startX = Math.floor(state.gridSize / 2) - Math.floor(chain.length / 2);
+  const startY = Math.floor(state.gridSize / 2);
+
+  state.nodes = chain.map((type, i) => ({
+    type,
+    gx: startX + i,
+    gy: startY,
+  }));
+
+  state.initialNodes = state.nodes.map(n => ({ ...n }));
+
+  // Update UI
+  $('#levelBadge').textContent = `Level ${level.id} • ${level.chainLength} nodes`;
+  buildLevelList();
+  updateScoreDisplay();
+  render();
+
+  // Rotate fact
+  state.factIndex = (state.factIndex + 1) % SCIENCE_FACTS.length;
+  $('#scienceFact').textContent = SCIENCE_FACTS[state.factIndex];
+}
+
+function resetLevel() {
+  state.nodes = state.initialNodes.map(n => ({ ...n }));
+  state.history = [];
+  state.draggingNode = -1;
+  updateScoreDisplay();
+  render();
+}
+
+function undo() {
+  if (state.history.length === 0) return;
+  state.nodes = state.history.pop();
+  state.draggingNode = -1;
+  updateScoreDisplay();
+  render();
+}
+
+function buildLevelList() {
+  const list = $('#levelList');
+  list.innerHTML = '';
+
+  LEVELS.forEach((level, i) => {
+    const unlocked = state.puzzlesSolved >= level.unlockAt;
+    const active = i === state.currentLevel;
+    const best = state.bestScores[level.id];
+
+    const item = document.createElement('div');
+    item.className = 'level-item' + (active ? ' active' : '') + (!unlocked ? ' locked' : '');
+    item.innerHTML = `
+      <div>
+        <div class="level-name">${level.id}. ${level.name}</div>
+        <div class="level-chain">${level.chainLength} nodes</div>
+      </div>
+      <div class="level-best">${best ? best.contacts + ' contacts' : unlocked ? '—' : '🔒'}</div>
+    `;
+
+    if (unlocked) {
+      item.addEventListener('click', () => startLevel(i));
+    }
+    list.appendChild(item);
+  });
+}
+
+// ─── Rendering ─────────────────────────────────────────────────────────
+function render() {
+  const W = state.canvasW;
+  const H = state.canvasH;
+  const cell = state.cellSize;
+  const gs = state.gridSize;
+
+  // Clear
+  ctx.fillStyle = '#050e0e';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid dots
+  ctx.fillStyle = 'rgba(0, 255, 136, 0.08)';
+  for (let gx = 0; gx < gs; gx++) {
+    for (let gy = 0; gy < gs; gy++) {
+      const x = (gx + 0.5) * cell;
+      const y = (gy + 0.5) * cell;
+      ctx.beginPath();
+      ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Grid lines (very subtle)
+  ctx.strokeStyle = 'rgba(0, 255, 136, 0.03)';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= gs; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i * cell, 0);
+    ctx.lineTo(i * cell, H);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, i * cell);
+    ctx.lineTo(W, i * cell);
+    ctx.stroke();
+  }
+
+  // H-H contact highlights (non-chain adjacent H-H pairs)
+  const contacts = getHHContacts();
+  ctx.strokeStyle = 'rgba(255, 136, 68, 0.25)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 4]);
+  for (const [i, j] of contacts) {
+    const x1 = (state.nodes[i].gx + 0.5) * cell;
+    const y1 = (state.nodes[i].gy + 0.5) * cell;
+    const x2 = (state.nodes[j].gx + 0.5) * cell;
+    const y2 = (state.nodes[j].gy + 0.5) * cell;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    // Glow at midpoint
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    const glow = ctx.createRadialGradient(mx, my, 0, mx, my, cell * 0.5);
+    glow.addColorStop(0, 'rgba(255, 136, 68, 0.12)');
+    glow.addColorStop(1, 'rgba(255, 136, 68, 0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(mx - cell * 0.5, my - cell * 0.5, cell, cell);
+  }
+  ctx.setLineDash([]);
+
+  // Chain connections
+  ctx.strokeStyle = 'rgba(200, 230, 230, 0.4)';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  for (let i = 0; i < state.nodes.length - 1; i++) {
+    const a = state.nodes[i];
+    const b = state.nodes[i + 1];
+    const x1 = (a.gx + 0.5) * cell;
+    const y1 = (a.gy + 0.5) * cell;
+    const x2 = (b.gx + 0.5) * cell;
+    const y2 = (b.gy + 0.5) * cell;
+
+    // Check if connection is valid (adjacent)
+    const dist = Math.abs(a.gx - b.gx) + Math.abs(a.gy - b.gy);
+    if (dist > 1) {
+      ctx.strokeStyle = 'rgba(255, 68, 68, 0.6)'; // Red for stretched connections
+    } else {
+      ctx.strokeStyle = 'rgba(200, 230, 230, 0.4)';
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+
+  // Nodes
+  for (let i = 0; i < state.nodes.length; i++) {
+    const node = state.nodes[i];
+    const x = (node.gx + 0.5) * cell;
+    const y = (node.gy + 0.5) * cell;
+    const r = cell * 0.35;
+    const isDragging = i === state.draggingNode;
+
+    // Glow
+    const glowR = r * 2;
+    let glowColor;
+    if (node.type === 'H') glowColor = 'rgba(255, 136, 68, 0.15)';
+    else if (node.type === 'P') glowColor = 'rgba(68, 170, 255, 0.12)';
+    else glowColor = 'rgba(68, 255, 136, 0.12)';
+
+    if (isDragging) {
+      const glow = ctx.createRadialGradient(x, y, 0, x, y, glowR * 1.5);
+      glow.addColorStop(0, glowColor);
+      glow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(x - glowR * 1.5, y - glowR * 1.5, glowR * 3, glowR * 3);
+    }
+
+    // Node circle
+    let fillColor, strokeColor;
+    if (node.type === 'H') {
+      fillColor = isDragging ? 'rgba(255, 136, 68, 0.35)' : 'rgba(255, 136, 68, 0.2)';
+      strokeColor = '#ff8844';
+    } else if (node.type === 'P') {
+      fillColor = isDragging ? 'rgba(68, 170, 255, 0.3)' : 'rgba(68, 170, 255, 0.15)';
+      strokeColor = '#44aaff';
+    } else {
+      fillColor = isDragging ? 'rgba(68, 255, 136, 0.3)' : 'rgba(68, 255, 136, 0.15)';
+      strokeColor = '#44ff88';
+    }
+
+    ctx.fillStyle = fillColor;
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = isDragging ? 3 : 2;
+
+    ctx.beginPath();
+    ctx.arc(x, y, isDragging ? r * 1.15 : r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Label
+    ctx.fillStyle = strokeColor;
+    ctx.font = `bold ${Math.floor(cell * 0.3)}px 'Courier New', monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(node.type, x, y);
+
+    // Index (small)
+    ctx.fillStyle = 'rgba(200, 230, 230, 0.25)';
+    ctx.font = `${Math.floor(cell * 0.18)}px 'Courier New', monospace`;
+    ctx.fillText(i + 1, x, y + r + cell * 0.15);
+  }
+}
+
+// ─── Grid/Pixel Conversion ─────────────────────────────────────────────
+function pixelToGrid(px, py) {
+  const cell = state.cellSize;
+  return {
+    gx: Math.floor(px / cell),
+    gy: Math.floor(py / cell),
+  };
+}
+
+function getCanvasPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) * (state.canvasW / rect.width),
+    y: (e.clientY - rect.top) * (state.canvasH / rect.height),
+  };
+}
+
+// ─── Interaction ───────────────────────────────────────────────────────
+function findNodeAt(gx, gy) {
+  return state.nodes.findIndex(n => n.gx === gx && n.gy === gy);
+}
+
+function findNodeNear(px, py) {
+  const cell = state.cellSize;
+  let closest = -1, closestDist = cell * 0.5;
+  for (let i = 0; i < state.nodes.length; i++) {
+    const nx = (state.nodes[i].gx + 0.5) * cell;
+    const ny = (state.nodes[i].gy + 0.5) * cell;
+    const d = Math.sqrt((px - nx) ** 2 + (py - ny) ** 2);
+    if (d < closestDist) {
+      closestDist = d;
+      closest = i;
+    }
+  }
+  return closest;
+}
+
+function onPointerDown(e) {
+  const pos = getCanvasPos(e);
+  const nodeIdx = findNodeNear(pos.x, pos.y);
+  if (nodeIdx >= 0) {
+    // Save state for undo
+    state.history.push(state.nodes.map(n => ({ ...n })));
+    if (state.history.length > 50) state.history.shift();
+
+    state.draggingNode = nodeIdx;
+    container.classList.add('dragging');
+    render();
+  }
+}
+
+function onPointerMove(e) {
+  if (state.draggingNode < 0) return;
+  const pos = getCanvasPos(e);
+  const grid = pixelToGrid(pos.x, pos.y);
+
+  // Clamp to grid
+  grid.gx = Math.max(0, Math.min(state.gridSize - 1, grid.gx));
+  grid.gy = Math.max(0, Math.min(state.gridSize - 1, grid.gy));
+
+  // Check if cell is occupied by another node
+  const occupied = state.nodes.some((n, i) => i !== state.draggingNode && n.gx === grid.gx && n.gy === grid.gy);
+  if (occupied) return;
+
+  // Check adjacency with neighbors in chain
+  const idx = state.draggingNode;
+  const prev = idx > 0 ? state.nodes[idx - 1] : null;
+  const next = idx < state.nodes.length - 1 ? state.nodes[idx + 1] : null;
+
+  const adjToPrev = !prev || (Math.abs(grid.gx - prev.gx) + Math.abs(grid.gy - prev.gy) === 1);
+  const adjToNext = !next || (Math.abs(grid.gx - next.gx) + Math.abs(grid.gy - next.gy) === 1);
+
+  if (adjToPrev && adjToNext) {
+    state.nodes[idx].gx = grid.gx;
+    state.nodes[idx].gy = grid.gy;
+    updateScoreDisplay();
+    render();
+  }
+}
+
+function onPointerUp() {
+  if (state.draggingNode >= 0) {
+    state.draggingNode = -1;
+    container.classList.remove('dragging');
+    render();
+  }
+}
+
+// Touch handling
+function onTouchStart(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  onPointerDown({ clientX: touch.clientX, clientY: touch.clientY });
+}
+
+function onTouchMove(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  onPointerMove({ clientX: touch.clientX, clientY: touch.clientY });
+}
+
+function onTouchEnd(e) {
+  onPointerUp();
+}
+
+// ─── Scoring ───────────────────────────────────────────────────────────
+function getHHContacts() {
+  const contacts = [];
+  for (let i = 0; i < state.nodes.length; i++) {
+    if (state.nodes[i].type !== 'H' && state.nodes[i].type !== 'S') continue;
+    for (let j = i + 2; j < state.nodes.length; j++) { // Skip immediate neighbor
+      if (state.nodes[j].type !== 'H' && state.nodes[j].type !== 'S') continue;
+      // Check grid adjacency
+      const dx = Math.abs(state.nodes[i].gx - state.nodes[j].gx);
+      const dy = Math.abs(state.nodes[i].gy - state.nodes[j].gy);
+      if (dx + dy === 1) {
+        // They're adjacent but not connected in chain (i+1 != j for i+2 start)
+        if (j !== i + 1) {
+          contacts.push([i, j]);
+        }
+      }
+    }
+  }
+  return contacts;
+}
+
+function isValidFold() {
+  // Check all chain connections are adjacent
+  for (let i = 0; i < state.nodes.length - 1; i++) {
+    const a = state.nodes[i];
+    const b = state.nodes[i + 1];
+    const dist = Math.abs(a.gx - b.gx) + Math.abs(a.gy - b.gy);
+    if (dist !== 1) return false;
+  }
+  // Check no overlaps
+  const positions = new Set();
+  for (const node of state.nodes) {
+    const key = `${node.gx},${node.gy}`;
+    if (positions.has(key)) return false;
+    positions.add(key);
+  }
+  return true;
+}
+
+function updateScoreDisplay() {
+  const contacts = getHHContacts();
+  const numContacts = contacts.length;
+  const level = LEVELS[state.currentLevel];
+  const optimal = OPTIMAL_CONTACTS[state.currentLevel] || 1;
+  const stability = Math.min(100, Math.round((numContacts / optimal) * 100));
+  const rpPotential = calculateRP(numContacts, optimal);
+  const best = state.bestScores[level.id];
+
+  $('#scoreContacts').textContent = numContacts;
+  $('#scoreStability').textContent = stability + '%';
+  $('#scoreBest').textContent = best ? best.contacts : '—';
+  $('#scoreRP').textContent = rpPotential;
+}
+
+function calculateRP(contacts, optimal) {
+  if (contacts === 0) return 1;
+  const ratio = Math.min(1, contacts / optimal);
+  return Math.max(1, Math.min(20, Math.round(5 + ratio * 15)));
+}
+
+// ─── Submit ────────────────────────────────────────────────────────────
+async function submitFold() {
+  if (!isValidFold()) {
+    showToast('Invalid fold — all connections must be adjacent!', 'error');
+    return;
+  }
+
+  const contacts = getHHContacts();
+  const numContacts = contacts.length;
+  const level = LEVELS[state.currentLevel];
+  const optimal = OPTIMAL_CONTACTS[state.currentLevel] || 1;
+  const ratio = Math.min(1, numContacts / optimal);
+  const rp = calculateRP(numContacts, optimal);
+
+  // Update best score
+  const prevBest = state.bestScores[level.id];
+  if (!prevBest || numContacts > prevBest.contacts) {
+    state.bestScores[level.id] = { contacts: numContacts, submitted: true };
+  }
+
+  state.totalRP += rp;
+  state.puzzlesSolved++;
+
+  // Submit to server
+  try {
+    await fetch('/api/research/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: state.userId,
+        gameType: 'molecule_sculptor',
+        taskId: `level-${level.id}-${Date.now()}`,
+        result: {
+          levelId: level.id,
+          chain: level.chain,
+          positions: state.nodes.map(n => ({ gx: n.gx, gy: n.gy })),
+          contacts: numContacts,
+          stabilityScore: ratio,
+          optimalScore: ratio,
+        },
+      }),
+    });
+  } catch (e) {
+    // Offline — still count locally
+  }
+
+  saveStats();
+  updateStats();
+  buildLevelList();
+  updateScoreDisplay();
+
+  // Show feedback
+  if (ratio >= 0.9) {
+    showToast(`★ Excellent fold! +${rp} RP — near optimal!`, 'gold');
+  } else if (ratio >= 0.6) {
+    showToast(`✓ Good fold! +${rp} RP`, 'success');
+  } else {
+    showToast(`+${rp} RP — try to get more H-H contacts!`, 'success');
+  }
+
+  // Auto-advance if good enough
+  if (ratio >= 0.5 && state.currentLevel < LEVELS.length - 1) {
+    const nextLevel = LEVELS[state.currentLevel + 1];
+    if (state.puzzlesSolved >= nextLevel.unlockAt) {
+      setTimeout(() => {
+        startLevel(state.currentLevel + 1);
+      }, 2000);
+    }
+  }
+}
+
+// ─── UI Helpers ────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+  const toast = $('#toast');
+  toast.textContent = msg;
+  toast.className = 'toast ' + type + ' show';
+  setTimeout(() => { toast.classList.remove('show'); }, 3000);
+}
+
+function updateStats() {
+  $('#totalRP').textContent = state.totalRP;
+  $('#statSolved').textContent = state.puzzlesSolved;
+  $('#statRP').textContent = state.totalRP;
+
+  // Best accuracy
+  const bests = Object.values(state.bestScores);
+  if (bests.length > 0) {
+    const avgRatio = bests.reduce((sum, b) => {
+      const lvlIdx = LEVELS.findIndex(l => state.bestScores[l.id] === b);
+      const opt = OPTIMAL_CONTACTS[lvlIdx] || 1;
+      return sum + Math.min(1, b.contacts / opt);
+    }, 0) / bests.length;
+    $('#statBestAcc').textContent = Math.round(avgRatio * 100) + '%';
+  }
+
+  // Update leaderboard (local for now, could fetch from server)
+  updateLeaderboard();
+}
+
+async function updateLeaderboard() {
+  const list = $('#leaderboard');
+  
+  try {
+    const res = await fetch('/api/research/leaderboard?gameType=molecule_sculptor&limit=5');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.length > 0) {
+        list.innerHTML = data.map((entry, i) => `
+          <div class="lb-entry">
+            <div class="lb-rank">${i + 1}</div>
+            <div class="lb-name">${entry.displayName || entry.username}</div>
+            <div class="lb-rp">${entry.totalRP} RP</div>
+          </div>
+        `).join('');
+        return;
+      }
+    }
+  } catch (e) {}
+
+  // Fallback: show local stats
+  if (state.puzzlesSolved > 0) {
+    list.innerHTML = `
+      <div class="lb-entry">
+        <div class="lb-rank">1</div>
+        <div class="lb-name">You</div>
+        <div class="lb-rp">${state.totalRP} RP</div>
+      </div>
+      <div class="lb-entry">
+        <div class="lb-rank" style="opacity:0.4">—</div>
+        <div class="lb-name" style="color:var(--text-dim)">More players joining...</div>
+        <div class="lb-rp"></div>
+      </div>
+    `;
+  }
+}
+
+function saveStats() {
+  localStorage.setItem('sculptor-stats', JSON.stringify({
+    bestScores: state.bestScores,
+    totalRP: state.totalRP,
+    puzzlesSolved: state.puzzlesSolved,
+    currentLevel: state.currentLevel,
+  }));
+}
+
+// ─── Boot ──────────────────────────────────────────────────────────────
+init();
+
+})();
+</script>
+</body>
+</html>
