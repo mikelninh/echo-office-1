@@ -14261,6 +14261,11 @@ const PremiumRender = {
         }
       }
     }
+    
+    // Apply rim lighting enhancement
+    if (typeof SpriteEnhancements !== 'undefined') {
+      SpriteEnhancements.addRimLighting(ctx, x, y, grid, scale, skinId);
+    }
   },
 
   // Idle render with breathing + head bob + skin-specific effects
@@ -14334,6 +14339,51 @@ const PremiumRender = {
         }
       }
     }
+    
+    // Apply rim lighting enhancement
+    if (typeof SpriteEnhancements !== 'undefined') {
+      SpriteEnhancements.addRimLighting(ctx, x, y, grid, scale, skinId);
+    }
+  }
+};
+
+// --- Sprite Enhancement System ---
+const SpriteEnhancements = {
+  // Rim lighting: subtle bright outline on light-facing side of sprites
+  addRimLighting(ctx, x, y, grid, scale, skinId) {
+    const skin = VISITOR_SKINS.find(s => s.id === skinId);
+    if (!skin || !grid) return;
+    
+    // Get accent color or derive from main color
+    const accentColor = skin.accent || adjustBrightness(skin.color, 40);
+    
+    // Light source from top-left (simulating soft ambient lighting)
+    const lightDir = { x: -1, y: -1 };
+    
+    ctx.save();
+    ctx.fillStyle = accentColor + '80'; // 50% alpha for subtle effect
+    
+    // Find edge pixels that face the light
+    for (let row = 0; row < grid.length; row++) {
+      const r = grid[row];
+      for (let col = 0; col < r.length; col++) {
+        const c = r[col];
+        if (c && c !== '.') {
+          // Check if this pixel has empty space on the light side
+          const hasEmptyLeft = col === 0 || !r[col - 1] || r[col - 1] === '.';
+          const hasEmptyTop = row === 0 || !grid[row - 1][col] || grid[row - 1][col] === '.';
+          
+          if (hasEmptyLeft || hasEmptyTop) {
+            // Add rim light pixel
+            const rimX = x + col * scale + (hasEmptyLeft ? -1 : 0);
+            const rimY = y + row * scale + (hasEmptyTop ? -1 : 0);
+            ctx.fillRect(rimX, rimY, scale + (hasEmptyLeft ? 1 : 0), scale + (hasEmptyTop ? 1 : 0));
+          }
+        }
+      }
+    }
+    
+    ctx.restore();
   }
 };
 
