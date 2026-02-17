@@ -14262,11 +14262,10 @@ const PremiumRender = {
       }
     }
     
-    // Apply sprite enhancements
+    // Apply sprite enhancements (AA removed — destroys pixel art aesthetic)
     if (typeof SpriteEnhancements !== 'undefined') {
       SpriteEnhancements.addRimLighting(ctx, x, y, grid, scale, skinId);
       SpriteEnhancements.addSpecularHighlight(ctx, x, y, grid, scale, skinId);
-      SpriteEnhancements.addSubPixelSmoothing(ctx, x, y, grid, scale, skinId);
       SpriteEnhancements.addEyeBlink(ctx, x, y, grid, scale, skinId);
     }
   },
@@ -14343,11 +14342,10 @@ const PremiumRender = {
       }
     }
     
-    // Apply sprite enhancements
+    // Apply sprite enhancements (AA removed — destroys pixel art aesthetic)
     if (typeof SpriteEnhancements !== 'undefined') {
       SpriteEnhancements.addRimLighting(ctx, x, y, grid, scale, skinId);
       SpriteEnhancements.addSpecularHighlight(ctx, x, y, grid, scale, skinId);
-      SpriteEnhancements.addSubPixelSmoothing(ctx, x, y, grid, scale, skinId);
       SpriteEnhancements.addEyeBlink(ctx, x, y, grid, scale, skinId);
     }
   }
@@ -14367,23 +14365,21 @@ const SpriteEnhancements = {
     const lightDir = { x: -1, y: -1 };
     
     ctx.save();
-    ctx.fillStyle = accentColor + '80'; // 50% alpha for subtle effect
+    // ~15% alpha — subtle edge catch, not a colored halo
+    ctx.fillStyle = accentColor + '26';
     
-    // Find edge pixels that face the light
+    // Find edge pixels that face the light — draw ON the pixel, not outside it
     for (let row = 0; row < grid.length; row++) {
       const r = grid[row];
       for (let col = 0; col < r.length; col++) {
         const c = r[col];
         if (c && c !== '.') {
-          // Check if this pixel has empty space on the light side
           const hasEmptyLeft = col === 0 || !r[col - 1] || r[col - 1] === '.';
           const hasEmptyTop = row === 0 || !grid[row - 1][col] || grid[row - 1][col] === '.';
           
           if (hasEmptyLeft || hasEmptyTop) {
-            // Add rim light pixel
-            const rimX = x + col * scale + (hasEmptyLeft ? -1 : 0);
-            const rimY = y + row * scale + (hasEmptyTop ? -1 : 0);
-            ctx.fillRect(rimX, rimY, scale + (hasEmptyLeft ? 1 : 0), scale + (hasEmptyTop ? 1 : 0));
+            // Draw on the edge pixel itself, not offset outside bounds
+            ctx.fillRect(x + col * scale, y + row * scale, scale, scale);
           }
         }
       }
@@ -14407,7 +14403,8 @@ const SpriteEnhancements = {
     // Moving highlight sweep across sprite (left to right, then right to left)
     const sweepSpeed = 1.5;
     const sweepPhase = (pn * sweepSpeed) % 4; // 4-second cycle
-    const sweepPos = sweepPhase < 2 ? sweepPhase / 2 : 2 - sweepPhase / 2; // 0 to 1 and back
+    const raw = sweepPhase < 2 ? sweepPhase / 2 : 2 - sweepPhase / 2;
+    const sweepPos = 0.5 - 0.5 * Math.cos(raw * Math.PI); // Sine ease — fast center, slow edges
     
     const spriteWidth = grid[0] ? grid[0].length : 0;
     const highlightCol = Math.floor(sweepPos * spriteWidth);
@@ -14424,7 +14421,7 @@ const SpriteEnhancements = {
           // Calculate highlight intensity based on distance from sweep center
           const distFromCenter = Math.abs(col - highlightCol - 0.5);
           let intensity = 1.0 - (distFromCenter / highlightWidth);
-          intensity = Math.max(0, intensity) * 0.7; // Cap at 70% for subtlety
+          intensity = Math.max(0, Math.pow(intensity, 2.5)) * 0.35; // Sharper falloff, softer peak
           
           if (intensity > 0) {
             ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
@@ -14498,8 +14495,12 @@ const SpriteEnhancements = {
             // Check if this is a dark pixel surrounded by lighter pixels (likely an eye)
             const isEyePixel = c === '#000' || c === '#222' || c === '#000000' || c === '#222222';
             if (isEyePixel) {
-              // Replace with skin color for closed eye look
-              const skinColor = '#f5d6b8'; // Default skin tone, could be made skin-specific
+              // Derive skin color from neighboring pixels (not hardcoded)
+              const neighbors = [
+                grid[row]?.[col-1], grid[row]?.[col+1],
+                grid[row-1]?.[col], grid[row+1]?.[col]
+              ].filter(nc => nc && nc !== '.' && nc !== '#000' && nc !== '#222' && nc !== '#111' && nc !== '#000000' && nc !== '#222222' && nc !== '#111111');
+              const skinColor = neighbors.length > 0 ? neighbors[0] : '#f5d6b8';
               ctx.fillStyle = skinColor;
               ctx.fillRect(x + col * scale, y + row * scale, scale, scale);
             }
@@ -14515,10 +14516,10 @@ const SpriteEnhancements = {
   renderDirectionalShadow(ctx, visitorX, visitorY, spriteWidth, spriteHeight, direction, moving) {
     ctx.save();
     
-    // Shadow properties
+    // Shadow properties — wider base for grounded look
     const shadowY = visitorY + 2; // Slightly below feet
-    const baseWidth = spriteWidth / 2.5;
-    const baseHeight = 4;
+    const baseWidth = spriteWidth / 2;
+    const baseHeight = 5;
     
     // Movement-based shadow displacement
     let shadowOffsetX = 0;
@@ -14546,22 +14547,26 @@ const SpriteEnhancements = {
       }
     }
     
-    // Draw enhanced shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.25)'; // Slightly darker than original
+    // Gradient contact shadow — soft radial falloff, not a solid blob
     ctx.save();
     ctx.translate(visitorX + shadowOffsetX, shadowY + shadowOffsetY);
     
     if (shadowSkew !== 0) {
-      // Apply horizontal skew for left/right movement
       ctx.transform(1, 0, shadowSkew, 1, 0, 0);
     }
     
-    // Draw elliptical shadow with movement-based deformation
     const widthMod = moving ? 1 + Math.abs(shadowSkew) * 0.3 : 1;
     const heightMod = moving && (direction === 0 || direction === 3) ? 1.2 : 1;
+    const finalW = baseWidth * widthMod * 1.3;
+    const finalH = baseHeight * heightMod * 1.5;
     
+    const grd = ctx.createRadialGradient(0, 0, 0, 0, 0, finalW);
+    grd.addColorStop(0, 'rgba(0,0,0,0.15)');
+    grd.addColorStop(0.5, 'rgba(0,0,0,0.08)');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grd;
     ctx.beginPath();
-    ctx.ellipse(0, 0, baseWidth * widthMod, baseHeight * heightMod, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, finalW, finalH, 0, 0, Math.PI * 2);
     ctx.fill();
     
     ctx.restore();
