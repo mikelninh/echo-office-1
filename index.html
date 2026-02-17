@@ -15176,8 +15176,7 @@ function showBarMenu() {
   p.querySelectorAll('.bar-drink').forEach(el => el.onclick = () => {
     const action = el.dataset.action;
     if (action === 'buy-round') {
-      const coins = LS.get('coins', 0);
-      if (coins < 20) { showNotification('Not enough ◈ for a round!'); return; }
+      if (!Coins.canAfford(20)) { showNotification('Not enough ◈ for a round!'); return; }
       Coins.spend(20, 'bar_round');
       LS.set('roundsBought', (LS.get('roundsBought', 0)) + 1);
       const name = LS.get('visitorName', 'Someone');
@@ -15205,8 +15204,7 @@ function showBarMenu() {
     }
 
     const d = BAR_MENU.find(x => x.id === el.dataset.id); if (!d) return;
-    const coins = LS.get('coins', 0);
-    if (d.cost > 0 && coins < d.cost) { showNotification('Not enough ◈'); return; }
+    if (d.cost > 0 && !Coins.canAfford(d.cost)) { showNotification('Not enough ◈'); return; }
     if (d.cost > 0) Coins.spend(d.cost, 'bar');
     applyDrinkEffect(d);
     p.closest('.popup-overlay').remove();
