@@ -10013,7 +10013,7 @@ function renderFloor1(){
   // Holographic overlay (station stats)
   ctx.fillStyle='rgba(0,255,255,.8)';ctx.font='6px monospace';
   ctx.fillText(`VISITORS: ${Math.floor(S.time/100)%999+150}`,wo.x+5,wo.y+15);
-  ctx.fillText(`FLOORS: ${S.currentFloor}/9 ACTIVE`,wo.x+5,wo.y+25);
+  ctx.fillText(`FLOORS: ${S.floor}/9 ACTIVE`,wo.x+5,wo.y+25);
   ctx.fillText(`STATUS: OPERATIONAL`,wo.x+5,wo.y+35);
   const eventList=['Meteor Shower','Solar Flare','Comm Signal','Deep Scan'];
   ctx.fillText(`EVENT: ${eventList[Math.floor(S.time/200)%4]}`,wo.x+5,wo.y+45);
