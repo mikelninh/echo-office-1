@@ -1657,6 +1657,58 @@ wss.on('connection', (visitorWs) => {
           }
         }
       }
+      // ═══ VOICE CHAT SIGNALING ═══
+      else if (msg.type === 'voice.join') {
+        const v = visitors.get(visitorId);
+        if (v) {
+          v.voiceEnabled = true;
+          // Notify all other voice-enabled visitors to connect
+          for (const [id, other] of visitors) {
+            if (id !== visitorId && other.voiceEnabled && other.ws.readyState === WebSocket.OPEN) {
+              other.ws.send(JSON.stringify({ type: 'voice.join', from: visitorId }));
+              // Also tell the joiner about existing voice users
+              v.ws.send(JSON.stringify({ type: 'voice.join', from: id }));
+            }
+          }
+          console.log(`🎤 ${v.name} joined voice chat`);
+        }
+      }
+      else if (msg.type === 'voice.leave') {
+        const v = visitors.get(visitorId);
+        if (v) {
+          v.voiceEnabled = false;
+          broadcast({ type: 'voice.leave', from: visitorId }, visitorId);
+          console.log(`🎤 ${v.name} left voice chat`);
+        }
+      }
+      else if (msg.type === 'voice.offer' || msg.type === 'voice.answer' || msg.type === 'voice.ice') {
+        // Relay WebRTC signaling to target peer
+        const target = visitors.get(msg.to);
+        if (target && target.ws.readyState === WebSocket.OPEN) {
+          const relay = { ...msg, from: visitorId };
+          delete relay.to;
+          target.ws.send(JSON.stringify(relay));
+        }
+      }
+      else if (msg.type === 'voice.speaking') {
+        const v = visitors.get(visitorId);
+        if (v) {
+          v.voiceSpeaking = msg.speaking;
+          // Broadcast speaking state to same-floor players
+          for (const [id, other] of visitors) {
+            if (id !== visitorId && other.floor === v.floor && other.ws.readyState === WebSocket.OPEN) {
+              other.ws.send(JSON.stringify({ type: 'voice.speaking', from: visitorId, speaking: msg.speaking }));
+            }
+          }
+        }
+      }
+      else if (msg.type === 'voice.state') {
+        const v = visitors.get(visitorId);
+        if (v) {
+          v.voiceState = msg.state;
+          broadcast({ type: 'voice.state', from: visitorId, state: msg.state }, visitorId);
+        }
+      }
       // ═══ MUSIC STUDIO MULTIPLAYER SYNC ═══
       else if (msg.type === 'music.note') {
         const visitor = visitors.get(visitorId);
