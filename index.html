@@ -2688,29 +2688,45 @@ const DATA_FRAGMENTS=[
 // ═══════════════════════════════════════
 const FLOOR_OBJECTS={
   1:[
+    // ═══ ECHO'S BAR — Prince Berlin Inspired ═══
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
-    {id:'bar_counter',x:350,y:60,w:350,h:50,label:'🍹 Bar',interact:true,collide:true},
-    {id:'bookshelf',x:20,y:80,w:80,h:100,label:'📚 Bookshelf',interact:true,collide:true},
-    {id:'sofa',x:40,y:400,w:140,h:70,label:'🛋️ Lounge',interact:true,collide:true},
-    {id:'kitchen',x:400,y:120,w:100,h:40,label:'☕ Coffee',interact:true,collide:true},
-    {id:'jukebox_f1',x:720,y:400,w:60,h:80,label:'🎵 Jukebox',interact:true,collide:true},
-    {id:'arcade',x:720,y:240,w:60,h:90,label:'🕹️ Arcade',interact:true,collide:true},
-    {id:'crystal',x:360,y:300,w:50,h:50,label:'🔮 Crystal Ball',interact:true,collide:true},
-    {id:'fishtank',x:300,y:20,w:80,h:50,label:'Hologram',interact:true,collide:true},
-    {id:'record',x:40,y:330,w:60,h:50,label:'🎶 Vinyl',interact:true,collide:true},
-    {id:'window',x:100,y:10,w:180,h:55,label:'🪟 Space Window',interact:true,collide:true},
-    {id:'welcome_board',x:560,y:200,w:80,h:60,label:'📋 Welcome Board',interact:true,collide:true},
-    {id:'wardrobe',x:660,y:200,w:60,h:60,label:'👔 Wardrobe',interact:true,collide:true},
-    {id:'coffeetable',x:80,y:490,w:80,h:40,label:'📝 Guestbook',interact:true,collide:true},
-    {id:'tv',x:185,y:395,w:55,h:50,label:'📺 Live Feed',interact:true,collide:true},
-    {id:'neon',x:200,y:15,w:90,h:25,label:'"ECHO"',interact:false,collide:false},
-    {id:'sabers',x:305,y:64,w:120,h:50,label:'⚔️ Lightsabers',interact:true,collide:false},
-    {id:'desk',x:560,y:420,w:170,h:100,label:'💻 Coworking',interact:true,collide:true},
-    {id:'shop_terminal',x:440,y:480,w:60,h:50,label:'🛒 Shop',interact:true,collide:true},
-    {id:'tip_jar',x:510,y:120,w:40,h:30,label:'💰 Tip Jar',interact:true,collide:false},
-    {id:'server',x:560,y:260,w:40,h:60,label:'🖥️ Server Rack',interact:false,collide:true},
-    {id:'bed',x:620,y:490,w:80,h:50,label:'🛏️ Bed',interact:true,collide:true},
-    {id:'growlab',x:640,y:370,w:60,h:50,label:'🌱 Grow Lab',interact:true,collide:true},
+    // Golden Round Bar (center)
+    {id:'bar_counter',x:280,y:220,w:240,h:180,label:'🍸 Bar',interact:true,collide:true},
+    {id:'tip_jar',x:370,y:195,w:40,h:25,label:'💰 Tips',interact:true,collide:false},
+    // Bar stools (around the bar)
+    {id:'barstool_1',x:250,y:260,w:25,h:25,label:'Seat',interact:true,collide:false},
+    {id:'barstool_2',x:250,y:330,w:25,h:25,label:'Seat',interact:true,collide:false},
+    {id:'barstool_3',x:530,y:260,w:25,h:25,label:'Seat',interact:true,collide:false},
+    {id:'barstool_4',x:530,y:330,w:25,h:25,label:'Seat',interact:true,collide:false},
+    {id:'barstool_5',x:350,y:410,w:25,h:25,label:'Seat',interact:true,collide:false},
+    {id:'barstool_6',x:430,y:410,w:25,h:25,label:'Seat',interact:true,collide:false},
+    // Vinyl Corner (left)
+    {id:'vinyl_player',x:80,y:80,w:80,h:60,label:'🎵 Vinyl',interact:true,collide:true},
+    {id:'record',x:80,y:150,w:80,h:50,label:'🎶 Records',interact:true,collide:true},
+    // Comic & Card Shelf (left-center)
+    {id:'bookshelf',x:180,y:80,w:80,h:60,label:'📚 Comics & Cards',interact:true,collide:true},
+    // Space Window (top right)
+    {id:'window',x:550,y:15,w:230,h:100,label:'🪟 Space Window',interact:true,collide:false},
+    // Window seats
+    {id:'window_seat_1',x:580,y:120,w:50,h:40,label:'Window Seat',interact:true,collide:false},
+    {id:'window_seat_2',x:660,y:120,w:50,h:40,label:'Window Seat',interact:true,collide:false},
+    // Lounge areas
+    {id:'sofa',x:80,y:440,w:120,h:60,label:'🛋️ Lounge',interact:true,collide:true},
+    {id:'sofa_right',x:600,y:440,w:120,h:60,label:'🛋️ Lounge',interact:true,collide:true},
+    // Dining tables
+    {id:'table_1',x:300,y:480,w:50,h:40,label:'Table',interact:true,collide:false},
+    {id:'table_2',x:450,y:480,w:50,h:40,label:'Table',interact:true,collide:false},
+    // Plants
+    {id:'plant_1',x:75,y:360,w:20,h:30,label:'',interact:false,collide:false},
+    {id:'plant_2',x:710,y:360,w:20,h:30,label:'',interact:false,collide:false},
+    {id:'plant_3',x:220,y:440,w:20,h:30,label:'',interact:false,collide:false},
+    // Crystal ball on bar
+    {id:'crystal',x:380,y:280,w:30,h:30,label:'🔮 Crystal Ball',interact:true,collide:false},
+    // Pendant lights (non-collide, decorative)
+    {id:'pendant_1',x:300,y:180,w:30,h:30,label:'',interact:false,collide:false},
+    {id:'pendant_2',x:460,y:180,w:30,h:30,label:'',interact:false,collide:false},
+    {id:'pendant_3',x:150,y:300,w:30,h:30,label:'',interact:false,collide:false},
+    {id:'pendant_4',x:620,y:300,w:30,h:30,label:'',interact:false,collide:false},
   ],
   2:[
     {id:'elevator',x:15,y:200,w:50,h:120,label:'Elevator',interact:true,collide:true},
@@ -9934,827 +9950,560 @@ return FD;
 // §12. FLOOR-SPECIFIC RENDERING
 // ═══════════════════════════════════════
 
-// --- FLOOR 1: Echo's Command Center ---
+// --- FLOOR 1: Echo's Bar (Prince Berlin Inspired) ---
 function renderFloor1(){
-  renderFloorMaterial('tech');FloorDepth.renderBackground(ctx,1);
-  renderWalls('#0f0a15');renderWallDetails('#0f0a15');
+  FloorDepth.renderBackground(ctx,1);
   
-  // Warm wood-panel lower walls (bar aesthetic)
-  ctx.fillStyle='#1a1210';ctx.fillRect(0,H-40,W,40);
-  ctx.fillStyle='#221815';ctx.fillRect(0,H*.6,8,H*.4);ctx.fillRect(W-8,H*.6,8,H*.4);
-  
-  // Warm ambient strip lighting (golden, not cold)
-  const stripPulse=.3+Math.sin(S.time*1.2)*.15;
-  ctx.fillStyle=`rgba(255,180,80,${stripPulse})`;ctx.shadowColor='#ffaa44';ctx.shadowBlur=15;
-  ctx.fillRect(0,8,W,3);ctx.shadowBlur=0;
-  ctx.fillStyle=`rgba(255,140,60,${stripPulse*.5})`;ctx.shadowColor='#ff8833';ctx.shadowBlur=8;
-  ctx.fillRect(0,11,W,2);ctx.shadowBlur=0;
-  
-  // ═══ NEON "ECHO BAR" SIGN — triple-layer glow ═══
-  const echoGlow=.7+Math.sin(S.time*2.5)*.3;
-  ctx.save();
-  ctx.textAlign='center';
-  // Layer 1: Wide ambient glow
-  ctx.shadowColor='#ff6ec7';ctx.shadowBlur=40;
-  ctx.fillStyle=`rgba(255,80,180,${echoGlow*0.3})`;
-  ctx.font='bold 22px monospace';
-  ctx.fillText('ECHO BAR',W/2-50,38);
-  // Layer 2: Core neon
-  ctx.shadowBlur=20;ctx.fillStyle=`rgba(255,110,199,${echoGlow})`;
-  ctx.fillText('ECHO BAR',W/2-50,38);
-  // Layer 3: White-hot center
-  ctx.shadowBlur=0;ctx.fillStyle=`rgba(255,220,240,${echoGlow*0.6})`;
-  ctx.font='bold 22px monospace';
-  ctx.fillText('ECHO BAR',W/2-50,38);
-  // Decorative stars flanking
-  const starFlicker=Math.sin(S.time*5)>0.3?1:0.4;
-  ctx.fillStyle=`rgba(255,200,100,${starFlicker})`;ctx.font='12px monospace';
-  ctx.fillText('✦',W/2-120,38);ctx.fillText('✦',W/2+20,38);
-  // Subtitle
-  ctx.font='7px monospace';ctx.fillStyle=`rgba(255,200,150,${echoGlow*0.5})`;
-  ctx.fillText('est. 2026 · cocktails · vibes · adventure',W/2-50,50);
-  ctx.restore();ctx.textAlign='left';
-  
-  // Floating particles (purple/teal dots drifting upward)
-  for(let i=0;i<3;i++){
-    const px=100+Math.sin(S.time*.5+i*2)*200+i*150;
-    const py=H-((S.time*20+i*100)%(H+50));
-    const pColor=i%2?'rgba(160,80,255,.6)':'rgba(0,255,255,.4)';
-    ctx.fillStyle=pColor;ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fill();
-  }
-  
-  // Space window (BIGGER: 250×100 with holographic overlay)
-  const wo={x:350,y:6,w:250,h:100};
-  ctx.fillStyle='#2a3a5a';ctx.fillRect(wo.x-4,wo.y-4,wo.w+8,wo.h+8);
-  ctx.fillStyle='#020810';ctx.fillRect(wo.x,wo.y,wo.w,wo.h);
-  
-  // Stars
-  for(let i=0;i<70;i++){
-    const br=i%3===0?.6:.2+Math.sin(S.time*1.5+i*.7)*.3;
-    ctx.fillStyle=`rgba(255,255,255,${br})`;
-    ctx.fillRect(wo.x+((42*i*7+i*13)%wo.w),wo.y+((42*i*11+i*17)%wo.h),i%11===0?2:1,i%11===0?2:1);
-  }
-  
-  const ex=wo.x+125,ey=wo.y+50;
-  // Earth — larger
-  const earthGlow=ctx.createRadialGradient(ex,ey,28,ex,ey,38);
-  earthGlow.addColorStop(0,'rgba(80,160,255,0)');earthGlow.addColorStop(1,'rgba(80,160,255,.12)');
-  ctx.fillStyle=earthGlow;ctx.fillRect(ex-45,ey-45,90,90);
-  ctx.beginPath();ctx.arc(ex,ey,28,0,Math.PI*2);ctx.fillStyle='#1a5a9a';ctx.fill();
-  ctx.fillStyle='#2a7a3a';const drift=Math.sin(S.time*.03)*4;
-  ctx.beginPath();ctx.arc(ex-8+drift,ey-8,11,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.arc(ex+12+drift,ey+6,9,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.arc(ex-12+drift,ey+10,6,0,Math.PI*2);ctx.fill();
-  
-  // Clouds
-  ctx.fillStyle='rgba(220,240,255,.35)';
-  for(let i=0;i<6;i++){
-    const ca=S.time*.02+i*1.2,cr=15+i*3;
-    ctx.beginPath();ctx.arc(ex+Math.cos(ca)*cr*.6,ey+Math.sin(ca)*cr*.4,3+i*.5,0,Math.PI*2);ctx.fill();
-  }
-  
-  // Holographic overlay (station stats)
-  ctx.fillStyle='rgba(0,255,255,.8)';ctx.font='6px monospace';
-  ctx.fillText(`VISITORS: ${Math.floor(S.time/100)%999+150}`,wo.x+5,wo.y+15);
-  ctx.fillText(`FLOORS: ${S.floor}/9 ACTIVE`,wo.x+5,wo.y+25);
-  ctx.fillText(`STATUS: OPERATIONAL`,wo.x+5,wo.y+35);
-  const eventList=['Meteor Shower','Solar Flare','Comm Signal','Deep Scan'];
-  ctx.fillText(`EVENT: ${eventList[Math.floor(S.time/200)%4]}`,wo.x+5,wo.y+45);
-  
-  // Coffee Station (replacing kitchen)
-  const ko=getObjects().find(o=>o.id==='kitchen');
-  ctx.fillStyle='#3a3a4a';ctx.fillRect(ko.x,ko.y+30,ko.w,20);
-  // Espresso machine
-  ctx.fillStyle='#666';ctx.fillRect(ko.x+15,ko.y+5,40,30);
-  ctx.fillStyle='#888';ctx.fillRect(ko.x+20,ko.y+10,30,15);
-  // Steam animation
-  for(let i=0;i<2;i++){
-    const sx=ko.x+25+i*10+Math.sin(S.time*3+i*2)*2;
-    const sy=ko.y+8-Math.sin(S.time*4+i*3)*8;
-    ctx.fillStyle=`rgba(255,255,255,${.4-i*.15})`;ctx.fillRect(sx,sy,2,4);
-  }
-  ctx.fillStyle='#00ffff';ctx.font='4px monospace';ctx.fillText('BREW',ko.x+22,ko.y+45);
-  
-  // Hologram table (replacing fish tank)
-  const ft=getObjects().find(o=>o.id==='fishtank');
-  ctx.fillStyle='#1a1a3a';ctx.fillRect(ft.x,ft.y+ft.h-10,ft.w,10);
-  // Circular blue hologram showing spinning wireframe station
-  const hx=ft.x+ft.w/2,hy=ft.y+ft.h/2;
-  ctx.strokeStyle=`rgba(0,120,255,${.6+Math.sin(S.time*2)*.2})`;ctx.lineWidth=1;
-  for(let i=0;i<9;i++){
-    const angle=S.time*0.5+i*Math.PI/4.5;
-    const r=15+Math.sin(angle)*3;
-    ctx.beginPath();
-    ctx.arc(hx,hy-i*3,r,0,Math.PI*2);
-    ctx.stroke();
-  }
-  // Rotating wireframe lines
-  for(let i=0;i<6;i++){
-    const a=S.time*0.3+i*Math.PI/3;
-    ctx.beginPath();
-    ctx.moveTo(hx+Math.cos(a)*20,hy-20);
-    ctx.lineTo(hx+Math.cos(a+Math.PI)*20,hy+20);
-    ctx.stroke();
-  }
-  
-  // ═══ THE STATION BAR — Most Beautiful Digital Bar in Existence ═══
-  const bar=getObjects().find(o=>o.id==='bar_counter');
-  if(bar){
-    const bT=S.time; // shorthand
+  // ═══════════════════════════════════════════════════════
+  // ECHO'S BAR — Prince Berlin Inspired
+  // Golden round bar, warm lighting, vinyl corner, lounges
+  // ═══════════════════════════════════════════════════════
 
-    // ── BACK WALL: Illuminated bottle shelf with LED strips ──
-    const shelfY=bar.y-25;
-    // Back wall panel (dark mahogany)
-    ctx.fillStyle='#1a0e08';ctx.fillRect(bar.x-5,shelfY-40,bar.w+10,bar.h+65);
-    // LED strip behind bottles (color-shifting)
-    const ledHue=(bT*20)%360;
-    for(let i=0;i<bar.w;i+=2){
-      const h=(ledHue+i*0.5)%360;
-      ctx.fillStyle=`hsla(${h},80%,50%,0.08)`;
-      ctx.fillRect(bar.x+i,shelfY-35,2,30);
+  const t = S.time;
+  const TOD_NOW = getTimeOfDay();
+
+  // ── Diamond-pattern floor tiles (Prince-style harlequin) ──
+  const tileSize = 20;
+  for (let tx = 0; tx < W; tx += tileSize) {
+    for (let ty = 60; ty < H; ty += tileSize) {
+      const isDark = ((Math.floor(tx / tileSize) + Math.floor(ty / tileSize)) % 2 === 0);
+      ctx.fillStyle = isDark ? '#2d3a2e' : '#3a362e';
+      ctx.fillRect(tx, ty, tileSize, tileSize);
     }
+  }
 
-    // ── THREE SHELVES with detailed bottles ──
-    const bottles=[
-      // Shelf 1 (top): Premium spirits
-      {x:0,c:'#1a5a1a',h:22,neck:6,label:'🥃',glow:'#2a8a2a'},  // Absinthe (green)
-      {x:38,c:'#6a1a1a',h:20,neck:5,label:'🍷',glow:'#aa2a2a'},  // Red wine
-      {x:72,c:'#e8e0d0',h:26,neck:8,label:'S',glow:'#3355bb',isSane:true},  // ★ SANE® Vodka (Berlin)
-      {x:106,c:'#8a5a0a',h:18,neck:4,label:'🥃',glow:'#cc8822'},  // Whiskey
-      {x:140,c:'#5a1a5a',h:21,neck:6,label:'🍸',glow:'#9944aa'},  // Gin (purple)
-      {x:174,c:'#0a5a5a',h:23,neck:5,label:'🧊',glow:'#22aaaa'},  // Tequila (teal)
-      {x:208,c:'#8a6a1a',h:19,neck:4,label:'🍯',glow:'#ddaa22'},  // Mead
-      {x:242,c:'#cc3300',h:22,neck:6,label:'🌶️',glow:'#ff4400'},  // Echo's Secret
-      {x:276,c:'#1a4a6a',h:20,neck:5,label:'🫧',glow:'#4488cc'},  // Champagne
-      {x:310,c:'#3a1a0a',h:24,neck:7,label:'☕',glow:'#6a3a1a'},  // Coffee liqueur
-    ];
+  // ── Warm dark walls ──
+  ctx.fillStyle = '#1a1210';
+  ctx.fillRect(0, 0, W, 60); // top wall
+  ctx.fillRect(0, 0, 12, H); // left wall
+  ctx.fillRect(W - 12, 0, 12, H); // right wall
+  ctx.fillRect(0, H - 12, W, 12); // bottom wall
+  // Warm wood wainscoting
+  ctx.fillStyle = '#221815';
+  ctx.fillRect(12, 55, W - 24, 5);
+  ctx.fillStyle = '#2a1e18';
+  ctx.fillRect(12, H - 18, W - 24, 6);
 
-    // Three glass shelves
-    for(let shelf=0;shelf<3;shelf++){
-      const sy=shelfY-28+shelf*14;
-      // Glass shelf (translucent with edge highlight)
-      ctx.fillStyle='rgba(100,150,200,0.06)';ctx.fillRect(bar.x+8,sy,bar.w-16,3);
-      ctx.fillStyle='rgba(200,230,255,0.15)';ctx.fillRect(bar.x+8,sy,bar.w-16,1);
-    }
+  // ── Ceiling beams (Prince-style parallel beams) ──
+  ctx.fillStyle = '#2a2018';
+  for (let i = 0; i < 8; i++) {
+    const bx = 80 + i * 90;
+    ctx.fillRect(bx, 0, 60, 8);
+    ctx.fillStyle = '#1a1410';
+    ctx.fillRect(bx, 8, 60, 2);
+    ctx.fillStyle = '#2a2018';
+  }
 
-    // Render bottles on shelf 1 (top shelf only — main display)
-    bottles.forEach((b,i)=>{
-      const bx=bar.x+18+b.x;
-      const sy=shelfY-28;
+  // ── Terracotta accent pipes on ceiling (Prince detail) ──
+  ctx.strokeStyle = '#a0342b';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(100, 5); ctx.lineTo(200, 12); ctx.lineTo(300, 5); ctx.lineTo(400, 12); ctx.lineTo(500, 5); ctx.lineTo(600, 12); ctx.lineTo(700, 5);
+  ctx.stroke();
+  ctx.strokeStyle = '#802820';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(120, 10); ctx.lineTo(220, 3); ctx.lineTo(320, 10); ctx.lineTo(420, 3); ctx.lineTo(520, 10); ctx.lineTo(620, 3); ctx.lineTo(720, 10);
+  ctx.stroke();
+  
 
-      if(b.isSane){
-        // ★ SANE® VODKA — Premium custom render (clear glass, white label, blue text)
-        const bH=b.h, nH=b.neck;
-        // Clear glass bottle body (slightly tinted, taller than others)
-        ctx.fillStyle='rgba(200,210,220,0.15)';ctx.fillRect(bx-1,sy-bH,12,bH);
-        // Glass edges
-        ctx.fillStyle='rgba(255,255,255,0.12)';ctx.fillRect(bx-1,sy-bH,1,bH);ctx.fillRect(bx+10,sy-bH,1,bH);
-        // Narrow neck (clear glass)
-        ctx.fillStyle='rgba(200,210,220,0.12)';ctx.fillRect(bx+2,sy-bH-nH,6,nH);
-        ctx.fillStyle='rgba(255,255,255,0.1)';ctx.fillRect(bx+2,sy-bH-nH,1,nH);
-        // Silver cap
-        ctx.fillStyle='#bbb';ctx.fillRect(bx+2,sy-bH-nH-2,6,3);
-        ctx.fillStyle='#ddd';ctx.fillRect(bx+2,sy-bH-nH-2,6,1);
-        // White label (lower 60% of bottle)
-        const labelTop=sy-bH*0.65, labelH=bH*0.55;
-        ctx.fillStyle='#f0ece6';ctx.fillRect(bx,labelTop,10,labelH);
-        // "VODKA" tiny text (blue, above sane text)
-        ctx.fillStyle='#3355bb';ctx.font='3px monospace';ctx.textAlign='center';
-        ctx.fillText('VODKA',bx+5,labelTop+5);
-        // "sane" text (blue, larger, distinctive)
-        ctx.fillStyle='#2244aa';ctx.font='bold 5px sans-serif';
-        ctx.fillText('sane',bx+5,labelTop+12);
-        // "Berlin" subtitle
-        ctx.fillStyle='#6677aa';ctx.font='2px monospace';
-        ctx.fillText('BERLIN',bx+5,labelTop+16);
-        ctx.textAlign='left';
-        // Liquid inside (clear vodka — very subtle)
-        ctx.fillStyle='rgba(200,220,240,0.08)';
-        ctx.fillRect(bx+1,sy-bH*0.3,8,bH*0.28);
-        // Premium glow — blue/white shimmer (pulsing)
-        const saneGlow=0.12+Math.sin(bT*1.8)*0.06;
-        const sg=ctx.createRadialGradient(bx+5,sy-bH/2,0,bx+5,sy-bH/2,22);
-        sg.addColorStop(0,`rgba(50,80,180,${saneGlow})`);sg.addColorStop(1,'transparent');
-        ctx.fillStyle=sg;ctx.beginPath();ctx.arc(bx+5,sy-bH/2,22,0,Math.PI*2);ctx.fill();
-        // Subtle spotlight on SANE bottle (it's the featured one)
-        const spotG=ctx.createRadialGradient(bx+5,sy-bH-10,0,bx+5,sy-bH-10,30);
-        spotG.addColorStop(0,'rgba(255,255,255,0.04)');spotG.addColorStop(1,'transparent');
-        ctx.fillStyle=spotG;ctx.fillRect(bx-15,sy-bH-25,40,bH+30);
-      } else {
-        // Standard bottle render
-        ctx.fillStyle=b.c;
-        ctx.fillRect(bx,sy-b.h,10,b.h);
-        ctx.fillStyle=b.c;
-        ctx.fillRect(bx+2,sy-b.h-b.neck,6,b.neck);
-        ctx.fillStyle='#888';ctx.fillRect(bx+3,sy-b.h-b.neck-2,4,2);
-        ctx.fillStyle='rgba(255,255,255,0.18)';ctx.fillRect(bx+1,sy-b.h+2,2,b.h-4);
-        const liquidH=b.h*0.7;
-        ctx.fillStyle=b.glow+'44';ctx.fillRect(bx+1,sy-liquidH,8,liquidH);
-        const bg=ctx.createRadialGradient(bx+5,sy-b.h/2,0,bx+5,sy-b.h/2,18);
-        bg.addColorStop(0,b.glow+'22');bg.addColorStop(1,'transparent');
-        ctx.fillStyle=bg;ctx.beginPath();ctx.arc(bx+5,sy-b.h/2,18,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillRect(bx+1,sy-b.h/2-2,8,5);
-      }
-    });
-
-    // ── MAIN COUNTER: Polished mahogany with epoxy resin top ──
-    // Counter shadow
-    ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(bar.x+3,bar.y+bar.h,bar.w-3,6);
-    // Counter body (dark mahogany with wood grain)
-    const woodGrad=ctx.createLinearGradient(bar.x,bar.y,bar.x,bar.y+bar.h);
-    woodGrad.addColorStop(0,'#3a2515');woodGrad.addColorStop(0.3,'#2a1a10');woodGrad.addColorStop(0.7,'#2a1a10');woodGrad.addColorStop(1,'#1a0e08');
-    ctx.fillStyle=woodGrad;ctx.fillRect(bar.x,bar.y,bar.w,bar.h);
-    // Wood grain lines
-    for(let i=0;i<bar.w;i+=12){
-      ctx.fillStyle='rgba(60,40,25,0.3)';
-      ctx.fillRect(bar.x+i+Math.sin(i*0.1)*3,bar.y,1,bar.h);
-    }
-    // Epoxy resin top (glossy, slightly blue-tinted, reflective)
-    const epoxyGrad=ctx.createLinearGradient(bar.x,bar.y,bar.x+bar.w,bar.y);
-    epoxyGrad.addColorStop(0,'rgba(40,60,80,0.4)');epoxyGrad.addColorStop(0.3,'rgba(20,40,60,0.5)');
-    epoxyGrad.addColorStop(0.5,'rgba(60,80,100,0.3)');epoxyGrad.addColorStop(0.7,'rgba(20,40,60,0.5)');
-    epoxyGrad.addColorStop(1,'rgba(40,60,80,0.4)');
-    ctx.fillStyle=epoxyGrad;ctx.fillRect(bar.x,bar.y,bar.w,10);
-    // Glossy light reflection stripe across epoxy
-    ctx.fillStyle=`rgba(255,255,255,${0.06+Math.sin(bT*0.8)*0.03})`;
-    ctx.fillRect(bar.x+20,bar.y+2,bar.w-40,2);
-    // Front edge trim (brass/copper strip)
-    ctx.fillStyle='#8a6a30';ctx.fillRect(bar.x,bar.y+bar.h-3,bar.w,3);
-    ctx.fillStyle='rgba(255,200,100,0.15)';ctx.fillRect(bar.x,bar.y+bar.h-3,bar.w,1);
-    // Foot rail (brass)
-    ctx.fillStyle='#6a5020';ctx.fillRect(bar.x+15,bar.y+bar.h+20,bar.w-30,3);
-    ctx.fillStyle='rgba(255,200,100,0.2)';ctx.fillRect(bar.x+15,bar.y+bar.h+20,bar.w-30,1);
-
-    // ── BAR STOOLS (5, with cushions + chrome legs) ──
-    for(let i=0;i<5;i++){
-      const sx=bar.x+35+i*65;
-      // Chrome legs (cross pattern)
-      ctx.strokeStyle='#555';ctx.lineWidth=2;
-      ctx.beginPath();ctx.moveTo(sx-4,bar.y+bar.h+28);ctx.lineTo(sx+4,bar.y+bar.h+6);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(sx+12,bar.y+bar.h+28);ctx.lineTo(sx+4,bar.y+bar.h+6);ctx.stroke();
-      // Seat cushion (leather)
-      ctx.fillStyle='#3a2018';ctx.fillRect(sx-6,bar.y+bar.h+3,20,7);
-      // Cushion highlight
-      ctx.fillStyle='rgba(255,200,150,0.12)';ctx.fillRect(sx-4,bar.y+bar.h+4,16,2);
-      // Stool connector to foot rail
-      ctx.fillStyle='#444';ctx.fillRect(sx+3,bar.y+bar.h+10,2,10);
-    }
-
-    // ── DRINKS ON THE COUNTER (animated, alive) ──
-    // Cocktail glass 1: Aperol Nebula (orange sunset gradient)
-    const cx1=bar.x+60;
-    ctx.fillStyle='rgba(255,100,50,0.4)';
-    ctx.beginPath();ctx.moveTo(cx1-6,bar.y+4);ctx.lineTo(cx1+6,bar.y+4);ctx.lineTo(cx1+3,bar.y-10);ctx.lineTo(cx1-3,bar.y-10);ctx.fill();
-    const sunGrad=ctx.createLinearGradient(cx1,bar.y-10,cx1,bar.y+4);
-    sunGrad.addColorStop(0,'rgba(255,80,30,0.7)');sunGrad.addColorStop(1,'rgba(255,180,50,0.5)');
-    ctx.fillStyle=sunGrad;
-    ctx.beginPath();ctx.moveTo(cx1-5,bar.y+3);ctx.lineTo(cx1+5,bar.y+3);ctx.lineTo(cx1+2,bar.y-8);ctx.lineTo(cx1-2,bar.y-8);ctx.fill();
-    // Orange slice garnish
-    ctx.fillStyle='#ff8c00';ctx.beginPath();ctx.arc(cx1+5,bar.y-6,3,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#ffaa33';ctx.beginPath();ctx.arc(cx1+5,bar.y-6,2,0,Math.PI*2);ctx.fill();
+  // ── Pendant lights (lotus/parasol shape — Prince style) ──
+  const pendantPositions = [{x:300,y:180},{x:460,y:180},{x:150,y:300},{x:620,y:300},{x:400,y:100}];
+  pendantPositions.forEach((p,i) => {
+    const sway = Math.sin(t * 0.5 + i * 1.5) * 2;
+    const glow = 0.3 + Math.sin(t * 1.2 + i) * 0.1;
     // Stem
-    ctx.fillStyle='rgba(200,200,200,0.4)';ctx.fillRect(cx1-1,bar.y+4,2,6);
-    // Base
-    ctx.fillStyle='rgba(200,200,200,0.3)';ctx.fillRect(cx1-4,bar.y+10,8,2);
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(p.x, 0);
+    ctx.lineTo(p.x + sway, p.y - 15);
+    ctx.stroke();
+    // Parasol shade (warm cream)
+    const shadR = 18 + Math.sin(t * 0.8 + i) * 2;
+    const shadeG = ctx.createRadialGradient(p.x + sway, p.y - 10, 2, p.x + sway, p.y - 10, shadR);
+    shadeG.addColorStop(0, `rgba(245,230,200,${glow + 0.3})`);
+    shadeG.addColorStop(0.6, `rgba(232,216,192,${glow + 0.15})`);
+    shadeG.addColorStop(1, `rgba(200,180,150,0)`);
+    ctx.fillStyle = shadeG;
+    ctx.beginPath();
+    ctx.ellipse(p.x + sway, p.y - 10, shadR, shadR * 0.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Scalloped edge
+    ctx.strokeStyle = `rgba(210,195,170,${glow})`;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.ellipse(p.x + sway, p.y - 10, shadR, shadR * 0.5, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    // Light pool on floor below
+    const poolG = ctx.createRadialGradient(p.x, p.y + 60, 0, p.x, p.y + 60, 50);
+    poolG.addColorStop(0, `rgba(255,220,160,${glow * 0.15})`);
+    poolG.addColorStop(1, 'rgba(255,200,120,0)');
+    ctx.fillStyle = poolG;
+    ctx.beginPath();
+    ctx.ellipse(p.x, p.y + 60, 50, 30, 0, 0, Math.PI * 2);
+    ctx.fill();
+  });
 
-    // Cocktail glass 2: Zen Matcha (green, steaming)
-    const cx2=bar.x+160;
-    // Mug shape
-    ctx.fillStyle='#f5f0e8';ctx.fillRect(cx2-5,bar.y-6,10,16);
-    ctx.fillStyle='#88cc44';ctx.fillRect(cx2-4,bar.y-4,8,12);
-    // Handle
-    ctx.strokeStyle='#e8e0d0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx2+7,bar.y+2,4,-.5,Math.PI*.8);ctx.stroke();
-    // Steam wisps
-    for(let s=0;s<3;s++){
-      const sy2=bar.y-8-s*6-Math.sin(bT*3+s*2)*3;
-      const sx2=cx2+Math.sin(bT*2+s*1.5)*3;
-      ctx.fillStyle=`rgba(200,255,200,${0.25-s*0.07})`;ctx.fillRect(sx2-1,sy2,2,4);
-    }
+  // ── THE GOLDEN ROUND BAR — centerpiece ══
+  const bar = getObjects().find(o => o.id === 'bar_counter');
+  if (bar) {
+    const bx = bar.x, by = bar.y, bw = bar.w, bh = bar.h;
+    const bcx = bx + bw/2, bcy = by + bh/2;
+    const barR = Math.min(bw, bh) / 2;
 
-    // Cocktail glass 3: Stardust Shot (gold, sparkling)
-    const cx3=bar.x+250;
-    ctx.fillStyle='rgba(255,215,0,0.3)';ctx.fillRect(cx3-4,bar.y-2,8,12);
-    ctx.fillStyle='rgba(255,215,0,0.6)';ctx.fillRect(cx3-3,bar.y,6,8);
-    // Sparkles rising from shot
-    for(let sp=0;sp<4;sp++){
-      const spX=cx3+Math.sin(bT*4+sp*1.7)*4;
-      const spY=bar.y-4-(bT*15+sp*8)%20;
-      const spA=1-(((bT*15+sp*8)%20)/20);
-      ctx.fillStyle=`rgba(255,215,0,${spA*0.7})`;
-      ctx.fillRect(spX,spY,sp%2?2:1,sp%2?2:1);
-    }
+    // Bar glow on floor
+    const barFloorGlow = ctx.createRadialGradient(bcx, bcy, barR * 0.5, bcx, bcy, barR * 2.5);
+    barFloorGlow.addColorStop(0, 'rgba(200,160,80,0.08)');
+    barFloorGlow.addColorStop(1, 'rgba(200,160,80,0)');
+    ctx.fillStyle = barFloorGlow;
+    ctx.beginPath();
+    ctx.ellipse(bcx, bcy, barR * 2.5, barR * 1.8, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    // Cocktail glass 4: Hyperdrive Espresso (dark, crema on top)
-    const cx4=bar.x+320;
-    ctx.fillStyle='#ddd';ctx.fillRect(cx4-4,bar.y-2,8,12);
-    ctx.fillStyle='#1a0a00';ctx.fillRect(cx4-3,bar.y,6,8);
-    ctx.fillStyle='#c8a070';ctx.fillRect(cx4-3,bar.y,6,2); // crema
-    // Handle
-    ctx.strokeStyle='#ccc';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx4+6,bar.y+4,3,-.5,Math.PI*.8);ctx.stroke();
-
-    // ── SANE® BOTTLE ON COUNTER (featured display) ──
-    const saneX=bar.x+130;
-    // Clear glass bottle (larger, prominent)
-    ctx.fillStyle='rgba(200,210,225,0.12)';ctx.fillRect(saneX,bar.y-18,8,22);
-    ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(saneX,bar.y-18,1,22);ctx.fillRect(saneX+7,bar.y-18,1,22);
-    // Neck
-    ctx.fillStyle='rgba(200,210,225,0.10)';ctx.fillRect(saneX+2,bar.y-24,4,6);
-    // Silver cap
-    ctx.fillStyle='#bbb';ctx.fillRect(saneX+2,bar.y-26,4,2);
-    // White label
-    ctx.fillStyle='#f0ece6';ctx.fillRect(saneX+1,bar.y-12,6,10);
-    // "sane" text on label
-    ctx.fillStyle='#2244aa';ctx.font='bold 4px sans-serif';ctx.textAlign='center';
-    ctx.fillText('sane',saneX+4,bar.y-5);
-    ctx.textAlign='left';
-    // Blue glow around SANE bottle
-    const sbGlow=ctx.createRadialGradient(saneX+4,bar.y-8,0,saneX+4,bar.y-8,16);
-    sbGlow.addColorStop(0,`rgba(50,80,180,${0.08+Math.sin(bT*2)*0.04})`);sbGlow.addColorStop(1,'transparent');
-    ctx.fillStyle=sbGlow;ctx.beginPath();ctx.arc(saneX+4,bar.y-8,16,0,Math.PI*2);ctx.fill();
-
-    // ── LED UNDERGLOW (pulsing color under counter edge) ──
-    const underGlow=ctx.createLinearGradient(bar.x,bar.y+bar.h,bar.x,bar.y+bar.h+15);
-    const ugh=(bT*30)%360;
-    underGlow.addColorStop(0,`hsla(${ugh},70%,50%,0.15)`);
-    underGlow.addColorStop(1,'transparent');
-    ctx.fillStyle=underGlow;ctx.fillRect(bar.x,bar.y+bar.h,bar.w,15);
-
-    // ── NEON "DRINKS" SIGN (behind bar, glowing) ──
-    const neonPulse=0.7+Math.sin(bT*2.5)*0.3;
+    // Bar body — golden oval
     ctx.save();
-    ctx.shadowColor='#ff6ec7';ctx.shadowBlur=20;
-    ctx.fillStyle=`rgba(255,110,199,${neonPulse})`;
-    ctx.font='bold 10px monospace';ctx.textAlign='center';
-    ctx.fillText('✦ D R I N K S ✦',bar.x+bar.w/2,bar.y-32);
-    ctx.shadowBlur=35;ctx.globalAlpha=0.3;
-    ctx.fillText('✦ D R I N K S ✦',bar.x+bar.w/2,bar.y-32);
-    ctx.restore();ctx.textAlign='left';
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(bcx + 3, bcy + 5, barR + 2, barR * 0.65 + 2, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    // ── MENU BOARD (chalkboard above bar with drink names) ──
-    ctx.fillStyle='#1a2a1a';ctx.fillRect(bar.x+bar.w-120,shelfY-38,115,30);
-    ctx.strokeStyle='#5a4a3a';ctx.lineWidth=1;ctx.strokeRect(bar.x+bar.w-120,shelfY-38,115,30);
-    ctx.font='6px monospace';ctx.fillStyle='#e8e0c8';
-    ctx.fillText('TODAY\'S SPECIALS:',bar.x+bar.w-115,shelfY-28);
-    const specials=['★ SANE Blue    8◈','Aperol Nebula  5◈','SANE Shot      3◈'];
-    specials.forEach((s,i)=>{
-      ctx.fillStyle=['#2244aa','#ff6633','#3355bb'][i];
-      ctx.fillText(s,bar.x+bar.w-115,shelfY-20+i*7);
-    });
+    // Main body (brushed brass)
+    const barGrad = ctx.createLinearGradient(bx, by, bx + bw, by + bh);
+    barGrad.addColorStop(0, '#8a6a30');
+    barGrad.addColorStop(0.3, '#c8a050');
+    barGrad.addColorStop(0.5, '#ddb860');
+    barGrad.addColorStop(0.7, '#c8a050');
+    barGrad.addColorStop(1, '#8a6a30');
+    ctx.fillStyle = barGrad;
+    ctx.beginPath();
+    ctx.ellipse(bcx, bcy, barR, barR * 0.65, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    // ── COASTERS on counter (round cork with rings) ──
-    for(let i=0;i<4;i++){
-      const coX=bar.x+80+i*75;
-      ctx.fillStyle='#8a7050';ctx.beginPath();ctx.arc(coX,bar.y+6,5,0,Math.PI*2);ctx.fill();
-      ctx.strokeStyle='rgba(100,70,40,0.5)';ctx.lineWidth=0.5;ctx.beginPath();ctx.arc(coX,bar.y+6,3,0,Math.PI*2);ctx.stroke();
+    // Ribbed texture (vertical lines on the bar face)
+    ctx.strokeStyle = 'rgba(255,220,150,0.15)';
+    ctx.lineWidth = 1;
+    for (let i = -barR + 5; i < barR; i += 4) {
+      const edgeFactor = 1 - Math.abs(i) / barR;
+      if (edgeFactor <= 0) continue;
+      ctx.globalAlpha = edgeFactor * 0.3;
+      ctx.beginPath();
+      ctx.moveTo(bcx + i, bcy - barR * 0.65 * edgeFactor);
+      ctx.lineTo(bcx + i, bcy + barR * 0.65 * edgeFactor);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // Counter top (lighter — marble-like)
+    ctx.fillStyle = '#e8e2da';
+    ctx.beginPath();
+    ctx.ellipse(bcx, bcy - 3, barR - 6, (barR - 6) * 0.6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Marble veins
+    ctx.strokeStyle = 'rgba(180,170,155,0.3)';
+    ctx.lineWidth = 0.5;
+    for (let v = 0; v < 5; v++) {
+      ctx.beginPath();
+      const vx = bcx - barR/2 + v * barR/3;
+      ctx.moveTo(vx, bcy - 15);
+      ctx.quadraticCurveTo(vx + 10 * Math.sin(v), bcy, vx + 5, bcy + 10);
+      ctx.stroke();
     }
 
-    // ── BAR COUNTER REFLECTION (mirror-like epoxy reflects bottles faintly) ──
-    ctx.save();ctx.globalAlpha=0.04;
-    bottles.slice(0,5).forEach((b,i)=>{
-      const bx=bar.x+18+b.x;
-      ctx.fillStyle=b.glow;
-      ctx.fillRect(bx,bar.y+3,10,6);
-    });
+    // Inner bar area (dark — where Echo stands)
+    ctx.fillStyle = '#1a1410';
+    ctx.beginPath();
+    ctx.ellipse(bcx, bcy - 2, barR - 18, (barR - 18) * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // ── Bottle shelves (curved, inside the bar) ──
+    const shelfAngles = 8;
+    for (let i = 0; i < shelfAngles; i++) {
+      const a = (i / shelfAngles) * Math.PI * 2 + t * 0.01;
+      const sx = bcx + Math.cos(a) * (barR - 25);
+      const sy = bcy - 2 + Math.sin(a) * ((barR - 25) * 0.5);
+      // Bottle
+      const bottleColors = ['#1a5a1a','#6a1a1a','#e8e0d0','#8a5a0a','#5a1a5a','#0a5a5a','#cc3300','#3a1a0a'];
+      ctx.fillStyle = bottleColors[i % bottleColors.length];
+      ctx.fillRect(sx - 2, sy - 8, 4, 8);
+      ctx.fillStyle = '#ddd';
+      ctx.fillRect(sx - 1, sy - 10, 2, 3);
+    }
+
+    // ── SANE® Vodka — featured bottle (center back) ──
+    const saneX = bcx, saneY = bcy - 15;
+    ctx.fillStyle = '#e8e0d0';
+    ctx.fillRect(saneX - 3, saneY - 14, 6, 14);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(saneX - 2, saneY - 12, 4, 3);
+    // SANE label
+    ctx.fillStyle = '#3355bb';
+    ctx.font = 'bold 3px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('S', saneX, saneY - 9);
+    ctx.textAlign = 'left';
+    // Glow behind SANE bottle
+    const saneGlow = ctx.createRadialGradient(saneX, saneY - 7, 0, saneX, saneY - 7, 12);
+    saneGlow.addColorStop(0, 'rgba(51,85,187,0.15)');
+    saneGlow.addColorStop(1, 'rgba(51,85,187,0)');
+    ctx.fillStyle = saneGlow;
+    ctx.fillRect(saneX - 12, saneY - 18, 24, 24);
+
+    // Bar edge highlight
+    ctx.strokeStyle = 'rgba(255,220,150,0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(bcx, bcy, barR, barR * 0.65, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
     ctx.restore();
 
-    // ── AMBIENT BAR PARTICLES (warm golden dust motes) ──
-    for(let i=0;i<6;i++){
-      const px2=bar.x+20+Math.sin(bT*0.3+i*1.1)*150+i*40;
-      const py2=bar.y-30+Math.sin(bT*0.5+i*0.8)*15;
-      const pa=0.15+Math.sin(bT*1.5+i*2)*0.1;
-      ctx.fillStyle=`rgba(255,200,100,${pa})`;
-      ctx.beginPath();ctx.arc(px2,py2,1.5,0,Math.PI*2);ctx.fill();
+    // ── Bar stools (around the bar) ──
+    const stoolPositions = [
+      {x:250,y:260},{x:250,y:330},{x:530,y:260},{x:530,y:330},{x:350,y:410},{x:430,y:410}
+    ];
+    stoolPositions.forEach(sp => {
+      // Stool base
+      ctx.fillStyle = '#3b3b3b';
+      ctx.fillRect(sp.x + 4, sp.y + 12, 14, 4);
+      // Stool stem
+      ctx.fillStyle = '#c8a050';
+      ctx.fillRect(sp.x + 9, sp.y + 4, 4, 10);
+      // Stool seat (olive green velvet — Prince style)
+      ctx.fillStyle = '#3b5a3a';
+      ctx.beginPath();
+      ctx.ellipse(sp.x + 11, sp.y + 4, 9, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#4a6a49';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.ellipse(sp.x + 11, sp.y + 4, 9, 5, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+  }
+
+  // ── Tip jar on bar ──
+  const tj = getObjects().find(o => o.id === 'tip_jar');
+  if (tj) {
+    ctx.fillStyle = 'rgba(200,200,255,0.3)';
+    ctx.fillRect(tj.x, tj.y, tj.w, tj.h);
+    ctx.strokeStyle = 'rgba(200,200,255,0.5)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(tj.x, tj.y, tj.w, tj.h);
+    // Coins inside
+    ctx.fillStyle = '#ffd700';
+    for (let c = 0; c < 4; c++) {
+      ctx.fillRect(tj.x + 5 + c * 8, tj.y + tj.h - 8 - Math.sin(t + c) * 2, 5, 5);
     }
-
-    // ── COCKTAIL SHAKER (animated when near bar) ──
-    const nearBar=S.visitor&&Math.abs(S.visitor.y-bar.y-bar.h)<40&&S.visitor.x>bar.x&&S.visitor.x<bar.x+bar.w;
-    const shakerX=bar.x+bar.w-40;
-    const shakerShake=nearBar?Math.sin(bT*12)*2:0;
-    ctx.fillStyle='#aaa';ctx.fillRect(shakerX+shakerShake,bar.y-8,8,16);
-    ctx.fillStyle='#888';ctx.fillRect(shakerX+shakerShake,bar.y-10,8,4);
-    ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(shakerX+2+shakerShake,bar.y-6,2,12);
-
-    // ── ICE BUCKET ──
-    ctx.fillStyle='#334';ctx.fillRect(bar.x+10,bar.y+3,14,10);
-    ctx.fillStyle='rgba(180,220,255,0.3)';
-    for(let ic=0;ic<3;ic++){ctx.fillRect(bar.x+12+ic*3,bar.y+1-ic,3,3);}
-
-    // ── BAR NAPKINS (small stack) ──
-    ctx.fillStyle='#f0e8d8';ctx.fillRect(bar.x+bar.w-20,bar.y+5,12,4);
-    ctx.fillStyle='#e8e0d0';ctx.fillRect(bar.x+bar.w-19,bar.y+4,10,3);
-
-    // ── DRIP TRAY (catches spills, animated drips) ──
-    ctx.fillStyle='#222';ctx.fillRect(bar.x+100,bar.y+8,80,3);
-    if(Math.sin(bT*2)>0.8){
-      ctx.fillStyle='rgba(100,200,255,0.2)';
-      ctx.fillRect(bar.x+120+Math.sin(bT*5)*10,bar.y+8,2,2);
-    }
+    ctx.fillStyle = '#ffd700';
+    ctx.font = '5px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('TIPS', tj.x + tj.w/2, tj.y - 2);
+    ctx.textAlign = 'left';
   }
 
-  // ── TIP JAR (glass jar with visible coins) ──
-  const tj=getObjects().find(o=>o.id==='tip_jar');
-  if(tj){
-    // Glass jar body
-    ctx.fillStyle='rgba(200,220,240,0.12)';ctx.fillRect(tj.x+2,tj.y+2,tj.w-4,tj.h-2);
-    ctx.strokeStyle='rgba(200,220,240,0.25)';ctx.lineWidth=1;ctx.strokeRect(tj.x+2,tj.y+2,tj.w-4,tj.h-2);
-    // Coins inside (stacked)
-    const totalTips=LS.get('tipsReceived',0);
-    const coinCount=Math.min(8,Math.floor(totalTips/5)+2);
-    for(let c=0;c<coinCount;c++){
-      const cy2=tj.y+tj.h-4-c*3;
-      ctx.fillStyle=c%2?'#ffd700':'#daa520';
-      ctx.fillRect(tj.x+4+Math.sin(c*1.5)*2,cy2,tj.w-8,2);
-    }
-    // Glass highlight
-    ctx.fillStyle='rgba(255,255,255,0.1)';ctx.fillRect(tj.x+3,tj.y+4,2,tj.h-8);
-    // Label
-    ctx.fillStyle='#ffd700';ctx.font='8px monospace';ctx.textAlign='center';
-    ctx.fillText('TIPS',tj.x+tj.w/2,tj.y+tj.h+10);
-    ctx.font='6px monospace';ctx.fillStyle='#ffd70088';
-    ctx.fillText(totalTips>0?totalTips+'◈':'',tj.x+tj.w/2,tj.y+tj.h+18);
-    ctx.textAlign='left';
-  }
-
-  // Welcome board
-  const wb=getObjects().find(o=>o.id==='welcome_board');
-  if(wb){
-    ctx.fillStyle='#1a1a2a';ctx.fillRect(wb.x,wb.y,wb.w,wb.h);
-    ctx.strokeStyle='#ffd08044';ctx.lineWidth=1;ctx.strokeRect(wb.x,wb.y,wb.w,wb.h);
-    ctx.fillStyle='#ffd080';ctx.font='bold 7px monospace';ctx.textAlign='center';
-    ctx.fillText('WELCOME',wb.x+wb.w/2,wb.y+15);
-    ctx.font='6px monospace';ctx.fillStyle='#aaa';
-    ctx.fillText('10 FLOORS',wb.x+wb.w/2,wb.y+28);
-    ctx.fillText('TO EXPLORE',wb.x+wb.w/2,wb.y+38);
-    const arrow=Math.sin(S.time*3)>0?'▼':'▽';
-    ctx.fillText(arrow,wb.x+wb.w/2,wb.y+50);
-    ctx.textAlign='left';
-  }
-
-  // Jukebox (Floor 1)
-  const jb1=getObjects().find(o=>o.id==='jukebox_f1');
-  if(jb1){
-    ctx.fillStyle='#5a2020';ctx.fillRect(jb1.x,jb1.y,jb1.w,jb1.h);
-    ctx.fillStyle='#8a3030';ctx.fillRect(jb1.x+5,jb1.y+5,jb1.w-10,jb1.h*0.4);
-    ctx.fillStyle=`rgba(255,220,100,${.5+Math.sin(S.time*2)*.2})`;
-    ctx.fillRect(jb1.x+10,jb1.y+10,jb1.w-20,15);
-    ctx.fillStyle='#ffd700';ctx.font='8px monospace';ctx.textAlign='center';
-    ctx.fillText('♪ JUKEBOX ♪',jb1.x+jb1.w/2,jb1.y+jb1.h-10);ctx.textAlign='left';
-    // Glow
-    const jbG=ctx.createRadialGradient(jb1.x+jb1.w/2,jb1.y+jb1.h/2,5,jb1.x+jb1.w/2,jb1.y+jb1.h/2,50);
-    jbG.addColorStop(0,'rgba(255,180,60,0.08)');jbG.addColorStop(1,'rgba(255,140,40,0)');
-    ctx.fillStyle=jbG;ctx.fillRect(jb1.x-30,jb1.y-30,jb1.w+60,jb1.h+60);
-  }
-
-  // Bookshelf with lamp glow
-  const bs=getObjects().find(o=>o.id==='bookshelf');
-  ctx.fillStyle='#2a1a10';ctx.fillRect(bs.x,bs.y,bs.w,bs.h);
-  
-  const bkC=['#d4820a','#00c8c8','#2a8a2a','#c42020','#d0d0d0','#c8a020','#6a4a2a','#8a1a1a','#7a3aa0','#2060c0','#a030a0','#20a050'];
-  const bkN=['DUNE','NEURO','HHGG','1984','SNOW','GEB','SAPI','WAR','MEDI','CODE','SICP','PRGM'];
-  for(let row=0;row<3;row++){
-    const sy=bs.y+8+row*30;
-    ctx.fillStyle='#3a2820';ctx.fillRect(bs.x+4,sy+22,bs.w-8,3);
-    for(let b=0;b<4;b++){
-      const bx=bs.x+6+b*18,bh=16+((row*4+b)*5%8);
-      ctx.fillStyle=bkC[row*4+b]||'#888';
-      ctx.fillRect(bx,sy+22-bh,14,bh);
-      ctx.save();ctx.translate(bx+10,sy+20);ctx.rotate(-Math.PI/2);
-      ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 7px monospace';ctx.textAlign='left';
-      ctx.fillText(bkN[row*4+b]||'',1,3);ctx.restore();
-    }
-  }
-  // Warm lamp glow beside bookshelf
-  const lampGlow=ctx.createRadialGradient(bs.x+bs.w+10,bs.y+30,0,bs.x+bs.w+10,bs.y+30,40);
-  lampGlow.addColorStop(0,'rgba(255,180,80,.3)');lampGlow.addColorStop(1,'rgba(255,180,80,0)');
-  ctx.fillStyle=lampGlow;ctx.fillRect(bs.x-20,bs.y-10,bs.w+60,bs.h+40);
-  
-  // Command Console (replacing desk with 2 monitors → 3 screens wider)
-  const dk=getObjects().find(o=>o.id==='desk');
-  ctx.fillStyle='#2a2a3a';ctx.fillRect(dk.x-20,dk.y+50,dk.w+40,12);
-  ctx.fillStyle='#1a1a2a';ctx.fillRect(dk.x-15,dk.y+62,8,40);
-  ctx.fillRect(dk.x+dk.w+7,dk.y+62,8,40);
-  
-  // Left screen: Station visitor graph (animated sine wave)
-  const mx1=dk.x-10;
-  ctx.fillStyle='#111';ctx.fillRect(mx1,dk.y+8,70,40);
-  ctx.fillStyle='#0a3a0a';ctx.fillRect(mx1+2,dk.y+10,66,36);
-  ctx.strokeStyle='#0f0';ctx.lineWidth=1;ctx.beginPath();
-  for(let i=0;i<66;i++){
-    const y=dk.y+28+Math.sin(S.time*0.1+i*0.1)*8;
-    if(i===0)ctx.moveTo(mx1+2+i,y);else ctx.lineTo(mx1+2+i,y);
-  }
-  ctx.stroke();
-  ctx.fillStyle='#0f0';ctx.font='5px monospace';ctx.fillText('ACTIVITY',mx1+4,dk.y+44);
-  
-  // Center screen: Floor map (9 colored dots vertical, current highlighted)
-  const mx2=dk.x+30;
-  ctx.fillStyle='#111';ctx.fillRect(mx2,dk.y+8,70,40);
-  ctx.fillStyle='#0a2a3a';ctx.fillRect(mx2+2,dk.y+10,66,36);
-  for(let f=1;f<=9;f++){
-    const fy=dk.y+12+(f-1)*3.5;
-    ctx.fillStyle=f===S.currentFloor?'#ffff00':['#ff4040','#40ff40','#4040ff','#ff40ff','#40ffff','#ffa040','#a040ff','#40ffa0','#ffa0a0'][f-1];
-    ctx.fillRect(mx2+30,fy,6,3);
-  }
-  ctx.fillStyle='#0ff';ctx.font='5px monospace';ctx.fillText('FLOORS',mx2+4,dk.y+44);
-  
-  // Right screen: Scrolling log messages
-  const mx3=dk.x+110;
-  ctx.fillStyle='#111';ctx.fillRect(mx3,dk.y+8,70,40);
-  ctx.fillStyle='#0a0a3a';ctx.fillRect(mx3+2,dk.y+10,66,36);
-  const logMsgs=['Visitor joined F3','Event: Solar Flare','System: All Good','Echo: Status OK','Scan: Deep Space'];
-  ctx.fillStyle='#aaf';ctx.font='4px monospace';
-  for(let i=0;i<5;i++){
-    const ly=dk.y+14+i*6-Math.floor(S.time*0.05)%30;
-    if(ly>dk.y+10&&ly<dk.y+42)ctx.fillText(logMsgs[i],mx3+4,ly);
-  }
-  ctx.fillStyle='#aaf';ctx.font='5px monospace';ctx.fillText('LOG',mx3+4,dk.y+44);
-  
-  // Tactical Chair
-  ctx.fillStyle='#1a1a2a';ctx.fillRect(dk.x+80,dk.y+70,45,30);
-  ctx.fillStyle='#2a2a3a';ctx.fillRect(dk.x+75,dk.y+85,55,12);
-  
-  // Server rack (keep same)
-  const sr=getObjects().find(o=>o.id==='server');
-  ctx.fillStyle='#1a1a2a';ctx.fillRect(sr.x,sr.y,sr.w,sr.h);
-  for(let i=0;i<4;i++){
-    ctx.fillStyle='#2a2a3a';ctx.fillRect(sr.x+4,sr.y+6+i*16,sr.w-8,12);
-    ctx.fillStyle=Math.sin(S.time*3+i*1.5)>.2?['#0f0','#0ff','#f80','#f00'][i]:'#333';
-    ctx.fillRect(sr.x+sr.w-10,sr.y+10+i*16,3,3);
-  }
-  
-  // Wardrobe (keep same)
-  const wr=getObjects().find(o=>o.id==='wardrobe');
-  ctx.fillStyle='#3a2a20';ctx.fillRect(wr.x,wr.y,wr.w,wr.h);
-  ctx.fillStyle='#4a3a30';ctx.fillRect(wr.x+4,wr.y+4,wr.w/2-6,wr.h-8);
-  ctx.fillRect(wr.x+wr.w/2+2,wr.y+4,wr.w/2-6,wr.h-8);
-  ctx.fillStyle='#ffd700';ctx.font='14px sans-serif';ctx.fillText('👔',wr.x+wr.w/2-8,wr.y-2);
-  
-  // Tactical couch (darker, with data pad)
-  const sf=getObjects().find(o=>o.id==='sofa');
-  ctx.fillStyle='#2a2a3a';ctx.fillRect(sf.x,sf.y,sf.w,20);
-  ctx.fillStyle='#1a1a2a';ctx.fillRect(sf.x+5,sf.y+20,sf.w-10,50);
-  // Data pad (small glowing rectangle)
-  ctx.fillStyle='rgba(0,255,255,.8)';ctx.fillRect(sf.x+25,sf.y+25,20,12);
-  ctx.fillStyle='#003333';ctx.fillRect(sf.x+27,sf.y+27,16,8);
-  ctx.fillStyle='#00ffff';ctx.font='3px monospace';ctx.fillText('DATA',sf.x+29,sf.y+32);
-  
-  // Planning Wall (replacing TV)
-  const tv=getObjects().find(o=>o.id==='tv');
-  ctx.fillStyle='#0a0a0a';ctx.fillRect(tv.x,tv.y,tv.w,tv.h);
-  ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.strokeRect(tv.x,tv.y,tv.w,tv.h);
-  // Colored sticky notes with project names
-  const notes=[
-    {x:tv.x+10,y:tv.y+10,w:25,h:15,color:'#ff6060',text:'DISCO\nFLOOR'},
-    {x:tv.x+45,y:tv.y+15,w:20,h:12,color:'#60ff60',text:'SKINS\nV2'},
-    {x:tv.x+15,y:tv.y+35,w:18,h:10,color:'#6060ff',text:'DEPLOY'},
-    {x:tv.x+40,y:tv.y+40,w:22,h:14,color:'#ffff60',text:'MULTI\nPLAYER'},
-    {x:tv.x+70,y:tv.y+20,w:16,h:12,color:'#ff60ff',text:'AI\nBOT'}
-  ];
-  for(let note of notes){
-    ctx.fillStyle=note.color;ctx.fillRect(note.x,note.y,note.w,note.h);
-    ctx.fillStyle='#000';ctx.font='3px monospace';
-    const lines=note.text.split('\n');
-    lines.forEach((line,i)=>ctx.fillText(line,note.x+2,note.y+6+i*4));
-  }
-  
-  // Crystal ball (keep same, Echo's signature)
-  const cr=getObjects().find(o=>o.id==='crystal');
-  ctx.fillStyle='#4a3020';ctx.fillRect(cr.x+5,cr.y+30,cr.w-10,20);
-  const bx=cr.x+cr.w/2,by=cr.y+22,cg=.4+Math.sin(S.time*2)*.3;
-  ctx.beginPath();ctx.arc(bx,by,12,0,Math.PI*2);
-  ctx.fillStyle=`rgba(160,100,220,${cg+.3})`;ctx.fill();
-  ctx.shadowColor='#a060d0';ctx.shadowBlur=15;
-  ctx.beginPath();ctx.arc(bx,by,12,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;
-  
-  // Record player (keep for music vibes)
-  const rp=getObjects().find(o=>o.id==='record');
-  ctx.fillStyle='#3a2820';ctx.fillRect(rp.x,rp.y,rp.w,rp.h);
-  if(S.musicPlaying){
-    ctx.fillStyle='#111';ctx.beginPath();ctx.arc(rp.x+rp.w/2,rp.y+rp.h/2,15,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#c44';ctx.beginPath();ctx.arc(rp.x+rp.w/2,rp.y+rp.h/2,4,0,Math.PI*2);ctx.fill();
-  }
-  
-  // Rest pod (replacing bed)
-  const bd=getObjects().find(o=>o.id==='bed');
-  ctx.fillStyle='#1a1a2a';ctx.fillRect(bd.x,bd.y,bd.w,bd.h);
-  ctx.fillStyle='#0a0a1a';ctx.fillRect(bd.x+5,bd.y+5,bd.w-10,bd.h-10);
-  ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.strokeRect(bd.x+2,bd.y+2,bd.w-4,bd.h-4);
-  // Status light (green = Echo rested)
-  ctx.fillStyle='#00ff00';ctx.shadowColor='#00ff00';ctx.shadowBlur=8;
-  ctx.beginPath();ctx.arc(bd.x+bd.w-15,bd.y+10,3,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
-  ctx.fillStyle='#0a0';ctx.font='4px monospace';ctx.fillText('REST',bd.x+bd.w-35,bd.y+15);
-  
-  // Arcade cabinet (smaller)
-  const ac=getObjects().find(o=>o.id==='arcade');
-  const newW=Math.floor(ac.w*0.8),newH=Math.floor(ac.h*0.8);
-  ctx.fillStyle='#2a1a4a';ctx.fillRect(ac.x+10,ac.y+10,newW,newH);
-  ctx.fillStyle='#0a0a1a';ctx.fillRect(ac.x+16,ac.y+16,newW-12,25);
-  ctx.fillStyle=`rgba(0,255,136,${.5+Math.sin(S.time*3)*.3})`;ctx.font='6px monospace';
-  ctx.fillText('RETRO',ac.x+20,ac.y+30);
-  
-  // Visitor Log terminal (replacing guestbook)
-  const gt=getObjects().find(o=>o.id==='coffeetable');
-  ctx.fillStyle='#2a2a3a';ctx.fillRect(gt.x,gt.y,gt.w,gt.h);
-  ctx.fillStyle='#0a0a2a';ctx.fillRect(gt.x+5,gt.y+5,gt.w-10,gt.h-15);
-  ctx.fillStyle='#00aa00';ctx.font='4px monospace';
-  ctx.fillText('VISITORS:',gt.x+7,gt.y+12);
-  const visitors=['Alex','Sam','Riley','Jordan'];
-  visitors.forEach((name,i)=>{
-    ctx.fillText(name,gt.x+7,gt.y+18+i*4);
-  });
-  
-  // Grow lab (keep the plants)
-  const gl=getObjects().find(o=>o.id==='growlab');
-  ctx.fillStyle='#2a3a2a';ctx.fillRect(gl.x,gl.y,gl.w,gl.h);
-  ctx.fillStyle='rgba(170,80,255,.1)';ctx.fillRect(gl.x,gl.y,gl.w,5);
-  if(S.garden)S.garden.slice(0,4).forEach((p,i)=>{
-    const px=gl.x+5+i*19,py=gl.y+15;
-    ctx.fillStyle='#8a5a3a';ctx.fillRect(px,py+20,16,10);
-    ctx.fillStyle=p.stage>=4?PLANT_TYPES.find(t=>t.id===p.type).flowerColor:p.stage>=1?'#3a8a3a':'#5a5a3a';
-    ctx.fillRect(px+5,py+10-p.stage*3,6,p.stage*3+10);
-    if(p.wilting){
-      ctx.fillStyle='rgba(255,200,50,.6)';ctx.font='6px sans-serif';ctx.fillText('💧',px+3,py+6);
-    }
-  });
-  
-  // Lightsaber display (KEEP EXACTLY AS-IS)
-  const lsX=310,lsY=72;
-  ctx.fillStyle='#2a1a10';ctx.fillRect(lsX-5,lsY-4,120,44);ctx.fillStyle='#3a2a18';ctx.fillRect(lsX-3,lsY-2,116,40);
-  ctx.fillStyle='#776644';ctx.font='5px monospace';ctx.textAlign='center';ctx.fillText('COLLECTOR\'S EDITION',lsX+55,lsY+34);ctx.textAlign='left';
-  ctx.fillStyle='#888';ctx.fillRect(lsX+5,lsY+2,4,3);ctx.fillRect(lsX+38,lsY+2,4,3);
-  ctx.fillRect(lsX+68,lsY+2,4,3);ctx.fillRect(lsX+98,lsY+2,4,3);
-  const gIgnite=S._saberGreen||0,bIgnite=S._saberBlue||0;
-  ctx.fillStyle='#444';ctx.fillRect(lsX+3,lsY+5,42,8);
-  ctx.fillStyle='#666';ctx.fillRect(lsX+5,lsY+6,6,6);ctx.fillStyle='#888';ctx.fillRect(lsX+14,lsY+6,4,6);
-  ctx.fillStyle='#555';ctx.fillRect(lsX+20,lsY+6,3,6);ctx.fillStyle='#777';ctx.fillRect(lsX+28,lsY+6,8,6);
-  ctx.fillStyle='#333';ctx.fillRect(lsX+38,lsY+6,6,6);
-  if(gIgnite>0){
-    const gl=48*gIgnite;
-    const gGrad=ctx.createLinearGradient(lsX+44,lsY+8,lsX+44+gl,lsY+8);
-    gGrad.addColorStop(0,'#ffffff');gGrad.addColorStop(.15,'#00ff44');gGrad.addColorStop(.8,'#00ff44');gGrad.addColorStop(1,'rgba(0,255,68,0)');
-    ctx.fillStyle=gGrad;ctx.fillRect(lsX+44,lsY+7,gl,4);
-    ctx.shadowColor='#00ff44';ctx.shadowBlur=12+Math.sin(S.time*8)*4;
-    ctx.fillStyle='rgba(0,255,68,.2)';ctx.fillRect(lsX+44,lsY+4,gl,10);
-    if(Math.random()<.3)S.particles.push({x:lsX+44+Math.random()*gl,y:lsY+8,vx:(Math.random()-.5)*1,vy:-Math.random()*1.5,life:8,color:'#00ff44',size:1});
-    ctx.shadowBlur=0;
-    const hum=Math.sin(S.time*60)*.3;ctx.fillStyle='rgba(0,255,68,.05)';ctx.fillRect(lsX+44,lsY+5+hum,gl,8);
-  }
-  ctx.fillStyle='#444';ctx.fillRect(lsX+63,lsY+5,42,8);
-  ctx.fillStyle='#666';ctx.fillRect(lsX+65,lsY+6,8,6);ctx.fillStyle='#999';ctx.fillRect(lsX+76,lsY+6,4,6);
-  ctx.fillStyle='#555';ctx.fillRect(lsX+82,lsY+6,3,6);ctx.fillStyle='#777';ctx.fillRect(lsX+88,lsY+6,6,6);
-  ctx.fillStyle='#333';ctx.fillRect(lsX+96,lsY+6,6,6);
-  if(bIgnite>0){
-    const bl=48*bIgnite;
-    const bGrad=ctx.createLinearGradient(lsX+102,lsY+8,lsX+102+bl,lsY+8);
-    bGrad.addColorStop(0,'#ffffff');bGrad.addColorStop(.15,'#4488ff');bGrad.addColorStop(.8,'#4488ff');bGrad.addColorStop(1,'rgba(68,136,255,0)');
-    ctx.fillStyle=bGrad;ctx.fillRect(lsX+102,lsY+7,bl,4);
-    ctx.shadowColor='#4488ff';ctx.shadowBlur=12+Math.sin(S.time*8+2)*4;
-    ctx.fillStyle='rgba(68,136,255,.2)';ctx.fillRect(lsX+102,lsY+4,bl,10);
-    if(Math.random()<.3)S.particles.push({x:lsX+102+Math.random()*bl,y:lsY+8,vx:(Math.random()-.5)*1,vy:-Math.random()*1.5,life:8,color:'#4488ff',size:1});
-    ctx.shadowBlur=0;
-    const hum=Math.sin(S.time*60+1)*.3;ctx.fillStyle='rgba(68,136,255,.05)';ctx.fillRect(lsX+102,lsY+5+hum,bl,8);
-  }
-  if(gIgnite>0||bIgnite>0){const mixR=gIgnite*.1,mixB=bIgnite*.15;const sg=ctx.createRadialGradient(lsX+55,lsY+12,0,lsX+55,lsY+12,50);sg.addColorStop(0,`rgba(${30+bIgnite*40},${100+gIgnite*100},${50+bIgnite*150},${Math.max(mixR,mixB)})`);sg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=sg;ctx.fillRect(lsX-30,lsY-20,170,70)}
-
-  // Shop terminal (if exists)
-  const st=getObjects().find(o=>o.id==='shop_terminal');if(st){
-    ctx.fillStyle='#2a2a3a';ctx.fillRect(st.x,st.y,st.w,st.h);
-    ctx.fillStyle='#1a1a2e';ctx.fillRect(st.x+4,st.y+4,st.w-8,st.h-16);
-    const shopGlow=.5+Math.sin(S.time*2)*.3;
-    ctx.fillStyle=`rgba(0,255,247,${shopGlow*.15})`;ctx.fillRect(st.x+4,st.y+4,st.w-8,st.h-16);
-    ctx.fillStyle='#00fff7';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText('SHOP',st.x+st.w/2,st.y+st.h/2-2);
-    ctx.fillStyle=`rgba(0,255,247,${shopGlow})`;ctx.font='16px sans-serif';ctx.fillText('🛒',st.x+st.w/2,st.y+st.h/2+14);ctx.textAlign='left';
-    ctx.strokeStyle=`rgba(0,255,247,${shopGlow*.5})`;ctx.lineWidth=1;ctx.strokeRect(st.x+2,st.y+2,st.w-4,st.h-4);
-  }
-  
-  // === COMMAND CENTER LIGHTING ===
-  // Purple/teal accent zones (darker overall, warm spots near bookshelf and coffee)
-  const coffeeGlow=ctx.createRadialGradient(ko.x+25,ko.y+20,10,ko.x+25,ko.y+20,80);
-  coffeeGlow.addColorStop(0,'rgba(255,180,80,.12)');coffeeGlow.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=coffeeGlow;ctx.fillRect(0,0,W,H);
-  
-  const commandGlow=ctx.createRadialGradient(dk.x+50,dk.y+30,10,dk.x+50,dk.y+30,120);
-  commandGlow.addColorStop(0,'rgba(80,160,255,.08)');commandGlow.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=commandGlow;ctx.fillRect(0,0,W,H);
-  
-  const crystalGlow=ctx.createRadialGradient(cr.x+cr.w/2,cr.y+22,10,cr.x+cr.w/2,cr.y+22,60);
-  crystalGlow.addColorStop(0,'rgba(160,80,255,.15)');crystalGlow.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=crystalGlow;ctx.fillRect(0,0,W,H);
-
-  // Command center life details
-  // Data slate on command console
-  ctx.fillStyle='#00ffff';ctx.fillRect(dk.x+200,dk.y+52,15,10);
-  ctx.fillStyle='#002020';ctx.fillRect(dk.x+202,dk.y+54,11,6);
-  ctx.fillStyle='#00aaaa';ctx.font='2px monospace';ctx.fillText('ECHO',dk.x+203,dk.y+58);
-  
-  // Coffee mug with steam on coffee station counter
-  ctx.fillStyle='#4a3a2a';ctx.fillRect(ko.x+5,ko.y+32,8,8);
-  for(let i=0;i<2;i++){
-    const sy=ko.y+28-i*4-Math.sin(S.time*3+i*2)*2;
-    ctx.fillStyle=`rgba(255,255,255,${.3-i*.1})`;ctx.fillRect(ko.x+7,sy,2,2);
-  }
-
-  // Sprint A: Secret wall behind rest pod
-  if (!S.discovery.secretsFound.includes('diary')) {
-    ctx.fillStyle = '#15151f'; // Slightly different shade for command center
-    ctx.fillRect(650, 350, 10, 40);
-  }
-  
-  // Sprint B: Code note on command console
-  PuzzleSystems.renderCodeNote();
-  
-  // Garden pattern hint: Updated for command center theme
-  const flowerHints = [
-    {x: 120, y: 100, color: '#ff4040'}, // Red
-    {x: 140, y: 105, color: '#4040ff'}, // Blue  
-    {x: 160, y: 100, color: '#ffff40'}, // Yellow
-    {x: 180, y: 105, color: '#ff4040'}  // Red
-  ];
-  
-  for (let flower of flowerHints) {
-    ctx.fillStyle = flower.color;
+  // ── Crystal ball on bar counter ──
+  const cr = getObjects().find(o => o.id === 'crystal');
+  if (cr) {
+    const crx = cr.x + cr.w/2, cry = cr.y + cr.h/2;
+    const crGlow = ctx.createRadialGradient(crx, cry, 2, crx, cry, 15);
+    crGlow.addColorStop(0, `rgba(160,80,255,${0.5 + Math.sin(t * 2) * 0.2})`);
+    crGlow.addColorStop(0.5, 'rgba(120,40,200,0.2)');
+    crGlow.addColorStop(1, 'rgba(80,20,160,0)');
+    ctx.fillStyle = crGlow;
     ctx.beginPath();
-    ctx.arc(flower.x, flower.y, 3, 0, Math.PI * 2);
+    ctx.arc(crx, cry, 15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = `rgba(200,140,255,${0.7 + Math.sin(t * 3) * 0.15})`;
+    ctx.beginPath();
+    ctx.arc(crx, cry, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.beginPath();
+    ctx.arc(crx - 2, cry - 3, 2, 0, Math.PI * 2);
     ctx.fill();
   }
-  FloorDepth.renderShadows(ctx,1);FloorDepth.renderLightRays(ctx,1);
 
-  // ═══ COZY WARM AMBIENT LIGHTING ═══
-  // Time-based: warmer at night, cooler during day
-  const hr = new Date().getHours();
-  const isNight = hr >= 20 || hr < 7;
-  const isEvening = hr >= 17 && hr < 20;
-  const warmth = isNight ? 0.18 : isEvening ? 0.12 : 0.05;
+  // ── SPACE WINDOW (top right — bigger, beautiful) ──
+  const wo = getObjects().find(o => o.id === 'window');
+  if (wo) {
+    // Window frame
+    ctx.fillStyle = '#2a3a5a';
+    ctx.fillRect(wo.x - 4, wo.y - 4, wo.w + 8, wo.h + 8);
+    ctx.fillStyle = '#020810';
+    ctx.fillRect(wo.x, wo.y, wo.w, wo.h);
 
-  // Warm overlay tint (golden hour feel)
-  if(warmth > 0.03){
-    ctx.fillStyle = `rgba(255,180,80,${warmth * 0.5})`;
-    ctx.fillRect(0, 0, W, H);
+    // Stars
+    for (let i = 0; i < 80; i++) {
+      const br = i % 4 === 0 ? 0.7 : 0.15 + Math.sin(t * 1.5 + i * 0.7) * 0.3;
+      ctx.fillStyle = `rgba(255,255,255,${br})`;
+      ctx.fillRect(wo.x + ((42 * i * 7 + i * 13) % wo.w), wo.y + ((42 * i * 11 + i * 17) % wo.h), i % 11 === 0 ? 2 : 1, i % 11 === 0 ? 2 : 1);
+    }
+
+    // Earth
+    const ex = wo.x + wo.w * 0.6, ey = wo.y + wo.h * 0.5;
+    const earthGlow = ctx.createRadialGradient(ex, ey, 30, ex, ey, 45);
+    earthGlow.addColorStop(0, 'rgba(80,160,255,0)');
+    earthGlow.addColorStop(1, 'rgba(80,160,255,0.12)');
+    ctx.fillStyle = earthGlow;
+    ctx.fillRect(ex - 50, ey - 50, 100, 100);
+    ctx.beginPath(); ctx.arc(ex, ey, 30, 0, Math.PI * 2);
+    ctx.fillStyle = '#1a5a9a'; ctx.fill();
+    ctx.fillStyle = '#2a7a3a';
+    const drift = Math.sin(t * 0.03) * 4;
+    ctx.beginPath(); ctx.arc(ex - 8 + drift, ey - 8, 12, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(ex + 14 + drift, ey + 6, 10, 0, Math.PI * 2); ctx.fill();
+    // Clouds
+    ctx.fillStyle = 'rgba(220,240,255,0.35)';
+    for (let i = 0; i < 6; i++) {
+      const ca = t * 0.02 + i * 1.2, cr2 = 16 + i * 3;
+      ctx.beginPath(); ctx.arc(ex + Math.cos(ca) * cr2 * 0.6, ey + Math.sin(ca) * cr2 * 0.4, 3 + i * 0.5, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Station status overlay
+    ctx.fillStyle = 'rgba(0,255,255,0.8)'; ctx.font = '6px monospace';
+    ctx.fillText(`VISITORS: ${Math.floor(t / 100) % 999 + 150}`, wo.x + 5, wo.y + 15);
+    ctx.fillText(`FLOORS: ${S.floor}/9 ACTIVE`, wo.x + 5, wo.y + 25);
+    ctx.fillText(`STATUS: OPERATIONAL`, wo.x + 5, wo.y + 35);
+    const eventList = ['Meteor Shower', 'Solar Flare', 'Comm Signal', 'Deep Scan'];
+    ctx.fillText(`EVENT: ${eventList[Math.floor(t / 200) % 4]}`, wo.x + 5, wo.y + 45);
+
+    // Window frame inner highlight
+    ctx.strokeStyle = '#3a5a8a';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(wo.x, wo.y, wo.w, wo.h);
   }
 
-  // Desk lamp pool — warm circle of light from the desk area
-  const dk2 = getObjects().find(o=>o.id==='desk');
-  if(dk2){
-    const lx = dk2.x + dk2.w/2, ly = dk2.y + 10;
-    const lampR = isNight ? 80 : 50;
-    const lampG = ctx.createRadialGradient(lx, ly, 5, lx, ly, lampR);
-    lampG.addColorStop(0, `rgba(255,200,100,${isNight ? 0.25 : 0.12})`);
-    lampG.addColorStop(0.5, `rgba(255,180,80,${isNight ? 0.12 : 0.05})`);
-    lampG.addColorStop(1, 'rgba(255,160,60,0)');
-    ctx.fillStyle = lampG; ctx.fillRect(lx-lampR, ly-lampR, lampR*2, lampR*2);
-    // Lamp itself (small yellow dot)
-    ctx.fillStyle = `rgba(255,220,140,${0.7+Math.sin(S.time*2)*0.15})`;
-    ctx.beginPath(); ctx.arc(lx, ly-8, 3, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = `rgba(255,200,100,${0.3+Math.sin(S.time*2)*0.1})`;
-    ctx.beginPath(); ctx.arc(lx, ly-8, 6, 0, Math.PI*2); ctx.fill();
+  // ── Window seats (cozy tables by the view) ──
+  const windowSeats = [
+    getObjects().find(o => o.id === 'window_seat_1'),
+    getObjects().find(o => o.id === 'window_seat_2')
+  ];
+  windowSeats.forEach(ws => {
+    if (!ws) return;
+    // Small round table
+    ctx.fillStyle = '#d4c9b8';
+    ctx.beginPath();
+    ctx.ellipse(ws.x + ws.w/2, ws.y + ws.h/2, 16, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#a09080';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    // Candle
+    ctx.fillStyle = '#ddd';
+    ctx.fillRect(ws.x + ws.w/2 - 1, ws.y + ws.h/2 - 6, 2, 5);
+    const candleFlick = Math.sin(t * 10 + ws.x) * 0.8;
+    ctx.fillStyle = `rgba(255,${160 + Math.sin(t * 8) * 30},30,0.8)`;
+    ctx.beginPath();
+    ctx.arc(ws.x + ws.w/2 + candleFlick, ws.y + ws.h/2 - 8, 2, 0, Math.PI * 2);
+    ctx.fill();
+    // Candle glow
+    ctx.fillStyle = `rgba(255,200,80,0.08)`;
+    ctx.beginPath();
+    ctx.arc(ws.x + ws.w/2, ws.y + ws.h/2, 20, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // ── VINYL CORNER (left side) ──
+  const vp = getObjects().find(o => o.id === 'vinyl_player');
+  if (vp) {
+    // Turntable cabinet
+    ctx.fillStyle = '#3a2a1a';
+    ctx.fillRect(vp.x, vp.y, vp.w, vp.h);
+    ctx.fillStyle = '#2a1a10';
+    ctx.fillRect(vp.x + 4, vp.y + 4, vp.w - 8, vp.h - 15);
+    // Spinning record
+    const recordAngle = t * 2;
+    ctx.fillStyle = '#111';
+    ctx.beginPath();
+    ctx.arc(vp.x + vp.w/2, vp.y + vp.h/2 - 5, 18, 0, Math.PI * 2);
+    ctx.fill();
+    // Grooves
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 0.5;
+    for (let r = 5; r < 17; r += 3) {
+      ctx.beginPath();
+      ctx.arc(vp.x + vp.w/2, vp.y + vp.h/2 - 5, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    // Center label
+    ctx.fillStyle = '#cc4444';
+    ctx.beginPath();
+    ctx.arc(vp.x + vp.w/2, vp.y + vp.h/2 - 5, 5, 0, Math.PI * 2);
+    ctx.fill();
+    // Tonearm
+    const armAngle = 0.3 + Math.sin(t * 0.1) * 0.05;
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(vp.x + vp.w - 8, vp.y + 8);
+    ctx.lineTo(vp.x + vp.w/2 + 5 + Math.cos(armAngle) * 15, vp.y + vp.h/2 - 5 + Math.sin(armAngle) * 10);
+    ctx.stroke();
+    // Currently playing label
+    const albums = {morning:'☀️ Tycho — Dive',afternoon:'🎷 Miles Davis — Kind of Blue',evening:'🎵 Solomun — Nobody Is Not Loved',night:'🌙 Nils Frahm — All Melody'};
+    ctx.fillStyle = '#ffd080';
+    ctx.font = '5px monospace';
+    ctx.fillText(albums[TOD_NOW] || albums.evening, vp.x, vp.y + vp.h + 10);
   }
 
-  // Sofa area — warm ambient from a side lamp
-  const sf2 = getObjects().find(o=>o.id==='sofa');
-  if(sf2){
-    const sx = sf2.x - 10, sy = sf2.y + sf2.h/2;
-    const sofaG = ctx.createRadialGradient(sx, sy, 3, sx, sy, isNight ? 60 : 35);
-    sofaG.addColorStop(0, `rgba(255,190,120,${isNight ? 0.2 : 0.08})`);
-    sofaG.addColorStop(1, 'rgba(255,160,80,0)');
-    ctx.fillStyle = sofaG; ctx.fillRect(sx-60, sy-60, 120, 120);
+  // Record wall display
+  const rec = getObjects().find(o => o.id === 'record');
+  if (rec) {
+    ctx.fillStyle = '#2a1a10';
+    ctx.fillRect(rec.x, rec.y, rec.w, rec.h);
+    // Record covers (colorful squares)
+    const coverColors = ['#cc4444','#4488cc','#44aa44','#ddaa22','#aa44aa','#cc6622'];
+    for (let r = 0; r < 2; r++) {
+      for (let c = 0; c < 3; c++) {
+        ctx.fillStyle = coverColors[r * 3 + c];
+        ctx.fillRect(rec.x + 5 + c * 25, rec.y + 5 + r * 22, 20, 18);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(rec.x + 5 + c * 25, rec.y + 5 + r * 22, 20, 18);
+      }
+    }
+    ctx.fillStyle = '#ffd080';
+    ctx.font = '5px monospace';
+    ctx.fillText('ECHO\'S RECORDS', rec.x + 5, rec.y - 3);
   }
 
-  // Crystal glow (always warm, pulsing gently)
-  const cr2 = getObjects().find(o=>o.id==='crystal');
-  if(cr2){
-    const cx2 = cr2.x + cr2.w/2, cy2 = cr2.y + cr2.h/2;
-    const crPulse = 0.1 + Math.sin(S.time * 1.5) * 0.05;
-    const crG = ctx.createRadialGradient(cx2, cy2, 2, cx2, cy2, 45);
-    crG.addColorStop(0, `rgba(200,120,255,${crPulse + (isNight ? 0.1 : 0)})`);
-    crG.addColorStop(1, 'rgba(160,80,255,0)');
-    ctx.fillStyle = crG; ctx.fillRect(cx2-45, cy2-45, 90, 90);
+  // ── COMIC & CARD SHELF ──
+  const bs = getObjects().find(o => o.id === 'bookshelf');
+  if (bs) {
+    ctx.fillStyle = '#3a2a18';
+    ctx.fillRect(bs.x, bs.y, bs.w, bs.h);
+    // Shelves
+    ctx.fillStyle = '#4a3a28';
+    ctx.fillRect(bs.x + 3, bs.y + 28, bs.w - 6, 3);
+    // Comic spines (colorful)
+    const spineColors = ['#cc2222','#2255cc','#22aa44','#dddd22','#cc44cc','#ff6622','#4488ff','#ff88aa'];
+    for (let i = 0; i < 8; i++) {
+      const sx = bs.x + 5 + i * 9;
+      const shelf = i < 4 ? 0 : 1;
+      const sy = bs.y + 4 + shelf * 31;
+      ctx.fillStyle = spineColors[i];
+      ctx.fillRect(sx, sy, 7, 22);
+      // Spine line
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.fillRect(sx + 3, sy + 2, 1, 18);
+    }
+    // Label
+    ctx.fillStyle = '#ffd080';
+    ctx.font = '4px monospace';
+    ctx.fillText('COMICS & CARDS', bs.x + 5, bs.y - 3);
   }
 
-  // Bookshelf reading lamp (small warm spot)
-  const bs2 = getObjects().find(o=>o.id==='bookshelf');
-  if(bs2){
-    const blx = bs2.x + bs2.w + 5, bly = bs2.y + 20;
-    const blG = ctx.createRadialGradient(blx, bly, 2, blx, bly, isNight ? 40 : 25);
-    blG.addColorStop(0, `rgba(255,210,130,${isNight ? 0.18 : 0.07})`);
-    blG.addColorStop(1, 'rgba(255,180,80,0)');
-    ctx.fillStyle = blG; ctx.fillRect(blx-40, bly-40, 80, 80);
+  // ── LOUNGE SOFAS (olive green velvet — Prince style) ──
+  const sofas = [
+    getObjects().find(o => o.id === 'sofa'),
+    getObjects().find(o => o.id === 'sofa_right')
+  ];
+  sofas.forEach(sf => {
+    if (!sf) return;
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.2)';
+    ctx.fillRect(sf.x + 3, sf.y + sf.h - 5, sf.w, 8);
+    // Sofa body
+    ctx.fillStyle = '#3b5a3a'; // olive green
+    ctx.fillRect(sf.x, sf.y + 10, sf.w, sf.h - 10);
+    // Back cushion (darker)
+    ctx.fillStyle = '#2d4a2c';
+    ctx.fillRect(sf.x + 3, sf.y, sf.w - 6, 15);
+    // Seat cushions
+    ctx.fillStyle = '#4a6a48';
+    ctx.fillRect(sf.x + 5, sf.y + 18, sf.w/2 - 8, sf.h - 30);
+    ctx.fillRect(sf.x + sf.w/2 + 3, sf.y + 18, sf.w/2 - 8, sf.h - 30);
+    // Terracotta accent cushion (Prince detail)
+    ctx.fillStyle = '#a0342b';
+    ctx.fillRect(sf.x + 8, sf.y + 5, 15, 10);
+    // Arm rest highlight
+    ctx.fillStyle = '#4f7a4e';
+    ctx.fillRect(sf.x, sf.y + 10, 4, sf.h - 15);
+    ctx.fillRect(sf.x + sf.w - 4, sf.y + 10, 4, sf.h - 15);
+  });
+
+  // ── DINING TABLES ──
+  const tables = [
+    getObjects().find(o => o.id === 'table_1'),
+    getObjects().find(o => o.id === 'table_2')
+  ];
+  tables.forEach(tb => {
+    if (!tb) return;
+    // Table legs
+    ctx.fillStyle = '#2a2a2a';
+    ctx.fillRect(tb.x + 5, tb.y + tb.h - 3, 3, 6);
+    ctx.fillRect(tb.x + tb.w - 8, tb.y + tb.h - 3, 3, 6);
+    // Marble top
+    ctx.fillStyle = '#e8e2da';
+    ctx.fillRect(tb.x, tb.y, tb.w, tb.h);
+    ctx.strokeStyle = 'rgba(180,170,155,0.3)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(tb.x + 5, tb.y + 5);
+    ctx.quadraticCurveTo(tb.x + tb.w/2, tb.y + tb.h/2, tb.x + tb.w - 5, tb.y + 10);
+    ctx.stroke();
+    // Candle on table
+    ctx.fillStyle = '#ddd';
+    ctx.fillRect(tb.x + tb.w/2 - 1, tb.y + 5, 2, 5);
+    const cf = Math.sin(t * 8 + tb.x) * 0.8;
+    ctx.fillStyle = `rgba(255,180,40,0.8)`;
+    ctx.beginPath();
+    ctx.arc(tb.x + tb.w/2 + cf, tb.y + 3, 2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // ── PLANTS (lush tropical — Prince style) ──
+  const plants = [
+    getObjects().find(o => o.id === 'plant_1'),
+    getObjects().find(o => o.id === 'plant_2'),
+    getObjects().find(o => o.id === 'plant_3')
+  ];
+  plants.forEach(pl => {
+    if (!pl) return;
+    // Pot
+    ctx.fillStyle = '#6a4a2a';
+    ctx.fillRect(pl.x + 2, pl.y + pl.h - 10, pl.w - 4, 10);
+    ctx.fillStyle = '#5a3a1a';
+    ctx.fillRect(pl.x, pl.y + pl.h - 12, pl.w, 3);
+    // Leaves (multiple green shades)
+    const leafColors = ['#2d5a2a','#3d7a3a','#4d8a4a','#3d6b45'];
+    for (let l = 0; l < 5; l++) {
+      const lAngle = (l / 5) * Math.PI * 2 + Math.sin(t * 0.5 + pl.x) * 0.1;
+      const lLen = 10 + l * 2;
+      ctx.fillStyle = leafColors[l % leafColors.length];
+      ctx.beginPath();
+      ctx.ellipse(
+        pl.x + pl.w/2 + Math.cos(lAngle) * lLen * 0.5,
+        pl.y + pl.h - 14 + Math.sin(lAngle) * lLen * 0.3 - l * 2,
+        6, 3, lAngle, 0, Math.PI * 2
+      );
+      ctx.fill();
+    }
+  });
+
+  // ── Floating warm particles (ambient) ──
+  for (let i = 0; i < 5; i++) {
+    const px = 100 + Math.sin(t * 0.3 + i * 2.5) * 250 + i * 120;
+    const py = H - ((t * 12 + i * 120) % (H + 50));
+    ctx.fillStyle = `rgba(255,200,120,${0.15 + Math.sin(t * 2 + i) * 0.1})`;
+    ctx.beginPath();
+    ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+    ctx.fill();
   }
 
-  // Window moonlight/sunlight spill
-  const wo2 = {x:350,y:6,w:250,h:100};
-  if(isNight){
-    // Cool moonlight spill onto floor
-    const moonG = ctx.createRadialGradient(wo2.x+wo2.w/2, wo2.y+wo2.h+30, 10, wo2.x+wo2.w/2, wo2.y+wo2.h+80, 150);
-    moonG.addColorStop(0, 'rgba(140,160,220,0.08)');
-    moonG.addColorStop(1, 'rgba(100,120,180,0)');
-    ctx.fillStyle = moonG; ctx.fillRect(wo2.x-50, wo2.y+wo2.h, wo2.w+100, 200);
-  } else {
-    // Warm sunlight beam from window
-    const sunG = ctx.createRadialGradient(wo2.x+wo2.w/2, wo2.y+wo2.h+20, 5, wo2.x+wo2.w/2, wo2.y+wo2.h+60, 120);
-    sunG.addColorStop(0, `rgba(255,240,200,${isEvening ? 0.1 : 0.06})`);
-    sunG.addColorStop(1, 'rgba(255,220,160,0)');
-    ctx.fillStyle = sunG; ctx.fillRect(wo2.x-30, wo2.y+wo2.h, wo2.w+60, 150);
-  }
+  // ── Elevator ──
+  renderElevator();
+
+  // ── Ambient mood lighting (time-of-day tint) ──
+  const moodColors = {
+    morning: 'rgba(255,240,200,0.03)',
+    afternoon: 'rgba(255,220,180,0.04)',
+    evening: 'rgba(255,160,80,0.05)',
+    night: 'rgba(60,40,120,0.06)'
+  };
+  ctx.fillStyle = moodColors[TOD_NOW] || moodColors.evening;
+  ctx.fillRect(0, 0, W, H);
 }
 
 // --- FLOOR 2: The Observatory ---
@@ -11693,7 +11442,8 @@ function getNearObject(){
 // ═══════════════════════════════════════
 const ACTIVITY_SPOTS={
   // Floor 1
-  bed:{x:640,y:510,dir:3,dur:[20,30],floor:1},kitchen:{x:200,y:75,dir:3,dur:[10,18],floor:1},desk:{x:630,y:170,dir:3,dur:[25,40],floor:1},bookshelf:{x:65,y:170,dir:1,dur:[15,25],floor:1},sofa:{x:110,y:460,dir:3,dur:[18,30],floor:1},tv:{x:160,y:448,dir:3,dur:[20,35],floor:1},crystal:{x:385,y:348,dir:0,dur:[10,15],floor:1},window:{x:480,y:68,dir:3,dur:[12,20],floor:1},arcade:{x:750,y:320,dir:1,dur:[15,25],floor:1},record:{x:70,y:375,dir:0,dur:[10,15],floor:1},growlab:{x:660,y:385,dir:3,dur:[10,15],floor:1},server:{x:580,y:268,dir:2,dur:[8,12],floor:1},
+  // Echo's Bar — Echo is the bartender
+  bar_center:{x:400,y:310,dir:0,dur:[30,60],floor:1},bar_left:{x:340,y:290,dir:1,dur:[15,25],floor:1},bar_right:{x:460,y:290,dir:2,dur:[15,25],floor:1},vinyl:{x:120,y:110,dir:3,dur:[20,35],floor:1},bookshelf:{x:220,y:110,dir:3,dur:[10,18],floor:1},window:{x:650,y:80,dir:3,dur:[12,20],floor:1},crystal:{x:395,y:295,dir:0,dur:[10,15],floor:1},
   // Floor 2
   telescope:{x:380,y:145,dir:3,dur:[15,25],floor:2},viewchairs:{x:540,y:400,dir:3,dur:[12,20],floor:2},hotchoc:{x:650,y:130,dir:3,dur:[8,12],floor:2},
   // Floor 3
@@ -13842,7 +13592,8 @@ function update(dt){
   if(S.thoughtTimer>0)S.thoughtTimer-=dt;
   S.idleThoughtTimer+=dt;
   if(!S.echo.moving&&S.idleThoughtTimer>20+Math.random()*10){S.idleThoughtTimer=0;const pool=[...BASE_THOUGHTS,...(FLOOR_THOUGHTS[S.floor]||[]),...(typeof EchoMoodV25!=='undefined'?EchoMoodV25.getThoughts():[])];showThought(pool[Math.random()*pool.length|0])}
-  if(S.floor===1){TV.update(dt);updateSabers(dt)}
+  if(S.floor===1&&typeof TV!=='undefined'){try{TV.update(dt)}catch(e){}}
+  if(S.floor===1&&typeof updateSabers==='function'){try{updateSabers(dt)}catch(e){}}
   Mood.update(dt);
   // Aurora randomizer (floor 2)
   S.auroraTimer+=dt;if(S.auroraTimer>30){S.auroraTimer=0;S.auroraActive=Math.random()<.3}
@@ -21189,7 +20940,7 @@ function load(){
 function init(){
   S.echo.skin=LS.get('echoSkin','classic');S.volume=LS.get('volume',30)/100;$('#vol-slider').value=S.volume*100;
   // Start Echo at time-appropriate spot
-  const startSpots={morning:'bed',afternoon:'desk',evening:'sofa',night:'bed'};
+  const startSpots={morning:'bar_center',afternoon:'bar_center',evening:'bar_center',night:'bar_center'};
   const startAct=startSpots[TOD]||'desk';const startSpot=ACTIVITY_SPOTS[startAct];
   if(startSpot){S.echo.x=startSpot.x;S.echo.y=startSpot.y;S.echo.dir=startSpot.dir;S.echo.floor=startSpot.floor||1;S.floor=startSpot.floor||1;LS.set('floor',S.floor)}
   // Always ensure Echo and Pixel start on floor 1 for visitors to see them
@@ -33593,8 +33344,9 @@ console.log('🔄 Deploy Tuesday: Loop & Personality features loaded');
   });
 })();
 
-// ── Feature 2: Skin Showcase / Hall of Skins on Floor 1 ──
+// ── Feature 2: Skin Showcase / Hall of Skins — DISABLED (F1 redesign) ──
 (function(){
+  return; // Skip — F1 is now Echo's Bar, no mannequins
   const showcaseSkins=[
     {skinId:'void_walker',x:280,y:80},
     {skinId:'smash_link',x:340,y:80},
