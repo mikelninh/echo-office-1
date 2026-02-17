@@ -2820,6 +2820,13 @@ const FLOOR_OBJECTS={
     {id:'plant_4',x:1700,y:170,w:30,h:40,label:'🌿',interact:false,collide:false},
     {id:'cozyseating',x:2000,y:250,w:140,h:100,label:'Cozy Corner',interact:true,collide:true},
 
+    // --- ZONE 3b: Pool Tables (x:1100-1500, y:700-1100) ---
+    {id:'pool_table_1',x:1100,y:700,w:200,h:120,label:'🎱 8-Ball',interact:true,collide:true},
+    {id:'pool_table_2',x:1400,y:700,w:200,h:120,label:'🎱 9-Ball',interact:true,collide:true},
+    {id:'pool_lamp_1',x:1180,y:670,w:40,h:20,label:'',interact:false,collide:false},
+    {id:'pool_lamp_2',x:1480,y:670,w:40,h:20,label:'',interact:false,collide:false},
+    {id:'cue_rack',x:1050,y:750,w:30,h:100,label:'Cue Rack',interact:false,collide:true},
+
     // --- ZONE 4: Stage & Dance Floor (x:1500-2400) ---
     {id:'stage',x:1600,y:850,w:500,h:150,label:'🎤 Stage',interact:true,collide:true},
     {id:'dj_booth',x:1780,y:860,w:120,h:80,label:'🎧 DJ Booth',interact:true,collide:true},
@@ -11175,6 +11182,50 @@ function renderFloor6(){
     ctx.fillStyle=lampGlow;ctx.fillRect(fl.x-70,fl.y-72,160,160);
   });
 
+  // === ZONE 3b: Pool Tables ===
+  getObjects().filter(o=>o.id.startsWith('pool_table_')).forEach(pt=>{
+    // Table body (dark wood)
+    ctx.fillStyle='#3a2a18';ctx.fillRect(pt.x-4,pt.y-4,pt.w+8,pt.h+8);
+    // Green felt
+    ctx.fillStyle='#1a6a2a';ctx.fillRect(pt.x,pt.y,pt.w,pt.h);
+    ctx.fillStyle='#1a7a30';ctx.fillRect(pt.x+4,pt.y+4,pt.w-8,pt.h-8);
+    // Rails (wood border inside)
+    ctx.fillStyle='#4a3a20';
+    ctx.fillRect(pt.x,pt.y,pt.w,6);ctx.fillRect(pt.x,pt.y+pt.h-6,pt.w,6);
+    ctx.fillRect(pt.x,pt.y,6,pt.h);ctx.fillRect(pt.x+pt.w-6,pt.y,6,pt.h);
+    // Pockets (6)
+    ctx.fillStyle='#111';
+    const pockets=[[0,0],[pt.w/2,0],[pt.w,0],[0,pt.h],[pt.w/2,pt.h],[pt.w,pt.h]];
+    pockets.forEach(([px,py])=>{ctx.beginPath();ctx.arc(pt.x+px,pt.y+py,6,0,Math.PI*2);ctx.fill();});
+    // Decorative balls on table
+    const ballColors=['#ffd700','#2244cc','#cc2222','#8833aa','#ff8800','#228833','#882222','#111'];
+    for(let i=0;i<8;i++){
+      const bx=pt.x+30+i*20+(Math.sin(i*2.1)*8);
+      const by=pt.y+pt.h/2+(Math.cos(i*1.7)*20);
+      ctx.fillStyle=ballColors[i];ctx.beginPath();ctx.arc(bx,by,4,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,0.3)';ctx.beginPath();ctx.arc(bx-1,by-1,1.5,0,Math.PI*2);ctx.fill();
+    }
+    // Cue ball
+    ctx.fillStyle='#eee';ctx.beginPath();ctx.arc(pt.x+pt.w-30,pt.y+pt.h/2,4,0,Math.PI*2);ctx.fill();
+  });
+  // Pool table lamps
+  getObjects().filter(o=>o.id.startsWith('pool_lamp_')).forEach(pl=>{
+    ctx.fillStyle='#228833';ctx.fillRect(pl.x,pl.y,pl.w,pl.h);
+    ctx.fillStyle='#2a9a3a';ctx.fillRect(pl.x+2,pl.y+pl.h-4,pl.w-4,4);
+    const lampGlow=ctx.createRadialGradient(pl.x+pl.w/2,pl.y+pl.h+60,0,pl.x+pl.w/2,pl.y+pl.h+60,100);
+    lampGlow.addColorStop(0,'rgba(200,255,200,0.06)');lampGlow.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=lampGlow;ctx.fillRect(pl.x-60,pl.y,pl.w+120,200);
+  });
+  // Cue rack
+  const cr=getObjects().find(o=>o.id==='cue_rack');
+  if(cr){
+    ctx.fillStyle='#3a2a18';ctx.fillRect(cr.x,cr.y,cr.w,cr.h);
+    for(let i=0;i<4;i++){
+      ctx.fillStyle='#5a4a30';ctx.fillRect(cr.x+5+i*6,cr.y+5,3,cr.h-10);
+      ctx.fillStyle='#c8a040';ctx.fillRect(cr.x+5+i*6,cr.y+cr.h-15,3,10);
+    }
+  }
+
   // === ZONE 4: Stage & Dance Floor ===
   const stage=getObjects().find(o=>o.id==='stage');
   if(stage){
@@ -14283,6 +14334,8 @@ function interact(){
     case'veve_trading':VeVeTrading.showUI();break;
     case'dj_booth':showDJBooth();break;
     case'dancefloor':if(typeof DanceSystem!=='undefined'){DanceSystem.toggle()}else{showNotification('🪩 Press V to dance!')}break;
+    case'pool_table_1':if(typeof Billiards!=='undefined')Billiards.startGame('8ball');break;
+    case'pool_table_2':if(typeof Billiards!=='undefined')Billiards.startGame('9ball');break;
     case'furniture_catalog':showFurnitureCatalog();break;
     case'wall_colors':showWallColorPicker();break;
     case'floor_colors':showFloorColorPicker();break;
@@ -31141,6 +31194,397 @@ function showNowPlaying(){
   const stop=p.querySelector('#np-stop');
   if(stop) stop.onclick=()=>{BarVibes.stop();S.musicPlaying=false;$('#btn-music').classList.remove('active');p.closest('.popup-overlay').remove();};
 }
+
+// ═══════════════════════════════════════
+// BILLIARDS — 8-Ball & 9-Ball Pool Minigame
+// ═══════════════════════════════════════
+const Billiards={
+  active:false, mode:'8ball', overlay:null, canvas:null, ctx2:null,
+  TW:360, TH:200, // table dimensions
+  PAD:20, // rail width
+  BALL_R:5, POCKET_R:9,
+  balls:[], cueBall:null, pocketed:[],
+  aiming:false, aimStart:null, power:0, maxPower:12,
+  shotsTaken:0, turnPhase:'aim', // aim | moving | win
+  solids:true, // player's group in 8ball
+  assignedGroup:false,
+
+  BALL_COLORS:['#ffd700','#2244cc','#cc2222','#8833aa','#ff8800','#228833','#882222','#111111',
+    '#ffd700','#2244cc','#cc2222','#8833aa','#ff8800','#228833','#882222'],
+
+  pockets(){
+    const w=this.TW,h=this.TH,p=this.PAD;
+    return[[p,p],[w/2,p-2],[w-p,p],[p,h-p],[w/2,h-p+2],[w-p,h-p]];
+  },
+
+  rackBalls(mode){
+    const cx=this.TW*0.7, cy=this.TH/2, r=this.BALL_R*2.2;
+    this.balls=[]; this.pocketed=[];
+    const count=mode==='9ball'?9:15;
+    // Triangle rack
+    let nums=[]; for(let i=1;i<=count;i++) nums.push(i);
+    // 8ball: 8 goes in center of rack
+    if(mode==='8ball'){
+      nums=nums.filter(n=>n!==8);
+      // Shuffle
+      for(let i=nums.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[nums[i],nums[j]]=[nums[j],nums[i]];}
+      nums.splice(4,0,8); // position 5 (center of 3rd row)
+    } else {
+      // 9ball: 1 at apex, 9 in center, rest random
+      nums=nums.filter(n=>n!==1&&n!==9);
+      for(let i=nums.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[nums[i],nums[j]]=[nums[j],nums[i]];}
+      nums.unshift(1); nums.splice(4,0,9);
+    }
+    let idx=0, row=0;
+    while(idx<count){
+      for(let col=0;col<=row&&idx<count;col++){
+        const bx=cx+row*r*0.866;
+        const by=cy+(col-row/2)*r;
+        const num=nums[idx];
+        this.balls.push({
+          num, x:bx, y:by, vx:0, vy:0, active:true,
+          color:this.BALL_COLORS[num-1],
+          stripe:num>8
+        });
+        idx++;
+      }
+      row++;
+    }
+    // Cue ball
+    this.cueBall={num:0,x:this.TW*0.25,y:this.TH/2,vx:0,vy:0,active:true,color:'#eee',stripe:false};
+    this.balls.push(this.cueBall);
+  },
+
+  startGame(mode){
+    this.mode=mode;
+    this.shotsTaken=0;
+    this.turnPhase='aim';
+    this.assignedGroup=false;
+    this.rackBalls(mode);
+    this.active=true;
+    // Create overlay
+    this.overlay=document.createElement('div');
+    this.overlay.className='popup-overlay';
+    this.overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='background:#1a1a2a;border:2px solid #228833;border-radius:12px;padding:12px;max-width:400px;width:95%';
+    wrap.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="color:#228833;font-size:14px;font-weight:bold">🎱 ${mode==='8ball'?'8-Ball':'9-Ball'} Pool</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="pool-shots" style="color:#ffd080;font-size:11px">Shots: 0</span>
+        <button id="pool-close" class="drink-btn" style="font-size:10px;padding:3px 10px;border-color:#ff4444;color:#ff4444">✕</button>
+      </div>
+    </div>
+    <canvas id="pool-canvas" width="${this.TW}" height="${this.TH}" style="width:100%;border-radius:6px;cursor:crosshair;touch-action:none"></canvas>
+    <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:center">
+      <div id="pool-status" style="color:#aaa;font-size:10px">Aim and drag to shoot</div>
+      <div id="pool-power-wrap" style="width:80px;height:6px;background:#333;border-radius:3px;overflow:hidden">
+        <div id="pool-power-bar" style="width:0%;height:100%;background:linear-gradient(90deg,#228833,#ffd700,#cc2222);border-radius:3px;transition:width 0.05s"></div>
+      </div>
+    </div>`;
+    this.overlay.appendChild(wrap);
+    document.body.appendChild(this.overlay);
+    this.canvas=document.getElementById('pool-canvas');
+    this.ctx2=this.canvas.getContext('2d');
+    document.getElementById('pool-close').onclick=()=>this.endGame();
+    // Input
+    const self=this;
+    const getPos=(e)=>{
+      const r=self.canvas.getBoundingClientRect();
+      const t=e.touches?e.touches[0]:e;
+      return{x:(t.clientX-r.left)/r.width*self.TW, y:(t.clientY-r.top)/r.height*self.TH};
+    };
+    this.canvas.onmousedown=this.canvas.ontouchstart=(e)=>{
+      e.preventDefault();
+      if(self.turnPhase!=='aim') return;
+      self.aiming=true;
+      self.aimStart=getPos(e);
+    };
+    this.canvas.onmousemove=this.canvas.ontouchmove=(e)=>{
+      e.preventDefault();
+      if(!self.aiming) return;
+      const pos=getPos(e);
+      const dx=self.aimStart.x-pos.x, dy=self.aimStart.y-pos.y;
+      self.power=Math.min(Math.sqrt(dx*dx+dy*dy)/30,1);
+      const pb=document.getElementById('pool-power-bar');
+      if(pb) pb.style.width=(self.power*100)+'%';
+    };
+    this.canvas.onmouseup=this.canvas.ontouchend=(e)=>{
+      e.preventDefault();
+      if(!self.aiming||self.turnPhase!=='aim') return;
+      self.aiming=false;
+      const pos=e.changedTouches?{x:self._lastMoveX||self.aimStart.x,y:self._lastMoveY||self.aimStart.y}:getPos(e);
+      if(self.power<0.05) return;
+      // Shoot!
+      const dx=self.aimStart.x-pos.x, dy=self.aimStart.y-pos.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<2) return;
+      const speed=self.power*self.maxPower;
+      self.cueBall.vx=dx/dist*speed;
+      self.cueBall.vy=dy/dist*speed;
+      self.turnPhase='moving';
+      self.shotsTaken++;
+      const shotsEl=document.getElementById('pool-shots');
+      if(shotsEl) shotsEl.textContent='Shots: '+self.shotsTaken;
+      self.power=0;
+      const pb=document.getElementById('pool-power-bar');
+      if(pb) pb.style.width='0%';
+      self._playHitSound();
+    };
+    // Track moves for touch
+    this.canvas.addEventListener('touchmove',(e)=>{
+      const r=self.canvas.getBoundingClientRect();
+      const t=e.touches[0];
+      self._lastMoveX=(t.clientX-r.left)/r.width*self.TW;
+      self._lastMoveY=(t.clientY-r.top)/r.height*self.TH;
+    },{passive:true});
+    // Game loop
+    this._loopId=setInterval(()=>self._update(),1000/60);
+    this._render();
+  },
+
+  _playHitSound(){
+    if(!S.audioCtx||!S.masterGain) return;
+    try{
+      const c=S.audioCtx,n=c.currentTime;
+      const o=c.createOscillator(),g=c.createGain();
+      o.type='sine';o.frequency.setValueAtTime(800,n);o.frequency.exponentialRampToValueAtTime(200,n+0.08);
+      g.gain.setValueAtTime(0.1*S.volume,n);g.gain.exponentialRampToValueAtTime(0.001,n+0.1);
+      o.connect(g);g.connect(S.masterGain);o.start(n);o.stop(n+0.15);
+    }catch(e){}
+  },
+
+  _playPocketSound(){
+    if(!S.audioCtx||!S.masterGain) return;
+    try{
+      const c=S.audioCtx,n=c.currentTime;
+      [500,700,900].forEach((f,i)=>{
+        const o=c.createOscillator(),g=c.createGain();
+        o.type='sine';o.frequency.value=f;
+        g.gain.setValueAtTime(0.06*S.volume,n+i*0.06);g.gain.exponentialRampToValueAtTime(0.001,n+i*0.06+0.1);
+        o.connect(g);g.connect(S.masterGain);o.start(n+i*0.06);o.stop(n+i*0.06+0.15);
+      });
+    }catch(e){}
+  },
+
+  _update(){
+    if(!this.active||this.turnPhase!=='moving') return;
+    const dt=1/60, friction=0.985;
+    let anyMoving=false;
+    // Move balls
+    this.balls.filter(b=>b.active).forEach(b=>{
+      b.x+=b.vx*dt*60; b.y+=b.vy*dt*60;
+      b.vx*=friction; b.vy*=friction;
+      if(Math.abs(b.vx)<0.01&&Math.abs(b.vy)<0.01){b.vx=0;b.vy=0;}
+      else anyMoving=true;
+      // Wall bounces
+      const p=this.PAD+this.BALL_R;
+      if(b.x<p){b.x=p;b.vx=-b.vx*0.8;}
+      if(b.x>this.TW-p){b.x=this.TW-p;b.vx=-b.vx*0.8;}
+      if(b.y<p){b.y=p;b.vy=-b.vy*0.8;}
+      if(b.y>this.TH-p){b.y=this.TH-p;b.vy=-b.vy*0.8;}
+    });
+    // Ball-ball collisions
+    const active=this.balls.filter(b=>b.active);
+    for(let i=0;i<active.length;i++){
+      for(let j=i+1;j<active.length;j++){
+        const a=active[i],b2=active[j];
+        const dx=b2.x-a.x, dy=b2.y-a.y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        const minD=this.BALL_R*2;
+        if(dist<minD&&dist>0){
+          // Separate
+          const overlap=(minD-dist)/2;
+          const nx=dx/dist, ny=dy/dist;
+          a.x-=nx*overlap; a.y-=ny*overlap;
+          b2.x+=nx*overlap; b2.y+=ny*overlap;
+          // Elastic collision
+          const dvx=a.vx-b2.vx, dvy=a.vy-b2.vy;
+          const dot=dvx*nx+dvy*ny;
+          if(dot>0){
+            a.vx-=dot*nx; a.vy-=dot*ny;
+            b2.vx+=dot*nx; b2.vy+=dot*ny;
+          }
+          if(Math.abs(dot)>1) this._playHitSound();
+        }
+      }
+    }
+    // Pocket detection
+    const pockets=this.pockets();
+    this.balls.filter(b=>b.active).forEach(b=>{
+      for(const[px,py] of pockets){
+        const d=Math.sqrt((b.x-px)**2+(b.y-py)**2);
+        if(d<this.POCKET_R){
+          b.active=false;
+          this.pocketed.push(b.num);
+          this._playPocketSound();
+          if(b===this.cueBall){
+            // Scratch! Re-spot cue ball
+            setTimeout(()=>{
+              this.cueBall.active=true;
+              this.cueBall.x=this.TW*0.25;this.cueBall.y=this.TH/2;
+              this.cueBall.vx=0;this.cueBall.vy=0;
+              const st=document.getElementById('pool-status');
+              if(st) st.textContent='Scratch! Cue ball re-spotted.';
+            },500);
+          } else if(b.num===8&&this.mode==='8ball'){
+            // Pocketed 8-ball
+            const remaining=this.balls.filter(bb=>bb.active&&bb.num>0&&bb.num!==8&&bb!==this.cueBall);
+            if(remaining.length===0){
+              this.turnPhase='win';
+              this._onWin();
+            } else {
+              this.turnPhase='win';
+              this._onLoss('Pocketed the 8-ball too early!');
+            }
+          } else if(b.num===9&&this.mode==='9ball'){
+            this.turnPhase='win';
+            this._onWin();
+          }
+          break;
+        }
+      }
+    });
+    // Check if all stopped
+    if(!anyMoving&&this.turnPhase==='moving'){
+      this.turnPhase='aim';
+      const st=document.getElementById('pool-status');
+      const remaining=this.balls.filter(b=>b.active&&b.num>0&&b!==this.cueBall);
+      if(st){
+        if(this.mode==='8ball') st.textContent=remaining.length+' balls left. Aim and shoot!';
+        else{
+          const lowest=remaining.reduce((min,b)=>b.num<min?b.num:min,99);
+          st.textContent=remaining.length+' left. Hit the '+lowest+' ball next!';
+        }
+      }
+      // Check win (all object balls pocketed in 8ball, minus 8-ball rule)
+      if(this.mode==='8ball'){
+        const objBalls=this.balls.filter(b=>b.active&&b.num>0&&b.num!==8&&b!==this.cueBall);
+        if(objBalls.length===0){
+          if(st) st.textContent='Now pocket the 8-ball to win!';
+        }
+      }
+    }
+    this._render();
+  },
+
+  _onWin(){
+    const coins=this.mode==='8ball'?Math.max(5,20-this.shotsTaken):Math.max(5,15-this.shotsTaken);
+    Coins.earn(coins,'pool');
+    const st=document.getElementById('pool-status');
+    if(st) st.innerHTML=`<span style="color:#ffd700">🏆 You win! +${coins}◈</span> <span style="color:#888">(${this.shotsTaken} shots)</span>`;
+    showNotification(`🎱 ${this.mode==='8ball'?'8-Ball':'9-Ball'} cleared in ${this.shotsTaken} shots! +${coins}◈`);
+    if(typeof MissionBoard!=='undefined'&&MissionBoard._progress) MissionBoard.trackProgress('games_played',1);
+  },
+
+  _onLoss(reason){
+    const st=document.getElementById('pool-status');
+    if(st) st.innerHTML=`<span style="color:#ff4444">💀 ${reason}</span> <button class="drink-btn" id="pool-retry" style="font-size:9px;padding:2px 8px;margin-left:8px">Retry</button>`;
+    setTimeout(()=>{
+      const retry=document.getElementById('pool-retry');
+      if(retry) retry.onclick=()=>{ this.rackBalls(this.mode); this.shotsTaken=0; this.turnPhase='aim'; this._render(); };
+    },100);
+  },
+
+  _render(){
+    if(!this.ctx2) return;
+    const c=this.ctx2, w=this.TW, h=this.TH, p=this.PAD;
+    // Table
+    c.fillStyle='#1a5a24';c.fillRect(0,0,w,h);
+    // Felt
+    c.fillStyle='#1a7a30';c.fillRect(p,p,w-p*2,h-p*2);
+    // Felt texture
+    c.fillStyle='rgba(0,60,0,0.08)';
+    for(let fy=p;fy<h-p;fy+=8){c.fillRect(p,fy,w-p*2,1);}
+    // Rails
+    c.fillStyle='#4a3020';
+    c.fillRect(0,0,w,p);c.fillRect(0,h-p,w,p);c.fillRect(0,0,p,h);c.fillRect(w-p,0,p,h);
+    c.fillStyle='#5a4030';
+    c.fillRect(2,2,w-4,p-4);c.fillRect(2,h-p+2,w-4,p-4);c.fillRect(2,2,p-4,h-4);c.fillRect(w-p+2,2,p-4,h-4);
+    // Diamond markers on rails
+    c.fillStyle='#c8a040';
+    for(let i=1;i<4;i++){
+      c.beginPath();c.arc(p+i*(w-p*2)/4,p/2,2,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(p+i*(w-p*2)/4,h-p/2,2,0,Math.PI*2);c.fill();
+    }
+    for(let i=1;i<2;i++){
+      c.beginPath();c.arc(p/2,p+i*(h-p*2)/2,2,0,Math.PI*2);c.fill();
+      c.beginPath();c.arc(w-p/2,p+i*(h-p*2)/2,2,0,Math.PI*2);c.fill();
+    }
+    // Pockets
+    this.pockets().forEach(([px,py])=>{
+      c.fillStyle='#0a0a0a';c.beginPath();c.arc(px,py,this.POCKET_R,0,Math.PI*2);c.fill();
+      c.fillStyle='#1a1a1a';c.beginPath();c.arc(px,py,this.POCKET_R-2,0,Math.PI*2);c.fill();
+    });
+    // Head string (dotted line)
+    c.strokeStyle='rgba(255,255,255,0.08)';c.lineWidth=1;c.setLineDash([4,4]);
+    c.beginPath();c.moveTo(w*0.35,p);c.lineTo(w*0.35,h-p);c.stroke();c.setLineDash([]);
+    // Balls
+    this.balls.filter(b=>b.active).forEach(b=>{
+      // Shadow
+      c.fillStyle='rgba(0,0,0,0.2)';c.beginPath();c.arc(b.x+1,b.y+1,this.BALL_R,0,Math.PI*2);c.fill();
+      // Ball body
+      c.fillStyle=b.color;c.beginPath();c.arc(b.x,b.y,this.BALL_R,0,Math.PI*2);c.fill();
+      // Stripe band
+      if(b.stripe){
+        c.fillStyle='#eee';c.beginPath();c.arc(b.x,b.y,this.BALL_R,0,Math.PI*2);c.fill();
+        c.fillStyle=b.color;
+        c.beginPath();c.arc(b.x,b.y-1,this.BALL_R*0.7,0,Math.PI*2);c.fill();
+        c.beginPath();c.arc(b.x,b.y+1,this.BALL_R*0.7,0,Math.PI*2);c.fill();
+      }
+      // Number
+      if(b.num>0){
+        c.fillStyle=b.num===8?'#fff':'#fff';
+        c.beginPath();c.arc(b.x,b.y,2.5,0,Math.PI*2);c.fill();
+        c.fillStyle='#111';c.font='bold 4px sans-serif';c.textAlign='center';c.textBaseline='middle';
+        c.fillText(b.num,b.x,b.y+0.5);c.textAlign='left';c.textBaseline='alphabetic';
+      }
+      // Highlight
+      c.fillStyle='rgba(255,255,255,0.35)';c.beginPath();c.arc(b.x-1.5,b.y-1.5,1.5,0,Math.PI*2);c.fill();
+    });
+    // Aiming line
+    if(this.turnPhase==='aim'&&this.cueBall&&this.cueBall.active){
+      if(this.aiming&&this.aimStart){
+        const cb=this.cueBall;
+        // Draw cue stick direction
+        const dx=this.aimStart.x-(this._lastMoveX||this.aimStart.x);
+        const dy=this.aimStart.y-(this._lastMoveY||this.aimStart.y);
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist>2){
+          const nx=dx/dist,ny=dy/dist;
+          c.strokeStyle='rgba(255,255,255,0.4)';c.lineWidth=1;c.setLineDash([3,3]);
+          c.beginPath();c.moveTo(cb.x,cb.y);c.lineTo(cb.x+nx*150,cb.y+ny*150);c.stroke();c.setLineDash([]);
+          // Cue stick
+          c.strokeStyle='#c8a040';c.lineWidth=2;
+          c.beginPath();c.moveTo(cb.x-nx*8,cb.y-ny*8);c.lineTo(cb.x-nx*(20+this.power*40),cb.y-ny*(20+this.power*40));c.stroke();
+          c.strokeStyle='#5a3020';c.lineWidth=2.5;
+          c.beginPath();c.moveTo(cb.x-nx*(20+this.power*40),cb.y-ny*(20+this.power*40));c.lineTo(cb.x-nx*(60+this.power*40),cb.y-ny*(60+this.power*40));c.stroke();
+        }
+      } else {
+        // Subtle crosshair on cue ball
+        c.strokeStyle='rgba(255,255,255,0.3)';c.lineWidth=0.5;
+        c.beginPath();c.moveTo(this.cueBall.x-8,this.cueBall.y);c.lineTo(this.cueBall.x+8,this.cueBall.y);c.stroke();
+        c.beginPath();c.moveTo(this.cueBall.x,this.cueBall.y-8);c.lineTo(this.cueBall.x,this.cueBall.y+8);c.stroke();
+      }
+    }
+    // Pocketed balls display (bottom bar)
+    if(this.pocketed.length>0){
+      c.fillStyle='rgba(0,0,0,0.4)';c.fillRect(p,h-p+4,w-p*2,p-6);
+      this.pocketed.forEach((num,i)=>{
+        if(num===0) return;
+        const col=this.BALL_COLORS[num-1];
+        c.fillStyle=col;c.beginPath();c.arc(p+8+i*12,h-p/2+2,4,0,Math.PI*2);c.fill();
+      });
+    }
+  },
+
+  endGame(){
+    this.active=false;
+    if(this._loopId){clearInterval(this._loopId);this._loopId=null;}
+    if(this.overlay){this.overlay.remove();this.overlay=null;}
+    this.canvas=null;this.ctx2=null;
+  }
+};
 
 // PART 2: STATION-WIDE SOUND EFFECTS
 const SoundFX = {
