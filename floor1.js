@@ -6,6 +6,10 @@
 (function() {
   'use strict';
 
+  // Unpack block-scoped vars from main script
+  const ctx=window._ctx, W=window._W, H=window._H, S=window._S, LS=window._LS;
+  const getObjects=window._getObjects;
+
   // Override the existing renderFloor1 with this enhanced version
   window._originalRenderFloor1 = window.renderFloor1;
 

@@ -11371,7 +11371,7 @@ function renderFloor2(){
     for(let i=0;i<20;i++){const ax=100+i*30+Math.sin(S.time*2+i*.5)*10;const ay=30+Math.sin(S.time+i*.3)*20;const ah=40+Math.sin(S.time*.7+i)*15;ctx.fillStyle=`rgba(${50+i*5},${200+Math.sin(i)*30},${100+i*3},${.08+Math.sin(S.time*3+i)*.04})`;ctx.fillRect(ax,ay,8,ah)}
   }
   // Telescope
-  const tl=getObjects().find(o=>o.id==='telescope');ctx.fillStyle='#555';ctx.fillRect(tl.x+20,tl.y+60,20,20);// tripod
+  const tl=getObjects().find(o=>o.id==='telescope_main');if(tl){ctx.fillStyle='#555';ctx.fillRect(tl.x+20,tl.y+60,20,20);// tripod
   ctx.fillStyle='#888';ctx.fillRect(tl.x+15,tl.y+10,30,8);// tube
   ctx.fillRect(tl.x+10,tl.y+8,10,12);// eyepiece
   ctx.fillStyle='#aaa';ctx.fillRect(tl.x+42,tl.y+6,5,14);// lens
@@ -11383,17 +11383,16 @@ function renderFloor2(){
     ctx.strokeStyle = `rgba(255,255,0,${pulse})`;
     ctx.lineWidth = 2;
     ctx.strokeRect(tl.x, tl.y, tl.w, tl.h);
-  }
+  }}
   // Star map
-  const sm=getObjects().find(o=>o.id==='starmap');ctx.fillStyle='#1a1a30';ctx.fillRect(sm.x,sm.y,sm.w,sm.h);ctx.strokeStyle='#334';ctx.lineWidth=1;for(let i=0;i<5;i++){ctx.beginPath();ctx.arc(sm.x+sm.w/2,sm.y+sm.h/2,10+i*8,0,Math.PI*2);ctx.stroke()}ctx.fillStyle='#fff';ctx.font='6px monospace';ctx.fillText('STAR MAP',sm.x+10,sm.y+sm.h-3);
-  // Viewing chairs
-  const vc=getObjects().find(o=>o.id==='viewchairs');ctx.fillStyle='#3a2a4a';ctx.fillRect(vc.x,vc.y,50,vc.h);ctx.fillRect(vc.x+60,vc.y,50,vc.h);ctx.fillStyle='#4a3a5a';ctx.fillRect(vc.x+5,vc.y+5,40,vc.h-10);ctx.fillRect(vc.x+65,vc.y+5,40,vc.h-10);
+  const sm=getObjects().find(o=>o.id==='star_map_table');if(sm){ctx.fillStyle='#1a1a30';ctx.fillRect(sm.x,sm.y,sm.w,sm.h);ctx.strokeStyle='#334';ctx.lineWidth=1;for(let i=0;i<5;i++){ctx.beginPath();ctx.arc(sm.x+sm.w/2,sm.y+sm.h/2,10+i*8,0,Math.PI*2);ctx.stroke()}ctx.fillStyle='#fff';ctx.font='6px monospace';ctx.fillText('STAR MAP',sm.x+10,sm.y+sm.h-3);}
+  // Viewing chairs (removed — no 'viewchairs' in FLOOR_OBJECTS)
   // Hot chocolate station
-  const hc=getObjects().find(o=>o.id==='hotchoc');ctx.fillStyle='#3a3a4a';ctx.fillRect(hc.x,hc.y+30,hc.w,20);ctx.fillStyle='#6a3a1a';ctx.fillRect(hc.x+20,hc.y+5,40,25);ctx.fillStyle='#fff';ctx.font='6px monospace';ctx.fillText('HOT COCOA',hc.x+10,hc.y+48);
+  const hc=getObjects().find(o=>o.id==='hotchoc_bar');if(hc){ctx.fillStyle='#3a3a4a';ctx.fillRect(hc.x,hc.y+30,hc.w,20);ctx.fillStyle='#6a3a1a';ctx.fillRect(hc.x+20,hc.y+5,40,25);ctx.fillStyle='#fff';ctx.font='6px monospace';ctx.fillText('HOT COCOA',hc.x+10,hc.y+48);}
   // Photo wall
-  const pw=getObjects().find(o=>o.id==='photowall');ctx.fillStyle='#2a2a3a';ctx.fillRect(pw.x,pw.y,pw.w,pw.h);
+  const pw=getObjects().find(o=>o.id==='photo_wall');if(pw){ctx.fillStyle='#2a2a3a';ctx.fillRect(pw.x,pw.y,pw.w,pw.h);
   const photos=[{c:'#446688',l:'Berlin'},{c:'#557744',l:'Alps'},{c:'#3366aa',l:'Ocean'}];
-  photos.forEach((ph,i)=>{const px=pw.x+8+i*48,py=pw.y+8;ctx.fillStyle=ph.c;ctx.fillRect(px,py,40,40);ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.strokeRect(px,py,40,40);ctx.fillStyle='#ddd';ctx.font='5px monospace';ctx.fillText(ph.l,px+4,py+52)});
+  photos.forEach((ph,i)=>{const px=pw.x+8+i*48,py=pw.y+8;ctx.fillStyle=ph.c;ctx.fillRect(px,py,40,40);ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.strokeRect(px,py,40,40);ctx.fillStyle='#ddd';ctx.font='5px monospace';ctx.fillText(ph.l,px+4,py+52)});}
   // Ambient
   const ag=ctx.createRadialGradient(400,100,0,400,100,300);ag.addColorStop(0,'rgba(50,30,80,.06)');ag.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=ag;ctx.fillRect(0,0,W,H);
   FloorDepth.renderShadows(ctx,2);FloorDepth.renderLightRays(ctx,2);
@@ -13526,18 +13525,18 @@ function render(){
   if (S.secretRooms.current) {
     SecretRooms.renderSecretRoom(S.secretRooms.current);
   } else {
-    if(S.floor===1)renderFloor1();
-    else if(S.floor===2)renderFloor2();
-    else if(S.floor===3)renderFloor3();
-    else if(S.floor===4)renderFloor4();
-    else if(S.floor===5)renderFloor5();
-    else if(S.floor===6)renderFloor6();
-    else if(S.floor===7)renderFloor7();
-    else if(S.floor===8)renderFloor8();
-    else if(S.floor===9)renderFloor9();
-    else if(S.floor===10)renderFloor10();
-    else if(S.floor===11)renderFloor11();
-    else if(S.floor===12)renderFloor12();
+    if(S.floor===1)(window.renderFloor1||renderFloor1)();
+    else if(S.floor===2)(window.renderFloor2||renderFloor2)();
+    else if(S.floor===3)(window.renderFloor3||renderFloor3)();
+    else if(S.floor===4)(window.renderFloor4||renderFloor4)();
+    else if(S.floor===5)(window.renderFloor5||renderFloor5)();
+    else if(S.floor===6)(window.renderFloor6||renderFloor6)();
+    else if(S.floor===7)(window.renderFloor7||renderFloor7)();
+    else if(S.floor===8)(window.renderFloor8||renderFloor8)();
+    else if(S.floor===9)(window.renderFloor9||renderFloor9)();
+    else if(S.floor===10)(window.renderFloor10||renderFloor10)();
+    else if(S.floor===11)(window.renderFloor11||renderFloor11)();
+    else if(S.floor===12)(window.renderFloor12||renderFloor12)();
   }
   // Shared elements
   renderElevator();
@@ -13815,24 +13814,50 @@ function updateVisitor(dt){
   // Dash cooldown
   if(S._dashCooldown>0)S._dashCooldown-=dt;
   
+  // Chain dash window countdown (after first dash ends, brief window to chain)
+  if(v._dashChainWindow>0&&!v._dashing){
+    v._dashChainWindow-=dt;
+    if(v._dashChainWindow<=0){
+      // Chain window expired — apply single dash cooldown
+      if(v._dashChain===1){
+        S._dashCooldown=DASH_COOLDOWN;
+        v._dashChain=0;
+      }
+    }
+  }
+  
   // Smooth dash interpolation
   if(v._dashing&&v._dashTimer>0){
     v._dashTimer-=dt;
     const totalDur=v._dashDuration||0.18;
     const progress=1-(v._dashTimer/totalDur);
-    // Ease-out curve for satisfying deceleration
-    const eased=1-Math.pow(1-Math.min(progress,1),3);
+    // Chain dash uses sharper ease (quartic) for snappier feel
+    const eased = v._dashIsChain
+      ? 1-Math.pow(1-Math.min(progress,1),4)
+      : 1-Math.pow(1-Math.min(progress,1),3);
     v.x=v._dashStartX+(v._dashTargetX-v._dashStartX)*eased;
     v.y=v._dashStartY+(v._dashTargetY-v._dashStartY)*eased;
     v.moving=true;
-    // Trail particles during dash
-    if(Math.random()<0.6){
-      S.particles.push({x:v.x+(Math.random()-.5)*10,y:v.y+(Math.random()-.5)*5,vx:(Math.random()-.5)*1,vy:(Math.random()-.5)*1,life:8,color:'rgba(0,255,247,0.3)',size:3+Math.random()*2});
+    // Trail particles during dash (chain = denser, gold-tinted)
+    const trailChance = v._dashIsChain ? 0.85 : 0.6;
+    const trailColor = v._dashIsChain ? 'rgba(255,220,100,0.4)' : 'rgba(0,255,247,0.3)';
+    const trailSize = v._dashIsChain ? 4+Math.random()*3 : 3+Math.random()*2;
+    if(Math.random()<trailChance){
+      S.particles.push({x:v.x+(Math.random()-.5)*10,y:v.y+(Math.random()-.5)*5,vx:(Math.random()-.5)*1,vy:(Math.random()-.5)*1,life:v._dashIsChain?12:8,color:trailColor,size:trailSize});
     }
     if(v._dashTimer<=0){
       v._dashing=false;
       v.x=v._dashTargetX;
       v.y=v._dashTargetY;
+      // If first dash just ended, open chain window
+      if(v._dashChain===1){
+        v._dashChainWindow=DASH_CHAIN_WINDOW;
+      } else if(v._dashChain===2){
+        // Chain dash finished — reset everything, apply cooldown
+        v._dashChain=0;
+        v._dashChainWindow=0;
+        S._dashCooldown=DASH_CHAIN_COOLDOWN;
+      }
     }
     return; // Skip normal movement during dash
   }
@@ -14221,10 +14246,11 @@ function renderVisitor(ctx){
       if(!v.moving&&v._wasMoving){if(!v._squashTimer)v._squashTimer=0.15;v._wasMoving=false}
       if(v.moving)v._wasMoving=true;
       if(v._squashTimer>0){v._squashTimer-=0.016;squashX=1.15;squashY=0.85;if(v._squashTimer<=0){squashX=1;squashY=1}}
-      // Dash stretch — elongate in movement direction
+      // Dash stretch — elongate in movement direction (chain dash = more extreme)
       if(v._dashing){
-        if(v._dashDir==='left'||v._dashDir==='right'){squashX=1.3;squashY=0.75;}
-        else{squashX=0.75;squashY=1.3;}
+        const chn=v._dashIsChain;
+        if(v._dashDir==='left'||v._dashDir==='right'){squashX=chn?1.5:1.3;squashY=chn?0.6:0.75;}
+        else{squashX=chn?0.6:0.75;squashY=chn?1.5:1.3;}
       }
       // Dance animation transforms
       let danceOffY=0, danceSwayX=0, danceRot=0;
@@ -16385,7 +16411,7 @@ function showWelcomeBoard(){
   const drinks=LS.get('drinksServed',0);
   const hr=new Date().getHours();
   const timeGreeting=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
-  const dailyTip=['Tip: Double-tap a direction key to dash! ⚡','Tip: Try typing "explosion" 💥','Tip: Pet Chomusuke 5 times for a surprise 🐱','Tip: Check the Crystal Ball for your fortune 🔮','Tip: The bar has 6 drinks, each with effects 🍹','Tip: Press B to open the shop anywhere 🛒','Tip: Floor 10 has 8 music clubs 🎵'][new Date().getDay()];
+  const dailyTip=['Tip: Double-tap to dash, tap again mid-dash for a CHAIN DASH! ⚡⚡','Tip: Try typing "explosion" 💥','Tip: Pet Chomusuke 5 times for a surprise 🐱','Tip: Check the Crystal Ball for your fortune 🔮','Tip: The bar has 6 drinks, each with effects 🍹','Tip: Press B to open the shop anywhere 🛒','Tip: Floor 10 has 8 music clubs 🎵'][new Date().getDay()];
   let html=`<h3 style="margin:0 0 6px">📋 Welcome to Echo Station</h3>`;
   html+=`<div style="font-size:11px;color:#ffd080;margin-bottom:8px">${timeGreeting}, traveler!</div>`;
   html+=`<div style="font-size:10px;line-height:1.6;color:#ccc">`;
@@ -21750,15 +21776,21 @@ function initInput(){
   const _dashDirTimes={up:0,down:0,left:0,right:0};
   const _dashDirTaps={up:0,down:0,left:0,right:0};
   S._dashCooldown=0;
-  const DASH_DISTANCE=100;
-  const DASH_COOLDOWN=0.4; // seconds
-  const DASH_DOUBLE_TAP_MS=350; // generous window
+  const DASH_DISTANCE=150; // base dash distance (was 100)
+  const DASH_CHAIN_DISTANCE=180; // second dash goes further
+  const DASH_COOLDOWN=0.3; // cooldown after single dash
+  const DASH_CHAIN_COOLDOWN=0.5; // cooldown after chain dash
+  const DASH_DOUBLE_TAP_MS=350; // window for initial double-tap trigger
+  const DASH_CHAIN_WINDOW=0.28; // seconds after dash ends to chain a second
   
   // Dash state for smooth animation
   S.visitor._dashing=false;
   S.visitor._dashTimer=0;
   S.visitor._dashDir=null;
   S.visitor._dashTrail=[];
+  S.visitor._dashChain=0; // 0=none, 1=first dash, 2=chain dash
+  S.visitor._dashChainWindow=0; // time left to trigger chain
+  S.visitor._dashChainDir=null; // direction of last dash (for chain input)
   
   // Map any key to a direction
   function keyToDir(k){
@@ -21787,30 +21819,58 @@ function initInput(){
     if(!dir)return;
     if(e.repeat)return; // ignore key repeat!
     
+    const v=S.visitor;
     const now=Date.now();
     const timeSinceRelease=now-(_dashDirTimes[dir]||0);
     
+    // Chain dash: during first dash or within chain window after, tap any direction
+    if(v._dashChain===1 && (v._dashing || v._dashChainWindow>0) && !DuelSystem.active){
+      _dashDirTaps[dir]=0;
+      performDash(dir, true); // chain=true
+      return;
+    }
+    
     // Double-tap: key was released recently and pressed again within window
-    if(_dashDirTaps[dir]===1 && timeSinceRelease<DASH_DOUBLE_TAP_MS && S._dashCooldown<=0 && !S.visitor._dashing){
+    if(_dashDirTaps[dir]===1 && timeSinceRelease<DASH_DOUBLE_TAP_MS && S._dashCooldown<=0 && !v._dashing){
       _dashDirTaps[dir]=0;
       if(DuelSystem.active){
         DuelSystem.dodge(dir);
       } else {
-        performDash(dir);
+        performDash(dir, false);
       }
     } else {
       _dashDirTaps[dir]=0; // reset if too slow
     }
   });
   
-  function performDash(dir){
+  function performDash(dir, isChain){
     if(S.spacewalk.active)return;
     const v=S.visitor;
-    S._dashCooldown=DASH_COOLDOWN;
+    const chain = isChain && v._dashChain===1;
+    
+    // Set chain state
+    if(chain){
+      v._dashChain=2; // consumed chain
+      v._dashChainWindow=0;
+      S._dashCooldown=DASH_CHAIN_COOLDOWN; // longer cooldown after chain
+    } else {
+      v._dashChain=1; // first dash — chain available
+      v._dashChainWindow=0; // will be set when dash ends
+      S._dashCooldown=0; // no cooldown yet — allow chain input
+    }
+    
+    // Snap to current position if interrupting a dash mid-flight
+    if(v._dashing){
+      v.x=v._dashStartX+(v._dashTargetX-v._dashStartX)*Math.min(1,(1-v._dashTimer/(v._dashDuration||0.18)));
+      v.y=v._dashStartY+(v._dashTargetY-v._dashStartY)*Math.min(1,(1-v._dashTimer/(v._dashDuration||0.18)));
+    }
+    
+    const dur = chain ? 0.15 : 0.18; // chain dash is snappier
     v._dashing=true;
-    v._dashTimer=0.18; // dash duration
-    v._dashDuration=0.18;
+    v._dashTimer=dur;
+    v._dashDuration=dur;
     v._dashDir=dir;
+    v._dashIsChain=chain;
     
     const startX=v.x, startY=v.y;
     
@@ -21819,7 +21879,7 @@ function initInput(){
     const _fw=(_fs&&_fs[S.floor])?_fs[S.floor].w:W;
     const _fh=(_fs&&_fs[S.floor])?_fs[S.floor].h:H;
     let tx=v.x, ty=v.y;
-    const dist=DASH_DISTANCE;
+    const dist = chain ? DASH_CHAIN_DISTANCE : DASH_DISTANCE;
     if(dir==='up')ty=Math.max(60,v.y-dist);
     if(dir==='down')ty=Math.min(_fh-20,v.y+dist);
     if(dir==='left')tx=Math.max(20,v.x-dist);
@@ -21836,62 +21896,87 @@ function initInput(){
     v._dashStartX=startX;
     v._dashStartY=startY;
     
-    // Afterimage ghosts (3 semi-transparent copies)
-    for(let i=0;i<3;i++){
-      const t=(i+1)/4;
+    // --- Visual effects (chain gets more juice) ---
+    const ghostCount = chain ? 5 : 3;
+    const ghostColor = chain ? '255,220,100' : '0,255,247'; // gold vs cyan
+    const ghostAlpha = chain ? 0.5 : 0.35;
+    
+    // Afterimage ghosts
+    for(let i=0;i<ghostCount;i++){
+      const t=(i+1)/(ghostCount+1);
       const px=startX+(tx-startX)*t;
       const py=startY+(ty-startY)*t;
-      // Big soft ghost
-      S.particles.push({x:px,y:py-15,vx:0,vy:0,life:18-i*4,color:`rgba(0,255,247,${0.35-i*0.1})`,size:12-i*2});
-      // Small sparkles along path
-      S.particles.push({x:px+(Math.random()-.5)*12,y:py-15+(Math.random()-.5)*12,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2,life:14,color:'rgba(255,255,255,0.6)',size:1.5});
+      S.particles.push({x:px,y:py-15,vx:0,vy:0,life:20-i*3,color:`rgba(${ghostColor},${ghostAlpha-i*0.08})`,size:chain?14-i*1.5:12-i*2});
+      S.particles.push({x:px+(Math.random()-.5)*14,y:py-15+(Math.random()-.5)*14,vx:(Math.random()-.5)*2.5,vy:(Math.random()-.5)*2.5,life:16,color:`rgba(255,255,255,${chain?0.8:0.6})`,size:chain?2.5:1.5});
     }
     
-    // Burst particles at start position (dust cloud)
-    for(let i=0;i<6;i++){
+    // Burst particles at start (chain = bigger burst)
+    const burstCount = chain ? 10 : 6;
+    for(let i=0;i<burstCount;i++){
       const angle=Math.random()*Math.PI*2;
-      const spd=1+Math.random()*2;
-      S.particles.push({x:startX,y:startY,vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd-0.5,life:15,color:'rgba(200,200,220,0.4)',size:2+Math.random()*2});
+      const spd=1+Math.random()*(chain?3.5:2);
+      S.particles.push({x:startX,y:startY,vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd-0.5,life:chain?20:15,color:chain?'rgba(255,200,60,0.5)':'rgba(200,200,220,0.4)',size:2+Math.random()*(chain?3:2)});
     }
     
-    // Speed lines streaking BEHIND the dash
-    const opposite={up:'down',down:'up',left:'right',right:'left'};
-    for(let i=0;i<10;i++){
-      const spread=(Math.random()-.5)*40;
+    // Speed lines (chain = more + longer)
+    const lineCount = chain ? 16 : 10;
+    for(let i=0;i<lineCount;i++){
+      const spread=(Math.random()-.5)*(chain?60:40);
       let lx=v.x, ly=v.y-15;
       let lvx=0,lvy=0;
-      if(dir==='left'||dir==='right'){ly+=spread;lvx=dir==='left'?2+Math.random()*3:-2-Math.random()*3;}
-      else{lx+=spread;lvy=dir==='up'?2+Math.random()*3:-2-Math.random()*3;}
-      S.particles.push({x:lx,y:ly,vx:lvx,vy:lvy,life:8+Math.random()*4,color:'rgba(0,255,247,0.25)',size:1});
+      const lineSpd = chain ? 3+Math.random()*4 : 2+Math.random()*3;
+      if(dir==='left'||dir==='right'){ly+=spread;lvx=dir==='left'?lineSpd:-lineSpd;}
+      else{lx+=spread;lvy=dir==='up'?lineSpd:-lineSpd;}
+      const lc = chain ? `rgba(255,220,100,${0.3+Math.random()*0.15})` : 'rgba(0,255,247,0.25)';
+      S.particles.push({x:lx,y:ly,vx:lvx,vy:lvy,life:chain?12+Math.random()*5:8+Math.random()*4,color:lc,size:chain?1.5:1});
     }
     
-    // Satisfying whoosh sound — two-tone sweep
+    // Chain dash: impact ring at start position
+    if(chain){
+      for(let i=0;i<12;i++){
+        const angle=(Math.PI*2/12)*i;
+        S.particles.push({x:startX+Math.cos(angle)*8,y:startY-10+Math.sin(angle)*8,vx:Math.cos(angle)*3,vy:Math.sin(angle)*3,life:12,color:'rgba(255,255,255,0.6)',size:2});
+      }
+    }
+    
+    // Sound — chain gets deeper whoosh + impact hit
     if(S.audioCtx&&S.masterGain){try{
       const c=S.audioCtx,n=c.currentTime;
-      // Low whoosh
+      // Low whoosh (chain = deeper + louder)
       const o1=c.createOscillator(),g1=c.createGain();
       o1.connect(g1);g1.connect(S.masterGain);
       o1.type='sine';
-      o1.frequency.setValueAtTime(300,n);
-      o1.frequency.exponentialRampToValueAtTime(80,n+0.15);
-      g1.gain.setValueAtTime(S.volume*0.1,n);
-      g1.gain.exponentialRampToValueAtTime(0.001,n+0.15);
-      o1.start(n);o1.stop(n+0.15);
+      o1.frequency.setValueAtTime(chain?400:300,n);
+      o1.frequency.exponentialRampToValueAtTime(chain?50:80,n+(chain?0.2:0.15));
+      g1.gain.setValueAtTime(S.volume*(chain?0.15:0.1),n);
+      g1.gain.exponentialRampToValueAtTime(0.001,n+(chain?0.2:0.15));
+      o1.start(n);o1.stop(n+(chain?0.2:0.15));
       // High shimmer
       const o2=c.createOscillator(),g2=c.createGain();
       o2.connect(g2);g2.connect(S.masterGain);
       o2.type='triangle';
-      o2.frequency.setValueAtTime(800,n);
-      o2.frequency.exponentialRampToValueAtTime(400,n+0.1);
-      g2.gain.setValueAtTime(S.volume*0.04,n);
+      o2.frequency.setValueAtTime(chain?1200:800,n);
+      o2.frequency.exponentialRampToValueAtTime(chain?500:400,n+0.1);
+      g2.gain.setValueAtTime(S.volume*(chain?0.06:0.04),n);
       g2.gain.exponentialRampToValueAtTime(0.001,n+0.1);
       o2.start(n);o2.stop(n+0.1);
+      // Chain: extra impact thud
+      if(chain){
+        const o3=c.createOscillator(),g3=c.createGain();
+        o3.connect(g3);g3.connect(S.masterGain);
+        o3.type='sine';
+        o3.frequency.setValueAtTime(60,n);
+        o3.frequency.exponentialRampToValueAtTime(30,n+0.08);
+        g3.gain.setValueAtTime(S.volume*0.12,n);
+        g3.gain.exponentialRampToValueAtTime(0.001,n+0.08);
+        o3.start(n);o3.stop(n+0.08);
+      }
     }catch(e){}}
     
-    // Subtle screen juice
-    S.screenShake=Math.max(S.screenShake||0,2);
-    // Brief iFrames during dash (invincible while dashing — feels fair)
-    if(DuelSystem.active)DuelSystem.iFrames=Math.max(DuelSystem.iFrames||0,0.18);
+    // Screen shake (chain = punchier)
+    S.screenShake=Math.max(S.screenShake||0,chain?4:2);
+    // Brief iFrames during dash
+    if(DuelSystem.active)DuelSystem.iFrames=Math.max(DuelSystem.iFrames||0,dur);
   }
   S.useVisitor=true;
 }
@@ -27285,104 +27370,7 @@ setInterval(async () => {
   setTimeout(endCinematic, 3200);
 })();
 
-// ─── 2. OBSERVATORY SIGNATURE MOMENT ───────────────────────────
-// Override renderFloor2 with enhanced version
-const _origRenderFloor2 = renderFloor2;
-renderFloor2 = function() {
-  renderFloorTiles('#3a3a4a','#4a4a5a');
-  renderWalls('#0a0820');
-  // Panoramic dome
-  ctx.fillStyle='#010412';ctx.fillRect(40,0,720,280);
-
-  // Dense star field — 4 brightness layers (same as original)
-  for(let i=0;i<60;i++){ctx.fillStyle=`rgba(255,255,255,${.08+Math.sin(S.time*.8+i*.3)*.06})`;ctx.fillRect(40+((i*53+7)%720),((i*31+11)%280),1,1)}
-  for(let i=0;i<50;i++){ctx.fillStyle=`rgba(255,255,255,${.2+Math.sin(S.time*1.2+i*.5)*.15})`;ctx.fillRect(40+((i*37+13)%720),((i*23+7)%280),1,1)}
-  for(let i=0;i<30;i++){ctx.fillStyle=`rgba(255,255,255,${.4+Math.sin(S.time*1.5+i*.7)*.25})`;ctx.fillRect(40+((i*41+19)%720),((i*29+3)%280),i%5===0?2:1,i%5===0?2:1)}
-  for(let i=0;i<12;i++){ctx.fillStyle=`rgba(255,255,240,${.7+Math.sin(S.time*2+i)*.2})`;ctx.fillRect(40+((i*67+29)%720),((i*43+17)%280),2,2)}
-
-  // Nebula (drifting)
-  const nebX=480+Math.sin(S.time*.05)*30,nebY=90+Math.cos(S.time*.03)*15;
-  const ng=ctx.createRadialGradient(nebX,nebY,0,nebX,nebY,100);ng.addColorStop(0,'rgba(100,50,150,.14)');ng.addColorStop(.5,'rgba(60,30,120,.06)');ng.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=ng;ctx.fillRect(40,0,720,280);
-  const neb2X=200+Math.sin(S.time*.04+2)*25;const ng2=ctx.createRadialGradient(neb2X,160,0,neb2X,160,60);ng2.addColorStop(0,'rgba(40,80,160,.08)');ng2.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=ng2;ctx.fillRect(40,0,720,280);
-
-  // === LARGE EARTH (radius 45) with detail ===
-  const ex=200, ey=130, er=45;
-  // Atmosphere glow ring
-  const atmoGlow=ctx.createRadialGradient(ex,ey,er-2,ex,ey,er+18);
-  atmoGlow.addColorStop(0,'rgba(80,160,255,0)');atmoGlow.addColorStop(0.5,'rgba(80,160,255,.15)');atmoGlow.addColorStop(1,'rgba(80,160,255,0)');
-  ctx.fillStyle=atmoGlow;ctx.beginPath();ctx.arc(ex,ey,er+18,0,Math.PI*2);ctx.fill();
-  // Ocean base
-  ctx.beginPath();ctx.arc(ex,ey,er,0,Math.PI*2);ctx.fillStyle='#1a5a9a';ctx.fill();
-  // Continents with drift
-  ctx.save();ctx.beginPath();ctx.arc(ex,ey,er,0,Math.PI*2);ctx.clip();
-  const drift=Math.sin(S.time*.03)*6;
-  ctx.fillStyle='#2a7a3a';
-  // Africa-ish
-  ctx.beginPath();ctx.ellipse(ex-4+drift,ey-8,12,16,0.2,0,Math.PI*2);ctx.fill();
-  // Americas-ish
-  ctx.beginPath();ctx.ellipse(ex+22+drift,ey-5,8,18,-0.1,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.ellipse(ex+18+drift,ey+14,6,10,0.3,0,Math.PI*2);ctx.fill();
-  // Asia-ish
-  ctx.beginPath();ctx.ellipse(ex-20+drift,ey-12,14,10,0,0,Math.PI*2);ctx.fill();
-  // Australia
-  ctx.beginPath();ctx.ellipse(ex-24+drift,ey+16,7,5,0.2,0,Math.PI*2);ctx.fill();
-  // Cloud swirls
-  ctx.fillStyle='rgba(220,240,255,.3)';
-  for(let i=0;i<8;i++){const ca=S.time*.02+i*0.8,cr=15+i*4;
-    ctx.beginPath();ctx.arc(ex+Math.cos(ca)*cr*.6,ey+Math.sin(ca)*cr*.4,4+Math.sin(i+S.time*.1)*1.5,0,Math.PI*2);ctx.fill()}
-  // Day/night terminator
-  const termX = Math.sin(S.time * 0.01) * 10;
-  const termGrad = ctx.createLinearGradient(ex+termX-er,ey,ex+termX+er,ey);
-  termGrad.addColorStop(0,'rgba(0,0,0,0)');termGrad.addColorStop(0.45,'rgba(0,0,0,0)');
-  termGrad.addColorStop(0.55,'rgba(0,0,20,.4)');termGrad.addColorStop(1,'rgba(0,0,20,.6)');
-  ctx.fillStyle=termGrad;ctx.fillRect(ex-er-5,ey-er-5,er*2+10,er*2+10);
-  // Polar ice
-  ctx.fillStyle='rgba(220,240,255,.5)';ctx.beginPath();ctx.arc(ex,ey-er+6,8,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.arc(ex,ey+er-5,6,0,Math.PI*2);ctx.fill();
-  ctx.restore();
-
-  // Saturn in corner
-  const satX=680,satY=55;ctx.fillStyle='#c8a050';ctx.beginPath();ctx.arc(satX,satY,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#b89040';ctx.beginPath();ctx.ellipse(satX,satY,8,3,0,Math.PI*.1,Math.PI*.9);ctx.fill();ctx.strokeStyle='rgba(200,180,130,.5)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(satX,satY,18,5,.1,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='rgba(180,160,110,.3)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(satX,satY,22,6,.1,0,Math.PI*2);ctx.stroke();
-
-  // Comet (passes every ~5 min)
-  const cometPhase=(S.time%18000)/18000;if(cometPhase<0.06){const cp=cometPhase/0.06;const cx=720-cp*800,cy=30+cp*120;ctx.fillStyle='rgba(220,240,255,.9)';ctx.beginPath();ctx.arc(cx,cy,2,0,Math.PI*2);ctx.fill();for(let t=1;t<8;t++){ctx.fillStyle=`rgba(180,200,255,${.4-t*.05})`;ctx.fillRect(cx+t*6,cy-t*.5,4,1)}}
-
-  // === SHOOTING STAR (every ~30s) ===
-  const shootPhase = (S.time % 30) / 30;
-  if (shootPhase < 0.03) {
-    const sp = shootPhase / 0.03;
-    const sx = 100 + sp * 500, sy = 20 + sp * 80;
-    ctx.strokeStyle = `rgba(255,255,255,${1-sp})`;
-    ctx.lineWidth = 2;
-    ctx.beginPath();ctx.moveTo(sx, sy);ctx.lineTo(sx - 30, sy - 10);ctx.stroke();
-    ctx.fillStyle = `rgba(255,255,255,${1-sp})`;ctx.beginPath();ctx.arc(sx, sy, 1.5, 0, Math.PI*2);ctx.fill();
-  }
-
-  // === VIVID AURORA ===
-  if(S.auroraActive){
-    const auroraColors = ['rgba(0,255,100,','rgba(130,0,255,','rgba(255,50,150,'];
-    for(let i=0;i<25;i++){
-      const ax=80+i*26+Math.sin(S.time*2+i*.5)*12;
-      const ay=25+Math.sin(S.time+i*.3)*25;
-      const ah=50+Math.sin(S.time*.7+i)*20;
-      const ci = i % 3;
-      const alpha = .1+Math.sin(S.time*3+i)*.06;
-      ctx.fillStyle=auroraColors[ci]+alpha+')';
-      ctx.fillRect(ax,ay,10,ah);
-    }
-  }
-
-  // Telescope, star map, chairs, hot choc, photo wall (from original)
-  const tl=getObjects().find(o=>o.id==='telescope');ctx.fillStyle='#555';ctx.fillRect(tl.x+20,tl.y+60,20,20);ctx.fillStyle='#888';ctx.fillRect(tl.x+15,tl.y+10,30,8);ctx.fillRect(tl.x+10,tl.y+8,10,12);ctx.fillStyle='#aaa';ctx.fillRect(tl.x+42,tl.y+6,5,14);ctx.fillStyle='#666';ctx.fillRect(tl.x+22,tl.y+18,16,42);
-  const sm=getObjects().find(o=>o.id==='starmap');ctx.fillStyle='#1a1a30';ctx.fillRect(sm.x,sm.y,sm.w,sm.h);ctx.strokeStyle='#334';ctx.lineWidth=1;for(let i=0;i<5;i++){ctx.beginPath();ctx.arc(sm.x+sm.w/2,sm.y+sm.h/2,10+i*8,0,Math.PI*2);ctx.stroke()}ctx.fillStyle='#fff';ctx.font='6px monospace';ctx.fillText('STAR MAP',sm.x+10,sm.y+sm.h-3);
-  const vc=getObjects().find(o=>o.id==='viewchairs');ctx.fillStyle='#3a2a4a';ctx.fillRect(vc.x,vc.y,50,vc.h);ctx.fillRect(vc.x+60,vc.y,50,vc.h);ctx.fillStyle='#4a3a5a';ctx.fillRect(vc.x+5,vc.y+5,40,vc.h-10);ctx.fillRect(vc.x+65,vc.y+5,40,vc.h-10);
-  const hc=getObjects().find(o=>o.id==='hotchoc');ctx.fillStyle='#3a3a4a';ctx.fillRect(hc.x,hc.y+30,hc.w,20);ctx.fillStyle='#6a3a1a';ctx.fillRect(hc.x+20,hc.y+5,40,25);ctx.fillStyle='#fff';ctx.font='6px monospace';ctx.fillText('HOT COCOA',hc.x+10,hc.y+48);
-  const pw=getObjects().find(o=>o.id==='photowall');ctx.fillStyle='#2a2a3a';ctx.fillRect(pw.x,pw.y,pw.w,pw.h);
-  const photos=[{c:'#446688',l:'Berlin'},{c:'#557744',l:'Alps'},{c:'#3366aa',l:'Ocean'}];
-  photos.forEach((ph,i)=>{const px=pw.x+8+i*48,py=pw.y+8;ctx.fillStyle=ph.c;ctx.fillRect(px,py,40,40);ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.strokeRect(px,py,40,40);ctx.fillStyle='#ddd';ctx.font='5px monospace';ctx.fillText(ph.l,px+4,py+52)});
-  // Ambient
-  const ag=ctx.createRadialGradient(400,100,0,400,100,300);ag.addColorStop(0,'rgba(50,30,80,.06)');ag.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=ag;ctx.fillRect(0,0,W,H);
-};
+// ─── 2. OBSERVATORY — handled by Floor 2/3/4 IIFE rewrite below ───
 
 // Zen Mode: fade UI when still for 10s on F2
 (function initZenMode() {
@@ -30429,18 +30417,18 @@ render = function() {
   if (S.secretRooms.current) {
     SecretRooms.renderSecretRoom(S.secretRooms.current);
   } else {
-    if(S.floor===1)renderFloor1();
-    else if(S.floor===2)renderFloor2();
-    else if(S.floor===3)renderFloor3();
-    else if(S.floor===4)renderFloor4();
-    else if(S.floor===5)renderFloor5();
-    else if(S.floor===6)renderFloor6();
-    else if(S.floor===7)renderFloor7();
-    else if(S.floor===8)renderFloor8();
-    else if(S.floor===9)renderFloor9();
-    else if(S.floor===10)renderFloor10();
-    else if(S.floor===11)renderFloor11();
-    else if(S.floor===12)renderFloor12();
+    if(S.floor===1)(window.renderFloor1||renderFloor1)();
+    else if(S.floor===2)(window.renderFloor2||renderFloor2)();
+    else if(S.floor===3)(window.renderFloor3||renderFloor3)();
+    else if(S.floor===4)(window.renderFloor4||renderFloor4)();
+    else if(S.floor===5)(window.renderFloor5||renderFloor5)();
+    else if(S.floor===6)(window.renderFloor6||renderFloor6)();
+    else if(S.floor===7)(window.renderFloor7||renderFloor7)();
+    else if(S.floor===8)(window.renderFloor8||renderFloor8)();
+    else if(S.floor===9)(window.renderFloor9||renderFloor9)();
+    else if(S.floor===10)(window.renderFloor10||renderFloor10)();
+    else if(S.floor===11)(window.renderFloor11||renderFloor11)();
+    else if(S.floor===12)(window.renderFloor12||renderFloor12)();
   }
   // Shared elements
   renderElevator();
@@ -37734,17 +37722,24 @@ var AmbientNPCs={
       AmbientNPCs.render(f);
     };
   });
-  // Also patch the overridden renderFloor2 if it exists
-  if(typeof _origRenderFloor2!=='undefined'){
-    var patched2=renderFloor2;
-    renderFloor2=function(){patched2();AmbientNPCs.render(2)};
-  }
+  // Note: F2/3/4 rewrites handled by later IIFE (window.renderFloor2/3/4)
 })();
+
+// ═══ Expose block-scoped vars for external scripts (floor1.js) and second <script> block ═══
+window._ctx=ctx; window._W=W; window._H=H; window._S=S; window._LS=LS;
+window._getObjects=getObjects; window._FloorDepth=typeof FloorDepth!=='undefined'?FloorDepth:null;
+window._renderFloorMaterial=typeof renderFloorMaterial!=='undefined'?renderFloorMaterial:null;
+window._renderWalls=typeof renderWalls!=='undefined'?renderWalls:null;
+window._renderWallDetails=typeof renderWallDetails!=='undefined'?renderWallDetails:null;
 
 </script>
 <script src="floor1.js"></script>
 <script src="voice.js"></script>
 <script>
+// ═══ Unpack block-scoped vars from first <script> block ═══
+const ctx=window._ctx, W=window._W, H=window._H, S=window._S, LS=window._LS;
+const getObjects=window._getObjects;
+
 // ═══ Voice Chat Integration ═══
 (function initVoiceIntegration() {
   // Wait for EchoWS to be connected
@@ -39514,9 +39509,11 @@ function renderFloor4(){
 
   FloorDepth.renderShadows(ctx,4);FloorDepth.renderLightRays(ctx,4);
 }
-window.renderFloor2 = renderFloor2;
-window.renderFloor3 = renderFloor3;
-window.renderFloor4 = renderFloor4;
+// Wrap with AmbientNPCs since these override patchFloorRenders
+const _rf2=renderFloor2,_rf3=renderFloor3,_rf4=renderFloor4;
+window.renderFloor2 = function(){_rf2();if(typeof AmbientNPCs!=='undefined')AmbientNPCs.render(2)};
+window.renderFloor3 = function(){_rf3();if(typeof AmbientNPCs!=='undefined')AmbientNPCs.render(3)};
+window.renderFloor4 = function(){_rf4();if(typeof AmbientNPCs!=='undefined')AmbientNPCs.render(4)};
 })();
 
 // ═══ FLOOR EXPANSION OVERRIDES — Replacing small floors with massive versions ═══
@@ -41268,9 +41265,11 @@ function renderFloor8() {
   }
 }
 
-window.renderFloor5 = renderFloor5;
-window.renderFloor7 = renderFloor7;
-window.renderFloor8 = renderFloor8;
+// Wrap with AmbientNPCs since these override patchFloorRenders
+const _rf5=renderFloor5,_rf7=renderFloor7,_rf8=renderFloor8;
+window.renderFloor5 = function(){_rf5();if(typeof AmbientNPCs!=='undefined')AmbientNPCs.render(5)};
+window.renderFloor7 = function(){_rf7();if(typeof AmbientNPCs!=='undefined')AmbientNPCs.render(7)};
+window.renderFloor8 = function(){_rf8();if(typeof AmbientNPCs!=='undefined')AmbientNPCs.render(8)};
 })();
 
 // Floor 9 rewrite — The Archive (3000×1500 Golden Cathedral)
@@ -42350,7 +42349,9 @@ function renderFloor9() {
   ctx.globalAlpha = 1.0;
 }
 
-window.renderFloor9 = renderFloor9;
+// Wrap with AmbientNPCs
+const _rf9=renderFloor9;
+window.renderFloor9 = function(){_rf9();if(typeof AmbientNPCs!=='undefined')AmbientNPCs.render(9)};
 })();
 </script>
 </body>
