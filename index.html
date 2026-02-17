@@ -2972,7 +2972,7 @@ const SEASON=getSeason(),TOD=getTimeOfDay();
 const Mood={
   current:'happy',timer:0,
   moods:{happy:{emoji:'😊',label:'Happy'},focused:{emoji:'🧑‍💻',label:'Focused'},cozy:{emoji:'🛋️',label:'Cozy'},excited:{emoji:'⚡',label:'Excited'}},
-  set(m){if(this.current===m)return;this.current=m;this.timer=0;const md=this.moods[m];$('#mood-hud').textContent=md.emoji+' '+md.label},
+  set(m){if(this.current===m)return;this.current=m;this.timer=0;const md=this.moods[m];if(!md)return;$('#mood-hud').textContent=md.emoji+' '+md.label},
   update(dt){this.timer+=dt;const e=S.echo;if(e.sitting&&S.nearObject?.id==='desk')this.set('focused');else if(e.sitting)this.set('cozy');else if(e.transforming)this.set('excited');else if(this.timer>15)this.set('happy')},
 };
 
@@ -21753,6 +21753,7 @@ const EchoMoodV25={
       Mood.moods.energetic={emoji:'⚡',label:'Energetic'};
       Mood.moods.contemplative={emoji:'🤔',label:'Contemplative'};
       Mood.moods.celebratory={emoji:'🎉',label:'Celebratory'};
+      Mood.moods.calm={emoji:'😌',label:'Calm'};
       Mood.set(newMood);
     }
   },
@@ -22000,8 +22001,11 @@ function init(){
   const startSpots={morning:'bar_center',afternoon:'bar_center',evening:'bar_center',night:'bar_center'};
   const startAct=startSpots[TOD]||'desk';const startSpot=ACTIVITY_SPOTS[startAct];
   if(startSpot){S.echo.x=startSpot.x;S.echo.y=startSpot.y;S.echo.dir=startSpot.dir;S.echo.floor=startSpot.floor||1;S.floor=startSpot.floor||1;LS.set('floor',S.floor)}
-  // Always ensure Echo and Pixel start on floor 1 for visitors to see them
-  S.echo.floor=1;S.pixel.floor=1;S.floor=1;
+  // Start on floor 1 unless ?floor= param is set
+  const _fpInit=parseInt(new URLSearchParams(window.location.search).get('floor'));
+  const _startFloor=(_fpInit>=1&&_fpInit<=10)?_fpInit:1;
+  S.echo.floor=_startFloor;S.pixel.floor=_startFloor;S.floor=_startFloor;
+  if(_startFloor!==1){S.visitor.x=_startFloor===10?590:_startFloor===6?120:400;S.visitor.y=_startFloor===10?100:_startFloor===6?650:300;}
   S.pixel.floor=S.echo.floor;S.pixel.x=S.echo.x+20;S.pixel.y=S.echo.y+10;
   EchoAI.currentActivity=startAct;EchoAI.state='activity';EchoAI.activityTimer=0;
   $('#floor-hud').textContent=`F${S.floor} · ${FLOOR_NAMES[S.floor]}`;
@@ -34444,6 +34448,9 @@ const DiscoMusic = {
 window.getVisitorSprite = getVisitorSprite;
 window.S = S;
 window.VISITOR_SKINS = VISITOR_SKINS;
+window.BarVibes = BarVibes;
+window.initAudio = initAudio;
+window.showVinylSelector = showVinylSelector;
 
 // ═══════════════════════════════════════
 // CAMERA SYSTEM + MINIMAP + FLOOR 10 ENLARGEMENT
