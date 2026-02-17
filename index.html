@@ -14266,6 +14266,7 @@ const PremiumRender = {
     if (typeof SpriteEnhancements !== 'undefined') {
       SpriteEnhancements.addRimLighting(ctx, x, y, grid, scale, skinId);
       SpriteEnhancements.addSpecularHighlight(ctx, x, y, grid, scale, skinId);
+      SpriteEnhancements.addEyeBlink(ctx, x, y, grid, scale, skinId);
     }
   },
 
@@ -14345,6 +14346,7 @@ const PremiumRender = {
     if (typeof SpriteEnhancements !== 'undefined') {
       SpriteEnhancements.addRimLighting(ctx, x, y, grid, scale, skinId);
       SpriteEnhancements.addSpecularHighlight(ctx, x, y, grid, scale, skinId);
+      SpriteEnhancements.addEyeBlink(ctx, x, y, grid, scale, skinId);
     }
   }
 };
@@ -14431,6 +14433,80 @@ const SpriteEnhancements = {
     }
     
     ctx.restore();
+  },
+
+  // Eye blink animation: 2-frame blink every 3-5 seconds for skins with visible eyes
+  addEyeBlink(ctx, x, y, grid, scale, skinId) {
+    // Define skins with visible eyes that should blink
+    const eyedSkins = new Set([
+      'saiyan', 'super_saiyan', 'pokemon_trainer', 'plumber', 'hero_of_time',
+      'pikachu_suit', 'shadow_ninja', 'hooded', 'spider-v', 'spider_v',
+      'knight-v', 'knight_v', 'speedster-v', 'speedster_v', 'hulk-v', 'hulk_v',
+      'web_slinger', 'wakandan', 'mjolnir_wielder', 'emerald_archer', 'scarlet_witch',
+      'winter_soldier', 'titan_shifter', 'straw_hat', 'plus_ultra', 'streetking',
+      'power_blossom', 'power_bubbles', 'power_buttercup'
+    ]);
+    
+    if (!eyedSkins.has(skinId) || !grid) return;
+    
+    // Initialize blink state for this visitor if not exists
+    if (!S.visitor._blinkState) {
+      S.visitor._blinkState = {
+        nextBlink: performance.now() / 1000 + 3 + Math.random() * 2, // 3-5 seconds
+        blinkFrame: 0, // 0 = open, 1 = half-closed, 2 = closed
+        blinkTimer: 0
+      };
+    }
+    
+    const pn = performance.now() / 1000;
+    const blinkState = S.visitor._blinkState;
+    
+    // Check if it's time to start a new blink
+    if (pn >= blinkState.nextBlink && blinkState.blinkFrame === 0) {
+      blinkState.blinkFrame = 1;
+      blinkState.blinkTimer = 0.08; // Each frame lasts 80ms
+    }
+    
+    // Update blink animation
+    if (blinkState.blinkFrame > 0) {
+      blinkState.blinkTimer -= 0.016; // Subtract frame time (~60fps)
+      if (blinkState.blinkTimer <= 0) {
+        blinkState.blinkFrame++;
+        if (blinkState.blinkFrame >= 4) {
+          // Blink cycle complete: closed -> half -> open
+          blinkState.blinkFrame = 0;
+          blinkState.nextBlink = pn + 3 + Math.random() * 2; // Next blink in 3-5s
+        } else {
+          blinkState.blinkTimer = 0.08; // Next frame in 80ms
+        }
+      }
+    }
+    
+    // Don't draw eye pixels if blinking
+    if (blinkState.blinkFrame === 2 || blinkState.blinkFrame === 3) { // Closed frames
+      ctx.save();
+      
+      // Find and obscure eye pixels (typically small dark pixels for pupils)
+      for (let row = 0; row < grid.length; row++) {
+        const r = grid[row];
+        for (let col = 0; col < r.length; col++) {
+          const c = r[col];
+          // Look for dark pixels that are likely eyes (in upper portion of sprite)
+          if (c && c !== '.' && row < grid.length * 0.4) {
+            // Check if this is a dark pixel surrounded by lighter pixels (likely an eye)
+            const isEyePixel = c === '#000' || c === '#222' || c === '#000000' || c === '#222222';
+            if (isEyePixel) {
+              // Replace with skin color for closed eye look
+              const skinColor = '#f5d6b8'; // Default skin tone, could be made skin-specific
+              ctx.fillStyle = skinColor;
+              ctx.fillRect(x + col * scale, y + row * scale, scale, scale);
+            }
+          }
+        }
+      }
+      
+      ctx.restore();
+    }
   }
 };
 
