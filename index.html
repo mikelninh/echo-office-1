@@ -14754,7 +14754,10 @@ function interact(){
     case'veve_rentals':VeVeRentals.showUI();break;
     case'veve_drops':VeVeDrops.showUI();break;
     case'veve_trading':VeVeTrading.showUI();break;
-    case'dj_booth':showDJBooth();break;
+    case'dj_booth':
+      if(S.floor===6&&typeof BarVibes!=='undefined'){showSoulDJBooth();}
+      else{showDJBooth();}
+      break;
     case'dancefloor':if(typeof DanceSystem!=='undefined'){DanceSystem.toggle()}else{showNotification('🪩 Press V to dance!')}break;
     case'pool_table_1':if(typeof Billiards!=='undefined')Billiards.startGame('8ball');break;
     case'pool_table_2':if(typeof Billiards!=='undefined')Billiards.startGame('9ball');break;
@@ -31068,6 +31071,37 @@ const BarVibes = {
       coverColors:['#8B4513','#2a1a00','#ffd080','#5a3a10'],bpm:78,swing:0.16,
       chords:[{n:[146.83,185,220,277.18],b:73.42,nm:'Dm9'},{n:[196,246.94,293.66,369.99],b:98,nm:'Gmaj7'},{n:[174.61,220,261.63,329.63],b:87.31,nm:'Fmaj7'},{n:[164.81,196,246.94,329.63],b:82.41,nm:'Em9'}],
       rhodesVol:.04,bassVol:.07,drumVol:.032,melodyChance:.22},
+    {id:'smooth_tribute',title:'Smooth Like Sade',artist:'Echo & The Velvet Horns',genre:'Smooth Soul',color:'#b8860b',
+      coverColors:['#b8860b','#1a0a00','#ffd700','#3a2a00'],bpm:96,swing:0.15,
+      chords:[
+        {n:[123.47,146.83,185,220],b:61.74,nm:'Bm7'},
+        {n:[164.81,196,246.94,293.66],b:82.41,nm:'Em7'},
+        {n:[185,220,277.18,329.63],b:92.5,nm:'F♯m7'},
+        {n:[146.83,174.61,220,261.63],b:73.42,nm:'Dmaj7'}
+      ],
+      rhodesVol:.035,bassVol:.06,drumVol:.022,melodyChance:.05,saxVol:.04,
+      // Sax melody patterns: each sub-array is one bar, each note is [freq, startBeat, durationBeats]
+      // Inspired by smooth operator's iconic sax riff — B minor pentatonic runs
+      _saxPattern:[
+        // Bar 1: Opening phrase — descending B minor
+        [[493.88,0,0.8],[440,1,0.6],[369.99,1.8,0.8],[329.63,2.8,1.2]],
+        // Bar 2: Response phrase — rising
+        [[293.66,0,0.6],[329.63,0.8,0.6],[369.99,1.6,1.0],[440,2.8,1.2]],
+        // Bar 3: Emotional peak — long held note with grace
+        [[493.88,0,1.5],[440,2,0.5],[493.88,2.8,1.2]],
+        // Bar 4: Resolution — gentle descent to tonic
+        [[440,0,0.8],[369.99,1,0.8],[329.63,2,0.6],[246.94,2.8,1.2]],
+        // Bar 5: Variation — syncopated
+        [[369.99,0.5,0.6],[440,1.2,0.6],[493.88,2,0.5],[440,2.8,1.2]],
+        // Bar 6: Call phrase
+        [[329.63,0,1.0],[369.99,1.2,0.8],[440,2.2,0.5],[493.88,2.8,1.2]],
+        // Bar 7: Breathy sustained
+        [[440,0,2.0],[369.99,2.5,1.5]],
+        // Bar 8: Closing run
+        [[493.88,0,0.4],[440,0.5,0.4],[369.99,1,0.4],[329.63,1.5,0.4],[293.66,2,0.6],[246.94,2.8,1.2]],
+      ],
+      _barCounter:0
+    },
 
     // ═══ JAZZ ═══
     {id:'velvet_dusk',title:'Velvet Dusk',artist:'Noir Sessions',genre:'Smoky Jazz',color:'#4a2a3a',
@@ -31276,6 +31310,55 @@ const BarVibes = {
     } catch(e){}
   },
 
+  // --- Saxophone (FM synthesis: detuned sawtooth pair + bandpass + vibrato) ---
+  _sax(freq, when, dur, vol) {
+    const c=S.audioCtx; if(!c||!S.masterGain) return;
+    try {
+      // Two slightly detuned oscillators for richness
+      const osc1=c.createOscillator(), osc2=c.createOscillator();
+      osc1.type='sawtooth'; osc2.type='sawtooth';
+      osc1.frequency.value=freq; osc2.frequency.value=freq*1.003;
+      // Vibrato LFO
+      const lfo=c.createOscillator(), lfoG=c.createGain();
+      lfo.type='sine'; lfo.frequency.value=5;
+      lfoG.gain.value=freq*0.008;
+      lfo.connect(lfoG);
+      lfoG.connect(osc1.frequency); lfoG.connect(osc2.frequency);
+      // Bandpass filter for that nasal sax quality
+      const filt=c.createBiquadFilter();
+      filt.type='bandpass'; filt.frequency.value=1200; filt.Q.value=1.5;
+      // Mix the two oscillators
+      const mix=c.createGain(); mix.gain.value=0.5;
+      osc1.connect(mix); osc2.connect(mix);
+      mix.connect(filt);
+      // ADSR envelope
+      const env=c.createGain();
+      env.gain.setValueAtTime(0,when);
+      env.gain.linearRampToValueAtTime(vol*S.volume,when+0.04);
+      env.gain.setValueAtTime(vol*S.volume*0.85,when+0.08);
+      env.gain.setValueAtTime(vol*S.volume*0.7,when+dur*0.7);
+      env.gain.exponentialRampToValueAtTime(0.0001,when+dur);
+      filt.connect(env); env.connect(S.masterGain);
+      osc1.start(when); osc2.start(when); lfo.start(when);
+      osc1.stop(when+dur+0.05); osc2.stop(when+dur+0.05); lfo.stop(when+dur+0.05);
+    } catch(e){}
+  },
+
+  // --- Smooth Operator Sax Melody Engine ---
+  _saxMelody(chord, when, beatLen, vol, rec) {
+    if(!rec._saxPattern) return;
+    const c=S.audioCtx; if(!c) return;
+    const pattern=rec._saxPattern;
+    const barNum=(rec._barCounter||0)%pattern.length;
+    const notes=pattern[barNum];
+    if(!notes) return;
+    notes.forEach(([noteFreq, startBeat, durBeats])=>{
+      const t=when+startBeat*beatLen;
+      const d=durBeats*beatLen;
+      this._sax(noteFreq,t,d,vol);
+    });
+  },
+
   // --- Vinyl Crackle (continuous filtered noise) ---
   startCrackle() {
     if(this.crackleNode||!S.audioCtx) return;
@@ -31341,6 +31424,12 @@ const BarVibes = {
       // Occasional melodic run
       if(Math.random()<rec.melodyChance) self._melody(chord,t,beatLen,rec.rhodesVol*0.6);
 
+      // Sax melody for tracks with _saxPattern (plays on beat 0 of each bar)
+      if(rec._saxPattern&&rec.saxVol&&self.currentBeat===0){
+        self._saxMelody(chord,t,beatLen,rec.saxVol,rec);
+        rec._barCounter=(rec._barCounter||0)+1;
+      }
+
       // Advance
       self.currentBeat++;
       if(self.currentBeat>=4){
@@ -31356,6 +31445,12 @@ const BarVibes = {
               self._progressionCount=0;
               const next=self.getNextByVotes();
               if(next&&next!==rec.id){self.start(next);return;}
+              // DJ Set queue: play next track in set
+              if(self._djSetQueue&&self._djSetQueue.length>0){
+                const nextTrack=self._djSetQueue.shift();
+                const nextRec=self.records.find(r=>r.id===nextTrack);
+                if(nextRec){showThought(`🎧 Next: "${nextRec.title}"`);self.start(nextTrack);return;}
+              }
               // Shuffle mode: auto-pick random next
               if(self._shuffleMode){
                 const pool=self.records.filter(r=>r.id!==rec.id);
@@ -32024,6 +32119,109 @@ const Billiards={
     this.canvas=null;this.ctx2=null;
   }
 };
+
+// --- Soul DJ Booth (Floor 6) ---
+function showSoulDJBooth(){
+  if(!S.audioCtx) initAudio();
+  const cur=BarVibes.currentRecord;
+  // Curated DJ sets
+  const djSets=[
+    {name:'Smooth Operator Set',icon:'🎷',desc:'Sade vibes. Sax-heavy, slow and smooth.',
+     tracks:['smooth_tribute','sade_nights','golden_hour','velvet_dusk'],color:'#b8860b'},
+    {name:'Late Night Soul',icon:'🌙',desc:'Neo-soul for after midnight.',
+     tracks:['midnight_silk','erykah','smooth_operator','station_after_dark'],color:'#9b59b6'},
+    {name:'Warm & Cozy',icon:'☕',desc:'Lo-fi soul and chill. Coffee shop vibes.',
+     tracks:['rainy_windows','study_beats','golden_hour','crystal_caves'],color:'#6688aa'},
+    {name:'Groove Session',icon:'🕺',desc:'Get up. Funk and soul that moves.',
+     tracks:['space_funk','groove_machine','neon_rain','cafe_havana'],color:'#ff4488'},
+    {name:'Jazz After Dark',icon:'🎹',desc:'Smoky jazz. Cool, intimate, timeless.',
+     tracks:['blue_note','autumn_leaves','velvet_dusk','bebop_cafe'],color:'#1a3a6a'},
+    {name:'World Tour',icon:'🌍',desc:'Bossa nova, dub, Latin. Around the globe.',
+     tracks:['ipanema_nights','dub_station','cafe_havana','massive_attack'],color:'#22aa66'},
+  ];
+
+  let html='<h3 style="color:#ffd080">🎧 Soul DJ Booth</h3>';
+  if(cur){
+    html+=`<div style="background:rgba(255,180,80,0.08);border:1px solid #ffd08044;border-radius:6px;padding:6px 8px;margin-bottom:8px">`;
+    html+=`<div style="color:#ffd080;font-size:8px;text-transform:uppercase">Now Playing</div>`;
+    html+=`<div style="color:#fff;font-size:12px;font-weight:bold">${cur.title}</div>`;
+    html+=`<div style="color:#888;font-size:9px">${cur.artist} — ${cur.genre}${cur._saxPattern?' 🎷':''}</div>`;
+    html+=`</div>`;
+  }
+
+  // Featured track
+  html+=`<div style="margin-bottom:8px">`;
+  html+=`<div style="font-size:9px;color:#b8860b;margin-bottom:4px">⭐ FEATURED — Smooth Like Sade</div>`;
+  html+=`<div class="drink-btn soul-featured" data-rid="smooth_tribute" style="display:flex;align-items:center;gap:10px;padding:10px;border-color:#b8860b;background:rgba(184,134,11,0.1);width:100%;text-align:left;cursor:pointer">`;
+  html+=`<div style="font-size:28px">🎷</div>`;
+  html+=`<div style="flex:1"><div style="color:#ffd700;font-size:12px;font-weight:bold">Smooth Like Sade</div>`;
+  html+=`<div style="color:#aaa;font-size:9px">Echo & The Velvet Horns</div>`;
+  html+=`<div style="color:#888;font-size:8px">Live sax melody · B minor · 96 BPM · 8-bar arrangement</div></div>`;
+  html+=`<div style="color:#ffd080;font-size:10px">▶ PLAY</div>`;
+  html+=`</div></div>`;
+
+  // DJ Sets
+  html+=`<div style="font-size:9px;color:#888;margin-bottom:4px">🎧 DJ Sets — curated flows</div>`;
+  html+=`<div style="max-height:180px;overflow-y:auto">`;
+  djSets.forEach((set,i)=>{
+    const trackNames=set.tracks.map(tid=>{const r=BarVibes.records.find(rr=>rr.id===tid);return r?r.title:'?';}).join(' → ');
+    html+=`<div class="drink-btn dj-set" data-idx="${i}" style="display:flex;align-items:center;gap:8px;padding:6px 8px;margin:3px 0;border-color:${set.color}66;width:100%;text-align:left;cursor:pointer">`;
+    html+=`<span style="font-size:18px">${set.icon}</span>`;
+    html+=`<div style="flex:1"><div style="color:${set.color};font-size:10px;font-weight:bold">${set.name}</div>`;
+    html+=`<div style="font-size:8px;color:#888">${set.desc}</div>`;
+    html+=`<div style="font-size:7px;color:#555;margin-top:2px">${trackNames}</div></div>`;
+    html+=`<div style="color:#ffd080;font-size:9px">▶</div>`;
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+
+  html+=`<div style="display:flex;gap:6px;margin-top:8px">`;
+  html+=`<button class="drink-btn" id="dj-browse" style="flex:1;border-color:#ffd080;color:#ffd080;font-size:10px">💿 All Records</button>`;
+  html+=`<button class="drink-btn" id="dj-shuffle" style="flex:1;border-color:#ff6ec7;color:#ff6ec7;font-size:10px">🔀 Soul Shuffle</button>`;
+  html+=`</div>`;
+
+  const{p}=createPopup(html);
+
+  // Featured track click
+  const feat=p.querySelector('.soul-featured');
+  if(feat) feat.onclick=()=>{
+    BarVibes.start('smooth_tribute');
+    S.musicPlaying=true;$('#btn-music').classList.add('active');
+    showThought('🎷 Smooth Like Sade — the sax speaks...');
+    p.closest('.popup-overlay').remove();
+  };
+
+  // DJ Set clicks
+  p.querySelectorAll('.dj-set').forEach(el=>{
+    el.onclick=()=>{
+      const set=djSets[parseInt(el.dataset.idx)];
+      // Start first track, queue the rest
+      BarVibes._djSetQueue=set.tracks.slice(1);
+      BarVibes._shuffleMode=false;
+      BarVibes.start(set.tracks[0]);
+      S.musicPlaying=true;$('#btn-music').classList.add('active');
+      showThought(`🎧 DJ Set: ${set.name}`);
+      showNotification(`🎧 Now playing: ${set.name}`);
+      p.closest('.popup-overlay').remove();
+    };
+  });
+
+  // Browse all
+  const browse=p.querySelector('#dj-browse');
+  if(browse) browse.onclick=()=>{p.closest('.popup-overlay').remove();showVinylSelector();};
+
+  // Soul shuffle (only soul/R&B/jazz tracks)
+  const shuffle=p.querySelector('#dj-shuffle');
+  if(shuffle) shuffle.onclick=()=>{
+    const soulTracks=BarVibes.records.filter(r=>/Soul|R&B|Neo|Jazz|Smooth/.test(r.genre));
+    const pick=soulTracks[Math.floor(Math.random()*soulTracks.length)];
+    BarVibes._shuffleMode=true;
+    BarVibes.start(pick.id);
+    S.musicPlaying=true;$('#btn-music').classList.add('active');
+    showThought(`🔀 Soul shuffle: "${pick.title}"`);
+    p.closest('.popup-overlay').remove();
+  };
+}
 
 // PART 2: STATION-WIDE SOUND EFFECTS
 const SoundFX = {
