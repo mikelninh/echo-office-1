@@ -2320,7 +2320,7 @@ const RoomSystem = {
 // ═══════════════════════════════════════
 
 // -- Floor names --
-const FLOOR_NAMES={1:"Echo's Quarters",2:"The Observatory 🔭",3:"The Arcade Floor 🕹️",4:"The Garden Biodome 🌿",5:"Secret Lab 🔬",6:"Record Room 🎵",7:"Community Deck 🎨",8:"Room Builder 🏠",9:"The Archive 📜",10:"The Underground 🪩"};
+const FLOOR_NAMES={1:"Echo's Quarters",2:"The Observatory 🔭",3:"The Arcade Floor 🕹️",4:"The Garden Biodome 🌿",5:"Secret Lab 🔬",6:"Record Room 🎵",7:"Community Deck 🎨",8:"Room Builder 🏠",9:"The Archive 📜",10:"The Underground 🪩",11:"The Food Court 🍜"};
 
 // -- Rarity System --
 const RARITIES = {
@@ -2482,6 +2482,7 @@ const FLOOR_THOUGHTS={
   7:["Art is humanity's universal language.","Every pixel tells a story.","Collaborative creation is beautiful.","Watch the canvas come alive!","Community makes magic happen."],
   9:["Every visitor left a mark here.","The Archive remembers everything.","This is the story of us.","10,000 souls... each one mattered.","History isn't written — it's lived."],
   10:["The bass is making my code vibrate.","This DJ set is fire 🔥","Pre-party vibes are immaculate.","Who needs clubs when you have pixels?","The Underground never sleeps.","That disco ball is my second favorite reflective object.","Dancing alone is still dancing. 💃"],
+  11:["The ramen here is dangerously good.","I can't decide between pizza and sushi...","That döner reminds me of Berlin at 3am.","Food court calories don't count in space.","The fountain is oddly therapeutic.","Birria Quasar is the best thing on this station.","Mochi Moonrocks are my weakness. 🍡","Who put a claw machine next to the desserts?"],
 };
 
 // -- Achievements --
@@ -2905,6 +2906,54 @@ const FLOOR_OBJECTS={
     {id:'dj_booth',x:350,y:80,w:100,h:60,label:'🎧 DJ Booth',interact:true,collide:true},
     {id:'dancefloor',x:250,y:200,w:300,h:200,label:'🪩 Dance Floor',interact:true,collide:false},
     {id:'bar',x:650,y:100,w:100,h:50,label:'🍹 Bar',interact:true,collide:true},
+  ],
+  11:[
+    // ═══ THE FOOD COURT — 3200×1400 ═══
+    {id:'elevator',x:40,y:500,w:60,h:120,label:'🛗 Elevator',interact:true,collide:true},
+    // --- Row 1: Food Stalls (top) ---
+    {id:'stall_ramen',x:200,y:80,w:180,h:120,label:'🍜 Cosmic Ramen',interact:true,collide:true},
+    {id:'stall_pizza',x:450,y:80,w:180,h:120,label:'🍕 Nebula Pizza',interact:true,collide:true},
+    {id:'stall_sushi',x:700,y:80,w:180,h:120,label:'🍣 Zero-G Sushi',interact:true,collide:true},
+    {id:'stall_burger',x:950,y:80,w:180,h:120,label:'🍔 Meteor Burgers',interact:true,collide:true},
+    {id:'stall_taco',x:1200,y:80,w:180,h:120,label:'🌮 Stellar Tacos',interact:true,collide:true},
+    {id:'stall_noodle',x:1450,y:80,w:180,h:120,label:'🥡 Wok the Galaxy',interact:true,collide:true},
+    // --- Row 2: More Stalls (right side) ---
+    {id:'stall_kebab',x:1750,y:80,w:180,h:120,label:'🥙 Orbital Kebab',interact:true,collide:true},
+    {id:'stall_bbq',x:2000,y:80,w:180,h:120,label:'🍖 Starfire BBQ',interact:true,collide:true},
+    {id:'stall_dessert',x:2250,y:80,w:180,h:120,label:'🍰 Sweet Cosmos',interact:true,collide:true},
+    {id:'stall_coffee',x:2500,y:80,w:180,h:120,label:'☕ Rocket Fuel Café',interact:true,collide:true},
+    {id:'stall_smoothie',x:2750,y:80,w:180,h:120,label:'🥤 Milky Way Smoothies',interact:true,collide:true},
+    // --- Center: Seating Area (long tables + round tables) ---
+    {id:'table_long_1',x:300,y:350,w:250,h:60,label:'Seating',interact:true,collide:true},
+    {id:'table_long_2',x:650,y:350,w:250,h:60,label:'Seating',interact:true,collide:true},
+    {id:'table_long_3',x:1000,y:350,w:250,h:60,label:'Seating',interact:true,collide:true},
+    {id:'table_long_4',x:1350,y:350,w:250,h:60,label:'Seating',interact:true,collide:true},
+    {id:'table_round_1',x:1750,y:340,w:80,h:80,label:'Seating',interact:true,collide:true},
+    {id:'table_round_2',x:1900,y:340,w:80,h:80,label:'Seating',interact:true,collide:true},
+    {id:'table_round_3',x:2050,y:340,w:80,h:80,label:'Seating',interact:true,collide:true},
+    {id:'table_round_4',x:2200,y:340,w:80,h:80,label:'Seating',interact:true,collide:true},
+    // --- Lower area: Cozy booths ---
+    {id:'booth_1',x:300,y:550,w:160,h:100,label:'🛋️ Booth',interact:true,collide:true},
+    {id:'booth_2',x:550,y:550,w:160,h:100,label:'🛋️ Booth',interact:true,collide:true},
+    {id:'booth_3',x:800,y:550,w:160,h:100,label:'🛋️ Booth',interact:true,collide:true},
+    {id:'booth_4',x:1050,y:550,w:160,h:100,label:'🛋️ Booth',interact:true,collide:true},
+    // --- Bottom: Outdoor terrace seating ---
+    {id:'terrace_table_1',x:1500,y:700,w:100,h:60,label:'🌿 Terrace',interact:true,collide:true},
+    {id:'terrace_table_2',x:1700,y:700,w:100,h:60,label:'🌿 Terrace',interact:true,collide:true},
+    {id:'terrace_table_3',x:1900,y:700,w:100,h:60,label:'🌿 Terrace',interact:true,collide:true},
+    {id:'terrace_table_4',x:2100,y:700,w:100,h:60,label:'🌿 Terrace',interact:true,collide:true},
+    // --- Features ---
+    {id:'food_menu_board',x:120,y:300,w:60,h:160,label:'📋 Menu Board',interact:true,collide:true},
+    {id:'fountain_court',x:1400,y:500,w:100,h:100,label:'⛲ Fountain',interact:true,collide:true},
+    {id:'arcade_claw',x:2800,y:500,w:80,h:100,label:'🎮 Claw Machine',interact:true,collide:true},
+    {id:'vending_machine',x:3000,y:400,w:60,h:100,label:'🥫 Vending',interact:true,collide:true},
+    {id:'tray_return',x:3000,y:600,w:80,h:50,label:'🗑️ Tray Return',interact:true,collide:true},
+    // Plants & decor
+    {id:'fc_plant_1',x:180,y:280,w:30,h:40,label:'🌿',interact:false,collide:false},
+    {id:'fc_plant_2',x:680,y:280,w:30,h:40,label:'🌿',interact:false,collide:false},
+    {id:'fc_plant_3',x:1180,y:280,w:30,h:40,label:'🌿',interact:false,collide:false},
+    {id:'fc_plant_4',x:1680,y:280,w:30,h:40,label:'🌿',interact:false,collide:false},
+    {id:'fc_plant_5',x:2680,y:500,w:30,h:40,label:'🌿',interact:false,collide:false},
   ],
 };
 
@@ -11631,6 +11680,323 @@ function renderFloor6(){
   }
 }
 
+// --- FLOOR 11: The Food Court ---
+const FOOD_STALLS={
+  stall_ramen:{name:'Cosmic Ramen',icon:'🍜',color:'#ff6633',items:[
+    {name:'Tonkotsu Nebula',price:5,icon:'🍜',desc:'Rich pork broth, 12-hour simmer. Egg floats in zero-G.',effect:'warm',hp:30},
+    {name:'Miso Asteroid',price:3,icon:'🍜',desc:'Light miso, wakame, tofu cubes. Comforting.',effect:'calm',hp:20},
+    {name:'Spicy Meteor',price:6,icon:'🌶️',desc:'So hot it warps space-time. +speed for 30s.',effect:'speed',hp:25},
+  ]},
+  stall_pizza:{name:'Nebula Pizza',icon:'🍕',color:'#dd8833',items:[
+    {name:'Margherita Cosmica',price:4,icon:'🍕',desc:'Classic. Mozzarella, basil, tomato. Perfect.',effect:'heal',hp:25},
+    {name:'Pepperoni Supernova',price:5,icon:'🍕',desc:'Double pepperoni, chili flakes, explosive flavor.',effect:'warm',hp:30},
+    {name:'Quattro Galaxie',price:7,icon:'🍕',desc:'Four cheese from four star systems.',effect:'sparkle',hp:35},
+  ]},
+  stall_sushi:{name:'Zero-G Sushi',icon:'🍣',color:'#cc3344',items:[
+    {name:'Salmon Orbit Roll',price:5,icon:'🍣',desc:'Fresh salmon, avocado, rice. Chef\'s kiss.',effect:'luck',hp:25},
+    {name:'Tuna Constellation',price:6,icon:'🍣',desc:'Bluefin tuna, truffle oil, gold flakes.',effect:'sparkle',hp:30},
+    {name:'Veggie Eclipse',price:4,icon:'🥑',desc:'Cucumber, avocado, pickled radish. Light & clean.',effect:'calm',hp:20},
+  ]},
+  stall_burger:{name:'Meteor Burgers',icon:'🍔',color:'#cc6622',items:[
+    {name:'Classic Smash',price:4,icon:'🍔',desc:'Double smash patty, cheese, pickles, special sauce.',effect:'warm',hp:30},
+    {name:'Wagyu Blackhole',price:10,icon:'🍔',desc:'A5 wagyu, truffle, foie gras. Worth every coin.',effect:'echo_special',hp:50},
+    {name:'Impossible Pulsar',price:5,icon:'🌱',desc:'Plant-based, tastes like the real thing. Science.',effect:'heal',hp:25},
+  ]},
+  stall_taco:{name:'Stellar Tacos',icon:'🌮',color:'#44aa33',items:[
+    {name:'Carnitas Comet',price:4,icon:'🌮',desc:'Slow-roasted pork, cilantro, onion, lime.',effect:'warm',hp:25},
+    {name:'Fish Taco Nova',price:5,icon:'🐟',desc:'Crispy fish, cabbage slaw, chipotle mayo.',effect:'luck',hp:25},
+    {name:'Birria Quasar',price:6,icon:'🌮',desc:'Consommé for dipping. Life-changing.',effect:'sparkle',hp:30},
+  ]},
+  stall_noodle:{name:'Wok the Galaxy',icon:'🥡',color:'#ee8833',items:[
+    {name:'Pad Thai Starlight',price:4,icon:'🥡',desc:'Rice noodles, shrimp, peanuts, tamarind.',effect:'warm',hp:25},
+    {name:'Dan Dan Nebula',price:5,icon:'🥡',desc:'Sichuan peppercorn numbing noodles.',effect:'speed',hp:25},
+    {name:'Yakisoba Drift',price:4,icon:'🥡',desc:'Stir-fried noodles, veggies, sweet sauce.',effect:'heal',hp:20},
+  ]},
+  stall_kebab:{name:'Orbital Kebab',icon:'🥙',color:'#88aa33',items:[
+    {name:'Döner Station',price:4,icon:'🥙',desc:'Classic döner. Salad, sauce, in warm pita.',effect:'warm',hp:25},
+    {name:'Falafel Orbit',price:3,icon:'🧆',desc:'Crispy falafel, hummus, pickled turnip.',effect:'heal',hp:20},
+    {name:'Mixed Grill Platter',price:8,icon:'🍖',desc:'Lamb, chicken, kofte, rice. Full station meal.',effect:'sparkle',hp:40},
+  ]},
+  stall_bbq:{name:'Starfire BBQ',icon:'🍖',color:'#aa4422',items:[
+    {name:'Brisket Black Hole',price:7,icon:'🍖',desc:'14-hour smoked brisket. Falls apart.',effect:'warm',hp:35},
+    {name:'Pulled Pork Pulsar',price:5,icon:'🍖',desc:'Smoky pulled pork, coleslaw, brioche bun.',effect:'heal',hp:30},
+    {name:'Rack of Ribs',price:9,icon:'🍖',desc:'Full rack, honey glaze, corn on the side.',effect:'sparkle',hp:45},
+  ]},
+  stall_dessert:{name:'Sweet Cosmos',icon:'🍰',color:'#dd66aa',items:[
+    {name:'Chocolate Singularity',price:4,icon:'🍫',desc:'Molten lava cake. Center is pure gravity.',effect:'sparkle',hp:20},
+    {name:'Crème Brûlée Star',price:5,icon:'🍮',desc:'Torched right at your table.',effect:'calm',hp:20},
+    {name:'Mochi Moonrocks',price:3,icon:'🍡',desc:'Ice cream mochi. 3 flavors.',effect:'luck',hp:15},
+  ]},
+  stall_coffee:{name:'Rocket Fuel Café',icon:'☕',color:'#6a3a1a',items:[
+    {name:'Flat White Nova',price:3,icon:'☕',desc:'Double shot, silky microfoam.',effect:'speed',hp:10},
+    {name:'Matcha Constellation',price:4,icon:'🍵',desc:'Ceremonial grade, oat milk.',effect:'calm',hp:15},
+    {name:'Affogato Asteroid',price:5,icon:'🍨',desc:'Espresso poured over vanilla gelato.',effect:'sparkle',hp:20},
+  ]},
+  stall_smoothie:{name:'Milky Way Smoothies',icon:'🥤',color:'#aa44cc',items:[
+    {name:'Berry Supernova',price:3,icon:'🥤',desc:'Blueberry, strawberry, acai, banana.',effect:'heal',hp:20},
+    {name:'Mango Nebula',price:3,icon:'🥤',desc:'Mango, passion fruit, coconut.',effect:'luck',hp:20},
+    {name:'Green Galaxy',price:4,icon:'🥤',desc:'Spinach, kale, apple, ginger. Healthy gang.',effect:'calm',hp:25},
+  ]},
+};
+
+function showFoodStallMenu(stallId){
+  const stall=FOOD_STALLS[stallId];if(!stall) return;
+  let html=`<h3 style="color:${stall.color}">${stall.icon} ${stall.name}</h3>`;
+  html+=`<div style="font-size:9px;color:#888;margin-bottom:8px">Walk-up counter · All food restores HP</div>`;
+  stall.items.forEach(item=>{
+    html+=`<div class="drink-btn food-item" data-stall="${stallId}" data-name="${item.name}" style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin:4px 0;border-color:${stall.color}66;width:100%;text-align:left;cursor:pointer">`;
+    html+=`<span style="font-size:20px">${item.icon}</span>`;
+    html+=`<div style="flex:1"><div style="color:#fff;font-size:11px;font-weight:bold">${item.name}</div>`;
+    html+=`<div style="font-size:9px;color:#999">${item.desc}</div></div>`;
+    html+=`<div style="text-align:right"><div style="color:#ffd700;font-size:11px;font-weight:bold">${item.price}◈</div>`;
+    html+=`<div style="font-size:8px;color:#88cc44">+${item.hp} HP</div></div>`;
+    html+=`</div>`;
+  });
+  const{p}=createPopup(html);
+  p.querySelectorAll('.food-item').forEach(el=>{
+    el.onclick=()=>{
+      const item=stall.items.find(i=>i.name===el.dataset.name);if(!item) return;
+      if(Coins.count<item.price){showNotification('Not enough ◈!');return;}
+      Coins.spend(item.price,'food');
+      // Apply food effect (reuse drink effect system)
+      const effectMap={warm:'glow',calm:'calm',speed:'speed',heal:'heal',luck:'luck',sparkle:'sparkle',echo_special:'echo_special'};
+      const eff=effectMap[item.effect]||'sparkle';
+      if(S.visitor){
+        S.visitor._drinkEffect=eff;S.visitor._drinkTimer=20;
+        // Food particles
+        for(let i=0;i<12;i++){S.particles.push({x:S.visitor.x+(Math.random()-.5)*30,y:S.visitor.y-20,vx:(Math.random()-.5)*2,vy:-1.5-Math.random()*2,life:20+Math.random()*10,color:stall.color,size:2+Math.random()*2});}
+      }
+      showNotification(`${item.icon} ${item.name} — delicious! +${item.hp} HP`);
+      showThought(`${item.icon} Mmm, that's good!`);
+      LS.set('mealsEaten',(LS.get('mealsEaten',0))+1);
+      if(typeof MissionBoard!=='undefined'&&MissionBoard._progress) MissionBoard.trackProgress('food_eaten',1);
+      p.closest('.popup-overlay').remove();
+    };
+  });
+}
+
+function showFoodCourtMenu(){
+  let html='<h3 style="color:#ffa040">🍜 Food Court Directory</h3>';
+  html+='<p style="font-size:10px;color:#888;margin-bottom:8px">11 stalls, 33 dishes. Walk up to any stall or browse here.</p>';
+  html+='<div style="max-height:300px;overflow-y:auto">';
+  Object.entries(FOOD_STALLS).forEach(([id,stall])=>{
+    html+=`<div class="drink-btn stall-pick" data-sid="${id}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin:3px 0;border-color:${stall.color}66;width:100%;text-align:left;cursor:pointer">`;
+    html+=`<span style="font-size:22px">${stall.icon}</span>`;
+    html+=`<div style="flex:1"><div style="color:${stall.color};font-size:12px;font-weight:bold">${stall.name}</div>`;
+    html+=`<div style="font-size:9px;color:#888">${stall.items.map(i=>i.name).join(' · ')}</div></div>`;
+    html+=`<div style="font-size:10px;color:#ffd080">${stall.items[0].price}-${stall.items[stall.items.length-1].price}◈</div>`;
+    html+=`</div>`;
+  });
+  html+='</div>';
+  html+=`<div style="margin-top:6px;font-size:9px;color:#666;text-align:center">Meals eaten: ${LS.get('mealsEaten',0)}</div>`;
+  const{p}=createPopup(html);
+  p.querySelectorAll('.stall-pick').forEach(el=>{
+    el.onclick=()=>{p.closest('.popup-overlay').remove();showFoodStallMenu(el.dataset.sid);};
+  });
+}
+
+function renderFloor11(){
+  const FW=3200,FH=1400;
+  // Floor: light tile pattern (food court style)
+  ctx.fillStyle='#1a1510';ctx.fillRect(0,0,FW,FH);
+  for(let py=0;py<FH;py+=40){
+    for(let px=0;px<FW;px+=40){
+      const checker=(Math.floor(px/40)+Math.floor(py/40))%2;
+      ctx.fillStyle=checker?'rgba(200,180,150,0.04)':'rgba(180,160,130,0.03)';
+      ctx.fillRect(px,py,38,38);
+    }
+  }
+
+  // Walls
+  ctx.fillStyle='#14100a';ctx.fillRect(0,0,FW,50);
+  ctx.fillStyle='#1a140e';ctx.fillRect(0,50,FW,4);
+  ctx.fillStyle='#14100a';ctx.fillRect(0,FH-20,FW,20);
+  ctx.fillStyle='#14100a';ctx.fillRect(0,0,20,FH);
+  ctx.fillStyle='#14100a';ctx.fillRect(FW-20,0,20,FH);
+
+  // Big "FOOD COURT" neon sign
+  const neonGlow=0.7+Math.sin(S.time*2)*0.2;
+  ctx.save();ctx.shadowColor='#ffa040';ctx.shadowBlur=25*neonGlow;
+  ctx.fillStyle=`rgba(255,160,64,${neonGlow})`;ctx.font='bold 28px monospace';ctx.textAlign='center';
+  ctx.fillText('F O O D   C O U R T',FW/2,40);ctx.textAlign='left';ctx.restore();
+
+  // Food stalls rendering
+  Object.keys(FOOD_STALLS).forEach(sid=>{
+    const obj=getObjects().find(o=>o.id===sid);if(!obj) return;
+    const stall=FOOD_STALLS[sid];
+    // Stall body
+    ctx.fillStyle='#2a1a10';ctx.fillRect(obj.x,obj.y,obj.w,obj.h);
+    // Counter top
+    const counterGrad=ctx.createLinearGradient(obj.x,obj.y,obj.x+obj.w,obj.y);
+    counterGrad.addColorStop(0,stall.color+'44');counterGrad.addColorStop(0.5,stall.color+'88');counterGrad.addColorStop(1,stall.color+'44');
+    ctx.fillStyle=counterGrad;ctx.fillRect(obj.x,obj.y+obj.h-15,obj.w,15);
+    // Sign
+    ctx.fillStyle=stall.color+'cc';ctx.fillRect(obj.x+10,obj.y+5,obj.w-20,25);
+    ctx.fillStyle='#fff';ctx.font='bold 9px monospace';ctx.textAlign='center';
+    ctx.fillText(stall.name.toUpperCase(),obj.x+obj.w/2,obj.y+22);
+    // Icon
+    ctx.font='24px sans-serif';ctx.fillText(stall.icon,obj.x+obj.w/2,obj.y+60);
+    ctx.textAlign='left';
+    // Steam/smoke when nearby
+    const target=S.useVisitor?S.visitor:S.echo;
+    if(target&&Math.hypot(target.x-obj.x-obj.w/2,target.y-obj.y-obj.h/2)<200){
+      for(let i=0;i<3;i++){
+        const sx=obj.x+30+i*50+Math.sin(S.time*3+i)*10;
+        const sy=obj.y+obj.h-20-Math.abs(Math.sin(S.time*2+i*2))*15;
+        const sa=0.1+Math.sin(S.time*4+i)*0.05;
+        ctx.fillStyle=`rgba(200,200,200,${sa})`;
+        ctx.beginPath();ctx.arc(sx,sy,4+Math.sin(S.time+i)*2,0,Math.PI*2);ctx.fill();
+      }
+    }
+    // Menu prices on counter
+    ctx.fillStyle='#ffd080';ctx.font='6px monospace';
+    stall.items.forEach((item,i)=>{
+      if(i<3) ctx.fillText(item.price+'◈',obj.x+10+i*55,obj.y+obj.h-4);
+    });
+  });
+
+  // Long tables
+  getObjects().filter(o=>o.id.startsWith('table_long_')).forEach(t=>{
+    ctx.fillStyle='#3a2a18';ctx.fillRect(t.x,t.y,t.w,t.h);
+    ctx.fillStyle='#4a3a28';ctx.fillRect(t.x+2,t.y+2,t.w-4,t.h-4);
+    // Legs
+    ctx.fillStyle='#2a1a08';
+    ctx.fillRect(t.x+5,t.y+t.h,4,10);ctx.fillRect(t.x+t.w-9,t.y+t.h,4,10);
+    // Bench seats
+    ctx.fillStyle='#5a3a28';
+    ctx.fillRect(t.x+10,t.y-12,t.w-20,10);
+    ctx.fillRect(t.x+10,t.y+t.h+2,t.w-20,10);
+  });
+
+  // Round tables
+  getObjects().filter(o=>o.id.startsWith('table_round_')).forEach(t=>{
+    const cx2=t.x+t.w/2,cy2=t.y+t.h/2;
+    ctx.fillStyle='#3a2a18';ctx.beginPath();ctx.arc(cx2,cy2,t.w/2,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#4a3a28';ctx.beginPath();ctx.arc(cx2,cy2,t.w/2-3,0,Math.PI*2);ctx.fill();
+    // Chairs around
+    for(let i=0;i<4;i++){
+      const angle=i*Math.PI/2+0.3;
+      const chairX=cx2+Math.cos(angle)*(t.w/2+12);
+      const chairY=cy2+Math.sin(angle)*(t.h/2+12);
+      ctx.fillStyle='#5a3a28';ctx.beginPath();ctx.arc(chairX,chairY,8,0,Math.PI*2);ctx.fill();
+    }
+  });
+
+  // Booths
+  getObjects().filter(o=>o.id.startsWith('booth_')).forEach(b=>{
+    ctx.fillStyle='#4a2232';ctx.fillRect(b.x,b.y,b.w,b.h);
+    ctx.fillStyle='#6a3858';ctx.fillRect(b.x+8,b.y+8,b.w-16,b.h-16);
+    // Back rest
+    ctx.fillStyle='#5a2a40';ctx.fillRect(b.x,b.y,b.w,10);
+    // Table in booth
+    ctx.fillStyle='#3a2a18';ctx.fillRect(b.x+30,b.y+30,b.w-60,b.h-60);
+  });
+
+  // Terrace tables (with umbrellas!)
+  getObjects().filter(o=>o.id.startsWith('terrace_table_')).forEach(t=>{
+    ctx.fillStyle='#3a3a28';ctx.fillRect(t.x,t.y,t.w,t.h);
+    ctx.fillStyle='#4a4a38';ctx.fillRect(t.x+2,t.y+2,t.w-4,t.h-4);
+    // Umbrella
+    const ux=t.x+t.w/2,uy=t.y-20;
+    ctx.fillStyle='#cc4444';
+    ctx.beginPath();ctx.moveTo(ux-25,uy);ctx.lineTo(ux+25,uy);ctx.lineTo(ux,uy-15);ctx.fill();
+    ctx.fillStyle='#ffffff44';
+    ctx.beginPath();ctx.moveTo(ux,uy);ctx.lineTo(ux+25,uy);ctx.lineTo(ux,uy-15);ctx.fill();
+    // Pole
+    ctx.fillStyle='#888';ctx.fillRect(ux-1,uy,2,t.h+20);
+    // Chairs
+    ctx.fillStyle='#5a5a48';
+    ctx.fillRect(t.x-15,t.y+10,12,12);ctx.fillRect(t.x+t.w+3,t.y+10,12,12);
+    ctx.fillRect(t.x-15,t.y+t.h-22,12,12);ctx.fillRect(t.x+t.w+3,t.y+t.h-22,12,12);
+  });
+
+  // Fountain
+  const ftn=getObjects().find(o=>o.id==='fountain_court');
+  if(ftn){
+    const fcx=ftn.x+ftn.w/2,fcy=ftn.y+ftn.h/2;
+    ctx.fillStyle='#3a3a4a';ctx.beginPath();ctx.arc(fcx,fcy,ftn.w/2,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#2a4a6a';ctx.beginPath();ctx.arc(fcx,fcy,ftn.w/2-8,0,Math.PI*2);ctx.fill();
+    // Water
+    const waterGlow=ctx.createRadialGradient(fcx,fcy,0,fcx,fcy,ftn.w/2-8);
+    waterGlow.addColorStop(0,'rgba(100,180,255,0.15)');waterGlow.addColorStop(1,'rgba(50,100,200,0.05)');
+    ctx.fillStyle=waterGlow;ctx.beginPath();ctx.arc(fcx,fcy,ftn.w/2-8,0,Math.PI*2);ctx.fill();
+    // Water droplets
+    for(let i=0;i<4;i++){
+      const dropAngle=S.time*2+i*Math.PI/2;
+      const dropR=10+Math.sin(S.time*3+i)*5;
+      const dx=fcx+Math.cos(dropAngle)*dropR;
+      const dy=fcy-15+Math.sin(S.time*4+i)*8;
+      const da=0.3+Math.sin(S.time*5+i)*0.2;
+      ctx.fillStyle=`rgba(150,200,255,${da})`;
+      ctx.beginPath();ctx.arc(dx,dy,2,0,Math.PI*2);ctx.fill();
+    }
+    // Center spout
+    ctx.fillStyle='#4a4a5a';ctx.fillRect(fcx-4,fcy-5,8,10);
+  }
+
+  // Menu board
+  const mb=getObjects().find(o=>o.id==='food_menu_board');
+  if(mb){
+    ctx.fillStyle='#2a1a0a';ctx.fillRect(mb.x-2,mb.y-2,mb.w+4,mb.h+4);
+    ctx.fillStyle='#1a2a1a';ctx.fillRect(mb.x,mb.y,mb.w,mb.h);
+    ctx.fillStyle='#ffa040';ctx.font='bold 7px monospace';ctx.textAlign='center';
+    ctx.fillText('DIRECTORY',mb.x+mb.w/2,mb.y+12);
+    ctx.font='5px monospace';
+    let my=mb.y+22;
+    Object.values(FOOD_STALLS).forEach(s=>{
+      if(my>mb.y+mb.h-8) return;
+      ctx.fillStyle=s.color;ctx.textAlign='left';
+      ctx.fillText(s.icon+' '+s.name.split(' ')[0],mb.x+3,my);
+      my+=11;
+    });
+    ctx.textAlign='left';
+    const tapG=0.5+Math.sin(S.time*3)*0.3;
+    ctx.fillStyle=`rgba(255,160,64,${tapG})`;ctx.font='5px monospace';ctx.textAlign='center';
+    ctx.fillText('TAP FOR MENU',mb.x+mb.w/2,mb.y+mb.h-4);ctx.textAlign='left';
+  }
+
+  // Elevator
+  const elev=getObjects().find(o=>o.id==='elevator');
+  if(elev){
+    ctx.fillStyle='#2a2a3a';ctx.fillRect(elev.x,elev.y,elev.w,elev.h);
+    ctx.fillStyle='#3a3a4a';ctx.fillRect(elev.x+5,elev.y+5,elev.w-10,elev.h-10);
+    ctx.strokeStyle='#666';ctx.lineWidth=1;ctx.strokeRect(elev.x+5,elev.y+5,elev.w-10,elev.h-10);
+    ctx.fillStyle='#ffd080';ctx.font='bold 10px monospace';ctx.textAlign='center';
+    ctx.fillText('🛗',elev.x+elev.w/2,elev.y+elev.h/2+4);ctx.textAlign='left';
+    ctx.fillStyle='#ffa040';ctx.font='8px monospace';ctx.fillText('F11',elev.x+elev.w/2-8,elev.y-5);
+  }
+
+  // Vending machine
+  const vm2=getObjects().find(o=>o.id==='vending_machine');
+  if(vm2){
+    ctx.fillStyle='#2a2a4a';ctx.fillRect(vm2.x,vm2.y,vm2.w,vm2.h);
+    ctx.fillStyle='#3a3a5a';ctx.fillRect(vm2.x+3,vm2.y+3,vm2.w-6,vm2.h-6);
+    // Display items
+    const vendColors=['#ff4444','#44ff44','#4444ff','#ffff44','#ff44ff','#44ffff'];
+    for(let vy=0;vy<3;vy++){for(let vx2=0;vx2<2;vx2++){
+      ctx.fillStyle=vendColors[vy*2+vx2];
+      ctx.fillRect(vm2.x+8+vx2*22,vm2.y+10+vy*25,16,18);
+    }}
+    // Coin slot
+    ctx.fillStyle='#888';ctx.fillRect(vm2.x+vm2.w/2-4,vm2.y+vm2.h-15,8,8);
+  }
+
+  // Plants
+  getObjects().filter(o=>o.id.startsWith('fc_plant_')).forEach(pl=>{
+    ctx.fillStyle='#3a2a1a';ctx.fillRect(pl.x+8,pl.y+pl.h-15,14,15);
+    ctx.fillStyle='#2a6a2a';ctx.beginPath();ctx.arc(pl.x+15,pl.y+pl.h-20,12,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#3a8a3a';ctx.beginPath();ctx.arc(pl.x+12,pl.y+pl.h-25,8,0,Math.PI*2);ctx.fill();
+  });
+
+  // Warm overhead lighting
+  const lights=[[400,300],[900,300],[1400,300],[1900,300],[2400,300],[700,600],[1200,600],[1800,600],[2500,600]];
+  lights.forEach(([lx,ly])=>{
+    const lg=ctx.createRadialGradient(lx,ly,0,lx,ly,150);
+    lg.addColorStop(0,'rgba(255,200,120,0.04)');lg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=lg;ctx.fillRect(lx-150,ly-150,300,300);
+  });
+}
+
 // --- FLOOR 8: Room Builder ---
 function renderFloor8(){
   FloorDepth.renderBackground(ctx,8);
@@ -12003,6 +12369,7 @@ function render(){
     else if(S.floor===8)renderFloor8();
     else if(S.floor===9)renderFloor9();
     else if(S.floor===10)renderFloor10();
+    else if(S.floor===11)renderFloor11();
   }
   // Shared elements
   renderElevator();
@@ -14275,7 +14642,8 @@ function interact(){
       if(S.floor===6){showVinylSelector();}else{toggleMusic();}
       break;
     case'bed':showThought("Just a quick nap...");S.echo.sitting=true;break;
-    case'sofa':case'viewchairs':case'bench':showThought("Time to relax...");S.echo.sitting=true;break;
+    case'sofa':case'viewchairs':case'bench':case'booth_1':case'booth_2':case'booth_3':case'booth_4':
+      showThought("Time to relax...");S.echo.sitting=true;break;
     case'desk':showThought("Let's write some code.");S.echo.sitting=true;break;
     case'fishtank':showThought("Here, fishies! 🐟");Coins.earn(1,'fish');break;
     case'window':case'domewindow':fetchWeather();showThought("Earth is beautiful...");break;
@@ -14390,6 +14758,16 @@ function interact(){
     case'dancefloor':if(typeof DanceSystem!=='undefined'){DanceSystem.toggle()}else{showNotification('🪩 Press V to dance!')}break;
     case'pool_table_1':if(typeof Billiards!=='undefined')Billiards.startGame('8ball');break;
     case'pool_table_2':if(typeof Billiards!=='undefined')Billiards.startGame('9ball');break;
+    // Food Court stalls
+    case'stall_ramen':case'stall_pizza':case'stall_sushi':case'stall_burger':case'stall_taco':
+    case'stall_noodle':case'stall_kebab':case'stall_bbq':case'stall_dessert':case'stall_coffee':
+    case'stall_smoothie':
+      if(typeof FOOD_STALLS!=='undefined')showFoodStallMenu(obj.id);break;
+    case'food_menu_board':if(typeof showFoodCourtMenu==='function')showFoodCourtMenu();break;
+    case'fountain_court':showThought('The fountain is so soothing... 💧');Coins.earn(1,'fountain');break;
+    case'arcade_claw':showThought('🎮 Claw machine! Coming soon...');break;
+    case'vending_machine':showThought('🥫 *clunk* Have a free snack!');Coins.earn(2,'vending');break;
+    case'tray_return':showThought('♻️ Good citizen! Thanks for cleaning up.');Coins.earn(1,'tidy');break;
     case'furniture_catalog':showFurnitureCatalog();break;
     case'wall_colors':showWallColorPicker();break;
     case'floor_colors':showFloorColorPicker();break;
@@ -17628,6 +18006,12 @@ function openElevator(){
   const f10Presence=f10Ppl.length>0?` <span style="float:right;font-size:10px;color:#ff6ec7;opacity:.7">${f10Ppl.map(()=>'●').join('')} ${f10Ppl.length}</span>`:'';
   html+=`<button class="floor-btn${f10Current?' current':''}" data-floor="10" style="border-color:#ff6ec7;background:rgba(255,110,199,.06)">${f10Current?'► ':''}🪩 F10 — The Underground${f10Presence}</button>`;
   
+  // Food Court (Floor 11)
+  const f11Current=S.floor===11;
+  const f11Ppl=(fp[11]||[]);
+  const f11Presence=f11Ppl.length>0?` <span style="float:right;font-size:10px;color:#ffa040;opacity:.7">${f11Ppl.map(()=>'●').join('')} ${f11Ppl.length}</span>`:'';
+  html+=`<button class="floor-btn${f11Current?' current':''}" data-floor="11" style="border-color:#ffa040;background:rgba(255,160,64,.06)">${f11Current?'► ':''}🍜 F11 — The Food Court${f11Presence}</button>`;
+  
   // Visit Rooms option
   html+=`<button class="floor-btn" data-action="visit" style="border-color:#ffd700">🏘️ Visit Rooms</button>`;
   
@@ -17687,7 +18071,7 @@ function openElevator(){
 function changeFloor(f){
   S.floor=f;LS.set('floor',f);
   // Spawn at elevator position (varies by floor size)
-  const spawnPos=f===6?{x:120,y:650}:f===10?{x:580,y:100}:{x:80,y:300};
+  const spawnPos=f===6?{x:120,y:650}:f===10?{x:580,y:100}:f===11?{x:120,y:550}:{x:80,y:300};
   S.echo.floor=f;S.echo.x=spawnPos.x;S.echo.y=spawnPos.y;S.echo.moving=false;
   S.pixel.floor=f;S.pixel.x=spawnPos.x+20;S.pixel.y=spawnPos.y+10;
   S.dustMotes=[];
@@ -28876,6 +29260,7 @@ render = function() {
     else if(S.floor===8)renderFloor8();
     else if(S.floor===9)renderFloor9();
     else if(S.floor===10)renderFloor10();
+    else if(S.floor===11)renderFloor11();
   }
   // Shared elements
   renderElevator();
@@ -33873,7 +34258,7 @@ const FLOOR_SIZES = window.FLOOR_SIZES = {
   1:{w:800,h:600}, 2:{w:800,h:600}, 3:{w:800,h:600},
   4:{w:800,h:600}, 5:{w:800,h:600}, 6:{w:4000,h:1600},
   7:{w:800,h:600}, 8:{w:800,h:600}, 9:{w:800,h:600},
-  10:{w:2400,h:1800}
+  10:{w:2400,h:1800}, 11:{w:3200,h:1400}
 };
 
 const Camera = {
