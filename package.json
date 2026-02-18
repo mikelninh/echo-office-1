@@ -1,28 +1,12 @@
 {
-  "name": "echo-worlds",
-  "version": "2.0.0",
-  "description": "Echo Worlds — Every community deserves a place",
-  "main": "platform.js",
+  "name": "echos-vault",
+  "version": "1.0.0",
+  "description": "Echo's Vault — Collectibles Command Center",
   "scripts": {
-    "start": "node platform.js",
-    "game": "node server.js",
-    "dev": "node platform.js"
+    "start": "npx http-server . -p ${PORT:-8080} -c86400 --cors --gzip -d false",
+    "dev": "npx http-server . -p 8765 -c-1 --cors"
   },
-  "keywords": [
-    "pixel-art",
-    "social",
-    "discord",
-    "citizen-science",
-    "msa"
-  ],
-  "author": "hallochupi-sketch",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "better-sqlite3": "^11.0.0",
-    "discord.js": "^14.0.0",
-    "express": "^4.21.0",
-    "socket.io": "^4.8.0",
-    "ws": "^8.19.0"
+    "http-server": "^14.1.1"
   }
 }
