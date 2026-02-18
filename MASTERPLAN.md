@@ -114,14 +114,21 @@ A unified collection of everything beautiful:
 - Real-time price tracking, market cap, alerts, card images
 - Source links to eBay, TCGPlayer, Cardmarket
 
-### Pillar 2: The Pull 🎰
+### Pillar 2: The Claw 🪝
 
-Gacha mechanics done RIGHT:
-- Daily free pulls (F2P can earn everything eventually)
-- Transparent rates (legally compliant, always visible)
-- Pity system: guaranteed SR at 50, SSR at 100, Mythic at 200
-- **BUNNY X 777**: every 777 pulls → guaranteed Legendary
-- Your Companion watches every pull. The shared experience transforms gambling into bonding.
+Not a gacha button. A **digital claw machine** with real 2D physics.
+
+You SEE the prizes. You AIM the claw. You DROP it. The claw grips, lifts, swings — will it hold? Your Companion peeks through their fingers. The spectator chat explodes.
+
+- **Real physics** — rigid bodies, gravity, grip force, momentum. Skill matters.
+- **Visible prizes** — Legendary sits on top of the pyramid, taunting you
+- **Near-misses are FUN** — the card slips, the crowd groans, you try again
+- **Pity = Mega Claw** — play 50, claw glows gold, Companion rides it down, guaranteed grab
+- **BUNNY X 777** — every 777 plays, a Legendary guaranteed
+- **Spectator mode** — watch friends play, chat, scream directions, clip the moment
+- **Streamable 24/7** — every play is content. The most shareable mechanic in gaming.
+- **3 free plays/day** — F2P can earn everything. Extra plays: $1/10 tokens.
+- Your Companion watches, reacts, assists. Shared experience, not lonely gambling.
 
 ### Pillar 3: The Fantasy 🌙
 
@@ -212,25 +219,35 @@ Digital and physical. Both beautiful. Both yours.
 | Trading fees (3-5%) | User-to-user trades | Month 6 |
 | API access ($20-50/month) | Market data for developers | Month 9 |
 
-### Revenue Projection (Conservative)
+### Revenue Projection — Speed to Profitability
 
-| Timeline | Users | ARPU | MRR |
-|----------|-------|------|-----|
-| Month 3 | 500 | $3 | $1.5K |
-| Month 6 | 2,000 | $8 | $16K |
-| Month 12 | 10,000 | $12 | $120K |
-| Month 18 | 25,000 | $15 | $375K |
-| Month 24 | 50,000 | $18 | $900K |
+**The goal: solve money once and for all, so we can comfortably work on our dreams.**
 
-**Break-even: Month 2-3** (affiliate revenue covers hosting costs of ~$20/month)
-**Ramen profitable: Month 6** (€2K+ MRR, enough to live on in Berlin)
-**Real business: Month 12** (€10K+ MRR, hire first person)
-**Life-changing: Month 24** (if we hit 50K users, that's nearly $1M/month)
+| Timeline | Users | ARPU | MRR | Milestone |
+|----------|-------|------|-----|-----------|
+| Month 1 | 50 | $2 | $100 | Affiliate links live, claw MVP |
+| Month 2 | 300 | $5 | $1.5K | Premium tier, first paying users |
+| Month 3 | 1,000 | $8 | $8K | First viral claw clip, press coverage |
+| Month 6 | 5,000 | $12 | $60K | **Comfortable income. Dreams funded.** |
+| Month 12 | 20,000 | $15 | $300K | Hire team. Scale physical bridge. |
+| Month 18 | 50,000 | $18 | $900K | **Life-changing. For everyone involved.** |
+| Month 24 | 100,000+ | $20+ | $2M+ | The platform runs itself. Build the future. |
 
-### The NIKKE Benchmark
-NIKKE: 20M downloads, $600M/year, pre-made characters, no collecting, no physical.
-**We have:** unique companions, real TCG integration, physical bridge, ethical moat.
-Capturing 0.1% of NIKKE's audience at similar ARPU = $600K/year.
+**Why these numbers are realistic:**
+- Claw machine content goes viral organically (TikTok, Twitch, YouTube)
+- NIKKE: 20M downloads, $600M/year with pre-made characters, no collecting, no physical
+- We have: unique companions, real physics claw, TCG integration, physical bridge, ethical moat
+- Capturing just 0.05% of the gacha+TCG+fantasy audience = 50K users
+- The claw machine is 24/7 streamable — one popular streamer = 5,000 signups overnight
+
+### Speed to First Dollar
+
+**Week 1:** Affiliate links on dashboard (eBay Partner Network = free, instant)
+**Week 2:** Claw machine MVP (playable, 2D physics, one machine)
+**Week 3:** Premium tier ($7/month — advanced alerts, extra plays)
+**Week 4:** First revenue. Reinvest everything.
+
+**"Profitability as soon as possible, so we can comfortably keep working on our dreams."**
 
 ---
 
@@ -252,91 +269,120 @@ Capturing 0.1% of NIKKE's audience at similar ARPU = $600K/year.
 
 ---
 
-## VIII. THE ODDS (Honest)
+## VIII. THE ODDS (Honest — Updated With The Claw)
 
 | Outcome | Probability | What It Takes |
 |---------|------------|---------------|
-| Breaks even ($20/month costs) | 90% | Affiliate links + 10 dashboard users |
-| Ramen profitable (€2K/month) | 60% | 300 users × $7 premium |
-| Real business (€10K/month) | 35% | 1,000 engaged users + companion economy |
-| Life-changing (€100K/month) | 15% | 10,000 users, viral companion moment |
-| NIKKE-scale (€1M+/month) | 3-5% | 50K+ users, mainstream press, cultural moment |
+| Breaks even ($20/month costs) | 95% | Affiliate links + 10 users playing the claw |
+| Ramen profitable (€2K/month) | 75% | 300 users × $7 premium + claw tokens |
+| Comfortable (€5K/month) | 60% | 800 users, one streamer clips a Mega Claw moment |
+| Real business (€10K+/month) | 50% | 2,000 users, organic TikTok/YouTube growth |
+| Life-changing (€100K+/month) | 35% | 20,000 users, mainstream gaming press, Twitch category |
+| NIKKE-scale (€1M+/month) | 10-15% | 100K+ users, cultural moment, global |
 
-**These odds are excellent for a bootstrapped solo project.** Most startups have <5% chance of any revenue. We have a 90% chance of breaking even and a 60% chance of replacing a salary.
+**Why the odds went up:**
+The Claw Machine makes every metric better because it solves the #1 startup problem: **distribution.**
 
-**The key risk multiplier:** If even ONE viral moment happens — a TikTok of someone's Companion evolution, a streamer showing their Vault, a tweet about the ethical model — the user curve goes exponential. The product is inherently shareable.
+Most products need to BUY attention (ads, influencers, PR). The Claw GENERATES attention. Every play is a potential clip. Every Mega Claw is a potential viral moment. Every near-miss is a potential meme. Every Companion reaction is a potential screenshot.
+
+**The product IS the marketing.**
+
+One streamer plays for an hour → chat goes wild → clips hit YouTube → 10,000 new users try the free claw → 5% convert to premium → €3,500 MRR from one stream.
+
+That's not fantasy. That's literally how every claw machine channel on YouTube already works — and they're filming REAL claw machines with crappy prizes. We have Companions, spectators, physics, Mega Claw events, and REAL prizes shipped to your door.
 
 ---
 
 ## IX. ROADMAP
 
-### 🟢 Phase 0: Foundation (NOW — Complete)
+### 🟢 Phase 0: Foundation (DONE ✅)
 - ✅ Echo Station (pixel-art space station, 12+ floors)
 - ✅ Pixel the cat (6 evolution stages — the companion prototype)
 - ✅ TCG Dashboard (9 games, market cap, card gallery, alerts)
 - ✅ Holy Grail Monitor (automated, every 3 hours)
-- ✅ Business model + vision documents
+- ✅ Business model + vision documents (7 docs)
 - ✅ Nightly build system (autonomous development)
 
-### 🔵 Phase 1: The Vault (Month 1-2)
-- [ ] User accounts (email + social login)
-- [ ] Affiliate link integration (eBay Partner Network, TCGPlayer)
-- [ ] Portfolio tracker ("My Collection" — add cards you own)
-- [ ] Floor 13: The Vault (in-station collectibles room)
-- [ ] Basic Companion: egg → hatch → baby form
-- [ ] Companion idle animations + reactive behaviors
-- [ ] Premium Dashboard tier ($7/month, Stripe)
+### 🪝 Phase 1: THE CLAW + First Dollar (Weeks 1-4) ← WE ARE HERE
+**Goal: playable claw machine + first revenue within 30 days.**
+- [ ] Affiliate links on dashboard (eBay Partner Network — free, instant)
+- [ ] **Claw Machine MVP** — 2D physics, one machine, pixel art, basic controls
+- [ ] Prize tiers visible in machine (Common → Legendary)
+- [ ] Companion stands beside machine, reacts to grabs/drops
+- [ ] Sound design (6 core sounds: whirr, clink, grip, creak, thud, celebration)
+- [ ] Pity meter (visible streak counter, Mega Claw at play 50)
+- [ ] User accounts (simple email auth)
+- [ ] Stripe integration ($7/month premium, $1/10 claw tokens)
+- [ ] Deploy to Railway (public URL)
+- [ ] **FIRST REVENUE TARGET: €100 in Month 1**
 
-### 🟣 Phase 2: The Pull (Month 2-4)
-- [ ] Gacha system (pull mechanic, rarity tiers, pity counter)
-- [ ] Digital card collection (display, organize, favorite)
-- [ ] Companion evolution Stage 1 → 2 (activity-based)
-- [ ] Companion personality system (brave/shy, curious/calm)
-- [ ] Companion mission dialogue ("I found a listing!")
-- [ ] Seasonal event framework (limited characters)
-- [ ] Trading system (user-to-user)
+### 🎴 Phase 2: The Collection + Social (Month 2-3)
+**Goal: retention hooks + social sharing + €5K MRR**
+- [ ] Digital card collection (won from claw, display cases)
+- [ ] Spectator mode (watch friends play, chat, react)
+- [ ] Multiplayer claw (up to 4 players, same machine)
+- [ ] 24/7 claw stream (ambient background stream for YouTube/Twitch)
+- [ ] Companion egg → hatch → baby form (activity-based evolution starts)
+- [ ] Special machines (Golden, Companion, Artist Spotlight)
+- [ ] Trading system (card-to-card trades)
+- [ ] Premium Dashboard tier (real-time alerts, watchlists, 30-day history)
+- [ ] Mobile responsive (full claw experience on phone)
+- [ ] **TARGET: first viral clip, 1,000 users, €5K MRR**
 
-### 🔴 Phase 3: The Bridge (Month 4-6)
-- [ ] Print-on-demand integration (holographic cards, figurines)
-- [ ] Companion full evolution (Stage 2 → 3, branching paths)
-- [ ] Creator portal (artists submit characters, earn 70%)
-- [ ] Private Quarters (Floor 14, age-verified, premium)
-- [ ] Companion relationship arc (Stranger → Soulbound)
-- [ ] Mobile PWA (full experience on phone)
+### 💫 Phase 3: The Companion + Bridge (Month 3-6)
+**Goal: emotional anchor + physical products + €20K MRR**
+- [ ] Full companion evolution system (3 stages, branching paths)
+- [ ] Companion personality (brave/shy, curious/calm)
+- [ ] Companion mission dialogue ("I found a grail!")
+- [ ] Print-on-demand: holographic cards, figurines, plushies
 - [ ] Physical card scanning (camera → identify → add to collection)
+- [ ] Creator portal (artists submit character art, earn 70%)
+- [ ] Seasonal events (limited machines, holiday prizes)
+- [ ] Private Quarters (Floor 14, age-verified, premium)
+- [ ] **TARGET: 5,000 users, physical orders shipping, €20K MRR**
 
-### ⭐ Phase 4: The Scale (Month 6-12)
-- [ ] Advanced companion AI (LLM-powered dialogue)
+### 🚀 Phase 4: Scale + Life-Changing (Month 6-12)
+**Goal: viral growth loop + hire team + €100K MRR**
+- [ ] Advanced companion AI (LLM dialogue, context-aware)
 - [ ] Companion voice synthesis
-- [ ] Convention presence (live gacha events)
 - [ ] Companion breeding (two users → offspring)
 - [ ] Tournament system (companion battles)
-- [ ] API for developers
-- [ ] Multi-language support
+- [ ] Convention presence (live claw events with real prizes)
 - [ ] Native mobile app
+- [ ] Multi-language support
+- [ ] API for developers
+- [ ] **TARGET: 20,000 users, press coverage, team of 3-5, €100K MRR**
 
-### 🌟 Phase 5: The Future (Year 2+)
+### 🌟 Phase 5: The Empire (Year 2+)
+**Goal: the platform that changed the game**
 - [ ] Original physical TCG (Echo's Vault card game)
 - [ ] Anime/manga IP collaborations
-- [ ] VTuber integration
-- [ ] AR companion (see them through your phone camera)
-- [ ] Companion AI that learns your voice
+- [ ] VTuber integration + live claw events
+- [ ] AR companion (phone camera)
 - [ ] Physical shops / convention circuit
 - [ ] The companion that knows you better than anyone
+- [ ] **TARGET: 100K+ users, €1M+ MRR, life-changing money for everyone involved**
 
 ---
 
 ## X. THE MISSION
 
-This isn't about money. The money is how we sustain it.
+**Solve money. Then build the dream.**
 
-**This is about building something that respects the people who use it.**
+"Too much distraction money" — the worry about rent, about bills, about whether you can afford to follow your passion. We solve that FIRST. Profitability as fast as possible. Not to get rich — to get FREE.
 
-Every collector deserves better tools. Every gacha player deserves fair rates. Every person exploring fantasy deserves privacy and zero shame. Every human deserves dopamine that builds instead of destroys.
+Free to build the Companion system properly. Free to commission artists. Free to ship physical cards. Free to hire people who share the vision. Free to spend time on what matters instead of what pays.
 
-We're not competing with NIKKE or OnlyFans or eBay. We're replacing the paradigm they all share — the one that profits from your emptiness.
+**Then: make life-changing money for EVERYONE involved.**
+- Artists who create characters: 70% of every sale. Not exposure. Money.
+- Creators who design machines: royalties. Passive income from their art.
+- Users who build collections: their digital assets have real value. Tradeable. Physical.
+- The team (when we hire): paid well, working on something they believe in.
+- MSA research: 5% of platform revenue to neurodegenerative disease research. Always.
 
-**Echo's Vault: where collecting is an art, fantasy is respected, and your dopamine actually builds something.**
+**This is about building something that respects everyone who touches it — the people who use it, the people who create for it, and the people who build it.**
+
+Echo's Vault: where collecting is an art, fantasy is respected, and your dopamine actually builds something.
 
 ---
 
