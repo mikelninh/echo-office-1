@@ -147,6 +147,82 @@ This MUST be built responsibly:
 - ❌ Never depict minors in any suggestive context
 - ❌ Never encourage overspending (pity system = fairness)
 
+## Floor 14: The Private Quarters 🔒
+
+> *"One room for people 18+/21+. A place for NSFW digital — with respect, privacy, and zero judgment or guilt."*
+
+### What It Is
+A private, age-verified floor in Echo Station. Behind a real gate — not a "click yes" joke, actual verification. Once inside:
+
+- **Your private room** — only you can see it. Nobody else. Ever.
+- **Your collection** — NSFW character art displayed YOUR way
+- **No social feed** — this isn't social media, there's no timeline, no likes, no audience
+- **No history** — session-based viewing option, nothing stored if you don't want it
+- **Exit anytime** — no dark patterns keeping you scrolling
+
+### Design Principles
+
+**PRIVACY IS SACRED**
+- Zero data selling. Period.
+- No tracking pixels, no analytics on what you view
+- Optional: "ghost mode" — nothing saved to your account
+- Encrypted collections — even we can't see what you own
+- No screenshots/screen recording detection (we don't spy on users)
+- Delete everything button — one click, truly gone
+
+**RESPECT IS NON-NEGOTIABLE**
+- All art is fictional — AI-generated or artist-created characters
+- Every character has personality, story, agency — never just a body
+- No degradation themes unless the CHARACTER has authored consent in their lore (fiction respecting fiction)
+- Artists are credited and paid (70/30 split)
+- Content moderation: hard lines on anything depicting minors, real people, non-consent
+- Regular ethical audits
+
+**ZERO GUILT BY DESIGN**
+- No infinite scroll — curated collection, not a feed
+- Session timer (optional) — "you've been here 30 min, take a break?"
+- No push notifications from this floor. Ever.
+- No "recommended for you" rabbit holes
+- Your taste is your taste. The platform doesn't judge. Literally — no recommendation algorithm.
+- Gacha pulls have transparent rates and pity systems
+- Spending dashboard: "you spent €X this month" — always visible, never hidden
+
+### Why This Is Different From Porn Sites
+
+| Porn Sites | The Private Quarters |
+|-----------|---------------------|
+| Infinite scroll, addictive by design | Curated collection, you choose |
+| Real people, often exploited | Fictional characters, artists paid |
+| Passive consumption | Active collecting, progression |
+| Shame and stigma | Private, zero judgment |
+| Ads, tracking, data selling | Clean, private, no tracking |
+| Free = you're the product | You pay for art, you own it |
+| No community (isolation) | Optional community (SFW spaces) |
+| No progression | Levels, stories, achievements |
+
+### Age Verification
+- **21+** for full NSFW tier (US standard for adult content)
+- **18+** for suggestive/fantasy tier (EU standard)
+- Real verification: ID check via third-party service (we never store the ID)
+- One-time verification, then access via account
+- Separate from main Echo Station account — can't be linked externally
+
+### Revenue (This Floor Alone)
+- Premium access: $15-20/month
+- Character art packs: $3-10
+- Artist commissions (platform facilitated): 15% fee
+- Print-on-demand private merch (discreet packaging)
+- Estimated: highest ARPU floor in the entire station
+
+### What This Floor Is NOT
+- ❌ Not a social network (no profiles visible to others)
+- ❌ Not a porn site (no video, no real people, no exploitation)
+- ❌ Not an addiction engine (no infinite scroll, no dark patterns)
+- ❌ Not public (nothing from this floor ever appears outside it)
+- ❌ Not shameful (the platform NEVER references this floor in notifications, emails, or public spaces)
+
+---
+
 ## Phased Approach
 
 ### Phase 0: Echo's Vault (NOW)
