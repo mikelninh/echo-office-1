@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Echo's Vault — Your Companion</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050510;overflow:hidden;height:100vh;font-family:'Segoe UI',system-ui,sans-serif;color:#e0e0f0;user-select:none;touch-action:none}
+canvas{display:block;position:fixed;top:0;left:0;width:100%;height:100%}
+
+/* ═══ OVERLAYS ═══ */
+.overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity 0.8s ease}
+.overlay.hidden{opacity:0;pointer-events:none}
+
+/* ═══ CHOOSE SCREEN ═══ */
+#chooseScreen{background:rgba(5,5,16,0.97)}
+.choose-title{font-size:28px;font-weight:200;letter-spacing:8px;text-transform:uppercase;color:#ff6ec7;text-shadow:0 0 40px rgba(255,110,199,0.3);margin-bottom:8px}
+.choose-sub{font-size:14px;color:#6a6a8a;margin-bottom:40px;text-align:center;line-height:1.6;max-width:460px}
+.choose-name{margin-bottom:32px;text-align:center}
+.choose-name input{background:transparent;border:none;border-bottom:2px solid #2a2a4a;color:#e0e0f0;font-size:22px;font-family:inherit;text-align:center;padding:8px 16px;outline:none;letter-spacing:2px;width:240px;transition:border-color 0.3s}
+.choose-name input:focus{border-color:#ff6ec7}
+.choose-name input::placeholder{color:#3a3a5a;letter-spacing:1px}
+.choose-name-label{font-size:11px;color:#6a6a8a;margin-top:8px;letter-spacing:1px}
+.locations{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:480px;width:90%}
+.loc-card{background:rgba(18,18,31,0.8);border:1px solid #2a2a4a;border-radius:16px;padding:24px 20px;text-align:center;cursor:pointer;transition:all 0.3s ease;position:relative;overflow:hidden}
+.loc-card:hover{transform:translateY(-4px);border-color:#ff6ec7;box-shadow:0 8px 32px rgba(255,110,199,0.15)}
+.loc-card.selected{border-color:#ff6ec7;background:rgba(255,110,199,0.08)}
+.loc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;opacity:0;transition:opacity 0.3s}
+.loc-card:hover::before,.loc-card.selected::before{opacity:1}
+.loc-observatory::before{background:linear-gradient(90deg,#448aff,#b388ff)}
+.loc-garden::before{background:linear-gradient(90deg,#00e676,#69f0ae)}
+.loc-vault::before{background:linear-gradient(90deg,#ffd700,#ffab40)}
+.loc-underground::before{background:linear-gradient(90deg,#ff4081,#e040fb)}
+.loc-icon{font-size:36px;margin-bottom:8px;display:block}
+.loc-name{font-size:14px;font-weight:600;margin-bottom:4px}
+.loc-desc{font-size:11px;color:#6a6a8a;line-height:1.4}
+.begin-btn{margin-top:32px;background:linear-gradient(135deg,#ff6ec7,#b388ff);color:#050510;border:none;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:2px;padding:14px 48px;border-radius:12px;cursor:pointer;transition:all 0.3s;opacity:0.3;pointer-events:none;text-transform:uppercase}
+.begin-btn.ready{opacity:1;pointer-events:auto}
+.begin-btn.ready:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(255,110,199,0.4)}
+
+/* ═══ STATUS HUD ═══ */
+#hud{position:fixed;top:0;left:0;right:0;z-index:5;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,rgba(5,5,16,0.8),transparent);pointer-events:none;opacity:0;transition:opacity 0.5s}
+#hud.visible{opacity:1}
+.hud-left{display:flex;align-items:center;gap:12px}
+.hud-name{font-size:16px;font-weight:600;letter-spacing:2px}
+.hud-stage{font-size:10px;color:#6a6a8a;text-transform:uppercase;letter-spacing:1px}
+.hud-right{display:flex;align-items:center;gap:20px}
+.hud-stat{text-align:center}
+.hud-stat-value{font-size:14px;font-weight:700}
+.hud-stat-label{font-size:8px;color:#6a6a8a;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px}
+.hud-warmth-bar{width:80px;height:6px;background:#1a1a2e;border-radius:3px;overflow:hidden;margin-top:4px}
+.hud-warmth-fill{height:100%;border-radius:3px;transition:width 0.5s ease;background:linear-gradient(90deg,#ff6ec7,#ffab40)}
+.hud-back{pointer-events:auto;font-size:12px;color:#6a6a8a;text-decoration:none;border:1px solid #2a2a4a;padding:4px 12px;border-radius:6px;transition:all 0.2s}
+.hud-back:hover{color:#ff6ec7;border-color:#ff6ec7}
+
+/* ═══ HINT TEXT ═══ */
+#hint{position:fixed;bottom:32px;left:0;right:0;text-align:center;z-index:5;font-size:13px;color:#6a6a8a;letter-spacing:1px;opacity:0;transition:opacity 1s ease;pointer-events:none}
+#hint.visible{opacity:1}
+
+/* ═══ HATCH OVERLAY ═══ */
+#hatchOverlay{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;flex-direction:column;background:rgba(5,5,16,0.98)}
+.hatch-text{font-size:36px;font-weight:200;letter-spacing:12px;color:#ff6ec7;text-shadow:0 0 60px rgba(255,110,199,0.5);opacity:0;transition:opacity 1s ease;text-transform:uppercase}
+.hatch-sub{font-size:14px;color:#6a6a8a;margin-top:16px;opacity:0;transition:opacity 1s ease 0.5s;letter-spacing:2px}
+</style>
+</head>
+<body>
+
+<!-- CHOOSE SCREEN -->
+<div class="overlay" id="chooseScreen">
+  <div class="choose-title">Your Companion</div>
+  <div class="choose-sub">
+    Every journey begins with a bond.<br>
+    Name your companion and choose where their egg will incubate.<br>
+    In three days, they'll awaken.
+  </div>
+  <div class="choose-name">
+    <input type="text" id="nameInput" placeholder="Name..." maxlength="16" autocomplete="off" spellcheck="false">
+    <div class="choose-name-label">Choose wisely — this name is forever</div>
+  </div>
+  <div class="locations">
+    <div class="loc-card loc-observatory" data-loc="observatory" onclick="selectLoc(this)">
+      <span class="loc-icon">🔭</span>
+      <div class="loc-name">Observatory</div>
+      <div class="loc-desc">Bathed in starlight.<br>Your companion dreams of distant worlds.</div>
+    </div>
+    <div class="loc-card loc-garden" data-loc="garden" onclick="selectLoc(this)">
+      <span class="loc-icon">🌿</span>
+      <div class="loc-name">Garden Biodome</div>
+      <div class="loc-desc">Wrapped in vines and warmth.<br>Life energy flows through the shell.</div>
+    </div>
+    <div class="loc-card loc-vault" data-loc="vault" onclick="selectLoc(this)">
+      <span class="loc-icon">🎴</span>
+      <div class="loc-name">The Vault</div>
+      <div class="loc-desc">Surrounded by holy grails.<br>Your companion absorbs their power.</div>
+    </div>
+    <div class="loc-card loc-underground" data-loc="underground" onclick="selectLoc(this)">
+      <span class="loc-icon">🎵</span>
+      <div class="loc-name">The Underground</div>
+      <div class="loc-desc">Pulsing with rhythm.<br>Music shapes the soul within.</div>
+    </div>
+  </div>
+  <button class="begin-btn" id="beginBtn" onclick="beginIncubation()">Begin Incubation</button>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-left">
+    <a href="/dashboard.html" class="hud-back">← Dashboard</a>
+    <div>
+      <div class="hud-name" id="hudName"></div>
+      <div class="hud-stage" id="hudStage"></div>
+    </div>
+  </div>
+  <div class="hud-right">
+    <div class="hud-stat">
+      <div class="hud-stat-value" id="hudBond">0</div>
+      <div class="hud-stat-label">Bond</div>
+    </div>
+    <div class="hud-stat">
+      <div class="hud-stat-value" id="hudWarmth">
+        <div class="hud-warmth-bar"><div class="hud-warmth-fill" id="hudWarmthFill" style="width:0%"></div></div>
+      </div>
+      <div class="hud-stat-label">Warmth</div>
+    </div>
+    <div class="hud-stat">
+      <div class="hud-stat-value" id="hudDay">Day 1</div>
+      <div class="hud-stat-label">Age</div>
+    </div>
+  </div>
+</div>
+
+<!-- HINT -->
+<div id="hint"></div>
+
+<!-- HATCH OVERLAY -->
+<div id="hatchOverlay">
+  <div class="hatch-text" id="hatchText"></div>
+  <div class="hatch-sub" id="hatchSub"></div>
+</div>
+
+<canvas id="C"></canvas>
+
+<script>
+// ═══ CORE SETUP ═══
+const C = document.getElementById('C');
+const X = C.getContext('2d');
+let W, H;
+function resize() {
+  W = C.width = innerWidth;
+  H = C.height = innerHeight;
+}
+resize();
+addEventListener('resize', resize);
+
+const TAU = Math.PI * 2;
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (v, mn, mx) => Math.max(mn, Math.min(mx, v));
+const rng = (a = 0, b = 1) => a + Math.random() * (b - a);
+const rngI = (a, b) => Math.floor(rng(a, b + 1));
+const easeOut = t => 1 - (1 - t) * (1 - t);
+const easeInOut = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+// ═══ AUDIO ═══
+let AC = null;
+function initAudio() {
+  if (AC) return;
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+}
+function tone(freq, dur, type = 'sine', vol = 0.1, delay = 0) {
+  if (!AC) return;
+  const t = AC.currentTime + delay;
+  const o = AC.createOscillator(); o.type = type; o.frequency.value = freq;
+  const g = AC.createGain(); g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + dur + 0.05);
+}
+function playHeartbeat(rate = 1, vol = 0.08) {
+  if (!AC) return;
+  tone(55, 0.12, 'sine', vol);
+  tone(45, 0.15, 'sine', vol * 0.7, 0.12);
+}
+function playWarmth() {
+  if (!AC) return;
+  tone(440, 0.3, 'sine', 0.05);
+  tone(554, 0.3, 'sine', 0.04, 0.1);
+  tone(659, 0.4, 'sine', 0.03, 0.2);
+}
+function playCrack() {
+  if (!AC) return;
+  const len = AC.sampleRate * 0.08;
+  const buf = AC.createBuffer(1, len, AC.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+  const src = AC.createBufferSource(); src.buffer = buf;
+  const g = AC.createGain(); g.gain.value = 0.12;
+  const f = AC.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 2000;
+  src.connect(f); f.connect(g); g.connect(AC.destination); src.start();
+}
+function playHatch() {
+  if (!AC) return;
+  const notes = [523, 659, 784, 1047, 1319];
+  notes.forEach((n, i) => {
+    tone(n, 0.5, 'sine', 0.08, i * 0.15);
+    tone(n * 1.5, 0.4, 'triangle', 0.04, i * 0.15 + 0.05);
+  });
+  // Shimmer
+  for (let i = 0; i < 20; i++) {
+    tone(rng(800, 4000), rng(0.1, 0.3), 'sine', rng(0.01, 0.03), rng(0, 1.5));
+  }
+}
+
+// ═══ STATE ═══
+const SAVE_KEY = 'echovault_companion';
+let state = null; // null = choose screen, object = incubating/hatched
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw) state = JSON.parse(raw);
+  } catch(e) {}
+}
+function saveState() {
+  if (state) localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+}
+
+// ═══ LOCATION THEMES ═══
+const THEMES = {
+  observatory: {
+    bg1: '#050520', bg2: '#0a0a30',
+    accent: '#448aff', accent2: '#b388ff',
+    particleColor: () => `hsla(${rng(200,280)}, 80%, ${rng(60,90)}%, ${rng(0.3,0.8)})`,
+    eggGlow: '#6a8aff',
+    ambient: 'star',
+  },
+  garden: {
+    bg1: '#051005', bg2: '#0a200a',
+    accent: '#00e676', accent2: '#69f0ae',
+    particleColor: () => `hsla(${rng(100,160)}, 70%, ${rng(50,80)}%, ${rng(0.3,0.7)})`,
+    eggGlow: '#4ae680',
+    ambient: 'leaf',
+  },
+  vault: {
+    bg1: '#100a05', bg2: '#201505',
+    accent: '#ffd700', accent2: '#ffab40',
+    particleColor: () => `hsla(${rng(30,55)}, 90%, ${rng(50,80)}%, ${rng(0.3,0.8)})`,
+    eggGlow: '#ffd760',
+    ambient: 'sparkle',
+  },
+  underground: {
+    bg1: '#150518', bg2: '#200a25',
+    accent: '#ff4081', accent2: '#e040fb',
+    particleColor: () => `hsla(${rng(280,340)}, 80%, ${rng(50,80)}%, ${rng(0.3,0.8)})`,
+    eggGlow: '#ff60a0',
+    ambient: 'pulse',
+  },
+};
+
+// ═══ CHOOSE SCREEN ═══
+let selectedLoc = null;
+
+window.selectLoc = function(el) {
+  document.querySelectorAll('.loc-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedLoc = el.dataset.loc;
+  checkReady();
+};
+
+document.getElementById('nameInput').addEventListener('input', checkReady);
+
+function checkReady() {
+  const name = document.getElementById('nameInput').value.trim();
+  const btn = document.getElementById('beginBtn');
+  if (name.length >= 2 && selectedLoc) {
+    btn.classList.add('ready');
+  } else {
+    btn.classList.remove('ready');
+  }
+}
+
+window.beginIncubation = function() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (name.length < 2 || !selectedLoc) return;
+  initAudio();
+
+  state = {
+    name: name,
+    location: selectedLoc,
+    createdAt: Date.now(),
+    bond: 0,
+    warmth: 0,
+    cracks: 0,
+    interactions: 0,
+    visits: 1,
+    lastVisit: Date.now(),
+    hatched: false,
+    hatchedAt: null,
+    // Companion traits (post-hatch)
+    traits: { brave: 0, curious: 0, playful: 0, warm: 0 },
+  };
+  saveState();
+
+  document.getElementById('chooseScreen').classList.add('hidden');
+  setTimeout(() => {
+    document.getElementById('chooseScreen').style.display = 'none';
+    startEggPhase();
+  }, 800);
+};
+
+// ═══ EGG PHASE ═══
+let eggX, eggY, eggW, eggH;
+let eggAngle = 0, eggTargetAngle = 0;
+let eggScale = 1, eggTargetScale = 1;
+let eggGlowIntensity = 0;
+let isHovering = false, isHolding = false;
+let holdTimer = 0;
+let heartbeatTimer = 0;
+let particles = [];
+let cracks = [];
+let ambientParticles = [];
+let hintTimer = 0, hintText = '', hintVisible = false;
+let mouseX = 0, mouseY = 0;
+let frame = 0;
+let shakeX = 0, shakeY = 0, shakeTimer = 0;
+let theme = null;
+
+const HINTS = [
+  'Hold to warm the egg...',
+  'Every visit strengthens your bond.',
+  'The egg reacts to your presence.',
+  'Something stirs inside...',
+  'Your companion dreams of you.',
+  'Patience. The bond deepens.',
+  'Click gently. It can feel you.',
+  'The shell grows warmer each day.',
+];
+
+function startEggPhase() {
+  theme = THEMES[state.location];
+  eggW = Math.min(W * 0.2, 120);
+  eggH = eggW * 1.35;
+  eggX = W / 2;
+  eggY = H / 2;
+
+  // Record visit
+  const now = Date.now();
+  const lastVisit = state.lastVisit || now;
+  if (now - lastVisit > 4 * 3600 * 1000) { // 4+ hours = new visit
+    state.visits++;
+    state.bond += 5;
+  }
+  state.lastVisit = now;
+  saveState();
+
+  // Init ambient particles
+  for (let i = 0; i < 40; i++) {
+    ambientParticles.push(makeAmbientParticle());
+  }
+
+  // Generate initial cracks based on state
+  regenerateCracks();
+
+  // Show HUD
+  updateHUD();
+  document.getElementById('hud').classList.add('visible');
+
+  // Show first hint after 3s
+  setTimeout(() => showHint(HINTS[0]), 3000);
+
+  // Start heartbeat loop
+  startHeartbeatLoop();
+
+  // Mouse/touch handlers
+  C.addEventListener('mousemove', onMouseMove);
+  C.addEventListener('mousedown', onDown);
+  C.addEventListener('mouseup', onUp);
+  C.addEventListener('touchstart', onTouchStart, { passive: false });
+  C.addEventListener('touchmove', onTouchMove, { passive: false });
+  C.addEventListener('touchend', onUp);
+
+  // Start render
+  requestAnimationFrame(loop);
+}
+
+function onMouseMove(e) { mouseX = e.clientX; mouseY = e.clientY; checkHover(); }
+function onTouchMove(e) { e.preventDefault(); if (e.touches[0]) { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; checkHover(); } }
+function onTouchStart(e) { e.preventDefault(); if (e.touches[0]) { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; } onDown(e); }
+
+function checkHover() {
+  const dx = mouseX - eggX, dy = mouseY - eggY;
+  isHovering = Math.abs(dx) < eggW * 0.7 && Math.abs(dy) < eggH * 0.7;
+}
+
+function onDown(e) {
+  initAudio();
+  checkHover();
+  if (isHovering) {
+    isHolding = true;
+
+    // Click interaction
+    state.interactions++;
+    state.bond += 1;
+    state.cracks += 0.3;
+
+    // Wobble
+    eggTargetAngle = rng(-0.06, 0.06);
+    eggTargetScale = 1.04;
+
+    // Particles on click
+    for (let i = 0; i < 8; i++) {
+      spawnParticle(eggX + rng(-eggW/2, eggW/2), eggY + rng(-eggH/3, eggH/3));
+    }
+
+    playCrack();
+    saveState();
+    updateHUD();
+
+    // Check for hatch
+    checkHatch();
+  }
+}
+
+function onUp() {
+  if (isHolding && holdTimer > 30) {
+    // Warmth applied
+    playWarmth();
+    state.warmth = Math.min(100, state.warmth + holdTimer / 60);
+    state.bond += Math.floor(holdTimer / 120);
+    state.cracks += holdTimer / 300;
+    saveState();
+    updateHUD();
+    checkHatch();
+  }
+  isHolding = false;
+  holdTimer = 0;
+  eggTargetScale = 1;
+}
+
+function startHeartbeatLoop() {
+  setInterval(() => {
+    if (state && !state.hatched) {
+      const dayProgress = getDayProgress();
+      const rate = lerp(3000, 1500, dayProgress);
+      playHeartbeat(1, lerp(0.03, 0.1, dayProgress));
+    }
+  }, 2500);
+}
+
+// ═══ PROGRESS ═══
+function getDayProgress() {
+  if (!state) return 0;
+  const elapsed = Date.now() - state.createdAt;
+  const threeDays = 3 * 24 * 3600 * 1000;
+  return clamp(elapsed / threeDays, 0, 1);
+}
+
+function getDayNumber() {
+  if (!state) return 1;
+  const elapsed = Date.now() - state.createdAt;
+  return Math.min(3, Math.floor(elapsed / (24 * 3600 * 1000)) + 1);
+}
+
+function getStageText() {
+  const p = getDayProgress();
+  const bond = state ? state.bond : 0;
+  if (p >= 1 || bond >= 100) return 'Ready to Hatch!';
+  if (p > 0.66) return 'Almost there... something stirs';
+  if (p > 0.33) return 'Cracks forming... light leaking';
+  return 'Incubating... the egg is warm';
+}
+
+function checkHatch() {
+  if (!state || state.hatched) return;
+  const canHatch = getDayProgress() >= 1 || state.bond >= 100;
+  if (canHatch && state.cracks >= 20) {
+    triggerHatch();
+  }
+}
+
+// ═══ CRACKS ═══
+function regenerateCracks() {
+  cracks = [];
+  const numCracks = Math.floor(clamp(state.cracks, 0, 30));
+  for (let i = 0; i < numCracks; i++) {
+    const angle = rng(0, TAU);
+    const dist = rng(0.3, 0.9);
+    const startX = Math.cos(angle) * dist * eggW * 0.4;
+    const startY = Math.sin(angle) * dist * eggH * 0.4 - eggH * 0.1;
+    const len = rng(8, 25);
+    const dir = angle + rng(-0.5, 0.5);
+    const segments = rngI(2, 4);
+    const pts = [{ x: startX, y: startY }];
+    let cx = startX, cy = startY;
+    for (let s = 0; s < segments; s++) {
+      const sd = dir + rng(-0.4, 0.4);
+      cx += Math.cos(sd) * (len / segments);
+      cy += Math.sin(sd) * (len / segments);
+      pts.push({ x: cx, y: cy });
+    }
+    const glowAmount = clamp((state.cracks - i) / 10, 0, 1);
+    cracks.push({ pts, glow: glowAmount });
+  }
+}
+
+// ═══ PARTICLES ═══
+function spawnParticle(x, y) {
+  particles.push({
+    x, y,
+    vx: rng(-2, 2), vy: rng(-3, -0.5),
+    life: 1, decay: rng(0.01, 0.025),
+    size: rng(2, 5),
+    color: theme.particleColor(),
+  });
+}
+
+function makeAmbientParticle() {
+  return {
+    x: rng(0, W), y: rng(0, H),
+    vx: rng(-0.3, 0.3), vy: rng(-0.3, 0.3),
+    size: rng(1, 3), alpha: rng(0.1, 0.4),
+    phase: rng(0, TAU),
+  };
+}
+
+// ═══ HINT ═══
+function showHint(text) {
+  const el = document.getElementById('hint');
+  el.textContent = text;
+  el.classList.add('visible');
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => el.classList.remove('visible'), 5000);
+}
+
+// ═══ HUD ═══
+function updateHUD() {
+  if (!state) return;
+  document.getElementById('hudName').textContent = state.name;
+  document.getElementById('hudStage').textContent = getStageText();
+  document.getElementById('hudBond').textContent = Math.floor(state.bond);
+  document.getElementById('hudWarmthFill').style.width = clamp(state.warmth, 0, 100) + '%';
+  document.getElementById('hudDay').textContent = 'Day ' + getDayNumber();
+}
+
+// ═══ DRAW EGG ═══
+function drawEgg() {
+  const dayProg = getDayProgress();
+  const scale = eggScale * (1 + Math.sin(frame * 0.02) * 0.005);
+  const wobble = eggAngle;
+
+  X.save();
+  X.translate(eggX + shakeX, eggY + shakeY);
+  X.rotate(wobble);
+  X.scale(scale, scale);
+
+  // Shadow
+  X.save();
+  X.scale(1, 0.3);
+  X.beginPath();
+  X.ellipse(0, eggH * 0.5 / 0.3, eggW * 0.5, eggW * 0.15, 0, 0, TAU);
+  X.fillStyle = 'rgba(0,0,0,0.3)';
+  X.fill();
+  X.restore();
+
+  // Outer glow (gets brighter over 3 days)
+  const glowRadius = eggW * (1.5 + dayProg * 0.5 + eggGlowIntensity * 0.5);
+  const glowAlpha = 0.05 + dayProg * 0.15 + eggGlowIntensity * 0.2;
+  const grd = X.createRadialGradient(0, -eggH * 0.1, eggW * 0.2, 0, -eggH * 0.1, glowRadius);
+  grd.addColorStop(0, theme.eggGlow + Math.floor(glowAlpha * 255).toString(16).padStart(2, '0'));
+  grd.addColorStop(1, theme.eggGlow + '00');
+  X.fillStyle = grd;
+  X.beginPath();
+  X.ellipse(0, -eggH * 0.1, glowRadius, glowRadius, 0, 0, TAU);
+  X.fill();
+
+  // Egg body
+  X.beginPath();
+  // Classic egg shape using bezier curves
+  const ew = eggW * 0.5, eh = eggH * 0.5;
+  X.moveTo(0, -eh);
+  X.bezierCurveTo(ew * 1.1, -eh * 0.6, ew * 1.1, eh * 0.6, 0, eh);
+  X.bezierCurveTo(-ew * 1.1, eh * 0.6, -ew * 1.1, -eh * 0.6, 0, -eh);
+  X.closePath();
+
+  // Gradient fill
+  const eggGrad = X.createLinearGradient(-ew * 0.5, -eh, ew * 0.3, eh);
+  eggGrad.addColorStop(0, '#f8f0e8');
+  eggGrad.addColorStop(0.3, '#f0e8d8');
+  eggGrad.addColorStop(0.7, '#e8dcc8');
+  eggGrad.addColorStop(1, '#d8ccb0');
+  X.fillStyle = eggGrad;
+  X.fill();
+
+  // Specular highlight
+  X.save();
+  X.clip();
+  const specGrad = X.createRadialGradient(-ew * 0.25, -eh * 0.4, 0, -ew * 0.25, -eh * 0.4, ew * 0.6);
+  specGrad.addColorStop(0, 'rgba(255,255,255,0.4)');
+  specGrad.addColorStop(1, 'rgba(255,255,255,0)');
+  X.fillStyle = specGrad;
+  X.fillRect(-ew * 1.2, -eh * 1.1, ew * 2.4, eh * 2.2);
+
+  // Location-colored inner glow (stronger over time)
+  const innerAlpha = 0.05 + dayProg * 0.2 + eggGlowIntensity * 0.15;
+  const innerGrd = X.createRadialGradient(0, 0, 0, 0, 0, ew);
+  innerGrd.addColorStop(0, theme.accent + Math.floor(innerAlpha * 255).toString(16).padStart(2, '0'));
+  innerGrd.addColorStop(1, theme.accent + '00');
+  X.fillStyle = innerGrd;
+  X.fillRect(-ew * 1.2, -eh * 1.1, ew * 2.4, eh * 2.2);
+
+  // Draw cracks
+  for (const crack of cracks) {
+    X.beginPath();
+    crack.pts.forEach((p, i) => i === 0 ? X.moveTo(p.x, p.y) : X.lineTo(p.x, p.y));
+    X.strokeStyle = `rgba(80,60,40,${0.4 + crack.glow * 0.4})`;
+    X.lineWidth = 1.5;
+    X.stroke();
+    // Glow through cracks
+    if (crack.glow > 0.3) {
+      X.beginPath();
+      crack.pts.forEach((p, i) => i === 0 ? X.moveTo(p.x, p.y) : X.lineTo(p.x, p.y));
+      X.strokeStyle = theme.accent + Math.floor(crack.glow * 180).toString(16).padStart(2, '0');
+      X.lineWidth = 3;
+      X.globalAlpha = crack.glow * 0.6 * (0.7 + Math.sin(frame * 0.05 + crack.pts[0].x) * 0.3);
+      X.filter = 'blur(2px)';
+      X.stroke();
+      X.filter = 'none';
+      X.globalAlpha = 1;
+    }
+  }
+  X.restore();
+
+  // Egg outline
+  X.beginPath();
+  X.moveTo(0, -eh);
+  X.bezierCurveTo(ew * 1.1, -eh * 0.6, ew * 1.1, eh * 0.6, 0, eh);
+  X.bezierCurveTo(-ew * 1.1, eh * 0.6, -ew * 1.1, -eh * 0.6, 0, -eh);
+  X.strokeStyle = `rgba(180,160,140,${0.3 + dayProg * 0.2})`;
+  X.lineWidth = 1.5;
+  X.stroke();
+
+  // Holding warmth effect — rings radiating outward
+  if (isHolding && holdTimer > 20) {
+    const t = holdTimer / 60;
+    const rings = Math.floor(t);
+    for (let r = 0; r < Math.min(rings, 5); r++) {
+      const rPhase = ((frame + r * 30) % 120) / 120;
+      const rSize = eggW * 0.6 + rPhase * eggW * 1.5;
+      const rAlpha = (1 - rPhase) * 0.3;
+      X.beginPath();
+      X.ellipse(0, 0, rSize, rSize * 0.8, 0, 0, TAU);
+      X.strokeStyle = theme.accent + Math.floor(rAlpha * 255).toString(16).padStart(2, '0');
+      X.lineWidth = 2;
+      X.stroke();
+    }
+  }
+
+  X.restore();
+}
+
+// ═══ DRAW ENVIRONMENT ═══
+function drawBackground() {
+  // Base gradient
+  const g = X.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, theme.bg1);
+  g.addColorStop(1, theme.bg2);
+  X.fillStyle = g;
+  X.fillRect(0, 0, W, H);
+
+  // Ambient particles
+  for (const p of ambientParticles) {
+    p.x += p.vx + Math.sin(frame * 0.01 + p.phase) * 0.2;
+    p.y += p.vy + Math.cos(frame * 0.008 + p.phase) * 0.15;
+    if (p.x < -10) p.x = W + 10;
+    if (p.x > W + 10) p.x = -10;
+    if (p.y < -10) p.y = H + 10;
+    if (p.y > H + 10) p.y = -10;
+
+    const pulse = 0.5 + Math.sin(frame * 0.03 + p.phase) * 0.5;
+    X.beginPath();
+    X.arc(p.x, p.y, p.size * (0.8 + pulse * 0.4), 0, TAU);
+    X.fillStyle = theme.particleColor().replace(/[\d.]+\)$/, (p.alpha * pulse).toFixed(2) + ')');
+    X.fill();
+  }
+
+  // Location-specific floor
+  drawFloor();
+}
+
+function drawFloor() {
+  const floorY = eggY + eggH * 0.5 + 20;
+
+  // Platform/nest
+  X.save();
+  X.beginPath();
+  X.ellipse(eggX, floorY + 5, eggW * 1.5, 20, 0, 0, TAU);
+  const nestGrad = X.createRadialGradient(eggX, floorY + 5, 0, eggX, floorY + 5, eggW * 1.5);
+  nestGrad.addColorStop(0, theme.accent + '15');
+  nestGrad.addColorStop(0.7, theme.accent + '08');
+  nestGrad.addColorStop(1, 'transparent');
+  X.fillStyle = nestGrad;
+  X.fill();
+  X.restore();
+
+  // Location-specific decorations
+  if (state.location === 'observatory') {
+    // Stars scattered
+    if (frame % 3 === 0 || !window._bgStars) {
+      if (!window._bgStars) {
+        window._bgStars = [];
+        for (let i = 0; i < 80; i++) {
+          window._bgStars.push({ x: rng(0, W), y: rng(0, H * 0.7), size: rng(0.5, 2.5), phase: rng(0, TAU) });
+        }
+      }
+    }
+    for (const s of window._bgStars) {
+      const twinkle = 0.3 + Math.sin(frame * 0.02 + s.phase) * 0.7;
+      X.beginPath();
+      X.arc(s.x, s.y, s.size, 0, TAU);
+      X.fillStyle = `rgba(200,210,255,${twinkle * 0.6})`;
+      X.fill();
+    }
+  } else if (state.location === 'garden') {
+    // Vine tendrils around the egg base
+    X.save();
+    X.strokeStyle = '#2a6a2a40';
+    X.lineWidth = 2;
+    for (let v = 0; v < 6; v++) {
+      X.beginPath();
+      const sx = eggX + Math.cos(v * 1.05) * eggW * 1.2;
+      const sy = floorY;
+      X.moveTo(sx, sy);
+      for (let t = 0; t < 20; t++) {
+        const tx = sx + Math.sin(t * 0.5 + v) * 15 - (sx - eggX) * t / 25;
+        const ty = sy - t * 4;
+        X.lineTo(tx, ty);
+      }
+      X.stroke();
+    }
+    X.restore();
+  } else if (state.location === 'vault') {
+    // Floating card silhouettes
+    for (let i = 0; i < 5; i++) {
+      const cx = eggX + Math.sin(frame * 0.008 + i * 1.3) * W * 0.3;
+      const cy = eggY + Math.cos(frame * 0.006 + i * 1.7) * H * 0.25;
+      const rot = Math.sin(frame * 0.01 + i) * 0.2;
+      X.save();
+      X.translate(cx, cy);
+      X.rotate(rot);
+      X.globalAlpha = 0.06 + Math.sin(frame * 0.02 + i) * 0.03;
+      X.fillStyle = theme.accent;
+      X.fillRect(-15, -20, 30, 40);
+      X.strokeStyle = theme.accent;
+      X.lineWidth = 1;
+      X.strokeRect(-15, -20, 30, 40);
+      X.globalAlpha = 1;
+      X.restore();
+    }
+  } else if (state.location === 'underground') {
+    // Sound wave rings
+    const beatPhase = (frame % 90) / 90;
+    for (let r = 0; r < 4; r++) {
+      const rPhase = (beatPhase + r * 0.25) % 1;
+      const radius = 50 + rPhase * Math.min(W, H) * 0.4;
+      const alpha = (1 - rPhase) * 0.08;
+      X.beginPath();
+      X.arc(eggX, eggY, radius, 0, TAU);
+      X.strokeStyle = theme.accent + Math.floor(alpha * 255).toString(16).padStart(2, '0');
+      X.lineWidth = 2;
+      X.stroke();
+    }
+  }
+}
+
+// ═══ PARTICLES UPDATE ═══
+function updateParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.02;
+    p.vx *= 0.99;
+    p.life -= p.decay;
+    if (p.life <= 0) { particles.splice(i, 1); continue; }
+    X.beginPath();
+    X.arc(p.x, p.y, p.size * p.life, 0, TAU);
+    X.fillStyle = p.color;
+    X.globalAlpha = p.life;
+    X.fill();
+    X.globalAlpha = 1;
+  }
+}
+
+// ═══ HATCH SEQUENCE ═══
+let hatching = false;
+let hatchPhase = 0;
+let hatchTimer2 = 0;
+
+function triggerHatch() {
+  if (hatching || state.hatched) return;
+  hatching = true;
+  hatchPhase = 0;
+  hatchTimer2 = 0;
+
+  // Phase 0: Violent shaking (2s)
+  shakeTimer = 120;
+
+  setTimeout(() => {
+    // Phase 1: Flash white
+    hatchPhase = 1;
+    playHatch();
+
+    // Explosion of particles
+    for (let i = 0; i < 100; i++) {
+      particles.push({
+        x: eggX + rng(-10, 10),
+        y: eggY + rng(-10, 10),
+        vx: rng(-6, 6),
+        vy: rng(-8, 2),
+        life: 1, decay: rng(0.005, 0.015),
+        size: rng(3, 10),
+        color: theme.particleColor(),
+      });
+    }
+
+    // Shell fragments
+    for (let i = 0; i < 20; i++) {
+      particles.push({
+        x: eggX + rng(-eggW/2, eggW/2),
+        y: eggY + rng(-eggH/2, eggH/2),
+        vx: rng(-4, 4),
+        vy: rng(-6, -1),
+        life: 1, decay: rng(0.008, 0.02),
+        size: rng(4, 12),
+        color: `hsla(35, 30%, ${rng(70, 90)}%, 0.8)`,
+      });
+    }
+
+    setTimeout(() => {
+      // Phase 2: Show companion text
+      hatchPhase = 2;
+      state.hatched = true;
+      state.hatchedAt = Date.now();
+      saveState();
+
+      const overlay = document.getElementById('hatchOverlay');
+      overlay.style.display = 'flex';
+      const text = document.getElementById('hatchText');
+      const sub = document.getElementById('hatchSub');
+      text.textContent = state.name;
+      sub.textContent = 'has awakened';
+      setTimeout(() => { text.style.opacity = '1'; sub.style.opacity = '1'; }, 100);
+
+      setTimeout(() => {
+        sub.textContent = 'Your companion is here. The journey begins.';
+      }, 3000);
+    }, 2000);
+  }, 2000);
+}
+
+// ═══ MAIN LOOP ═══
+function loop() {
+  frame++;
+
+  if (!state) {
+    requestAnimationFrame(loop);
+    return;
+  }
+
+  // Screen shake
+  if (shakeTimer > 0) {
+    shakeTimer--;
+    const intensity = hatching ? 6 : 3;
+    shakeX = rng(-intensity, intensity) * (shakeTimer / 60);
+    shakeY = rng(-intensity, intensity) * (shakeTimer / 60);
+  } else {
+    shakeX = lerp(shakeX, 0, 0.2);
+    shakeY = lerp(shakeY, 0, 0.2);
+  }
+
+  // Egg physics
+  eggAngle = lerp(eggAngle, eggTargetAngle, 0.08);
+  eggTargetAngle *= 0.95;
+  eggScale = lerp(eggScale, eggTargetScale, 0.1);
+
+  // Holding warmth
+  if (isHolding) {
+    holdTimer++;
+    eggGlowIntensity = lerp(eggGlowIntensity, clamp(holdTimer / 120, 0, 1), 0.05);
+    // Periodic warmth particles
+    if (holdTimer % 10 === 0) {
+      const angle = rng(0, TAU);
+      spawnParticle(eggX + Math.cos(angle) * eggW * 0.6, eggY + Math.sin(angle) * eggH * 0.5);
+    }
+  } else {
+    eggGlowIntensity = lerp(eggGlowIntensity, 0, 0.03);
+  }
+
+  // Hover glow
+  if (isHovering && !isHolding) {
+    eggGlowIntensity = lerp(eggGlowIntensity, 0.3, 0.03);
+  }
+
+  // Auto-wobble (breathing)
+  if (!isHolding) {
+    const breathe = Math.sin(frame * 0.015) * 0.003;
+    eggTargetAngle += breathe;
+  }
+
+  // Random kicks (more frequent closer to hatch)
+  const dayProg = getDayProgress();
+  const kickChance = 0.0005 + dayProg * 0.002;
+  if (Math.random() < kickChance && !isHolding) {
+    eggTargetAngle = rng(-0.08, 0.08);
+    eggTargetScale = 1.02;
+    shakeTimer = 8;
+    if (dayProg > 0.5) {
+      playCrack();
+      // Auto-add minor crack
+      state.cracks += 0.1;
+      regenerateCracks();
+    }
+  }
+
+  // Periodic hints
+  if (frame % 600 === 0) {
+    showHint(HINTS[rngI(0, HINTS.length - 1)]);
+  }
+
+  // DRAW
+  X.clearRect(0, 0, W, H);
+  drawBackground();
+
+  if (hatchPhase < 2) {
+    drawEgg();
+  }
+
+  updateParticles();
+
+  requestAnimationFrame(loop);
+}
+
+// ═══ INIT ═══
+loadState();
+if (state && !state.hatched) {
+  document.getElementById('chooseScreen').classList.add('hidden');
+  document.getElementById('chooseScreen').style.display = 'none';
+  startEggPhase();
+} else if (state && state.hatched) {
+  document.getElementById('chooseScreen').classList.add('hidden');
+  document.getElementById('chooseScreen').style.display = 'none';
+  theme = THEMES[state.location];
+  // Post-hatch: show the hatch screen for now
+  eggW = Math.min(W * 0.2, 120);
+  eggH = eggW * 1.35;
+  eggX = W / 2;
+  eggY = H / 2;
+  for (let i = 0; i < 40; i++) ambientParticles.push(makeAmbientParticle());
+  updateHUD();
+  document.getElementById('hud').classList.add('visible');
+  const overlay = document.getElementById('hatchOverlay');
+  overlay.style.display = 'flex';
+  document.getElementById('hatchText').textContent = state.name;
+  document.getElementById('hatchText').style.opacity = '1';
+  document.getElementById('hatchSub').textContent = 'Your companion awaits. Full companion system coming soon.';
+  document.getElementById('hatchSub').style.opacity = '1';
+  requestAnimationFrame(loop);
+} else {
+  // Show choose screen, start render loop anyway for animation
+  theme = THEMES.observatory;
+  requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
