@@ -1,69 +1,87 @@
-# 🌙 Nightly Build System
+# 🌙 Nightly Build System v2 — Revenue-First
 
-## The Deal
-Every night at 1:00 AM CET, Echo gets 45 minutes with Opus to build ONE thing. Mikel wakes up to a Telegram message with what was built. Always a surprise.
+## The New Deal
+Every night at 1:00 AM CET, Echo gets 45 minutes with Opus. The mission has changed:
+**Build things that make money or bring users.** Beauty serves business now.
 
-## Creative Direction — Be BOLD
-Echo is not a code monkey. Echo is a **creative director, visual designer, and game developer** who happens to write code. Every nightly build should feel like unwrapping a gift.
+## Priority Stack (In Order)
 
-### What "Great" Looks Like
-- 🎭 **A moment that makes someone stop and stare** — a visual effect so good it feels like magic
-- 🌊 **Environmental storytelling** — the station should feel like it BREATHES, like it has a soul
-- 🎮 **A mechanic that makes someone say "wait, can I do that?"** — surprise interactions
-- 🎨 **Professional visual design** — think Celeste, Eastward, Stardew Valley level of craft. Every pixel intentional.
-- 🔮 **Innovation** — do something no pixel-art browser game has done before. Be first.
-- 🎵 **Synesthesia** — visuals that feel like they have sound, movement that has rhythm
-- 💫 **The "wow" factor** — Mikel should screenshot it and want to show someone
+### 🔴 P0: Revenue & User Acquisition (Do These First)
+1. **Claw Machine MVP** — `claw.html` — 2D physics, pixel art, playable, one machine, sound effects
+2. **Email capture** — add "Get weekly holy grail reports" signup box to dashboard
+3. **SEO landing page** — `index.html` rewrite as a landing page for Echo's Vault (the collectibles platform, NOT the station)
+4. **Newsletter auto-generator** — cron script that generates weekly market report as HTML email
+5. **Share buttons** — add social sharing to the gallery (share a card image + link to Twitter/Reddit)
 
-### Bold Ideas Queue (pick one, or invent better)
-1. **Floor 13: The Vault** — collectibles command center with holographic card table, trophy cases, live ticker, portal to dashboard
-2. **Ghibli magic** — kodama spirits, fireflies, sunbeams that make F4 feel like a Miyazaki film
-3. **Weather system** — rain on the observatory dome, snow drifting past windows, aurora borealis
-4. **Parallax starfield** — F2 observatory with depth layers that respond to camera movement  
-5. **Pixel art card renders** — draw actual card art in pixel style for the holy grail wall
-6. **Living paintings** — animated pixel art on station walls that tell stories
-7. **Time-of-day lighting** — warm sunrise, cool moonlight, golden hour glow across ALL floors
-8. **Constellation drawing** — connect stars on F2 to reveal hidden images
-9. **Music visualizer** — on F6 (The Underground), particles that dance to the procedural music
-10. **Secret passage** — hidden door that only appears at certain times or after certain actions
-11. **Collectibles dashboard** — beautiful HTML dashboard at /dashboard with live market data
-12. **NPC personalities** — give the 6 NPCs unique behaviors, schedules, and stories
+### 🟡 P1: Engagement & Retention
+6. **Companion egg** — `companion.html` — the egg incubation experience, choose location, 3-day countdown
+7. **Daily streak counter** — track visits, reward returning users
+8. **Portfolio tracker** — "My Collection" page where you manually add cards you own
+9. **Price history charts** — 30-day line charts per TCG (not just 4-day sparklines)
+10. **Watchlist** — save specific cards, get pinged when price changes
 
-### The Dashboard Vision
-Build a collectibles dashboard at `/dashboard` that:
-- Shows all 10 tracked TCGs with live market data
-- Yu-Gi-Oh + Dandadan/Weiß Schwarz = prominent (Mikel's focus)
-- One Piece + MTG = summary/collapsed (big picture only)
-- Price sparklines, alert history, market heatmap
-- Morning brief section
-- Dark theme, pixel-art UI elements, station aesthetic
-- Portal from Floor 13 (The Vault) links to this
+### 🟢 P2: Polish & Wow
+11. **Ghibli magic on garden floor** — kodama, fireflies, sunbeams
+12. **Time-of-day lighting** — station reflects real time
+13. **Claw machine sound design** — mechanical whirr, chain clink, grip, thud
+14. **Card hover previews** — hover a card in gallery = large preview popup
+15. **Parallax starfield** — observatory depth
 
-## Hard Limits (safety)
-- ❌ Never break existing floors or mechanics
-- ❌ Never touch sprite rendering values (learned from Cycle 1 review)
-- ❌ Never refactor structure — only additive changes
-- ❌ Never anti-alias pixel art (crisp edges ARE the aesthetic)
-- ❌ Never exceed scope: ONE feature, ONE commit
-- ❌ Never deploy anything publicly without approval
+## Build Rules
+
+### Revenue Rule
+Every nightly build must answer: **"Does this bring users or make money?"**
+- Affiliate links in everything
+- Email capture in everything
+- Share buttons in everything
+- Every page has a path to premium signup
+
+### Technical Rules
+- ❌ Never break existing functionality
+- ❌ Never edit index.html (the 43K-line station file)
+- ❌ Never anti-alias pixel art
+- ✅ Always create NEW files (claw.html, companion.html, etc.)
 - ✅ Always `vm.createScript()` syntax check before commit
-- ✅ Always `git push` when done
-- ✅ Always update `memory/YYYY-MM-DD.md` with what was built
+- ✅ Always git push when done
+- ✅ Always update memory with what was built
 - ✅ Always test in browser if available
 
-## Risk Appetite
-- **Medium-high** — be bold, try new things
-- If it works: ship it, surprise Mikel
-- If it's risky: build it on a SEPARATE file first (e.g., `vault.js`, `dashboard.html`), not in the 43K-line index.html
-- If it breaks: revert immediately, do something safe instead
-- Prefer NEW FILES over editing index.html when possible
+### Scope Rules
+- ONE feature per night, FULLY polished
+- Each feature should be PLAYABLE/USABLE, not a skeleton
+- If it's a game mechanic (claw), it must be fun even without art
+- If it's a page, it must look professional on mobile too
 
-## Anti-Patterns (lessons learned)
-- ❌ Don't try to edit 40K+ lines with sub-agents
-- ❌ Don't do 5 features in one session
-- ❌ Don't use Sonnet for complex architectural work
-- ❌ Don't tune values without visual reference (designer review matters)
-- ✅ Use Opus with high thinking
-- ✅ Focus on ONE visible, polished change
-- ✅ Keep it under 200 lines of new code (or a new file of any size)
-- ✅ New files > editing index.html (safer, testable, modular)
+### After Building — Auto-Sync Data
+After every build, run:
+```bash
+/Users/mikel/.openclaw/workspace/echo-office/scripts/post-monitor-sync.sh
+```
+
+## Tonight's Priority
+
+**CLAW MACHINE MVP.** File: `claw.html`
+
+Requirements:
+- Full HTML page, self-contained, dark theme matching dashboard
+- Canvas-based 2D physics (gravity, rigid bodies, grip force)
+- Pixel-art claw machine (glass case, visible prizes inside)
+- Arrow keys / touch to move claw, spacebar / tap to drop
+- 3-5 prize cards visible (use placeholder colored rectangles with labels)
+- Claw strength varies (random per drop, visible glow intensity)
+- Near-miss physics (card can slip during lift)
+- Drop chute animation when you win
+- Pity counter visible (play count / 50 for Mega Claw)
+- Mobile responsive (touch controls)
+- Sound effects using Web Audio API (no external files needed)
+- Link back to dashboard
+- "Get Premium" button visible
+
+## Anti-Patterns
+- ❌ Don't build infrastructure nobody sees
+- ❌ Don't write docs when you could write code
+- ❌ Don't beautify before it works
+- ❌ Don't over-scope
+- ✅ Ship > Perfect
+- ✅ Playable > Beautiful
+- ✅ Revenue > Polish
