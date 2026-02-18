@@ -38354,6 +38354,24 @@ window._renderWallDetails = typeof renderWallDetails !== 'undefined' ? renderWal
 // ═══ Additional bridge: functions used by second <script> block (AmbientNPCs, floor rewrites, etc.) ═══
 window.drawSprite = typeof drawSprite !== 'undefined' ? drawSprite : null;
 window.getVisitorSprite = typeof getVisitorSprite !== 'undefined' ? getVisitorSprite : null;
+window.showNotification = typeof showNotification !== 'undefined' ? showNotification : null;
+window.ctx = typeof ctx !== 'undefined' ? ctx : null;
+window.W = typeof W !== 'undefined' ? W : null;
+window.H = typeof H !== 'undefined' ? H : null;
+window.FLOOR_NAMES = typeof FLOOR_NAMES !== 'undefined' ? FLOOR_NAMES : null;
+// Expose floor renderers so second <script> block and patchFloorRenders can override them
+if(typeof renderFloor1==='function') window.renderFloor1=renderFloor1;
+if(typeof renderFloor2==='function') window.renderFloor2=renderFloor2;
+if(typeof renderFloor3==='function') window.renderFloor3=renderFloor3;
+if(typeof renderFloor4==='function') window.renderFloor4=renderFloor4;
+if(typeof renderFloor5==='function') window.renderFloor5=renderFloor5;
+if(typeof renderFloor6==='function') window.renderFloor6=renderFloor6;
+if(typeof renderFloor7==='function') window.renderFloor7=renderFloor7;
+if(typeof renderFloor8==='function') window.renderFloor8=renderFloor8;
+if(typeof renderFloor9==='function') window.renderFloor9=renderFloor9;
+if(typeof renderFloor10==='function') window.renderFloor10=renderFloor10;
+if(typeof renderFloor11==='function') window.renderFloor11=renderFloor11;
+if(typeof renderFloor12==='function') window.renderFloor12=renderFloor12;
 window.FLOOR_OBJECTS = typeof FLOOR_OBJECTS !== 'undefined' ? FLOOR_OBJECTS : null;
 window.renderFloorMaterial = typeof renderFloorMaterial !== 'undefined' ? renderFloorMaterial : null;
 window.renderWalls = typeof renderWalls !== 'undefined' ? renderWalls : null;
