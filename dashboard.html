@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Echo's Vault — Collectibles Dashboard</title>
+<title>Echo's Vault — Collectibles Command Center</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@300;400;500;700&display=swap');
 
@@ -37,7 +37,7 @@ body {
 /* ═══ HEADER ═══ */
 .header {
   position: sticky; top: 0; z-index: 100;
-  background: linear-gradient(180deg, var(--bg) 0%, rgba(10,10,20,0.95) 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, rgba(10,10,20,0.97) 100%);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   padding: 16px 24px;
@@ -76,7 +76,7 @@ body {
 }
 .ticker-inner {
   display: inline-block;
-  animation: scroll 40s linear infinite;
+  animation: scroll 45s linear infinite;
 }
 @keyframes scroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
 .ticker-item { display: inline-block; margin: 0 24px; }
@@ -85,7 +85,7 @@ body {
 .ticker-flat { color: var(--dim); }
 
 /* ═══ GRID ═══ */
-.dashboard { padding: 24px; max-width: 1400px; margin: 0 auto; }
+.dashboard { padding: 24px; max-width: 1440px; margin: 0 auto; }
 
 .section-title {
   font-family: 'Press Start 2P', cursive;
@@ -93,7 +93,7 @@ body {
   color: var(--dim);
   text-transform: uppercase;
   letter-spacing: 2px;
-  margin: 24px 0 12px;
+  margin: 28px 0 14px;
   display: flex; align-items: center; gap: 8px;
 }
 .section-title::after {
@@ -103,8 +103,33 @@ body {
   background: linear-gradient(90deg, var(--border), transparent);
 }
 
+/* ═══ MARKET CAP BANNER ═══ */
+.market-cap-banner {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 50%, var(--surface) 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.market-cap-banner::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--accent), var(--purple), var(--cyan));
+}
+.mcap-main {}
+.mcap-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+.mcap-value { font-size: 36px; font-weight: 700; color: var(--gold); margin: 4px 0; }
+.mcap-sub { font-size: 11px; color: var(--dim); }
+.mcap-stats { display: flex; gap: 32px; }
+.mcap-stat {}
+.mcap-stat-value { font-size: 20px; font-weight: 700; }
+.mcap-stat-label { font-size: 9px; color: var(--dim); text-transform: uppercase; margin-top: 2px; }
+
 /* ═══ HERO CARDS ═══ */
-.hero-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.hero-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 8px; }
 
 .hero-card {
   background: var(--surface);
@@ -124,15 +149,23 @@ body {
 .hero-dandadan::before { background: linear-gradient(90deg, #ff4081, #e040fb); }
 
 .hero-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
-.hero-game { font-size: 16px; font-weight: 700; margin: 4px 0; }
+.hero-game { font-size: 16px; font-weight: 700; margin: 4px 0; display:flex; align-items:center; gap:8px; }
+.hero-game a { color: inherit; text-decoration: none; }
+.hero-game a:hover { color: var(--accent); }
+.source-link {
+  font-size: 9px; color: var(--accent); text-decoration: none;
+  border: 1px solid rgba(255,110,199,0.3); padding: 2px 8px; border-radius: 3px;
+  transition: all 0.2s;
+}
+.source-link:hover { background: var(--accent); color: var(--bg); }
 .hero-stat-row { display: flex; gap: 24px; margin-top: 12px; }
-.hero-stat { }
+.hero-stat {}
 .hero-stat-value { font-size: 22px; font-weight: 700; }
 .hero-stat-label { font-size: 9px; color: var(--dim); text-transform: uppercase; margin-top: 2px; }
 .hero-sparkline { margin-top: 12px; height: 40px; }
 
 /* ═══ MARKET GRID ═══ */
-.market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
 
 .tcg-card {
   background: var(--surface);
@@ -140,7 +173,6 @@ body {
   border-radius: 8px;
   padding: 14px;
   transition: transform 0.15s, border-color 0.15s;
-  cursor: default;
 }
 .tcg-card:hover { transform: translateY(-1px); border-color: var(--accent); }
 .tcg-card.collapsed { opacity: 0.6; }
@@ -148,6 +180,8 @@ body {
 
 .tcg-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .tcg-name { font-size: 12px; font-weight: 600; }
+.tcg-name a { color: inherit; text-decoration: none; }
+.tcg-name a:hover { color: var(--accent); }
 .tcg-badge {
   font-size: 9px; padding: 2px 6px; border-radius: 3px;
   font-weight: 500;
@@ -165,6 +199,45 @@ body {
   color: var(--accent);
   display: flex; align-items: center; gap: 4px;
 }
+.tcg-mcap { font-size: 10px; color: var(--gold); margin-top: 4px; }
+
+/* ═══ CARD GALLERY ═══ */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+.gallery-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.gallery-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(255,110,199,0.15);
+}
+.gallery-card img {
+  width: 100%; aspect-ratio: 3/4; object-fit: cover;
+  display: block; background: var(--surface2);
+}
+.gallery-card-info {
+  padding: 8px 10px;
+}
+.gallery-card-game { font-size: 8px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; }
+.gallery-card-title { font-size: 10px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gallery-card-price { font-size: 11px; font-weight: 700; margin-top: 4px; }
+.gallery-card-title a { color: var(--text); text-decoration: none; }
+.gallery-card-title a:hover { color: var(--accent); }
+.gallery-placeholder {
+  width: 100%; aspect-ratio: 3/4;
+  background: linear-gradient(135deg, var(--surface2), var(--surface));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px;
+}
 
 /* ═══ ALERT FEED ═══ */
 .alert-feed {
@@ -172,7 +245,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px;
-  max-height: 500px;
+  max-height: 600px;
   overflow-y: auto;
 }
 .alert-feed::-webkit-scrollbar { width: 4px; }
@@ -202,7 +275,7 @@ body {
 
 .alert-dot {
   width: 6px; height: 6px; border-radius: 50%;
-  margin-top: 6px; flex-shrink: 0;
+  display: inline-block; vertical-align: middle; margin-right: 4px;
 }
 .alert-game { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; }
 .alert-title { font-size: 12px; margin: 2px 0; line-height: 1.4; }
@@ -217,7 +290,6 @@ body {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 20px;
-  margin-top: 16px;
 }
 .brief-title { font-family: 'Press Start 2P', cursive; font-size: 10px; color: var(--accent); margin-bottom: 12px; }
 .brief-text { font-size: 13px; line-height: 1.7; color: var(--text); }
@@ -236,14 +308,30 @@ body {
 /* ═══ CANVAS SPARKLINE ═══ */
 canvas.spark { display: block; width: 100%; image-rendering: pixelated; }
 
+/* ═══ FILTER TABS ═══ */
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.filter-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 4px 12px; border-radius: 4px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--dim); cursor: pointer; transition: all 0.15s;
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--text); }
+.filter-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 768px) {
   .hero-row { grid-template-columns: 1fr; }
   .market-grid { grid-template-columns: 1fr 1fr; }
+  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
   .dashboard { padding: 12px; }
+  .market-cap-banner { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .mcap-value { font-size: 28px; }
+  .two-col { grid-template-columns: 1fr !important; }
 }
 @media (max-width: 480px) {
   .market-grid { grid-template-columns: 1fr; }
+  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
 }
 
 /* ═══ AMBIENT PARTICLES ═══ */
@@ -281,6 +369,9 @@ canvas.spark { display: block; width: 100%; image-rendering: pixelated; }
 <!-- DASHBOARD -->
 <div class="dashboard">
 
+  <!-- MARKET CAP BANNER -->
+  <div class="market-cap-banner" id="mcapBanner"></div>
+
   <!-- HERO CARDS -->
   <div class="section-title">🎯 Your Focus</div>
   <div class="hero-row" id="heroRow"></div>
@@ -289,82 +380,91 @@ canvas.spark { display: block; width: 100%; image-rendering: pixelated; }
   <div class="section-title">📊 Market Overview</div>
   <div class="market-grid" id="marketGrid"></div>
 
-  <!-- MORNING BRIEF -->
-  <div class="section-title">☀️ Morning Brief</div>
-  <div class="brief" id="morningBrief"></div>
+  <!-- CARD GALLERY -->
+  <div class="section-title">🎴 Holy Grail Gallery</div>
+  <div class="filter-row" id="galleryFilters"></div>
+  <div class="gallery-grid" id="galleryGrid"></div>
 
-  <!-- ALERTS — FULL WIDTH FOR CARD VISUALS -->
-  <div class="section-title">🚨 Recent Holy Grails</div>
-  <div class="alert-feed" id="alertFeed" style="max-height:700px"></div>
+  <!-- TWO COLUMNS: BRIEF + ALERTS -->
+  <div class="two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px">
+    <div>
+      <div class="section-title">☀️ Morning Brief</div>
+      <div class="brief" id="morningBrief"></div>
+    </div>
+    <div>
+      <div class="section-title">🚨 Latest Alerts</div>
+      <div class="alert-feed" id="alertFeed"></div>
+    </div>
+  </div>
 
 </div>
 
 <div class="footer">
   🔮 Echo's Vault · Powered by Echo Station · Data refreshes every 3 hours<br>
-  10 TCGs tracked · eBay.com · eBay.de · €5,000+ threshold
+  9 TCGs tracked · eBay.com · eBay.de · TCGPlayer · €5,000+ threshold
 </div>
 
 <script>
-// ═══ DATA ═══
-// Load market-stats.json from the same directory
+// ═══ CONFIG ═══
 let MARKET_DATA = null;
 let SEEN_DATA = null;
+let galleryFilter = 'all';
 
 const TCG_CONFIG = {
-  yugioh:    { name: 'Yu-Gi-Oh!', emoji: '👑', color: '#ffd700', tier: 'hero', order: 1 },
-  dandadan:  { name: 'Dandadan', emoji: '👁️‍🗨️', color: '#ff4081', tier: 'hero', order: 2 },
-  weiss:     { name: 'Weiß Schwarz', emoji: '🎴', color: '#e040fb', tier: 'focus', order: 3 },
-  pokemon:   { name: 'Pokémon', emoji: '⚡', color: '#ffeb3b', tier: 'focus', order: 4 },
-  digimon:   { name: 'Digimon', emoji: '🦖', color: '#448aff', tier: 'watch', order: 5 },
-  lorcana:   { name: 'Lorcana', emoji: '✨', color: '#18ffff', tier: 'watch', order: 6 },
-  unionarena:{ name: 'Union Arena', emoji: '⚔️', color: '#b388ff', tier: 'watch', order: 7 },
-  dragonball:{ name: 'Dragon Ball', emoji: '🐉', color: '#ffab40', tier: 'watch', order: 8 },
-  onepiece:  { name: 'One Piece', emoji: '🏴‍☠️', color: '#ff5252', tier: 'overview', order: 9 },
-  mtg:       { name: 'MTG', emoji: '🧙', color: '#6a6a8a', tier: 'overview', order: 10 },
+  yugioh:    { name: 'Yu-Gi-Oh!', emoji: '👑', color: '#ffd700', tier: 'hero', order: 1,
+               searchUrl: 'https://www.ebay.com/sch/i.html?_nkw=yugioh&_sacat=183454&_udlo=5000&_sop=13' },
+  dandadan:  { name: 'Dandadan', emoji: '👁️‍🗨️', color: '#ff4081', tier: 'hero', order: 2,
+               searchUrl: 'https://www.ebay.com/sch/i.html?_nkw=dandadan+weiss+schwarz&_sacat=183454&_udlo=5000&_sop=13' },
+  weiss:     { name: 'Weiß Schwarz', emoji: '🎴', color: '#e040fb', tier: 'focus', order: 3,
+               searchUrl: 'https://www.ebay.com/sch/i.html?_nkw=weiss+schwarz&_sacat=183454&_udlo=5000&_sop=13' },
+  pokemon:   { name: 'Pokémon', emoji: '⚡', color: '#ffeb3b', tier: 'focus', order: 4,
+               searchUrl: 'https://www.ebay.com/sch/i.html?_nkw=pokemon+tcg&_sacat=183454&_udlo=5000&_sop=13' },
+  digimon:   { name: 'Digimon', emoji: '🦖', color: '#448aff', tier: 'watch', order: 5,
+               searchUrl: 'https://www.ebay.com/sch/i.html?_nkw=digimon+card+game+tcg&_sacat=183454&_udlo=5000&_sop=13' },
+  lorcana:   { name: 'Lorcana', emoji: '✨', color: '#18ffff', tier: 'watch', order: 6,
+               searchUrl: 'https://www.ebay.com/sch/i.html?_nkw=disney+lorcana+tcg&_sacat=183454&_udlo=5000&_sop=13' },
+  unionarena:{ name: 'Union Arena', emoji: '⚔️', color: '#b388ff', tier: 'watch', order: 7,
+               searchUrl: 'https://www.ebay.com/sch/i.html?_nkw=union+arena+tcg+card&_sacat=183454&_udlo=5000&_sop=13' },
+  dragonball:{ name: 'Dragon Ball', emoji: '🐉', color: '#ffab40', tier: 'watch', order: 8,
+               searchUrl: 'https://www.ebay.com/sch/i.html?_nkw=dragon+ball+super+card+game&_sacat=183454&_udlo=5000&_sop=13' },
+  onepiece:  { name: 'One Piece', emoji: '🏴‍☠️', color: '#ff5252', tier: 'overview', order: 9,
+               searchUrl: 'https://www.ebay.com/sch/i.html?_nkw=one+piece+tcg+card&_sacat=183454&_udlo=5000&_sop=13' },
+  mtg:       { name: 'MTG', emoji: '🧙', color: '#6a6a8a', tier: 'overview', order: 10,
+               searchUrl: 'https://www.ebay.com/sch/i.html?_nkw=mtg&_sacat=183454&_udlo=5000&_sop=13' },
 };
 
+// ═══ DATA LOADING ═══
 async function loadData() {
   try {
-    const [statsRes, seenRes] = await Promise.all([
-      fetch('/scripts/yugioh-monitor/market-stats.json').catch(() => null),
-      fetch('/scripts/yugioh-monitor/seen.json').catch(() => null),
+    const [r1, r2] = await Promise.all([
+      fetch('market-stats.json').catch(()=>null),
+      fetch('seen.json').catch(()=>null),
     ]);
-    // Try local paths, fall back to relative
-    if (statsRes && statsRes.ok) {
-      MARKET_DATA = await statsRes.json();
-    } else {
-      const r2 = await fetch('market-stats.json').catch(() => null);
-      if (r2 && r2.ok) MARKET_DATA = await r2.json();
-    }
-    if (seenRes && seenRes.ok) {
-      SEEN_DATA = await seenRes.json();
-    } else {
-      const r2 = await fetch('seen.json').catch(() => null);
-      if (r2 && r2.ok) SEEN_DATA = await r2.json();
-    }
-  } catch(e) { console.error('Data load error:', e); }
+    if (r1 && r1.ok) MARKET_DATA = await r1.json();
+    if (r2 && r2.ok) SEEN_DATA = await r2.json();
+  } catch(e) { console.error('Load error:', e); }
 
-  // Fallback: hardcoded from latest run
-  if (!MARKET_DATA) {
-    MARKET_DATA = FALLBACK_DATA;
-  }
-
+  if (!MARKET_DATA) MARKET_DATA = FALLBACK_DATA;
   render();
 }
 
-// Hardcoded fallback data from the monitor
 const FALLBACK_DATA = {
-  "2026-02-15": {"yugioh":{"totalListings":80,"avgPrice":23557,"maxPrice":100000,"newAlerts":3},"pokemon":{"totalListings":172,"avgPrice":10699,"maxPrice":100000,"newAlerts":2},"mtg":{"totalListings":83,"avgPrice":12504,"maxPrice":49826,"newAlerts":0},"onepiece":{"totalListings":129,"avgPrice":9002,"maxPrice":39000,"newAlerts":39},"dragonball":{"totalListings":54,"avgPrice":8520,"maxPrice":60000,"newAlerts":0}},
-  "2026-02-16": {"yugioh":{"totalListings":80,"avgPrice":23557,"maxPrice":100000,"newAlerts":0},"pokemon":{"totalListings":175,"avgPrice":10808,"maxPrice":99999,"newAlerts":2},"mtg":{"totalListings":83,"avgPrice":12514,"maxPrice":49826,"newAlerts":0},"onepiece":{"totalListings":136,"avgPrice":8732,"maxPrice":39000,"newAlerts":0},"dragonball":{"totalListings":57,"avgPrice":8436,"maxPrice":60000,"newAlerts":0}},
-  "2026-02-17": {"yugioh":{"totalListings":81,"avgPrice":21572,"maxPrice":100000,"newAlerts":1},"pokemon":{"totalListings":176,"avgPrice":11650,"maxPrice":149999,"newAlerts":1},"mtg":{"totalListings":83,"avgPrice":12344,"maxPrice":49746,"newAlerts":0},"onepiece":{"totalListings":131,"avgPrice":9311,"maxPrice":52000,"newAlerts":0},"dragonball":{"totalListings":59,"avgPrice":8319,"maxPrice":60000,"newAlerts":0}},
-  "2026-02-18": {"yugioh":{"totalListings":80,"avgPrice":21778,"maxPrice":100000,"newAlerts":0},"pokemon":{"totalListings":172,"avgPrice":12208,"maxPrice":149999,"newAlerts":0},"mtg":{"totalListings":84,"avgPrice":12271,"maxPrice":49523,"newAlerts":0},"onepiece":{"totalListings":136,"avgPrice":9020,"maxPrice":39000,"newAlerts":3},"dragonball":{"totalListings":57,"avgPrice":8434,"maxPrice":60000,"newAlerts":0},"weiss":{"totalListings":15,"avgPrice":9147,"maxPrice":22500,"newAlerts":15},"dandadan":{"totalListings":5,"avgPrice":10219,"maxPrice":22500,"newAlerts":0},"digimon":{"totalListings":10,"avgPrice":13784,"maxPrice":77777,"newAlerts":3},"lorcana":{"totalListings":50,"avgPrice":54745,"maxPrice":99999,"newAlerts":50},"unionarena":{"totalListings":13,"avgPrice":8469,"maxPrice":15000,"newAlerts":2}}
+  "2026-02-15":{"yugioh":{"totalListings":80,"avgPrice":23557,"maxPrice":100000,"newAlerts":3},"pokemon":{"totalListings":172,"avgPrice":10699,"maxPrice":100000,"newAlerts":2},"mtg":{"totalListings":83,"avgPrice":12504,"maxPrice":49826,"newAlerts":0},"onepiece":{"totalListings":129,"avgPrice":9002,"maxPrice":39000,"newAlerts":39},"dragonball":{"totalListings":54,"avgPrice":8520,"maxPrice":60000,"newAlerts":0}},
+  "2026-02-16":{"yugioh":{"totalListings":80,"avgPrice":23557,"maxPrice":100000,"newAlerts":0},"pokemon":{"totalListings":175,"avgPrice":10808,"maxPrice":99999,"newAlerts":2},"mtg":{"totalListings":83,"avgPrice":12514,"maxPrice":49826,"newAlerts":0},"onepiece":{"totalListings":136,"avgPrice":8732,"maxPrice":39000,"newAlerts":0},"dragonball":{"totalListings":57,"avgPrice":8436,"maxPrice":60000,"newAlerts":0}},
+  "2026-02-17":{"yugioh":{"totalListings":81,"avgPrice":21572,"maxPrice":100000,"newAlerts":1},"pokemon":{"totalListings":176,"avgPrice":11650,"maxPrice":149999,"newAlerts":1},"mtg":{"totalListings":83,"avgPrice":12344,"maxPrice":49746,"newAlerts":0},"onepiece":{"totalListings":131,"avgPrice":9311,"maxPrice":52000,"newAlerts":0},"dragonball":{"totalListings":59,"avgPrice":8319,"maxPrice":60000,"newAlerts":0}},
+  "2026-02-18":{"yugioh":{"totalListings":80,"avgPrice":21778,"maxPrice":100000,"newAlerts":0},"pokemon":{"totalListings":172,"avgPrice":12208,"maxPrice":149999,"newAlerts":0},"mtg":{"totalListings":84,"avgPrice":12271,"maxPrice":49523,"newAlerts":0},"onepiece":{"totalListings":136,"avgPrice":9020,"maxPrice":39000,"newAlerts":3},"dragonball":{"totalListings":57,"avgPrice":8434,"maxPrice":60000,"newAlerts":0},"weiss":{"totalListings":15,"avgPrice":9147,"maxPrice":22500,"newAlerts":15},"dandadan":{"totalListings":5,"avgPrice":10219,"maxPrice":22500,"newAlerts":0},"digimon":{"totalListings":10,"avgPrice":13784,"maxPrice":77777,"newAlerts":3},"lorcana":{"totalListings":50,"avgPrice":54745,"maxPrice":99999,"newAlerts":50},"unionarena":{"totalListings":13,"avgPrice":8469,"maxPrice":15000,"newAlerts":2}}
 };
 
+// ═══ HELPERS ═══
 function cents(v) { return '€' + (v/100).toLocaleString('de-DE', {minimumFractionDigits:0, maximumFractionDigits:0}); }
-
-function getDates() {
-  return Object.keys(MARKET_DATA).sort();
+function centsK(v) {
+  const val = v / 100;
+  if (val >= 1000000) return '€' + (val/1000000).toFixed(1) + 'M';
+  if (val >= 1000) return '€' + (val/1000).toFixed(0) + 'K';
+  return '€' + val.toFixed(0);
 }
+
+function getDates() { return Object.keys(MARKET_DATA).sort(); }
 
 function getLatest(gameId) {
   const dates = getDates();
@@ -375,8 +475,7 @@ function getLatest(gameId) {
 }
 
 function getHistory(gameId) {
-  const dates = getDates();
-  return dates.map(d => ({date:d, data: MARKET_DATA[d][gameId] || null})).filter(x=>x.data);
+  return getDates().map(d => ({date:d, data: MARKET_DATA[d][gameId] || null})).filter(x=>x.data);
 }
 
 function getTrend(gameId) {
@@ -393,13 +492,11 @@ function drawSparkline(canvas, values, color) {
   const w = canvas.width = canvas.offsetWidth * 2;
   const h = canvas.height = canvas.offsetHeight * 2;
   ctx.clearRect(0, 0, w, h);
-
   if (values.length < 2) return;
   const min = Math.min(...values) * 0.95;
   const max = Math.max(...values) * 1.05;
   const range = max - min || 1;
 
-  // Gradient fill
   const grad = ctx.createLinearGradient(0, 0, 0, h);
   grad.addColorStop(0, color + '40');
   grad.addColorStop(1, color + '00');
@@ -416,7 +513,6 @@ function drawSparkline(canvas, values, color) {
   ctx.fillStyle = grad;
   ctx.fill();
 
-  // Line
   ctx.beginPath();
   values.forEach((v, i) => {
     const x = (i / (values.length - 1)) * w;
@@ -427,7 +523,6 @@ function drawSparkline(canvas, values, color) {
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // End dot
   const lastX = w;
   const lastY = h - ((values[values.length-1] - min) / range) * h;
   ctx.beginPath();
@@ -436,37 +531,104 @@ function drawSparkline(canvas, values, color) {
   ctx.fill();
 }
 
+function truncate(s, n) { return s.length > n ? s.substring(0, n) + '...' : s; }
+
+function detectGame(title) {
+  if (!title) return 'unknown';
+  const t = title.toLowerCase();
+  if (t.includes('yu-gi-oh') || t.includes('yugioh') || t.includes('blue-eyes') || t.includes('exodia') || t.includes('dark magician')) return 'yugioh';
+  if (t.includes('dandadan')) return 'dandadan';
+  if (t.includes('weiss schwarz') || t.includes('weiß schwarz')) return 'weiss';
+  if (t.includes('pokemon') || t.includes('pokémon') || t.includes('charizard') || t.includes('pikachu')) return 'pokemon';
+  if (t.includes('one piece') || t.includes('luffy') || t.includes('zoro') || t.includes('shanks')) return 'onepiece';
+  if (t.includes('magic the gathering') || t.includes('mtg') || t.includes('black lotus')) return 'mtg';
+  if (t.includes('dragon ball')) return 'dragonball';
+  if (t.includes('digimon')) return 'digimon';
+  if (t.includes('lorcana')) return 'lorcana';
+  if (t.includes('union arena')) return 'unionarena';
+  return 'unknown';
+}
+
+function makeEbayLink(key) {
+  if (key.includes('ebay-com-')) return `https://www.ebay.com/itm/${key.replace('ebay-com-','')}`;
+  if (key.includes('ebay-de-')) return `https://www.ebay.de/itm/${key.replace('ebay-de-','')}`;
+  if (key.includes('tcg-')) {
+    const parts = key.split('-');
+    const productId = parts[parts.length - 1];
+    return `https://www.tcgplayer.com/product/${productId}`;
+  }
+  return '#';
+}
+
 // ═══ RENDER ═══
 function render() {
   const dates = getDates();
   const latestDate = dates[dates.length - 1];
   document.getElementById('lastUpdate').textContent = 'Last scan: ' + latestDate + ' · ' + new Date().toLocaleTimeString('de-DE', {hour:'2-digit',minute:'2-digit'});
 
-  // TICKER
+  renderMarketCap();
   renderTicker();
-
-  // HERO CARDS (Yu-Gi-Oh + Dandadan)
   renderHeroes();
-
-  // MARKET GRID
   renderMarket();
-
-  // ALERTS
+  renderGallery();
   renderAlerts();
-
-  // MORNING BRIEF
   renderBrief();
 
-  // Draw sparklines after DOM is ready
   requestAnimationFrame(() => {
     document.querySelectorAll('canvas.spark').forEach(c => {
       const gid = c.dataset.game;
       const color = c.dataset.color;
-      const hist = getHistory(gid);
-      const vals = hist.map(h => h.data.avgPrice);
+      const vals = getHistory(gid).map(h => h.data.avgPrice);
       if (vals.length) drawSparkline(c, vals, color);
     });
   });
+}
+
+function renderMarketCap() {
+  const el = document.getElementById('mcapBanner');
+  const dates = getDates();
+  const today = MARKET_DATA[dates[dates.length - 1]] || {};
+
+  let totalMcap = 0;
+  let totalListings = 0;
+  let totalAlerts = 0;
+  let tcgCount = 0;
+
+  Object.entries(today).forEach(([gid, d]) => {
+    totalMcap += (d.avgPrice || 0) * (d.totalListings || 0);
+    totalListings += d.totalListings || 0;
+    totalAlerts += d.newAlerts || 0;
+    tcgCount++;
+  });
+
+  // Highest value TCG
+  let topTcg = null, topMcap = 0;
+  Object.entries(today).forEach(([gid, d]) => {
+    const mc = (d.avgPrice||0) * (d.totalListings||0);
+    if (mc > topMcap) { topMcap = mc; topTcg = gid; }
+  });
+
+  el.innerHTML = `
+    <div class="mcap-main">
+      <div class="mcap-label">📈 Total Tracked Market Cap (Holy Grails €5K+)</div>
+      <div class="mcap-value">${centsK(totalMcap)}</div>
+      <div class="mcap-sub">${totalListings} listings across ${tcgCount} TCGs · ${dates[dates.length-1]}</div>
+    </div>
+    <div class="mcap-stats">
+      <div class="mcap-stat">
+        <div class="mcap-stat-value" style="color:var(--accent)">${totalAlerts}</div>
+        <div class="mcap-stat-label">New Alerts</div>
+      </div>
+      <div class="mcap-stat">
+        <div class="mcap-stat-value" style="color:var(--green)">${tcgCount}</div>
+        <div class="mcap-stat-label">TCGs Tracked</div>
+      </div>
+      <div class="mcap-stat">
+        <div class="mcap-stat-value" style="color:${TCG_CONFIG[topTcg]?.color||'var(--gold)'}">${TCG_CONFIG[topTcg]?.emoji||''} ${centsK(topMcap)}</div>
+        <div class="mcap-stat-label">Top TCG Mcap</div>
+      </div>
+    </div>
+  `;
 }
 
 function renderTicker() {
@@ -476,13 +638,13 @@ function renderTicker() {
   games.forEach(gid => {
     const cfg = TCG_CONFIG[gid];
     const latest = getLatest(gid);
-    if (!latest) { html += `<span class="ticker-item">${cfg.emoji} ${cfg.name} —</span>`; return; }
+    if (!latest) return;
     const trend = getTrend(gid);
     const cls = trend.dir === 'up' ? 'ticker-up' : trend.dir === 'down' ? 'ticker-down' : 'ticker-flat';
     const arrow = trend.dir === 'up' ? '▲' : trend.dir === 'down' ? '▼' : '●';
     html += `<span class="ticker-item"><span style="color:${cfg.color}">${cfg.emoji}</span> ${cfg.name} <span class="${cls}">${arrow} ${Math.abs(trend.pct).toFixed(1)}%</span> ${cents(latest.data.avgPrice)} avg</span>`;
   });
-  el.innerHTML = html + html; // duplicate for seamless scroll
+  el.innerHTML = html + html;
 }
 
 function renderHeroes() {
@@ -498,10 +660,14 @@ function renderHeroes() {
     const d = latest ? latest.data : {totalListings:0,avgPrice:0,maxPrice:0,newAlerts:0};
     const trendColor = trend.dir==='up' ? 'var(--green)' : trend.dir==='down' ? 'var(--red)' : 'var(--dim)';
     const trendArrow = trend.dir==='up' ? '▲' : trend.dir==='down' ? '▼' : '●';
+    const mcap = centsK((d.avgPrice||0) * (d.totalListings||0));
     return `
       <div class="hero-card ${h.cls}">
         <div class="hero-label">${cfg.emoji} YOUR FOCUS</div>
-        <div class="hero-game">${cfg.name}</div>
+        <div class="hero-game">
+          <span>${cfg.name}</span>
+          <a href="${cfg.searchUrl}" target="_blank" class="source-link">eBay →</a>
+        </div>
         <div class="hero-stat-row">
           <div class="hero-stat">
             <div class="hero-stat-value">${cents(d.avgPrice)}</div>
@@ -518,6 +684,10 @@ function renderHeroes() {
           <div class="hero-stat">
             <div class="hero-stat-value" style="color:${trendColor}">${trendArrow} ${Math.abs(trend.pct).toFixed(1)}%</div>
             <div class="hero-stat-label">Trend</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value" style="color:var(--gold)">${mcap}</div>
+            <div class="hero-stat-label">Mcap</div>
           </div>
         </div>
         <div class="hero-sparkline">
@@ -542,44 +712,112 @@ function renderMarket() {
     const isCollapsed = cfg.tier === 'overview';
     const badgeCls = trend.dir==='up'?'badge-up':trend.dir==='down'?'badge-down':'badge-flat';
     const arrow = trend.dir==='up'?'▲':trend.dir==='down'?'▼':'●';
+    const mcap = centsK((d.avgPrice||0) * (d.totalListings||0));
     return `
       <div class="tcg-card ${isCollapsed?'collapsed':''}">
         <div class="tcg-header">
-          <span class="tcg-name" style="color:${cfg.color}">${cfg.emoji} ${cfg.name}</span>
+          <span class="tcg-name" style="color:${cfg.color}">
+            <a href="${cfg.searchUrl}" target="_blank">${cfg.emoji} ${cfg.name}</a>
+          </span>
           <span class="tcg-badge ${badgeCls}">${arrow} ${Math.abs(trend.pct).toFixed(1)}%</span>
         </div>
         <div class="tcg-price">${cents(d.avgPrice)}</div>
         <div class="tcg-meta">${d.totalListings} listings · max ${cents(d.maxPrice)}</div>
+        <div class="tcg-mcap">mcap ${mcap}</div>
         <div class="tcg-sparkline">
           <canvas class="spark" data-game="${gid}" data-color="${cfg.color}" style="height:30px"></canvas>
         </div>
-        ${d.newAlerts > 0 ? `<div class="tcg-alerts">🔔 ${d.newAlerts} new alerts today</div>` : ''}
+        ${d.newAlerts > 0 ? `<div class="tcg-alerts">🔔 ${d.newAlerts} new alerts</div>` : ''}
       </div>
     `;
   }).join('');
 }
 
-function renderAlerts() {
-  const el = document.getElementById('alertFeed');
+function renderGallery() {
+  const filtersEl = document.getElementById('galleryFilters');
+  const gridEl = document.getElementById('galleryGrid');
+
   if (!SEEN_DATA) {
-    el.innerHTML = '<div style="color:var(--dim);font-size:12px;padding:20px;text-align:center">Alert data loading...</div>';
+    gridEl.innerHTML = '<div style="color:var(--dim);font-size:12px;padding:20px;text-align:center;grid-column:1/-1">Loading card data...</div>';
     return;
   }
 
-  // Get recent alerts sorted by date
+  // Build card list
+  const allCards = Object.entries(SEEN_DATA)
+    .map(([key, val]) => ({ key, ...val }))
+    .filter(a => a.firstSeen)
+    .sort((a, b) => new Date(b.firstSeen) - new Date(a.firstSeen));
+
+  // Get unique games for filter
+  const gamesPresent = new Set();
+  allCards.forEach(c => {
+    const g = c.game || detectGame(c.title);
+    if (g !== 'unknown') gamesPresent.add(g);
+  });
+
+  // Render filters
+  const filterGames = [...gamesPresent].sort((a,b) => (TCG_CONFIG[a]?.order||99) - (TCG_CONFIG[b]?.order||99));
+  filtersEl.innerHTML = `
+    <button class="filter-btn ${galleryFilter==='all'?'active':''}" onclick="setFilter('all')">All (${allCards.length})</button>
+    ${filterGames.map(g => {
+      const cfg = TCG_CONFIG[g];
+      const count = allCards.filter(c => (c.game||detectGame(c.title)) === g).length;
+      return `<button class="filter-btn ${galleryFilter===g?'active':''}" onclick="setFilter('${g}')" style="${galleryFilter===g?'':`border-color:${cfg?.color}30;color:${cfg?.color}`}">${cfg?.emoji||''} ${cfg?.name||g} (${count})</button>`;
+    }).join('')}
+  `;
+
+  // Filter cards
+  const filtered = galleryFilter === 'all' ? allCards : allCards.filter(c => (c.game||detectGame(c.title)) === galleryFilter);
+  const display = filtered.slice(0, 60); // show up to 60
+
+  gridEl.innerHTML = display.map(card => {
+    const game = card.game || detectGame(card.title);
+    const cfg = TCG_CONFIG[game] || { name: 'Unknown', color: '#6a6a8a', emoji: '❓' };
+    const link = makeEbayLink(card.key);
+    const imgHtml = card.image
+      ? `<img src="${card.image}" alt="${(card.title||'').substring(0,30)}" loading="lazy" onerror="this.outerHTML='<div class=gallery-placeholder>${cfg.emoji}</div>'">`
+      : `<div class="gallery-placeholder">${cfg.emoji}</div>`;
+    return `
+      <a href="${link}" target="_blank" class="gallery-card" style="text-decoration:none;color:inherit">
+        ${imgHtml}
+        <div class="gallery-card-info">
+          <div class="gallery-card-game" style="color:${cfg.color}">${cfg.emoji} ${cfg.name}</div>
+          <div class="gallery-card-title">${truncate(card.title||'Unknown', 30)}</div>
+          ${card.price ? `<div class="gallery-card-price" style="color:${cfg.color}">${card.price}</div>` : ''}
+        </div>
+      </a>
+    `;
+  }).join('');
+
+  if (filtered.length > 60) {
+    gridEl.innerHTML += `<div style="grid-column:1/-1;text-align:center;color:var(--dim);font-size:11px;padding:12px">Showing 60 of ${filtered.length} cards</div>`;
+  }
+}
+
+window.setFilter = function(f) {
+  galleryFilter = f;
+  renderGallery();
+};
+
+function renderAlerts() {
+  const el = document.getElementById('alertFeed');
+  if (!SEEN_DATA) {
+    el.innerHTML = '<div style="color:var(--dim);font-size:12px;padding:20px;text-align:center">Loading alerts...</div>';
+    return;
+  }
+
   const alerts = Object.entries(SEEN_DATA)
     .map(([key, val]) => ({ key, ...val }))
     .filter(a => a.firstSeen)
     .sort((a, b) => new Date(b.firstSeen) - new Date(a.firstSeen))
-    .slice(0, 30);
+    .slice(0, 20);
 
   el.innerHTML = alerts.map(a => {
-    const game = a.game || (a.key.startsWith('ebay-com-') || a.key.startsWith('ebay-de-') ? detectGame(a.title) : 'unknown');
+    const game = a.game || detectGame(a.title);
     const cfg = TCG_CONFIG[game] || { name: 'Unknown', color: '#6a6a8a', emoji: '❓' };
     const date = new Date(a.firstSeen);
     const timeStr = date.toLocaleDateString('de-DE', {day:'numeric',month:'short'});
-    const link = a.key.includes('ebay-com-') ? `https://www.ebay.com/itm/${a.key.replace('ebay-com-','')}` :
-                 a.key.includes('ebay-de-') ? `https://www.ebay.de/itm/${a.key.replace('ebay-de-','')}` : '#';
+    const link = makeEbayLink(a.key);
     const imgHtml = a.image
       ? `<img class="alert-img" src="${a.image}" alt="${(a.title||'').substring(0,30)}" loading="lazy" onerror="this.outerHTML='<div class=alert-img-placeholder>${cfg.emoji}</div>'">`
       : `<div class="alert-img-placeholder">${cfg.emoji}</div>`;
@@ -588,7 +826,7 @@ function renderAlerts() {
       <div class="alert-item">
         <a href="${link}" target="_blank" style="flex-shrink:0">${imgHtml}</a>
         <div style="flex:1;min-width:0">
-          <div class="alert-game"><span class="alert-dot" style="background:${cfg.color};display:inline-block;vertical-align:middle;margin-right:4px"></span>${cfg.emoji} ${cfg.name}</div>
+          <div class="alert-game"><span class="alert-dot" style="background:${cfg.color}"></span>${cfg.emoji} ${cfg.name}</div>
           <div class="alert-title"><a href="${link}" target="_blank">${truncate(a.title||'Unknown card',55)}</a></div>
           ${priceHtml}
         </div>
@@ -598,35 +836,18 @@ function renderAlerts() {
   }).join('');
 }
 
-function detectGame(title) {
-  if (!title) return 'unknown';
-  const t = title.toLowerCase();
-  if (t.includes('yu-gi-oh') || t.includes('yugioh') || t.includes('blue-eyes') || t.includes('exodia') || t.includes('dark magician')) return 'yugioh';
-  if (t.includes('dandadan')) return 'dandadan';
-  if (t.includes('weiss') || t.includes('weiß') || t.includes('schwarz')) return 'weiss';
-  if (t.includes('pokemon') || t.includes('pokémon') || t.includes('charizard') || t.includes('pikachu')) return 'pokemon';
-  if (t.includes('one piece') || t.includes('luffy') || t.includes('zoro') || t.includes('shanks')) return 'onepiece';
-  if (t.includes('magic') || t.includes('mtg') || t.includes('black lotus')) return 'mtg';
-  if (t.includes('dragon ball')) return 'dragonball';
-  if (t.includes('digimon')) return 'digimon';
-  if (t.includes('lorcana') || t.includes('disney')) return 'lorcana';
-  if (t.includes('union arena')) return 'unionarena';
-  return 'unknown';
-}
-
-function truncate(s, n) { return s.length > n ? s.substring(0, n) + '...' : s; }
-
 function renderBrief() {
   const el = document.getElementById('morningBrief');
   const dates = getDates();
   const today = dates[dates.length - 1];
   const todayData = MARKET_DATA[today] || {};
 
-  // Generate brief
   const highlights = [];
+  let totalMcap = 0;
   Object.entries(todayData).forEach(([gid, d]) => {
     const cfg = TCG_CONFIG[gid];
     if (!cfg) return;
+    totalMcap += (d.avgPrice||0) * (d.totalListings||0);
     const trend = getTrend(gid);
     if (Math.abs(trend.pct) > 5) {
       highlights.push(`<strong>${cfg.emoji} ${cfg.name}</strong> ${trend.dir==='up'?'surged':'dropped'} ${Math.abs(trend.pct).toFixed(1)}%`);
@@ -642,10 +863,10 @@ function renderBrief() {
   el.innerHTML = `
     <div class="brief-title">☀️ Today's Brief — ${today}</div>
     <div class="brief-text">
-      Tracking <strong>${totalListings} listings</strong> across ${Object.keys(todayData).length} TCGs with <strong>${totalAlerts} new alerts</strong> today.<br><br>
+      Tracking <strong>${totalListings} holy grails</strong> worth <strong>${centsK(totalMcap)}</strong> across ${Object.keys(todayData).length} TCGs. <strong>${totalAlerts} new alerts</strong> today.<br><br>
       ${highlights.length ? highlights.join('<br>') + '<br><br>' : ''}
-      ${highlights.length === 0 ? 'Quiet day across the markets. No major moves. Good time to research and position.' : ''}
-      <br><span style="color:var(--dim);font-size:11px">Data refreshes every 3 hours via the Holy Grail Monitor. Threshold: €5,000+</span>
+      ${highlights.length === 0 ? 'Markets quiet. No major moves. Good time to research and position.<br><br>' : ''}
+      <span style="color:var(--dim);font-size:11px">Data from eBay.com, eBay.de, TCGPlayer · €5,000+ threshold · Refreshes every 3 hours</span>
     </div>
   `;
 }
@@ -657,19 +878,14 @@ function initParticles() {
   let w, h;
   const particles = [];
 
-  function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-  }
+  function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
   resize();
   window.addEventListener('resize', resize);
 
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 35; i++) {
     particles.push({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
+      x: Math.random() * w, y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
       size: Math.random() * 2 + 0.5,
       alpha: Math.random() * 0.5 + 0.1,
     });
@@ -694,8 +910,6 @@ function initParticles() {
 // ═══ INIT ═══
 initParticles();
 loadData();
-
-// Auto-refresh every 5 minutes
 setInterval(loadData, 5 * 60 * 1000);
 </script>
 </body>
