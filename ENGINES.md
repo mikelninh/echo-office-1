@@ -276,4 +276,49 @@ And this is CONSERVATIVE. One viral claw clip = 10x the user numbers overnight.
 
 ---
 
-*"Too much distraction money" — that ends here. Six engines, all feeding each other, all running simultaneously. The machine builds itself.* 💰🔥
+---
+
+## Engine 7: 📺 Ads — Relevant, Optional, Revenue From Day One
+
+### Why It Works
+Our audience is hyper-targeted: TCG collectors actively looking at cards. Advertisers DREAM of this audience. eBay, TCGPlayer, CardMarket, card shops — they all want eyeballs on their listings.
+
+### Ad Types (Ethical, Not Annoying)
+
+| Ad Type | Where | Revenue |
+|---------|-------|---------|
+| **Reward ads** | Between claw plays — watch 15s → get 1 free play | $5-15 CPM |
+| **Dashboard banners** | Sidebar/footer on dashboard — TCGPlayer, eBay, sealed product | $2-8 CPM |
+| **Sponsored machines** | Branded claw machine by a TCG company | $500-5000/month flat fee |
+| **Sponsored events** | "Street Wars brought to you by..." | $200-2000/event |
+| **Internal shop ads** | Shop owners pay to promote their shop to nearby streets | $2-5 per promotion |
+| **Newsletter sponsor** | One sponsor per weekly email | $50-500/issue |
+
+### Implementation
+- **Week 1**: Google AdSense on dashboard (instant, automatic)
+- **Week 2**: Reward ad system in claw (watch ad = free play)
+- **Month 2**: Direct ad sales to TCG companies
+- **Month 3**: Internal ad marketplace for shop owners
+
+### Revenue Math
+- 10K daily pageviews × $8 CPM = **$2,400/month** from display ads alone
+- Reward ads: 1,000 ad views/day × $12 CPM = **$360/month**
+- 2 sponsored machines × $1,000/month = **$2,000/month**
+- **Total Engine 7: $2,000-5,000/month scaling with traffic**
+
+## Updated Engine Map
+
+```
+E1 Affiliate    → $225-1125/mo     (passive, from day 1)
+E2 Premium      → $350-3500/mo     (subscriptions)
+E3 Newsletter   → $1950-2250/mo    (content + data)
+E4 Creator      → $500-5000/mo     (artist marketplace)
+E5 Tournament   → $570-5000/mo     (entry fees + rake)
+E6 Claw         → $3000-60K/mo     (tokens + plays)
+E7 Ads          → $2000-5000/mo    (display + reward + sponsored)
+E8 Neighborhoods→ $5K-5M/mo        (shops + rent + customization)
+─────────────────────────────────────
+TOTAL            $12K-5M+/mo        (8 engines compounding)
+```
+
+*"Too much distraction money" — that ends here. Eight engines, all feeding each other, all running simultaneously. The machine builds machines.* 💰🔥
