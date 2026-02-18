@@ -38338,6 +38338,19 @@ console.log('🔄 Deploy Tuesday: Loop & Personality features loaded');
 
 console.log('🔄 Deploy Wednesday: The Hook features loaded');
 
+// ═══ Expose main IIFE vars to window (for post-IIFE code + second <script> block) ═══
+window.changeFloor = changeFloor;
+window._ctx = typeof ctx !== 'undefined' ? ctx : null;
+window._W = typeof W !== 'undefined' ? W : null;
+window._H = typeof H !== 'undefined' ? H : null;
+window._S = S;
+window._LS = typeof LS !== 'undefined' ? LS : null;
+window._getObjects = typeof getObjects !== 'undefined' ? getObjects : null;
+window._FloorDepth = typeof FloorDepth !== 'undefined' ? FloorDepth : null;
+window._renderFloorMaterial = typeof renderFloorMaterial !== 'undefined' ? renderFloorMaterial : null;
+window._renderWalls = typeof renderWalls !== 'undefined' ? renderWalls : null;
+window._renderWallDetails = typeof renderWallDetails !== 'undefined' ? renderWallDetails : null;
+
 })();
 
 // ═══════════════════════════════════════════════════
@@ -38634,9 +38647,7 @@ window.addEventListener('load', function(){
   console.log('🔧 Floor-size movement patch applied. FLOOR_SIZES:', typeof FLOOR_SIZES !== 'undefined' ? JSON.stringify(FLOOR_SIZES) : 'NOT FOUND');
 });
 
-// ═══ Expose key functions for deploy features below ═══
-// (function declarations should be in scope but browser parsing quirks)
-if(typeof changeFloor==='function')window.changeFloor=changeFloor;
+// ═══ changeFloor exposed on window inside main IIFE ═══
 if(typeof EchoReactions!=='undefined')window.EchoReactions=EchoReactions;
 
 // ═══════════════════════════════════════
@@ -38679,23 +38690,26 @@ if(typeof EchoReactions!=='undefined')window.EchoReactions=EchoReactions;
 
 // === 2. ECHO PERSONAL GREETING ===
 (function echoGreeting(){
-  if(LS.get('echoGreetingDone'))return;
-  var _greetCF=window.changeFloor||changeFloor;
-  window.changeFloor=changeFloor=function(f){
+  var _LS=window._LS||{get:function(){return null},set:function(){}};
+  if(_LS.get('echoGreetingDone'))return;
+  if(!window.changeFloor)return;
+  var _greetCF=window.changeFloor;
+  window.changeFloor=function(f){
     _greetCF(f);
-    if(f===1&&!LS.get('echoGreetingDone')){
-      LS.set('echoGreetingDone',true);
-      var skinId=S.visitor?S.visitor.skin:'hooded';
-      var sk=VISITOR_SKINS.find(function(s){return s.id===skinId})||VISITOR_SKINS[0];
+    if(f===1&&!_LS.get('echoGreetingDone')){
+      _LS.set('echoGreetingDone',true);
+      var _S=window._S||window.S||{};
+      var skinId=_S.visitor?_S.visitor.skin:'hooded';
+      var sk=(window.VISITOR_SKINS||[]).find(function(s){return s.id===skinId})||(window.VISITOR_SKINS||[{}])[0];
       setTimeout(function(){
         // Walk Echo toward visitor
-        if(S.echo&&S.visitor){
-          S.echo.targetX=S.visitor.x-40;
-          S.echo.targetY=S.visitor.y;
-          S.echo.moving=true;
+        if(_S.echo&&_S.visitor){
+          _S.echo.targetX=_S.visitor.x-40;
+          _S.echo.targetY=_S.visitor.y;
+          _S.echo.moving=true;
         }
         setTimeout(function(){
-          EchoReactions.trigger('welcome_greeting','Hey! Welcome to the station \ud83d\udc4b I\'m Echo. That '+sk.label+' looks great on you! Look around \u2014 sparkly things are interactive.');
+          if(window.EchoReactions)window.EchoReactions.trigger('welcome_greeting','Hey! Welcome to the station \ud83d\udc4b I\'m Echo. That '+sk.label+' looks great on you! Look around \u2014 sparkly things are interactive.');
         },1500);
       },2000);
     }
@@ -38704,11 +38718,13 @@ if(typeof EchoReactions!=='undefined')window.EchoReactions=EchoReactions;
 
 // === 3. MUSIC ENABLE PROMPT ON FLOOR 10 ===
 (function musicPrompt(){
-  var _mpCF=window.changeFloor||changeFloor;
-  window.changeFloor=changeFloor=function(f){
+  if(!window.changeFloor)return;
+  var _mpCF=window.changeFloor;
+  var _LS=window._LS||{get:function(){return null},set:function(){}};
+  window.changeFloor=function(f){
     _mpCF(f);
-    if(f===10&&!LS.get('musicPrompted')){
-      LS.set('musicPrompted',true);
+    if(f===10&&!_LS.get('musicPrompted')){
+      _LS.set('musicPrompted',true);
       var ov=document.createElement('div');
       ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9998;display:flex;align-items:center;justify-content:center';
       var box=document.createElement('div');
@@ -38832,20 +38848,23 @@ var AmbientNPCs={
   // Note: F2/3/4 rewrites handled by later IIFE (window.renderFloor2/3/4)
 })();
 
-// ═══ Expose block-scoped vars for external scripts (floor1.js) and second <script> block ═══
-window._ctx=ctx; window._W=W; window._H=H; window._S=S; window._LS=LS;
-window._getObjects=getObjects; window._FloorDepth=typeof FloorDepth!=='undefined'?FloorDepth:null;
-window._renderFloorMaterial=typeof renderFloorMaterial!=='undefined'?renderFloorMaterial:null;
-window._renderWalls=typeof renderWalls!=='undefined'?renderWalls:null;
-window._renderWallDetails=typeof renderWallDetails!=='undefined'?renderWallDetails:null;
+// ═══ Bridge vars already exposed inside main IIFE (before its closing). ═══
+// This block is kept as a safety net — vars set above via window._ take precedence.
 
 </script>
 <script src="floor1.js"></script>
 <script src="voice.js"></script>
 <script>
 // ═══ Unpack block-scoped vars from first <script> block ═══
-const ctx=window._ctx, W=window._W, H=window._H, S=window._S, LS=window._LS;
-const getObjects=window._getObjects;
+// Note: window._* vars may be undefined if an error in block 1 prevents their assignment.
+// Fall back to window.S (set earlier at line ~37049) and DOM-based ctx.
+const ctx=window._ctx||(document.getElementById('game')?document.getElementById('game').getContext('2d'):null);
+const W=window._W||(document.getElementById('game')?document.getElementById('game').width:800);
+const H=window._H||(document.getElementById('game')?document.getElementById('game').height:600);
+const S=window._S||window.S;
+const LS=window._LS||{};
+const getObjects=window._getObjects||(window.getObjects?window.getObjects.bind(window):function(){return{}});
+const FloorDepth=window._FloorDepth||window.FloorDepth||null;
 
 // ═══ Voice Chat Integration ═══
 (function initVoiceIntegration() {
