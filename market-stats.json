@@ -167,12 +167,12 @@
       }
     },
     "pokemon": {
-      "totalListings": 177,
-      "avgPrice": 11390,
+      "totalListings": 174,
+      "avgPrice": 11677,
       "maxPrice": 149999,
-      "newAlerts": 2,
+      "newAlerts": 1,
       "platforms": {
-        "ebay": 177,
+        "ebay": 174,
         "tcgplayer": 0
       }
     },
@@ -187,12 +187,12 @@
       }
     },
     "onepiece": {
-      "totalListings": 138,
-      "avgPrice": 8773,
-      "maxPrice": 39000,
-      "newAlerts": 5,
+      "totalListings": 133,
+      "avgPrice": 9266,
+      "maxPrice": 52000,
+      "newAlerts": 9,
       "platforms": {
-        "ebay": 138,
+        "ebay": 133,
         "tcgplayer": 0
       }
     },
@@ -210,7 +210,7 @@
       "totalListings": 16,
       "avgPrice": 9200,
       "maxPrice": 22500,
-      "newAlerts": 1,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 16,
         "tcgplayer": 0
