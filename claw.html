@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Echo's Vault — The Claw</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a14;color:#e0e0f0;font-family:'JetBrains Mono',monospace;overflow:hidden;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:none}
+canvas{display:block;image-rendering:auto;border-radius:8px;max-width:100vw;max-height:90vh}
+.hud{position:fixed;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:10}
+.hud-left,.hud-right{pointer-events:auto}
+.hud-title{font-family:'Press Start 2P',cursive;font-size:11px;background:linear-gradient(135deg,#ff6ec7,#b388ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hud-sub{font-size:10px;color:#6a6a8a;margin-top:2px}
+.hud-stat{font-size:11px;text-align:right;margin-bottom:4px}
+.hud-stat span{color:#ffd700;font-weight:700}
+.pity-bar{width:120px;height:8px;background:#1a1a2e;border-radius:4px;overflow:hidden;margin-top:4px}
+.pity-fill{height:100%;background:linear-gradient(90deg,#ff6ec7,#ffd700);border-radius:4px;transition:width 0.3s}
+.controls-hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:10px;color:#6a6a8a;text-align:center;pointer-events:none;z-index:10}
+.back-link{position:fixed;bottom:12px;right:12px;font-size:10px;color:#ff6ec7;text-decoration:none;z-index:10}
+.grab-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Press Start 2P',cursive;font-size:20px;color:#ffd700;text-shadow:0 0 20px #ffd700,0 0 40px #ff6ec7;pointer-events:none;z-index:20;opacity:0;transition:opacity 0.3s}
+.grab-msg.show{opacity:1}
+.mega-flash{position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle,rgba(255,215,0,0.3),transparent);pointer-events:none;z-index:15;opacity:0;transition:opacity 0.5s}
+.mega-flash.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="hud">
+  <div class="hud-left">
+    <div class="hud-title">THE CLAW</div>
+    <div class="hud-sub">Echo's Vault</div>
+  </div>
+  <div class="hud-right">
+    <div class="hud-stat">Plays: <span id="playCount">0</span></div>
+    <div class="hud-stat">Won: <span id="wonCount">0</span></div>
+    <div class="hud-stat">Strength: <span id="clawPower">???</span></div>
+    <div class="hud-stat" style="font-size:9px;color:#6a6a8a">Mega Claw in <span id="megaIn">50</span></div>
+    <div class="pity-bar"><div class="pity-fill" id="pityFill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="grab-msg" id="grabMsg"></div>
+<div class="mega-flash" id="megaFlash"></div>
+
+<canvas id="game"></canvas>
+
+<div class="controls-hint" id="controlsHint">← → Move · SPACE Drop · R Reset</div>
+<a href="dashboard.html" class="back-link">← Dashboard</a>
+
+<script>
+// ═══ CLAW MACHINE ═══
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+// Sizing
+const W = 600, H = 700;
+canvas.width = W;
+canvas.height = H;
+
+// Scale for retina
+function resizeCanvas() {
+  const scale = Math.min(window.innerWidth / W, (window.innerHeight - 60) / H, 1.5);
+  canvas.style.width = (W * scale) + 'px';
+  canvas.style.height = (H * scale) + 'px';
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// ═══ AUDIO ═══
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(freq, duration, type='sine', vol=0.15) {
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type;
+  o.frequency.value = freq;
+  g.gain.value = vol;
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime + duration);
+}
+
+function sndMove() { playSound(200, 0.05, 'square', 0.05); }
+function sndDrop() { playSound(150, 0.3, 'sawtooth', 0.1); }
+function sndGrip() { playSound(400, 0.15, 'square', 0.12); }
+function sndWin() {
+  [523, 659, 784, 1047].forEach((f,i) => setTimeout(() => playSound(f, 0.2, 'sine', 0.15), i*100));
+}
+function sndMiss() { playSound(200, 0.4, 'sawtooth', 0.08); }
+function sndMega() {
+  [262,330,392,523,659,784,1047,1319].forEach((f,i) => setTimeout(() => playSound(f, 0.3, 'sine', 0.2), i*80));
+}
+function sndThud() { playSound(80, 0.15, 'triangle', 0.2); }
+
+// ═══ GAME STATE ═══
+const MACHINE = { x: 50, y: 80, w: 500, h: 540, floorY: 560, chuteX: 480, chuteW: 60 };
+const RAIL_Y = 115;
+const CLAW_SPEED = 4;
+const DROP_SPEED = 3;
+const LIFT_SPEED = 2;
+const GRAVITY = 0.15;
+
+let state = 'idle'; // idle, moving, dropping, gripping, lifting, returning, won, miss
+let clawX = W / 2;
+let clawY = RAIL_Y;
+let clawOpen = 1; // 1=open, 0=closed
+let clawStrength = 0; // 0-1
+let isMega = false;
+let heldPrize = null;
+let heldOffsetX = 0;
+let heldOffsetY = 0;
+let slipTimer = 0;
+let plays = 0;
+let wins = 0;
+let moveDir = 0;
+let msgTimer = 0;
+let msgText = '';
+let shakeTimer = 0;
+let particles = [];
+
+// ═══ PRIZES ═══
+const RARITY_COLORS = {
+  common: { bg: '#2a3a5a', border: '#4a6a9a', label: '#8ab4f8', glow: null },
+  rare: { bg: '#2a4a2a', border: '#4a9a4a', label: '#4ade80', glow: null },
+  super: { bg: '#4a3a5a', border: '#9a4a9a', label: '#c084fc', glow: '#c084fc' },
+  ultra: { bg: '#5a4a1a', border: '#daa520', label: '#ffd700', glow: '#ffd700' },
+  legendary: { bg: '#5a1a1a', border: '#ff4444', label: '#ff6ec7', glow: '#ff6ec7' },
+};
+
+const CARD_NAMES = {
+  yugioh: ['Blue-Eyes White Dragon', 'Dark Magician', 'Exodia Head', 'Red-Eyes B. Dragon', 'Pot of Greed'],
+  pokemon: ['Charizard 1st Ed', 'Pikachu Illustrator', 'Shadowless Zard', 'Gold Star Rayquaza', 'Shining Mewtwo'],
+  dandadan: ['Okarun SR', 'Momo Ayase', 'Turbo Granny', 'Seiko SP', 'Jiji & Okarun'],
+  onepiece: ['Luffy Manga Alt', 'Shanks SP', 'Zoro Alt Art', 'Nami Romance', 'Gear 5 Luffy'],
+  lorcana: ['Elsa D23 Promo', 'Mickey Sorcerer', 'Stitch Holo', 'Belle Enchanted', 'Maleficent SR'],
+};
+
+let prizes = [];
+
+function spawnPrizes() {
+  prizes = [];
+  const count = 8 + Math.floor(Math.random() * 5); // 8-12 prizes
+  for (let i = 0; i < count; i++) {
+    const rng = Math.random();
+    let rarity, weight;
+    if (rng < 0.35) { rarity = 'common'; weight = 1; }
+    else if (rng < 0.60) { rarity = 'rare'; weight = 1.5; }
+    else if (rng < 0.80) { rarity = 'super'; weight = 2; }
+    else if (rng < 0.95) { rarity = 'ultra'; weight = 3; }
+    else { rarity = 'legendary'; weight = 5; }
+
+    const gameKeys = Object.keys(CARD_NAMES);
+    const game = gameKeys[Math.floor(Math.random() * gameKeys.length)];
+    const names = CARD_NAMES[game];
+    const name = names[Math.floor(Math.random() * names.length)];
+
+    const pw = 50 + Math.random() * 15;
+    const ph = 65 + Math.random() * 10;
+
+    prizes.push({
+      x: MACHINE.x + 40 + Math.random() * (MACHINE.w - 140),
+      y: MACHINE.floorY - ph - Math.random() * 80,
+      w: pw, h: ph,
+      vx: 0, vy: 0,
+      rotation: (Math.random() - 0.5) * 0.3,
+      rarity, weight, game, name,
+      grounded: false,
+    });
+  }
+}
+spawnPrizes();
+
+// ═══ PHYSICS ═══
+function updatePhysics() {
+  for (const p of prizes) {
+    if (p === heldPrize) continue;
+
+    p.vy += GRAVITY;
+    p.x += p.vx;
+    p.y += p.vy;
+
+    // Floor collision
+    if (p.y + p.h > MACHINE.floorY) {
+      p.y = MACHINE.floorY - p.h;
+      p.vy *= -0.3;
+      if (Math.abs(p.vy) < 0.5) { p.vy = 0; p.grounded = true; }
+      p.vx *= 0.8;
+    }
+
+    // Wall collision
+    if (p.x < MACHINE.x + 10) { p.x = MACHINE.x + 10; p.vx *= -0.5; }
+    if (p.x + p.w > MACHINE.x + MACHINE.w - 10) { p.x = MACHINE.x + MACHINE.w - 10 - p.w; p.vx *= -0.5; }
+
+    // Prize-to-prize collision (simple push)
+    for (const q of prizes) {
+      if (q === p || q === heldPrize) continue;
+      const overlapX = Math.min(p.x + p.w, q.x + q.w) - Math.max(p.x, q.x);
+      const overlapY = Math.min(p.y + p.h, q.y + q.h) - Math.max(p.y, q.y);
+      if (overlapX > 0 && overlapY > 0) {
+        const pushX = overlapX * 0.3;
+        if (p.x < q.x) { p.vx -= pushX * 0.1; q.vx += pushX * 0.1; }
+        else { p.vx += pushX * 0.1; q.vx -= pushX * 0.1; }
+        // Vertical push
+        if (overlapY < overlapX) {
+          if (p.y < q.y) { p.y -= overlapY * 0.5; q.y += overlapY * 0.5; }
+          else { p.y += overlapY * 0.5; q.y -= overlapY * 0.5; }
+        }
+      }
+    }
+
+    p.vx *= 0.98;
+    p.rotation += p.vx * 0.01;
+  }
+}
+
+// ═══ CLAW LOGIC ═══
+function rollStrength() {
+  if (isMega) return 1.0;
+  // Gets stronger with more plays (pity)
+  const pityBonus = Math.min(plays % 50, 40) * 0.012; // up to 0.48 bonus at 40 plays
+  const base = 0.25 + Math.random() * 0.5; // 0.25 - 0.75
+  return Math.min(base + pityBonus, 0.95);
+}
+
+function updateClawPowerDisplay() {
+  const pct = clawStrength;
+  const el = document.getElementById('clawPower');
+  if (isMega) {
+    el.textContent = '★ MEGA ★';
+    el.style.color = '#ffd700';
+  } else if (pct > 0.7) {
+    el.textContent = '■■■ Strong';
+    el.style.color = '#00e676';
+  } else if (pct > 0.4) {
+    el.textContent = '■■□ Medium';
+    el.style.color = '#ffab40';
+  } else {
+    el.textContent = '■□□ Weak';
+    el.style.color = '#ff5252';
+  }
+}
+
+function startDrop() {
+  if (state !== 'idle') return;
+  audioCtx.resume();
+
+  plays++;
+  const megaAt = 50;
+  isMega = (plays % megaAt === 0);
+
+  if (isMega) {
+    sndMega();
+    document.getElementById('megaFlash').classList.add('show');
+    setTimeout(() => document.getElementById('megaFlash').classList.remove('show'), 1500);
+    showMsg('★ MEGA CLAW ★', 2000);
+    shakeTimer = 30;
+  }
+
+  clawStrength = rollStrength();
+  updateClawPowerDisplay();
+
+  document.getElementById('playCount').textContent = plays;
+  const pityPct = ((plays % megaAt) / megaAt) * 100;
+  document.getElementById('pityFill').style.width = pityPct + '%';
+  document.getElementById('megaIn').textContent = megaAt - (plays % megaAt);
+
+  state = 'dropping';
+  clawOpen = 1;
+  sndDrop();
+}
+
+function findPrizeUnderClaw() {
+  const cx = clawX;
+  const cy = clawY + 40;
+  let best = null;
+  let bestDist = 999;
+  for (const p of prizes) {
+    if (cx > p.x - 5 && cx < p.x + p.w + 5 && cy > p.y - 10 && cy < p.y + p.h + 10) {
+      const dist = Math.abs(cx - (p.x + p.w/2));
+      if (dist < bestDist) { bestDist = dist; best = p; }
+    }
+  }
+  return best;
+}
+
+function showMsg(text, dur=1500) {
+  msgText = text;
+  msgTimer = dur;
+  const el = document.getElementById('grabMsg');
+  el.textContent = text;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+function spawnParticles(x, y, color, count=15) {
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x, y,
+      vx: (Math.random()-0.5) * 6,
+      vy: (Math.random()-0.5) * 6 - 2,
+      life: 40 + Math.random() * 20,
+      maxLife: 60,
+      size: 2 + Math.random() * 3,
+      color,
+    });
+  }
+}
+
+// ═══ UPDATE ═══
+function update() {
+  // Claw movement
+  if (state === 'idle') {
+    clawX += moveDir * CLAW_SPEED;
+    clawX = Math.max(MACHINE.x + 40, Math.min(MACHINE.x + MACHINE.w - 40, clawX));
+    if (moveDir !== 0) sndMove();
+  }
+
+  // Drop
+  if (state === 'dropping') {
+    clawY += DROP_SPEED;
+    // Check if we hit a prize or the floor
+    const prize = findPrizeUnderClaw();
+    if (prize && clawY + 40 >= prize.y) {
+      state = 'gripping';
+      clawOpen = 0;
+      sndGrip();
+      heldPrize = prize;
+      heldOffsetX = clawX - (prize.x + prize.w/2);
+      heldOffsetY = clawY + 40 - prize.y;
+      slipTimer = 0;
+      setTimeout(() => { state = 'lifting'; }, 300);
+    } else if (clawY + 40 >= MACHINE.floorY - 10) {
+      state = 'gripping';
+      clawOpen = 0;
+      sndGrip();
+      setTimeout(() => { state = 'lifting'; }, 300);
+    }
+  }
+
+  // Lifting
+  if (state === 'lifting') {
+    clawY -= LIFT_SPEED;
+
+    if (heldPrize) {
+      // Update held prize position
+      heldPrize.x = clawX - heldPrize.w/2 - heldOffsetX;
+      heldPrize.y = clawY + 40 - heldOffsetY;
+      heldPrize.vy = 0;
+      heldPrize.vx = 0;
+
+      // Slip chance based on weight vs strength
+      slipTimer++;
+      const slipChance = (heldPrize.weight * 0.008) * (1 - clawStrength);
+      if (!isMega && Math.random() < slipChance && slipTimer > 20) {
+        // SLIP!
+        heldPrize.vy = 1;
+        heldPrize.vx = (Math.random() - 0.5) * 2;
+        sndMiss();
+
+        // Near miss message
+        const nearChute = Math.abs(heldPrize.x - MACHINE.chuteX) < 80;
+        if (nearChute && clawY < RAIL_Y + 100) {
+          showMsg('SO CLOSE!', 1500);
+          spawnParticles(heldPrize.x + heldPrize.w/2, heldPrize.y, '#ff5252', 10);
+        } else {
+          showMsg('Slipped!', 1000);
+        }
+        heldPrize = null;
+        state = 'returning_empty';
+      }
+    }
+
+    // Reached the top
+    if (clawY <= RAIL_Y) {
+      clawY = RAIL_Y;
+      if (heldPrize) {
+        state = 'returning';
+      } else {
+        state = 'returning_empty';
+      }
+    }
+  }
+
+  // Returning to chute with prize
+  if (state === 'returning') {
+    const targetX = MACHINE.x + MACHINE.chuteX;
+    const dx = targetX - clawX;
+    clawX += Math.sign(dx) * Math.min(Math.abs(dx), CLAW_SPEED);
+
+    if (heldPrize) {
+      heldPrize.x = clawX - heldPrize.w/2 - heldOffsetX;
+      heldPrize.y = clawY + 40 - heldOffsetY;
+
+      // Can still slip during return!
+      slipTimer++;
+      const slipChance = (heldPrize.weight * 0.004) * (1 - clawStrength);
+      if (!isMega && Math.random() < slipChance && slipTimer > 40) {
+        heldPrize.vy = 1;
+        heldPrize.vx = (Math.random() - 0.5) * 3;
+        showMsg('NO! So close!', 1500);
+        spawnParticles(heldPrize.x + heldPrize.w/2, heldPrize.y, '#ff5252', 15);
+        sndMiss();
+        heldPrize = null;
+        state = 'returning_empty';
+      }
+    }
+
+    if (Math.abs(dx) < 3) {
+      // Drop into chute!
+      if (heldPrize) {
+        wins++;
+        document.getElementById('wonCount').textContent = wins;
+        const rColors = RARITY_COLORS[heldPrize.rarity];
+        showMsg(heldPrize.rarity === 'legendary' ? '★ LEGENDARY! ★' :
+                heldPrize.rarity === 'ultra' ? '✦ ULTRA RARE! ✦' :
+                heldPrize.rarity === 'super' ? '◆ SUPER RARE!' :
+                heldPrize.rarity === 'rare' ? '● RARE!' : 'Got it!', 2000);
+        spawnParticles(clawX, clawY + 60, rColors.glow || rColors.label, 25);
+        sndWin();
+        shakeTimer = 10;
+
+        // Remove from prizes
+        const idx = prizes.indexOf(heldPrize);
+        if (idx > -1) prizes.splice(idx, 1);
+        heldPrize = null;
+
+        // Refill if too few
+        if (prizes.length < 5) {
+          for (let i = 0; i < 4; i++) {
+            setTimeout(() => {
+              const p = createRandomPrize();
+              p.y = MACHINE.y + 20;
+              p.vy = 2;
+              prizes.push(p);
+              sndThud();
+            }, 500 + i * 300);
+          }
+        }
+      }
+      state = 'returning_empty';
+    }
+  }
+
+  // Returning empty
+  if (state === 'returning_empty') {
+    clawY -= LIFT_SPEED;
+    if (clawY <= RAIL_Y) {
+      clawY = RAIL_Y;
+      clawOpen = 1;
+      state = 'idle';
+      isMega = false;
+    }
+  }
+
+  // Physics
+  updatePhysics();
+
+  // Particles
+  particles = particles.filter(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.1;
+    p.life--;
+    return p.life > 0;
+  });
+
+  // Shake
+  if (shakeTimer > 0) shakeTimer--;
+}
+
+function createRandomPrize() {
+  const rng = Math.random();
+  let rarity, weight;
+  if (rng < 0.35) { rarity = 'common'; weight = 1; }
+  else if (rng < 0.60) { rarity = 'rare'; weight = 1.5; }
+  else if (rng < 0.80) { rarity = 'super'; weight = 2; }
+  else if (rng < 0.95) { rarity = 'ultra'; weight = 3; }
+  else { rarity = 'legendary'; weight = 5; }
+
+  const gameKeys = Object.keys(CARD_NAMES);
+  const game = gameKeys[Math.floor(Math.random() * gameKeys.length)];
+  const names = CARD_NAMES[game];
+  const name = names[Math.floor(Math.random() * names.length)];
+
+  return {
+    x: MACHINE.x + 60 + Math.random() * (MACHINE.w - 180),
+    y: MACHINE.y + 30,
+    w: 50 + Math.random() * 15,
+    h: 65 + Math.random() * 10,
+    vx: (Math.random() - 0.5) * 2,
+    vy: 0,
+    rotation: (Math.random() - 0.5) * 0.3,
+    rarity, weight, game, name,
+    grounded: false,
+  };
+}
+
+// ═══ RENDER ═══
+function render() {
+  ctx.clearRect(0, 0, W, H);
+
+  const shake = shakeTimer > 0 ? (Math.random()-0.5) * shakeTimer * 0.5 : 0;
+  ctx.save();
+  ctx.translate(shake, shake * 0.5);
+
+  // Background
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+  bgGrad.addColorStop(0, '#0a0a14');
+  bgGrad.addColorStop(1, '#12121f');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Machine body
+  drawMachine();
+
+  // Prizes
+  for (const p of prizes) {
+    drawPrize(p);
+  }
+
+  // Claw
+  drawClaw();
+
+  // Particles
+  for (const p of particles) {
+    const alpha = p.life / p.maxLife;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // Chute label
+  ctx.fillStyle = '#6a6a8a';
+  ctx.font = '10px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  ctx.fillText('WIN', MACHINE.x + MACHINE.chuteX + MACHINE.chuteW/2, MACHINE.floorY + 28);
+
+  ctx.restore();
+}
+
+function drawMachine() {
+  const m = MACHINE;
+
+  // Machine outer frame
+  ctx.fillStyle = '#1a1a2e';
+  ctx.strokeStyle = '#2a2a4a';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(m.x - 10, m.y - 20, m.w + 20, m.h + 60, 12);
+  ctx.fill();
+  ctx.stroke();
+
+  // Glass area
+  ctx.fillStyle = 'rgba(10,10,30,0.7)';
+  ctx.fillRect(m.x, m.y, m.w, m.h - 20);
+
+  // Glass border
+  ctx.strokeStyle = '#3a3a5a';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(m.x, m.y, m.w, m.h - 20);
+
+  // Glass reflection
+  ctx.fillStyle = 'rgba(255,255,255,0.02)';
+  ctx.fillRect(m.x + 10, m.y + 10, m.w * 0.3, m.h * 0.6);
+
+  // Rail
+  ctx.fillStyle = '#3a3a5a';
+  ctx.fillRect(m.x, RAIL_Y - 4, m.w, 8);
+  ctx.fillStyle = '#4a4a6a';
+  ctx.fillRect(m.x, RAIL_Y - 2, m.w, 4);
+
+  // Floor
+  const floorGrad = ctx.createLinearGradient(0, m.floorY - 30, 0, m.floorY);
+  floorGrad.addColorStop(0, 'transparent');
+  floorGrad.addColorStop(1, 'rgba(26,26,46,0.8)');
+  ctx.fillStyle = floorGrad;
+  ctx.fillRect(m.x, m.floorY - 30, m.w, 30);
+
+  ctx.fillStyle = '#2a2a4a';
+  ctx.fillRect(m.x, m.floorY, m.w, 4);
+
+  // Chute opening
+  ctx.fillStyle = '#0a0a14';
+  ctx.fillRect(m.x + m.chuteX, m.floorY - 5, m.chuteW, 50);
+  ctx.strokeStyle = isMega ? '#ffd700' : '#4a4a6a';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(m.x + m.chuteX, m.floorY - 5, m.chuteW, 50);
+
+  // Top decorative lights
+  const t = Date.now() * 0.003;
+  for (let i = 0; i < 8; i++) {
+    const lx = m.x + 30 + i * (m.w - 40) / 7;
+    const brightness = Math.sin(t + i * 0.8) * 0.5 + 0.5;
+    const colors = ['#ff6ec7', '#ffd700', '#00e676', '#448aff', '#b388ff', '#ff5252', '#18ffff', '#ffab40'];
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.globalAlpha = 0.3 + brightness * 0.7;
+    ctx.beginPath();
+    ctx.arc(lx, m.y - 8, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // "ECHO'S VAULT" text on machine
+  ctx.fillStyle = '#6a6a8a';
+  ctx.font = '8px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  ctx.fillText("ECHO'S VAULT", m.x + m.w / 2, m.y + m.h + 25);
+}
+
+function drawPrize(p) {
+  const rc = RARITY_COLORS[p.rarity];
+
+  ctx.save();
+  ctx.translate(p.x + p.w/2, p.y + p.h/2);
+  ctx.rotate(p.rotation);
+
+  // Glow for rare+
+  if (rc.glow) {
+    ctx.shadowColor = rc.glow;
+    ctx.shadowBlur = 12;
+  }
+
+  // Card body
+  ctx.fillStyle = rc.bg;
+  ctx.strokeStyle = rc.border;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(-p.w/2, -p.h/2, p.w, p.h, 4);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+
+  // Card inner art area
+  ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  ctx.fillRect(-p.w/2 + 4, -p.h/2 + 14, p.w - 8, p.h - 28);
+
+  // Game icon (simple shapes)
+  ctx.fillStyle = rc.label;
+  ctx.font = '14px serif';
+  ctx.textAlign = 'center';
+  const gameEmoji = p.game === 'yugioh' ? '👑' : p.game === 'pokemon' ? '⚡' :
+                    p.game === 'dandadan' ? '👁' : p.game === 'onepiece' ? '🏴' : '✨';
+  ctx.fillText(gameEmoji, 0, 6);
+
+  // Rarity label
+  ctx.fillStyle = rc.label;
+  ctx.font = 'bold 7px "JetBrains Mono"';
+  ctx.fillText(p.rarity.toUpperCase(), 0, -p.h/2 + 10);
+
+  // Card name (truncated)
+  ctx.fillStyle = '#ccc';
+  ctx.font = '6px "JetBrains Mono"';
+  const shortName = p.name.length > 12 ? p.name.substring(0, 11) + '..' : p.name;
+  ctx.fillText(shortName, 0, p.h/2 - 6);
+
+  ctx.restore();
+}
+
+function drawClaw() {
+  const cx = clawX;
+  const cy = clawY;
+
+  // Cable
+  ctx.strokeStyle = '#4a4a6a';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx, RAIL_Y);
+  ctx.lineTo(cx, cy);
+  ctx.stroke();
+
+  // Claw carriage on rail
+  ctx.fillStyle = isMega ? '#ffd700' : '#3a3a5a';
+  ctx.fillRect(cx - 15, RAIL_Y - 8, 30, 12);
+
+  // Strength glow
+  if (state !== 'idle') {
+    const glowIntensity = clawStrength;
+    const glowColor = isMega ? `rgba(255,215,0,${glowIntensity * 0.4})` :
+                      glowIntensity > 0.7 ? `rgba(0,230,118,${glowIntensity * 0.3})` :
+                      glowIntensity > 0.4 ? `rgba(255,171,64,${glowIntensity * 0.3})` :
+                      `rgba(255,82,82,${glowIntensity * 0.3})`;
+    ctx.fillStyle = glowColor;
+    ctx.beginPath();
+    ctx.arc(cx, cy + 10, 20 + glowIntensity * 10, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Claw head
+  ctx.fillStyle = isMega ? '#ffd700' : '#6a6a8a';
+  ctx.fillRect(cx - 10, cy - 5, 20, 15);
+
+  // Claw arms
+  const openAngle = clawOpen * 0.5;
+  ctx.strokeStyle = isMega ? '#ffd700' : '#8a8aaa';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+
+  // Left arm
+  ctx.beginPath();
+  ctx.moveTo(cx - 5, cy + 10);
+  ctx.lineTo(cx - 12 - openAngle * 15, cy + 35);
+  ctx.lineTo(cx - 8 - openAngle * 10, cy + 42);
+  ctx.stroke();
+
+  // Right arm
+  ctx.beginPath();
+  ctx.moveTo(cx + 5, cy + 10);
+  ctx.lineTo(cx + 12 + openAngle * 15, cy + 35);
+  ctx.lineTo(cx + 8 + openAngle * 10, cy + 42);
+  ctx.stroke();
+
+  // Center arm
+  ctx.beginPath();
+  ctx.moveTo(cx, cy + 10);
+  ctx.lineTo(cx, cy + 38);
+  ctx.lineTo(cx, cy + 43);
+  ctx.stroke();
+}
+
+// ═══ INPUT ═══
+const keys = {};
+window.addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (e.code === 'Space') { e.preventDefault(); startDrop(); }
+  if (e.code === 'KeyR') { resetGame(); }
+});
+window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+// Touch controls
+let touchStartX = 0;
+let touchActive = false;
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  audioCtx.resume();
+  const touch = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  const x = (touch.clientX - rect.left) / rect.width * W;
+  const y = (touch.clientY - rect.top) / rect.height * H;
+
+  if (y > H * 0.7) {
+    // Bottom area = drop
+    startDrop();
+  } else {
+    touchStartX = x;
+    touchActive = true;
+  }
+});
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (!touchActive) return;
+  const touch = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  const x = (touch.clientX - rect.left) / rect.width * W;
+  const dx = x - touchStartX;
+  if (Math.abs(dx) > 5) {
+    moveDir = dx > 0 ? 1 : -1;
+    touchStartX = x;
+  }
+});
+canvas.addEventListener('touchend', () => { touchActive = false; moveDir = 0; });
+
+function resetGame() {
+  state = 'idle';
+  clawX = W / 2;
+  clawY = RAIL_Y;
+  clawOpen = 1;
+  heldPrize = null;
+  isMega = false;
+  spawnPrizes();
+}
+
+// ═══ GAME LOOP ═══
+function gameLoop() {
+  // Keyboard input
+  if (state === 'idle') {
+    if (keys['ArrowLeft'] || keys['KeyA']) moveDir = -1;
+    else if (keys['ArrowRight'] || keys['KeyD']) moveDir = 1;
+    else if (!touchActive) moveDir = 0;
+  }
+
+  update();
+  render();
+  requestAnimationFrame(gameLoop);
+}
+
+// Mobile hint
+if ('ontouchstart' in window) {
+  document.getElementById('controlsHint').textContent = 'Drag to move · Tap bottom to drop';
+}
+
+gameLoop();
+</script>
+</body>
+</html>
