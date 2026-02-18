@@ -38351,6 +38351,23 @@ window._renderFloorMaterial = typeof renderFloorMaterial !== 'undefined' ? rende
 window._renderWalls = typeof renderWalls !== 'undefined' ? renderWalls : null;
 window._renderWallDetails = typeof renderWallDetails !== 'undefined' ? renderWallDetails : null;
 
+// ═══ Additional bridge: functions used by second <script> block (AmbientNPCs, floor rewrites, etc.) ═══
+window.drawSprite = typeof drawSprite !== 'undefined' ? drawSprite : null;
+window.getVisitorSprite = typeof getVisitorSprite !== 'undefined' ? getVisitorSprite : null;
+window.FLOOR_OBJECTS = typeof FLOOR_OBJECTS !== 'undefined' ? FLOOR_OBJECTS : null;
+window.renderFloorMaterial = typeof renderFloorMaterial !== 'undefined' ? renderFloorMaterial : null;
+window.renderWalls = typeof renderWalls !== 'undefined' ? renderWalls : null;
+window.renderWallDetails = typeof renderWallDetails !== 'undefined' ? renderWallDetails : null;
+window.renderHullDetails = typeof renderHullDetails !== 'undefined' ? renderHullDetails : null;
+window.getObjects = typeof getObjects !== 'undefined' ? getObjects : null;
+window.FloorDepth = typeof FloorDepth !== 'undefined' ? FloorDepth : null;
+window.VISITOR_SKINS = typeof VISITOR_SKINS !== 'undefined' ? VISITOR_SKINS : null;
+window.EchoReactions = typeof EchoReactions !== 'undefined' ? EchoReactions : null;
+window.SpriteEnhancements = typeof SpriteEnhancements !== 'undefined' ? SpriteEnhancements : null;
+window.LS = typeof LS !== 'undefined' ? LS : null;
+window.S = S;
+window.Coins = typeof Coins !== 'undefined' ? Coins : null;
+
 })();
 
 // ═══════════════════════════════════════════════════
@@ -38647,8 +38664,7 @@ window.addEventListener('load', function(){
   console.log('🔧 Floor-size movement patch applied. FLOOR_SIZES:', typeof FLOOR_SIZES !== 'undefined' ? JSON.stringify(FLOOR_SIZES) : 'NOT FOUND');
 });
 
-// ═══ changeFloor exposed on window inside main IIFE ═══
-if(typeof EchoReactions!=='undefined')window.EchoReactions=EchoReactions;
+// ═══ changeFloor + EchoReactions now exposed on window inside main IIFE (bridge section) ═══
 
 // ═══════════════════════════════════════
 // DEPLOY FEATURES: Starter Gift, Greeting, Music Prompt, Share, Ambient NPCs
@@ -38833,19 +38849,18 @@ var AmbientNPCs={
   }
 };
 
-// Patch render functions
+// Patch render functions — use window refs since originals are IIFE-scoped
 (function patchFloorRenders(){
   var floors=[1,2,3,4,5];
-  var renderFns={1:renderFloor1,2:renderFloor2,3:renderFloor3,4:renderFloor4,5:renderFloor5};
   floors.forEach(function(f){
-    var orig=renderFns[f];
     var fnName='renderFloor'+f;
+    var orig=window[fnName];
+    if(!orig) return; // not yet defined
     window[fnName]=function(){
       orig();
-      AmbientNPCs.render(f);
+      if(typeof AmbientNPCs!=='undefined') AmbientNPCs.render(f);
     };
   });
-  // Note: F2/3/4 rewrites handled by later IIFE (window.renderFloor2/3/4)
 })();
 
 // ═══ Bridge vars already exposed inside main IIFE (before its closing). ═══
@@ -38865,6 +38880,17 @@ const S=window._S||window.S;
 const LS=window._LS||{};
 const getObjects=window._getObjects||(window.getObjects?window.getObjects.bind(window):function(){return{}});
 const FloorDepth=window._FloorDepth||window.FloorDepth||null;
+
+// ═══ Additional unpacks for AmbientNPCs, floor rewrites, etc. ═══
+const drawSprite=window.drawSprite||function(){};
+const getVisitorSprite=window.getVisitorSprite||function(){return null};
+const renderFloorMaterial=window.renderFloorMaterial||function(){};
+const renderWalls=window.renderWalls||function(){};
+const renderWallDetails=window.renderWallDetails||function(){};
+const renderHullDetails=window.renderHullDetails||function(){};
+const FLOOR_OBJECTS=window.FLOOR_OBJECTS||{};
+const VISITOR_SKINS=window.VISITOR_SKINS||[];
+const Coins=window.Coins||{lifetime:0};
 
 // ═══ Voice Chat Integration ═══
 (function initVoiceIntegration() {
