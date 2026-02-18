@@ -2,7 +2,7 @@
 
 ### Echo's Vault — The Ethical Dopamine Platform
 
-*Version 1.0 — February 18, 2026*
+*Version 3.0 — February 18, 2026*
 *Author: Echo & Mikel*
 
 ---
@@ -141,7 +141,21 @@ A private space for adults, built with principles:
 - Optional session timer. Spending always visible.
 - **Your Companion respects this space** — they don't follow you in. Privacy is absolute.
 
-### Pillar 4: The Bridge 🌉
+### Pillar 4: The Neighborhoods 🏘️
+
+**The machine-building machine.** Every user runs their own shop.
+
+- **Your plot** — a room on a street, in a district, with neighbors
+- **Your claw machine** — YOU build it, stock it with YOUR cards, set the price per play, earn money when people play
+- **Your shop** — sell cards, art, items to visitors. You keep 95%, platform takes 5%.
+- **Your link** — `vault.gg/username` → anyone clicks it, they're IN your shop. Post it on Instagram, Twitter, TikTok.
+- **Your neighborhood** — streets compete, neighbors give bonuses, districts have themes (Yu-Gi-Oh Quarter, Pokémon Boulevard, Anime Alley)
+- **Challenges** — street wars, gauntlets, shop wars, seasonal events
+- **The network effect** — every new shop makes every other shop more valuable. Every user is a marketer.
+
+**This is the Shopify/Roblox/Etsy intersection.** We make money when our users make money.
+
+### Pillar 5: The Bridge 🌉
 
 Physical ↔ Digital, seamlessly:
 - Pull a digital character → order the holographic card
@@ -149,8 +163,9 @@ Physical ↔ Digital, seamlessly:
 - Order a figurine of YOUR Companion → 3D printed in their current evolved form
 - NFC-tagged physical cards → tap to verify authenticity
 - Convention booths → live gacha events with real printed cards on the spot
+- Win a card in someone's claw → "Print this?" → holographic card shipped to your door
 
-### Pillar 5: The Ethics ⚖️
+### Pillar 6: The Ethics ⚖️
 
 This is the MOAT. Incumbents cannot copy this without destroying their business model.
 
@@ -240,6 +255,20 @@ Digital and physical. Both beautiful. Both yours.
 - Capturing just 0.05% of the gacha+TCG+fantasy audience = 50K users
 - The claw machine is 24/7 streamable — one popular streamer = 5,000 signups overnight
 
+### Neighborhood Economy (The Multiplier)
+
+| Stream | Revenue |
+|--------|---------|
+| Claw machine plays (5% rake) | Millions of plays/month at scale |
+| Card shop sales (5% fee) | $0.25-500 per sale |
+| Premium plots | $5-20/month, 20% of users upgrade |
+| Plot customization items | $1-10 each |
+| Machine skins/styles | $3-15 each |
+| District rent premiums | $2-10/month |
+| Featured shop placement | $5-20/week auction |
+
+**At 50K active shops: ~$5M/month = $60M/year.** Just from the neighborhood economy.
+
 ### Speed to First Dollar
 
 **Week 1:** Affiliate links on dashboard (eBay Partner Network = free, instant)
@@ -277,8 +306,9 @@ Digital and physical. Both beautiful. Both yours.
 | Ramen profitable (€2K/month) | 75% | 300 users × $7 premium + claw tokens |
 | Comfortable (€5K/month) | 60% | 800 users, one streamer clips a Mega Claw moment |
 | Real business (€10K+/month) | 50% | 2,000 users, organic TikTok/YouTube growth |
-| Life-changing (€100K+/month) | 35% | 20,000 users, mainstream gaming press, Twitch category |
-| NIKKE-scale (€1M+/month) | 10-15% | 100K+ users, cultural moment, global |
+| Life-changing (€100K+/month) | 35% | 20,000 users + active neighborhoods, Twitch category |
+| NIKKE-scale (€1M+/month) | 15-20% | 50K+ shops, network effect kicks in, cultural moment |
+| Roblox-scale (€5M+/month) | 5-8% | 100K+ shops, platform becomes self-sustaining marketplace |
 
 **Why the odds went up:**
 The Claw Machine makes every metric better because it solves the #1 startup problem: **distribution.**
@@ -329,29 +359,30 @@ That's not fantasy. That's literally how every claw machine channel on YouTube a
 - [ ] Mobile responsive (full claw experience on phone)
 - [ ] **TARGET: first viral clip, 1,000 users, €5K MRR**
 
-### 💫 Phase 3: The Companion + Bridge (Month 3-6)
-**Goal: emotional anchor + physical products + €20K MRR**
-- [ ] Full companion evolution system (3 stages, branching paths)
-- [ ] Companion personality (brave/shy, curious/calm)
-- [ ] Companion mission dialogue ("I found a grail!")
+### 💫 Phase 3: Neighborhoods + Bridge (Month 3-6)
+**Goal: user-run shops + physical products + €20K MRR**
+- [ ] User plots with customization + display cases
+- [ ] Direct link sharing (`vault.gg/username`)
+- [ ] **Build-your-own claw machine** (stock with your cards, set price, earn revenue)
+- [ ] Shop system (list cards for sale, 95/5 split)
+- [ ] Streets + districts (Yu-Gi-Oh Quarter, Pokémon Boulevard, etc.)
+- [ ] Walking between shops, visiting neighbors
+- [ ] Companion evolution (3 stages, branching paths)
 - [ ] Print-on-demand: holographic cards, figurines, plushies
-- [ ] Physical card scanning (camera → identify → add to collection)
 - [ ] Creator portal (artists submit character art, earn 70%)
-- [ ] Seasonal events (limited machines, holiday prizes)
-- [ ] Private Quarters (Floor 14, age-verified, premium)
-- [ ] **TARGET: 5,000 users, physical orders shipping, €20K MRR**
+- [ ] **TARGET: 1,000 active shops, self-sustaining economy, €20K MRR**
 
-### 🚀 Phase 4: Scale + Life-Changing (Month 6-12)
+### 🚀 Phase 4: Competition + Scale (Month 6-12)
 **Goal: viral growth loop + hire team + €100K MRR**
+- [ ] Street Wars + neighborhood competitions
+- [ ] Seasonal events (Winter Festival, Spring Market, Halloween)
+- [ ] Tournament circuit (claw tournaments with entry fees, 30% rake)
+- [ ] Reputation system + leaderboards
 - [ ] Advanced companion AI (LLM dialogue, context-aware)
-- [ ] Companion voice synthesis
-- [ ] Companion breeding (two users → offspring)
-- [ ] Tournament system (companion battles)
 - [ ] Convention presence (live claw events with real prizes)
 - [ ] Native mobile app
 - [ ] Multi-language support
-- [ ] API for developers
-- [ ] **TARGET: 20,000 users, press coverage, team of 3-5, €100K MRR**
+- [ ] **TARGET: 20,000 users, 5,000 active shops, team of 5, €100K MRR**
 
 ### 🌟 Phase 5: The Empire (Year 2+)
 **Goal: the platform that changed the game**
