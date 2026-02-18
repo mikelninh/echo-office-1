@@ -180,22 +180,35 @@ body {
 
 .alert-item {
   display: flex; align-items: flex-start; gap: 12px;
-  padding: 10px 0;
+  padding: 12px 0;
   border-bottom: 1px solid rgba(42,42,74,0.5);
   transition: background 0.15s;
 }
 .alert-item:last-child { border-bottom: none; }
-.alert-item:hover { background: rgba(255,110,199,0.03); }
+.alert-item:hover { background: rgba(255,110,199,0.05); border-radius: 8px; }
+
+.alert-img {
+  width: 64px; height: 88px; border-radius: 6px; object-fit: cover;
+  flex-shrink: 0; background: var(--surface2); border: 1px solid var(--border);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.alert-item:hover .alert-img { transform: scale(1.05); box-shadow: 0 4px 16px rgba(255,110,199,0.2); }
+.alert-img-placeholder {
+  width: 64px; height: 88px; border-radius: 6px; flex-shrink: 0;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: var(--dim);
+}
 
 .alert-dot {
   width: 6px; height: 6px; border-radius: 50%;
   margin-top: 6px; flex-shrink: 0;
 }
-.alert-game { font-size: 10px; color: var(--dim); text-transform: uppercase; }
-.alert-title { font-size: 12px; margin: 2px 0; }
+.alert-game { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; }
+.alert-title { font-size: 12px; margin: 2px 0; line-height: 1.4; }
 .alert-title a { color: var(--text); text-decoration: none; }
 .alert-title a:hover { color: var(--accent); }
-.alert-price { font-size: 11px; font-weight: 600; }
+.alert-price { font-size: 13px; font-weight: 700; margin-top: 4px; }
 .alert-time { font-size: 10px; color: var(--dim); margin-left: auto; white-space: nowrap; }
 
 /* ═══ MORNING BRIEF ═══ */
@@ -276,17 +289,13 @@ canvas.spark { display: block; width: 100%; image-rendering: pixelated; }
   <div class="section-title">📊 Market Overview</div>
   <div class="market-grid" id="marketGrid"></div>
 
-  <!-- TWO COLUMNS: ALERTS + BRIEF -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">
-    <div>
-      <div class="section-title">🚨 Recent Alerts</div>
-      <div class="alert-feed" id="alertFeed"></div>
-    </div>
-    <div>
-      <div class="section-title">☀️ Morning Brief</div>
-      <div class="brief" id="morningBrief"></div>
-    </div>
-  </div>
+  <!-- MORNING BRIEF -->
+  <div class="section-title">☀️ Morning Brief</div>
+  <div class="brief" id="morningBrief"></div>
+
+  <!-- ALERTS — FULL WIDTH FOR CARD VISUALS -->
+  <div class="section-title">🚨 Recent Holy Grails</div>
+  <div class="alert-feed" id="alertFeed" style="max-height:700px"></div>
 
 </div>
 
@@ -565,18 +574,23 @@ function renderAlerts() {
     .slice(0, 30);
 
   el.innerHTML = alerts.map(a => {
-    const game = a.key.startsWith('ebay-com-') || a.key.startsWith('ebay-de-') ? detectGame(a.title) : 'unknown';
+    const game = a.game || (a.key.startsWith('ebay-com-') || a.key.startsWith('ebay-de-') ? detectGame(a.title) : 'unknown');
     const cfg = TCG_CONFIG[game] || { name: 'Unknown', color: '#6a6a8a', emoji: '❓' };
     const date = new Date(a.firstSeen);
     const timeStr = date.toLocaleDateString('de-DE', {day:'numeric',month:'short'});
     const link = a.key.includes('ebay-com-') ? `https://www.ebay.com/itm/${a.key.replace('ebay-com-','')}` :
                  a.key.includes('ebay-de-') ? `https://www.ebay.de/itm/${a.key.replace('ebay-de-','')}` : '#';
+    const imgHtml = a.image
+      ? `<img class="alert-img" src="${a.image}" alt="${(a.title||'').substring(0,30)}" loading="lazy" onerror="this.outerHTML='<div class=alert-img-placeholder>${cfg.emoji}</div>'">`
+      : `<div class="alert-img-placeholder">${cfg.emoji}</div>`;
+    const priceHtml = a.price ? `<div class="alert-price" style="color:${cfg.color}">${a.price}</div>` : '';
     return `
       <div class="alert-item">
-        <div class="alert-dot" style="background:${cfg.color}"></div>
+        <a href="${link}" target="_blank" style="flex-shrink:0">${imgHtml}</a>
         <div style="flex:1;min-width:0">
-          <div class="alert-game">${cfg.emoji} ${cfg.name}</div>
-          <div class="alert-title"><a href="${link}" target="_blank">${truncate(a.title||'Unknown card',60)}</a></div>
+          <div class="alert-game"><span class="alert-dot" style="background:${cfg.color};display:inline-block;vertical-align:middle;margin-right:4px"></span>${cfg.emoji} ${cfg.name}</div>
+          <div class="alert-title"><a href="${link}" target="_blank">${truncate(a.title||'Unknown card',55)}</a></div>
+          ${priceHtml}
         </div>
         <div class="alert-time">${timeStr}</div>
       </div>
