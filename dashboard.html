@@ -201,35 +201,108 @@ body {
 }
 .tcg-mcap { font-size: 10px; color: var(--gold); margin-top: 4px; }
 
+/* ═══ HERO SHOWCASE ═══ */
+.showcase-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.showcase-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  aspect-ratio: 3/4;
+}
+.showcase-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 16px 48px rgba(255,110,199,0.3);
+}
+.showcase-card img {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block;
+}
+.showcase-card .showcase-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(5,5,16,0.95));
+  padding: 40px 16px 14px;
+}
+.showcase-card .showcase-name {
+  font-size: 14px; font-weight: 700; color: #fff;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.8);
+}
+.showcase-card .showcase-game {
+  font-size: 9px; text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.showcase-card .showcase-badge {
+  display: inline-block; font-size: 8px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; padding: 2px 8px; border-radius: 3px;
+  margin-top: 6px;
+}
+.showcase-card::after {
+  content: ''; position: absolute; inset: 0;
+  border-radius: 12px; pointer-events: none;
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+}
+.showcase-card:hover::after { border-color: var(--accent); }
+.showcase-card.tier-mythic { box-shadow: 0 0 20px rgba(255,215,0,0.15); }
+.showcase-card.tier-mythic::after { border-color: rgba(255,215,0,0.3); }
+.showcase-card.tier-mythic:hover::after { border-color: var(--gold); }
+
 /* ═══ CARD GALLERY ═══ */
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
 }
 .gallery-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
-  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  transition: transform 0.25s ease, border-color 0.25s, box-shadow 0.25s;
   cursor: pointer;
+  position: relative;
 }
 .gallery-card:hover {
-  transform: translateY(-4px) scale(1.02);
+  transform: translateY(-6px) scale(1.03);
   border-color: var(--accent);
-  box-shadow: 0 8px 24px rgba(255,110,199,0.15);
+  box-shadow: 0 12px 32px rgba(255,110,199,0.2);
 }
+.gallery-card.rarity-holy { border-color: rgba(255,215,0,0.4); box-shadow: 0 0 12px rgba(255,215,0,0.1); }
+.gallery-card.rarity-holy:hover { border-color: var(--gold); box-shadow: 0 12px 32px rgba(255,215,0,0.3); }
+.gallery-card.rarity-ultra { border-color: rgba(179,136,255,0.3); }
+.gallery-card.rarity-ultra:hover { border-color: var(--purple); box-shadow: 0 12px 32px rgba(179,136,255,0.2); }
+.gallery-card.rarity-super { border-color: rgba(0,230,118,0.3); }
+.gallery-card.rarity-super:hover { border-color: var(--green); box-shadow: 0 12px 32px rgba(0,230,118,0.2); }
+
+.gallery-card .card-tier-badge {
+  position: absolute; top: 8px; right: 8px; z-index: 2;
+  font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 2px 6px; border-radius: 3px;
+  backdrop-filter: blur(8px);
+}
+.badge-holy { background: rgba(255,215,0,0.2); color: var(--gold); border: 1px solid rgba(255,215,0,0.4); }
+.badge-ultra { background: rgba(179,136,255,0.2); color: var(--purple); border: 1px solid rgba(179,136,255,0.4); }
+.badge-super { background: rgba(0,230,118,0.2); color: var(--green); border: 1px solid rgba(0,230,118,0.4); }
+
 .gallery-card img {
   width: 100%; aspect-ratio: 3/4; object-fit: cover;
   display: block; background: var(--surface2);
+  transition: opacity 0.4s ease;
 }
+.gallery-card img.loading { opacity: 0; }
+.gallery-card img.loaded { opacity: 1; }
 .gallery-card-info {
-  padding: 8px 10px;
+  padding: 10px 12px;
 }
 .gallery-card-game { font-size: 8px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; }
-.gallery-card-title { font-size: 10px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.gallery-card-price { font-size: 11px; font-weight: 700; margin-top: 4px; }
+.gallery-card-title { font-size: 10px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+.gallery-card-price { font-size: 12px; font-weight: 700; margin-top: 5px; }
 .gallery-card-title a { color: var(--text); text-decoration: none; }
 .gallery-card-title a:hover { color: var(--accent); }
 .gallery-placeholder {
@@ -238,6 +311,56 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 32px;
 }
+
+/* ═══ LIGHTBOX MODAL ═══ */
+.lightbox {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(5,5,16,0.92);
+  backdrop-filter: blur(20px);
+  display: none; align-items: center; justify-content: center;
+  cursor: pointer;
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.lightbox.active { display: flex; opacity: 1; }
+.lightbox-inner {
+  max-width: 600px; width: 90%;
+  cursor: default;
+  animation: lightboxIn 0.3s ease;
+}
+@keyframes lightboxIn { from { transform: scale(0.9) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+.lightbox-img {
+  width: 100%; border-radius: 12px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+}
+.lightbox-info {
+  margin-top: 16px; text-align: center;
+}
+.lightbox-title { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.4; }
+.lightbox-game { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
+.lightbox-price { font-size: 22px; font-weight: 700; margin-top: 8px; }
+.lightbox-link {
+  display: inline-block; margin-top: 12px;
+  font-size: 12px; color: var(--accent); text-decoration: none;
+  border: 1px solid var(--accent); padding: 6px 20px; border-radius: 6px;
+  transition: all 0.2s;
+}
+.lightbox-link:hover { background: var(--accent); color: var(--bg); }
+.lightbox-close {
+  position: absolute; top: 20px; right: 24px;
+  font-size: 28px; color: var(--dim); cursor: pointer;
+  transition: color 0.2s;
+  background: none; border: none; font-family: inherit;
+}
+.lightbox-close:hover { color: var(--text); }
+.lightbox-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-size: 36px; color: var(--dim); cursor: pointer;
+  background: none; border: none; padding: 20px;
+  transition: color 0.2s;
+}
+.lightbox-nav:hover { color: var(--text); }
+.lightbox-nav.prev { left: 10px; }
+.lightbox-nav.next { right: 10px; }
 
 /* ═══ ALERT FEED ═══ */
 .alert-feed {
@@ -434,7 +557,8 @@ canvas.spark { display: block; width: 100%; image-rendering: pixelated; }
 @media (max-width: 768px) {
   .hero-row { grid-template-columns: 1fr; }
   .market-grid { grid-template-columns: 1fr 1fr; }
-  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  .showcase-row { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
   .dashboard { padding: 12px; }
   .market-cap-banner { flex-direction: column; align-items: flex-start; gap: 16px; }
   .mcap-value { font-size: 28px; }
@@ -444,7 +568,10 @@ canvas.spark { display: block; width: 100%; image-rendering: pixelated; }
 }
 @media (max-width: 480px) {
   .market-grid { grid-template-columns: 1fr; }
-  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+  .showcase-row { grid-template-columns: repeat(2, 1fr); }
+  .lightbox-inner { width: 95%; }
+  .lightbox-nav { font-size: 24px; padding: 10px; }
 }
 
 /* ═══ AMBIENT PARTICLES ═══ */
@@ -496,10 +623,30 @@ canvas.spark { display: block; width: 100%; image-rendering: pixelated; }
   <div class="section-title">📊 Market Overview</div>
   <div class="market-grid" id="marketGrid"></div>
 
+  <!-- HERO SHOWCASE -->
+  <div class="section-title">💎 Featured Holy Grails</div>
+  <div class="showcase-row" id="showcaseRow"></div>
+
   <!-- CARD GALLERY -->
   <div class="section-title">🎴 Holy Grail Gallery</div>
   <div class="filter-row" id="galleryFilters"></div>
   <div class="gallery-grid" id="galleryGrid"></div>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" onclick="if(event.target===this)closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <button class="lightbox-nav prev" onclick="navLightbox(-1)">‹</button>
+    <button class="lightbox-nav next" onclick="navLightbox(1)">›</button>
+    <div class="lightbox-inner">
+      <img class="lightbox-img" id="lightboxImg" src="" alt="">
+      <div class="lightbox-info">
+        <div class="lightbox-game" id="lightboxGame"></div>
+        <div class="lightbox-title" id="lightboxTitle"></div>
+        <div class="lightbox-price" id="lightboxPrice"></div>
+        <a class="lightbox-link" id="lightboxLink" href="#" target="_blank">View on eBay →</a>
+      </div>
+    </div>
+  </div>
 
   <!-- TWO COLUMNS: BRIEF + ALERTS -->
   <div class="two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px">
@@ -706,6 +853,7 @@ function render() {
   renderTicker();
   renderHeroes();
   renderMarket();
+  renderShowcase();
   renderGallery();
   renderAlerts();
   renderBrief();
@@ -892,6 +1040,139 @@ function renderMarket() {
   }).join('');
 }
 
+// ═══ IMAGE HELPERS ═══
+function toHQ(url) {
+  if (!url) return url;
+  return url.replace(/s-l\d+/, 's-l1600');
+}
+function toThumb(url) {
+  if (!url) return url;
+  return url.replace(/s-l\d+/, 's-l500');
+}
+
+// ═══ PRICE TIER ═══
+function parsePriceNum(priceStr) {
+  if (!priceStr) return 0;
+  const cleaned = priceStr.replace(/[^0-9.,]/g, '').replace(',', '');
+  return parseFloat(cleaned) || 0;
+}
+function getPriceTier(priceStr) {
+  const p = parsePriceNum(priceStr);
+  if (p >= 25000) return { tier: 'holy', label: 'HOLY GRAIL', cls: 'badge-holy', cardCls: 'rarity-holy' };
+  if (p >= 10000) return { tier: 'ultra', label: 'ULTRA RARE', cls: 'badge-ultra', cardCls: 'rarity-ultra' };
+  if (p >= 5000) return { tier: 'super', label: 'SUPER RARE', cls: 'badge-super', cardCls: 'rarity-super' };
+  return { tier: 'rare', label: '', cls: '', cardCls: '' };
+}
+
+// ═══ CURATED HERO SHOWCASE ═══
+const SHOWCASE_CARDS = [
+  { query: /blue.eyes.*white.*dragon/i, name: 'Blue-Eyes White Dragon', game: 'yugioh' },
+  { query: /exodia.*forbidden/i, name: 'Exodia the Forbidden One', game: 'yugioh' },
+  { query: /dark.magician.girl/i, name: 'Dark Magician Girl', game: 'yugioh' },
+  { query: /charizard.*base.*set|charizard.*1st/i, name: 'Charizard', game: 'pokemon' },
+  { query: /black.lotus/i, name: 'Black Lotus', game: 'mtg' },
+  { query: /luffy.*alt.*art|luffy.*manga|luffy.*signed/i, name: 'Monkey D. Luffy', game: 'onepiece' },
+  { query: /umbreon.*star|umbreon.*vmax/i, name: 'Umbreon', game: 'pokemon' },
+  { query: /elsa.*snow.*queen.*lorcana|lorcana.*elsa/i, name: 'Elsa, Snow Queen', game: 'lorcana' },
+];
+
+function renderShowcase() {
+  const el = document.getElementById('showcaseRow');
+  if (!SEEN_DATA) { el.innerHTML = ''; return; }
+  const entries = Object.entries(SEEN_DATA);
+  const cards = [];
+
+  for (const sc of SHOWCASE_CARDS) {
+    const match = entries.find(([k, v]) => v.image && sc.query.test(v.title || ''));
+    if (match) {
+      const [key, val] = match;
+      const cfg = TCG_CONFIG[sc.game] || TCG_CONFIG[val.game] || { name: '?', color: '#6a6a8a', emoji: '❓' };
+      const tier = getPriceTier(val.price);
+      cards.push({ ...val, key, showcaseName: sc.name, cfg, tier, game: sc.game });
+    }
+    if (cards.length >= 4) break;
+  }
+
+  el.innerHTML = cards.map((c, i) => {
+    const link = makeEbayLink(c.key);
+    const imgUrl = toHQ(c.image);
+    return `
+      <div class="showcase-card ${c.tier.tier === 'holy' ? 'tier-mythic' : ''}" onclick="openLightboxForShowcase(${i})" data-idx="${i}">
+        <img src="${imgUrl}" alt="${c.showcaseName}" loading="lazy">
+        <div class="showcase-overlay">
+          <div class="showcase-game" style="color:${c.cfg.color}">${c.cfg.emoji} ${c.cfg.name}</div>
+          <div class="showcase-name">${c.showcaseName}</div>
+          ${c.price ? `<div class="showcase-badge" style="background:${c.cfg.color}20;color:${c.cfg.color};border:1px solid ${c.cfg.color}40">${c.price}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  window._showcaseCards = cards;
+}
+
+// ═══ LIGHTBOX ═══
+let lightboxCards = [];
+let lightboxIdx = 0;
+
+function openLightbox(cards, idx) {
+  lightboxCards = cards;
+  lightboxIdx = idx;
+  showLightboxCard();
+  const lb = document.getElementById('lightbox');
+  lb.style.display = 'flex';
+  requestAnimationFrame(() => lb.classList.add('active'));
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  const lb = document.getElementById('lightbox');
+  lb.classList.remove('active');
+  setTimeout(() => { lb.style.display = 'none'; }, 300);
+  document.body.style.overflow = '';
+}
+
+function navLightbox(dir) {
+  lightboxIdx = (lightboxIdx + dir + lightboxCards.length) % lightboxCards.length;
+  showLightboxCard();
+}
+
+function showLightboxCard() {
+  const c = lightboxCards[lightboxIdx];
+  if (!c) return;
+  const cfg = TCG_CONFIG[c.game || detectGame(c.title)] || { name: 'Unknown', color: '#6a6a8a', emoji: '❓' };
+  document.getElementById('lightboxImg').src = toHQ(c.image) || '';
+  document.getElementById('lightboxGame').innerHTML = `<span style="color:${cfg.color}">${cfg.emoji} ${cfg.name}</span>`;
+  document.getElementById('lightboxTitle').textContent = c.title || c.showcaseName || 'Unknown';
+  const priceEl = document.getElementById('lightboxPrice');
+  if (c.price) {
+    priceEl.textContent = c.price;
+    priceEl.style.color = cfg.color;
+    priceEl.style.display = '';
+  } else {
+    priceEl.style.display = 'none';
+  }
+  const link = makeEbayLink(c.key);
+  document.getElementById('lightboxLink').href = affiliateUrl(link);
+}
+
+window.openLightboxForShowcase = function(idx) {
+  openLightbox(window._showcaseCards || [], idx);
+};
+
+window.openLightboxForGallery = function(idx) {
+  openLightbox(window._galleryDisplay || [], idx);
+};
+
+document.addEventListener('keydown', e => {
+  const lb = document.getElementById('lightbox');
+  if (lb.style.display !== 'flex') return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') navLightbox(-1);
+  if (e.key === 'ArrowRight') navLightbox(1);
+});
+
+// ═══ GALLERY ═══
 function renderGallery() {
   const filtersEl = document.getElementById('galleryFilters');
   const gridEl = document.getElementById('galleryGrid');
@@ -901,20 +1182,23 @@ function renderGallery() {
     return;
   }
 
-  // Build card list
   const allCards = Object.entries(SEEN_DATA)
     .map(([key, val]) => ({ key, ...val }))
     .filter(a => a.firstSeen)
-    .sort((a, b) => new Date(b.firstSeen) - new Date(a.firstSeen));
+    .sort((a, b) => {
+      // Sort: cards with images first, then by date
+      const aImg = a.image ? 1 : 0;
+      const bImg = b.image ? 1 : 0;
+      if (aImg !== bImg) return bImg - aImg;
+      return new Date(b.firstSeen) - new Date(a.firstSeen);
+    });
 
-  // Get unique games for filter
   const gamesPresent = new Set();
   allCards.forEach(c => {
     const g = c.game || detectGame(c.title);
     if (g !== 'unknown') gamesPresent.add(g);
   });
 
-  // Render filters
   const filterGames = [...gamesPresent].sort((a,b) => (TCG_CONFIG[a]?.order||99) - (TCG_CONFIG[b]?.order||99));
   filtersEl.innerHTML = `
     <button class="filter-btn ${galleryFilter==='all'?'active':''}" onclick="setFilter('all')">All (${allCards.length})</button>
@@ -925,31 +1209,33 @@ function renderGallery() {
     }).join('')}
   `;
 
-  // Filter cards
   const filtered = galleryFilter === 'all' ? allCards : allCards.filter(c => (c.game||detectGame(c.title)) === galleryFilter);
-  const display = filtered.slice(0, 60); // show up to 60
+  const display = filtered.slice(0, 80);
+  window._galleryDisplay = display;
 
-  gridEl.innerHTML = display.map(card => {
+  gridEl.innerHTML = display.map((card, i) => {
     const game = card.game || detectGame(card.title);
     const cfg = TCG_CONFIG[game] || { name: 'Unknown', color: '#6a6a8a', emoji: '❓' };
-    const link = makeEbayLink(card.key);
+    const tier = getPriceTier(card.price);
     const imgHtml = card.image
-      ? `<img src="${card.image}" alt="${(card.title||'').substring(0,30)}" loading="lazy" onerror="this.outerHTML='<div class=gallery-placeholder>${cfg.emoji}</div>'">`
+      ? `<img src="${toThumb(card.image)}" alt="${(card.title||'').substring(0,30)}" loading="lazy" class="loading" onload="this.classList.replace('loading','loaded')" onerror="this.outerHTML='<div class=gallery-placeholder>${cfg.emoji}</div>'">`
       : `<div class="gallery-placeholder">${cfg.emoji}</div>`;
+    const tierBadge = tier.label ? `<div class="card-tier-badge ${tier.cls}">${tier.label}</div>` : '';
     return `
-      <a href="${affiliateUrl(link)}" target="_blank" class="gallery-card" style="text-decoration:none;color:inherit">
+      <div class="gallery-card ${tier.cardCls}" style="text-decoration:none;color:inherit;cursor:pointer" onclick="openLightboxForGallery(${i})">
+        ${tierBadge}
         ${imgHtml}
         <div class="gallery-card-info">
           <div class="gallery-card-game" style="color:${cfg.color}">${cfg.emoji} ${cfg.name}</div>
-          <div class="gallery-card-title">${truncate(card.title||'Unknown', 30)}</div>
+          <div class="gallery-card-title">${truncate(card.title||'Unknown', 32)}</div>
           ${card.price ? `<div class="gallery-card-price" style="color:${cfg.color}">${card.price}</div>` : ''}
         </div>
-      </a>
+      </div>
     `;
   }).join('');
 
-  if (filtered.length > 60) {
-    gridEl.innerHTML += `<div style="grid-column:1/-1;text-align:center;color:var(--dim);font-size:11px;padding:12px">Showing 60 of ${filtered.length} cards</div>`;
+  if (filtered.length > 80) {
+    gridEl.innerHTML += `<div style="grid-column:1/-1;text-align:center;color:var(--dim);font-size:11px;padding:16px">Showing 80 of ${filtered.length} cards · <span style="color:var(--accent);cursor:pointer" onclick="loadMoreGallery()">Load more</span></div>`;
   }
 }
 
@@ -978,7 +1264,7 @@ function renderAlerts() {
     const timeStr = date.toLocaleDateString('de-DE', {day:'numeric',month:'short'});
     const link = makeEbayLink(a.key);
     const imgHtml = a.image
-      ? `<img class="alert-img" src="${a.image}" alt="${(a.title||'').substring(0,30)}" loading="lazy" onerror="this.outerHTML='<div class=alert-img-placeholder>${cfg.emoji}</div>'">`
+      ? `<img class="alert-img" src="${toThumb(a.image)}" alt="${(a.title||'').substring(0,30)}" loading="lazy" onerror="this.outerHTML='<div class=alert-img-placeholder>${cfg.emoji}</div>'">`
       : `<div class="alert-img-placeholder">${cfg.emoji}</div>`;
     const priceHtml = a.price ? `<div class="alert-price" style="color:${cfg.color}">${a.price}</div>` : '';
     return `
