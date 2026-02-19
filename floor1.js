@@ -738,17 +738,7 @@
       ctx.fill();
     }
 
-    // ────────────────────────────────────────────────
-    // AMBIENT MOOD TINT (time of day)
-    // ────────────────────────────────────────────────
-    const tints = {
-      morning: 'rgba(255,240,210,0.03)',
-      afternoon: 'rgba(255,225,190,0.04)',
-      evening: 'rgba(255,170,90,0.05)',
-      night: 'rgba(50,30,100,0.06)'
-    };
-    ctx.fillStyle = tints[TOD] || tints.evening;
-    ctx.fillRect(0, 0, W, H);
+    // TOD tint removed — visual-polish.js handles ambient lighting per floor
   };
 
   // ═══════════════════════════════════════════════════

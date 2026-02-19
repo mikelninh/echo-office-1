@@ -413,8 +413,8 @@
         // Warm amber lamp glow — center/upper-center
         const lampY = H * 0.38;
         const g = ctx.createRadialGradient(W / 2, lampY, 30, W / 2, lampY, W * 0.65);
-        g.addColorStop(0, 'rgba(255,200,80,0.04)');
-        g.addColorStop(0.5, 'rgba(200,120,30,0.03)');
+        g.addColorStop(0, 'rgba(255,200,80,0.02)');
+        g.addColorStop(0.5, 'rgba(200,120,30,0.01)');
         g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, W, H);

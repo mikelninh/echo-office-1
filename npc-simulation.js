@@ -13,7 +13,7 @@
 
   // ─── Constants ──────────────────────────────────────────────────────────────
   var TICK_RATE = 1;            // Simulation ticks per real second
-  var TIME_SCALE = 60;          // 1 real second = 1 sim minute → 24 min = 1 sim day
+  var TIME_SCALE = 1;           // 1:1 real time — synced with the player's clock
   var MAX_POPULATION = 50;
   var FEED_MAX = 6;
 
@@ -196,17 +196,18 @@
     };
   }
 
-  // Decay rates per sim hour, modified by personality
+  // Decay rates per REAL hour, modified by personality
+  // Calibrated so needs deplete over a full real day (need ~0.06/h to go 1→0 in 16 waking hours)
   function needDecayRates(ocean) {
     return {
-      energy:    0.04 + ocean.neuroticism * 0.02,       // Anxious people tire faster
-      hunger:    0.05,                                     // Everyone gets hungry
-      social:    0.03 * ocean.extraversion + 0.01,        // Extraverts need more social
-      fun:       0.02 + ocean.openness * 0.02,            // Creative people need stimulation
-      purpose:   0.02 * ocean.conscientiousness + 0.01,   // Disciplined people need purpose
-      growth:    0.01 + ocean.openness * 0.02,            // Curious people need to learn
-      comfort:   0.01 + ocean.neuroticism * 0.02,         // Anxious people need comfort
-      belonging: 0.02 * ocean.agreeableness + 0.01,       // Agreeable people need belonging
+      energy:    0.06 + ocean.neuroticism * 0.01,        // Anxious people tire faster
+      hunger:    0.07,                                     // Everyone gets hungry (~3 meals/day)
+      social:    0.04 * ocean.extraversion + 0.02,        // Extraverts need more social
+      fun:       0.03 + ocean.openness * 0.02,            // Creative people need stimulation
+      purpose:   0.03 * ocean.conscientiousness + 0.01,   // Disciplined people need purpose
+      growth:    0.02 + ocean.openness * 0.02,            // Curious people need to learn
+      comfort:   0.02 + ocean.neuroticism * 0.02,         // Anxious people need comfort
+      belonging: 0.03 * ocean.agreeableness + 0.01,       // Agreeable people need belonging
     };
   }
 
@@ -324,12 +325,15 @@
     };
   }
 
-  // ─── Simulation Clock ───────────────────────────────────────────────────────
+  // ─── Real-Time Clock (synced with player's local time) ──────────────────────
 
-  var _simTime = 8.0;  // Start at 8 AM
   var _simDay = 1;
+  var _lastRealDay = new Date().getDate();
 
-  function getSimHour() { return _simTime % 24; }
+  function getSimHour() {
+    var now = new Date();
+    return now.getHours() + now.getMinutes() / 60;
+  }
   function getSimDay() { return _simDay; }
 
   function isNightTime() {
@@ -337,11 +341,15 @@
     return h >= 22 || h < 6;
   }
 
+  // _simTime tracks cumulative hours for prayer/event timing (still advances in real-time)
+  var _simTime = getSimHour();
+
   function advanceClock(dt) {
-    var prevDay = Math.floor(_simTime / 24);
-    _simTime += dt * TIME_SCALE / 3600; // dt in real seconds → sim hours
-    var newDay = Math.floor(_simTime / 24);
-    if (newDay > prevDay) {
+    _simTime += dt / 3600; // dt in real seconds → real hours
+    // Detect day change from real clock
+    var today = new Date().getDate();
+    if (today !== _lastRealDay) {
+      _lastRealDay = today;
       _simDay++;
       onNewDay();
     }
@@ -1036,7 +1044,7 @@
     miracles: [],                // Recent miracles: [{ text, time, witnesses }]
     gatheringActive: false,      // Is a prayer gathering happening?
     gatheringTimer: 0,           // Countdown for next gathering
-    gatheringInterval: 180,      // Sim seconds between gatherings (~3 real minutes)
+    gatheringInterval: 180,      // Real seconds between gatherings (3 minutes)
     gatheringParticipants: [],   // NPCs currently at shrine
     gatheringPhase: 'none',      // none, assembling, praying, reflecting, dispersing
     gatheringPhaseTimer: 0,
@@ -1146,7 +1154,7 @@
   function updateGathering(dt, dtHours) {
     // Gathering timer
     if (_faith.gatheringPhase === 'none') {
-      _faith.gatheringTimer += dt * TIME_SCALE;
+      _faith.gatheringTimer += dt; // Real seconds
       if (_faith.gatheringTimer >= _faith.gatheringInterval) {
         startGathering();
       }

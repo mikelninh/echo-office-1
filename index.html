@@ -13641,9 +13641,7 @@ function render(){
     ctx.textAlign='left';
   }
   else if(S._visitorSaber){const col=S._visitorSaber==='green'?'#00ff44':'#4488ff';ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(W/2-60,H-28,120,22);ctx.strokeStyle=col;ctx.lineWidth=1;ctx.strokeRect(W/2-60,H-28,120,22);ctx.fillStyle=col;ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText('\u2694\uFE0F E:Swing  Q:Block  Double-tap WASD:Dodge',W/2,H-13);ctx.textAlign='left'}
-  // Time of day overlay
-  if(TOD==='night'){ctx.fillStyle='rgba(0,0,30,.15)';ctx.fillRect(0,0,W,H)}
-  else if(TOD==='evening'){ctx.fillStyle='rgba(40,20,0,.06)';ctx.fillRect(0,0,W,H)}
+  // TOD tint removed — visual-polish handles per-floor ambiance
 }
 
 // ═══════════════════════════════════════
@@ -31600,8 +31598,7 @@ render = function() {
   if(DuelSystem.active){renderDuelHUD();if(typeof ArenaSpectator!=='undefined'){ArenaSpectator.renderBettingHUD(ctx);ArenaSpectator.renderChat(ctx);}}
   else if(WeaponSystem.equipped&&!S._visitorSaber){const wpn=WeaponSystem.equipped;const r=RARITIES[wpn.rarity]||RARITIES.common;ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(W/2-80,H-28,160,22);ctx.strokeStyle=r.color;ctx.lineWidth=1;ctx.strokeRect(W/2-80,H-28,160,22);ctx.fillStyle=r.color;ctx.font='bold 10px monospace';ctx.textAlign='center';const comboTxt=WeaponSystem._comboCount>1?' x'+WeaponSystem._comboCount:'';ctx.fillText(wpn.icon+' '+wpn.name+comboTxt+'  E:Attack  Q:Block',W/2,H-13);ctx.textAlign='left';}
   else if(S._visitorSaber){const col=S._visitorSaber==='green'?'#00ff44':'#4488ff';ctx.fillStyle='rgba(10,10,20,.85)';ctx.fillRect(W/2-60,H-28,120,22);ctx.strokeStyle=col;ctx.lineWidth=1;ctx.strokeRect(W/2-60,H-28,120,22);ctx.fillStyle=col;ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText('⚔️ E:Swing  Q:Block  Double-tap WASD:Dodge',W/2,H-13);ctx.textAlign='left'}
-  if(TOD==='night'){ctx.fillStyle='rgba(0,0,30,.15)';ctx.fillRect(0,0,W,H)}
-  else if(TOD==='evening'){ctx.fillStyle='rgba(40,20,0,.06)';ctx.fillRect(0,0,W,H)}
+  // TOD tint removed — was causing brown overlay (visual-polish handles per-floor ambiance)
 };
 
 // Hook into input handling
@@ -35666,6 +35663,7 @@ const AtmosphereSystem = {
     darkFloors: [4, 5, 9], // F4 garden at "night", F5 lab, F9 archive
     
     isActive() {
+      if (!this.enabled) return false; // Respect the enabled flag
       const floor = S.floor;
       if (!this.darkFloors.includes(floor)) return false;
       
