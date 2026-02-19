@@ -398,13 +398,21 @@
 
   // ─── Lighting overlays (per floor) ────────────────────────────────────────────
 
+  /** Returns Camera offset (x,y) if available, else {x:0,y:0} */
+  function getCameraOffset() {
+    if (typeof Camera !== 'undefined') return { x: Camera.x || 0, y: Camera.y || 0 };
+    return { x: 0, y: 0 };
+  }
+
   function renderLighting(ctx, floor, W, H, t) {
     ctx.save();
 
-    // Lighting draws full-screen tints — must use screen space, not world/camera space.
-    // Reset to identity so fillRect(0,0,W,H) covers the viewport correctly
-    // regardless of camera pan during fast movement or dash.
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    // Lighting draws full-screen tints in SCREEN space.
+    // The camera system patches ctx.save() to inject translate(-Camera.x,-Camera.y),
+    // so all drawing is in world space by default. To fill the SCREEN we offset by Camera.
+    // DO NOT use setTransform() — that breaks the camera's save/restore depth tracking.
+    const cam = getCameraOffset();
+    const cx = cam.x, cy = cam.y;
 
     // Skip lighting for floors that handle their own atmosphere
     // (Cinema, planet rooms, placeholder segments)
@@ -416,35 +424,35 @@
 
       case 1: {
         // Warm amber lamp glow — center/upper-center
-        const lampY = H * 0.38;
-        const g = ctx.createRadialGradient(W / 2, lampY, 30, W / 2, lampY, W * 0.65);
+        const lampY = cy + H * 0.38;
+        const g = ctx.createRadialGradient(cx + W / 2, lampY, 30, cx + W / 2, lampY, W * 0.65);
         g.addColorStop(0, 'rgba(255,200,80,0.02)');
         g.addColorStop(0.5, 'rgba(200,120,30,0.01)');
         g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
-        ctx.fillRect(0, 0, W, H);
+        ctx.fillRect(cx, cy, W, H);
         break;
       }
 
       case 2: {
         // Cool starlight — blue-purple at edges (very subtle)
-        const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.2, W / 2, H / 2, W * 0.75);
+        const g = ctx.createRadialGradient(cx + W / 2, cy + H / 2, H * 0.2, cx + W / 2, cy + H / 2, W * 0.75);
         g.addColorStop(0, 'rgba(0,0,0,0)');
         g.addColorStop(0.6, 'rgba(60,40,100,0.01)');
         g.addColorStop(1, 'rgba(20,10,60,0.02)');
         ctx.fillStyle = g;
-        ctx.fillRect(0, 0, W, H);
+        ctx.fillRect(cx, cy, W, H);
         break;
       }
 
       case 4: {
         // Green-tinted natural light + subtle sun rays (day only)
-        const g = ctx.createRadialGradient(W * 0.5, -30, 10, W * 0.5, -30, H * 1.2);
+        const g = ctx.createRadialGradient(cx + W * 0.5, cy - 30, 10, cx + W * 0.5, cy - 30, H * 1.2);
         g.addColorStop(0, 'rgba(220,255,180,0.07)');
         g.addColorStop(0.5, 'rgba(120,200,80,0.03)');
         g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
-        ctx.fillRect(0, 0, W, H);
+        ctx.fillRect(cx, cy, W, H);
 
         if (tod !== 'night') {
           // Two subtle sun ray fans
@@ -453,7 +461,7 @@
           for (let i = 0; i < 4; i++) {
             const rayAngle = -0.4 + i * 0.25;
             ctx.save();
-            ctx.translate(W * 0.5, 0);
+            ctx.translate(cx + W * 0.5, cy);
             ctx.rotate(rayAngle);
             ctx.beginPath();
             ctx.moveTo(0, 0);
@@ -470,12 +478,12 @@
       case 6: {
         // Candlelight — warm flickering amber
         const flicker = 0.96 + 0.04 * Math.sin(t * 8.3 + 1.1) * Math.sin(t * 5.7);
-        const g = ctx.createRadialGradient(W / 2, H * 0.55, 20, W / 2, H * 0.55, W * 0.6);
+        const g = ctx.createRadialGradient(cx + W / 2, cy + H * 0.55, 20, cx + W / 2, cy + H * 0.55, W * 0.6);
         g.addColorStop(0, `rgba(255,180,60,${0.05 * flicker})`);
         g.addColorStop(0.5, `rgba(200,100,20,${0.03 * flicker})`);
         g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
-        ctx.fillRect(0, 0, W, H);
+        ctx.fillRect(cx, cy, W, H);
         break;
       }
     }
@@ -635,11 +643,11 @@
 
   function renderFade(ctx, W, H) {
     if (fade.alpha <= 0) return;
+    const cam = getCameraOffset();
     ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0); // screen space — covers viewport during camera movement
     ctx.globalAlpha = fade.alpha;
     ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(cam.x, cam.y, W, H); // offset by camera to cover screen space
     ctx.restore();
   }
 
