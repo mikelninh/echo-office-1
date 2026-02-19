@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Companion Card — Echo's Vault</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0a14;
+      color: #fff;
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 6px;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 32px;
+    }
+
+    /* Card flip container — 63.5mm × 88mm at 96dpi ≈ 240px × 333px, scaled ×1.5 */
+    .card-scene {
+      width: 360px;
+      height: 500px;
+      perspective: 800px;
+      margin-bottom: 28px;
+    }
+
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+    }
+
+    .card-scene.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      overflow: hidden;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+      background: #0d0d1a;
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      gap: 10px;
+    }
+
+    .card-back .back-title {
+      font-size: 16px;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .back-stat {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .back-stat span:last-child {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .back-watermark {
+      font-size: 10px;
+      color: rgba(255,255,255,0.2);
+      margin-top: 20px;
+      letter-spacing: 3px;
+    }
+
+    canvas#front-canvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 16px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .btn {
+      padding: 11px 22px;
+      border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.07);
+      color: #fff;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .btn:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.35); }
+    .btn.primary { background: rgba(91,142,230,0.25); border-color: rgba(91,142,230,0.5); }
+    .btn.primary:hover { background: rgba(91,142,230,0.4); }
+
+    .flip-hint {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 10px;
+    }
+
+    .mpc-note {
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      max-width: 340px;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .no-companion {
+      padding: 40px;
+      text-align: center;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📛 Companion Card</h1>
+  <p class="subtitle">Echo's Vault — Your unique partner</p>
+
+  <div id="main-content">
+    <div class="card-scene" id="card-scene">
+      <div class="card-inner" id="card-inner">
+        <!-- Front face: canvas -->
+        <div class="card-face" id="card-front">
+          <canvas id="front-canvas" width="360" height="500"></canvas>
+        </div>
+        <!-- Back face -->
+        <div class="card-face card-back" id="card-back">
+          <div class="back-title" id="back-name">—</div>
+          <div class="back-stat"><span>Level</span><span id="back-level">—</span></div>
+          <div class="back-stat"><span>Path</span><span id="back-path">—</span></div>
+          <div class="back-stat"><span>Floors Visited</span><span id="back-floors">—</span></div>
+          <div class="back-stat"><span>Claw Pulls</span><span id="back-claws">—</span></div>
+          <div class="back-stat"><span>Grails Spotted</span><span id="back-grails">—</span></div>
+          <div class="back-stat"><span>Days Together</span><span id="back-days">—</span></div>
+          <div class="back-watermark">ECHO'S VAULT</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="flip-hint">Click the card to flip it</p>
+
+    <div class="buttons">
+      <button class="btn primary" id="download-btn">⬇ Download PNG</button>
+      <a class="btn" href="https://www.makeplayingcards.com" target="_blank" rel="noopener">🃏 Order at MPC</a>
+      <button class="btn" id="flip-btn">🔄 Flip Card</button>
+    </div>
+
+    <p class="mpc-note">
+      To order a physical card: click <strong>Download PNG</strong> first,
+      then upload the image to MakePlayingCards.com and customise your order.
+    </p>
+  </div>
+
+  <div class="no-companion" id="no-companion" style="display:none">
+    <p>No companion data found.</p>
+    <p style="margin-top:8px;font-size:12px">Visit Echo's Vault and hatch your companion first.</p>
+  </div>
+
+  <script>
+  (function () {
+    // ── Palettes & Sprites (duplicated from companion.js for standalone use) ──
+
+    const PALETTES = {
+      egg:      { 1: '#f5e6c8', 2: '#d4b896', 3: '#b8956e', 4: '#7a5c3a' },
+      collector:{ 1: '#5b8ee6', 2: '#ffd700', 3: '#3a5fa8', 4: '#ffe066', 5: '#fff', 6: '#222' },
+      explorer: { 1: '#4caf50', 2: '#ff9800', 3: '#2e7d32', 4: '#fff', 5: '#8d6e63', 6: '#222' },
+      fighter:  { 1: '#e53935', 2: '#9c27b0', 3: '#b71c1c', 4: '#fff', 5: '#ffd600', 6: '#222' },
+    };
+
+    const PATH_GRADIENTS = {
+      collector: ['#1a2a6c', '#5b8ee6', '#ffd700'],
+      explorer:  ['#134e1a', '#4caf50', '#ff9800'],
+      fighter:   ['#4a0a0a', '#e53935', '#9c27b0'],
+      egg:       ['#2a1a0a', '#b8956e', '#f5e6c8'],
+    };
+
+    const SPRITES = {
+      egg: [
+        [0,0,0,2,2,0,0,0],[0,0,2,1,1,2,0,0],[0,2,1,1,1,1,2,0],[2,1,1,1,1,1,1,2],
+        [2,1,1,1,1,1,1,2],[2,1,1,1,1,1,1,2],[2,1,1,1,1,1,1,2],[2,1,1,1,1,1,1,2],
+        [0,2,1,1,1,1,2,0],[0,0,2,1,1,2,0,0],[0,0,0,2,2,0,0,0],[0,0,0,0,0,0,0,0],
+      ],
+      collector_1: [
+        [0,0,1,1,1,1,0,0],[0,1,1,6,6,1,1,0],[0,1,1,1,1,1,1,0],[0,0,1,2,2,1,0,0],
+        [0,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1],[1,2,1,1,1,1,2,1],
+        [0,2,2,0,0,2,2,0],[0,2,0,0,0,0,2,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+      ],
+      collector_2: [
+        [0,0,1,1,1,1,0,0],[0,1,1,6,6,1,1,0],[0,1,1,1,1,1,1,0],[0,0,1,2,4,1,0,0],
+        [0,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,2],[1,1,1,1,1,1,2,4],[1,2,1,1,1,1,2,0],
+        [0,2,2,0,0,2,2,0],[0,2,2,0,0,2,2,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+      ],
+      collector_3: [
+        [0,0,1,1,1,1,0,0],[0,1,4,6,6,4,1,0],[0,1,1,1,1,1,1,0],[0,1,1,2,2,1,1,0],
+        [2,1,1,1,1,1,1,2],[2,1,1,1,1,1,1,4],[2,1,1,1,1,1,4,4],[0,2,1,1,1,2,0,0],
+        [0,2,2,1,2,2,0,0],[0,2,2,1,2,2,0,0],[0,0,2,2,2,0,0,0],[0,0,0,0,0,0,0,0],
+      ],
+      explorer_1: [
+        [0,0,1,1,1,1,0,0],[0,1,1,6,6,1,1,0],[0,1,1,1,1,1,1,0],[0,0,1,2,2,1,0,0],
+        [0,1,1,1,1,1,1,0],[0,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1],[1,2,1,1,1,1,2,1],
+        [0,5,2,0,0,2,5,0],[0,5,0,0,0,0,5,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+      ],
+      explorer_2: [
+        [0,0,1,1,1,1,0,0],[0,1,1,6,6,1,1,0],[0,1,1,1,1,1,1,0],[0,2,1,2,2,1,2,0],
+        [2,1,1,1,1,1,1,0],[2,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,2],[1,2,1,1,1,1,2,1],
+        [0,5,2,0,0,2,5,0],[0,5,5,0,0,5,5,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+      ],
+      explorer_3: [
+        [0,0,1,1,1,1,0,0],[0,1,2,6,6,2,1,0],[0,1,1,1,1,1,1,0],[0,1,1,2,2,1,1,0],
+        [2,2,1,1,1,1,2,2],[2,1,1,1,1,1,1,2],[2,1,1,1,1,1,1,2],[2,1,1,1,1,1,1,2],
+        [0,2,2,1,1,2,2,0],[0,5,2,0,0,2,5,0],[0,5,5,0,0,5,5,0],[0,0,0,0,0,0,0,0],
+      ],
+      fighter_1: [
+        [0,0,1,1,1,1,0,0],[0,1,1,6,6,1,1,0],[0,1,1,1,1,1,1,0],[0,0,1,2,2,1,0,0],
+        [0,1,1,1,1,1,1,0],[5,1,1,1,1,1,1,5],[1,1,1,1,1,1,1,1],[1,2,1,1,1,1,2,1],
+        [0,3,2,0,0,2,3,0],[0,3,0,0,0,0,3,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+      ],
+      fighter_2: [
+        [0,0,1,1,1,1,0,0],[0,1,1,6,6,1,1,0],[0,1,1,1,1,1,1,0],[0,0,1,2,2,1,0,0],
+        [5,1,1,1,1,1,1,0],[5,1,1,1,1,1,1,4],[1,1,1,1,1,1,1,4],[1,2,1,1,1,1,2,1],
+        [0,3,2,0,0,2,3,0],[0,3,3,0,0,3,3,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+      ],
+      fighter_3: [
+        [0,0,1,1,1,1,0,0],[0,1,5,6,6,5,1,0],[0,1,1,1,1,1,1,0],[5,1,1,2,2,1,1,5],
+        [5,2,1,1,1,1,2,5],[5,1,1,1,1,1,1,4],[5,1,1,1,1,1,4,4],[1,2,1,1,1,1,2,1],
+        [0,3,3,1,1,3,3,0],[0,3,3,0,0,3,3,0],[0,0,3,0,0,3,0,0],[0,0,0,0,0,0,0,0],
+      ],
+    };
+
+    function getSpriteKey(s) {
+      if (!s.hatchedAt) return 'egg';
+      const p = s.evolutionPath || 'collector';
+      const n = s.form === 'sprite1' ? '1' : s.form === 'sprite2' ? '2' : '3';
+      return `${p}_${n}`;
+    }
+
+    function drawSprite(ctx, key, scale, ox, oy) {
+      const grid = SPRITES[key] || SPRITES['egg'];
+      const pathKey = key.includes('collector') ? 'collector'
+                    : key.includes('explorer') ? 'explorer'
+                    : key.includes('fighter') ? 'fighter'
+                    : 'egg';
+      const pal = PALETTES[pathKey];
+      for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+          const ci = grid[r][c];
+          if (!ci) continue;
+          ctx.fillStyle = pal[ci] || '#f00';
+          ctx.fillRect(ox + c * scale, oy + r * scale, scale, scale);
+        }
+      }
+    }
+
+    // ── Load companion data ──────────────────────────────────────────────────
+
+    let companion = null;
+    try {
+      const raw = localStorage.getItem('echo_companion');
+      if (raw) companion = JSON.parse(raw);
+    } catch (e) {}
+
+    // Allow URL param override for testing
+    const urlId = new URLSearchParams(location.search).get('id');
+
+    if (!companion) {
+      document.getElementById('main-content').style.display = 'none';
+      document.getElementById('no-companion').style.display = '';
+    } else {
+      renderCard(companion);
+    }
+
+    function renderCard(s) {
+      const path = s.evolutionPath || 'egg';
+      const colors = PATH_GRADIENTS[path] || PATH_GRADIENTS.egg;
+      const key = getSpriteKey(s);
+      const days = s.bornAt ? Math.ceil((Date.now() - s.bornAt) / 86400000) : 0;
+
+      // ── Front canvas ────────────────────────────────────────────────────
+      const canvas = document.getElementById('front-canvas');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+
+      // Background gradient
+      const grad = ctx.createLinearGradient(0, 0, W, H);
+      grad.addColorStop(0, colors[0]);
+      grad.addColorStop(0.5, colors[1]);
+      grad.addColorStop(1, colors[2]);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      // Subtle inner glow
+      const glow = ctx.createRadialGradient(W/2, H*0.4, 0, W/2, H*0.4, W*0.5);
+      glow.addColorStop(0, 'rgba(255,255,255,0.18)');
+      glow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, W, H);
+
+      // Card border
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 3;
+      roundRect(ctx, 6, 6, W-12, H-12, 14);
+      ctx.stroke();
+
+      // Sprite (8×12 at scale 14 = 112×168)
+      const spriteScale = 14;
+      const spriteW = 8 * spriteScale;
+      const spriteH = 12 * spriteScale;
+      const spriteX = (W - spriteW) / 2;
+      const spriteY = 60;
+      drawSprite(ctx, key, spriteScale, spriteX, spriteY);
+
+      // Name
+      ctx.font = 'bold 26px Courier New';
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
+      ctx.textAlign = 'center';
+      ctx.fillText(s.name || '???', W/2, spriteY + spriteH + 36);
+
+      // Level + path
+      ctx.font = '14px Courier New';
+      ctx.fillStyle = 'rgba(255,255,255,0.65)';
+      ctx.fillText(`Level ${s.level} · ${(s.evolutionPath || 'egg').toUpperCase()}`, W/2, spriteY + spriteH + 58);
+
+      // Watermark
+      ctx.font = '11px Courier New';
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.letterSpacing = '3px';
+      ctx.fillText("ECHO'S VAULT", W/2, H - 20);
+
+      // ── Back face text ───────────────────────────────────────────────────
+      const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setText('back-name', s.name || '???');
+      setText('back-level', s.level);
+      setText('back-path', (s.evolutionPath || '???').toUpperCase());
+      setText('back-floors', s.traits ? (s.traits.floorsVisited || 0) : 0);
+      setText('back-claws', s.traits ? (s.traits.clawPulls || 0) : 0);
+      setText('back-grails', s.traits ? (s.traits.grailsSpotted || 0) : 0);
+      setText('back-days', days);
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    // ── Flip ──────────────────────────────────────────────────────────────
+    let flipped = false;
+
+    function flipCard() {
+      flipped = !flipped;
+      document.getElementById('card-scene').classList.toggle('flipped', flipped);
+    }
+
+    document.getElementById('flip-btn').addEventListener('click', flipCard);
+    document.getElementById('card-scene').addEventListener('click', flipCard);
+
+    // ── Download ──────────────────────────────────────────────────────────
+    document.getElementById('download-btn').addEventListener('click', () => {
+      // Make sure front is showing
+      const wasFlipped = flipped;
+      if (flipped) flipCard();
+
+      setTimeout(() => {
+        const canvas = document.getElementById('front-canvas');
+        const link = document.createElement('a');
+        const name = (companion && companion.name) ? companion.name : 'companion';
+        link.download = `${name.toLowerCase()}-companion-card.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        if (wasFlipped) flipCard();
+      }, 100);
+    });
+
+  })();
+  </script>
+</body>
+</html>
