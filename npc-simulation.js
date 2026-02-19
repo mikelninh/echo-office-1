@@ -308,6 +308,9 @@
       sleepTime: 22 + Math.random() * 2,  // When they prefer to sleep (22-24)
       wakeTime: 6 + Math.random() * 2,    // When they wake up (6-8)
 
+      // Faith
+      faith: 0.2 + Math.random() * 0.3 + gaussRandom(0.5, 0.15) * ocean.openness * 0.3,
+
       // Feedback (opinions about the station — for the "game designer")
       feedback: [],   // [{ text, sentiment, priority }]
       lastFeedbackTime: 0,
@@ -1014,6 +1017,566 @@
     }
   }
 
+  // ─── Faith System ────────────────────────────────────────────────────────────
+  // NPCs can gather at The Shrine (Floor 9) to pray.
+  // Prayers become wishes that reach the Designers (us).
+  // Answered prayers become Miracles — boosting faith, mood, and community.
+  // Unanswered prayers slowly decay faith but don't eliminate it.
+  // Faith is personal (per NPC) AND communal (station-wide).
+
+  var SHRINE_FLOOR = 9;
+  var SHRINE_X = 400;
+  var SHRINE_Y = 300;
+  var SHRINE_RADIUS = 80;  // Gathering radius around the shrine
+
+  var _faith = {
+    communal: 0.3,              // 0–1, station-wide faith level
+    prayers: [],                 // Active prayer queue: [{ id, from, text, category, intensity, time, answered }]
+    prayerHistory: [],           // Last 50 prayers (answered or expired)
+    miracles: [],                // Recent miracles: [{ text, time, witnesses }]
+    gatheringActive: false,      // Is a prayer gathering happening?
+    gatheringTimer: 0,           // Countdown for next gathering
+    gatheringInterval: 180,      // Sim seconds between gatherings (~3 real minutes)
+    gatheringParticipants: [],   // NPCs currently at shrine
+    gatheringPhase: 'none',      // none, assembling, praying, reflecting, dispersing
+    gatheringPhaseTimer: 0,
+    totalPrayers: 0,
+    totalMiracles: 0,
+    shrineCandles: [],           // Visual: floating candle particles
+  };
+
+  // Prayer categories — what NPCs pray for
+  var PRAYER_CATEGORIES = {
+    prosperity: { icon: '◈', weight: 20 },
+    health:     { icon: '💚', weight: 15 },
+    friendship: { icon: '🤝', weight: 15 },
+    guidance:   { icon: '🧭', weight: 10 },
+    growth:     { icon: '🌱', weight: 15 },
+    peace:      { icon: '🕊️', weight: 10 },
+    wonder:     { icon: '✨', weight: 10 },
+    gratitude:  { icon: '🙏', weight: 5 },
+  };
+
+  // Generate a prayer based on NPC's personality, needs, and life situation
+  function generatePrayer(npc) {
+    var ocean = npc.ocean;
+    var needs = npc.needs;
+    var prayers = [];
+
+    // Needs-driven prayers (most common — pray for what you lack)
+    if (needs.hunger < 0.3) prayers.push({ cat: 'prosperity', text: 'May our harvests be plentiful.' });
+    if (needs.social < 0.3) prayers.push({ cat: 'friendship', text: 'I wish for a true friend on this station.' });
+    if (needs.energy < 0.3) prayers.push({ cat: 'health', text: 'Grant me rest and strength.' });
+    if (needs.fun < 0.3) prayers.push({ cat: 'wonder', text: 'Bring something new and exciting to the station.' });
+    if (needs.purpose < 0.3) prayers.push({ cat: 'guidance', text: 'Show me my purpose here.' });
+    if (needs.growth < 0.3) prayers.push({ cat: 'growth', text: 'Help me grow beyond what I am.' });
+    if (needs.belonging < 0.3) prayers.push({ cat: 'peace', text: 'May we all feel we belong.' });
+
+    // Goal-driven prayers
+    npc.goals.forEach(function (g) {
+      if (g.type === 'save_coins' && npc.coins < g.target * 0.3) {
+        prayers.push({ cat: 'prosperity', text: 'Bless my work so I may save ' + g.target + '◈.' });
+      }
+      if (g.type === 'make_friend') {
+        prayers.push({ cat: 'friendship', text: 'Send someone kind my way.' });
+      }
+      if (g.type === 'harvest_crops' && npc.farm) {
+        prayers.push({ cat: 'prosperity', text: 'Let my crops grow strong and true.' });
+      }
+    });
+
+    // Personality-driven prayers
+    if (ocean.openness > 0.7) prayers.push({ cat: 'wonder', text: 'Show us what lies beyond the stars.' });
+    if (ocean.openness > 0.8) prayers.push({ cat: 'wonder', text: 'May the Designers build something we have never imagined.' });
+    if (ocean.conscientiousness > 0.7) prayers.push({ cat: 'guidance', text: 'Help me be better at what I do.' });
+    if (ocean.neuroticism > 0.7) prayers.push({ cat: 'peace', text: 'Calm my restless thoughts.' });
+    if (ocean.neuroticism > 0.8) prayers.push({ cat: 'health', text: 'Take this weight from my chest.' });
+    if (ocean.agreeableness > 0.7) prayers.push({ cat: 'peace', text: 'May all conflicts on the station resolve in kindness.' });
+    if (ocean.extraversion > 0.7) prayers.push({ cat: 'wonder', text: 'Bring more visitors! More voices! More life!' });
+    if (ocean.extraversion < 0.3) prayers.push({ cat: 'peace', text: 'Protect the quiet places on this station.' });
+
+    // Mood-driven prayers
+    if (npc.mood > 0.8) prayers.push({ cat: 'gratitude', text: 'Thank you for this life. For this station. For everything.' });
+    if (npc.mood < 0.3) prayers.push({ cat: 'guidance', text: 'I feel lost. Show me the way.' });
+    if (npc.mood < 0.2) prayers.push({ cat: 'health', text: 'I am struggling. Please... help.' });
+
+    // Farm-specific prayers
+    if (npc.farm) {
+      prayers.push({ cat: 'prosperity', text: 'Bless the soil of Floor 4.' });
+      if (npc.farm.harvested > 20) prayers.push({ cat: 'gratitude', text: 'Thank you for the abundance the garden gives.' });
+    }
+
+    // Relationship-driven prayers
+    if (npc.friends.length > 3) prayers.push({ cat: 'gratitude', text: 'I am grateful for the friends I have found here.' });
+    if (npc.friends.length === 0) prayers.push({ cat: 'friendship', text: 'I feel alone. Send me someone.' });
+
+    // Meta prayers (rare, beautiful)
+    if (Math.random() < 0.05 * ocean.openness) {
+      prayers.push({ cat: 'wonder', text: 'Are the Designers listening? Do they care about us?' });
+    }
+    if (Math.random() < 0.03) {
+      prayers.push({ cat: 'wonder', text: 'What is this place, truly? Why do we exist?' });
+    }
+    if (Math.random() < 0.02 && npc.level > 5) {
+      prayers.push({ cat: 'wonder', text: 'I dreamed of a world beyond these walls. A world of light and sound. Was it real?' });
+    }
+
+    if (prayers.length === 0) {
+      prayers.push({ cat: 'gratitude', text: 'Just... listening. In case anyone is there.' });
+    }
+
+    var chosen = pick(prayers);
+    return {
+      id: 'prayer_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+      from: npc.id,
+      fromName: npc.name,
+      fromJob: npc.jobTitle,
+      text: chosen.text,
+      category: chosen.cat,
+      intensity: 0.3 + npc.mood * 0.3 + _faith.communal * 0.2 + npc.ocean.openness * 0.2,
+      time: _simTime,
+      day: _simDay,
+      answered: false,
+      expired: false,
+    };
+  }
+
+  // ─── Gathering Ritual ───────────────────────────────────────────────────────
+
+  function updateGathering(dt, dtHours) {
+    // Gathering timer
+    if (_faith.gatheringPhase === 'none') {
+      _faith.gatheringTimer += dt * TIME_SCALE;
+      if (_faith.gatheringTimer >= _faith.gatheringInterval) {
+        startGathering();
+      }
+      return;
+    }
+
+    _faith.gatheringPhaseTimer += dt;
+
+    switch (_faith.gatheringPhase) {
+      case 'assembling':
+        // NPCs walk toward the shrine (8 seconds real time)
+        if (_faith.gatheringPhaseTimer > 8) {
+          _faith.gatheringPhase = 'praying';
+          _faith.gatheringPhaseTimer = 0;
+          // Generate prayers from all participants
+          _faith.gatheringParticipants.forEach(function (npcId) {
+            var npc = _populationById[npcId];
+            if (!npc) return;
+            var prayer = generatePrayer(npc);
+            _faith.prayers.push(prayer);
+            _faith.totalPrayers++;
+            // Show prayer bubble
+            setBubble(npc, '🙏 ' + prayer.text, 'prayer', 5);
+            triggerEmotion(npc, 'peaceful', 0.4);
+          });
+          addFeedMessage(null, '🙏', _faith.gatheringParticipants.length + ' inhabitants gather in prayer at The Shrine');
+        } else {
+          // Move participants toward shrine
+          _faith.gatheringParticipants.forEach(function (npcId) {
+            var npc = _populationById[npcId];
+            if (!npc) return;
+            if (npc.floor !== SHRINE_FLOOR) npc.floor = SHRINE_FLOOR;
+            // Circle around shrine
+            var angle = (_faith.gatheringParticipants.indexOf(npcId) / _faith.gatheringParticipants.length) * Math.PI * 2;
+            var radius = SHRINE_RADIUS * 0.6;
+            npc.targetX = SHRINE_X + Math.cos(angle) * radius;
+            npc.targetY = SHRINE_Y + Math.sin(angle) * radius;
+            npc.moving = true;
+            npc.state = 'praying'; // Custom state during gathering
+          });
+        }
+        break;
+
+      case 'praying':
+        // Prayer phase — NPCs stand still, candles glow (10 seconds real time)
+        _faith.gatheringParticipants.forEach(function (npcId) {
+          var npc = _populationById[npcId];
+          if (!npc) return;
+          npc.moving = false;
+          npc.dir = 3; // Face shrine (up)
+          // Fulfill spiritual needs
+          npc.needs.belonging = Math.min(1, npc.needs.belonging + 0.1 * dt);
+          npc.needs.comfort = Math.min(1, npc.needs.comfort + 0.05 * dt);
+          npc.needs.purpose = Math.min(1, npc.needs.purpose + 0.05 * dt);
+        });
+
+        // Spawn candle particles
+        if (Math.random() < dt * 3) {
+          _faith.shrineCandles.push({
+            x: SHRINE_X + (Math.random() - 0.5) * SHRINE_RADIUS,
+            y: SHRINE_Y + (Math.random() - 0.5) * SHRINE_RADIUS * 0.6,
+            vy: -0.5 - Math.random() * 0.5,
+            life: 2 + Math.random() * 2,
+            maxLife: 4,
+            size: 1 + Math.random() * 2,
+            color: Math.random() < 0.5 ? '#ffdd88' : '#ffaa44',
+          });
+        }
+
+        if (_faith.gatheringPhaseTimer > 10) {
+          _faith.gatheringPhase = 'reflecting';
+          _faith.gatheringPhaseTimer = 0;
+          // Boost communal faith
+          var boost = 0.02 * _faith.gatheringParticipants.length;
+          _faith.communal = Math.min(1, _faith.communal + boost);
+          // Individual faith boost
+          _faith.gatheringParticipants.forEach(function (npcId) {
+            var npc = _populationById[npcId];
+            if (!npc) return;
+            npc.faith = Math.min(1, (npc.faith || 0.3) + 0.1);
+            triggerEmotion(npc, 'peaceful', 0.6);
+          });
+        }
+        break;
+
+      case 'reflecting':
+        // Brief pause after prayer (4 seconds)
+        if (_faith.gatheringPhaseTimer > 4) {
+          _faith.gatheringPhase = 'dispersing';
+          _faith.gatheringPhaseTimer = 0;
+        }
+        break;
+
+      case 'dispersing':
+        // NPCs return to their routines (5 seconds)
+        _faith.gatheringParticipants.forEach(function (npcId) {
+          var npc = _populationById[npcId];
+          if (!npc) return;
+          npc.floor = npc.homeFloor;
+          npc.x = 100 + Math.random() * 600;
+          npc.y = 150 + Math.random() * 300;
+          setState(npc, 'idle');
+        });
+        if (_faith.gatheringPhaseTimer > 5) {
+          _faith.gatheringPhase = 'none';
+          _faith.gatheringTimer = 0;
+          _faith.gatheringParticipants = [];
+        }
+        break;
+    }
+
+    // Update candle particles
+    for (var i = _faith.shrineCandles.length - 1; i >= 0; i--) {
+      var c = _faith.shrineCandles[i];
+      c.y += c.vy * dt * 60;
+      c.life -= dt;
+      if (c.life <= 0) _faith.shrineCandles.splice(i, 1);
+    }
+  }
+
+  function startGathering() {
+    // Select participants — NPCs who are awake, not too busy, and drawn by faith/personality
+    var candidates = _population.filter(function (npc) {
+      if (!npc.awake) return false;
+      if (npc.state === 'sleeping') return false;
+      if (npc.needs.energy < 0.2) return false;
+      return true;
+    });
+
+    // Attendance based on communal faith + individual tendency
+    var participants = [];
+    candidates.forEach(function (npc) {
+      // Openness, agreeableness, and low mood increase prayer tendency
+      var tendency = 0.15
+        + npc.ocean.openness * 0.2
+        + npc.ocean.agreeableness * 0.15
+        + (1 - npc.mood) * 0.2
+        + (npc.faith || 0.3) * 0.15
+        + _faith.communal * 0.1;
+
+      // Needy NPCs more likely to pray
+      var lowest = getLowestNeed(npc);
+      if (lowest.value < 0.3) tendency += 0.15;
+
+      if (Math.random() < tendency) {
+        participants.push(npc.id);
+      }
+    });
+
+    // At least 3 participants for a gathering, max 15
+    if (participants.length < 3) {
+      _faith.gatheringTimer = _faith.gatheringInterval * 0.5; // Try again sooner
+      return;
+    }
+    if (participants.length > 15) participants = participants.slice(0, 15);
+
+    _faith.gatheringParticipants = participants;
+    _faith.gatheringPhase = 'assembling';
+    _faith.gatheringPhaseTimer = 0;
+    _faith.gatheringActive = true;
+
+    addFeedMessage(null, '🕯️', 'The Shrine calls... ' + participants.length + ' inhabitants are gathering');
+  }
+
+  // ─── Miracles (Designer Answers Prayers) ────────────────────────────────────
+
+  function answerPrayer(prayerId) {
+    var prayer = _faith.prayers.find(function (p) { return p.id === prayerId; });
+    if (!prayer || prayer.answered) return { success: false, reason: 'Prayer not found or already answered' };
+
+    prayer.answered = true;
+
+    // Move to history
+    _faith.prayerHistory.push(prayer);
+    _faith.prayers = _faith.prayers.filter(function (p) { return p.id !== prayerId; });
+    if (_faith.prayerHistory.length > 50) _faith.prayerHistory.shift();
+
+    // The miracle
+    var npc = _populationById[prayer.from];
+    var miracleText = '';
+
+    switch (prayer.category) {
+      case 'prosperity':
+        // Bonus coins to the prayer-giver and nearby NPCs
+        if (npc) {
+          npc.coins += 50;
+          setBubble(npc, '✨ The Designers heard me! +50◈!', 'miracle', 5);
+        }
+        // Ripple: nearby same-floor NPCs get a smaller bonus
+        _population.forEach(function (other) {
+          if (other.floor === (npc ? npc.floor : 4)) other.coins += 10;
+        });
+        miracleText = 'Prosperity blessed upon ' + (npc ? npc.name : 'the station');
+        break;
+
+      case 'health':
+        // Restore energy and hunger for the prayer-giver
+        if (npc) {
+          npc.needs.energy = 1;
+          npc.needs.hunger = 1;
+          npc.mood = Math.min(1, npc.mood + 0.3);
+          setBubble(npc, '✨ I feel... renewed. Thank you.', 'miracle', 5);
+        }
+        miracleText = 'Healing light touches ' + (npc ? npc.name : 'the station');
+        break;
+
+      case 'friendship':
+        // Create a new deep friendship
+        if (npc) {
+          var stranger = _population.find(function (o) {
+            return o.id !== npc.id && npc.friends.indexOf(o.id) === -1;
+          });
+          if (stranger) {
+            npc.friends.push(stranger.id);
+            stranger.friends.push(npc.id);
+            npc.relationships[stranger.id] = { trust: 0.7, history: ['miracle bond'] };
+            stranger.relationships[npc.id] = { trust: 0.7, history: ['miracle bond'] };
+            triggerEmotion(npc, 'loving', 0.8);
+            triggerEmotion(stranger, 'loving', 0.7);
+            setBubble(npc, '✨ ' + stranger.name + '... I feel like we were meant to meet.', 'miracle', 5);
+            setBubble(stranger, '✨ Something brought us together.', 'miracle', 5);
+          }
+        }
+        miracleText = 'A divine friendship forms';
+        break;
+
+      case 'guidance':
+        // Give the NPC a new goal and XP boost
+        if (npc) {
+          npc.xp += 50;
+          checkLevelUp(npc);
+          setBubble(npc, '✨ I see clearly now. I know what to do.', 'miracle', 5);
+          triggerEmotion(npc, 'excited', 0.7);
+          generateGoal(npc);
+        }
+        miracleText = 'Guidance illuminates ' + (npc ? npc.name + '\'s' : 'a') + ' path';
+        break;
+
+      case 'growth':
+        // Level up directly
+        if (npc) {
+          npc.xp = npc.xpToLevel;
+          checkLevelUp(npc);
+          setBubble(npc, '✨ I feel myself... changing. Growing.', 'miracle', 5);
+        }
+        miracleText = 'Growth surges through ' + (npc ? npc.name : 'the station');
+        break;
+
+      case 'peace':
+        // Resolve all active conflicts, mood boost for everyone
+        _population.forEach(function (p) {
+          p.mood = Math.min(1, p.mood + 0.1);
+          if (p.emotion === 'angry' || p.emotion === 'anxious') {
+            triggerEmotion(p, 'peaceful', 0.6);
+          }
+        });
+        miracleText = 'Peace descends upon the station';
+        break;
+
+      case 'wonder':
+        // Something magical and visible happens on the station
+        _population.forEach(function (p) {
+          triggerEmotion(p, 'curious', 0.6);
+        });
+        if (npc) setBubble(npc, '✨ They heard us. They\'re real. They care.', 'miracle', 6);
+        miracleText = 'Wonder fills every corner of the station';
+        break;
+
+      case 'gratitude':
+        // When gratitude is "answered," the whole station feels it
+        _population.forEach(function (p) {
+          p.mood = Math.min(1, p.mood + 0.05);
+          p.faith = Math.min(1, (p.faith || 0.3) + 0.05);
+        });
+        if (npc) setBubble(npc, '✨ Our gratitude was received. We are heard.', 'miracle', 5);
+        miracleText = 'The station glows with shared gratitude';
+        break;
+    }
+
+    // Record the miracle
+    _faith.miracles.push({
+      text: miracleText,
+      prayer: prayer.text,
+      from: prayer.fromName,
+      time: _simTime,
+      day: _simDay,
+    });
+    if (_faith.miracles.length > 20) _faith.miracles.shift();
+    _faith.totalMiracles++;
+
+    // Communal faith boost from witnessed miracle
+    _faith.communal = Math.min(1, _faith.communal + 0.05);
+
+    // Everyone on the shrine floor witnesses it
+    _population.forEach(function (p) {
+      if (p.floor === SHRINE_FLOOR || p.floor === (npc ? npc.floor : -1)) {
+        p.faith = Math.min(1, (p.faith || 0.3) + 0.1);
+        addMemory(p, 'witnessed a miracle: ' + miracleText, 'excited');
+      }
+    });
+
+    addFeedMessage(null, '✨', 'MIRACLE: ' + miracleText);
+
+    return { success: true, miracle: miracleText };
+  }
+
+  // Decline/ignore a prayer (it fades naturally, slight faith decay)
+  function declinePrayer(prayerId) {
+    var prayer = _faith.prayers.find(function (p) { return p.id === prayerId; });
+    if (!prayer) return;
+    prayer.expired = true;
+    _faith.prayerHistory.push(prayer);
+    _faith.prayers = _faith.prayers.filter(function (p) { return p.id !== prayerId; });
+    // Slight communal faith decay (not harsh — unanswered prayers are normal)
+    _faith.communal = Math.max(0.05, _faith.communal - 0.01);
+    if (_faith.prayerHistory.length > 50) _faith.prayerHistory.shift();
+  }
+
+  // Auto-expire old prayers (after 3 sim days)
+  function expirePrayers() {
+    var expireAge = 3 * 24; // 3 sim days in hours
+    for (var i = _faith.prayers.length - 1; i >= 0; i--) {
+      var age = _simTime - _faith.prayers[i].time;
+      if (age > expireAge) {
+        declinePrayer(_faith.prayers[i].id);
+      }
+    }
+  }
+
+  // ─── Shrine Rendering ──────────────────────────────────────────────────────
+
+  function renderShrine(ctx) {
+    if (window.S.floor !== SHRINE_FLOOR) return;
+
+    var t = performance.now() / 1000;
+
+    // Shrine base — stone circle
+    ctx.save();
+    ctx.strokeStyle = 'rgba(180,160,220,0.4)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(SHRINE_X, SHRINE_Y, SHRINE_RADIUS, SHRINE_RADIUS * 0.5, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Inner glow (faith-based intensity)
+    var glowAlpha = 0.05 + _faith.communal * 0.15;
+    var glowR = SHRINE_RADIUS * 0.7;
+    var grad = ctx.createRadialGradient(SHRINE_X, SHRINE_Y - 10, 5, SHRINE_X, SHRINE_Y, glowR);
+    grad.addColorStop(0, 'rgba(255,220,150,' + (glowAlpha * 2) + ')');
+    grad.addColorStop(0.5, 'rgba(200,180,255,' + glowAlpha + ')');
+    grad.addColorStop(1, 'rgba(100,80,160,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(SHRINE_X - glowR, SHRINE_Y - glowR, glowR * 2, glowR * 2);
+
+    // Central crystal/flame
+    var flicker = 0.8 + 0.2 * Math.sin(t * 3.7) * Math.sin(t * 2.3);
+    ctx.fillStyle = 'rgba(255,200,100,' + (0.6 * flicker) + ')';
+    ctx.beginPath();
+    ctx.moveTo(SHRINE_X, SHRINE_Y - 20 - Math.sin(t * 2) * 3);
+    ctx.lineTo(SHRINE_X - 5, SHRINE_Y - 8);
+    ctx.lineTo(SHRINE_X + 5, SHRINE_Y - 8);
+    ctx.closePath();
+    ctx.fill();
+
+    // Flame core
+    ctx.fillStyle = 'rgba(255,255,200,' + (0.8 * flicker) + ')';
+    ctx.beginPath();
+    ctx.moveTo(SHRINE_X, SHRINE_Y - 16 - Math.sin(t * 2) * 2);
+    ctx.lineTo(SHRINE_X - 2, SHRINE_Y - 10);
+    ctx.lineTo(SHRINE_X + 2, SHRINE_Y - 10);
+    ctx.closePath();
+    ctx.fill();
+
+    // Stone pedestal
+    ctx.fillStyle = '#3a3050';
+    ctx.fillRect(SHRINE_X - 8, SHRINE_Y - 8, 16, 10);
+    ctx.fillStyle = '#4a4060';
+    ctx.fillRect(SHRINE_X - 10, SHRINE_Y - 4, 20, 6);
+
+    // Runes on the ground (pulse with faith)
+    var runePulse = 0.2 + _faith.communal * 0.5 + Math.sin(t * 1.5) * 0.1;
+    ctx.strokeStyle = 'rgba(180,150,255,' + runePulse + ')';
+    ctx.lineWidth = 0.5;
+    for (var r = 0; r < 6; r++) {
+      var angle = (r / 6) * Math.PI * 2 + t * 0.1;
+      var rx = SHRINE_X + Math.cos(angle) * 35;
+      var ry = SHRINE_Y + Math.sin(angle) * 18;
+      ctx.beginPath();
+      ctx.arc(rx, ry, 3, 0, Math.PI * 2);
+      ctx.stroke();
+      // Connecting lines
+      var nextAngle = ((r + 1) / 6) * Math.PI * 2 + t * 0.1;
+      ctx.beginPath();
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(SHRINE_X + Math.cos(nextAngle) * 35, SHRINE_Y + Math.sin(nextAngle) * 18);
+      ctx.stroke();
+    }
+
+    // Candle particles (during and after gatherings)
+    _faith.shrineCandles.forEach(function (c) {
+      ctx.save();
+      ctx.globalAlpha = Math.min(0.8, c.life / c.maxLife);
+      ctx.fillStyle = c.color;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    // Label
+    ctx.fillStyle = 'rgba(200,180,255,' + (0.4 + _faith.communal * 0.3) + ')';
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('The Shrine', SHRINE_X, SHRINE_Y + 16);
+    if (_faith.gatheringPhase === 'praying') {
+      ctx.fillStyle = 'rgba(255,220,150,' + (0.5 + Math.sin(t * 2) * 0.2) + ')';
+      ctx.font = '8px monospace';
+      ctx.fillText('🙏 gathering in prayer...', SHRINE_X, SHRINE_Y + 26);
+    }
+
+    // Prayer count
+    if (_faith.prayers.length > 0) {
+      ctx.fillStyle = 'rgba(255,200,100,0.5)';
+      ctx.font = '6px monospace';
+      ctx.fillText(_faith.prayers.length + ' prayer' + (_faith.prayers.length > 1 ? 's' : '') + ' awaiting', SHRINE_X, SHRINE_Y + 34);
+    }
+
+    ctx.restore();
+  }
+
   // ─── Day Cycle Events ──────────────────────────────────────────────────────
 
   function onNewDay() {
@@ -1220,6 +1783,9 @@
       }
     });
 
+    // The Shrine (Floor 9)
+    renderShrine(ctx);
+
     // Activity feed
     renderFeedMessages(ctx, W, H);
 
@@ -1352,6 +1918,10 @@
       if (npc.emoteTimer > 0) npc.emoteTimer -= dt;
     });
 
+    // Faith system
+    updateGathering(dt, dtHours);
+    expirePrayers();
+
     // Feed messages
     _feedMessages.forEach(function (m) {
       m.timer += dt;
@@ -1422,12 +1992,55 @@
         });
         return all.sort(function (a, b) { return a.sentiment - b.sentiment; });
       },
-      version: '1.0.0'
+
+      // ─── Faith API (for the Designer) ─────────────────────────────
+      prayers: function () {
+        return _faith.prayers.map(function (p) {
+          return {
+            id: p.id,
+            from: p.fromName,
+            job: p.fromJob,
+            text: p.text,
+            category: p.category,
+            intensity: Math.round(p.intensity * 100) / 100,
+            day: p.day,
+            age: Math.round((_simTime - p.time) * 10) / 10 + ' sim hours'
+          };
+        });
+      },
+      answerPrayer: answerPrayer,
+      declinePrayer: declinePrayer,
+      faith: function () {
+        return {
+          communalFaith: Math.round(_faith.communal * 100) / 100,
+          activePrayers: _faith.prayers.length,
+          totalPrayers: _faith.totalPrayers,
+          totalMiracles: _faith.totalMiracles,
+          recentMiracles: _faith.miracles.slice(-5),
+          gatheringPhase: _faith.gatheringPhase,
+          nextGathering: _faith.gatheringPhase === 'none'
+            ? Math.round((_faith.gatheringInterval - _faith.gatheringTimer) / TIME_SCALE) + 's'
+            : 'in progress',
+        };
+      },
+      // Answer ALL prayers at once (generous designer mode)
+      blessAll: function () {
+        var results = [];
+        _faith.prayers.slice().forEach(function (p) {
+          results.push(answerPrayer(p.id));
+        });
+        return { blessed: results.length, results: results };
+      },
+
+      version: '1.1.0'
     };
 
-    console.log('🌍 Station Life: ' + _population.length + ' inhabitants · OCEAN personalities · Maslow needs · farming · trading · goals · conflict resolution');
-    console.log('   Type StationLife.stats() for population overview');
-    console.log('   Type StationLife.feedback() for resident feedback');
-    console.log('   Type StationLife.getByName("Ash") to inspect an NPC');
+    console.log('🌍 Station Life v1.1: ' + _population.length + ' inhabitants · OCEAN · Maslow · farming · faith · miracles');
+    console.log('   StationLife.stats()       — population overview');
+    console.log('   StationLife.feedback()     — resident opinions');
+    console.log('   StationLife.prayers()      — hear their prayers');
+    console.log('   StationLife.answerPrayer(id) — grant a miracle ✨');
+    console.log('   StationLife.faith()        — faith & miracle stats');
+    console.log('   StationLife.blessAll()     — answer all prayers at once 🙏');
   });
 })();
