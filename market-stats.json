@@ -272,7 +272,7 @@
       "totalListings": 174,
       "avgPrice": 11069,
       "maxPrice": 149999,
-      "newAlerts": 6,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 174,
         "tcgplayer": 0
@@ -282,19 +282,19 @@
       "totalListings": 85,
       "avgPrice": 12208,
       "maxPrice": 49257,
-      "newAlerts": 2,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 85,
         "tcgplayer": 0
       }
     },
     "onepiece": {
-      "totalListings": 132,
-      "avgPrice": 9629,
-      "maxPrice": 52000,
-      "newAlerts": 6,
+      "totalListings": 138,
+      "avgPrice": 9086,
+      "maxPrice": 39000,
+      "newAlerts": 3,
       "platforms": {
-        "ebay": 132,
+        "ebay": 138,
         "tcgplayer": 0
       }
     },
@@ -302,7 +302,7 @@
       "totalListings": 60,
       "avgPrice": 8328,
       "maxPrice": 60000,
-      "newAlerts": 2,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 60,
         "tcgplayer": 0
@@ -342,7 +342,7 @@
       "totalListings": 51,
       "avgPrice": 53791,
       "maxPrice": 99999,
-      "newAlerts": 1,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 51,
         "tcgplayer": 0
