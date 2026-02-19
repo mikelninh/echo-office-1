@@ -401,6 +401,10 @@
   function renderLighting(ctx, floor, W, H, t) {
     ctx.save();
 
+    // Skip lighting for floors that handle their own atmosphere
+    // (Cinema, planet rooms, placeholder segments)
+    if (floor === 12 || floor >= 20) { ctx.restore(); return; }
+
     const tod = getTOD();
 
     switch (floor) {
@@ -411,7 +415,7 @@
         const g = ctx.createRadialGradient(W / 2, lampY, 30, W / 2, lampY, W * 0.65);
         g.addColorStop(0, 'rgba(255,200,80,0.04)');
         g.addColorStop(0.5, 'rgba(200,120,30,0.03)');
-        g.addColorStop(1, 'rgba(0,0,0,0.08)');
+        g.addColorStop(1, 'rgba(0,0,0,0.03)');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, W, H);
         break;
@@ -421,8 +425,8 @@
         // Cool starlight — blue-purple at edges
         const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.2, W / 2, H / 2, W * 0.75);
         g.addColorStop(0, 'rgba(0,0,0,0)');
-        g.addColorStop(0.6, 'rgba(60,40,100,0.05)');
-        g.addColorStop(1, 'rgba(20,10,60,0.12)');
+        g.addColorStop(0.6, 'rgba(60,40,100,0.02)');
+        g.addColorStop(1, 'rgba(20,10,60,0.05)');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, W, H);
         break;
@@ -471,12 +475,12 @@
       }
     }
 
-    // Time-of-day tinting (subtle, applies to all floors)
+    // Time-of-day tinting (very subtle, applies to all floors)
     if (tod === 'night') {
-      ctx.fillStyle = 'rgba(0,0,20,0.06)';
+      ctx.fillStyle = 'rgba(0,0,20,0.03)';
       ctx.fillRect(0, 0, W, H);
     } else if (tod === 'dawn') {
-      ctx.fillStyle = 'rgba(255,180,80,0.05)';
+      ctx.fillStyle = 'rgba(255,180,80,0.02)';
       ctx.fillRect(0, 0, W, H);
     }
     // day / evening: no extra tint needed (covered by existing render)
