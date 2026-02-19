@@ -38690,6 +38690,9 @@ window.addEventListener('load', function(){
 
 // === 1. FREE STARTER SKIN GIFT ===
 (function starterSkinGift(){
+  var LS=window.LS||window._LS;if(!LS)return;
+  var VISITOR_SKINS=window.VISITOR_SKINS||[];
+  var S=window.S||window._S||{};
   if(LS.get('starterGiftGiven'))return;
   var owned=LS.get('visitorSkinsOwned',[]);
   if(owned.length>0)return; // not a new visitor
