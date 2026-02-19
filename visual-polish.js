@@ -401,6 +401,11 @@
   function renderLighting(ctx, floor, W, H, t) {
     ctx.save();
 
+    // Lighting draws full-screen tints — must use screen space, not world/camera space.
+    // Reset to identity so fillRect(0,0,W,H) covers the viewport correctly
+    // regardless of camera pan during fast movement or dash.
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
     // Skip lighting for floors that handle their own atmosphere
     // (Cinema, planet rooms, placeholder segments)
     if (floor === 12 || floor >= 20) { ctx.restore(); return; }
@@ -631,6 +636,7 @@
   function renderFade(ctx, W, H) {
     if (fade.alpha <= 0) return;
     ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // screen space — covers viewport during camera movement
     ctx.globalAlpha = fade.alpha;
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, W, H);
@@ -666,17 +672,23 @@
     if (!ctx || !s) return;
 
     // Guard: only run ONCE per animation frame (prevent double-wrap stacking)
-    const frameId = Math.round(performance.now());
+    // Use a frame counter tied to rAF, not performance.now() (ms precision too coarse)
+    const frameId = Math.round(performance.now() * 10); // 0.1ms precision
     if (frameId === _lastPolishFrame) return;
     _lastPolishFrame = frameId;
 
     // Save the ENTIRE canvas state before we touch anything —
     // other systems (dash renderer, HUD) may have leaked globalAlpha/fillStyle/etc.
     ctx.save();
-    // Reset to clean defaults so our rendering is predictable
+
+    // CRITICAL: reset alpha + composite, but DO NOT reset the transform.
+    // The camera system sets a world-space transform (pan/zoom) that must stay active
+    // so our overlays draw in world-space with everything else.
+    // Resetting via setTransform() was causing overlays to draw at screen origin
+    // during fast camera movement / dashing, producing the color-drag artifact.
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    // (transform intentionally left as-is — inherits camera matrix)
 
     const now = performance.now();
     const dt  = Math.min((now - _lastTime) / 1000, 0.05);
