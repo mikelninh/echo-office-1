@@ -1378,46 +1378,28 @@
   }
 
   function patchDrawDispatch() {
-    // The game's render chain has hardcoded floor numbers 1-12.
-    // For floors 30-35, nothing renders. We patch via wrapping the ctx's
-    // fillRect to detect when the game starts drawing, and override.
-    // Actually the simplest approach: override the game's render by wrapping
-    // the outer draw function.
-
-    // Wait for 'draw' to be defined
-    var attempts = 0;
-    function tryPatch() {
-      attempts++;
-      if (attempts > 200) return;
-
-      if (typeof window.draw !== 'function') {
-        setTimeout(tryPatch, 100);
-        return;
-      }
-
-      // Find the last override of draw (ring-engine may have patched it too)
-      var _origDraw = window.draw;
-      window.draw = function () {
-        var floor = window.S && window.S.floor;
-        if (floor && floor >= 30 && floor <= 35) {
-          // Clear canvas and render planet room directly
-          var cx = window.ctx;
-          var w = window.W, h = window.H;
-          if (cx && w && h) {
-            cx.save();
-            cx.clearRect(0, 0, w, h);
-            (window['renderFloor' + floor] || function () {})();
-            // Draw characters on top
-            renderPlanetCharacters();
-            cx.restore();
-          }
-        } else {
-          _origDraw.apply(this, arguments);
-        }
-      };
+    // Instead of wrapping window.draw (which breaks the chain for non-planet floors),
+    // use a separate requestAnimationFrame loop that ONLY renders when on planet floors.
+    // The game's normal draw loop handles floors 1-12 untouched.
+    
+    function planetRenderLoop() {
+      requestAnimationFrame(planetRenderLoop);
+      var floor = window.S && window.S.floor;
+      if (!floor || floor < 30 || floor > 35) return;
+      
+      var cx = window.ctx;
+      var w = window.W, h = window.H;
+      if (!cx || !w || !h) return;
+      
+      cx.save();
+      cx.clearRect(0, 0, w, h);
+      var renderFn = window['renderFloor' + floor];
+      if (typeof renderFn === 'function') renderFn();
+      renderPlanetCharacters();
+      cx.restore();
     }
-
-    setTimeout(tryPatch, 500);
+    
+    requestAnimationFrame(planetRenderLoop);
   }
 
   function renderPlanetCharacters() {
