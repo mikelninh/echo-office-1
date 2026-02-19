@@ -195,6 +195,18 @@ These are REAL and will be built — but not before Phase 0 is solid:
 
 ---
 
+## THE TEAM (AI Specialists)
+
+| Name | Role | Cadence |
+|------|------|---------|
+| **Echo** 🔮 | Chief of Staff / Builder | Continuous |
+| **ARCADE** 🎮 | Creative Director / Game Design | Every Sunday 10 AM → Telegram |
+| **PIXEL** 🎨 | Visual Designer / Pixel Art | On demand — owns all skins, items, UI |
+
+**PIXEL's mandate:** Every skin is instantly recognizable. Every item is beautiful. Every UI element has purpose. Pixel art perfectionist. Ships gorgeous things.
+
+---
+
 ## THE WEEKLY CADENCE
 
 **Every Sunday, ARCADE reviews the week:**
