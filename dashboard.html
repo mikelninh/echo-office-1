@@ -565,6 +565,10 @@ canvas.spark { display: block; width: 100%; image-rendering: pixelated; }
   .premium-inner { flex-direction: column; text-align: center; }
   .premium-right { width: 100%; }
   .two-col { grid-template-columns: 1fr !important; }
+  .partner-card { flex-direction: column; padding: 20px 18px; gap: 18px; }
+  .partner-logo { width: 60px; height: 60px; font-size: 28px; }
+  .partner-info h3 { font-size: 16px; }
+  .featured-label { font-size: 7px; }
 }
 @media (max-width: 480px) {
   .market-grid { grid-template-columns: 1fr; }
@@ -573,6 +577,176 @@ canvas.spark { display: block; width: 100%; image-rendering: pixelated; }
   .lightbox-inner { width: 95%; }
   .lightbox-nav { font-size: 24px; padding: 10px; }
 }
+
+/* ═══ PARTNERS SECTION ═══ */
+.partners {
+  margin-top: 40px;
+  margin-bottom: 8px;
+}
+.partners > h2 {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.partners > h2::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,215,0,0.3), transparent);
+}
+
+.partner-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 32px;
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  backdrop-filter: blur(12px);
+}
+.partner-card.featured {
+  border: 1px solid rgba(255,215,0,0.3);
+  background: rgba(255,255,255,0.05);
+}
+.partner-card.featured::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--orange), var(--accent));
+}
+.partner-card.featured::after {
+  content: '';
+  position: absolute; top: -60%; right: -10%;
+  width: 260px; height: 260px;
+  background: radial-gradient(circle, rgba(255,215,0,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+.partner-card:hover {
+  border-color: rgba(255,215,0,0.55);
+  box-shadow: 0 0 32px rgba(255,215,0,0.08), 0 8px 40px rgba(0,0,0,0.4);
+}
+
+.featured-label {
+  position: absolute;
+  top: 14px; right: 16px;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: rgba(255,215,0,0.12);
+  color: var(--gold);
+  border: 1px solid rgba(255,215,0,0.3);
+}
+
+.partner-logo {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  background: rgba(255,215,0,0.06);
+  border: 1px solid rgba(255,215,0,0.2);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  transition: transform 0.3s, background 0.3s;
+}
+.partner-card:hover .partner-logo {
+  transform: scale(1.07);
+  background: rgba(255,215,0,0.1);
+}
+
+.partner-info {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+.partner-info h3 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.partner-tagline {
+  font-size: 11px;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.partner-desc {
+  font-size: 12px;
+  color: var(--dim);
+  line-height: 1.7;
+  margin-bottom: 14px;
+  max-width: 600px;
+}
+.partner-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.partner-badges .badge {
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,215,0,0.2);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.3px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.partner-badges .badge:hover {
+  background: rgba(255,215,0,0.08);
+  border-color: rgba(255,215,0,0.4);
+}
+
+.partner-link {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px 24px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  color: #0a0a14;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(255,215,0,0.2);
+}
+.partner-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(255,215,0,0.35);
+}
+
+.partner-cta {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--dim);
+}
+.partner-cta a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.partner-cta a:hover { color: var(--text); }
 
 /* ═══ AMBIENT PARTICLES ═══ */
 #particles {
@@ -632,6 +806,61 @@ canvas.spark { display: block; width: 100%; image-rendering: pixelated; }
   <div class="filter-row" id="galleryFilters"></div>
   <div class="gallery-grid" id="galleryGrid"></div>
 
+  <!-- PARTNERS -->
+  <section class="partners" id="partnersSection">
+    <h2>🤝 Official Partners</h2>
+    <div class="partner-card featured">
+      <span class="featured-label">⭐ FEATURED PARTNER</span>
+      <div class="partner-logo">
+        <!-- pixel art game controller -->
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- controller body -->
+          <rect x="4" y="12" width="32" height="18" rx="8" fill="rgba(255,215,0,0.18)" stroke="rgba(255,215,0,0.5)" stroke-width="1.5"/>
+          <!-- d-pad left arm -->
+          <rect x="8" y="18" width="4" height="4" rx="1" fill="#ffd700" opacity="0.9"/>
+          <!-- d-pad right arm -->
+          <rect x="16" y="18" width="4" height="4" rx="1" fill="#ffd700" opacity="0.9"/>
+          <!-- d-pad center -->
+          <rect x="12" y="18" width="4" height="4" rx="1" fill="#ffd700"/>
+          <!-- d-pad vertical -->
+          <rect x="12" y="14" width="4" height="12" rx="1" fill="#ffd700" opacity="0.7"/>
+          <!-- buttons A B X Y -->
+          <circle cx="28" cy="17" r="2" fill="#ff4081" opacity="0.9"/>
+          <circle cx="33" cy="20" r="2" fill="#18ffff" opacity="0.9"/>
+          <circle cx="28" cy="23" r="2" fill="#00e676" opacity="0.9"/>
+          <circle cx="23" cy="20" r="2" fill="#ffab40" opacity="0.9"/>
+          <!-- grip bumps -->
+          <ellipse cx="10" cy="29" rx="5" ry="3" fill="rgba(255,215,0,0.12)" stroke="rgba(255,215,0,0.3)" stroke-width="1"/>
+          <ellipse cx="30" cy="29" rx="5" ry="3" fill="rgba(255,215,0,0.12)" stroke="rgba(255,215,0,0.3)" stroke-width="1"/>
+          <!-- select/start -->
+          <rect x="17" y="19" width="3" height="2" rx="1" fill="rgba(255,255,255,0.3)"/>
+          <rect x="21" y="19" width="3" height="2" rx="1" fill="rgba(255,255,255,0.3)"/>
+        </svg>
+      </div>
+      <div class="partner-info">
+        <h3>nxtlvl-shop</h3>
+        <p class="partner-tagline">Retro Gaming &amp; PSA Graded Cards · Berlin</p>
+        <p class="partner-desc">
+          Our official Berlin partner for authenticated, PSA-graded collectible cards.
+          Premium retro gaming items verified by professional graders. The gold standard
+          for collectors who demand authenticity.
+        </p>
+        <div class="partner-badges">
+          <span class="badge">🏪 Berlin Local</span>
+          <span class="badge">🏆 PSA Certified</span>
+          <span class="badge">🎮 Retro Gaming</span>
+          <span class="badge">✅ Verified Seller</span>
+        </div>
+        <a href="https://www.ebay.de/usr/nxtlvl-shop" target="_blank" rel="noopener" class="partner-link">
+          Visit Shop on eBay.de →
+        </a>
+      </div>
+    </div>
+    <div class="partner-cta">
+      <p>Want to become a partner? <a href="mailto:partners@echostation.gg">Contact us</a> · <a href="#">Become a partner →</a></p>
+    </div>
+  </section>
+
   <!-- LIGHTBOX -->
   <div class="lightbox" id="lightbox" onclick="if(event.target===this)closeLightbox()">
     <button class="lightbox-close" onclick="closeLightbox()">✕</button>
@@ -664,7 +893,11 @@ canvas.spark { display: block; width: 100%; image-rendering: pixelated; }
 
 <div class="footer">
   🔮 Echo's Vault · Powered by Echo Station · Data refreshes every 3 hours<br>
-  9 TCGs tracked · eBay.com · eBay.de · TCGPlayer · €5,000+ threshold
+  9 TCGs tracked · eBay.com · eBay.de · TCGPlayer · €5,000+ threshold<br>
+  <span style="color:rgba(255,215,0,0.5);margin-top:8px;display:inline-block">
+    🤝 Partners: <a href="https://www.ebay.de/usr/nxtlvl-shop" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--gold)'">nxtlvl-shop (Berlin)</a>
+    · <a href="mailto:partners@echostation.gg" style="color:var(--accent);text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--accent)'">Become a partner →</a>
+  </span>
 </div>
 
 <script>
@@ -1200,6 +1433,7 @@ function renderGallery() {
   });
 
   const filterGames = [...gamesPresent].sort((a,b) => (TCG_CONFIG[a]?.order||99) - (TCG_CONFIG[b]?.order||99));
+  const ebayDeCount = allCards.filter(c => c.key && c.key.includes('ebay-de-')).length;
   filtersEl.innerHTML = `
     <button class="filter-btn ${galleryFilter==='all'?'active':''}" onclick="setFilter('all')">All (${allCards.length})</button>
     ${filterGames.map(g => {
@@ -1207,9 +1441,14 @@ function renderGallery() {
       const count = allCards.filter(c => (c.game||detectGame(c.title)) === g).length;
       return `<button class="filter-btn ${galleryFilter===g?'active':''}" onclick="setFilter('${g}')" style="${galleryFilter===g?'':`border-color:${cfg?.color}30;color:${cfg?.color}`}">${cfg?.emoji||''} ${cfg?.name||g} (${count})</button>`;
     }).join('')}
+    ${ebayDeCount > 0 ? `<button class="filter-btn ${galleryFilter==='ebay-de'?'active':''}" onclick="setFilter('ebay-de')" style="${galleryFilter==='ebay-de'?'':'border-color:rgba(255,215,0,0.3);color:var(--gold)'}">🏪 nxtlvl-shop / eBay.de (${ebayDeCount})</button>` : ''}
   `;
 
-  const filtered = galleryFilter === 'all' ? allCards : allCards.filter(c => (c.game||detectGame(c.title)) === galleryFilter);
+  const filtered = galleryFilter === 'all'
+    ? allCards
+    : galleryFilter === 'ebay-de'
+      ? allCards.filter(c => c.key && c.key.includes('ebay-de-'))
+      : allCards.filter(c => (c.game||detectGame(c.title)) === galleryFilter);
   const display = filtered.slice(0, 80);
   window._galleryDisplay = display;
 
@@ -1221,9 +1460,12 @@ function renderGallery() {
       ? `<img src="${toThumb(card.image)}" alt="${(card.title||'').substring(0,30)}" loading="lazy" class="loading" onload="this.classList.replace('loading','loaded')" onerror="this.outerHTML='<div class=gallery-placeholder>${cfg.emoji}</div>'">`
       : `<div class="gallery-placeholder">${cfg.emoji}</div>`;
     const tierBadge = tier.label ? `<div class="card-tier-badge ${tier.cls}">${tier.label}</div>` : '';
+    const isEbayDe = card.key && card.key.includes('ebay-de-');
+    const partnerBadge = isEbayDe ? `<div class="card-tier-badge" style="top:auto;bottom:8px;right:8px;background:rgba(255,215,0,0.15);color:var(--gold);border:1px solid rgba(255,215,0,0.35)">🏪 nxtlvl</div>` : '';
     return `
       <div class="gallery-card ${tier.cardCls}" style="text-decoration:none;color:inherit;cursor:pointer" onclick="openLightboxForGallery(${i})">
         ${tierBadge}
+        ${partnerBadge}
         ${imgHtml}
         <div class="gallery-card-info">
           <div class="gallery-card-game" style="color:${cfg.color}">${cfg.emoji} ${cfg.name}</div>
