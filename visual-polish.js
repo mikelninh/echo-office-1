@@ -415,18 +415,18 @@
         const g = ctx.createRadialGradient(W / 2, lampY, 30, W / 2, lampY, W * 0.65);
         g.addColorStop(0, 'rgba(255,200,80,0.04)');
         g.addColorStop(0.5, 'rgba(200,120,30,0.03)');
-        g.addColorStop(1, 'rgba(0,0,0,0.03)');
+        g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, W, H);
         break;
       }
 
       case 2: {
-        // Cool starlight — blue-purple at edges
+        // Cool starlight — blue-purple at edges (very subtle)
         const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.2, W / 2, H / 2, W * 0.75);
         g.addColorStop(0, 'rgba(0,0,0,0)');
-        g.addColorStop(0.6, 'rgba(60,40,100,0.02)');
-        g.addColorStop(1, 'rgba(20,10,60,0.05)');
+        g.addColorStop(0.6, 'rgba(60,40,100,0.01)');
+        g.addColorStop(1, 'rgba(20,10,60,0.02)');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, W, H);
         break;
@@ -468,21 +468,17 @@
         const g = ctx.createRadialGradient(W / 2, H * 0.55, 20, W / 2, H * 0.55, W * 0.6);
         g.addColorStop(0, `rgba(255,180,60,${0.05 * flicker})`);
         g.addColorStop(0.5, `rgba(200,100,20,${0.03 * flicker})`);
-        g.addColorStop(1, 'rgba(0,0,0,0.1)');
+        g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, W, H);
         break;
       }
     }
 
-    // Time-of-day tinting (very subtle, applies to all floors)
-    if (tod === 'night') {
-      ctx.fillStyle = 'rgba(0,0,20,0.03)';
-      ctx.fillRect(0, 0, W, H);
-    } else if (tod === 'dawn') {
-      ctx.fillStyle = 'rgba(255,180,80,0.02)';
-      ctx.fillRect(0, 0, W, H);
-    }
+    // Time-of-day tinting disabled — was causing accumulated brown overlay
+    // TODO: re-enable once we confirm single-frame rendering
+    // if (tod === 'night') { ... }
+    // if (tod === 'dawn') { ... }
     // day / evening: no extra tint needed (covered by existing render)
 
     ctx.restore();
@@ -653,10 +649,16 @@
   let _t = 0; // cumulative time for animations
 
   /** Called once per frame after each floor render */
+  let _lastPolishFrame = -1;
   function onAfterFloorRender(floor) {
     const ctx = getCtx();
     const s   = getS();
     if (!ctx || !s) return;
+
+    // Guard: only run ONCE per animation frame (prevent double-wrap stacking)
+    const frameId = Math.round(performance.now());
+    if (frameId === _lastPolishFrame) return;
+    _lastPolishFrame = frameId;
 
     // Save the ENTIRE canvas state before we touch anything —
     // other systems (dash renderer, HUD) may have leaked globalAlpha/fillStyle/etc.
