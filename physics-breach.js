@@ -698,9 +698,15 @@
       return;
     }
 
+    var _bootTime = Date.now();
+    var _lastBreachTime = 0;
     window.changeFloor = function(f) {
-      // Trigger major breach on floor change
-      try { major(); } catch (e) { /* noop */ }
+      // Skip breach on initial load (first 2 seconds) and debounce (1s between breaches)
+      var now = Date.now();
+      if (now - _bootTime > 2000 && now - _lastBreachTime > 1000) {
+        _lastBreachTime = now;
+        try { major(); } catch (e) { /* noop */ }
+      }
       return _orig.apply(this, arguments);
     };
   }
