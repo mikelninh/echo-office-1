@@ -589,6 +589,113 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // ═══ NPC AI CHAT — Haiku-powered NPC conversations ═══
+  if (req.url === '/api/npc-chat' && req.method === 'POST') {
+    let body = '';
+    req.on('data', c => { body += c; if (body.length > 5e4) req.destroy(); });
+    req.on('end', async () => {
+      try {
+        const { prompt, participants, topic } = JSON.parse(body);
+        if (!prompt) { res.writeHead(400); res.end('{"error":"no prompt"}'); return; }
+
+        // Check for Anthropic API key
+        const apiKey = process.env.ANTHROPIC_API_KEY;
+        if (!apiKey) {
+          // Fallback: return empty (client will use pre-generated pool)
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ lines: [], fallback: true, reason: 'no API key' }));
+          return;
+        }
+
+        // Call Anthropic Haiku for cheap, fast NPC dialogue
+        const https = require('https');
+        const payload = JSON.stringify({
+          model: 'claude-haiku-4-5-20250610',
+          max_tokens: 300,
+          messages: [{ role: 'user', content: prompt }],
+          system: 'You are a dialogue writer for a pixel-art space station game. Write SHORT, punchy, in-character conversations. Output ONLY a JSON array of {speaker, text} objects. No markdown, no explanation.'
+        });
+
+        const apiReq = https.request({
+          hostname: 'api.anthropic.com',
+          path: '/v1/messages',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01'
+          }
+        }, (apiRes) => {
+          let data = '';
+          apiRes.on('data', chunk => { data += chunk; });
+          apiRes.on('end', () => {
+            try {
+              const result = JSON.parse(data);
+              const text = result.content?.[0]?.text || '[]';
+              // Parse the JSON array from the response
+              let lines = [];
+              try {
+                // Try to extract JSON from the response (might have markdown wrapping)
+                const jsonMatch = text.match(/\[[\s\S]*\]/);
+                if (jsonMatch) lines = JSON.parse(jsonMatch[0]);
+              } catch (e) {
+                console.warn('[NPC-Chat] Failed to parse AI response:', text.slice(0, 200));
+              }
+
+              // Validate format
+              lines = lines.filter(l => l.speaker && l.text && l.text.length < 80);
+              // Normalize speaker names to lowercase
+              lines = lines.map(l => ({ speaker: l.speaker.toLowerCase(), text: l.text }));
+
+              console.log(`💬 AI NPC chat: ${participants?.join('+')} on "${topic}" → ${lines.length} lines`);
+
+              // Cache for future use
+              if (lines.length > 0) {
+                const cacheDir = path.join(__dirname, 'npc-cache');
+                if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
+                const cacheFile = path.join(cacheDir, Date.now() + '.json');
+                fs.writeFileSync(cacheFile, JSON.stringify({ participants, topic, lines, generated: new Date().toISOString() }));
+                // Keep only last 100 cached conversations
+                const files = fs.readdirSync(cacheDir).sort();
+                if (files.length > 100) {
+                  files.slice(0, files.length - 100).forEach(f => {
+                    try { fs.unlinkSync(path.join(cacheDir, f)); } catch {}
+                  });
+                }
+              }
+
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ lines, participants, topic, ai: true }));
+            } catch (e) {
+              console.error('[NPC-Chat] Parse error:', e.message);
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ lines: [], error: 'parse_error' }));
+            }
+          });
+        });
+
+        apiReq.on('error', (e) => {
+          console.error('[NPC-Chat] API error:', e.message);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ lines: [], error: 'api_error' }));
+        });
+
+        apiReq.setTimeout(10000, () => {
+          apiReq.destroy();
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ lines: [], error: 'timeout' }));
+        });
+
+        apiReq.write(payload);
+        apiReq.end();
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
+
   // Duel Leaderboard API
   // Bug Report endpoint
   if (req.url === '/api/bug-report' && req.method === 'POST') {
