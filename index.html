@@ -43630,6 +43630,38 @@ window.renderFloor9 = function(){_rf9();if(typeof AmbientNPCs!=='undefined')Ambi
 <script src="secret-rooms.js"></script>
 <script src="zerog-dance.js"></script>
 <script src="vip-premium.js"></script>
+<script>
+// ─── Overlay Diagnostic (auto-runs 3s after load) ───
+setTimeout(function(){
+  var issues = [];
+  document.querySelectorAll('*').forEach(function(el){
+    var s = window.getComputedStyle(el);
+    var r = el.getBoundingClientRect();
+    if((s.position==='fixed'||s.position==='absolute') &&
+       r.width > window.innerWidth*0.4 && r.height > window.innerHeight*0.4 &&
+       s.display!=='none' && s.visibility!=='hidden' && parseFloat(s.opacity)>0.01){
+      var bg = s.backgroundColor;
+      // Skip transparent backgrounds
+      if(bg==='rgba(0, 0, 0, 0)'||bg==='transparent') return;
+      issues.push({tag:el.tagName,id:el.id,cls:el.className.toString().split(' ')[0],
+        z:s.zIndex,bg:bg.slice(0,60),w:Math.round(r.width),h:Math.round(r.height),
+        opacity:s.opacity,pe:s.pointerEvents});
+    }
+  });
+  if(issues.length>0){
+    console.warn('⚠️ OVERLAY DIAGNOSTIC — Elements covering screen:');
+    issues.forEach(function(i){console.warn('  🔴',i.tag+'#'+i.id,'{z:'+i.z+', bg:'+i.bg+', '+i.w+'x'+i.h+', opacity:'+i.opacity+'}')});
+  }
+  // Also check canvas globalAlpha
+  var c=document.querySelector('canvas');
+  if(c){var cx=c.getContext('2d');if(cx)console.log('🎨 Canvas globalAlpha:',cx.globalAlpha,'compositeOp:',cx.globalCompositeOperation)}
+  // Check visual-polish fade state
+  if(window.VisualPolish&&window.VisualPolish.fade){
+    var f=window.VisualPolish.fade;
+    if(f.alpha>0.01)console.warn('⚠️ VisualPolish fade ACTIVE: alpha='+f.alpha+' dir='+f.dir);
+  }
+},3000);
+</script>
 <script src="npc-life.js"></script>
 <script src="npc-simulation.js"></script>
 </body>

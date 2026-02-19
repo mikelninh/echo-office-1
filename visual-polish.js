@@ -595,16 +595,26 @@
 
   // ─── Floor transition fade ────────────────────────────────────────────────────
 
-  const fade = { alpha: 0, dir: 0, cb: null };
+  const fade = { alpha: 0, dir: 0, cb: null, startTime: 0 };
 
   function startFloorFade(onMidpoint) {
     fade.alpha = 0;
     fade.dir = 1;       // fading to black
     fade.cb = onMidpoint;
+    fade.startTime = performance.now();
   }
 
   function stepFade(dt) {
     if (fade.dir === 0) return;
+
+    // Safety: force-clear fade if stuck for more than 2 seconds
+    if (performance.now() - fade.startTime > 2000) {
+      fade.alpha = 0;
+      fade.dir = 0;
+      fade.cb = null;
+      return;
+    }
+
     const speed = dt * (1 / 0.15); // 0.15s half
     if (fade.dir === 1) {
       fade.alpha = Math.min(1, fade.alpha + speed);

@@ -755,11 +755,15 @@
     ensureFadeEl();
     _fadeEl.style.background = 'rgba(0,0,0,0.9)';
     setTimeout(function() {
-      fn();
+      try { fn(); } catch(e) { console.error('[RingEngine] crossfade fn error:', e); }
       setTimeout(function() {
         _fadeEl.style.background = 'rgba(0,0,0,0)';
       }, 100);
     }, 300);
+    // Safety: force-clear fade after 2 seconds no matter what
+    setTimeout(function() {
+      if (_fadeEl) _fadeEl.style.background = 'rgba(0,0,0,0)';
+    }, 2000);
   }
 
   // ─── Override Elevator Button ──────────────────────────────────────────────
