@@ -5,902 +5,1491 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Echo's Vault — The Claw</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a14;color:#e0e0f0;font-family:'JetBrains Mono',monospace;overflow:hidden;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:none}
-canvas{display:block;image-rendering:auto;border-radius:8px;max-width:100vw;max-height:90vh}
-.hud{position:fixed;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:10}
-.hud-left,.hud-right{pointer-events:auto}
-.hud-title{font-family:'Press Start 2P',cursive;font-size:11px;background:linear-gradient(135deg,#ff6ec7,#b388ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hud-sub{font-size:10px;color:#6a6a8a;margin-top:2px}
-.hud-stat{font-size:11px;text-align:right;margin-bottom:4px}
-.hud-stat span{color:#ffd700;font-weight:700}
-.pity-bar{width:120px;height:8px;background:#1a1a2e;border-radius:4px;overflow:hidden;margin-top:4px}
-.pity-fill{height:100%;background:linear-gradient(90deg,#ff6ec7,#ffd700);border-radius:4px;transition:width 0.3s}
-.controls-hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:10px;color:#6a6a8a;text-align:center;pointer-events:none;z-index:10}
-.back-link{position:fixed;bottom:12px;right:12px;font-size:10px;color:#ff6ec7;text-decoration:none;z-index:10}
-.grab-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Press Start 2P',cursive;font-size:20px;color:#ffd700;text-shadow:0 0 20px #ffd700,0 0 40px #ff6ec7;pointer-events:none;z-index:20;opacity:0;transition:opacity 0.3s}
-.grab-msg.show{opacity:1}
-.mega-flash{position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle,rgba(255,215,0,0.3),transparent);pointer-events:none;z-index:15;opacity:0;transition:opacity 0.5s}
-.mega-flash.show{opacity:1}
+body{background:#050510;overflow:hidden;height:100vh;display:flex;align-items:center;justify-content:center;touch-action:none;user-select:none;font-family:sans-serif}
+canvas{display:block;cursor:none}
+#startScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(5,5,16,0.95);display:flex;align-items:center;justify-content:center;z-index:100;cursor:pointer}
+#startScreen .inner{text-align:center;color:#fff;font-family:sans-serif}
+#startScreen h1{font-size:28px;letter-spacing:6px;color:#ff6ec7;text-shadow:0 0 30px #ff6ec7,0 0 60px #ff6ec780;margin-bottom:12px}
+#startScreen p{font-size:14px;color:#8888aa;animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:0.5}50%{opacity:1}}
 </style>
 </head>
 <body>
-
-<div class="hud">
-  <div class="hud-left">
-    <div class="hud-title">THE CLAW</div>
-    <div class="hud-sub">Echo's Vault</div>
-  </div>
-  <div class="hud-right">
-    <div class="hud-stat">Plays: <span id="playCount">0</span></div>
-    <div class="hud-stat">Won: <span id="wonCount">0</span></div>
-    <div class="hud-stat">Strength: <span id="clawPower">???</span></div>
-    <div class="hud-stat" style="font-size:9px;color:#6a6a8a">Mega Claw in <span id="megaIn">50</span></div>
-    <div class="pity-bar"><div class="pity-fill" id="pityFill" style="width:0%"></div></div>
-  </div>
-</div>
-
-<div class="grab-msg" id="grabMsg"></div>
-<div class="mega-flash" id="megaFlash"></div>
-
-<canvas id="game"></canvas>
-
-<div class="controls-hint" id="controlsHint">← → / WASD Move · SPACE Drop · R Reset</div>
-<a href="dashboard.html" class="back-link">← Dashboard</a>
-
+<div id="startScreen" onclick="initGame()"><div class="inner"><h1>ECHO'S VAULT</h1><p>▶ CLICK TO START ◀</p></div></div>
+<canvas id="C"></canvas>
 <script>
-// ═══ CLAW MACHINE — POLISHED ═══
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-
-const W = 600, H = 700;
-canvas.width = W; canvas.height = H;
-
-function resizeCanvas() {
-  const scale = Math.min(window.innerWidth / W, (window.innerHeight - 60) / H, 1.5);
-  canvas.style.width = (W * scale) + 'px';
-  canvas.style.height = (H * scale) + 'px';
+const C = document.getElementById('C');
+const X = C.getContext('2d');
+let W = 700, H = 800;
+C.width = W; C.height = H;
+function resize() {
+  const s = Math.min(innerWidth / W, innerHeight / H);
+  C.style.width = (W * s) + 'px';
+  C.style.height = (H * s) + 'px';}
+resize();
+addEventListener('resize', resize);
+const TAU = Math.PI * 2;
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (v, mn, mx) => Math.max(mn, Math.min(mx, v));
+const easeOut = t => 1 - (1 - t) * (1 - t);
+const easeInOut = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+const rng = (a = 0, b = 1) => a + Math.random() * (b - a);
+const rngI = (a, b) => Math.floor(rng(a, b + 1));
+const hexToRGB = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+const noiseP=[];for(let i=0;i<512;i++)noiseP[i]=(i*131+17)&255;
+function noise2D(x, y) {
+  const xi = ~~x & 255, yi = ~~y & 255;
+  const xf = x - ~~x, yf = y - ~~y;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const aa = noiseP[noiseP[xi] + yi], ba = noiseP[noiseP[xi + 1] + yi];
+  const ab = noiseP[noiseP[xi] + yi + 1], bb = noiseP[noiseP[xi + 1] + yi + 1];
+  return lerp(lerp(aa / 255, ba / 255, u), lerp(ab / 255, bb / 255, u), v);}
+// === TOKEN SYSTEM ===
+const MAX_TOKENS = 3;
+function getTokenData() {
+  try {
+    const raw = localStorage.getItem('echovault_claw_tokens');
+    if (raw) {
+      const d = JSON.parse(raw);
+      const today = new Date().toDateString();
+      if (d.date === today) return d;
+    }
+  } catch(e) {}
+  return { tokens: MAX_TOKENS, date: new Date().toDateString() };
 }
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
+function saveTokenData(d) { localStorage.setItem('echovault_claw_tokens', JSON.stringify(d)); }
+let tokenData = getTokenData();
+saveTokenData(tokenData);
 
-// ═══ AUDIO ═══
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-let ambientStarted = false;
-let ambientGain = null;
+// === COLLECTION PERSISTENCE ===
+function loadCollection() {
+  try {
+    const raw = localStorage.getItem('echovault_collection');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return [];
+}
+function saveCollection(col) { localStorage.setItem('echovault_collection', JSON.stringify(col)); }
+let persistedCollection = loadCollection();
 
-function playSound(freq, duration, type='sine', vol=0.15) {
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.type = type; o.frequency.value = freq;
-  g.gain.value = vol;
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start(); o.stop(audioCtx.currentTime + duration);
+// === COMPANION INTEGRATION ===
+function getCompanion() {
+  try {
+    const raw = localStorage.getItem('echovault_companion');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return null;
+}
+let companionData = getCompanion();
+
+// === REAL CARD PRIZES ===
+let cardPool = []; // Loaded from seen.json
+let cardPoolReady = false;
+fetch('seen.json').then(r => r.json()).then(data => {
+  const entries = Object.values(data);
+  cardPool = entries.filter(e => e.image && e.title).map(e => ({
+    title: e.title,
+    image: e.image.replace('/s-l500.', '/s-l1600.'),
+    imageSm: e.image,
+  }));
+  cardPoolReady = cardPool.length > 0;
+}).catch(() => { cardPoolReady = false; });
+
+function getRandomCard() {
+  if (!cardPoolReady || cardPool.length === 0) return null;
+  return cardPool[Math.floor(Math.random() * cardPool.length)];
 }
 
-function startAmbientHum() {
-  if (ambientStarted) return;
-  ambientStarted = true;
-  ambientGain = audioCtx.createGain();
-  ambientGain.gain.value = 0.02;
-  ambientGain.connect(audioCtx.destination);
-  const o1 = audioCtx.createOscillator();
-  o1.type = 'sine'; o1.frequency.value = 55;
-  o1.connect(ambientGain); o1.start();
-  const o2 = audioCtx.createOscillator();
-  o2.type = 'sine'; o2.frequency.value = 82.5;
-  const g2 = audioCtx.createGain(); g2.gain.value = 0.5;
-  o2.connect(g2); g2.connect(ambientGain); o2.start();
+// === TOKEN DEPLETION OVERLAY ===
+let showTokenDepletedOverlay = false;
+
+let AC = null;
+let masterGain, musicGain, sfxGain;
+let musicPlaying = false;
+let musicTempo = 1.0;
+function initAudio() {
+  if (AC) return;
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = AC.createGain(); masterGain.gain.value = 0.7; masterGain.connect(AC.destination);
+  sfxGain = AC.createGain(); sfxGain.gain.value = 0.6; sfxGain.connect(masterGain);
+  musicGain = AC.createGain(); musicGain.gain.value = 0.12; musicGain.connect(masterGain);}
+function createNoise(dur, freq = 4000, q = 1, vol = 0.1, type = 'lowpass') {
+  const len = AC.sampleRate * dur;
+  const buf = AC.createBuffer(1, len, AC.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  const src = AC.createBufferSource(); src.buffer = buf;
+  const filt = AC.createBiquadFilter(); filt.type = type; filt.frequency.value = freq; filt.Q.value = q;
+  const g = AC.createGain(); g.gain.value = vol;
+  src.connect(filt); filt.connect(g); g.connect(sfxGain);
+  return {src, gain: g, filter: filt, start: (t = 0) => src.start(AC.currentTime + t) };}
+function tone(freq, dur, type = 'sine', vol = 0.15, delay = 0) {
+  const t = AC.currentTime + delay;
+  const o = AC.createOscillator(); o.type = type; o.frequency.value = freq;
+  const g = AC.createGain(); g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g); g.connect(sfxGain); o.start(t); o.stop(t + dur + 0.05);}
+function sndAmbient() {
+  const o1 = AC.createOscillator(); o1.type = 'sine'; o1.frequency.value = 50;
+  const g1 = AC.createGain(); g1.gain.value = 0.03;
+  o1.connect(g1); g1.connect(masterGain); o1.start();
+  const o2 = AC.createOscillator(); o2.type = 'triangle'; o2.frequency.value = 165;
+  const g2 = AC.createGain(); g2.gain.value = 0.008;
+  const f2 = AC.createBiquadFilter(); f2.type = 'lowpass'; f2.frequency.value = 200;
+  o2.connect(f2); f2.connect(g2); g2.connect(masterGain); o2.start();}
+function sndServo(dir) {
+  if (!AC) return;
+  const n = createNoise(0.06, 1200 + dir * 200, 2, 0.04, 'bandpass');
+  n.start();}
+function sndDrop() {
+  if (!AC) return;
+  tone(80, 0.15, 'square', 0.15);
+  tone(55, 0.2, 'triangle', 0.12, 0.02);
+  const n = createNoise(0.3, 800, 1, 0.08);
+  n.gain.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.3);
+  n.start();}
+function sndDescend() {
+  if (!AC) return;
+  const n = createNoise(0.08, 1500, 3, 0.05, 'bandpass');
+  n.start();}
+function sndGrip() {
+  if (!AC) return;
+  tone(600, 0.08, 'square', 0.2);
+  tone(900, 0.05, 'square', 0.15, 0.03);
+  const n = createNoise(0.1, 3000, 1, 0.12);
+  n.start();}
+function sndLift(progress) {
+  if (!AC) return;
+  const f = 200 + progress * 600;
+  tone(f, 0.1, 'sawtooth', 0.05);
+  if (Math.random() < 0.3) {// Creak
+  const n = createNoise(0.08, f * 2, 5, 0.03, 'bandpass');
+  n.start();}
 }
-
-function sndMove() { playSound(200, 0.05, 'square', 0.04); }
-function sndDrop() { playSound(150, 0.3, 'sawtooth', 0.1); }
-function sndGrip() { playSound(400, 0.15, 'square', 0.12); }
-function sndThud() { playSound(80, 0.15, 'triangle', 0.15); }
-
-function sndLiftNote(progress) {
-  const freq = 300 + progress * 500;
-  playSound(freq, 0.12, 'sine', 0.06);
-}
-
-function sndSlipSad() {
-  [400,350,280,200].forEach((f,i) => setTimeout(() => playSound(f, 0.2, 'sawtooth', 0.08), i*80));
-}
-
-function sndWinCommon() { playSound(880, 0.2, 'sine', 0.15); }
+function sndSlip() {
+  if (!AC) return;
+  const o = AC.createOscillator(); o.type = 'sawtooth'; o.frequency.value = 400;
+  o.frequency.exponentialRampToValueAtTime(80, AC.currentTime + 0.4);
+  const g = AC.createGain(); g.gain.value = 0.12;
+  g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.5);
+  const f = AC.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 600;
+  o.connect(f); f.connect(g); g.connect(sfxGain); o.start(); o.stop(AC.currentTime + 0.6);
+  setTimeout(() => {tone(50, 0.15, 'triangle', 0.2);}, 300);}
+function sndWinCommon() {tone(880, 0.15, 'sine', 0.2); tone(1100, 0.15, 'sine', 0.2, 0.12);}
 function sndWinRare() {
-  [523,659,784].forEach((f,i) => setTimeout(() => playSound(f, 0.2, 'sine', 0.15), i*100));
-}
+  [523, 659, 784].forEach((f, i) => {tone(f, 0.2, 'sine', 0.18, i * 0.1); tone(f * 1.5, 0.15, 'triangle', 0.06, i * 0.1);});}
 function sndWinSuper() {
-  [523,659,784,1047,784].forEach((f,i) => setTimeout(() => playSound(f, 0.25, 'sine', 0.18), i*100));
-}
+  [523, 659, 784, 1047, 784].forEach((f, i) => {tone(f, 0.25, 'sine', 0.2, i * 0.08); tone(f * 2, 0.15, 'triangle', 0.06, i * 0.08);});
+  setTimeout(() => {const n = createNoise(0.4, 6000, 1, 0.04); n.start();}, 400);}
 function sndWinUltra() {
-  [262,330,392,523,659,784,1047].forEach((f,i) => setTimeout(() => {
-    playSound(f, 0.3, 'sine', 0.2);
-    playSound(f*1.5, 0.2, 'triangle', 0.08);
-  }, i*90));
-}
+  [262, 330, 392].forEach(f => tone(f, 0.5, 'sine', 0.12));
+  [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => {
+  tone(f, 0.3, 'sine', 0.15, 0.15 + i * 0.08);
+  tone(f * 0.5, 0.2, 'triangle', 0.06, 0.15 + i * 0.08);});
+  setTimeout(() => {const n = createNoise(0.6, 8000, 0.5, 0.06); n.start();}, 600);
+  setTimeout(() => {const n = createNoise(1.0, 2000, 0.3, 0.08); n.gain.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 1.5); n.start();}, 700);}
 function sndWinLegendary() {
-  const notes = [262,330,392,523,659,784,1047,1319,1568,1047,1319,1568];
-  notes.forEach((f,i) => setTimeout(() => {
-    playSound(f, 0.35, 'sine', 0.22);
-    playSound(f*0.5, 0.3, 'triangle', 0.1);
-    if (i > 6) playSound(f*2, 0.15, 'square', 0.05);
-  }, i*110));
-  setTimeout(() => { playSound(2093, 0.8, 'sine', 0.25); playSound(1047, 0.8, 'triangle', 0.15); }, 1400);
-}
+  const notes = [262, 330, 392, 523, 659, 784, 1047, 1319];
+  notes.forEach((f, i) => {
+  tone(f, 0.35, 'sine', 0.18, i * 0.09);
+  tone(f * 1.5, 0.2, 'triangle', 0.06, i * 0.09);});
+  setTimeout(() => {
+  [523, 659, 784, 1047].forEach(f => {tone(f, 0.8, 'sine', 0.2); tone(f * 2, 0.4, 'triangle', 0.08);});
+  const n = createNoise(0.5, 10000, 0.3, 0.1); n.start();}, 750);
+  setTimeout(() => {
+  [2093, 1568, 1319, 1047, 784].forEach((f, i) => tone(f, 0.2, 'sine', 0.1, i * 0.1));}, 1500);
+  setTimeout(() => {
+  const n = createNoise(1.5, 2500, 0.2, 0.12);
+  n.gain.gain.setValueAtTime(0.12, AC.currentTime);
+  n.gain.gain.linearRampToValueAtTime(0.15, AC.currentTime + 0.3);
+  n.gain.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 2.0);
+  n.start();}, 1300);
+  setTimeout(() => {
+  tone(2093, 1.0, 'sine', 0.15);
+  tone(1568, 1.0, 'triangle', 0.08);
+  const n2 = createNoise(1.0, 12000, 0.5, 0.05); n2.start();}, 2200);}
 function sndMega() {
-  [262,330,392,523,659,784,1047,1319].forEach((f,i) => setTimeout(() => playSound(f, 0.3, 'sine', 0.2), i*80));
-}
-function sndMiss() { playSound(200, 0.4, 'sawtooth', 0.08); }
-
+  if (!AC) return;
+  const o = AC.createOscillator(); o.type = 'sine'; o.frequency.value = 40;
+  const g = AC.createGain(); g.gain.value = 0.35;
+  g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 0.8);
+  o.connect(g); g.connect(sfxGain); o.start(); o.stop(AC.currentTime + 1);
+  for (let i = 0; i < 6; i++) {
+  setTimeout(() => {
+    const n = createNoise(0.05, 4000 + Math.random() * 4000, 2, 0.08 + Math.random() * 0.05);
+    n.start();}, i * 80);}
+  const sw = AC.createOscillator(); sw.type = 'sawtooth'; sw.frequency.value = 100;
+  sw.frequency.exponentialRampToValueAtTime(2000, AC.currentTime + 0.8);
+  const sg = AC.createGain(); sg.gain.value = 0.12;
+  sg.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + 1.0);
+  const sf = AC.createBiquadFilter(); sf.type = 'lowpass'; sf.frequency.value = 3000;
+  sw.connect(sf); sf.connect(sg); sg.connect(sfxGain); sw.start(); sw.stop(AC.currentTime + 1.1);}
+let musicOscs = [];
+function startMusic() {
+  if (musicPlaying || !AC) return;
+  musicPlaying = true;
+  const chords = [
+  [261.6, 329.6, 392.0], // C
+  [220.0, 277.2, 329.6], // Am
+  [246.9, 311.1, 370.0], // B
+  [196.0, 246.9, 293.7], // G
+  ];
+  let chordIdx = 0;
+  function playChord() {
+  if (!musicPlaying) return;
+  const chord = chords[chordIdx % chords.length];
+  chord.forEach(f => {
+    const o = AC.createOscillator(); o.type = 'triangle';
+    o.frequency.value = f / 2;
+    const g = AC.createGain(); g.gain.value = 0.0;
+    g.gain.linearRampToValueAtTime(0.04, AC.currentTime + 0.3);
+    g.gain.linearRampToValueAtTime(0.0, AC.currentTime + 2.8 / musicTempo);
+    const fl = AC.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = 400;
+    o.connect(fl); fl.connect(g); g.connect(musicGain);
+    o.start(); o.stop(AC.currentTime + 3.0 / musicTempo);});
+  chordIdx++;
+  setTimeout(playChord, 3000 / musicTempo);}
+  playChord();}
 function playWinSound(rarity) {
+  if (!AC) return;
   if (rarity === 'legendary') sndWinLegendary();
   else if (rarity === 'ultra') sndWinUltra();
   else if (rarity === 'super') sndWinSuper();
   else if (rarity === 'rare') sndWinRare();
-  else sndWinCommon();
+  else sndWinCommon();}
+const M = {
+  x: 75, y: 110, w: 550, h: 560,
+  floorY: 610,
+  railY: 148,
+  chuteX: 460, chuteW: 70,
+  innerX: 85, innerW: 530,
+};
+let feltCanvas = null;
+function generateFelt() {
+  feltCanvas = document.createElement('canvas');
+  feltCanvas.width = M.w; feltCanvas.height = 60;
+  const fc = feltCanvas.getContext('2d');
+  for (let py = 0; py < 60; py++) {
+  for (let px = 0; px < M.w; px++) {
+    const n = noise2D(px * 0.08, py * 0.08);
+    const n2 = noise2D(px * 0.2, py * 0.2) * 0.3;
+    const v = 18 + (n + n2) * 20;
+    fc.fillStyle = `rgb(${v * 0.6|0},${v * 0.8|0},${v|0})`;
+    fc.fillRect(px, py, 1, 1);}
+  }
 }
-
-// ═══ GAME STATE ═══
-const MACHINE = { x: 50, y: 80, w: 500, h: 540, floorY: 560, chuteX: 480, chuteW: 60 };
-const RAIL_Y = 115;
-const DROP_SPEED = 3;
-const LIFT_SPEED = 2;
-const GRAVITY = 0.15;
-
-let state = 'idle';
-let clawX = W / 2, clawY = RAIL_Y;
-let clawVelX = 0; // for smooth acceleration
-const CLAW_ACCEL = 0.5, CLAW_MAX_SPEED = 5, CLAW_FRICTION = 0.85;
-let clawOpen = 1;
-let clawStrength = 0;
-let isMega = false;
-let heldPrize = null, heldOffsetX = 0, heldOffsetY = 0;
-let slipTimer = 0;
-let plays = 0, wins = 0;
-let moveDir = 0;
-let msgTimer = 0, msgText = '';
-let shakeTimer = 0, shakeIntensity = 0;
-let particles = [];
-let frameTime = Date.now();
-let slowMoTimer = 0; // frames of slow-mo remaining
-let slowMoFactor = 1;
-let liftNoteTimer = 0;
-let screenFlashColor = null, screenFlashAlpha = 0;
-
-// Pendulum swing for claw
+const chromeSparkles = [];
+for (let i = 0; i < 30; i++) {
+  chromeSparkles.push({
+  side: Math.random() < 0.5 ? 'left' : (Math.random() < 0.5 ? 'right' : 'top'),
+  pos: Math.random(),
+  phase: Math.random() * TAU,
+  speed: 0.5 + Math.random() * 2,
+  });}
+let state = 'idle'; // idle, anticipation, dropping, gripping, lifting, returning, returning_empty, win_reveal
+let clawX = W / 2, clawY = M.railY;
+let clawVelX = 0, clawTargetOpen = 1, clawOpen = 1;
 let clawSwingAngle = 0, clawSwingVel = 0;
-const SWING_DAMPING = 0.92, SWING_STRENGTH = 0.003;
-
-// Collection shelf — last 5 won cards
+let clawStrength = 0, isMega = false, megaScale = 1;
+let heldPrize = null, heldOffX = 0, heldOffY = 0;
+let slipTimer = 0;
+let plays = 0, wins = 0, streak = 0;
+let moveDir = 0, moveHeld = false;
+let shakeX = 0, shakeY = 0, shakeTimer = 0, shakeInt = 0;
+let slowMo = 1, slowMoTimer = 0;
+let screenFlash = null, screenFlashA = 0;
+let liftNoteT = 0;
+let descendSndT = 0;
+let time = 0, dt = 1/60, realTime = 0;
+let particles = [];
+let dustMotes = [];
 let collection = [];
-
-// Near-miss text
-let nearMissText = '', nearMissTimer = 0, nearMissColor = '#ff5252';
-
-// Win animation: card flying to shelf
 let flyingCards = [];
-
-// ═══ PRIZES ═══
-const RARITY_COLORS = {
-  common:    { bg:'#1e2d4d', border:'#3a5a8a', label:'#7aabf0', glow:null,      particle:'#7aabf0' },
-  rare:      { bg:'#1e3d1e', border:'#3a8a3a', label:'#4ade80', glow:null,      particle:'#4ade80' },
-  super:     { bg:'#3a2a5a', border:'#8a3a9a', label:'#c084fc', glow:'#c084fc', particle:'#c084fc' },
-  ultra:     { bg:'#4a3a0a', border:'#daa520', label:'#ffd700', glow:'#ffd700', particle:'#ffd700' },
-  legendary: { bg:'#4a0a0a', border:'#ff4444', label:'#ff6ec7', glow:'#ff6ec7', particle:'#ff6ec7' },
+let revealCard = null; // card being revealed
+const MEGA_EVERY = 50;
+let hudPop = {plays: 0, wins: 0, streak: 0 };
+let ledPhase = 0;
+const RARITY = {
+  common:  {bg: '#162040', border: '#2a5090', label: '#6a9ae8', glow: null, particle: '#6a9ae8', gemColor: '#4488cc', weight: 1 },
+  rare:    {bg: '#103010', border: '#208040', label: '#40c070', glow: '#40c070', particle: '#40c070', gemColor: '#22aa55', weight: 1.5 },
+  super:   {bg: '#2a1848', border: '#7030a0', label: '#b060e0', glow: '#b060e0', particle: '#b060e0', gemColor: '#9944dd', weight: 2 },
+  ultra:   {bg: '#3a2800', border: '#c09020', label: '#ffd740', glow: '#ffd740', particle: '#ffd740', gemColor: '#ffaa00', weight: 3 },
+  legendary: {bg: '#3a0808', border: '#ff2244', label: '#ff6ec7', glow: '#ff6ec7', particle: '#ff6ec7', gemColor: '#ff2266', weight: 5 },
 };
-
 const CARD_NAMES = {
-  yugioh:  ['Blue-Eyes White Dragon','Dark Magician','Exodia Head','Red-Eyes B. Dragon','Pot of Greed'],
-  pokemon: ['Charizard 1st Ed','Pikachu Illustrator','Shadowless Zard','Gold Star Rayquaza','Shining Mewtwo'],
-  dandadan: ['Okarun SR','Momo Ayase','Turbo Granny','Seiko SP','Jiji & Okarun'],
-  onepiece: ['Luffy Manga Alt','Shanks SP','Zoro Alt Art','Nami Romance','Gear 5 Luffy'],
-  lorcana: ['Elsa D23 Promo','Mickey Sorcerer','Stitch Holo','Belle Enchanted','Maleficent SR'],
+  yugioh:  ['Blue-Eyes','Dark Magician','Exodia','Red-Eyes','Pot of Greed'],
+  pokemon: ['Charizard','Pikachu Illust','Shadowless','Rayquaza GS','Shining Mew2'],
+  dandadan: ['Okarun SR','Momo Ayase','Turbo Granny','Seiko SP','Jiji'],
+  onepiece: ['Luffy Alt','Shanks SP','Zoro Alt','Nami Romance','Gear 5'],
+  lorcana: ['Elsa D23','Mickey Sorc','Stitch Holo','Belle Enchnt','Maleficent'],
 };
-const GAME_EMOJI = { yugioh:'👑', pokemon:'⚡', dandadan:'👁', onepiece:'🏴', lorcana:'✨' };
-
+const GAME_ICONS = {yugioh: '👑', pokemon: '⚡', dandadan: '👁', onepiece: '🏴', lorcana: '✨' };
 let prizes = [];
-
 function makePrize(x, y) {
-  const rng = Math.random();
-  let rarity, weight;
-  if (rng < 0.35) { rarity='common'; weight=1; }
-  else if (rng < 0.60) { rarity='rare'; weight=1.5; }
-  else if (rng < 0.80) { rarity='super'; weight=2; }
-  else if (rng < 0.95) { rarity='ultra'; weight=3; }
-  else { rarity='legendary'; weight=5; }
+  const r = Math.random();
+  let rarity;
+  if (r < 0.35) rarity = 'common';
+  else if (r < 0.60) rarity = 'rare';
+  else if (r < 0.80) rarity = 'super';
+  else if (r < 0.95) rarity = 'ultra';
+  else rarity = 'legendary';
   const gk = Object.keys(CARD_NAMES);
-  const game = gk[Math.floor(Math.random()*gk.length)];
-  const name = CARD_NAMES[game][Math.floor(Math.random()*CARD_NAMES[game].length)];
+  const game = gk[rngI(0, gk.length - 1)];
+  const name = CARD_NAMES[game][rngI(0, CARD_NAMES[game].length - 1)];
+  // Attach real card data if available
+  const realCardData = getRandomCard();
   return {
-    x, y, w: 50+Math.random()*15, h: 65+Math.random()*10,
-    vx: (Math.random()-0.5)*1.5, vy: 0,
-    rotation: (Math.random()-0.5)*0.4,
-    rarity, weight, game, name, grounded: false,
-  };
-}
-
+  x, y, w: 48, h: 64,
+  vx: rng(-1, 1), vy: 0,
+  rot: rng(-0.3, 0.3), rotV: 0,
+  rarity, game, name,
+  icon: GAME_ICONS[game],
+  grounded: false,
+  glowPhase: Math.random() * TAU,
+  magnetGlow: 0,
+  realCard: realCardData,
+  };}
 function spawnPrizes() {
   prizes = [];
-  const count = 8 + Math.floor(Math.random()*5);
+  const count = 10 + rngI(0, 4);
   for (let i = 0; i < count; i++) {
-    const px = MACHINE.x + 40 + Math.random()*(MACHINE.w - 140);
-    // Start from the top — stagger vertically so they fall and pile up
-    const py = MACHINE.y + 20 + Math.random()*60 - i*15;
-    const p = makePrize(px, py);
-    p.vy = 1 + Math.random()*2; // falling velocity
-    prizes.push(p);
-  }
+  const px = M.x + 30 + Math.random() * (M.w - 120);
+  const py = M.y + 10 - i * 20;
+  const p = makePrize(px, py);
+  p.vy = 1 + Math.random() * 2;
+  prizes.push(p);}
 }
-spawnPrizes();
-
-// ═══ PHYSICS ═══
+function initDust() {
+  dustMotes = [];
+  for (let i = 0; i < 40; i++) {
+  dustMotes.push({
+    x: M.x + rng(10, M.w - 10),
+    y: M.y + rng(40, M.h - 80),
+    vx: rng(-0.15, 0.15),
+    vy: rng(-0.2, -0.05),
+    size: rng(0.5, 1.5),
+    alpha: rng(0.1, 0.4),
+    phase: rng(0, TAU),
+  });}
+}
 function updatePhysics() {
-  const grav = GRAVITY * slowMoFactor;
+  const g = 0.18 * slowMo;
   for (const p of prizes) {
-    if (p === heldPrize) continue;
-    p.vy += grav;
-    p.x += p.vx * slowMoFactor;
-    p.y += p.vy * slowMoFactor;
-    if (p.y + p.h > MACHINE.floorY) {
-      p.y = MACHINE.floorY - p.h;
-      if (Math.abs(p.vy) > 1.5) sndThud();
-      p.vy *= -0.3;
-      if (Math.abs(p.vy) < 0.5) { p.vy = 0; p.grounded = true; }
-      p.vx *= 0.8;
+  if (p === heldPrize) continue;
+  p.vy += g;
+  p.x += p.vx * slowMo;
+  p.y += p.vy * slowMo;
+  p.rot += p.rotV * slowMo;
+  p.rotV *= 0.97;
+  if (p.y + p.h > M.floorY) {
+    p.y = M.floorY - p.h;
+    if (Math.abs(p.vy) > 1.5 && AC) tone(50 + Math.random() * 40, 0.1, 'triangle', 0.06);
+    p.vy *= -0.25;
+    if (Math.abs(p.vy) < 0.5) {p.vy = 0; p.grounded = true;}
+    p.vx *= 0.75;
+    p.rotV *= 0.5;}
+  if (p.x < M.x + 8) {p.x = M.x + 8; p.vx = Math.abs(p.vx) * 0.4;}
+  if (p.x + p.w > M.x + M.w - 8) {p.x = M.x + M.w - 8 - p.w; p.vx = -Math.abs(p.vx) * 0.4;}
+  if (p.y < M.y + 30) {p.y = M.y + 30; p.vy = Math.abs(p.vy) * 0.3;}
+  for (const q of prizes) {
+    if (q === p || q === heldPrize) continue;
+    const ox = Math.min(p.x + p.w, q.x + q.w) - Math.max(p.x, q.x);
+    const oy = Math.min(p.y + p.h, q.y + q.h) - Math.max(p.y, q.y);
+    if (ox > 0 && oy > 0) {
+    if (oy < ox) {
+      const push = oy * 0.4;
+      if (p.y < q.y) {p.y -= push; q.y += push; p.vy -= 0.3; q.vy += 0.3;}
+      else {p.y += push; q.y -= push; p.vy += 0.3; q.vy -= 0.3;}
+    } else {
+      const push = ox * 0.3;
+      if (p.x < q.x) {p.vx -= push * 0.08; q.vx += push * 0.08;}
+      else {p.vx += push * 0.08; q.vx -= push * 0.08;}
     }
-    if (p.x < MACHINE.x + 10) { p.x = MACHINE.x + 10; p.vx *= -0.5; }
-    if (p.x + p.w > MACHINE.x + MACHINE.w - 10) { p.x = MACHINE.x + MACHINE.w - 10 - p.w; p.vx *= -0.5; }
-    // prize-to-prize
-    for (const q of prizes) {
-      if (q === p || q === heldPrize) continue;
-      const ox = Math.min(p.x+p.w,q.x+q.w)-Math.max(p.x,q.x);
-      const oy = Math.min(p.y+p.h,q.y+q.h)-Math.max(p.y,q.y);
-      if (ox > 0 && oy > 0) {
-        const push = ox*0.3;
-        if (p.x < q.x) { p.vx -= push*0.1; q.vx += push*0.1; }
-        else { p.vx += push*0.1; q.vx -= push*0.1; }
-        if (oy < ox) {
-          if (p.y < q.y) { p.y -= oy*0.5; q.y += oy*0.5; }
-          else { p.y += oy*0.5; q.y -= oy*0.5; }
-        }
-      }
-    }
-    p.vx *= 0.98;
-    p.rotation += p.vx * 0.01;
+    p.rotV += (Math.random() - 0.5) * 0.02;}
   }
+  p.vx *= 0.985;}
 }
-
-// ═══ CLAW LOGIC ═══
+function spawnParticle(x, y, vx, vy, color, size, life, grav = 0.08) {
+  particles.push({x, y, vx, vy, color, size, life, maxLife: life, grav });}
+function spawnBurst(x, y, color, count = 30, speed = 4) {
+  for (let i = 0; i < count; i++) {
+  const a = (i / count) * TAU;
+  const s = rng(1, speed);
+  spawnParticle(x, y, Math.cos(a) * s, Math.sin(a) * s - 1, color, rng(1.5, 4), rng(30, 60));}
+}
+function spawnConfetti(x, y, count = 50) {
+  const colors = ['#ff6ec7', '#ffd700', '#00e676', '#448aff', '#ff5252', '#b388ff', '#18ffff'];
+  for (let i = 0; i < count; i++) {
+  const c = colors[rngI(0, colors.length - 1)];
+  spawnParticle(x + rng(-40, 40), y + rng(-20, 20), rng(-5, 5), rng(-8, -2), c, rng(2, 5), rng(50, 90), 0.06);}
+}
+function spawnStars(x, y, count = 15) {
+  for (let i = 0; i < count; i++) {
+  spawnParticle(x + rng(-30, 30), y, rng(-1, 1), rng(-3, -1), '#ffd700', rng(1, 3), rng(40, 80), -0.02);}
+}
+function spawnElectric(x, y, count = 20) {
+  for (let i = 0; i < count; i++) {
+  spawnParticle(x + rng(-15, 15), y + rng(-15, 15), rng(-3, 3), rng(-3, 3), '#ffd740', rng(1, 2.5), rng(8, 18), 0);}
+}
+function spawnRedSparks(x, y) {
+  for (let i = 0; i < 20; i++) {
+  spawnParticle(x + rng(-20, 20), y, rng(-2, 2), rng(1, 4), '#ff3333', rng(1, 3), rng(20, 40), 0.1);}
+}
+function doShake(intensity, frames) {shakeTimer = frames; shakeInt = intensity;}
+function doFlash(color, alpha) {screenFlash = color; screenFlashA = alpha;}
+function updateMagnetism() {
+  const cx = clawX, cy = clawY + 40 * megaScale;
+  for (const p of prizes) {
+  if (p === heldPrize) continue;
+  const dx = (p.x + p.w / 2) - cx;
+  const dy = (p.y + p.h / 2) - cy;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  p.magnetGlow = dist < 80 ? (1 - dist / 80) * 0.6 : 0;}
+}
+const ACCEL = 0.4, MAX_SPD = 5, FRICTION = 0.88;
+const DROP_SPD = 4, LIFT_SPD = 1.2;
+const SWING_DAMP = 0.94, SWING_STR = 0.004;
 function rollStrength() {
   if (isMega) return 1.0;
-  const pityBonus = Math.min(plays % 50, 40) * 0.012;
-  return Math.min(0.25 + Math.random()*0.5 + pityBonus, 0.95);
-}
-
-function updateClawPowerDisplay() {
-  const el = document.getElementById('clawPower');
-  if (isMega) { el.textContent='★ MEGA ★'; el.style.color='#ffd700'; }
-  else if (clawStrength > 0.7) { el.textContent='■■■ Strong'; el.style.color='#00e676'; }
-  else if (clawStrength > 0.4) { el.textContent='■■□ Medium'; el.style.color='#ffab40'; }
-  else { el.textContent='■□□ Weak'; el.style.color='#ff5252'; }
-}
-
-function startDrop() {
-  if (state !== 'idle') return;
-  audioCtx.resume(); startAmbientHum();
-  plays++;
-  const megaAt = 50;
-  isMega = (plays % megaAt === 0);
-  if (isMega) {
-    sndMega();
-    document.getElementById('megaFlash').classList.add('show');
-    setTimeout(() => document.getElementById('megaFlash').classList.remove('show'), 1500);
-    showMsg('★ MEGA CLAW ★', 2000);
-    shakeTimer = 30; shakeIntensity = 4;
-  }
-  clawStrength = rollStrength();
-  updateClawPowerDisplay();
-  document.getElementById('playCount').textContent = plays;
-  const pityPct = ((plays % megaAt)/megaAt)*100;
-  document.getElementById('pityFill').style.width = pityPct+'%';
-  document.getElementById('megaIn').textContent = megaAt - (plays % megaAt);
-  state = 'dropping'; clawOpen = 1;
-  sndDrop();
-}
-
-function findPrizeUnderClaw() {
-  const cx = clawX, cy = clawY + 40;
-  let best = null, bestDist = 999;
+  const pity = Math.min(plays % MEGA_EVERY, 40) * 0.012;
+  return clamp(0.25 + Math.random() * 0.5 + pity, 0.15, 0.95);}
+function findPrize() {
+  const cx = clawX, cy = clawY + 40 * megaScale;
+  let best = null, bestD = 999;
   for (const p of prizes) {
-    if (cx > p.x-5 && cx < p.x+p.w+5 && cy > p.y-10 && cy < p.y+p.h+10) {
-      const d = Math.abs(cx-(p.x+p.w/2));
-      if (d < bestDist) { bestDist=d; best=p; }
-    }
+  if (cx > p.x - 8 && cx < p.x + p.w + 8 && cy > p.y - 12 && cy < p.y + p.h + 12) {
+    const d = Math.abs(cx - (p.x + p.w / 2));
+    if (d < bestD) {bestD = d; best = p;}
   }
-  return best;
-}
-
-function showMsg(text, dur=1500) {
-  msgText=text; msgTimer=dur;
-  const el = document.getElementById('grabMsg');
-  el.textContent=text; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), dur);
-}
-
-function spawnParticles(x, y, color, count=15) {
-  for (let i = 0; i < count; i++) {
-    particles.push({
-      x, y, vx:(Math.random()-0.5)*6, vy:(Math.random()-0.5)*6-2,
-      life:40+Math.random()*20, maxLife:60, size:2+Math.random()*3, color,
-    });
   }
-}
-
-function spawnBurstParticles(x, y, color, count=40) {
-  for (let i = 0; i < count; i++) {
-    const ang = (i/count)*Math.PI*2;
-    const spd = 2+Math.random()*5;
-    particles.push({
-      x, y, vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd-1,
-      life:50+Math.random()*30, maxLife:80, size:2+Math.random()*4, color,
-    });
-  }
-}
-
-function triggerNearMiss() {
-  slowMoTimer = 30; // ~0.5 seconds of slow-mo
-  nearMissText = 'ALMOST!'; nearMissTimer = 90; nearMissColor = '#ff5252';
-  shakeTimer = 20; shakeIntensity = 6;
-  // Red particles shower
-  for (let i = 0; i < 25; i++) {
-    particles.push({
-      x: MACHINE.x + Math.random()*MACHINE.w, y: MACHINE.y + 40,
-      vx:(Math.random()-0.5)*3, vy:1+Math.random()*3,
-      life:40+Math.random()*20, maxLife:60, size:2+Math.random()*3, color:'#ff3333',
-    });
-  }
-  sndSlipSad();
-}
-
+  return best;}
 function triggerWin(prize) {
   wins++;
-  document.getElementById('wonCount').textContent = wins;
-  const rc = RARITY_COLORS[prize.rarity];
-  const msgs = {
-    legendary:'★ LEGENDARY! ★', ultra:'✦ ULTRA RARE! ✦',
-    super:'◆ SUPER RARE!', rare:'● RARE!', common:'Got it!',
-  };
-  showMsg(msgs[prize.rarity], 2500);
-
-  // Big burst
-  const burstCount = prize.rarity==='legendary'?60 : prize.rarity==='ultra'?45 : prize.rarity==='super'?30 : 20;
-  spawnBurstParticles(clawX, clawY+60, rc.particle, burstCount);
-
-  // Screen flash
-  screenFlashColor = rc.particle; screenFlashAlpha = prize.rarity==='legendary'?0.5 : prize.rarity==='ultra'?0.35 : 0.2;
-  shakeTimer = prize.rarity==='legendary'?25 : 12; shakeIntensity = prize.rarity==='legendary'?6:3;
-
+  streak++;
+  hudPop.wins = 12;
+  if (streak > 1) hudPop.streak = 15;
+  const rc = RARITY[prize.rarity];
+  const cx = clawX, cy = clawY + 50;
+  const isLeg = prize.rarity === 'legendary';
+  const isUlt = prize.rarity === 'ultra';
+  const isSup = prize.rarity === 'super';
+  spawnBurst(cx, cy, rc.particle, isLeg ? 60 : isUlt ? 40 : isSup ? 25 : 15, isLeg ? 6 : 4);
+  spawnConfetti(cx, cy, isLeg ? 70 : isUlt ? 50 : isSup ? 30 : 15);
+  if (isLeg || isUlt) spawnStars(cx, cy, isLeg ? 25 : 15);
+  doFlash(rc.particle, isLeg ? 0.45 : isUlt ? 0.3 : isSup ? 0.2 : 0.12);
+  doShake(isLeg ? 8 : isUlt ? 5 : 3, isLeg ? 30 : 15);
   playWinSound(prize.rarity);
-
-  // Flying card to collection
-  flyingCards.push({
-    x: clawX, y: clawY+40,
-    targetX: 18, targetY: H-90,
-    progress: 0, speed: 0.025,
-    rarity: prize.rarity, game: prize.game, name: prize.name, emoji: GAME_EMOJI[prize.game],
-  });
-
-  // Add to collection
-  collection.unshift({ rarity:prize.rarity, game:prize.game, name:prize.name, emoji:GAME_EMOJI[prize.game] });
-  if (collection.length > 5) collection.pop();
-
-  // Remove from play area
+  // Pick a real card from seen.json if available
+  const realCard = getRandomCard();
+  const displayName = realCard ? realCard.title.substring(0, 40) : prize.name;
+  const displayImage = realCard ? realCard.image : null;
+  revealCard = {
+  rarity: prize.rarity, game: prize.game, name: displayName, icon: prize.icon,
+  timer: 0, duration: isLeg ? 180 : isUlt ? 140 : 100,
+  x: cx, y: cy, phase: 0,
+  cardImage: displayImage, cardImageLoaded: null,
+  };
+  // Load the card image for reveal display
+  if (displayImage) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => { if (revealCard) revealCard.cardImageLoaded = img; };
+    img.src = displayImage;
+  }
+  // Save to in-session collection
+  collection.unshift({rarity: prize.rarity, game: prize.game, name: displayName, icon: prize.icon, image: displayImage });
+  if (collection.length > 10) collection.pop();
+  // Persist to localStorage
+  const wonCard = { rarity: prize.rarity, game: prize.game, name: displayName, icon: prize.icon, image: displayImage, wonAt: Date.now() };
+  persistedCollection.unshift(wonCard);
+  if (persistedCollection.length > 200) persistedCollection.pop();
+  saveCollection(persistedCollection);
   const idx = prizes.indexOf(prize);
   if (idx > -1) prizes.splice(idx, 1);
   heldPrize = null;
-
-  // Refill if low
-  if (prizes.length < 5) {
-    for (let i = 0; i < 4; i++) {
-      setTimeout(() => {
-        const p = makePrize(MACHINE.x+60+Math.random()*(MACHINE.w-180), MACHINE.y+20);
-        p.vy = 2; prizes.push(p); sndThud();
-      }, 500+i*300);
-    }
+  if (prizes.length < 6) {
+  for (let i = 0; i < 4; i++) {
+    setTimeout(() => {
+    const p = makePrize(M.x + 40 + Math.random() * (M.w - 140), M.y + 20);
+    p.vy = 2; prizes.push(p);}, 800 + i * 400);}
   }
 }
-
-// ═══ UPDATE ═══
+function triggerNearMiss() {
+  slowMoTimer = 30;
+  doShake(7, 25);
+  spawnRedSparks(clawX, clawY + 50);
+  sndSlip();}
+function triggerSlip() {
+  heldPrize.vy = 1;
+  heldPrize.vx = rng(-2, 2);
+  heldPrize.rotV = rng(-0.1, 0.1);
+  const nearChute = Math.abs(heldPrize.x - (M.x + M.chuteX)) < 90 && clawY < M.railY + 120;
+  if (nearChute) triggerNearMiss();
+  else {doShake(3, 10); sndSlip();}
+  spawnBurst(heldPrize.x + heldPrize.w / 2, heldPrize.y, '#ff3333', 10, 3);
+  heldPrize = null;
+  streak = 0;}
 function update() {
-  // Slow-mo
-  if (slowMoTimer > 0) { slowMoTimer--; slowMoFactor = 0.3; }
-  else { slowMoFactor = 1; }
-
-  // Near-miss text fade
-  if (nearMissTimer > 0) nearMissTimer--;
-
-  // Screen flash fade
-  if (screenFlashAlpha > 0) screenFlashAlpha = Math.max(0, screenFlashAlpha - 0.015);
-
-  // Claw movement with acceleration
+  time += dt;
+  realTime = performance.now() / 1000;
+  if (slowMoTimer > 0) {slowMoTimer--; slowMo = 0.25;}
+  else slowMo = lerp(slowMo, 1, 0.1);
+  musicTempo = (state === 'lifting' || state === 'returning') ? 1.3 : 1.0;
+  if (shakeTimer > 0) {
+  shakeTimer--;
+  const t = shakeTimer / 20;
+  shakeX = (Math.random() - 0.5) * shakeInt * t;
+  shakeY = (Math.random() - 0.5) * shakeInt * t * 0.7;} else {shakeX = 0; shakeY = 0;}
+  if (screenFlashA > 0) screenFlashA = Math.max(0, screenFlashA - 0.012);
+  for (const k in hudPop) if (hudPop[k] > 0) hudPop[k]--;
+  megaScale = lerp(megaScale, isMega ? 1.4 : 1, 0.05);
+  ledPhase += 0.03;
   if (state === 'idle') {
-    clawVelX += moveDir * CLAW_ACCEL;
-    if (moveDir === 0) clawVelX *= CLAW_FRICTION;
-    clawVelX = Math.max(-CLAW_MAX_SPEED, Math.min(CLAW_MAX_SPEED, clawVelX));
-    clawX += clawVelX;
-    clawX = Math.max(MACHINE.x+40, Math.min(MACHINE.x+MACHINE.w-40, clawX));
-    if (Math.abs(clawVelX) > 0.3) sndMove();
+  clawVelX += moveDir * ACCEL;
+  if (moveDir === 0) clawVelX *= FRICTION;
+  clawVelX = clamp(clawVelX, -MAX_SPD, MAX_SPD);
+  clawX += clawVelX * slowMo;
+  clawX = clamp(clawX, M.x + 35, M.x + M.w - 35);
+  if (Math.abs(clawVelX) > 0.5) sndServo(clawVelX);
+  clawTargetOpen = 1;}
+  if (state === 'anticipation') {
+  slipTimer++;
+  if (slipTimer > 6) {state = 'dropping'; sndDrop(); descendSndT = 0;}
   }
-
-  // Pendulum swing
-  const accelForce = (state==='idle') ? clawVelX * SWING_STRENGTH : 0;
-  clawSwingVel += accelForce;
-  clawSwingVel -= clawSwingAngle * 0.05; // spring back
-  clawSwingVel *= SWING_DAMPING;
-  clawSwingAngle += clawSwingVel;
-  clawSwingAngle = Math.max(-0.4, Math.min(0.4, clawSwingAngle));
-
-  // Drop
   if (state === 'dropping') {
-    clawY += DROP_SPEED * slowMoFactor;
-    const prize = findPrizeUnderClaw();
-    if (prize && clawY+40 >= prize.y) {
-      state = 'gripping'; clawOpen = 0; sndGrip();
-      heldPrize = prize;
-      heldOffsetX = clawX-(prize.x+prize.w/2);
-      heldOffsetY = clawY+40-prize.y;
-      slipTimer = 0;
-      setTimeout(() => { if (state==='gripping') state='lifting'; }, 300);
-    } else if (clawY+40 >= MACHINE.floorY-10) {
-      state = 'gripping'; clawOpen = 0; sndGrip();
-      setTimeout(() => { if (state==='gripping') state='lifting'; }, 300);
-    }
+  const accel = 0.15;
+  clawY += DROP_SPD * slowMo + slipTimer * accel * slowMo;
+  slipTimer++;
+  descendSndT++;
+  if (descendSndT % 6 === 0) sndDescend();
+  const prize = findPrize();
+  if (prize && clawY + 40 * megaScale >= prize.y) {
+    state = 'gripping';
+    clawTargetOpen = 0;
+    sndGrip();
+    heldPrize = prize;
+    heldOffX = clawX - (prize.x + prize.w / 2);
+    heldOffY = clawY + 40 * megaScale - prize.y;
+    slipTimer = 0;
+    doShake(2, 5);
+    setTimeout(() => {if (state === 'gripping') {state = 'lifting'; liftNoteT = 0;} }, 400);} else if (clawY + 40 * megaScale >= M.floorY - 8) {
+    state = 'gripping';
+    clawTargetOpen = 0;
+    sndGrip();
+    slipTimer = 0;
+    doShake(2, 4);
+    setTimeout(() => {if (state === 'gripping') state = 'returning_empty';}, 400);}
   }
-
-  // Lifting
   if (state === 'lifting') {
-    clawY -= LIFT_SPEED * slowMoFactor;
-    // Tension build: ascending notes
-    liftNoteTimer++;
-    if (liftNoteTimer % 12 === 0 && heldPrize) {
-      const progress = 1 - (clawY - RAIL_Y) / (MACHINE.floorY - RAIL_Y);
-      sndLiftNote(Math.max(0, progress));
-    }
-
-    if (heldPrize) {
-      heldPrize.x = clawX-heldPrize.w/2-heldOffsetX;
-      heldPrize.y = clawY+40-heldOffsetY;
-      heldPrize.vy = 0; heldPrize.vx = 0;
-      slipTimer++;
-      const slipChance = (heldPrize.weight*0.008)*(1-clawStrength);
-      if (!isMega && Math.random() < slipChance && slipTimer > 20) {
-        heldPrize.vy = 1; heldPrize.vx = (Math.random()-0.5)*2;
-        const nearChute = Math.abs(heldPrize.x-MACHINE.chuteX)<80;
-        if (nearChute && clawY < RAIL_Y+100) {
-          triggerNearMiss();
-        } else {
-          showMsg('Slipped!', 1000); sndMiss();
-        }
-        spawnParticles(heldPrize.x+heldPrize.w/2, heldPrize.y, '#ff5252', 10);
-        heldPrize = null; state = 'returning_empty';
-      }
-    }
-    if (clawY <= RAIL_Y) {
-      clawY = RAIL_Y; liftNoteTimer = 0;
-      state = heldPrize ? 'returning' : 'returning_empty';
-    }
+  const weight = heldPrize ? RARITY[heldPrize.rarity].weight : 1;
+  const speed = LIFT_SPD / (0.5 + weight * 0.25) * slowMo;
+  clawY -= speed;
+  liftNoteT++;
+  if (liftNoteT % 10 === 0 && heldPrize) {
+    const prog = 1 - (clawY - M.railY) / (M.floorY - M.railY);
+    sndLift(clamp(prog, 0, 1));}
+  if (heldPrize) {
+    const tilt = Math.sin(time * 3) * weight * 0.015;
+    heldPrize.rot = clawSwingAngle + tilt;
+    heldPrize.x = clawX - heldPrize.w / 2 - heldOffX + Math.sin(clawSwingAngle) * 5;
+    heldPrize.y = clawY + 40 * megaScale - heldOffY;
+    heldPrize.vy = 0; heldPrize.vx = 0;
+    slipTimer++;
+    const slipChance = (weight * 0.007) * (1 - clawStrength);
+    if (!isMega && Math.random() < slipChance && slipTimer > 25) {
+    triggerSlip();
+    state = 'returning_empty';}
   }
-
-  // Returning to chute
+  if (clawY <= M.railY) {
+    clawY = M.railY;
+    state = heldPrize ? 'returning' : 'returning_empty';}
+  }
   if (state === 'returning') {
-    const targetX = MACHINE.x + MACHINE.chuteX;
-    const dx = targetX - clawX;
-    const spd = Math.min(Math.abs(dx), CLAW_MAX_SPEED) * slowMoFactor;
-    clawX += Math.sign(dx) * spd;
-    // Update pendulum from horizontal movement
-    clawSwingVel += Math.sign(dx) * 0.002;
-
-    if (heldPrize) {
-      heldPrize.x = clawX-heldPrize.w/2-heldOffsetX;
-      heldPrize.y = clawY+40-heldOffsetY;
-      slipTimer++;
-      const slipChance = (heldPrize.weight*0.004)*(1-clawStrength);
-      if (!isMega && Math.random() < slipChance && slipTimer > 40) {
-        heldPrize.vy = 1; heldPrize.vx = (Math.random()-0.5)*3;
-        triggerNearMiss();
-        spawnParticles(heldPrize.x+heldPrize.w/2, heldPrize.y, '#ff5252', 15);
-        heldPrize = null; state = 'returning_empty';
-      }
-    }
-    if (Math.abs(dx) < 3 && heldPrize) {
-      triggerWin(heldPrize);
-      state = 'returning_empty';
-    }
+  const tx = M.x + M.chuteX + M.chuteW / 2;
+  const dx = tx - clawX;
+  const spd = Math.min(Math.abs(dx), MAX_SPD) * slowMo;
+  clawX += Math.sign(dx) * spd;
+  clawSwingVel += Math.sign(dx) * 0.0015;
+  if (heldPrize) {
+    const weight = RARITY[heldPrize.rarity].weight;
+    const tilt = Math.sin(time * 2.5) * weight * 0.01;
+    heldPrize.rot = clawSwingAngle + tilt;
+    heldPrize.x = clawX - heldPrize.w / 2 - heldOffX + Math.sin(clawSwingAngle) * 5;
+    heldPrize.y = clawY + 40 * megaScale - heldOffY;
+    slipTimer++;
+    const slipChance = (weight * 0.003) * (1 - clawStrength);
+    if (!isMega && Math.random() < slipChance && slipTimer > 45) {
+    triggerSlip();
+    state = 'returning_empty';}
   }
-
-  // Returning empty
+  if (Math.abs(dx) < 4 && heldPrize) {
+    triggerWin(heldPrize);
+    state = 'returning_empty';}
+  }
   if (state === 'returning_empty') {
-    clawY -= LIFT_SPEED;
-    if (clawY <= RAIL_Y) { clawY = RAIL_Y; clawOpen = 1; state = 'idle'; isMega = false; }
+  clawY -= LIFT_SPD * 1.5 * slowMo;
+  if (clawY <= M.railY) {
+    clawY = M.railY;
+    clawTargetOpen = 1;
+    state = 'idle';
+    isMega = false;}
   }
-
+  if (revealCard) {
+  revealCard.timer++;
+  if (revealCard.timer >= revealCard.duration) revealCard = null;}
+  const accelForce = (state === 'idle') ? clawVelX * SWING_STR : 0;
+  clawSwingVel += accelForce;
+  clawSwingVel -= clawSwingAngle * 0.06;
+  clawSwingVel *= SWING_DAMP;
+  clawSwingAngle += clawSwingVel;
+  clawSwingAngle = clamp(clawSwingAngle, -0.35, 0.35);
+  clawOpen = lerp(clawOpen, clawTargetOpen, 0.2);
   updatePhysics();
-
-  // Particles
+  updateMagnetism();
   particles = particles.filter(p => {
-    p.x += p.vx * slowMoFactor; p.y += p.vy * slowMoFactor;
-    p.vy += 0.1; p.life--; return p.life > 0;
-  });
-
-  // Flying cards
-  flyingCards = flyingCards.filter(fc => {
-    fc.progress += fc.speed;
-    fc.x += (fc.targetX - fc.x) * 0.06;
-    fc.y += (fc.targetY - fc.y) * 0.06;
-    return fc.progress < 1;
-  });
-
-  if (shakeTimer > 0) shakeTimer--;
-}
-
-// ═══ RENDER ═══
-function render() {
-  const now = Date.now();
-  ctx.clearRect(0, 0, W, H);
-  const shake = shakeTimer > 0 ? (Math.random()-0.5)*shakeIntensity*(shakeTimer/20) : 0;
-  ctx.save();
-  ctx.translate(shake, shake*0.5);
-
-  // Background
-  const bgGrad = ctx.createLinearGradient(0,0,0,H);
-  bgGrad.addColorStop(0,'#0a0a14'); bgGrad.addColorStop(1,'#12121f');
-  ctx.fillStyle = bgGrad; ctx.fillRect(0,0,W,H);
-
-  // Machine glow pulse
-  const glowPulse = 0.5 + Math.sin(now*0.002)*0.3;
-  const machGlow = ctx.createRadialGradient(W/2, H/2-30, 50, W/2, H/2-30, 350);
-  machGlow.addColorStop(0, `rgba(180,100,255,${0.04*glowPulse})`);
-  machGlow.addColorStop(0.5, `rgba(100,50,180,${0.02*glowPulse})`);
-  machGlow.addColorStop(1, 'transparent');
-  ctx.fillStyle = machGlow; ctx.fillRect(0,0,W,H);
-
-  drawMachine(now);
-
-  // Drop preview line
-  if (state === 'idle') {
-    ctx.save();
-    ctx.setLineDash([4,6]);
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(clawX, clawY+45);
-    ctx.lineTo(clawX, MACHINE.floorY);
-    ctx.stroke();
-    ctx.restore();
+  p.x += p.vx * slowMo;
+  p.y += p.vy * slowMo;
+  p.vy += p.grav;
+  p.life--;
+  return p.life > 0;});
+  for (const d of dustMotes) {
+  d.x += d.vx + Math.sin(time * 0.5 + d.phase) * 0.05;
+  d.y += d.vy;
+  if (d.y < M.y + 30) {d.y = M.floorY - 10; d.x = M.x + rng(10, M.w - 10);}
   }
-
-  // Prize shadows on floor
   for (const p of prizes) {
-    if (p === heldPrize) continue;
-    ctx.fillStyle = 'rgba(0,0,0,0.15)';
-    const shadowY = MACHINE.floorY + 1;
-    const dist = MACHINE.floorY - (p.y+p.h);
-    const spread = Math.max(0.6, 1 - dist*0.003);
-    ctx.fillRect(p.x + p.w*0.1, shadowY, p.w*0.8*spread, 3);
+  if (p.rarity === 'legendary' && Math.random() < 0.08) {
+    spawnParticle(p.x + rng(0, p.w), p.y, rng(-0.3, 0.3), rng(-1, -0.3), '#ffd700', rng(1, 2), rng(25, 45), -0.01);}
   }
-
-  // Prizes
-  for (const p of prizes) drawPrize(p, now);
-
-  // Claw
-  drawClaw(now);
-
-  // Particles
-  for (const p of particles) {
-    const alpha = p.life / p.maxLife;
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = p.color;
-    ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill();
-  }
-  ctx.globalAlpha = 1;
-
-  // Chute label
-  ctx.fillStyle = '#6a6a8a'; ctx.font = '10px "Press Start 2P"'; ctx.textAlign = 'center';
-  ctx.fillText('WIN', MACHINE.x+MACHINE.chuteX+MACHINE.chuteW/2, MACHINE.floorY+28);
-
-  // Near-miss text
-  if (nearMissTimer > 0) {
-    const alpha = Math.min(1, nearMissTimer/30);
-    const scale = 1 + (1-alpha)*0.3;
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.translate(W/2, H/2 - 40);
-    ctx.scale(scale, scale);
-    ctx.font = 'bold 28px "Press Start 2P"';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#ff2222';
-    ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 20;
-    ctx.fillText(nearMissText, 0, 0);
-    ctx.shadowBlur = 0;
-    ctx.restore();
-  }
-
-  // Flying cards animation
-  for (const fc of flyingCards) {
-    const rc = RARITY_COLORS[fc.rarity];
-    const s = 1 - fc.progress*0.6;
-    ctx.save();
-    ctx.globalAlpha = 1-fc.progress;
-    ctx.translate(fc.x, fc.y);
-    ctx.scale(s, s);
-    ctx.fillStyle = rc.bg; ctx.strokeStyle = rc.border; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.roundRect(-15,-20,30,40,3); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = rc.label; ctx.font = '12px serif'; ctx.textAlign = 'center';
-    ctx.fillText(fc.emoji||'★', 0, 5);
-    ctx.restore();
-  }
-
-  // Screen flash
-  if (screenFlashAlpha > 0 && screenFlashColor) {
-    ctx.fillStyle = screenFlashColor;
-    ctx.globalAlpha = screenFlashAlpha;
-    ctx.fillRect(0,0,W,H);
-    ctx.globalAlpha = 1;
-  }
-
-  // Collection shelf
-  drawCollection(now);
-
-  ctx.restore();
+  if (isMega && (state === 'dropping' || state === 'lifting' || state === 'returning')) {
+  if (Math.random() < 0.3) spawnElectric(clawX, clawY + 20 * megaScale, 2);}
 }
-
-function drawMachine(now) {
-  const m = MACHINE;
-
-  // Machine outer frame
-  ctx.fillStyle = '#1a1a2e'; ctx.strokeStyle = '#2a2a4a'; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.roundRect(m.x-10,m.y-20,m.w+20,m.h+60,12); ctx.fill(); ctx.stroke();
-
-  // Glass area
-  ctx.fillStyle = 'rgba(10,10,30,0.7)';
-  ctx.fillRect(m.x,m.y,m.w,m.h-20);
-
-  // Glass border
-  ctx.strokeStyle = '#3a3a5a'; ctx.lineWidth = 2;
-  ctx.strokeRect(m.x,m.y,m.w,m.h-20);
-
-  // Glass reflections — diagonal highlight lines
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(m.x,m.y,m.w,m.h-20);
-  ctx.clip();
-  ctx.strokeStyle = 'rgba(255,255,255,0.03)'; ctx.lineWidth = 20;
-  ctx.beginPath();
-  ctx.moveTo(m.x-20, m.y+120); ctx.lineTo(m.x+160, m.y-20);
-  ctx.stroke();
-  ctx.strokeStyle = 'rgba(255,255,255,0.02)'; ctx.lineWidth = 12;
-  ctx.beginPath();
-  ctx.moveTo(m.x+200, m.y+m.h); ctx.lineTo(m.x+380, m.y+80);
-  ctx.stroke();
-  ctx.restore();
-
-  // Rail
-  ctx.fillStyle = '#3a3a5a'; ctx.fillRect(m.x,RAIL_Y-4,m.w,8);
-  ctx.fillStyle = '#4a4a6a'; ctx.fillRect(m.x,RAIL_Y-2,m.w,4);
-
-  // Floor
-  const floorGrad = ctx.createLinearGradient(0,m.floorY-30,0,m.floorY);
-  floorGrad.addColorStop(0,'transparent');
-  floorGrad.addColorStop(1,'rgba(26,26,46,0.8)');
-  ctx.fillStyle = floorGrad; ctx.fillRect(m.x,m.floorY-30,m.w,30);
-  ctx.fillStyle = '#2a2a4a'; ctx.fillRect(m.x,m.floorY,m.w,4);
-
-  // Chute
-  ctx.fillStyle = '#0a0a14';
-  ctx.fillRect(m.x+m.chuteX,m.floorY-5,m.chuteW,50);
-  ctx.strokeStyle = isMega?'#ffd700':'#4a4a6a'; ctx.lineWidth = 2;
-  ctx.strokeRect(m.x+m.chuteX,m.floorY-5,m.chuteW,50);
-
-  // Top lights
-  const t = now * 0.003;
-  const colors = ['#ff6ec7','#ffd700','#00e676','#448aff','#b388ff','#ff5252','#18ffff','#ffab40'];
-  for (let i = 0; i < 8; i++) {
-    const lx = m.x+30+i*(m.w-40)/7;
-    const brightness = Math.sin(t+i*0.8)*0.5+0.5;
-    ctx.fillStyle = colors[i%colors.length];
-    ctx.globalAlpha = 0.3+brightness*0.7;
-    ctx.beginPath(); ctx.arc(lx,m.y-8,4,0,Math.PI*2); ctx.fill();
+function drawMachine() {
+  const t = realTime;
+  X.save();
+  X.fillStyle = 'rgba(0,0,0,0.4)';
+  X.beginPath(); X.roundRect(M.x - 18, M.y - 48, M.w + 36, M.h + 95, 16);
+  X.fill();
+  const bodyGrad = X.createLinearGradient(M.x - 15, 0, M.x + M.w + 15, 0);
+  bodyGrad.addColorStop(0, '#1a1a30');
+  bodyGrad.addColorStop(0.5, '#22223a');
+  bodyGrad.addColorStop(1, '#1a1a30');
+  X.fillStyle = bodyGrad;
+  X.beginPath(); X.roundRect(M.x - 15, M.y - 45, M.w + 30, M.h + 88, 14);
+  X.fill();
+  X.strokeStyle = '#555570';
+  X.lineWidth = 3;
+  X.beginPath(); X.roundRect(M.x - 15, M.y - 45, M.w + 30, M.h + 88, 14);
+  X.stroke();
+  X.strokeStyle = '#3a3a55';
+  X.lineWidth = 1.5;
+  X.beginPath(); X.roundRect(M.x - 10, M.y - 40, M.w + 20, M.h + 78, 10);
+  X.stroke();
+  const ledCount = 30;
+  for (let i = 0; i < ledCount; i++) {
+  const prog = i / ledCount;
+  const hue = (prog * 360 + ledPhase * 120) % 360;
+  const bright = 0.5 + Math.sin(ledPhase * 3 + i * 0.5) * 0.3;
+  const ly = M.y - 35 + prog * (M.h + 60);
+  X.fillStyle = `hsla(${hue},100%,60%,${bright * 0.6})`;
+  X.beginPath(); X.arc(M.x - 11, ly, 2, 0, TAU); X.fill();
+  X.fillStyle = `hsla(${hue},100%,60%,${bright * 0.15})`;
+  X.beginPath(); X.arc(M.x - 11, ly, 6, 0, TAU); X.fill();
+  X.fillStyle = `hsla(${hue},100%,60%,${bright * 0.6})`;
+  X.beginPath(); X.arc(M.x + M.w + 11, ly, 2, 0, TAU); X.fill();
+  X.fillStyle = `hsla(${hue},100%,60%,${bright * 0.15})`;
+  X.beginPath(); X.arc(M.x + M.w + 11, ly, 6, 0, TAU); X.fill();}
+  X.fillStyle = 'rgba(100,80,180,0.06)';
+  for (let py = 0; py < 20; py++) {
+  if (py % 3 === 0) { X.fillRect(M.x - 10, M.y + py * 28, 4, 12); X.fillRect(M.x + M.w + 4, M.y + py * 28, 4, 12);}
   }
-  ctx.globalAlpha = 1;
-
-  // Label
-  ctx.fillStyle = '#6a6a8a'; ctx.font = '8px "Press Start 2P"'; ctx.textAlign = 'center';
-  ctx.fillText("ECHO'S VAULT", m.x+m.w/2, m.y+m.h+25);
+  const marqueeY = M.y - 28;
+  const mqGrad = X.createLinearGradient(M.x, marqueeY - 15, M.x, marqueeY + 15);
+  mqGrad.addColorStop(0, '#2a1040');
+  mqGrad.addColorStop(1, '#180828');
+  X.fillStyle = mqGrad;
+  X.beginPath(); X.roundRect(M.x + 40, marqueeY - 16, M.w - 80, 32, 6);
+  X.fill();
+  X.strokeStyle = '#6a3a90';
+  X.lineWidth = 1;
+  X.beginPath(); X.roundRect(M.x + 40, marqueeY - 16, M.w - 80, 32, 6);
+  X.stroke();
+  const flicker = Math.sin(t * 8) > -0.1 ? 1 : 0.3;
+  const flicker2 = Math.sin(t * 12 + 2) > -0.05 ? 1 : 0.5;
+  X.save();
+  X.font = 'bold 20px sans-serif';
+  X.textAlign = 'center';
+  X.textBaseline = 'middle';
+  X.shadowColor = `rgba(255,110,199,${0.8 * flicker})`;
+  X.shadowBlur = 25;
+  X.fillStyle = `rgba(255,110,199,${0.9 * flicker})`;
+  X.fillText("ECHO'S VAULT", M.x + M.w / 2, marqueeY);
+  X.shadowBlur = 12;
+  X.fillStyle = `rgba(255,200,230,${0.95 * flicker2})`;
+  X.fillText("ECHO'S VAULT", M.x + M.w / 2, marqueeY);
+  X.shadowBlur = 0;
+  X.restore();
+  const glassGrad = X.createLinearGradient(0, M.y, 0, M.y + M.h - 20);
+  glassGrad.addColorStop(0, 'rgba(8,8,25,0.85)');
+  glassGrad.addColorStop(1, 'rgba(12,12,30,0.9)');
+  X.fillStyle = glassGrad;
+  X.fillRect(M.x, M.y + 10, M.w, M.h - 30);
+  X.strokeStyle = 'rgba(100,100,150,0.3)';
+  X.lineWidth = 2;
+  X.strokeRect(M.x, M.y + 10, M.w, M.h - 30);
+  if (feltCanvas) {
+  X.drawImage(feltCanvas, M.x, M.floorY - 20, M.w, 40);}
+  X.strokeStyle = '#2a2a4a';
+  X.lineWidth = 2;
+  X.beginPath(); X.moveTo(M.x, M.floorY + 2); X.lineTo(M.x + M.w, M.floorY + 2); X.stroke();
+  const railGrad = X.createLinearGradient(0, M.railY - 5, 0, M.railY + 5);
+  railGrad.addColorStop(0, '#5a5a7a');
+  railGrad.addColorStop(0.5, '#7a7a9a');
+  railGrad.addColorStop(1, '#4a4a6a');
+  X.fillStyle = railGrad;
+  X.fillRect(M.x + 2, M.railY - 4, M.w - 4, 8);
+  X.fillStyle = 'rgba(255,255,255,0.1)';
+  X.fillRect(M.x + 2, M.railY - 3, M.w - 4, 2);
+  const chuteX = M.x + M.chuteX;
+  X.fillStyle = '#050510';
+  X.fillRect(chuteX, M.floorY - 5, M.chuteW, 55);
+  X.strokeStyle = isMega ? '#ffd700' : '#4a4a70';
+  X.lineWidth = 2;
+  X.strokeRect(chuteX, M.floorY - 5, M.chuteW, 55);
+  for (let i = 0; i < 3; i++) {
+  const flash = Math.sin(t * 4 + i * 1.5) > 0 ? 0.8 : 0.2;
+  const ay = M.floorY - 25 + i * 15;
+  X.fillStyle = `rgba(255,215,0,${flash})`;
+  X.beginPath();
+  X.moveTo(chuteX + M.chuteW / 2 - 8, ay);
+  X.lineTo(chuteX + M.chuteW / 2 + 8, ay);
+  X.lineTo(chuteX + M.chuteW / 2, ay + 10);
+  X.closePath(); X.fill();
+  X.fillStyle = `rgba(255,215,0,${flash * 0.2})`;
+  X.beginPath();
+  X.moveTo(chuteX + M.chuteW / 2 - 12, ay - 2);
+  X.lineTo(chuteX + M.chuteW / 2 + 12, ay - 2);
+  X.lineTo(chuteX + M.chuteW / 2, ay + 14);
+  X.closePath(); X.fill();}
+  X.fillStyle = '#8888aa';
+  X.font = 'bold 10px sans-serif';
+  X.textAlign = 'center';
+  X.fillText('WIN', chuteX + M.chuteW / 2, M.floorY + 42);
+  X.save();
+  X.beginPath();
+  X.rect(M.x, M.y + 10, M.w, M.h - 30);
+  X.clip();
+  X.strokeStyle = 'rgba(255,255,255,0.04)';
+  X.lineWidth = 30;
+  X.beginPath();
+  X.moveTo(M.x - 30, M.y + 150);
+  X.lineTo(M.x + 180, M.y - 10);
+  X.stroke();
+  X.strokeStyle = 'rgba(255,255,255,0.02)';
+  X.lineWidth = 15;
+  X.beginPath();
+  X.moveTo(M.x + 280, M.y + M.h);
+  X.lineTo(M.x + 440, M.y + 100);
+  X.stroke();
+  X.restore();
+  for (const sp of chromeSparkles) {
+  const sparkle = Math.sin(t * sp.speed + sp.phase);
+  if (sparkle > 0.9) {
+    const alpha = (sparkle - 0.9) * 10;
+    let sx, sy;
+    if (sp.side === 'left') {sx = M.x - 12; sy = M.y - 30 + sp.pos * (M.h + 60);}
+    else if (sp.side === 'right') {sx = M.x + M.w + 12; sy = M.y - 30 + sp.pos * (M.h + 60);}
+    else {sx = M.x + sp.pos * M.w; sy = M.y - 40;}
+    X.fillStyle = `rgba(255,255,255,${alpha * 0.8})`;
+    X.beginPath(); X.arc(sx, sy, 1.5, 0, TAU); X.fill();
+    X.fillStyle = `rgba(255,255,255,${alpha * 0.3})`;
+    X.beginPath(); X.arc(sx, sy, 4, 0, TAU); X.fill();}
+  }
+  X.restore();}
+function drawDust() {
+  for (const d of dustMotes) {
+  const twinkle = 0.5 + Math.sin(realTime * 2 + d.phase) * 0.5;
+  X.fillStyle = `rgba(200,200,255,${d.alpha * twinkle})`;
+  X.beginPath(); X.arc(d.x, d.y, d.size, 0, TAU); X.fill();}
 }
-
-function drawPrize(p, now) {
-  const rc = RARITY_COLORS[p.rarity];
-  ctx.save();
-  ctx.translate(p.x+p.w/2, p.y+p.h/2);
-  ctx.rotate(p.rotation);
-
-  // Ambient glow for ultra/legendary
-  if (p.rarity === 'ultra' || p.rarity === 'legendary') {
-    const pulse = 0.5+Math.sin(now*0.004+(p.x*0.1))*0.5;
-    const glowSize = 20+pulse*15;
-    const glowGrad = ctx.createRadialGradient(0,0,0, 0,0,glowSize);
-    glowGrad.addColorStop(0, rc.glow.replace(')', `,${0.25*pulse})`).replace('rgb','rgba'));
-    glowGrad.addColorStop(1, 'transparent');
-    // Convert hex glow to rgba
-    ctx.fillStyle = `rgba(${hexToRgb(rc.glow)},${0.25*pulse})`;
-    ctx.beginPath(); ctx.arc(0,0,glowSize,0,Math.PI*2); ctx.fill();
-  }
-
-  // Animated shimmer border for ultra/legendary
+function drawPrize(p) {
+  const rc = RARITY[p.rarity];
+  const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+  X.save();
+  X.translate(cx, cy);
+  X.rotate(p.rot);
+  if (p !== heldPrize) {
+  const dist = M.floorY - (p.y + p.h);
+  const shadowAlpha = clamp(0.2 - dist * 0.002, 0, 0.2);
+  const shadowSpread = clamp(1 - dist * 0.003, 0.5, 1);
+  X.fillStyle = `rgba(0,0,0,${shadowAlpha})`;
+  X.fillRect(-p.w * 0.4 * shadowSpread, M.floorY - cy - 1, p.w * 0.8 * shadowSpread, 3);}
+  if (p.magnetGlow > 0.05) {
+  X.fillStyle = `rgba(${hexToRGB(rc.particle).join(',')},${p.magnetGlow * 0.3})`;
+  X.beginPath(); X.arc(0, 0, p.w * 0.8, 0, TAU); X.fill();}
   if (rc.glow) {
-    const shimmerHue = (now*0.1 + p.x) % 360;
-    ctx.strokeStyle = `hsl(${shimmerHue},80%,60%)`;
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.roundRect(-p.w/2-1,-p.h/2-1,p.w+2,p.h+2,5); ctx.stroke();
-  }
-
-  // Card body
-  ctx.fillStyle = rc.bg; ctx.strokeStyle = rc.border; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.roundRect(-p.w/2,-p.h/2,p.w,p.h,4); ctx.fill(); ctx.stroke();
-
-  // Top banner
-  ctx.fillStyle = rc.border;
-  ctx.beginPath(); ctx.roundRect(-p.w/2,-p.h/2,p.w,14,[4,4,0,0]); ctx.fill();
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 7px "JetBrains Mono"'; ctx.textAlign = 'center';
-  ctx.fillText(p.rarity.toUpperCase(), 0, -p.h/2+10);
-
-  // Art area
-  ctx.fillStyle = 'rgba(255,255,255,0.05)';
-  ctx.fillRect(-p.w/2+4, -p.h/2+16, p.w-8, p.h-32);
-
-  // Larger center emoji
-  ctx.font = '18px serif'; ctx.textAlign = 'center';
-  ctx.fillText(GAME_EMOJI[p.game]||'★', 0, 8);
-
-  // Bottom: card name
-  ctx.fillStyle = '#ccc'; ctx.font = '6px "JetBrains Mono"';
-  const shortName = p.name.length>12 ? p.name.substring(0,11)+'..' : p.name;
-  ctx.fillText(shortName, 0, p.h/2-5);
-
-  ctx.restore();
-}
-
-function drawClaw(now) {
+  const pulse = 0.5 + Math.sin(realTime * 3 + p.glowPhase) * 0.5;
+  const glowR = 25 + pulse * 15;
+  const grad = X.createRadialGradient(0, 0, 2, 0, 0, glowR);
+  const rgb = hexToRGB(rc.glow);
+  grad.addColorStop(0, `rgba(${rgb.join(',')},${0.25 * pulse})`);
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  X.fillStyle = grad;
+  X.beginPath(); X.arc(0, 0, glowR, 0, TAU); X.fill();}
+  if (p.rarity === 'legendary') {
+  const hue = (realTime * 60 + p.x) % 360;
+  X.strokeStyle = `hsl(${hue},90%,60%)`;
+  X.lineWidth = 3;
+  X.beginPath(); X.roundRect(-p.w / 2 - 2, -p.h / 2 - 2, p.w + 4, p.h + 4, 6); X.stroke();
+  X.strokeStyle = `hsla(${hue},90%,60%,0.3)`;
+  X.lineWidth = 6;
+  X.beginPath(); X.roundRect(-p.w / 2 - 4, -p.h / 2 - 4, p.w + 8, p.h + 8, 8); X.stroke();} else if (p.rarity === 'ultra') {
+  const pulse = 0.6 + Math.sin(realTime * 4 + p.glowPhase) * 0.4;
+  X.strokeStyle = `rgba(255,215,0,${pulse})`;
+  X.lineWidth = 2.5;
+  X.beginPath(); X.roundRect(-p.w / 2 - 1, -p.h / 2 - 1, p.w + 2, p.h + 2, 5); X.stroke();}
+  X.fillStyle = rc.bg;
+  X.beginPath(); X.roundRect(-p.w / 2, -p.h / 2, p.w, p.h, 4); X.fill();
+  X.strokeStyle = rc.border;
+  X.lineWidth = 1.5;
+  X.beginPath(); X.roundRect(-p.w / 2, -p.h / 2, p.w, p.h, 4); X.stroke();
+  X.fillStyle = 'rgba(255,255,255,0.04)';
+  X.beginPath(); X.roundRect(-p.w / 2 + 4, -p.h / 2 + 14, p.w - 8, p.h - 28, 2); X.fill();
+  X.strokeStyle = 'rgba(255,255,255,0.08)';
+  X.lineWidth = 0.5;
+  X.beginPath(); X.roundRect(-p.w / 2 + 4, -p.h / 2 + 14, p.w - 8, p.h - 28, 2); X.stroke();
+  X.fillStyle = rc.border + '80';
+  X.beginPath(); X.roundRect(-p.w / 2, -p.h / 2, p.w, 12, [4, 4, 0, 0]); X.fill();
+  X.fillStyle = '#fff';
+  X.font = 'bold 6px sans-serif';
+  X.textAlign = 'center';
+  X.fillText(p.rarity.toUpperCase(), 0, -p.h / 2 + 9);
+  const gemX = p.w / 2 - 8, gemY = -p.h / 2 + 7;
+  X.fillStyle = rc.gemColor;
+  if (p.rarity === 'legendary') {
+  X.beginPath();
+  for (let i = 0; i < 5; i++) {
+    const a = -Math.PI / 2 + (i * TAU / 5);
+    const r = i === 0 ? 4 : 4;
+    X.lineTo(gemX + Math.cos(a) * r, gemY + Math.sin(a) * r);
+    const a2 = a + TAU / 10;
+    X.lineTo(gemX + Math.cos(a2) * 2, gemY + Math.sin(a2) * 2);}
+  X.closePath(); X.fill();} else {
+  X.beginPath();
+  X.moveTo(gemX, gemY - 3);
+  X.lineTo(gemX + 3, gemY);
+  X.lineTo(gemX, gemY + 3);
+  X.lineTo(gemX - 3, gemY);
+  X.closePath(); X.fill();}
+  X.font = '16px serif';
+  X.fillText(p.icon, 0, 6);
+  X.fillStyle = '#aaaacc';
+  X.font = '5.5px sans-serif';
+  const shortName = p.name.length > 12 ? p.name.substring(0, 11) + '..' : p.name;
+  X.fillText(shortName, 0, p.h / 2 - 5);
+  X.restore();}
+function drawClaw() {
   const cx = clawX, cy = clawY;
+  const ms = megaScale;
+  X.strokeStyle = '#5a5a7a';
+  X.lineWidth = 2;
+  const cableLen = cy - M.railY;
+  const sag = cableLen * 0.02 + Math.sin(realTime * 8) * (state === 'idle' ? 0.5 : 1.5);
+  X.beginPath();
+  X.moveTo(cx, M.railY + 4);
+  X.quadraticCurveTo(cx + sag, M.railY + cableLen * 0.5, cx, cy);
+  X.stroke();
+  if (state === 'dropping' || state === 'lifting') {
+  X.strokeStyle = 'rgba(200,200,255,0.1)';
+  X.lineWidth = 1;
+  const vib = Math.sin(realTime * 30) * 2;
+  X.beginPath();
+  X.moveTo(cx + vib, M.railY + 4);
+  X.quadraticCurveTo(cx + sag - vib, M.railY + cableLen * 0.5, cx + vib * 0.5, cy);
+  X.stroke();}
+  const carriageGrad = X.createLinearGradient(cx - 18, M.railY - 8, cx + 18, M.railY - 8);
+  carriageGrad.addColorStop(0, isMega ? '#c09020' : '#4a4a6a');
+  carriageGrad.addColorStop(0.5, isMega ? '#ffd740' : '#6a6a8a');
+  carriageGrad.addColorStop(1, isMega ? '#c09020' : '#4a4a6a');
+  X.fillStyle = carriageGrad;
+  X.beginPath(); X.roundRect(cx - 18, M.railY - 9, 36, 13, 3); X.fill();
+  X.strokeStyle = isMega ? '#ffd740' : '#7a7a9a';
+  X.lineWidth = 1;
+  X.beginPath(); X.roundRect(cx - 18, M.railY - 9, 36, 13, 3); X.stroke();
+  if (state !== 'idle' && state !== 'anticipation') {
+  const gi = clawStrength;
+  const color = isMega ? [255, 215, 0] : gi > 0.7 ? [0, 230, 118] : gi > 0.4 ? [255, 171, 64] : [255, 82, 82];
+  const grad = X.createRadialGradient(cx, cy + 10 * ms, 0, cx, cy + 10 * ms, 25 * ms);
+  grad.addColorStop(0, `rgba(${color.join(',')},${gi * 0.3})`);
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  X.fillStyle = grad;
+  X.beginPath(); X.arc(cx, cy + 10 * ms, 25 * ms, 0, TAU); X.fill();}
+  X.save();
+  X.translate(cx, cy);
+  X.rotate(clawSwingAngle);
+  X.scale(ms, ms);
+  const headGrad = X.createLinearGradient(-12, -6, 12, 14);
+  headGrad.addColorStop(0, isMega ? '#ffd740' : '#7a7a9a');
+  headGrad.addColorStop(1, isMega ? '#c09020' : '#5a5a7a');
+  X.fillStyle = headGrad;
+  X.beginPath(); X.roundRect(-12, -6, 24, 18, 3); X.fill();
+  X.strokeStyle = isMega ? '#ffe070' : '#9a9aba';
+  X.lineWidth = 1;
+  X.beginPath(); X.roundRect(-12, -6, 24, 18, 3); X.stroke();
+  X.fillStyle = isMega ? '#ffe070' : '#aaaacc';
+  X.beginPath(); X.arc(0, 2, 3, 0, TAU); X.fill();
+  X.fillStyle = isMega ? '#c09020' : '#6a6a8a';
+  X.beginPath(); X.arc(0, 2, 1.5, 0, TAU); X.fill();
+  const openAngle = clawOpen * 0.55;
+  const prongColor = isMega ? '#ffd740' : '#8a8aaa';
+  const prongColorDark = isMega ? '#c09020' : '#6a6a8a';
+  function drawProng(angle) {
+  X.save();
+  X.rotate(angle);
+  X.strokeStyle = prongColor;
+  X.lineWidth = 3.5;
+  X.lineCap = 'round';
+  X.beginPath();
+  X.moveTo(0, 12);
+  X.lineTo(0, 25);
+  X.stroke();
+  X.fillStyle = prongColorDark;
+  X.beginPath(); X.arc(0, 25, 2.5, 0, TAU); X.fill();
+  X.strokeStyle = prongColor;
+  X.lineWidth = 3;
+  X.beginPath();
+  X.moveTo(0, 25);
+  X.quadraticCurveTo(Math.sign(angle || 0.001) * -3, 35, Math.sign(angle || 0.001) * -2, 40);
+  X.stroke();
+  X.fillStyle = prongColor;
+  X.beginPath(); X.arc(Math.sign(angle || 0.001) * -2, 40, 2, 0, TAU); X.fill();
+  X.restore();}
+  drawProng(-openAngle - 0.15);
+  drawProng(openAngle + 0.15);
+  X.strokeStyle = prongColor;
+  X.lineWidth = 3.5;
+  X.lineCap = 'round';
+  X.beginPath(); X.moveTo(0, 12); X.lineTo(0, 28); X.stroke();
+  X.fillStyle = prongColorDark;
+  X.beginPath(); X.arc(0, 28, 2.5, 0, TAU); X.fill();
+  X.strokeStyle = prongColor;
+  X.lineWidth = 3;
+  X.beginPath(); X.moveTo(0, 28); X.lineTo(0, 40); X.stroke();
+  X.fillStyle = prongColor;
+  X.beginPath(); X.arc(0, 40, 2, 0, TAU); X.fill();
+  X.restore();}
+function drawDropPreview() {
+  if (state !== 'idle') return;
+  X.save();
+  X.setLineDash([4, 8]);
+  X.strokeStyle = 'rgba(255,255,255,0.06)';
+  X.lineWidth = 1;
+  X.beginPath();
+  X.moveTo(clawX, clawY + 45);
+  X.lineTo(clawX, M.floorY);
+  X.stroke();
+  X.restore();}
+function drawParticles() {
+  for (const p of particles) {
+  const alpha = p.life / p.maxLife;
+  X.globalAlpha = alpha;
+  X.fillStyle = p.color;
+  X.beginPath(); X.arc(p.x, p.y, p.size * (0.5 + alpha * 0.5), 0, TAU); X.fill();}
+  X.globalAlpha = 1;}
+function drawHUD() {
+  const t = realTime;
+  const titleFlicker = Math.sin(t * 6) > -0.15 ? 1 : 0.2;
+  X.save();
+  // === Top bar with Dashboard link ===
+  X.fillStyle = 'rgba(10,10,25,0.7)';
+  X.fillRect(0, 0, W, 12);
+  X.fillStyle = '#ff6ec7';
+  X.font = 'bold 9px sans-serif';
+  X.textAlign = 'left';
+  X.textBaseline = 'top';
+  X.fillText('← Dashboard', 8, 2);
+  X.restore();
+  X.save();
+  X.font = 'bold 14px sans-serif';
+  X.textAlign = 'left';
+  X.textBaseline = 'top';
+  X.shadowColor = `rgba(255,110,199,${titleFlicker * 0.7})`;
+  X.shadowBlur = 15;
+  X.fillStyle = `rgba(255,110,199,${titleFlicker * 0.9})`;
+  X.fillText('THE CLAW', 18, 18);
+  X.shadowBlur = 5;
+  X.fillStyle = `rgba(255,210,240,${titleFlicker})`;
+  X.fillText('THE CLAW', 18, 18);
+  X.shadowBlur = 0;
+  X.fillStyle = '#6a6a8a';
+  X.font = '9px sans-serif';
+  X.fillText("Echo's Vault", 18, 36);
+  // === Token Counter ===
+  tokenData = getTokenData();
+  const tokenStr = '\u{1FA99} ' + tokenData.tokens + '/' + MAX_TOKENS;
+  const tokenColor = tokenData.tokens > 0 ? '#ffd740' : '#ff5252';
+  X.fillStyle = tokenColor;
+  X.font = 'bold 12px sans-serif';
+  X.fillText(tokenStr, 18, 50);
+  // === Companion presence ===
+  companionData = getCompanion();
+  if (companionData && companionData.name) {
+    const compName = companionData.name;
+    X.fillStyle = '#b388ff';
+    X.font = '9px sans-serif';
+    X.textAlign = 'left';
+    X.fillText('\u{1F43E} ' + compName + ' is watching!', 18, 66);
+  }
+  X.restore();
+  X.save();
+  X.textAlign = 'right';
+  X.textBaseline = 'top';
+  X.font = '11px sans-serif';
+  const statsX = W - 18;
+  const playScale = 1 + hudPop.plays * 0.015;
+  X.save(); X.translate(statsX, 16); X.scale(playScale, playScale);
+  X.fillStyle = '#8888aa'; X.fillText('Plays: ', 0, 0);
+  X.fillStyle = '#ffd740'; X.font = 'bold 11px sans-serif';
+  X.fillText(plays, -X.measureText('Plays: ').width + X.measureText('Plays: ' + plays).width - X.measureText('Plays: ').width, 0);
+  X.restore();
+  X.fillStyle = '#8888aa'; X.font = '11px sans-serif';
+  X.fillText(`Plays: ${plays}`, statsX, 16);
+  X.fillStyle = '#ffd740'; X.font = 'bold 11px sans-serif';
+  X.fillText(`${plays}`, statsX, 16);
+  const winScale = 1 + hudPop.wins * 0.02;
+  X.save(); X.translate(statsX, 32); X.scale(winScale, winScale);
+  X.fillStyle = '#8888aa'; X.font = '11px sans-serif';
+  X.fillText(`Won: `, 0, 0);
+  X.restore();
+  X.fillStyle = '#8888aa'; X.font = '11px sans-serif';
+  X.fillText(`Won: ${wins}`, statsX, 32);
+  X.fillStyle = '#00e676'; X.font = 'bold 11px sans-serif';
+  X.fillText(`${wins}`, statsX, 32);
+  if (streak > 1) {
+  const stScale = 1 + hudPop.streak * 0.025;
+  X.save(); X.translate(statsX, 48); X.scale(stScale, stScale);
+  X.fillStyle = '#ffd740'; X.font = 'bold 11px sans-serif';
+  X.fillText(`x${streak} STREAK`, 0, 0);
+  X.restore();}
+  const barX = statsX - 120, barY = streak > 1 ? 64 : 50;
+  const barW = 120, barH = 8;
+  X.fillStyle = '#1a1a30';
+  X.beginPath(); X.roundRect(barX, barY, barW, barH, 4); X.fill();
+  if (state !== 'idle' && state !== 'anticipation') {
+  const sColor = isMega ? '#ffd740' : clawStrength > 0.7 ? '#00e676' : clawStrength > 0.4 ? '#ffab40' : '#ff5252';
+  const sGrad = X.createLinearGradient(barX, 0, barX + barW * clawStrength, 0);
+  sGrad.addColorStop(0, sColor);
+  sGrad.addColorStop(1, sColor + '80');
+  X.fillStyle = sGrad;
+  X.beginPath(); X.roundRect(barX, barY, barW * clawStrength, barH, 4); X.fill();}
+  X.fillStyle = '#6a6a8a'; X.font = '7px sans-serif'; X.textAlign = 'right';
+  X.fillText('STRENGTH', statsX, barY + barH + 10);
+  const pityY = barY + barH + 20;
+  const pityW = 140, pityH = 14;
+  const pityPct = (plays % MEGA_EVERY) / MEGA_EVERY;
+  const pityX = statsX - pityW;
+  X.fillStyle = '#1a1a30';
+  X.beginPath(); X.roundRect(pityX, pityY, pityW, pityH, 7); X.fill();
+  X.strokeStyle = '#2a2a4a';
+  X.lineWidth = 1;
+  X.beginPath(); X.roundRect(pityX, pityY, pityW, pityH, 7); X.stroke();
+  const pityGrad = X.createLinearGradient(pityX, 0, pityX + pityW * pityPct, 0);
+  pityGrad.addColorStop(0, '#ff6ec7');
+  pityGrad.addColorStop(1, '#ffd740');
+  X.fillStyle = pityGrad;
+  X.beginPath(); X.roundRect(pityX, pityY, pityW * pityPct, pityH, 7); X.fill();
+  if (pityPct > 0.8) {
+  const pulse = 0.3 + Math.sin(t * 6) * 0.3;
+  X.fillStyle = `rgba(255,215,0,${pulse})`;
+  X.beginPath(); X.roundRect(pityX, pityY, pityW * pityPct, pityH, 7); X.fill();}
+  X.fillStyle = '#fff'; X.font = 'bold 7px sans-serif'; X.textAlign = 'center';
+  X.fillText(`MEGA IN ${MEGA_EVERY - (plays % MEGA_EVERY)}`, pityX + pityW / 2, pityY + pityH - 4);
+  X.restore();
+  X.fillStyle = '#4a4a6a';
+  X.font = '9px sans-serif';
+  X.textAlign = 'center';
+  if ('ontouchstart' in window) {
+  X.fillText('Touch left/right to move \u00b7 Swipe down or double-tap to drop', W / 2, H - 14);} else {
+  X.fillText('\u2190 \u2192 Move \u00b7 SPACE Drop \u00b7 R Reset', W / 2, H - 14);}
+}
+// Track loaded thumbnail images
+const thumbCache = {};
+function getThumb(url) {
+  if (!url) return null;
+  if (thumbCache[url]) return thumbCache[url].complete ? thumbCache[url] : null;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = url.replace('/s-l1600.', '/s-l500.');
+  thumbCache[url] = img;
+  return null;
+}
 
-  // Cable
-  ctx.strokeStyle = '#4a4a6a'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(cx,RAIL_Y); ctx.lineTo(cx,cy); ctx.stroke();
-
-  // Carriage
-  ctx.fillStyle = isMega?'#ffd700':'#3a3a5a';
-  ctx.fillRect(cx-15,RAIL_Y-8,30,12);
-
-  // Strength glow
+function drawCollection() {
+  // Use persisted collection, show last 10 with duplicate tracking
+  const col = persistedCollection.slice(0, 10);
+  if (col.length === 0) return;
+  // Count duplicates
+  const dupCounts = {};
+  for (const c of persistedCollection) {
+    const key = c.name;
+    dupCounts[key] = (dupCounts[key] || 0) + 1;
+  }
+  const sx = 14, sy = H - 82;
+  const cw = Math.min(col.length, 10) * 38 + 12;
+  X.fillStyle = 'rgba(15,15,35,0.85)';
+  X.beginPath(); X.roundRect(sx - 6, sy - 14, cw, 62, 6); X.fill();
+  X.strokeStyle = '#2a2a4a';
+  X.lineWidth = 1;
+  X.beginPath(); X.roundRect(sx - 6, sy - 14, cw, 62, 6); X.stroke();
+  X.fillStyle = '#6a6a8a'; X.font = 'bold 6px sans-serif'; X.textAlign = 'left';
+  X.fillText('COLLECTION', sx, sy - 5);
+  for (let i = 0; i < col.length; i++) {
+  const c = col[i];
+  const rc = RARITY[c.rarity];
+  const ccx = sx + i * 38 + 18, ccy = sy + 18;
+  X.fillStyle = rc.bg;
+  X.beginPath(); X.roundRect(ccx - 14, ccy - 14, 28, 34, 3); X.fill();
+  X.strokeStyle = rc.border;
+  X.lineWidth = 1;
+  X.beginPath(); X.roundRect(ccx - 14, ccy - 14, 28, 34, 3); X.stroke();
+  // Try to draw thumbnail image
+  const thumb = c.image ? getThumb(c.image) : null;
+  if (thumb) {
+    try { X.drawImage(thumb, ccx - 12, ccy - 12, 24, 30); } catch(e) {}
+  } else {
+    X.fillStyle = '#fff'; X.font = '12px serif'; X.textAlign = 'center';
+    X.fillText(c.icon, ccx, ccy + 3);
+  }
+  X.fillStyle = rc.label; X.font = 'bold 5px sans-serif'; X.textAlign = 'center';
+  X.fillText(c.rarity.substr(0, 3).toUpperCase(), ccx, ccy + 19);
+  // Duplicate count
+  const count = dupCounts[c.name] || 1;
+  if (count > 1) {
+    X.fillStyle = '#ffd740'; X.font = 'bold 7px sans-serif'; X.textAlign = 'right';
+    X.fillText('\u2B50\u00d7' + count, ccx + 14, ccy - 8);
+  }
+  }
+}
+function drawWinReveal() {
+  if (!revealCard) return;
+  const r = revealCard;
+  const rc = RARITY[r.rarity];
+  const prog = r.timer / r.duration;
+  let scale, alpha, x, y, rotation;
+  if (prog < 0.3) {
+  const t = prog / 0.3;
+  const e = easeOut(t);
+  scale = 0.3 + e * 1.7;
+  alpha = e;
+  x = lerp(r.x, W / 2, e);
+  y = lerp(r.y, H / 2 - 40, e);
+  rotation = (1 - e) * 2;} else if (prog < 0.7) {
+  scale = 2;
+  alpha = 1;
+  x = W / 2;
+  y = H / 2 - 40;
+  rotation = Math.sin(realTime * 3) * 0.03;} else {
+  const t = (prog - 0.7) / 0.3;
+  const e = easeInOut(t);
+  scale = 2 - e * 1.5;
+  alpha = 1 - e;
+  x = lerp(W / 2, 40, e);
+  y = lerp(H / 2 - 40, H - 60, e);
+  rotation = 0;}
+  X.save();
+  X.globalAlpha = alpha;
+  X.translate(x, y);
+  X.rotate(rotation);
+  X.scale(scale, scale);
+  if (rc.glow) {
+  X.shadowColor = rc.glow;
+  X.shadowBlur = 30;}
+  if (r.rarity === 'legendary') {
+  const hue = (realTime * 80) % 360;
+  X.strokeStyle = `hsl(${hue},90%,60%)`;
+  X.lineWidth = 3;
+  X.beginPath(); X.roundRect(-28, -38, 56, 76, 6); X.stroke();}
+  X.fillStyle = rc.bg;
+  X.beginPath(); X.roundRect(-26, -36, 52, 72, 5); X.fill();
+  X.strokeStyle = rc.border;
+  X.lineWidth = 2;
+  X.beginPath(); X.roundRect(-26, -36, 52, 72, 5); X.stroke();
+  X.shadowBlur = 0;
+  X.fillStyle = 'rgba(255,255,255,0.05)';
+  X.beginPath(); X.roundRect(-22, -20, 44, 36, 2); X.fill();
+  X.fillStyle = rc.border + '90';
+  X.beginPath(); X.roundRect(-26, -36, 52, 14, [5, 5, 0, 0]); X.fill();
+  X.fillStyle = '#fff';
+  X.font = 'bold 7px sans-serif';
+  X.textAlign = 'center';
+  X.fillText(r.rarity.toUpperCase(), 0, -26);
+  X.font = '22px serif';
+  X.fillText(r.icon, 0, 6);
+  // Draw card image if loaded
+  if (r.cardImageLoaded) {
+    X.save();
+    X.beginPath(); X.roundRect(-20, -18, 40, 40, 2); X.clip();
+    X.drawImage(r.cardImageLoaded, -20, -18, 40, 40);
+    X.restore();
+  }
+  X.fillStyle = '#ddd';
+  X.font = 'bold 5px sans-serif';
+  const truncName = r.name.length > 28 ? r.name.substring(0, 27) + '..' : r.name;
+  X.fillText(truncName, 0, 28);
+  X.restore();
+  // Post-play navigation buttons (visible during reveal)
+  if (prog > 0.3 && prog < 0.85) {
+    X.save();
+    X.globalAlpha = Math.min(1, (prog - 0.3) * 3);
+    const btnY = H / 2 + 60;
+    // Dashboard button
+    X.fillStyle = 'rgba(40,40,80,0.9)';
+    X.beginPath(); X.roundRect(W / 2 - 140, btnY, 125, 28, 6); X.fill();
+    X.strokeStyle = '#6a6a8a'; X.lineWidth = 1;
+    X.beginPath(); X.roundRect(W / 2 - 140, btnY, 125, 28, 6); X.stroke();
+    X.fillStyle = '#ffd740'; X.font = 'bold 10px sans-serif'; X.textAlign = 'center';
+    X.fillText('\u{1F4CA} Dashboard', W / 2 - 77, btnY + 18);
+    // Companion button
+    X.fillStyle = 'rgba(40,40,80,0.9)';
+    X.beginPath(); X.roundRect(W / 2 + 15, btnY, 125, 28, 6); X.fill();
+    X.strokeStyle = '#6a6a8a'; X.lineWidth = 1;
+    X.beginPath(); X.roundRect(W / 2 + 15, btnY, 125, 28, 6); X.stroke();
+    X.fillStyle = '#b388ff'; X.font = 'bold 10px sans-serif'; X.textAlign = 'center';
+    X.fillText('\u{1F95A} Companion', W / 2 + 78, btnY + 18);
+    X.restore();
+  }
+}
+function drawTokenDepletedOverlay() {
+  if (!showTokenDepletedOverlay) return;
+  X.save();
+  X.fillStyle = 'rgba(5,5,16,0.88)';
+  X.fillRect(0, 0, W, H);
+  X.textAlign = 'center';
+  X.textBaseline = 'middle';
+  // Friendly message
+  X.fillStyle = '#ff6ec7';
+  X.font = 'bold 22px sans-serif';
+  X.shadowColor = '#ff6ec7';
+  X.shadowBlur = 20;
+  X.fillText('No More Plays Today!', W / 2, H / 2 - 60);
+  X.shadowBlur = 0;
+  X.fillStyle = '#8888aa';
+  X.font = '13px sans-serif';
+  X.fillText('Come back tomorrow for 3 fresh tokens \u{1FA99}', W / 2, H / 2 - 25);
+  X.fillText("In the meantime, check out what you've collected!", W / 2, H / 2 + 0);
+  // Buttons
+  const btnY = H / 2 + 30;
+  // Dashboard
+  X.fillStyle = 'rgba(40,40,80,0.95)';
+  X.beginPath(); X.roundRect(W / 2 - 140, btnY, 125, 30, 8); X.fill();
+  X.strokeStyle = '#ffd740'; X.lineWidth = 1.5;
+  X.beginPath(); X.roundRect(W / 2 - 140, btnY, 125, 30, 8); X.stroke();
+  X.fillStyle = '#ffd740'; X.font = 'bold 12px sans-serif';
+  X.fillText('\u{1F4CA} Dashboard', W / 2 - 77, btnY + 17);
+  // Companion
+  X.fillStyle = 'rgba(40,40,80,0.95)';
+  X.beginPath(); X.roundRect(W / 2 + 15, btnY, 125, 30, 8); X.fill();
+  X.strokeStyle = '#b388ff'; X.lineWidth = 1.5;
+  X.beginPath(); X.roundRect(W / 2 + 15, btnY, 125, 30, 8); X.stroke();
+  X.fillStyle = '#b388ff'; X.font = 'bold 12px sans-serif';
+  X.fillText('\u{1F95A} Companion', W / 2 + 78, btnY + 17);
+  X.restore();
+}
+function drawMegaOverlay() {
+  if (!isMega) return;
+  const t = realTime;
+  const grad = X.createRadialGradient(W / 2, H / 2, 100, W / 2, H / 2, 500);
+  grad.addColorStop(0, 'rgba(0,0,0,0)');
+  grad.addColorStop(1, `rgba(255,215,0,${0.08 + Math.sin(t * 3) * 0.04})`);
+  X.fillStyle = grad;
+  X.fillRect(0, 0, W, H);
   if (state !== 'idle') {
-    const gi = clawStrength;
-    const glowColor = isMega?`rgba(255,215,0,${gi*0.4})` :
-      gi>0.7?`rgba(0,230,118,${gi*0.3})`:gi>0.4?`rgba(255,171,64,${gi*0.3})`:`rgba(255,82,82,${gi*0.3})`;
-    ctx.fillStyle = glowColor;
-    ctx.beginPath(); ctx.arc(cx,cy+10,20+gi*10,0,Math.PI*2); ctx.fill();
+  const pulse = 0.5 + Math.sin(t * 5) * 0.5;
+  X.save();
+  X.font = 'bold 18px sans-serif';
+  X.textAlign = 'center';
+  X.fillStyle = `rgba(255,215,0,${pulse * 0.4})`;
+  X.shadowColor = '#ffd740';
+  X.shadowBlur = 20;
+  X.fillText('★ MEGA CLAW ★', W / 2, M.y + 35);
+  X.shadowBlur = 0;
+  X.restore();}
+}
+function render() {
+  X.clearRect(0, 0, W, H);
+  const bgGrad = X.createLinearGradient(0, 0, 0, H);
+  bgGrad.addColorStop(0, '#060612');
+  bgGrad.addColorStop(0.5, '#0a0a1a');
+  bgGrad.addColorStop(1, '#060612');
+  X.fillStyle = bgGrad;
+  X.fillRect(0, 0, W, H);
+  const glowPulse = 0.5 + Math.sin(realTime * 1.5) * 0.3;
+  const machGlow = X.createRadialGradient(W / 2, H / 2 - 30, 50, W / 2, H / 2 - 30, 400);
+  machGlow.addColorStop(0, `rgba(120,60,200,${0.03 * glowPulse})`);
+  machGlow.addColorStop(1, 'transparent');
+  X.fillStyle = machGlow;
+  X.fillRect(0, 0, W, H);
+  X.save();
+  X.translate(shakeX, shakeY);
+  const px = (clawX - W / 2) * 0.008;
+  const py = (clawY - M.railY) * 0.005;
+  X.save();
+  X.translate(px, py);
+  drawMachine();
+  drawDust();
+  drawDropPreview();
+  for (const p of prizes) {
+  if (p === heldPrize) continue;
+  const dist = M.floorY - (p.y + p.h);
+  if (dist < 60) {
+    const alpha = clamp(0.12 - dist * 0.002, 0, 0.12);
+    X.fillStyle = `rgba(0,0,0,${alpha})`;
+    X.fillRect(p.x + 5, M.floorY + 1, p.w - 10, 2);}
   }
-
-  // Claw head + arms with pendulum swing
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate(clawSwingAngle);
-
-  // Head
-  ctx.fillStyle = isMega?'#ffd700':'#6a6a8a';
-  ctx.fillRect(-10,-5,20,15);
-
-  // Arms
-  const oa = clawOpen * 0.5;
-  ctx.strokeStyle = isMega?'#ffd700':'#8a8aaa';
-  ctx.lineWidth = 3; ctx.lineCap = 'round';
-
-  // Left
-  ctx.beginPath(); ctx.moveTo(-5,10); ctx.lineTo(-12-oa*15,35); ctx.lineTo(-8-oa*10,42); ctx.stroke();
-  // Right
-  ctx.beginPath(); ctx.moveTo(5,10); ctx.lineTo(12+oa*15,35); ctx.lineTo(8+oa*10,42); ctx.stroke();
-  // Center
-  ctx.beginPath(); ctx.moveTo(0,10); ctx.lineTo(0,38); ctx.lineTo(0,43); ctx.stroke();
-
-  ctx.restore();
-}
-
-function drawCollection(now) {
-  if (collection.length === 0) return;
-  // Draw shelf area at bottom-left
-  const sx = 8, sy = H - 80;
-  ctx.fillStyle = 'rgba(20,20,40,0.7)';
-  ctx.beginPath(); ctx.roundRect(sx-4, sy-12, collection.length*38+8, 52, 6); ctx.fill();
-  ctx.strokeStyle = '#3a3a5a'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.roundRect(sx-4, sy-12, collection.length*38+8, 52, 6); ctx.stroke();
-
-  ctx.fillStyle = '#6a6a8a'; ctx.font = '6px "Press Start 2P"'; ctx.textAlign = 'left';
-  ctx.fillText('WON', sx, sy-4);
-
-  for (let i = 0; i < collection.length; i++) {
-    const c = collection[i];
-    const rc = RARITY_COLORS[c.rarity];
-    const cx = sx + i*38 + 16, cy2 = sy + 16;
-    ctx.fillStyle = rc.bg; ctx.strokeStyle = rc.border; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.roundRect(cx-14,cy2-14,28,34,3); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#fff'; ctx.font = '12px serif'; ctx.textAlign = 'center';
-    ctx.fillText(c.emoji||'★', cx, cy2+4);
-    ctx.fillStyle = rc.label; ctx.font = '5px "JetBrains Mono"';
-    ctx.fillText(c.rarity.substr(0,3).toUpperCase(), cx, cy2+16);
-  }
-}
-
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1,3),16)||200;
-  const g = parseInt(hex.slice(3,5),16)||100;
-  const b = parseInt(hex.slice(5,7),16)||200;
-  return `${r},${g},${b}`;
-}
-
-// ═══ INPUT ═══
+  for (const p of prizes) drawPrize(p);
+  drawClaw();
+  drawParticles();
+  X.restore(); // parallax
+  drawMegaOverlay();
+  if (screenFlashA > 0 && screenFlash) {
+  const rgb = hexToRGB(screenFlash);
+  X.fillStyle = `rgba(${rgb.join(',')},${screenFlashA})`;
+  X.fillRect(0, 0, W, H);}
+  X.restore(); // shake
+  drawWinReveal();
+  drawHUD();
+  drawCollection();
+  drawTokenDepletedOverlay();}
 const keys = {};
-window.addEventListener('keydown', e => {
+let lastTapTime = 0;
+addEventListener('keydown', e => {
+  if (e.repeat) return;
   keys[e.code] = true;
-  if (e.code==='Space') { e.preventDefault(); startDrop(); }
-  if (e.code==='KeyR') resetGame();
-});
-window.addEventListener('keyup', e => { keys[e.code]=false; });
-
-let touchStartX = 0, touchActive = false;
-canvas.addEventListener('touchstart', e => {
-  e.preventDefault(); audioCtx.resume(); startAmbientHum();
+  if (e.code === 'Space') {e.preventDefault(); startDrop();}
+  if (e.code === 'KeyR') resetGame();});
+addEventListener('keyup', e => {keys[e.code] = false;});
+let touchActive = false, touchStartY = 0;
+C.addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (!gameStarted) return;
   const touch = e.touches[0];
-  const rect = canvas.getBoundingClientRect();
-  const y = (touch.clientY-rect.top)/rect.height*H;
-  if (y > H*0.7) startDrop();
-  else { touchStartX = (touch.clientX-rect.left)/rect.width*W; touchActive = true; }
-});
-canvas.addEventListener('touchmove', e => {
+  const rect = C.getBoundingClientRect();
+  const tx = (touch.clientX - rect.left) / rect.width;
+  const ty = (touch.clientY - rect.top) / rect.height;
+  touchStartY = touch.clientY;
+  touchActive = true;
+  const now = Date.now();
+  if (now - lastTapTime < 300) {startDrop(); lastTapTime = 0; return;}
+  lastTapTime = now;
+  if (tx < 0.5) moveDir = -1;
+  else moveDir = 1;});
+C.addEventListener('touchmove', e => {
   e.preventDefault();
   if (!touchActive) return;
   const touch = e.touches[0];
-  const rect = canvas.getBoundingClientRect();
-  const x = (touch.clientX-rect.left)/rect.width*W;
-  const dx = x-touchStartX;
-  if (Math.abs(dx)>5) { moveDir = dx>0?1:-1; touchStartX = x; }
-});
-canvas.addEventListener('touchend', () => { touchActive=false; moveDir=0; });
-
-function resetGame() {
-  state='idle'; clawX=W/2; clawY=RAIL_Y; clawOpen=1; clawVelX=0;
-  heldPrize=null; isMega=false; slowMoTimer=0;
-  clawSwingAngle=0; clawSwingVel=0;
-  spawnPrizes();
-}
-
-// ═══ GAME LOOP ═══
-function gameLoop() {
-  if (state==='idle') {
-    if (keys['ArrowLeft']||keys['KeyA']) moveDir=-1;
-    else if (keys['ArrowRight']||keys['KeyD']) moveDir=1;
-    else if (!touchActive) moveDir=0;
+  const dy = touch.clientY - touchStartY;
+  if (dy > 50) {startDrop(); touchActive = false; moveDir = 0; return;}
+  const rect = C.getBoundingClientRect();
+  const tx = (touch.clientX - rect.left) / rect.width;
+  if (tx < 0.4) moveDir = -1;
+  else if (tx > 0.6) moveDir = 1;
+  else moveDir = 0;});
+C.addEventListener('touchend', () => {touchActive = false; moveDir = 0;});
+C.addEventListener('click', e => {
+  const rect = C.getBoundingClientRect();
+  const cx = (e.clientX - rect.left) / rect.width * W;
+  const cy = (e.clientY - rect.top) / rect.height * H;
+  // Top bar "← Dashboard" link
+  if (cx < 120 && cy < 14) {
+    window.location.href = 'dashboard.html';
+    return;
   }
-  update(); render();
-  requestAnimationFrame(gameLoop);
-}
-
-if ('ontouchstart' in window) {
-  document.getElementById('controlsHint').textContent='Drag to move · Tap bottom to drop';
-}
-
+  // Token depleted overlay buttons
+  if (showTokenDepletedOverlay) {
+    const btnY = H / 2 + 30;
+    const btnH = 30;
+    // Dashboard button (left)
+    if (cx > W / 2 - 140 && cx < W / 2 - 10 && cy > btnY && cy < btnY + btnH) {
+      window.location.href = 'dashboard.html'; return;
+    }
+    // Companion button (right)
+    if (cx > W / 2 + 10 && cx < W / 2 + 140 && cy > btnY && cy < btnY + btnH) {
+      window.location.href = 'companion.html'; return;
+    }
+    // Close overlay on any other click
+    showTokenDepletedOverlay = false;
+    return;
+  }
+  // Win reveal post-play buttons
+  if (revealCard && revealCard.timer > revealCard.duration * 0.5) {
+    const btnY2 = H / 2 + 60;
+    if (cx > W / 2 - 140 && cx < W / 2 - 10 && cy > btnY2 && cy < btnY2 + 28) {
+      window.location.href = 'dashboard.html'; return;
+    }
+    if (cx > W / 2 + 10 && cx < W / 2 + 140 && cy > btnY2 && cy < btnY2 + 28) {
+      window.location.href = 'companion.html'; return;
+    }
+  }
+});
+function startDrop() {
+  if (state !== 'idle' || !gameStarted) return;
+  // Check tokens
+  tokenData = getTokenData();
+  if (tokenData.tokens <= 0) {
+    showTokenDepletedOverlay = true;
+    return;
+  }
+  // Consume a token
+  tokenData.tokens--;
+  saveTokenData(tokenData);
+  initAudio();
+  AC.resume();
+  if (!musicPlaying) {sndAmbient(); startMusic();}
+  plays++;
+  hudPop.plays = 10;
+  isMega = (plays % MEGA_EVERY === 0);
+  if (isMega) {
+  sndMega();
+  doFlash('#ffd740', 0.35);
+  doShake(5, 30);
+  spawnElectric(clawX, clawY, 30);}
+  clawStrength = rollStrength();
+  state = 'anticipation';
+  slipTimer = 0;
+  streak = isMega ? streak : (heldPrize ? streak : streak); // preserve streak
+  if (AC) tone(120, 0.08, 'square', 0.08);}
+function resetGame() {
+  state = 'idle'; clawX = W / 2; clawY = M.railY;
+  clawVelX = 0; clawTargetOpen = 1; clawOpen = 1;
+  clawSwingAngle = 0; clawSwingVel = 0;
+  heldPrize = null; isMega = false; megaScale = 1;
+  slowMoTimer = 0; slowMo = 1;
+  revealCard = null;
+  spawnPrizes();}
+let gameStarted = false;
+function initGame() {
+  document.getElementById('startScreen').style.display = 'none';
+  gameStarted = true;
+  initAudio();
+  AC.resume();
+  sndAmbient();
+  startMusic();
+  generateFelt();
+  spawnPrizes();
+  initDust();}
+function gameLoop() {
+  if (!gameStarted) {requestAnimationFrame(gameLoop); render(); return;}
+  if (state === 'idle') {
+  if (keys['ArrowLeft'] || keys['KeyA']) moveDir = -1;
+  else if (keys['ArrowRight'] || keys['KeyD']) moveDir = 1;
+  else if (!touchActive) moveDir = 0;}
+  update();
+  render();
+  requestAnimationFrame(gameLoop);}
+generateFelt();
+spawnPrizes();
+initDust();
 gameLoop();
 </script>
 </body>
