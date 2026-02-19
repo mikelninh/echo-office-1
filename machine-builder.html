@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Echo's Vault — Machine Builder</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07071a;--surface:#10102a;--surface2:#18183a;--border:#2a2a55;
+  --text:#dde0ff;--dim:#6060a0;--accent:#ff6ec7;--gold:#ffd700;
+  --green:#00e676;--purple:#b388ff;--cyan:#18ffff;--orange:#ffab40;
+}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace,sans-serif;min-height:100vh;overflow-x:hidden}
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:rgba(7,7,26,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:0}
+.nav-title{font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-right:auto}
+.nav-link{font-size:11px;color:var(--dim);text-decoration:none;padding:6px 14px;border-radius:6px;transition:all .2s}
+.nav-link:hover{color:var(--text);background:var(--surface2)}
+/* GRID BACKGROUND */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:.2;pointer-events:none;z-index:0}
+/* LAYOUT */
+.layout{position:relative;z-index:1;display:grid;grid-template-columns:260px 1fr 280px;gap:20px;padding:20px 20px 0;max-width:1200px;margin:0 auto;align-items:start}
+/* PANELS */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.panel-title{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent)}
+/* CENTER */
+.center-col{display:flex;flex-direction:column;align-items:center;gap:14px}
+/* CANVAS WRAPPER */
+.canvas-wrap{position:relative;border-radius:18px;overflow:hidden;box-shadow:0 0 60px rgba(255,110,199,.25),0 0 120px rgba(179,136,255,.12);border:1px solid var(--border)}
+canvas#machineCanvas{display:block;image-rendering:pixelated}
+/* SKINS */
+.skins{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.skin-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border-radius:10px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .2s;font-size:11px;color:var(--dim);min-width:72px}
+.skin-btn:hover{border-color:var(--dim);color:var(--text)}
+.skin-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(255,110,199,.1);box-shadow:0 0 12px rgba(255,110,199,.3)}
+.skin-icon{font-size:20px}
+/* PRIZE STOCKING */
+.prize-pool{display:flex;flex-wrap:wrap;gap:6px;min-height:80px;background:var(--surface2);border-radius:10px;padding:10px;border:2px dashed var(--border);position:relative}
+.prize-pool.dragover{border-color:var(--accent);background:rgba(255,110,199,.05)}
+.prize-badge{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:10px;background:var(--surface);border:1px solid var(--border);cursor:pointer;transition:all .2s}
+.prize-badge:hover{border-color:#ff5252;background:rgba(255,82,82,.1)}
+.prize-badge.remove:hover::after{content:'✕';margin-left:4px}
+.collection-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
+.collection-list::-webkit-scrollbar{width:4px}
+.collection-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.coll-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;transition:all .2s;font-size:11px}
+.coll-item:hover{border-color:var(--accent);background:rgba(255,110,199,.08)}
+.coll-item.in-pool{opacity:.4;pointer-events:none}
+.coll-rarity{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+/* SETTINGS */
+label.setting-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+input[type=text].setting-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:inherit;font-size:12px;outline:none;transition:border-color .2s}
+input[type=text].setting-input:focus{border-color:var(--accent)}
+.price-row{display:flex;gap:6px;flex-wrap:wrap}
+.price-btn{padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--dim);font-family:inherit;font-size:11px;cursor:pointer;transition:all .2s}
+.price-btn:hover{border-color:var(--dim);color:var(--text)}
+.price-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,.1)}
+.diff-row{display:flex;flex-direction:column;gap:6px}
+.diff-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .2s;text-align:left;width:100%}
+.diff-btn:hover{border-color:var(--dim)}
+.diff-btn.active{border-color:var(--purple);background:rgba(179,136,255,.1)}
+.diff-btn .diff-icon{font-size:16px}
+.diff-btn .diff-name{font-size:11px;font-weight:700;color:var(--text)}
+.diff-btn .diff-desc{font-size:9px;color:var(--dim);margin-top:2px}
+.diff-info{margin-left:auto;font-size:9px;color:var(--accent)}
+/* SLIDER */
+.slider-wrap{display:flex;align-items:center;gap:10px}
+input[type=range]{flex:1;accent-color:var(--accent);height:4px}
+.slider-val{font-size:11px;color:var(--accent);min-width:28px;text-align:right}
+/* CLAW BAR (visual strength) */
+.claw-strength-bar{height:8px;border-radius:4px;background:var(--surface2);border:1px solid var(--border);overflow:hidden;margin-top:4px}
+.claw-strength-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--purple),var(--accent));transition:width .3s}
+/* ACTION BUTTONS */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;transition:all .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn-test{background:var(--surface2);border:1px solid var(--purple);color:var(--purple)}
+.btn-test:hover{background:rgba(179,136,255,.1);box-shadow:0 0 20px rgba(179,136,255,.3)}
+.btn-publish{background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;width:100%;font-size:13px;padding:14px;box-shadow:0 0 30px rgba(255,110,199,.3)}
+.btn-publish:hover{box-shadow:0 0 50px rgba(255,110,199,.5);transform:translateY(-2px)}
+.btn-update{background:linear-gradient(135deg,var(--gold),var(--orange));color:#000}
+/* PUBLISH STATUS */
+.publish-status{text-align:center;font-size:11px;color:var(--green);display:none;padding:10px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);border-radius:10px}
+.publish-status a{color:var(--green)}
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.stat-label{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:2px}
+.stat-value{font-size:20px;font-weight:700;color:var(--text);margin-top:4px}
+.stat-note{font-size:9px;color:var(--dim);text-align:center;padding:10px;background:rgba(255,110,199,.04);border:1px dashed var(--border);border-radius:8px;line-height:1.6}
+/* FOOTER BOTTOM */
+.bottom-section{position:relative;z-index:1;max-width:1200px;margin:20px auto;padding:0 20px 40px}
+/* TEST overlay msg */
+.test-msg{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:var(--cyan);font-size:11px;padding:6px 14px;border-radius:20px;border:1px solid var(--cyan);pointer-events:none;white-space:nowrap;opacity:0;transition:opacity .3s;z-index:10}
+.test-msg.show{opacity:1}
+/* EMPTY COLLECTION */
+.empty-coll{text-align:center;font-size:11px;color:var(--dim);padding:20px 10px;line-height:1.8}
+.empty-coll a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+<!-- NAV -->
+<nav class="nav">
+  <span class="nav-title">🎰 Machine Builder</span>
+  <a href="index.html" class="nav-link">← My Shop</a>
+  <a href="index.html#neighborhood" class="nav-link">🏘️ Neighborhood</a>
+  <a href="dashboard.html" class="nav-link">📊 Dashboard</a>
+</nav>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT: PRIZE STOCKING -->
+  <div class="panel" id="leftPanel">
+    <div class="panel-title">🎁 Prize Stocking</div>
+
+    <div>
+      <label class="setting-label">In Machine <span id="prizeCount" style="color:var(--accent)">0</span>/20</label>
+      <div class="prize-pool" id="prizePool" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="dropToPrize(event)">
+        <span id="poolEmpty" style="font-size:10px;color:var(--dim);align-self:center;width:100%;text-align:center">Drop cards here…</span>
+      </div>
+    </div>
+
+    <div>
+      <label class="setting-label" style="margin-bottom:8px;display:block">Your Collection</label>
+      <div class="collection-list" id="collectionList">
+        <div class="empty-coll" id="emptyCollMsg">
+          No cards yet!<br>
+          <a href="claw.html">Win cards first! → Play the Claw</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER: CANVAS + SKINS + ACTIONS -->
+  <div class="center-col">
+    <!-- Canvas -->
+    <div class="canvas-wrap">
+      <canvas id="machineCanvas" width="400" height="500"></canvas>
+      <div class="test-msg" id="testMsg">🎮 Test Play…</div>
+    </div>
+
+    <!-- Skins -->
+    <div class="skins" id="skinRow">
+      <button class="skin-btn active" data-skin="classic" onclick="setSkin('classic',this)"><span class="skin-icon">🎰</span>Classic</button>
+      <button class="skin-btn" data-skin="neon" onclick="setSkin('neon',this)"><span class="skin-icon">💜</span>Neon</button>
+      <button class="skin-btn" data-skin="gold" onclick="setSkin('gold',this)"><span class="skin-icon">🏆</span>Gold</button>
+      <button class="skin-btn" data-skin="crystal" onclick="setSkin('crystal',this)"><span class="skin-icon">🌊</span>Crystal</button>
+      <button class="skin-btn" data-skin="inferno" onclick="setSkin('inferno',this)"><span class="skin-icon">🔥</span>Inferno</button>
+    </div>
+
+    <!-- Action row -->
+    <div style="display:flex;gap:10px;width:100%">
+      <button class="btn btn-test" style="flex:1" onclick="testPlay()">🎮 Test Play</button>
+    </div>
+  </div>
+
+  <!-- RIGHT: SETTINGS -->
+  <div class="panel">
+    <div class="panel-title">⚙️ Settings</div>
+
+    <!-- Machine Name -->
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label class="setting-label">Machine Name</label>
+      <input type="text" class="setting-input" id="machineName" maxlength="30" placeholder="My Claw Machine" oninput="updateName()" value="Echo's Vault">
+    </div>
+
+    <!-- Play Price -->
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label class="setting-label">Play Price</label>
+      <div class="price-row" id="priceRow"></div>
+    </div>
+
+    <!-- Difficulty -->
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label class="setting-label">Difficulty</label>
+      <div class="diff-row">
+        <button class="diff-btn active" data-diff="easy" onclick="setDiff('easy',this)">
+          <span class="diff-icon">😊</span>
+          <div><div class="diff-name">Easy</div><div class="diff-desc">Generous! Visitors love winning</div></div>
+          <span class="diff-info">70%</span>
+        </button>
+        <button class="diff-btn" data-diff="normal" onclick="setDiff('normal',this)">
+          <span class="diff-icon">😐</span>
+          <div><div class="diff-name">Normal</div><div class="diff-desc">Balanced risk/reward</div></div>
+          <span class="diff-info">40%</span>
+        </button>
+        <button class="diff-btn" data-diff="hard" onclick="setDiff('hard',this)">
+          <span class="diff-icon">😈</span>
+          <div><div class="diff-name">Hard</div><div class="diff-desc">Only the worthy! Higher revenue</div></div>
+          <span class="diff-info">15%</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Claw Strength -->
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label class="setting-label">Claw Strength</label>
+      <div class="slider-wrap">
+        <span style="font-size:12px">🦾</span>
+        <input type="range" id="clawStrength" min="1" max="10" value="5" oninput="updateStrength()">
+        <span class="slider-val" id="strengthVal">5</span>
+      </div>
+      <div class="claw-strength-bar"><div class="claw-strength-fill" id="strengthFill" style="width:50%"></div></div>
+    </div>
+
+    <!-- Publish -->
+    <button class="btn btn-publish" id="publishBtn" onclick="publishMachine()">🚀 Publish Machine</button>
+    <div class="publish-status" id="publishStatus">
+      ✅ Machine published! <a href="index.html">Visit your shop →</a>
+    </div>
+  </div>
+</div>
+
+<!-- STATS BOTTOM -->
+<div class="bottom-section">
+  <div class="panel">
+    <div class="panel-title">📊 Machine Stats</div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Total Plays</div><div class="stat-value" id="statPlays">0</div></div>
+      <div class="stat-card"><div class="stat-label">Revenue Earned</div><div class="stat-value" id="statRevenue">◈0</div></div>
+      <div class="stat-card"><div class="stat-label">Prizes Won</div><div class="stat-value" id="statPrizes">0/<span id="statStocked">0</span></div></div>
+      <div class="stat-card"><div class="stat-label">Avg Session</div><div class="stat-value">--</div></div>
+    </div>
+    <div class="stat-note">🔮 Stats tracking coming with multiplayer launch! — Your machine is being set up for the neighborhood.</div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+const cfg = {
+  skin: 'classic',
+  name: "Echo's Vault",
+  price: 3,
+  diff: 'easy',
+  strength: 5
+};
+let prizes = [];
+let collection = [];
+let isPublished = false;
+let testAnim = null;
+
+// ─── SKINS DEFINITION ────────────────────────────────────────────────────────
+const SKINS = {
+  classic: {
+    bodyTop:'#cc1111',bodyBot:'#990000',trim:'#c0c0c0',trimShine:'#ffffff',
+    glass:'rgba(160,220,255,0.18)',glassEdge:'#5599bb',
+    sign:'#ffee00',signText:'#000000',
+    particle:null,particleColor:null
+  },
+  neon: {
+    bodyTop:'#5500aa',bodyBot:'#330066',trim:'#ff00ff',trimShine:'#ff88ff',
+    glass:'rgba(200,100,255,0.15)',glassEdge:'#cc44ff',
+    sign:'#ff00cc',signText:'#ffffff',
+    particle:'led',particleColor:'#ff00ff'
+  },
+  gold: {
+    bodyTop:'#b8860b',bodyBot:'#7a5a00',trim:'#ffd700',trimShine:'#fffacd',
+    glass:'rgba(255,215,0,0.12)',glassEdge:'#ccaa00',
+    sign:'#ffd700',signText:'#000000',
+    particle:'diamond',particleColor:'#ffd700'
+  },
+  crystal: {
+    bodyTop:'#0066aa',bodyBot:'#004488',trim:'#88ddff',trimShine:'#ffffff',
+    glass:'rgba(100,200,255,0.22)',glassEdge:'#00aaff',
+    sign:'#00ccff',signText:'#ffffff',
+    particle:'sparkle',particleColor:'#88eeff'
+  },
+  inferno: {
+    bodyTop:'#330000',bodyBot:'#110000',trim:'#ff4400',trimShine:'#ff8800',
+    glass:'rgba(255,80,0,0.12)',glassEdge:'#cc2200',
+    sign:'#ff2200',signText:'#ffffff',
+    particle:'ember',particleColor:'#ff6600'
+  }
+};
+
+// Particles
+let particles = [];
+
+// ─── CANVAS SETUP ────────────────────────────────────────────────────────────
+const canvas = document.getElementById('machineCanvas');
+const ctx = canvas.getContext('2d');
+const W = 400, H = 500;
+
+// ─── CLAW ANIMATION STATE ────────────────────────────────────────────────────
+let clawAnim = {
+  x: 200, y: 80, // current claw x,y
+  targetX: 200, phase: 'idle', // idle | drop | grab | lift | release
+  t: 0, grabY: 320, prizeEmoji: null, grabSuccess: false
+};
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function init() {
+  // Load config
+  try {
+    const saved = JSON.parse(localStorage.getItem('echovault_machine_config') || '{}');
+    if (saved.skin) cfg.skin = saved.skin;
+    if (saved.name) cfg.name = saved.name;
+    if (saved.price) cfg.price = saved.price;
+    if (saved.diff) cfg.diff = saved.diff;
+    if (saved.strength) cfg.strength = saved.strength;
+    if (saved.published) isPublished = true;
+  } catch(e) {}
+
+  // Load prizes
+  try { prizes = JSON.parse(localStorage.getItem('echovault_machine_prizes') || '[]'); } catch(e) {}
+
+  // Load collection
+  try { collection = JSON.parse(localStorage.getItem('echovault_collection') || '[]'); } catch(e) {}
+
+  // Apply cfg to UI
+  document.getElementById('machineName').value = cfg.name;
+  document.getElementById('clawStrength').value = cfg.strength;
+  document.getElementById('strengthVal').textContent = cfg.strength;
+  document.getElementById('strengthFill').style.width = (cfg.strength * 10) + '%';
+
+  // Activate skin btn
+  document.querySelectorAll('.skin-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.skin === cfg.skin);
+  });
+
+  // Price buttons
+  buildPriceRow();
+
+  // Diff buttons
+  document.querySelectorAll('.diff-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.diff === cfg.diff);
+  });
+
+  // Publish state
+  if (isPublished) {
+    document.getElementById('publishBtn').textContent = '🔄 Update Machine';
+    document.getElementById('publishBtn').className = 'btn btn-update';
+    document.getElementById('publishStatus').style.display = 'block';
+  }
+
+  renderCollection();
+  renderPrizePool();
+  spawnParticles();
+
+  // Start render loop
+  requestAnimationFrame(loop);
+}
+
+function buildPriceRow() {
+  const row = document.getElementById('priceRow');
+  row.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    const b = document.createElement('button');
+    b.className = 'price-btn' + (i === cfg.price ? ' active' : '');
+    b.textContent = '◈' + i;
+    b.onclick = () => setPrice(i, b);
+    row.appendChild(b);
+  }
+}
+
+// ─── PARTICLES ───────────────────────────────────────────────────────────────
+function spawnParticles() {
+  particles = [];
+  const skin = SKINS[cfg.skin];
+  if (!skin.particle) return;
+  const count = skin.particle === 'ember' ? 30 : 15;
+  for (let i = 0; i < count; i++) {
+    particles.push(newParticle(skin));
+  }
+}
+
+function newParticle(skin) {
+  return {
+    x: 30 + Math.random() * 340,
+    y: 130 + Math.random() * 260,
+    vx: (Math.random() - 0.5) * 0.6,
+    vy: skin.particle === 'ember' ? -0.5 - Math.random() * 1.5 : (Math.random() - 0.5) * 0.4,
+    r: 1.5 + Math.random() * 3,
+    life: Math.random(),
+    type: skin.particle,
+    color: skin.particleColor
+  };
+}
+
+function updateParticles() {
+  const skin = SKINS[cfg.skin];
+  if (!skin.particle) { particles = []; return; }
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    p.life += 0.008;
+    if (p.life > 1 || p.y < 80 || p.y > 430 || p.x < 20 || p.x > 380) {
+      Object.assign(p, newParticle(skin));
+    }
+  });
+}
+
+// ─── DRAW MACHINE ─────────────────────────────────────────────────────────────
+function drawMachine() {
+  const skin = SKINS[cfg.skin];
+  ctx.clearRect(0, 0, W, H);
+
+  // Dark BG
+  const bg = ctx.createRadialGradient(200, 250, 30, 200, 250, 280);
+  bg.addColorStop(0, '#141428');
+  bg.addColorStop(1, '#070714');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // ── MACHINE BODY ──
+  // Side panels
+  const bodyGrad = ctx.createLinearGradient(20, 120, 380, 490);
+  bodyGrad.addColorStop(0, skin.bodyTop);
+  bodyGrad.addColorStop(1, skin.bodyBot);
+
+  // Main body
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(18, 108, 364, 370, [4,4,12,12]);
+  ctx.fillStyle = bodyGrad;
+  ctx.fill();
+  // Highlight stripe
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.fillRect(18, 108, 30, 370);
+  ctx.fillRect(352, 108, 14, 370);
+  ctx.restore();
+
+  // ── GLASS CASE ──
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(38, 128, 324, 270, 6);
+  ctx.fillStyle = skin.glass;
+  ctx.fill();
+  ctx.strokeStyle = skin.glassEdge;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // Glass shimmer
+  const shim = ctx.createLinearGradient(38, 128, 120, 200);
+  shim.addColorStop(0, 'rgba(255,255,255,0.12)');
+  shim.addColorStop(0.5, 'rgba(255,255,255,0.02)');
+  shim.addColorStop(1, 'transparent');
+  ctx.fillStyle = shim;
+  ctx.fill();
+  ctx.restore();
+
+  // ── NEON GLOW edges (Neon skin) ──
+  if (cfg.skin === 'neon') {
+    ctx.save();
+    ctx.shadowColor = skin.particleColor;
+    ctx.shadowBlur = 18;
+    ctx.strokeStyle = skin.particleColor;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(38, 128, 324, 270, 6);
+    ctx.stroke();
+    // LED strips
+    for (let y = 145; y < 380; y += 30) {
+      ctx.globalAlpha = 0.18;
+      ctx.strokeStyle = '#ff00ff';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(39, y); ctx.lineTo(361, y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // ── INFERNO FLAME BASE ──
+  if (cfg.skin === 'inferno') {
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    for (let x = 40; x < 370; x += 20) {
+      const h2 = 18 + Math.sin(Date.now() / 400 + x) * 10;
+      const fg = ctx.createLinearGradient(x, 395, x, 395 - h2);
+      fg.addColorStop(0, '#ff4400');
+      fg.addColorStop(1, 'transparent');
+      ctx.fillStyle = fg;
+      ctx.fillRect(x - 8, 395 - h2, 16, h2);
+    }
+    ctx.restore();
+  }
+
+  // ── CRYSTAL ICE VEINS ──
+  if (cfg.skin === 'crystal') {
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.strokeStyle = '#88eeff';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 6; i++) {
+      ctx.beginPath();
+      const sx = 50 + i * 55, sy = 130;
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(sx + 20, sy + 50);
+      ctx.lineTo(sx - 10, sy + 90);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // ── PRIZES IN GLASS ──
+  drawPrizes();
+
+  // ── PARTICLES ──
+  particles.forEach(p => {
+    ctx.save();
+    ctx.globalAlpha = 0.6 * (1 - Math.abs(p.life - 0.5) * 2);
+    if (p.type === 'sparkle') {
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (p.type === 'ember') {
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * 0.7, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (p.type === 'led') {
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 10;
+      ctx.fillRect(p.x - p.r / 2, p.y - p.r / 2, p.r, p.r);
+    } else if (p.type === 'diamond') {
+      ctx.fillStyle = p.color;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillRect(-p.r, -p.r, p.r * 2, p.r * 2);
+      ctx.restore();
+    }
+    ctx.restore();
+  });
+
+  // ── CHROME TRIM ──
+  ctx.save();
+  ctx.fillStyle = skin.trim;
+  // Top trim
+  ctx.fillRect(18, 108, 364, 14);
+  // Bottom trim
+  ctx.fillRect(18, 462, 364, 14);
+  // Side accents
+  ctx.fillRect(18, 108, 12, 370);
+  ctx.fillRect(370, 108, 12, 370);
+  // Shine on trim
+  ctx.fillStyle = skin.trimShine;
+  ctx.globalAlpha = 0.4;
+  ctx.fillRect(18, 108, 364, 3);
+  ctx.fillRect(18, 108, 3, 370);
+  ctx.restore();
+
+  // ── SIGN / TOPPER ──
+  ctx.save();
+  const signGrad = ctx.createLinearGradient(60, 60, 340, 105);
+  signGrad.addColorStop(0, skin.sign);
+  signGrad.addColorStop(1, shadeColor(skin.sign, -30));
+  ctx.fillStyle = signGrad;
+  ctx.beginPath();
+  ctx.roundRect(55, 58, 290, 48, 8);
+  ctx.fill();
+  // Sign border
+  ctx.strokeStyle = skin.trim;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // Shine
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.beginPath();
+  ctx.roundRect(57, 60, 286, 10, [6,6,0,0]);
+  ctx.fill();
+  // Sign text
+  ctx.fillStyle = skin.signText;
+  ctx.font = 'bold 15px monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const label = cfg.name.length > 20 ? cfg.name.substring(0, 20) + '…' : cfg.name;
+  ctx.fillText(label.toUpperCase(), 200, 82);
+  ctx.restore();
+
+  // ── PRICE DISPLAY ──
+  ctx.save();
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.roundRect(140, 410, 120, 34, 6);
+  ctx.fill();
+  ctx.fillStyle = '#ffcc00';
+  ctx.font = 'bold 14px monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('◈' + cfg.price + ' PER PLAY', 200, 427);
+  ctx.restore();
+
+  // ── CLAW RAIL ──
+  ctx.save();
+  ctx.strokeStyle = skin.trim;
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(38, 140); ctx.lineTo(362, 140);
+  ctx.stroke();
+  ctx.fillStyle = skin.trim;
+  ctx.fillRect(36, 134, 12, 12);
+  ctx.fillRect(352, 134, 12, 12);
+  ctx.restore();
+
+  // ── CLAW ──
+  drawClaw(skin);
+
+  // ── MACHINE BASE / LEGS ──
+  ctx.save();
+  ctx.fillStyle = skin.bodyBot;
+  ctx.fillRect(40, 476, 50, 20);
+  ctx.fillRect(310, 476, 50, 20);
+  ctx.fillStyle = skin.trim;
+  ctx.fillRect(42, 492, 46, 4);
+  ctx.fillRect(312, 492, 46, 4);
+  ctx.restore();
+}
+
+function drawClaw(skin) {
+  const cx = clawAnim.x;
+  const cy = clawAnim.y;
+
+  ctx.save();
+  // Wire from rail to claw
+  ctx.strokeStyle = skin.trim;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(cx, 140);
+  ctx.lineTo(cx, cy - 10);
+  ctx.stroke();
+
+  // Claw body
+  ctx.fillStyle = skin.trim;
+  ctx.beginPath();
+  ctx.roundRect(cx - 12, cy - 10, 24, 12, 3);
+  ctx.fill();
+
+  // Claw prongs (3)
+  const openAngle = clawAnim.phase === 'grab' || clawAnim.phase === 'lift' ? 0 : 22;
+  const prongs = [-1, 0, 1];
+  prongs.forEach((offset, i) => {
+    ctx.save();
+    ctx.translate(cx + offset * 8, cy + 2);
+    ctx.rotate((i - 1) * (openAngle * Math.PI / 180));
+    ctx.fillStyle = skin.trim;
+    ctx.shadowColor = skin.trimShine;
+    ctx.shadowBlur = 4;
+    ctx.beginPath();
+    ctx.moveTo(-2, 0); ctx.lineTo(2, 0); ctx.lineTo(1, 16); ctx.lineTo(-1, 16);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // If carrying a prize
+  if (clawAnim.phase === 'lift' && clawAnim.prizeEmoji) {
+    ctx.font = '18px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(clawAnim.prizeEmoji, cx, cy + 18);
+  }
+
+  ctx.restore();
+}
+
+function drawPrizes() {
+  if (prizes.length === 0) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(150,150,200,0.3)';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Stock prizes →', 200, 270);
+    ctx.restore();
+    return;
+  }
+  // Scatter prizes in glass area (38-362 x, 140-395 y)
+  prizes.forEach((p, i) => {
+    const cols = 6;
+    const gx = 62 + (i % cols) * 52;
+    const gy = 165 + Math.floor(i / cols) * 50;
+    ctx.font = '22px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // Gentle float
+    const wobble = Math.sin(Date.now() / 900 + i * 1.2) * 4;
+    ctx.fillText(p.emoji || '🎁', gx, gy + wobble);
+  });
+}
+
+function shadeColor(hex, amt) {
+  // simple shade: only works with hex
+  try {
+    let n = parseInt(hex.slice(1), 16);
+    let r = Math.min(255, Math.max(0, (n >> 16) + amt));
+    let g = Math.min(255, Math.max(0, ((n >> 8) & 0xff) + amt));
+    let b = Math.min(255, Math.max(0, (n & 0xff) + amt));
+    return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+  } catch(e) { return hex; }
+}
+
+// ─── CLAW ANIMATION ──────────────────────────────────────────────────────────
+function idleClaw(ts) {
+  // Slow pan left-right
+  clawAnim.x = 200 + Math.sin(ts / 2000) * 60;
+  clawAnim.y = 80;
+  clawAnim.phase = 'idle';
+}
+
+function testPlay() {
+  if (testAnim) return;
+  const msg = document.getElementById('testMsg');
+  msg.classList.add('show');
+  const hasPrize = prizes.length > 0;
+  const prizeEmoji = hasPrize ? (prizes[Math.floor(Math.random() * prizes.length)].emoji || '🎁') : '💨';
+  const diffRates = { easy: 0.7, normal: 0.4, hard: 0.15 };
+  const win = Math.random() < diffRates[cfg.diff];
+
+  let startX = clawAnim.x;
+  let targetX = 80 + Math.random() * 240;
+  let phase = 0;
+  let phaseT = 0;
+  const phases = ['move', 'drop', 'grab', 'lift', 'return'];
+
+  testAnim = setInterval(() => {
+    phaseT += 0.03;
+    if (phase === 0) { // move
+      clawAnim.x = startX + (targetX - startX) * Math.min(phaseT / 0.7, 1);
+      clawAnim.y = 80;
+      clawAnim.phase = 'idle';
+      if (phaseT >= 0.7) { phase = 1; phaseT = 0; }
+    } else if (phase === 1) { // drop
+      clawAnim.y = 80 + (clawAnim.grabY - 80) * Math.min(phaseT / 0.8, 1);
+      clawAnim.phase = 'idle';
+      if (phaseT >= 0.8) { phase = 2; phaseT = 0; }
+    } else if (phase === 2) { // grab
+      clawAnim.phase = 'grab';
+      if (phaseT >= 0.4) {
+        clawAnim.prizeEmoji = win ? prizeEmoji : null;
+        clawAnim.grabSuccess = win;
+        phase = 3; phaseT = 0;
+      }
+    } else if (phase === 3) { // lift
+      clawAnim.y = clawAnim.grabY + (80 - clawAnim.grabY) * Math.min(phaseT / 0.8, 1);
+      clawAnim.phase = 'lift';
+      if (phaseT >= 0.8) { phase = 4; phaseT = 0; }
+    } else if (phase === 4) { // return
+      clawAnim.x += (200 - clawAnim.x) * 0.05;
+      clawAnim.phase = 'idle';
+      clawAnim.prizeEmoji = null;
+      if (phaseT >= 0.8) {
+        clearInterval(testAnim);
+        testAnim = null;
+        clawAnim.phase = 'idle';
+        clawAnim.y = 80;
+        msg.classList.remove('show');
+      }
+    }
+  }, 16);
+}
+
+// ─── RENDER LOOP ─────────────────────────────────────────────────────────────
+let lastTs = 0;
+function loop(ts) {
+  if (!testAnim) idleClaw(ts);
+  updateParticles();
+  drawMachine();
+  requestAnimationFrame(loop);
+}
+
+// ─── SETTINGS HANDLERS ───────────────────────────────────────────────────────
+function setSkin(id, btn) {
+  cfg.skin = id;
+  document.querySelectorAll('.skin-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  spawnParticles();
+  saveConfig();
+}
+
+function updateName() {
+  cfg.name = document.getElementById('machineName').value;
+  saveConfig();
+}
+
+function setPrice(p, btn) {
+  cfg.price = p;
+  document.querySelectorAll('.price-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  saveConfig();
+}
+
+function setDiff(d, btn) {
+  cfg.diff = d;
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  saveConfig();
+}
+
+function updateStrength() {
+  cfg.strength = parseInt(document.getElementById('clawStrength').value);
+  document.getElementById('strengthVal').textContent = cfg.strength;
+  document.getElementById('strengthFill').style.width = (cfg.strength * 10) + '%';
+  saveConfig();
+}
+
+function saveConfig() {
+  localStorage.setItem('echovault_machine_config', JSON.stringify(cfg));
+}
+
+// ─── PRIZE STOCKING ───────────────────────────────────────────────────────────
+function renderCollection() {
+  const list = document.getElementById('collectionList');
+  const empty = document.getElementById('emptyCollMsg');
+  if (collection.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = '';
+  collection.forEach((card, i) => {
+    const inPool = prizes.some(p => p.id === (card.id || i));
+    const div = document.createElement('div');
+    div.className = 'coll-item' + (inPool ? ' in-pool' : '');
+    div.draggable = !inPool;
+    div.dataset.index = i;
+    const rarityColors = { common:'#6060a0', uncommon:'#00b0ff', rare:'#aa44ff', legendary:'#ffd700', mythic:'#ff4400' };
+    const rColor = rarityColors[card.rarity] || '#6060a0';
+    div.innerHTML = '<span class="coll-rarity" style="background:'+rColor+'"></span>'
+      + '<span style="font-size:14px">' + (card.emoji || '🎁') + '</span>'
+      + '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (card.name || 'Card') + '</span>'
+      + '<span style="font-size:9px;color:var(--dim)">' + (card.rarity || '') + '</span>';
+    div.onclick = () => addToPrizePool(i);
+    div.ondragstart = (e) => {
+      e.dataTransfer.setData('text/plain', i);
+    };
+    list.appendChild(div);
+  });
+}
+
+function dropToPrize(e) {
+  e.preventDefault();
+  document.getElementById('prizePool').classList.remove('dragover');
+  const idx = parseInt(e.dataTransfer.getData('text/plain'));
+  if (!isNaN(idx)) addToPrizePool(idx);
+}
+
+function addToPrizePool(idx) {
+  if (prizes.length >= 20) return;
+  const card = collection[idx];
+  if (!card) return;
+  const id = card.id || idx;
+  if (prizes.some(p => p.id === id)) return;
+  prizes.push({ id, name: card.name || 'Card', emoji: card.emoji || '🎁', rarity: card.rarity });
+  savePrizes();
+  renderCollection();
+  renderPrizePool();
+}
+
+function removeFromPool(id) {
+  prizes = prizes.filter(p => p.id !== id);
+  savePrizes();
+  renderCollection();
+  renderPrizePool();
+}
+
+function savePrizes() {
+  localStorage.setItem('echovault_machine_prizes', JSON.stringify(prizes));
+  document.getElementById('statStocked').textContent = prizes.length;
+}
+
+function renderPrizePool() {
+  const pool = document.getElementById('prizePool');
+  const poolEmpty = document.getElementById('poolEmpty');
+  // Remove existing badges
+  pool.querySelectorAll('.prize-badge').forEach(b => b.remove());
+  if (prizes.length === 0) {
+    poolEmpty.style.display = 'block';
+  } else {
+    poolEmpty.style.display = 'none';
+    prizes.forEach(p => {
+      const badge = document.createElement('div');
+      badge.className = 'prize-badge';
+      badge.title = 'Click to remove';
+      badge.innerHTML = (p.emoji || '🎁') + ' <span>' + (p.name || 'Card').substring(0,10) + '</span>';
+      badge.onclick = () => removeFromPool(p.id);
+      pool.appendChild(badge);
+    });
+  }
+  document.getElementById('prizeCount').textContent = prizes.length;
+  document.getElementById('statStocked').textContent = prizes.length;
+}
+
+// ─── PUBLISH ─────────────────────────────────────────────────────────────────
+function publishMachine() {
+  saveConfig();
+  savePrizes();
+  const fullCfg = Object.assign({}, cfg, { published: true, publishedAt: Date.now() });
+  localStorage.setItem('echovault_machine_config', JSON.stringify(fullCfg));
+  isPublished = true;
+  const btn = document.getElementById('publishBtn');
+  btn.textContent = '🔄 Update Machine';
+  btn.className = 'btn btn-update';
+  document.getElementById('publishStatus').style.display = 'block';
+}
+
+// ─── BOOT ────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
