@@ -654,6 +654,14 @@
     const s   = getS();
     if (!ctx || !s) return;
 
+    // Save the ENTIRE canvas state before we touch anything —
+    // other systems (dash renderer, HUD) may have leaked globalAlpha/fillStyle/etc.
+    ctx.save();
+    // Reset to clean defaults so our rendering is predictable
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
     const now = performance.now();
     const dt  = Math.min((now - _lastTime) / 1000, 0.05);
     _lastTime = now;
@@ -691,6 +699,9 @@
     // Fade overlay (floor transitions)
     stepFade(dt);
     renderFade(ctx, W, H);
+
+    // Restore canvas state — clean slate for the next system
+    ctx.restore();
   }
 
   /** Wrap a floor renderer to inject our effects after */
