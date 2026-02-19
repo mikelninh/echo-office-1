@@ -1373,26 +1373,7 @@
     // but only up to 12 in the inline if-else. We need to intercept.
     // We do this by patching the SECOND render loop (ring-engine also wraps draw).
     // Strategy: wrap requestAnimationFrame to inject our floor renders.
-    var _origRAF = window.requestAnimationFrame;
-    var _injectInstalled = false;
-
-    function installDrawPatch() {
-      // Find the game's main loop via checking if draw is defined now
-      if (typeof window.draw === 'function' && !_injectInstalled) {
-        _injectInstalled = true;
-        var _gameDraw = window.draw;
-        window.draw = function () {
-          _gameDraw.apply(this, arguments);
-          // After the main draw, if on a planet floor, the floor was already
-          // rendered by window.renderFloorXX being registered. But the game
-          // only dispatches 1-12 in its hardcoded chain.
-          // We need a different approach for floors >= 30.
-        };
-      }
-    }
-
-    // Better approach: hook into the animation loop via setInterval fallback
-    // and render planet floor when S.floor is 30-35
+    // Patch draw dispatch for planet floors (30-35)
     patchDrawDispatch();
   }
 
