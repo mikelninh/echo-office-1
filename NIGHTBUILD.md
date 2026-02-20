@@ -103,6 +103,12 @@ Pick 2 NPCs with opposing personality traits (high vs low agreeableness, high vs
 
 ---
 
+## ✅ BOTH BUILDS COMPLETE — Feb 20, 2026 (3 AM retry window)
+- companion-memory.js: 22,470 bytes, syntax checked ✅
+- npc-drama.js: 24,693 bytes, syntax checked ✅
+- Commit: 881def9, pushed to master
+- Data synced: seen.json + market-stats.json
+
 ## After Both Builds:
 1. Git add, commit with message: `feat: companion memory log + NPC drama surface — The World Gets Deep`
 2. Git push

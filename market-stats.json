@@ -260,7 +260,7 @@
   "2026-02-19": {
     "yugioh": {
       "totalListings": 80,
-      "avgPrice": 21784,
+      "avgPrice": 22650,
       "maxPrice": 100000,
       "newAlerts": 0,
       "platforms": {
@@ -269,12 +269,12 @@
       }
     },
     "pokemon": {
-      "totalListings": 174,
-      "avgPrice": 11069,
+      "totalListings": 177,
+      "avgPrice": 11024,
       "maxPrice": 149999,
-      "newAlerts": 0,
+      "newAlerts": 5,
       "platforms": {
-        "ebay": 174,
+        "ebay": 177,
         "tcgplayer": 0
       }
     },
@@ -289,12 +289,12 @@
       }
     },
     "onepiece": {
-      "totalListings": 138,
-      "avgPrice": 9086,
-      "maxPrice": 39000,
-      "newAlerts": 3,
+      "totalListings": 134,
+      "avgPrice": 9610,
+      "maxPrice": 52000,
+      "newAlerts": 4,
       "platforms": {
-        "ebay": 138,
+        "ebay": 134,
         "tcgplayer": 0
       }
     },
@@ -350,7 +350,7 @@
     },
     "unionarena": {
       "totalListings": 13,
-      "avgPrice": 8470,
+      "avgPrice": 8749,
       "maxPrice": 15000,
       "newAlerts": 0,
       "platforms": {
