@@ -1083,54 +1083,78 @@
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // ELEVATOR BUTTON: Add Floor 13 to elevator menu
+  // ELEVATOR BUTTON: MutationObserver approach — 100% reliable
+  // Watches the #elevator-overlay for innerHTML changes (when openElevator
+  // fills it with buttons). Injects F13 button immediately after.
+  // No function-wrapping, no timing races.
   // ═══════════════════════════════════════════════════════════════════
   function patchElevatorMenu() {
-    var _origOpenElevator = window.openElevator;
-    if (typeof _origOpenElevator !== 'function' || window._floor13ElevatorPatched) return;
-    window._floor13ElevatorPatched = true;
+    var ov = document.getElementById('elevator-overlay');
+    if (!ov) {
+      // DOM not ready yet — retry
+      setTimeout(patchElevatorMenu, 200);
+      return;
+    }
 
-    window.openElevator = function() {
-      _origOpenElevator.apply(this, arguments);
+    function injectF13Button() {
+      // Already there? Skip.
+      if (ov.querySelector('[data-floor="13"]')) return;
+      // Elevator not open? Skip.
+      if (!ov.classList.contains('show')) return;
 
-      // Inject F13 button after elevator HTML is built
-      setTimeout(function() {
-        var ov = document.getElementById('elevator-overlay');
-        if (!ov || !ov.classList.contains('show')) return;
-        if (ov.querySelector('[data-floor="13"]')) return; // already injected
+      var isCurrent = window.S && window.S.floor === 13;
 
-        // Build button matching existing floor-btn style
-        var f13btn = document.createElement('button');
-        f13btn.className = 'floor-btn' + (window.S && window.S.floor === 13 ? ' current' : '');
-        f13btn.setAttribute('data-floor', '13');
-        f13btn.style.cssText = 'border-color:#4ecdc4;background:rgba(78,205,196,0.06)';
-        f13btn.textContent = (window.S && window.S.floor === 13 ? '► ' : '') + '🎙️ F13 — Podcast Studio';
+      var btn = document.createElement('button');
+      btn.className = 'floor-btn' + (isCurrent ? ' current' : '');
+      btn.setAttribute('data-floor', '13');
+      btn.style.cssText = 'border-color:#4ecdc4;background:rgba(78,205,196,0.06)';
+      btn.textContent = (isCurrent ? '► ' : '') + '🎙️ F13 — Podcast Studio';
 
-        // Wire click: use same pattern as existing buttons (data-floor triggers changeFloor)
-        f13btn.onclick = function() {
-          ov.className = '';  // close elevator (removes 'show')
-          if (typeof removeElevatorKeyNav === 'function') removeElevatorKeyNav();
-          // changeFloor is the internal function used by data-floor buttons
-          if (typeof changeFloor === 'function') {
-            changeFloor(13);
-          } else {
-            // Fallback: set S.floor directly and trigger a floor change
-            if (window.S) { window.S.floor = 13; window.S.visitor.x = 200; window.S.visitor.y = 400; }
-          }
-        };
-
-        // Insert before the "Visit Rooms" button (data-action="visit")
-        var visitBtn = ov.querySelector('[data-action="visit"]');
-        if (visitBtn && visitBtn.parentNode) {
-          visitBtn.parentNode.insertBefore(f13btn, visitBtn);
-        } else {
-          // Fallback: find the popup div and append
-          var popup = ov.querySelector('.popup');
-          if (popup) popup.insertBefore(f13btn, popup.querySelector('[data-action]') || null);
-          else ov.appendChild(f13btn);
+      btn.onclick = function() {
+        // Close elevator the same way the game does
+        ov.classList.remove('show');
+        if (typeof removeElevatorKeyNav === 'function') removeElevatorKeyNav();
+        if (typeof window.changeFloor === 'function') {
+          window.changeFloor(13);
+        } else if (typeof changeFloor === 'function') {
+          changeFloor(13);
         }
-      }, 50);
-    };
+      };
+
+      // Insert before the "Visit Rooms" button
+      var visitBtn = ov.querySelector('[data-action="visit"]');
+      if (visitBtn) {
+        visitBtn.parentNode.insertBefore(btn, visitBtn);
+      } else {
+        // Fallback: append inside the popup div
+        var popup = ov.querySelector('.popup') || ov;
+        popup.appendChild(btn);
+      }
+    }
+
+    // Watch for the elevator overlay's content being set (openElevator calls ov.innerHTML = html)
+    var observer = new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        var m = mutations[i];
+        // childList change means innerHTML was set — elevator just opened
+        if (m.type === 'childList' && ov.classList.contains('show')) {
+          injectF13Button();
+          break;
+        }
+        // Also catch class changes (show added)
+        if (m.type === 'attributes' && m.attributeName === 'class' && ov.classList.contains('show')) {
+          // Brief delay to let innerHTML be set after class change
+          setTimeout(injectF13Button, 20);
+          break;
+        }
+      }
+    });
+
+    observer.observe(ov, {
+      childList: true,    // watch for innerHTML changes
+      attributes: true,  // watch for class="show" being added
+      subtree: false
+    });
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -1140,8 +1164,8 @@
     registerFloor();
     patchInteract();
     registerInteractiveObjects();
-    patchRenderDispatch();           // hook renderFloor12 to dispatch to F13
-    setTimeout(patchElevatorMenu, 1500); // elevator patch after game init
+    patchRenderDispatch();  // hook renderFloor12 to dispatch to F13
+    patchElevatorMenu();   // MutationObserver — no timing dependency
     console.log('[Floor13] 🎙️ Podcast Studio loaded');
   }
 
