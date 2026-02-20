@@ -711,11 +711,10 @@
     // Lighting overlay
     renderLighting(ctx, floor, W, H, _t);
 
-    // Weather (F2 only) — also needs screen-space context (same camera issue as particles)
+    // Weather (F2 only) — screen-space, same fix as particles
     if (floor === 2) {
-      const camW = getCameraOffset();
       ctx.save();
-      ctx.translate(camW.x, camW.y);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       renderWeather(ctx, W, H, _t);
       ctx.restore();
     }
@@ -728,23 +727,30 @@
       spawnForFloor(floor, pool, W, H);
     }
 
-    // Particles are stored in SCREEN-SPACE coordinates (spawned relative to W/H).
-    // But onAfterFloorRender is called while the camera's world-space translate is active
-    // (ctx.save() at depth 0 injects translate(-Camera.x, -Camera.y) via the Camera patch).
-    // We undo that translate here so particles draw at their true screen positions.
+    // Particles are in SCREEN-SPACE coordinates (0→W, 0→H).
+    // The camera may have applied a world-space translate. We use a raw
+    // CanvasRenderingContext2D transform reset to draw in true screen space,
+    // then restore the camera transform afterward.
+    // We call the ORIGINAL save/restore (bypassing camera patch depth tracking)
+    // to avoid corrupting _saveDepth, then use setTransform for screen-space.
     const cam = getCameraOffset();
-    ctx.save();
-    ctx.translate(cam.x, cam.y); // cancel out translate(-cam.x, -cam.y) from camera patch
 
-    // Step + draw
+    // Step particles first (physics update — position is always screen-space)
     for (let i = pool.length - 1; i >= 0; i--) {
       const p = pool[i];
       stepParticle(p, dt, W, H);
-      if (p.life <= 0) { pool.splice(i, 1); continue; }
-      drawParticle(ctx, p, _t);
+      if (p.life <= 0) { pool.splice(i, 1); }
     }
 
-    ctx.restore(); // restore camera world-space transform
+    // Draw particles in true screen space using setTransform
+    // setTransform(1,0,0,1,0,0) resets to identity — screen origin.
+    // We save/restore to sandwich the reset so the camera transform is unaffected.
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // identity: screen space, no camera offset
+    for (let i = 0; i < pool.length; i++) {
+      drawParticle(ctx, pool[i], _t);
+    }
+    ctx.restore(); // restores whatever transform was active (world-space camera translate)
 
     // Fade overlay (floor transitions)
     stepFade(dt);

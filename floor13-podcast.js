@@ -1083,78 +1083,49 @@
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // ELEVATOR BUTTON: MutationObserver approach — 100% reliable
-  // Watches the #elevator-overlay for innerHTML changes (when openElevator
-  // fills it with buttons). Injects F13 button immediately after.
-  // No function-wrapping, no timing races.
+  // ELEVATOR BUTTON
+  // Synchronous wrap of openElevator — runs after ALL of openElevator's
+  // code finishes (JS single-threaded), so HTML is fully built.
   // ═══════════════════════════════════════════════════════════════════
   function patchElevatorMenu() {
-    var ov = document.getElementById('elevator-overlay');
-    if (!ov) {
-      // DOM not ready yet — retry
-      setTimeout(patchElevatorMenu, 200);
+    // openElevator may not exist yet if game hasn't initialised — retry
+    if (typeof window.openElevator !== 'function') {
+      setTimeout(patchElevatorMenu, 300);
       return;
     }
+    if (window._f13elevDone) return;
+    window._f13elevDone = true;
 
-    function injectF13Button() {
-      // Already there? Skip.
-      if (ov.querySelector('[data-floor="13"]')) return;
-      // Elevator not open? Skip.
-      if (!ov.classList.contains('show')) return;
+    var _orig = window.openElevator;
+    window.openElevator = function() {
+      _orig.apply(this, arguments);
+      // _orig has fully run — ov.innerHTML is set, all game buttons wired.
+      // Inject F13 button now (synchronous, no race possible).
+      var ov = document.getElementById('elevator-overlay');
+      if (!ov) return;
+      if (ov.querySelector('[data-floor="13"]')) return; // safety check
 
       var isCurrent = window.S && window.S.floor === 13;
-
       var btn = document.createElement('button');
       btn.className = 'floor-btn' + (isCurrent ? ' current' : '');
       btn.setAttribute('data-floor', '13');
       btn.style.cssText = 'border-color:#4ecdc4;background:rgba(78,205,196,0.06)';
       btn.textContent = (isCurrent ? '► ' : '') + '🎙️ F13 — Podcast Studio';
-
       btn.onclick = function() {
-        // Close elevator the same way the game does
-        ov.classList.remove('show');
+        ov.className = '';  // matches how game closes elevator
         if (typeof removeElevatorKeyNav === 'function') removeElevatorKeyNav();
-        if (typeof window.changeFloor === 'function') {
-          window.changeFloor(13);
-        } else if (typeof changeFloor === 'function') {
-          changeFloor(13);
-        }
+        changeFloor(13);
       };
 
-      // Insert before the "Visit Rooms" button
+      // Insert before the "Visit Rooms" button (data-action="visit")
       var visitBtn = ov.querySelector('[data-action="visit"]');
       if (visitBtn) {
         visitBtn.parentNode.insertBefore(btn, visitBtn);
       } else {
-        // Fallback: append inside the popup div
         var popup = ov.querySelector('.popup') || ov;
         popup.appendChild(btn);
       }
-    }
-
-    // Watch for the elevator overlay's content being set (openElevator calls ov.innerHTML = html)
-    var observer = new MutationObserver(function(mutations) {
-      for (var i = 0; i < mutations.length; i++) {
-        var m = mutations[i];
-        // childList change means innerHTML was set — elevator just opened
-        if (m.type === 'childList' && ov.classList.contains('show')) {
-          injectF13Button();
-          break;
-        }
-        // Also catch class changes (show added)
-        if (m.type === 'attributes' && m.attributeName === 'class' && ov.classList.contains('show')) {
-          // Brief delay to let innerHTML be set after class change
-          setTimeout(injectF13Button, 20);
-          break;
-        }
-      }
-    });
-
-    observer.observe(ov, {
-      childList: true,    // watch for innerHTML changes
-      attributes: true,  // watch for class="show" being added
-      subtree: false
-    });
+    };
   }
 
   // ═══════════════════════════════════════════════════════════════════
