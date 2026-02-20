@@ -1140,12 +1140,11 @@
     console.log('[Floor13] 🎙️ Podcast Studio loaded');
   }
 
-  // Run after DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    // Small delay to let the game initialize first
-    setTimeout(init, 100);
-  }
+  // Run after ALL scripts have loaded (window load + extra delay to be safe).
+  // Using 'load' (not DOMContentLoaded) ensures external scripts that also wrap
+  // openElevator have already run, so our patch is the last one applied.
+  window.addEventListener('load', function() {
+    setTimeout(init, 3000);
+  });
 
 })();

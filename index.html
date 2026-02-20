@@ -19734,6 +19734,10 @@ function openElevator(){
   const f12Presence=f12Ppl.length>0?` <span style="float:right;font-size:10px;color:#ff6644;opacity:.7">${f12Ppl.map(()=>'●').join('')} ${f12Ppl.length}</span>`:'';
   html+=`<button class="floor-btn${f12Current?' current':''}" data-floor="12" style="border-color:#ff6644;background:rgba(255,102,68,.06)">${f12Current?'► ':''}💪 F12 — The Movement${f12Presence}</button>`;
   
+  // Podcast Studio (Floor 13)
+  const f13Current=S.floor===13;
+  html+=`<button class="floor-btn${f13Current?' current':''}" data-floor="13" style="border-color:#4ecdc4;background:rgba(78,205,196,.06)">${f13Current?'► ':''}🎙️ F13 — Podcast Studio</button>`;
+  
   // Visit Rooms option
   html+=`<button class="floor-btn" data-action="visit" style="border-color:#ffd700">🏘️ Visit Rooms</button>`;
   

@@ -63,11 +63,13 @@
     /** F1 – Quarters: golden dust motes in lamplight */
     1(pool, W, H) {
       if (pool.length >= maxParticles()) return;
-      // Drift toward lamp zones (center-ish, warm)
+      // Spawn in WORLD-SPACE so particles stay fixed relative to the floor
+      // even when the camera pans (floor 1 is 2400×1200, camera scrolls).
+      const cam = getCameraOffset();
       const lampX = W * (0.35 + Math.random() * 0.3);
       pool.push(makeParticle({
-        x: lampX + (Math.random() - 0.5) * 160,
-        y: 80 + Math.random() * (H - 160),
+        x: cam.x + lampX + (Math.random() - 0.5) * 160,
+        y: cam.y + 80 + Math.random() * (H - 160),
         vx: (Math.random() - 0.5) * 0.25,
         vy: -0.08 - Math.random() * 0.12,
         life: 220 + Math.random() * 180,
@@ -390,8 +392,15 @@
       p.vx += (Math.random() - 0.5) * 0.003;
     }
 
-    // Kill OOB
-    if (p.x < -20 || p.x > W + 20 || p.y < -20 || p.y > H + 80) {
+    // Kill OOB — use world-space bounds (floor may be larger than viewport).
+    // Particles carry world-space coords; use floor dimensions when available,
+    // otherwise fall back to viewport dimensions with generous margin.
+    const floorSizes = window.FLOOR_SIZES;
+    const s = getS();
+    const floor = s && s.floor;
+    const fw = (floorSizes && floor && floorSizes[floor]) ? floorSizes[floor].w : W;
+    const fh = (floorSizes && floor && floorSizes[floor]) ? floorSizes[floor].h : H;
+    if (p.x < -20 || p.x > fw + 20 || p.y < -20 || p.y > fh + 80) {
       p.life = 0;
     }
   }
@@ -727,30 +736,20 @@
       spawnForFloor(floor, pool, W, H);
     }
 
-    // Particles are in SCREEN-SPACE coordinates (0→W, 0→H).
-    // The camera may have applied a world-space translate. We use a raw
-    // CanvasRenderingContext2D transform reset to draw in true screen space,
-    // then restore the camera transform afterward.
-    // We call the ORIGINAL save/restore (bypassing camera patch depth tracking)
-    // to avoid corrupting _saveDepth, then use setTransform for screen-space.
-    const cam = getCameraOffset();
-
-    // Step particles first (physics update — position is always screen-space)
+    // Step particles (physics update).
+    // Particles are stored in WORLD-SPACE coordinates (Camera offset added at spawn
+    // for large floors like F1). They draw correctly under the camera's world-space
+    // transform without any setTransform juggling — no depth-tracking corruption.
     for (let i = pool.length - 1; i >= 0; i--) {
       const p = pool[i];
       stepParticle(p, dt, W, H);
       if (p.life <= 0) { pool.splice(i, 1); }
     }
 
-    // Draw particles in true screen space using setTransform
-    // setTransform(1,0,0,1,0,0) resets to identity — screen origin.
-    // We save/restore to sandwich the reset so the camera transform is unaffected.
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0); // identity: screen space, no camera offset
+    // Draw particles directly in world-space (no transform change needed).
     for (let i = 0; i < pool.length; i++) {
       drawParticle(ctx, pool[i], _t);
     }
-    ctx.restore(); // restores whatever transform was active (world-space camera translate)
 
     // Fade overlay (floor transitions)
     stepFade(dt);
