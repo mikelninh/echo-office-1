@@ -711,9 +711,13 @@
     // Lighting overlay
     renderLighting(ctx, floor, W, H, _t);
 
-    // Weather (F2 only)
+    // Weather (F2 only) — also needs screen-space context (same camera issue as particles)
     if (floor === 2) {
+      const camW = getCameraOffset();
+      ctx.save();
+      ctx.translate(camW.x, camW.y);
       renderWeather(ctx, W, H, _t);
+      ctx.restore();
     }
 
     // Ambient particles
@@ -724,6 +728,14 @@
       spawnForFloor(floor, pool, W, H);
     }
 
+    // Particles are stored in SCREEN-SPACE coordinates (spawned relative to W/H).
+    // But onAfterFloorRender is called while the camera's world-space translate is active
+    // (ctx.save() at depth 0 injects translate(-Camera.x, -Camera.y) via the Camera patch).
+    // We undo that translate here so particles draw at their true screen positions.
+    const cam = getCameraOffset();
+    ctx.save();
+    ctx.translate(cam.x, cam.y); // cancel out translate(-cam.x, -cam.y) from camera patch
+
     // Step + draw
     for (let i = pool.length - 1; i >= 0; i--) {
       const p = pool[i];
@@ -731,6 +743,8 @@
       if (p.life <= 0) { pool.splice(i, 1); continue; }
       drawParticle(ctx, p, _t);
     }
+
+    ctx.restore(); // restore camera world-space transform
 
     // Fade overlay (floor transitions)
     stepFade(dt);
