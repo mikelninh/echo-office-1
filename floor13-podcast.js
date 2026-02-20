@@ -742,7 +742,14 @@
   function renderFloor13() {
     var c = ctx();
     if (!c) return;
+
+    // CRITICAL: save full canvas state before drawing anything.
+    // Without this, fillStyle/strokeStyle/globalAlpha/lineWidth/imageSmoothingEnabled
+    // all leak into the next frame and corrupt other floors.
+    c.save();
     c.imageSmoothingEnabled = false;
+    c.globalAlpha = 1;
+    c.globalCompositeOperation = 'source-over';
 
     tickAnimations();
 
@@ -838,6 +845,9 @@
     c.font = '6px "Press Start 2P", monospace';
     c.fillStyle = 'rgba(78,205,196,0.3)';
     c.fillText('F13 · PODCAST STUDIO', FW / 2 - 100, FH - 20);
+
+    // Restore all canvas state — prevents any color/alpha/transform leaking into other floors
+    c.restore();
   }
 
   // Register on window
