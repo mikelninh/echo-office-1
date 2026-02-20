@@ -1130,8 +1130,8 @@
     registerFloor();
     patchInteract();
     registerInteractiveObjects();
-    // Defer elevator patch until game is fully loaded
-    setTimeout(patchElevatorMenu, 2000);
+    patchRenderDispatch();           // hook renderFloor12 to dispatch to F13
+    setTimeout(patchElevatorMenu, 1500); // elevator patch after game init
     console.log('[Floor13] 🎙️ Podcast Studio loaded');
   }
 
