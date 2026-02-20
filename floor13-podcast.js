@@ -966,96 +966,40 @@
     patchRenderDispatch();
   }
 
-  // Patch the main render dispatch to call renderFloor13 when on floor 13
+  // Patch the main render dispatch to call renderFloor13 when on floor 13.
+  //
+  // The game's render() function has an if/else-if chain for floors 1-12.
+  // Floor 13 is simply not in that chain. The cleanest fix:
+  // wrap window.renderFloor12 — the last branch in the chain.
+  // When the game calls renderFloor12 but we're actually on floor 13,
+  // skip F12 rendering and call renderFloor13 instead.
+  //
+  // This runs in the same RAF frame as the game, avoiding flicker.
   function patchRenderDispatch() {
     if (window._floor13RenderPatched) return;
-    window._floor13RenderPatched = true;
 
-    // Hook into the game loop via requestAnimationFrame override
-    // The game loop calls a render function. We intercept by wrapping
-    // the existing floor render calls that happen inside the game's RAF.
-    // Since the game checks S.floor in a switch, we patch at the RAF level.
-    var _origRAF = window.requestAnimationFrame;
-    var frameCount = 0;
-    window.requestAnimationFrame = function(cb) {
-      return _origRAF.call(window, function(ts) {
-        var result = cb(ts);
-        // After the game's frame, check if we're on floor 13 and render
-        var S = getS();
-        if (S && S.floor === 13 && window.renderFloor13) {
-          // The game didn't render floor 13, we do it here
-          // But we need to avoid double-render if the game already called it.
-          // This approach is a fallback; the cleaner approach below is preferred.
-        }
-        return result;
-      });
-    };
-    // Undo the RAF patch — it's too invasive. Use a simpler approach.
-    window.requestAnimationFrame = _origRAF;
-    window._floor13RenderPatched = false;
-
-    // Better approach: directly extend the render dispatch by wrapping the game's render
-    // The game has a global render function. Find and patch it.
-    setTimeout(function() {
-      // Try to find the game's draw/render function and patch the floor dispatch
-      // The game uses a pattern like: if(S.floor===12) renderFloor12();
-      // We can wrap the global `draw` or `render` function if it's exposed.
-      // Check for common names:
-      var renderNames = ['draw', 'render', 'gameLoop', 'loop', 'tick', 'frame'];
-      // Since we can't easily patch internal functions, we use an interval to
-      // trigger floor13 render when on floor 13.
-      // The cleanest way: override ctx.clearRect to detect frame start, then inject.
-      patchViaCtxDraw();
-    }, 1000);
-  }
-
-  function patchViaCtxDraw() {
-    if (window._floor13CtxPatched) return;
-    // Use MutationObserver + RAF loop to inject our render at the right time
-    // Strategy: use a post-frame RAF loop that checks if floor 13 and redraws on top
-    var lastFloor = null;
-
-    function postFrameCheck() {
-      var S = getS();
-      if (S && S.floor === 13) {
-        // We ARE on floor 13 - renderFloor13 should be called
-        // Since the game's dispatch chain doesn't include floor 13,
-        // we need to ensure it gets called. The safest way is to
-        // hook into what the game does call.
-        // Find if there's a drawScene/render exposed:
-        if (!window._floor13CtxPatched && window.ctx) {
-          window._floor13CtxPatched = true;
-          // Wrap ctx.clearRect — called at start of each frame
-          var _origClear = window.ctx.clearRect.bind(window.ctx);
-          window.ctx.clearRect = function(x, y, w, h) {
-            _origClear(x, y, w, h);
-            // After clear: if on floor 13, schedule our render
-            if (getS().floor === 13) {
-              // Use a microtask to render after the game's floor renders
-              Promise.resolve().then(function() {
-                if (getS().floor === 13 && window.renderFloor13) {
-                  window.renderFloor13();
-                }
-              });
-            }
-          };
-        }
+    function doWrap() {
+      var _origF12 = window.renderFloor12;
+      if (typeof _origF12 !== 'function') {
+        // Game not ready yet — retry
+        setTimeout(doWrap, 300);
+        return;
       }
-      requestAnimationFrame(postFrameCheck);
+      if (window._floor13RenderPatched) return;
+      window._floor13RenderPatched = true;
+
+      window.renderFloor12 = function() {
+        var S = getS();
+        if (S && S.floor === 13) {
+          // We're on floor 13 — render the podcast studio instead
+          if (window.renderFloor13) window.renderFloor13();
+        } else {
+          _origF12.apply(this, arguments);
+        }
+      };
     }
 
-    // Actually, the cleanest approach: patch the game's existing floor dispatch.
-    // The game does: else if(S.floor===12)(window.renderFloor12||renderFloor12)();
-    // After that block, there's no else-if for 13. We can wrap renderFloor12
-    // to check after it, but that's messy.
-    // BEST: Simply use the direct RAF approach to render on top when floor===13.
-    (function floor13Loop() {
-      var S = getS();
-      if (S && S.floor === 13 && window.renderFloor13 && window.ctx) {
-        window.renderFloor13();
-      }
-      requestAnimationFrame(floor13Loop);
-    })();
+    doWrap();
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -1132,46 +1076,51 @@
   // ELEVATOR BUTTON: Add Floor 13 to elevator menu
   // ═══════════════════════════════════════════════════════════════════
   function patchElevatorMenu() {
-    // The elevator menu is built dynamically in openElevator().
-    // It reads FLOOR_NAMES for buttons. Since we've added floor 13 to FLOOR_NAMES,
-    // the menu might already include it if it iterates all keys.
-    // Check: the menu has explicit floor lists. We patch showElevator or openElevator.
     var _origOpenElevator = window.openElevator;
-    if (typeof _origOpenElevator === 'function' && !window._floor13ElevatorPatched) {
-      window._floor13ElevatorPatched = true;
-      window.openElevator = function() {
-        _origOpenElevator.apply(this, arguments);
-        // After the elevator opens, inject floor 13 button
-        setTimeout(function() {
-          var ov = document.querySelector('.elevator-overlay, #elevator-overlay, [class*="elevator"]');
-          if (!ov) return;
-          var existing = ov.querySelector('[data-floor="13"]');
-          if (existing) return; // already there
+    if (typeof _origOpenElevator !== 'function' || window._floor13ElevatorPatched) return;
+    window._floor13ElevatorPatched = true;
 
-          var f13btn = document.createElement('button');
-          f13btn.className = 'floor-btn';
-          f13btn.setAttribute('data-floor', '13');
-          f13btn.style.borderColor = '#4ecdc4';
-          f13btn.style.background = 'rgba(78,205,196,0.06)';
-          f13btn.textContent = '🎙️ F13 — Podcast Studio';
-          f13btn.onclick = function() {
-            ov.className = '';
-            if (typeof changeFloor === 'function') changeFloor(13);
-            else if (typeof window.changeFloor === 'function') window.changeFloor(13);
-          };
+    window.openElevator = function() {
+      _origOpenElevator.apply(this, arguments);
 
-          // Insert before the "Visit Rooms" button or at end
-          var visitBtn = ov.querySelector('[data-action="visit"]');
-          if (visitBtn) {
-            ov.querySelector('.elevator-overlay > div, [class*="elevator"] > div') || ov;
-            visitBtn.parentNode.insertBefore(f13btn, visitBtn);
+      // Inject F13 button after elevator HTML is built
+      setTimeout(function() {
+        var ov = document.getElementById('elevator-overlay');
+        if (!ov || !ov.classList.contains('show')) return;
+        if (ov.querySelector('[data-floor="13"]')) return; // already injected
+
+        // Build button matching existing floor-btn style
+        var f13btn = document.createElement('button');
+        f13btn.className = 'floor-btn' + (window.S && window.S.floor === 13 ? ' current' : '');
+        f13btn.setAttribute('data-floor', '13');
+        f13btn.style.cssText = 'border-color:#4ecdc4;background:rgba(78,205,196,0.06)';
+        f13btn.textContent = (window.S && window.S.floor === 13 ? '► ' : '') + '🎙️ F13 — Podcast Studio';
+
+        // Wire click: use same pattern as existing buttons (data-floor triggers changeFloor)
+        f13btn.onclick = function() {
+          ov.className = '';  // close elevator (removes 'show')
+          if (typeof removeElevatorKeyNav === 'function') removeElevatorKeyNav();
+          // changeFloor is the internal function used by data-floor buttons
+          if (typeof changeFloor === 'function') {
+            changeFloor(13);
           } else {
-            var container = ov.querySelector('div') || ov;
-            container.appendChild(f13btn);
+            // Fallback: set S.floor directly and trigger a floor change
+            if (window.S) { window.S.floor = 13; window.S.visitor.x = 200; window.S.visitor.y = 400; }
           }
-        }, 100);
-      };
-    }
+        };
+
+        // Insert before the "Visit Rooms" button (data-action="visit")
+        var visitBtn = ov.querySelector('[data-action="visit"]');
+        if (visitBtn && visitBtn.parentNode) {
+          visitBtn.parentNode.insertBefore(f13btn, visitBtn);
+        } else {
+          // Fallback: find the popup div and append
+          var popup = ov.querySelector('.popup');
+          if (popup) popup.insertBefore(f13btn, popup.querySelector('[data-action]') || null);
+          else ov.appendChild(f13btn);
+        }
+      }, 50);
+    };
   }
 
   // ═══════════════════════════════════════════════════════════════════
