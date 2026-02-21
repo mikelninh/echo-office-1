@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Echo's Vault — Companion Profile</title>
+<meta name="description" content="Meet my companion in Echo's Vault — the pixel world where your gaming self lives.">
+<meta property="og:title" content="Echo's Vault — Companion Profile">
+<meta property="og:description" content="My companion has been with me since Day 1. Come see our story.">
+<meta property="og:image" content="https://echosvault.com/og-companion.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+:root {
+  --bg: #050510;
+  --surface: #0d0d1f;
+  --surface2: #12122a;
+  --border: #1e1e3e;
+  --accent-collector: #5b8ee6;
+  --accent-explorer: #4caf50;
+  --accent-fighter: #e53935;
+  --accent-egg: #f5e6c8;
+  --pink: #ff6ec7;
+  --text: #e0e0f0;
+  --muted: #6a6a8a;
+  --gold: #ffd700;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+
+/* ─── Background particles ─── */
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:0.4;pointer-events:none}
+
+/* ─── Layout ─── */
+.page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px 80px}
+
+/* ─── Header ─── */
+.site-header{width:100%;max-width:700px;display:flex;align-items:center;justify-content:space-between;margin-bottom:48px}
+.site-logo{font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--pink);text-decoration:none;opacity:0.8}
+.site-logo:hover{opacity:1}
+.cta-btn{background:linear-gradient(135deg,#ff6ec7,#b388ff);color:#050510;border:none;font-family:inherit;font-size:12px;font-weight:700;letter-spacing:2px;padding:10px 22px;border-radius:8px;cursor:pointer;text-decoration:none;transition:all 0.25s;text-transform:uppercase}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(255,110,199,0.4)}
+
+/* ─── Companion Card ─── */
+.companion-card{width:100%;max-width:700px;background:var(--surface);border:1px solid var(--border);border-radius:24px;overflow:hidden;margin-bottom:24px}
+.card-hero{position:relative;height:240px;background:radial-gradient(ellipse at 50% 100%, rgba(91,142,230,0.12) 0%, transparent 70%);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.card-hero.explorer-bg{background:radial-gradient(ellipse at 50% 100%, rgba(76,175,80,0.12) 0%, transparent 70%)}
+.card-hero.fighter-bg{background:radial-gradient(ellipse at 50% 100%, rgba(229,57,53,0.12) 0%, transparent 70%)}
+.hero-canvas-wrap{position:relative;width:200px;height:200px;flex-shrink:0}
+#companion-canvas{display:block;image-rendering:pixelated}
+.companion-aura{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);width:80px;height:20px;border-radius:50%;filter:blur(8px);opacity:0.5}
+.card-hero-text{position:absolute;bottom:0;left:0;right:0;padding:20px 28px;background:linear-gradient(0deg,rgba(5,5,16,0.95),transparent)}
+.companion-name{font-size:26px;font-weight:700;letter-spacing:2px;margin-bottom:2px}
+.companion-title{font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.mood-badge{position:absolute;top:20px;right:20px;background:rgba(13,13,31,0.85);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:13px;display:flex;align-items:center;gap:6px}
+.mood-emoji{font-size:16px}
+
+/* ─── Stats row ─── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--border)}
+.stat-cell{padding:20px 16px;text-align:center;border-right:1px solid var(--border)}
+.stat-cell:last-child{border-right:none}
+.stat-value{font-size:22px;font-weight:700;line-height:1}
+.stat-label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+
+/* ─── Day Badge ─── */
+.day-badge{position:absolute;top:20px;left:20px;background:rgba(13,13,31,0.85);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--gold);letter-spacing:1px}
+
+/* ─── Evolution path ─── */
+.path-row{display:flex;align-items:center;gap:10px;padding:18px 24px;border-top:1px solid var(--border);background:var(--surface2)}
+.path-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.path-icon.collector{background:rgba(91,142,230,0.2);border:1px solid rgba(91,142,230,0.4)}
+.path-icon.explorer{background:rgba(76,175,80,0.2);border:1px solid rgba(76,175,80,0.4)}
+.path-icon.fighter{background:rgba(229,57,53,0.2);border:1px solid rgba(229,57,53,0.4)}
+.path-icon.egg{background:rgba(245,230,200,0.1);border:1px solid rgba(245,230,200,0.2)}
+.path-text strong{font-size:13px;font-weight:600}
+.path-text p{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
+.level-pill{margin-left:auto;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:12px;padding:4px 12px;font-size:12px;color:var(--gold);font-weight:700;white-space:nowrap}
+
+/* ─── XP bar ─── */
+.xp-row{padding:14px 24px;border-top:1px solid var(--border)}
+.xp-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px}
+.xp-bar-bg{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+.xp-bar-fill{height:100%;border-radius:3px;transition:width 1s ease}
+
+/* ─── Memory Feed ─── */
+.section-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.memory-section{width:100%;max-width:700px;margin-bottom:24px}
+.memory-feed{display:flex;flex-direction:column;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.memory-item{display:flex;align-items:flex-start;gap:16px;padding:18px 20px;border-bottom:1px solid var(--border);position:relative;transition:background 0.2s}
+.memory-item:last-child{border-bottom:none}
+.memory-item:hover{background:var(--surface2)}
+.memory-dot-col{display:flex;flex-direction:column;align-items:center;padding-top:2px;gap:0}
+.memory-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.memory-line{width:2px;flex:1;margin-top:4px;min-height:20px;opacity:0.2}
+.memory-icon{font-size:18px;flex-shrink:0;margin-top:-1px}
+.memory-body{flex:1;min-width:0}
+.memory-text{font-size:14px;line-height:1.5;color:var(--text)}
+.memory-meta{font-size:11px;color:var(--muted);margin-top:4px}
+.memory-empty{padding:40px 20px;text-align:center;color:var(--muted);font-size:14px;line-height:1.6}
+
+/* ─── Call to Action ─── */
+.profile-cta{width:100%;max-width:700px;background:linear-gradient(135deg,rgba(255,110,199,0.08),rgba(179,136,255,0.08));border:1px solid rgba(255,110,199,0.2);border-radius:20px;padding:40px 32px;text-align:center}
+.profile-cta h2{font-size:22px;font-weight:700;margin-bottom:8px}
+.profile-cta p{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6;max-width:380px;margin-left:auto;margin-right:auto}
+.cta-actions{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.cta-primary{background:linear-gradient(135deg,#ff6ec7,#b388ff);color:#050510;border:none;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:1px;padding:14px 32px;border-radius:12px;cursor:pointer;text-decoration:none;transition:all 0.25s}
+.cta-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(255,110,199,0.35)}
+.cta-secondary{background:transparent;border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:13px;padding:13px 24px;border-radius:12px;cursor:pointer;text-decoration:none;transition:all 0.25s}
+.cta-secondary:hover{border-color:var(--pink);color:var(--pink)}
+
+/* ─── Share button ─── */
+.share-row{width:100%;max-width:700px;display:flex;gap:10px;margin-bottom:24px}
+.share-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--muted);font-size:12px;font-family:monospace;outline:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.share-copy-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:12px;font-weight:600;padding:10px 18px;border-radius:10px;cursor:pointer;white-space:nowrap;transition:all 0.2s;letter-spacing:0.5px}
+.share-copy-btn:hover{border-color:var(--pink);color:var(--pink)}
+.share-copy-btn.copied{border-color:#4caf50;color:#4caf50}
+
+/* ─── No data state ─── */
+.no-data{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;gap:16px}
+.no-data h1{font-size:32px;font-weight:200;letter-spacing:4px;color:var(--pink)}
+.no-data p{font-size:15px;color:var(--muted);line-height:1.6;max-width:340px}
+
+/* ─── Responsive ─── */
+@media(max-width:500px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .stat-cell:nth-child(2){border-right:none}
+  .stat-cell:nth-child(3){border-top:1px solid var(--border)}
+  .stat-cell:nth-child(4){border-top:1px solid var(--border)}
+  .cta-actions{flex-direction:column}
+  .cta-primary,.cta-secondary{width:100%;text-align:center}
+  .card-hero{height:200px}
+}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<div class="page">
+  <header class="site-header">
+    <a href="/" class="site-logo">Echo's Vault</a>
+    <a href="/" class="cta-btn">Enter the Station</a>
+  </header>
+
+  <!-- Companion Card (rendered by JS) -->
+  <div id="companion-card-wrap" style="width:100%;max-width:700px;display:none">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- Share row -->
+  <div id="share-row" class="share-row" style="display:none">
+    <input id="share-url" class="share-input" readonly type="text">
+    <button class="share-copy-btn" id="copy-btn" onclick="copyShareUrl()">📋 Copy Link</button>
+  </div>
+
+  <!-- Memory section -->
+  <div id="memory-section" class="memory-section" style="display:none">
+    <div class="section-title">Our Story</div>
+    <div class="memory-feed" id="memory-feed">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div id="profile-cta" class="profile-cta" style="display:none">
+    <h2>Your companion is waiting.</h2>
+    <p>Every pull, every floor, every grail — remembered by a partner who grows with you.</p>
+    <div class="cta-actions">
+      <a href="/" class="cta-primary">Enter Echo's Vault</a>
+      <a href="/companion.html" class="cta-secondary">Meet Your Companion</a>
+    </div>
+  </div>
+
+  <!-- No data state -->
+  <div id="no-data" class="no-data" style="display:none">
+    <h1>No companion found.</h1>
+    <p>Visit Echo's Vault to hatch your companion and come back to share your story.</p>
+    <a href="/" class="cta-btn" style="margin-top:8px">Enter the Station →</a>
+  </div>
+</div>
+
+<script>
+// ─── Sprite data (mirror from companion.js) ────────────────────────────────
+const PALETTES = {
+  egg:       { 1: '#f5e6c8', 2: '#d4b896', 3: '#b8956e', 4: '#7a5c3a' },
+  collector: { 1: '#5b8ee6', 2: '#ffd700', 3: '#3a5fa8', 4: '#ffe066', 5: '#fff', 6: '#222' },
+  explorer:  { 1: '#4caf50', 2: '#ff9800', 3: '#2e7d32', 4: '#fff',    5: '#8d6e63', 6: '#222' },
+  fighter:   { 1: '#e53935', 2: '#9c27b0', 3: '#b71c1c', 4: '#fff',    5: '#ffd600', 6: '#222' },
+};
+
+const SPRITES = {
+  egg: [
+    [0,0,0,2,2,0,0,0],[0,0,2,1,1,2,0,0],[0,2,1,1,1,1,2,0],
+    [2,1,1,1,1,1,1,2],[2,1,1,1,1,1,1,2],[2,1,1,1,1,1,1,2],
+    [2,1,1,1,1,1,1,2],[2,1,1,1,1,1,1,2],[0,2,1,1,1,1,2,0],
+    [0,0,2,1,1,2,0,0],[0,0,0,2,2,0,0,0],[0,0,0,0,0,0,0,0],
+  ],
+  collector_1: [
+    [0,0,0,2,2,0,0,0],[0,0,2,1,1,2,0,0],[0,2,1,3,3,1,2,0],
+    [2,1,3,1,1,3,1,2],[2,1,1,4,4,1,1,2],[2,1,1,1,1,1,1,2],
+    [0,2,3,1,1,3,2,0],[0,0,2,3,3,2,0,0],[0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+  ],
+  collector_2: [
+    [0,0,0,2,2,0,0,0],[0,0,2,1,1,2,0,0],[0,2,1,3,3,1,2,0],
+    [2,1,3,4,4,3,1,2],[2,1,1,5,5,1,1,2],[2,1,1,1,1,1,1,2],
+    [0,2,3,1,1,3,2,0],[0,0,2,3,3,2,0,0],[0,0,2,1,1,2,0,0],
+    [0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+  ],
+  collector_3: [
+    [0,0,2,2,2,2,0,0],[0,2,1,1,1,1,2,0],[2,1,3,4,4,3,1,2],
+    [2,1,4,5,5,4,1,2],[2,1,1,5,5,1,1,2],[2,1,1,1,1,1,1,2],
+    [0,2,3,1,1,3,2,0],[0,0,2,3,3,2,0,0],[0,0,2,1,1,2,0,0],
+    [0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+  ],
+  explorer_1: [
+    [0,0,2,2,0,0,0,0],[0,2,1,1,2,0,0,0],[2,1,1,1,1,2,0,0],
+    [2,1,1,4,4,1,2,0],[0,2,1,1,1,2,0,0],[0,2,1,2,1,2,0,0],
+    [0,2,1,1,1,2,0,0],[0,0,2,1,2,0,0,0],[0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+  ],
+  explorer_2: [
+    [0,0,2,2,0,0,0,0],[0,2,1,1,2,0,0,0],[2,1,1,1,1,2,0,0],
+    [2,1,1,4,4,1,2,0],[0,2,1,1,1,1,2,0],[2,3,1,2,1,1,2,0],
+    [2,3,1,1,1,2,0,0],[0,2,3,1,2,0,0,0],[0,0,2,3,0,0,0,0],
+    [0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+  ],
+  explorer_3: [
+    [0,0,2,2,0,0,0,0],[0,2,1,1,2,2,0,0],[2,1,1,1,1,1,2,0],
+    [2,1,1,4,4,1,1,2],[0,2,1,1,1,1,2,0],[2,3,1,2,2,1,2,0],
+    [2,3,1,1,1,2,0,0],[0,2,3,1,2,0,0,0],[0,0,2,3,0,0,0,0],
+    [0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+  ],
+  fighter_1: [
+    [0,0,0,2,2,0,0,0],[0,0,2,1,1,2,0,0],[0,2,1,1,1,1,2,0],
+    [2,1,1,5,5,1,1,2],[2,1,1,1,1,1,1,2],[2,1,2,1,1,2,1,2],
+    [0,2,1,1,1,1,2,0],[0,0,2,2,2,2,0,0],[0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+  ],
+  fighter_2: [
+    [0,0,2,2,2,0,0,0],[0,2,1,1,1,2,0,0],[2,1,1,2,1,1,2,0],
+    [2,1,2,5,5,2,1,2],[2,1,1,1,1,1,1,2],[2,2,2,1,1,2,2,2],
+    [0,2,1,1,1,1,2,0],[0,0,2,2,2,2,0,0],[0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+  ],
+  fighter_3: [
+    [0,2,2,2,2,2,0,0],[2,1,1,1,1,1,2,0],[2,1,2,1,2,1,2,0],
+    [2,1,2,5,5,2,1,2],[2,2,1,1,1,1,2,2],[0,2,2,1,1,2,2,0],
+    [0,2,1,1,1,1,2,0],[0,0,2,2,2,2,0,0],[0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],
+  ],
+};
+
+const PATH_META = {
+  collector: { icon: '📦', label: 'The Collector', desc: 'Obsessed with finding the rarest, most valuable treasures. Knows the market better than anyone.', accent: '#5b8ee6', bgClass: '' },
+  explorer:  { icon: '🧭', label: 'The Explorer',  desc: 'Always first into the unknown. Curious about every floor, every secret, every door not yet opened.', accent: '#4caf50', bgClass: 'explorer-bg' },
+  fighter:   { icon: '⚔️', label: 'The Fighter',   desc: 'Competitive and relentless. Only cares about climbing higher than yesterday.', accent: '#e53935', bgClass: 'fighter-bg' },
+  egg:       { icon: '🥚', label: 'The Hatchling', desc: 'Still growing. Something is stirring inside.', accent: '#f5e6c8', bgClass: '' },
+};
+
+const FORM_NAMES = { egg:'Egg', egg_crack:'Cracking!', sprite1:'Form I', sprite2:'Form II', sprite3:'Final Form' };
+
+const TYPE_COLORS = {
+  grail: '#ffd700', claw: '#ff6ec7', moment: '#b388ff', milestone: '#4caf50', floor: '#5b8ee6', default: '#6a6a8a'
+};
+
+// ─── Background particles ─────────────────────────────────────────────────
+(function bgParticles() {
+  const c = document.getElementById('bg-canvas');
+  const ctx = c.getContext('2d');
+  let W, H, pts = [];
+  function resize() {
+    W = c.width = window.innerWidth;
+    H = c.height = window.innerHeight;
+  }
+  function makePts() {
+    pts = Array.from({length:60}, () => ({
+      x: Math.random()*W, y: Math.random()*H,
+      vx: (Math.random()-.5)*.15, vy: (Math.random()-.5)*.15,
+      r: Math.random()*.8+.2, a: Math.random()*.5+.1
+    }));
+  }
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    for (const p of pts) {
+      p.x=(p.x+p.vx+W)%W; p.y=(p.y+p.vy+H)%H;
+      ctx.globalAlpha=p.a; ctx.fillStyle='#b388ff';
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha=1;
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',()=>{resize();makePts()});
+  resize(); makePts(); draw();
+})();
+
+// ─── Draw sprite ──────────────────────────────────────────────────────────
+function drawSprite(canvas, spriteKey, scale) {
+  const ctx = canvas.getContext('2d');
+  const grid = SPRITES[spriteKey] || SPRITES['egg'];
+  const rows = grid.length, cols = grid[0].length;
+  canvas.width = cols * scale;
+  canvas.height = rows * scale;
+  const pathKey = spriteKey.includes('collector') ? 'collector'
+                : spriteKey.includes('explorer')  ? 'explorer'
+                : spriteKey.includes('fighter')   ? 'fighter'
+                : 'egg';
+  const palette = PALETTES[pathKey];
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for (let r=0; r<rows; r++) {
+    for (let c=0; c<cols; c++) {
+      const ci = grid[r][c];
+      if (!ci) continue;
+      ctx.fillStyle = palette[ci] || '#f00';
+      ctx.fillRect(c*scale, r*scale, scale, scale);
+    }
+  }
+}
+
+// ─── Date helpers ─────────────────────────────────────────────────────────
+function daysSince(ts) {
+  return Math.max(1, Math.floor((Date.now()-ts)/(1000*60*60*24))+1);
+}
+function relTime(ts) {
+  const d = Math.floor((Date.now()-ts)/(1000*60*60*24));
+  if (d===0) return 'Today';
+  if (d===1) return 'Yesterday';
+  if (d<7) return d+'d ago';
+  if (d<30) return Math.floor(d/7)+'w ago';
+  return Math.floor(d/30)+'mo ago';
+}
+function fmtDay(n) { return 'Day '+n; }
+
+// ─── Get sprite key ───────────────────────────────────────────────────────
+function getSpriteKey(state) {
+  if (!state || state.form==='egg'||state.form==='egg_crack') return 'egg';
+  const path = state.evolutionPath || 'collector';
+  const fn = state.form==='sprite1'?'1': state.form==='sprite2'?'2':'3';
+  return path+'_'+fn;
+}
+
+// ─── Load data ────────────────────────────────────────────────────────────
+function loadFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem('echo_companion');
+    const companion = raw ? JSON.parse(raw) : null;
+    const memRaw = localStorage.getItem('echo_companion_memory');
+    const memories = memRaw ? JSON.parse(memRaw) : [];
+    return { companion, memories };
+  } catch(e) { return { companion: null, memories: [] }; }
+}
+
+// URL-encode companion data for sharing (only non-sensitive public stats)
+function encodeShareData(companion, memories) {
+  try {
+    const pub = {
+      name: companion.name,
+      form: companion.form,
+      evolutionPath: companion.evolutionPath,
+      level: companion.level,
+      xp: companion.xp,
+      mood: companion.mood,
+      bornAt: companion.bornAt,
+      traits: companion.traits,
+      // share last 10 memories
+      memories: (memories||[]).slice(-10).map(m=>({ts:m.ts,type:m.type,icon:m.icon,text:m.text}))
+    };
+    return btoa(JSON.stringify(pub));
+  } catch(e) { return null; }
+}
+
+function decodeShareData(encoded) {
+  try {
+    return JSON.parse(atob(encoded));
+  } catch(e) { return null; }
+}
+
+// ─── Build the profile card HTML ──────────────────────────────────────────
+function buildProfile(companion, memories) {
+  const spriteKey = getSpriteKey(companion);
+  const path = companion.evolutionPath || (companion.form==='egg'?'egg':'collector');
+  const meta = PATH_META[path] || PATH_META.egg;
+  const dayNum = companion.bornAt ? daysSince(companion.bornAt) : 1;
+  const XP_PER_LEVEL = 20, MAX_LEVEL = 20;
+  const level = companion.level || 1;
+  const xp = companion.xp || 0;
+  const xpInLevel = xp % XP_PER_LEVEL;
+  const xpPct = Math.min(100, Math.round((xpInLevel/XP_PER_LEVEL)*100));
+  const t = companion.traits || {};
+  const formLabel = FORM_NAMES[companion.form] || companion.form || 'Unknown';
+  const moodEmojis = {curious:'🤔',happy:'😊',excited:'🤩',calm:'😌',sleepy:'😴'};
+  const moodEmoji = moodEmojis[companion.mood] || '😌';
+
+  document.getElementById('companion-card-wrap').innerHTML = `
+    <div class="companion-card">
+      <div class="card-hero ${meta.bgClass}">
+        <div class="day-badge">⭐ ${fmtDay(dayNum)}</div>
+        <div class="mood-badge"><span class="mood-emoji">${moodEmoji}</span>${companion.mood||'calm'}</div>
+        <div class="hero-canvas-wrap">
+          <canvas id="companion-canvas" style="image-rendering:pixelated"></canvas>
+          <div class="companion-aura" style="background:${meta.accent}"></div>
+        </div>
+        <div class="card-hero-text">
+          <div class="companion-name">${companion.name||'Unnamed'}</div>
+          <div class="companion-title">${meta.label} · ${formLabel}</div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-cell">
+          <div class="stat-value" style="color:${meta.accent}">${level}</div>
+          <div class="stat-label">Level</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-value">${dayNum}</div>
+          <div class="stat-label">Days</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-value">${t.clawPulls||0}</div>
+          <div class="stat-label">🎰 Pulls</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-value">${t.floorsVisited||0}</div>
+          <div class="stat-label">🗺️ Floors</div>
+        </div>
+      </div>
+
+      <div class="path-row">
+        <div class="path-icon ${path}">${meta.icon}</div>
+        <div class="path-text">
+          <strong>${meta.label}</strong>
+          <p>${meta.desc}</p>
+        </div>
+        <div class="level-pill">Lv.${level} / ${MAX_LEVEL}</div>
+      </div>
+
+      <div class="xp-row">
+        <div class="xp-label"><span>XP</span><span>${xpInLevel}/${XP_PER_LEVEL}</span></div>
+        <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-fill" style="width:0%;background:${meta.accent}"></div></div>
+      </div>
+    </div>
+  `;
+
+  // draw sprite
+  const canvas = document.getElementById('companion-canvas');
+  drawSprite(canvas, spriteKey, 16);
+  canvas.style.width = canvas.width*2+'px';
+  canvas.style.height = canvas.height*2+'px';
+
+  // animate XP bar
+  setTimeout(()=>{ document.getElementById('xp-fill').style.width=xpPct+'%'; },100);
+
+  // show card
+  document.getElementById('companion-card-wrap').style.display='block';
+
+  // Build memory feed
+  if (memories && memories.length > 0) {
+    const feed = document.getElementById('memory-feed');
+    const show = [...memories].reverse().slice(0,15);
+    feed.innerHTML = show.map((m,i)=>{
+      const color = TYPE_COLORS[m.type]||TYPE_COLORS.default;
+      const isLast = i===show.length-1;
+      const dayN = m.dayNum || '';
+      const when = m.ts ? relTime(m.ts) : '';
+      const meta2 = dayN ? `${fmtDay(dayN)} · ${when}` : when;
+      return `
+        <div class="memory-item">
+          <div class="memory-dot-col">
+            <div class="memory-dot" style="background:${color}"></div>
+            ${!isLast?`<div class="memory-line" style="background:${color}"></div>`:''}
+          </div>
+          <div class="memory-icon">${m.icon||'✨'}</div>
+          <div class="memory-body">
+            <div class="memory-text">${m.text||''}</div>
+            <div class="memory-meta">${meta2}</div>
+          </div>
+        </div>`;
+    }).join('');
+    document.getElementById('memory-section').style.display='block';
+  }
+
+  document.getElementById('profile-cta').style.display='block';
+}
+
+// ─── Share URL ────────────────────────────────────────────────────────────
+function buildShareUrl(companion, memories) {
+  const encoded = encodeShareData(companion, memories);
+  if (!encoded) return window.location.href;
+  const url = new URL(window.location.href);
+  url.searchParams.set('c', encoded);
+  return url.toString();
+}
+
+window.copyShareUrl = function() {
+  const input = document.getElementById('share-url');
+  input.select();
+  try { document.execCommand('copy'); } catch(e) { navigator.clipboard.writeText(input.value).catch(()=>{}); }
+  const btn = document.getElementById('copy-btn');
+  btn.textContent = '✅ Copied!';
+  btn.classList.add('copied');
+  setTimeout(()=>{ btn.textContent='📋 Copy Link'; btn.classList.remove('copied'); }, 2000);
+};
+
+// ─── Main init ────────────────────────────────────────────────────────────
+(function init() {
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get('c');
+
+  let companion = null, memories = [];
+
+  if (encoded) {
+    // Viewing someone else's profile via shared link
+    const data = decodeShareData(encoded);
+    if (data) {
+      companion = data;
+      memories = data.memories || [];
+    }
+  } else {
+    // Own profile — read from localStorage
+    const local = loadFromLocalStorage();
+    companion = local.companion;
+    memories = local.memories;
+  }
+
+  if (!companion || !companion.name) {
+    // Try to show something if companion exists but no name yet
+    if (companion) {
+      companion.name = companion.name || 'Unknown';
+    } else {
+      document.getElementById('no-data').style.display = 'flex';
+      return;
+    }
+  }
+
+  buildProfile(companion, memories);
+
+  // Build share URL and show share row (only when viewing own profile)
+  if (!encoded) {
+    const shareUrl = buildShareUrl(companion, memories);
+    document.getElementById('share-url').value = shareUrl;
+    document.getElementById('share-row').style.display = 'flex';
+
+    // Update page title and OG meta
+    document.title = `${companion.name} — Echo's Vault Companion`;
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.content = `Meet ${companion.name} — Echo's Vault Companion`;
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.content = `${companion.name} is a Level ${companion.level} ${(companion.evolutionPath||'').charAt(0).toUpperCase()+(companion.evolutionPath||'').slice(1)} companion. Day ${companion.bornAt?daysSince(companion.bornAt):1} of our journey. Come see our story.`;
+  } else {
+    // Shared view — update meta for previews
+    const name = companion.name;
+    const path = companion.evolutionPath||'';
+    const lvl = companion.level||1;
+    const day = companion.bornAt?daysSince(companion.bornAt):1;
+    document.title = `${name} — Echo's Vault Companion`;
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.content = `Meet ${name} — Echo's Vault Companion`;
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.content = `${name} is a Level ${lvl} ${path.charAt(0).toUpperCase()+path.slice(1)} companion. Day ${day} of our journey.`;
+  }
+})();
+</script>
+</body>
+</html>
