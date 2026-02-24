@@ -382,9 +382,9 @@
     },
     "mtg": {
       "totalListings": 127,
-      "avgPrice": 5299,
+      "avgPrice": 5334,
       "maxPrice": 41787,
-      "newAlerts": 0,
+      "newAlerts": 3,
       "platforms": {
         "ebay": 127,
         "tcgplayer": 0
@@ -401,12 +401,12 @@
       }
     },
     "dragonball": {
-      "totalListings": 103,
-      "avgPrice": 4638,
+      "totalListings": 104,
+      "avgPrice": 4622,
       "maxPrice": 60000,
-      "newAlerts": 0,
+      "newAlerts": 1,
       "platforms": {
-        "ebay": 103,
+        "ebay": 104,
         "tcgplayer": 0
       }
     },
