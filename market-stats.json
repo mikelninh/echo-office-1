@@ -358,5 +358,107 @@
         "tcgplayer": 0
       }
     }
+  },
+  "2026-02-24": {
+    "yugioh": {
+      "totalListings": 119,
+      "avgPrice": 9890,
+      "maxPrice": 77777,
+      "newAlerts": 82,
+      "platforms": {
+        "ebay": 119,
+        "tcgplayer": 0
+      }
+    },
+    "pokemon": {
+      "totalListings": 118,
+      "avgPrice": 5355,
+      "maxPrice": 39000,
+      "newAlerts": 102,
+      "platforms": {
+        "ebay": 118,
+        "tcgplayer": 0
+      }
+    },
+    "mtg": {
+      "totalListings": 127,
+      "avgPrice": 5299,
+      "maxPrice": 41787,
+      "newAlerts": 99,
+      "platforms": {
+        "ebay": 127,
+        "tcgplayer": 0
+      }
+    },
+    "onepiece": {
+      "totalListings": 138,
+      "avgPrice": 5199,
+      "maxPrice": 20493,
+      "newAlerts": 74,
+      "platforms": {
+        "ebay": 138,
+        "tcgplayer": 0
+      }
+    },
+    "dragonball": {
+      "totalListings": 103,
+      "avgPrice": 4638,
+      "maxPrice": 60000,
+      "newAlerts": 82,
+      "platforms": {
+        "ebay": 103,
+        "tcgplayer": 0
+      }
+    },
+    "weiss": {
+      "totalListings": 56,
+      "avgPrice": 4939,
+      "maxPrice": 22500,
+      "newAlerts": 45,
+      "platforms": {
+        "ebay": 56,
+        "tcgplayer": 0
+      }
+    },
+    "dandadan": {
+      "totalListings": 33,
+      "avgPrice": 4444,
+      "maxPrice": 22500,
+      "newAlerts": 0,
+      "platforms": {
+        "ebay": 33,
+        "tcgplayer": 0
+      }
+    },
+    "digimon": {
+      "totalListings": 42,
+      "avgPrice": 5887,
+      "maxPrice": 77777,
+      "newAlerts": 13,
+      "platforms": {
+        "ebay": 42,
+        "tcgplayer": 0
+      }
+    },
+    "lorcana": {
+      "totalListings": 66,
+      "avgPrice": 21546,
+      "maxPrice": 99999,
+      "newAlerts": 40,
+      "platforms": {
+        "ebay": 66,
+        "tcgplayer": 0
+      }
+    },
+    "unionarena": {
+      "totalListings": 42,
+      "avgPrice": 5063,
+      "maxPrice": 15000,
+      "newAlerts": 17,
+      "platforms": {
+        "ebay": 42,
+        "tcgplayer": 0
+      }
+    }
   }
 }
