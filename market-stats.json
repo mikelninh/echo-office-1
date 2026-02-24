@@ -364,7 +364,7 @@
       "totalListings": 119,
       "avgPrice": 9890,
       "maxPrice": 77777,
-      "newAlerts": 82,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 119,
         "tcgplayer": 0
@@ -374,7 +374,7 @@
       "totalListings": 118,
       "avgPrice": 5355,
       "maxPrice": 39000,
-      "newAlerts": 102,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 118,
         "tcgplayer": 0
@@ -384,7 +384,7 @@
       "totalListings": 127,
       "avgPrice": 5299,
       "maxPrice": 41787,
-      "newAlerts": 99,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 127,
         "tcgplayer": 0
@@ -394,7 +394,7 @@
       "totalListings": 138,
       "avgPrice": 5199,
       "maxPrice": 20493,
-      "newAlerts": 74,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 138,
         "tcgplayer": 0
@@ -404,7 +404,7 @@
       "totalListings": 103,
       "avgPrice": 4638,
       "maxPrice": 60000,
-      "newAlerts": 82,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 103,
         "tcgplayer": 0
@@ -414,7 +414,7 @@
       "totalListings": 56,
       "avgPrice": 4939,
       "maxPrice": 22500,
-      "newAlerts": 45,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 56,
         "tcgplayer": 0
@@ -434,7 +434,7 @@
       "totalListings": 42,
       "avgPrice": 5887,
       "maxPrice": 77777,
-      "newAlerts": 13,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 42,
         "tcgplayer": 0
@@ -444,7 +444,7 @@
       "totalListings": 66,
       "avgPrice": 21546,
       "maxPrice": 99999,
-      "newAlerts": 40,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 66,
         "tcgplayer": 0
@@ -454,7 +454,7 @@
       "totalListings": 42,
       "avgPrice": 5063,
       "maxPrice": 15000,
-      "newAlerts": 17,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 42,
         "tcgplayer": 0
