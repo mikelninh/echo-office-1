@@ -468,6 +468,8 @@ function triggerWin(prize) {
   wins++;
   streak++;
   hudPop.wins = 12;
+  window.dispatchEvent(new CustomEvent('clawWin', {detail:{rarity:prize.rarity,name:prize.name}}));
+  if (window.ClawSpectator) window.ClawSpectator.onWin(prize.rarity);
   if (streak > 1) hudPop.streak = 15;
   const rc = RARITY[prize.rarity];
   const cx = clawX, cy = clawY + 50;
@@ -519,7 +521,9 @@ function triggerNearMiss() {
   slowMoTimer = 30;
   doShake(7, 25);
   spawnRedSparks(clawX, clawY + 50);
-  sndSlip();}
+  sndSlip();
+  window.dispatchEvent(new CustomEvent('clawNearMiss'));
+  if (window.ClawSpectator) window.ClawSpectator.onNearMiss();}
 function triggerSlip() {
   heldPrize.vy = 1;
   heldPrize.vx = rng(-2, 2);
@@ -1453,6 +1457,8 @@ function startDrop() {
   sndMega();
   doFlash('#ffd740', 0.35);
   doShake(5, 30);
+  window.dispatchEvent(new CustomEvent('clawMega'));
+  if (window.ClawSpectator) window.ClawSpectator.onMega();
   spawnElectric(clawX, clawY, 30);}
   clawStrength = rollStrength();
   state = 'anticipation';
@@ -1492,5 +1498,6 @@ spawnPrizes();
 initDust();
 gameLoop();
 </script>
+<script src="claw-spectator.js"></script>
 </body>
 </html>
