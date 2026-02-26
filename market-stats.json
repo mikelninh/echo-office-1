@@ -562,5 +562,107 @@
         "tcgplayer": 0
       }
     }
+  },
+  "2026-02-26": {
+    "yugioh": {
+      "totalListings": 117,
+      "avgPrice": 10929,
+      "maxPrice": 99999,
+      "newAlerts": 0,
+      "platforms": {
+        "ebay": 117,
+        "tcgplayer": 0
+      }
+    },
+    "pokemon": {
+      "totalListings": 118,
+      "avgPrice": 5314,
+      "maxPrice": 39000,
+      "newAlerts": 4,
+      "platforms": {
+        "ebay": 118,
+        "tcgplayer": 0
+      }
+    },
+    "mtg": {
+      "totalListings": 127,
+      "avgPrice": 5541,
+      "maxPrice": 41905,
+      "newAlerts": 0,
+      "platforms": {
+        "ebay": 127,
+        "tcgplayer": 0
+      }
+    },
+    "onepiece": {
+      "totalListings": 139,
+      "avgPrice": 5106,
+      "maxPrice": 20551,
+      "newAlerts": 1,
+      "platforms": {
+        "ebay": 139,
+        "tcgplayer": 0
+      }
+    },
+    "dragonball": {
+      "totalListings": 106,
+      "avgPrice": 4851,
+      "maxPrice": 60000,
+      "newAlerts": 0,
+      "platforms": {
+        "ebay": 106,
+        "tcgplayer": 0
+      }
+    },
+    "weiss": {
+      "totalListings": 57,
+      "avgPrice": 4963,
+      "maxPrice": 22500,
+      "newAlerts": 0,
+      "platforms": {
+        "ebay": 57,
+        "tcgplayer": 0
+      }
+    },
+    "dandadan": {
+      "totalListings": 35,
+      "avgPrice": 4444,
+      "maxPrice": 22500,
+      "newAlerts": 0,
+      "platforms": {
+        "ebay": 35,
+        "tcgplayer": 0
+      }
+    },
+    "digimon": {
+      "totalListings": 44,
+      "avgPrice": 5745,
+      "maxPrice": 77777,
+      "newAlerts": 0,
+      "platforms": {
+        "ebay": 44,
+        "tcgplayer": 0
+      }
+    },
+    "lorcana": {
+      "totalListings": 66,
+      "avgPrice": 23225,
+      "maxPrice": 111107,
+      "newAlerts": 0,
+      "platforms": {
+        "ebay": 66,
+        "tcgplayer": 0
+      }
+    },
+    "unionarena": {
+      "totalListings": 46,
+      "avgPrice": 4917,
+      "maxPrice": 15000,
+      "newAlerts": 0,
+      "platforms": {
+        "ebay": 46,
+        "tcgplayer": 0
+      }
+    }
   }
 }

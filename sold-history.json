@@ -323,5 +323,70 @@
       "fetchedAt": 1771941780009
     },
     "fetchedAt": 1771941780009
+  },
+  "blue-eyes-white-dragon-1st-edition-lob": {
+    "title": "Blue-Eyes White Dragon 1st Edition LOB",
+    "stats": {
+      "median": 295,
+      "avg": 717,
+      "min": 50,
+      "max": 4100,
+      "count": 8,
+      "rawCount": 10,
+      "samples": [
+        {
+          "price": 350,
+          "date": null,
+          "url": "https://www.ebay.com/itm/397645492776"
+        },
+        {
+          "price": 31,
+          "date": null,
+          "url": "https://www.ebay.com/itm/317899498425"
+        },
+        {
+          "price": 49.99,
+          "date": null,
+          "url": "https://www.ebay.com/itm/287147172159"
+        },
+        {
+          "price": 259.95,
+          "date": null,
+          "url": "https://www.ebay.com/itm/406080300574"
+        },
+        {
+          "price": 329.99,
+          "date": null,
+          "url": "https://www.ebay.com/itm/306775024351"
+        },
+        {
+          "price": 139.99,
+          "date": null,
+          "url": "https://www.ebay.com/itm/127686900795"
+        },
+        {
+          "price": 4100,
+          "date": null,
+          "url": "https://www.ebay.com/itm/277714658569"
+        },
+        {
+          "price": 455,
+          "date": null,
+          "url": "https://www.ebay.com/itm/187883310921"
+        },
+        {
+          "price": 20000,
+          "date": null,
+          "url": "https://www.ebay.com/itm/256925779427"
+        },
+        {
+          "price": 54.99,
+          "date": null,
+          "url": "https://www.ebay.com/itm/267582819817"
+        }
+      ],
+      "fetchedAt": 1772077701331
+    },
+    "fetchedAt": 1772077701331
   }
 }
