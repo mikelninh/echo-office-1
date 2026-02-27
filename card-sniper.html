@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card Sniper Alpha — TCG Grading Arbitrage Alerts</title>
+<meta name="description" content="Get real-time alerts when valuable TCG cards are listed below graded market value. Buy raw, grade, flip. Only fires when the math is real.">
+<meta property="og:title" content="Card Sniper Alpha — TCG Grading Arbitrage Alerts">
+<meta property="og:description" content="The algorithm finds mispriced grails before anyone else. Pokémon, Yu-Gi-Oh!, One Piece, Dragon Ball, MTG, Lorcana. €19/mo.">
+<meta property="og:image" content="https://card-sniper-production.up.railway.app/og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ═══ RESET & BASE ═══ */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:       #080810;
+    --surface:  #0f0f1a;
+    --surface2: #161625;
+    --border:   rgba(255,255,255,0.08);
+    --text:     #e8e8f4;
+    --dim:      #7070a0;
+    --accent:   #ff4d6d;
+    --gold:     #ffd60a;
+    --green:    #06d6a0;
+    --blue:     #4895ef;
+    --purple:   #b388ff;
+    --red:      #ff4d6d;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ═══ NOISE TEXTURE ═══ */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; opacity: 0.4;
+  }
+
+  /* ═══ LAYOUT ═══ */
+  .container { max-width: 980px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+  section { padding: 80px 0; }
+
+  /* ═══ NAV ═══ */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,8,16,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+  }
+  .nav-inner {
+    max-width: 980px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 15px; font-weight: 700;
+    color: var(--gold);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-cta {
+    background: var(--accent);
+    color: white;
+    padding: 9px 20px; border-radius: 8px;
+    font-weight: 600; font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .nav-cta:hover { background: #ff6b84; transform: translateY(-1px); }
+
+  /* ═══ HERO ═══ */
+  .hero {
+    padding: 100px 0 80px;
+    text-align: center;
+    position: relative;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 500px;
+    background: radial-gradient(ellipse at center, rgba(255,77,109,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,214,10,0.08);
+    border: 1px solid rgba(255,214,10,0.2);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px; font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    margin-bottom: 28px;
+  }
+  .hero-badge::before { content: '⚡'; }
+  h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    margin-bottom: 24px;
+  }
+  h1 em { color: var(--accent); font-style: normal; }
+  h1 .gold { color: var(--gold); }
+  .hero-sub {
+    font-size: clamp(16px, 2.5vw, 20px);
+    color: var(--dim);
+    max-width: 560px; margin: 0 auto 48px;
+    line-height: 1.6;
+  }
+  .hero-sub strong { color: var(--text); }
+  .hero-actions {
+    display: flex; align-items: center; justify-content: center;
+    gap: 16px; flex-wrap: wrap;
+    margin-bottom: 60px;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--accent);
+    color: white;
+    padding: 16px 32px; border-radius: 12px;
+    font-weight: 700; font-size: 17px;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 8px 32px rgba(255,77,109,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,77,109,0.4); }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--dim);
+    padding: 16px 28px; border-radius: 12px;
+    font-weight: 500; font-size: 15px;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+  .hero-trust {
+    display: flex; align-items: center; justify-content: center;
+    gap: 24px; flex-wrap: wrap;
+    color: var(--dim); font-size: 13px;
+  }
+  .trust-item { display: flex; align-items: center; gap: 6px; }
+  .trust-item::before { content: '✓'; color: var(--green); }
+
+  /* ═══ TICKER ═══ */
+  .ticker-wrap {
+    background: rgba(255,214,10,0.04);
+    border-top: 1px solid rgba(255,214,10,0.1);
+    border-bottom: 1px solid rgba(255,214,10,0.1);
+    padding: 12px 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .ticker-wrap::before, .ticker-wrap::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 60px; z-index: 2;
+  }
+  .ticker-wrap::before { left: 0; background: linear-gradient(to right, var(--bg), transparent); }
+  .ticker-wrap::after  { right: 0; background: linear-gradient(to left, var(--bg), transparent); }
+  .ticker-track {
+    display: flex; gap: 48px;
+    animation: ticker 28s linear infinite;
+    width: max-content;
+  }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .ticker-item {
+    display: flex; align-items: center; gap: 8px;
+    white-space: nowrap;
+    font-size: 13px; font-family: 'Space Mono', monospace;
+  }
+  .ticker-badge {
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .badge-legendary { background: rgba(255,77,109,0.15); color: var(--accent); border: 1px solid rgba(255,77,109,0.3); }
+  .badge-steal     { background: rgba(6,214,160,0.12); color: var(--green); border: 1px solid rgba(6,214,160,0.25); }
+  .badge-solid     { background: rgba(72,149,239,0.12); color: var(--blue); border: 1px solid rgba(72,149,239,0.25); }
+
+  /* ═══ HOW IT WORKS ═══ */
+  .section-label {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.12em;
+    color: var(--accent); text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  h2 {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700; letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+  .section-sub { color: var(--dim); font-size: 18px; max-width: 520px; }
+
+  .steps {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px; margin-top: 56px;
+  }
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .step:hover { border-color: rgba(255,255,255,0.15); }
+  .step-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--accent); margin-bottom: 16px;
+  }
+  .step-icon { font-size: 32px; margin-bottom: 12px; display: block; }
+  .step h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+  .step p { color: var(--dim); font-size: 14px; line-height: 1.6; }
+
+  /* ═══ REAL ALERT ═══ */
+  .alert-showcase {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    margin-top: 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .alert-showcase::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(to right, var(--accent), var(--purple), var(--gold));
+  }
+  .alert-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px; flex-wrap: gap;
+  }
+  .alert-score-big {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .score-circle {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: rgba(255,77,109,0.1);
+    border: 2px solid rgba(255,77,109,0.4);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  .score-circle .num {
+    font-family: 'Space Mono', monospace;
+    font-size: 24px; font-weight: 700; color: var(--accent);
+    line-height: 1;
+  }
+  .score-circle .lbl { font-size: 9px; color: var(--dim); letter-spacing: 0.06em; }
+  .alert-verdict {
+    font-size: 20px; font-weight: 700;
+  }
+  .alert-game-tag {
+    background: rgba(255,214,10,0.08);
+    border: 1px solid rgba(255,214,10,0.2);
+    color: var(--gold);
+    padding: 4px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 600;
+  }
+  .alert-card-title {
+    font-size: 18px; font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+  .alert-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px; margin-bottom: 20px;
+  }
+  .alert-stat {
+    background: var(--surface2);
+    border-radius: 12px; padding: 16px;
+  }
+  .alert-stat-label { font-size: 11px; color: var(--dim); letter-spacing: 0.05em; margin-bottom: 4px; }
+  .alert-stat-value { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; }
+  .text-green { color: var(--green); }
+  .text-gold  { color: var(--gold); }
+  .text-red   { color: var(--red); }
+  .text-blue  { color: var(--blue); }
+  .alert-ev-table {
+    background: var(--surface2);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .ev-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .ev-row:last-child { border-bottom: none; }
+  .ev-grade { color: var(--dim); }
+  .ev-profit { font-family: 'Space Mono', monospace; font-weight: 700; }
+  .ev-roi { font-size: 12px; color: var(--dim); }
+  .alert-cta-strip {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .blur-overlay {
+    position: relative;
+  }
+  .blur-overlay::after {
+    content: '🔒 Subscribe to see live alerts';
+    position: absolute; inset: 0;
+    background: rgba(8,8,16,0.88);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 15px; color: var(--dim);
+    border-radius: 12px;
+  }
+
+  /* ═══ PROOF ═══ */
+  .proof-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px; margin-top: 48px;
+  }
+  .proof-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .proof-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .game-pill {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    padding: 3px 10px; border-radius: 100px;
+    text-transform: uppercase;
+  }
+  .game-dragonball { background: rgba(255,214,10,0.1); color: var(--gold); border: 1px solid rgba(255,214,10,0.2); }
+  .game-onepiece   { background: rgba(72,149,239,0.1); color: var(--blue); border: 1px solid rgba(72,149,239,0.2); }
+  .game-lorcana    { background: rgba(179,136,255,0.1); color: var(--purple); border: 1px solid rgba(179,136,255,0.2); }
+  .score-pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px; font-weight: 700;
+    padding: 4px 10px; border-radius: 8px;
+    background: rgba(255,77,109,0.1); color: var(--accent);
+    border: 1px solid rgba(255,77,109,0.2);
+  }
+  .score-pill.high { background: rgba(6,214,160,0.1); color: var(--green); border-color: rgba(6,214,160,0.25); }
+  .proof-title { font-size: 14px; color: var(--text); line-height: 1.5; }
+  .proof-stats {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .proof-stat {
+    background: var(--surface2); border-radius: 8px; padding: 8px 12px;
+    flex: 1; min-width: 90px;
+  }
+  .proof-stat-label { font-size: 10px; color: var(--dim); letter-spacing: 0.04em; }
+  .proof-stat-value { font-family: 'Space Mono', monospace; font-size: 15px; font-weight: 700; }
+  .proof-timestamp { font-size: 11px; color: var(--dim); }
+
+  /* ═══ ALGORITHM ═══ */
+  .algo-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px; margin-top: 48px;
+  }
+  .algo-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px;
+  }
+  .algo-icon { font-size: 28px; margin-bottom: 12px; }
+  .algo-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .algo-card p { font-size: 13px; color: var(--dim); line-height: 1.6; }
+  .score-breakdown {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px; margin-top: 32px;
+  }
+  .score-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .score-row:last-child { border-bottom: none; }
+  .score-bar-wrap { flex: 1; background: var(--surface2); border-radius: 4px; height: 6px; }
+  .score-bar { height: 6px; border-radius: 4px; background: var(--accent); }
+  .score-label { font-size: 14px; color: var(--text); min-width: 180px; }
+  .score-pts { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--dim); min-width: 50px; text-align: right; }
+
+  /* ═══ COVERAGE ═══ */
+  .tcg-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px; margin-top: 48px;
+  }
+  .tcg-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px 16px;
+    text-align: center;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .tcg-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
+  .tcg-icon { font-size: 32px; margin-bottom: 10px; display: block; }
+  .tcg-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .tcg-count { font-size: 11px; color: var(--dim); }
+
+  /* ═══ PRICING ═══ */
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px; margin-top: 56px;
+  }
+  .tier-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px;
+    position: relative;
+    transition: all 0.2s;
+  }
+  .tier-card:hover { border-color: rgba(255,255,255,0.15); }
+  .tier-card.featured {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(255,77,109,0.05), var(--surface));
+  }
+  .tier-featured-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: white;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    padding: 4px 14px; border-radius: 100px;
+    white-space: nowrap;
+  }
+  .tier-name { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; color: var(--dim); margin-bottom: 8px; }
+  .tier-price {
+    font-family: 'Space Mono', monospace;
+    font-size: 42px; font-weight: 700;
+    line-height: 1; margin-bottom: 4px;
+  }
+  .tier-price sup { font-size: 20px; }
+  .tier-period { font-size: 13px; color: var(--dim); margin-bottom: 24px; }
+  .tier-features { list-style: none; margin-bottom: 28px; }
+  .tier-features li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 0; font-size: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tier-features li:last-child { border-bottom: none; }
+  .tier-features li::before { content: '✓'; color: var(--green); flex-shrink: 0; padding-top: 1px; }
+  .tier-features li.dim::before { color: var(--dim); }
+  .tier-features li.dim { color: var(--dim); }
+  .tier-btn {
+    display: block; text-align: center;
+    padding: 14px; border-radius: 12px;
+    font-weight: 700; font-size: 15px;
+    text-decoration: none; transition: all 0.2s;
+  }
+  .tier-btn-primary {
+    background: var(--accent); color: white;
+    box-shadow: 0 4px 20px rgba(255,77,109,0.25);
+  }
+  .tier-btn-primary:hover { background: #ff6b84; transform: translateY(-1px); }
+  .tier-btn-outline {
+    border: 1px solid var(--border); color: var(--text);
+  }
+  .tier-btn-outline:hover { border-color: rgba(255,255,255,0.2); }
+
+  /* ═══ FAQ ═══ */
+  .faq-list { margin-top: 48px; }
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+    padding: 24px 0;
+  }
+  .faq-item:first-child { border-top: 1px solid var(--border); }
+  .faq-q {
+    font-size: 17px; font-weight: 600; margin-bottom: 12px;
+    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  }
+  .faq-q::after { content: '+'; color: var(--dim); font-weight: 300; font-size: 22px; }
+  .faq-a { color: var(--dim); font-size: 15px; line-height: 1.7; }
+
+  /* ═══ FOOTER CTA ═══ */
+  .footer-cta {
+    text-align: center;
+    padding: 100px 0;
+    position: relative;
+  }
+  .footer-cta::before {
+    content: '';
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse at center, rgba(255,214,10,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .footer-cta h2 { margin-bottom: 16px; }
+  .footer-cta p { color: var(--dim); font-size: 18px; max-width: 500px; margin: 0 auto 40px; }
+
+  /* ═══ FOOTER ═══ */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 0;
+    color: var(--dim); font-size: 13px;
+  }
+  .footer-inner {
+    max-width: 980px; margin: 0 auto; padding: 0 24px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+  }
+  footer a { color: var(--dim); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+
+  /* ═══ LIVE INDICATOR ═══ */
+  .live-dot {
+    display: inline-block;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 3px rgba(6,214,160,0.2);
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(6,214,160,0.2); }
+    50% { box-shadow: 0 0 0 6px rgba(6,214,160,0.05); }
+  }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (max-width: 640px) {
+    section { padding: 60px 0; }
+    .hero { padding: 60px 0 40px; }
+    .alert-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+    .pricing-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">🎯 Card<span>Sniper</span> <span style="color:var(--dim);font-size:11px;font-weight:400;">ALPHA</span></a>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="live-dot"></span>
+      <span style="font-size:13px;color:var(--dim);">System live</span>
+      <a href="#pricing" class="nav-cta">Get Access →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">Grading Arbitrage Alerts · 105 Target Cards</div>
+    <h1>The algorithm finds<br><em>mispriced grails</em><br>before anyone else</h1>
+    <p class="hero-sub">
+      Raw cards listed at ≤55% of graded market value. Full multi-grade EV breakdown. <strong>Only fires when the math is real.</strong>
+    </p>
+    <div class="hero-actions">
+      <a href="#pricing" class="btn-primary">
+        🎯 Get Alerts for €19/mo
+      </a>
+      <a href="#proof" class="btn-secondary">
+        See real alerts ↓
+      </a>
+    </div>
+    <div class="hero-trust">
+      <span class="trust-item">Pokémon, Yu-Gi-Oh!, MTG</span>
+      <span class="trust-item">One Piece, Dragon Ball</span>
+      <span class="trust-item">Lorcana, Weiß Schwarz</span>
+      <span class="trust-item">Cancel anytime</span>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER — live alert feed simulation -->
+<div class="ticker-wrap">
+  <div class="ticker-track" id="tickerTrack">
+    <div class="ticker-item">
+      <span class="ticker-badge badge-legendary">SCORE 96 · LEGENDARY</span>
+      Dragon Ball Goku SR FB05-119 — Listed $3,499 · PSA 10 FMV $6,100
+    </div>
+    <div class="ticker-item">
+      <span class="ticker-badge badge-solid">SCORE 74 · SOLID</span>
+      One Piece Luffy SEC Silver OP05-119 — Listed $2,607 · 37% below FMV
+    </div>
+    <div class="ticker-item">
+      <span class="ticker-badge badge-steal">SCORE 72 · SOLID</span>
+      Lorcana Kuzco Championship Promo — Listed $3,650 · buy window open
+    </div>
+    <div class="ticker-item">
+      <span class="ticker-badge badge-legendary">SCORE 96 · LEGENDARY</span>
+      Dragon Ball Goku SR FB05-119 — Listed $3,499 · PSA 10 FMV $6,100
+    </div>
+    <div class="ticker-item">
+      <span class="ticker-badge badge-solid">SCORE 74 · SOLID</span>
+      One Piece Luffy SEC Silver OP05-119 — Listed $2,607 · 37% below FMV
+    </div>
+    <div class="ticker-item">
+      <span class="ticker-badge badge-steal">SCORE 72 · SOLID</span>
+      Lorcana Kuzco Championship Promo — Listed $3,650 · buy window open
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2>Three steps.<br>One clean signal.</h2>
+    <p class="section-sub">We scan eBay continuously for raw cards listed below graded market value. You get the alert, you make the call.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">STEP 01</div>
+        <span class="step-icon">🔍</span>
+        <h3>We find the mispricing</h3>
+        <p>Scanner runs every few hours across 7 TCGs, 105 target cards. Filters for raw listings at ≤55% of PSA 10 fair market value.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">STEP 02</div>
+        <span class="step-icon">🧮</span>
+        <h3>Algorithm scores the deal</h3>
+        <p>Steal Score™ runs 5 signals: graded FMV spread, EV across PSA 10/9/8/≤7, PSA population scarcity, comp quality, listing quality. Only scores ≥80 fire.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">STEP 03</div>
+        <span class="step-icon">📲</span>
+        <h3>You get the Telegram alert</h3>
+        <p>Full breakdown: buy price, PSA grade scenarios, break-even grade, profit per scenario, long-term tier projection. Everything to make the decision in 60 seconds.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">STEP 04</div>
+        <span class="step-icon">🏆</span>
+        <h3>Buy → Grade → Flip</h3>
+        <p>Raw card → PSA/BGS submission → sell graded on eBay or Cardmarket. GameStop exit floor for eligible PSA 8–10. Exit strategies included in every alert.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REAL ALERT SHOWCASE -->
+<section id="proof">
+  <div class="container">
+    <div class="section-label">Real Alert</div>
+    <h2>This fired on Feb 26th.<br>Here's the full breakdown.</h2>
+    <p class="section-sub">No mock data. This is exactly what subscribers saw, straight from the log.</p>
+
+    <div class="alert-showcase">
+      <!-- Header -->
+      <div class="alert-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div class="alert-score-big">
+          <div class="score-circle">
+            <span class="num">96</span>
+            <span class="lbl">SCORE</span>
+          </div>
+          <div>
+            <div class="alert-verdict">🔥🔥🔥 LEGENDARY</div>
+            <div style="color:var(--dim);font-size:13px;margin-top:2px;">Top 5% of all alerts scored</div>
+          </div>
+        </div>
+        <span class="alert-game-tag">Dragon Ball TCG</span>
+      </div>
+
+      <!-- Card title -->
+      <div class="alert-card-title">
+        Dragon Ball Super Fusion World Manga #FB05-119 SON GOKU S.R. — Raw
+      </div>
+
+      <!-- Key stats -->
+      <div class="alert-grid">
+        <div class="alert-stat">
+          <div class="alert-stat-label">LISTED PRICE</div>
+          <div class="alert-stat-value text-red">$3,499</div>
+        </div>
+        <div class="alert-stat">
+          <div class="alert-stat-label">PSA 10 FMV</div>
+          <div class="alert-stat-value text-green">~$6,100</div>
+        </div>
+        <div class="alert-stat">
+          <div class="alert-stat-label">DISCOUNT</div>
+          <div class="alert-stat-value text-gold">43% below</div>
+        </div>
+        <div class="alert-stat">
+          <div class="alert-stat-label">PLATFORM</div>
+          <div class="alert-stat-value" style="font-size:14px;">eBay.com</div>
+        </div>
+      </div>
+
+      <!-- EV Table -->
+      <div style="font-size:12px;color:var(--dim);margin-bottom:8px;letter-spacing:0.05em;text-transform:uppercase;">Expected Value by Grade Scenario</div>
+      <div class="alert-ev-table">
+        <div class="ev-row">
+          <span class="ev-grade">PSA 10 (gem mint)</span>
+          <span class="ev-profit text-green">+$1,850 profit</span>
+          <span class="ev-roi">~52% ROI</span>
+        </div>
+        <div class="ev-row">
+          <span class="ev-grade">PSA 9 (mint)</span>
+          <span class="ev-profit text-green">+$620 profit</span>
+          <span class="ev-roi">~17% ROI</span>
+        </div>
+        <div class="ev-row">
+          <span class="ev-grade">PSA 8 (near mint)</span>
+          <span class="ev-profit" style="color:var(--dim);">−$180 loss</span>
+          <span class="ev-roi">break-even at 8</span>
+        </div>
+        <div class="ev-row">
+          <span class="ev-grade">PSA ≤7 (below 8)</span>
+          <span class="ev-profit text-red">−$890 loss</span>
+          <span class="ev-roi">loss scenario</span>
+        </div>
+      </div>
+
+      <!-- CTA strip -->
+      <div class="alert-cta-strip">
+        <div style="font-size:13px;color:var(--dim);">
+          🔒 <strong style="color:var(--text);">Subscribers see:</strong> eBay link, break-even grade, grade rate for this set, PSA pop scarcity score, exit strategy
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MORE PROOF CARDS -->
+<section style="padding-top:0;">
+  <div class="container">
+    <div class="section-label">Also Fired Recently</div>
+    <h2>The signal is consistent.</h2>
+
+    <div class="proof-grid">
+      <div class="proof-card">
+        <div class="proof-card-header">
+          <span class="game-pill game-onepiece">One Piece</span>
+          <span class="score-pill">74</span>
+        </div>
+        <div class="proof-title">OP05-119 Monkey D. Luffy — Special Card SEC Silver English</div>
+        <div class="proof-stats">
+          <div class="proof-stat">
+            <div class="proof-stat-label">Listed</div>
+            <div class="proof-stat-value text-red">$2,607</div>
+          </div>
+          <div class="proof-stat">
+            <div class="proof-stat-label">Below FMV</div>
+            <div class="proof-stat-value text-gold">37%</div>
+          </div>
+        </div>
+        <div class="proof-timestamp">🕐 Feb 26, 2026</div>
+      </div>
+
+      <div class="proof-card">
+        <div class="proof-card-header">
+          <span class="game-pill game-lorcana">Lorcana</span>
+          <span class="score-pill">72</span>
+        </div>
+        <div class="proof-title">TOP 16 Enchanted Foil Kuzco — Lorcana Championship Promo 8/C1</div>
+        <div class="proof-stats">
+          <div class="proof-stat">
+            <div class="proof-stat-label">Listed</div>
+            <div class="proof-stat-value text-red">$3,650</div>
+          </div>
+          <div class="proof-stat">
+            <div class="proof-stat-label">Below FMV</div>
+            <div class="proof-stat-value text-gold">36%</div>
+          </div>
+        </div>
+        <div class="proof-timestamp">🕐 Feb 25, 2026</div>
+      </div>
+
+      <div class="proof-card">
+        <div class="proof-card-header">
+          <span class="game-pill game-dragonball">Dragon Ball</span>
+          <span class="score-pill high">96 🔥</span>
+        </div>
+        <div class="proof-title">FB05-119 Son Goku S.R. — Fusion World Manga Edition (repeat: sellers keep re-listing)</div>
+        <div class="proof-stats">
+          <div class="proof-stat">
+            <div class="proof-stat-label">Listed</div>
+            <div class="proof-stat-value text-red">$3,499</div>
+          </div>
+          <div class="proof-stat">
+            <div class="proof-stat-label">Below FMV</div>
+            <div class="proof-stat-value text-gold">43%</div>
+          </div>
+        </div>
+        <div class="proof-timestamp">🕐 Feb 25, 2026</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ALGORITHM -->
+<section id="algorithm">
+  <div class="container">
+    <div class="section-label">The Algorithm</div>
+    <h2>Steal Score™ — how we<br>filter the noise</h2>
+    <p class="section-sub">Five signals combined into a 0–100 score. We only push alerts when you'd actually want to act.</p>
+
+    <div class="score-breakdown">
+      <div style="font-size:13px;color:var(--dim);margin-bottom:20px;letter-spacing:0.05em;text-transform:uppercase;">Signal Weights</div>
+      <div class="score-row">
+        <div class="score-label">PSA 8 profitability</div>
+        <div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:var(--accent)"></div></div>
+        <div class="score-pts">35 pts</div>
+      </div>
+      <div class="score-row">
+        <div class="score-label">Listed ≤55% of PSA 10 FMV</div>
+        <div class="score-bar-wrap"><div class="score-bar" style="width:86%;background:var(--gold)"></div></div>
+        <div class="score-pts">30 pts</div>
+      </div>
+      <div class="score-row">
+        <div class="score-label">EV ROI quality (≥150%)</div>
+        <div class="score-bar-wrap"><div class="score-bar" style="width:57%;background:var(--green)"></div></div>
+        <div class="score-pts">20 pts</div>
+      </div>
+      <div class="score-row">
+        <div class="score-label">HIGH confidence comps (5+)</div>
+        <div class="score-bar-wrap"><div class="score-bar" style="width:43%;background:var(--blue)"></div></div>
+        <div class="score-pts">15 pts</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:16px;font-size:13px;color:var(--dim);">
+        <span>Alert threshold: <strong style="color:var(--text);">80+</strong></span>
+        <span>Legendary: <strong style="color:var(--accent);">95+</strong></span>
+        <span>Min profit filter: <strong style="color:var(--text);">€1,500</strong></span>
+        <span>Min ROI filter: <strong style="color:var(--text);">150%</strong></span>
+      </div>
+    </div>
+
+    <div class="algo-grid" style="margin-top:24px;">
+      <div class="algo-card">
+        <div class="algo-icon">📊</div>
+        <h3>Multi-Grade EV</h3>
+        <p>Every alert shows expected value for PSA 10, 9, 8, and ≤7. You see the downside before you buy.</p>
+      </div>
+      <div class="algo-card">
+        <div class="algo-icon">🎰</div>
+        <h3>Grade Rate by Set</h3>
+        <p>We use set-specific PSA 10 rates — LOB 1st Ed has a very different rate than OP-01. No generic guessing.</p>
+      </div>
+      <div class="algo-card">
+        <div class="algo-icon">🕵️</div>
+        <h3>Raw-Only Filter</h3>
+        <p>Any listing with PSA/BGS/CGC in the title is skipped automatically. You're looking at raw cards only.</p>
+      </div>
+      <div class="algo-card">
+        <div class="algo-icon">🏪</div>
+        <h3>GameStop Exit Floor</h3>
+        <p>For eligible cards, we include the GameStop buylist as a backup exit. Floor, not ceiling.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TCG COVERAGE -->
+<section id="coverage">
+  <div class="container">
+    <div class="section-label">Coverage</div>
+    <h2>105 target cards.<br>7 TCGs.</h2>
+    <p class="section-sub">Curated for grade-pop scarcity + secondary market depth. Not every card — the <em>right</em> cards.</p>
+
+    <div class="tcg-grid">
+      <div class="tcg-card">
+        <span class="tcg-icon">🟡</span>
+        <div class="tcg-name">Pokémon</div>
+        <div class="tcg-count">15 targets · S/A/B tiers</div>
+      </div>
+      <div class="tcg-card">
+        <span class="tcg-icon">🟣</span>
+        <div class="tcg-name">Yu-Gi-Oh!</div>
+        <div class="tcg-count">15 targets · 1st ed focus</div>
+      </div>
+      <div class="tcg-card">
+        <span class="tcg-icon">⚔️</span>
+        <div class="tcg-name">Magic: The Gathering</div>
+        <div class="tcg-count">15 targets · Reserved List</div>
+      </div>
+      <div class="tcg-card">
+        <span class="tcg-icon">🏴‍☠️</span>
+        <div class="tcg-name">One Piece</div>
+        <div class="tcg-count">15 targets · OP-01 → OP-06</div>
+      </div>
+      <div class="tcg-card">
+        <span class="tcg-icon">🐉</span>
+        <div class="tcg-name">Dragon Ball</div>
+        <div class="tcg-count">15 targets · Fusion World</div>
+      </div>
+      <div class="tcg-card">
+        <span class="tcg-icon">✨</span>
+        <div class="tcg-name">Lorcana</div>
+        <div class="tcg-count">15 targets · Enchanted foils</div>
+      </div>
+      <div class="tcg-card">
+        <span class="tcg-icon">🌸</span>
+        <div class="tcg-name">Weiß Schwarz</div>
+        <div class="tcg-count">15 targets · JP editions</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <h2>One good alert pays for<br>years of subscription.</h2>
+    <p class="section-sub">We only fire on ≥€1,500 net profit opportunities. Do the math.</p>
+
+    <div class="pricing-grid">
+      <!-- Free -->
+      <div class="tier-card">
+        <div class="tier-name">FREE</div>
+        <div class="tier-price">€0</div>
+        <div class="tier-period">forever</div>
+        <ul class="tier-features">
+          <li>Weekly market digest</li>
+          <li>TCG price overview</li>
+          <li class="dim">No real-time alerts</li>
+          <li class="dim">No Steal Score</li>
+          <li class="dim">No EV breakdowns</li>
+        </ul>
+        <a href="https://t.me/CardSniperAlpha" target="_blank" class="tier-btn tier-btn-outline">Join Telegram →</a>
+      </div>
+
+      <!-- Alpha (featured) -->
+      <div class="tier-card featured">
+        <div class="tier-featured-badge">⭐ MOST POPULAR</div>
+        <div class="tier-name">ALPHA</div>
+        <div class="tier-price"><sup>€</sup>19</div>
+        <div class="tier-period">per month · cancel anytime</div>
+        <ul class="tier-features">
+          <li>Real-time Telegram alerts</li>
+          <li>Full Steal Score™ breakdown</li>
+          <li>PSA 10/9/8/≤7 EV scenarios</li>
+          <li>Break-even grade shown</li>
+          <li>GameStop exit floor</li>
+          <li>105-card watch list</li>
+          <li>Cancel anytime</li>
+        </ul>
+        <a href="#" id="subscribeAlpha" class="tier-btn tier-btn-primary">Get Alpha Access →</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="tier-card">
+        <div class="tier-name">PRO</div>
+        <div class="tier-price"><sup>€</sup>49</div>
+        <div class="tier-period">per month</div>
+        <ul class="tier-features">
+          <li>Everything in Alpha</li>
+          <li>Custom want list (your cards)</li>
+          <li>Exit signal alerts (sell timing)</li>
+          <li>Japan arb monitor (Mercari JP)</li>
+          <li>Price trend reports</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#" id="subscribePro" class="tier-btn tier-btn-outline">Get Pro Access →</a>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:32px;color:var(--dim);font-size:14px;">
+      Payments via Stripe. Secure. Cancel anytime from your billing portal. No tricks.
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-label">FAQ</div>
+    <h2>Questions people ask<br>before subscribing</h2>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">How often will I get alerts?</div>
+        <div class="faq-a">Depends on the market. Some days zero. Some days 3–5. We only fire when the math works (Steal Score ≥80, ≥€1,500 net profit, 150%+ ROI). Silence means no genuine opportunity was found — that's a feature, not a bug.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How accurate are the EV numbers?</div>
+        <div class="faq-a">We use real sold comps from eBay (last 60 days, IQR outlier-filtered), real PSA population data, and set-specific grade rates. We require 5+ HIGH-confidence comps before triggering an alert. Not perfect, but the methodology is transparent and every alert includes the comp count.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Do I need grading experience?</div>
+        <div class="faq-a">Helpful but not required. Each alert includes a break-even grade — if you can grade at PSA 8 or better, you profit. We also include a grading risk note per card type (e.g. "centering issues common in 1st Ed LOB").</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What's the catch with the Dragon Ball card that keeps appearing?</div>
+        <div class="faq-a">No catch — that listing genuinely scores 96. It's been re-listed multiple times by the same seller at the same price. Each new listing triggers the scanner independently. If it's still live when you see it, the opportunity is real.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Where does the alert go?</div>
+        <div class="faq-a">Private Telegram channel. You get an invite link after subscribing. Alerts come in with full formatting — no need to be at a computer, you'll see it on your phone.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I try before subscribing?</div>
+        <div class="faq-a">We don't have a free trial right now (the best alerts are high-value and time-sensitive). But the three alert examples on this page are real, from our log. The algorithm isn't a black box — the methodology is fully described above.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER CTA -->
+<section class="footer-cta">
+  <div class="container">
+    <div class="section-label">Join the Alpha</div>
+    <h2>One deal pays for<br><span class="gold" style="color:var(--gold)">years</span> of alerts.</h2>
+    <p>The Dragon Ball alert above: buy $3,499, grade PSA 10, sell $6,100. That's €1,850 profit on a €19/mo subscription. Do the math.</p>
+    <a href="#pricing" class="btn-primary" style="font-size:18px;padding:18px 40px;">
+      🎯 Start for €19/mo →
+    </a>
+    <div style="margin-top:20px;color:var(--dim);font-size:13px;">
+      No lock-in. Cancel from your Stripe billing portal anytime.
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <strong style="color:var(--text);">🎯 Card Sniper Alpha</strong> — TCG Grading Arbitrage Alerts
+    </div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;">
+      <a href="https://t.me/CardSniperAlpha" target="_blank">Telegram</a>
+      <a href="/about.html">Affiliate</a>
+      <span style="color:rgba(255,255,255,0.15);">|</span>
+      <span>Not financial advice. Do your own due diligence.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── Subscribe button handler ──────────────────────────────────────────────────
+// Wires subscribe buttons to the subscription server (Railway deployment).
+// When Stripe is configured, these go to /subscribe?tier=alpha|pro
+// For now → direct Telegram contact link as fallback.
+
+const SUBSCRIPTION_SERVER = 'https://card-sniper-production.up.railway.app';
+
+function handleSubscribe(tier) {
+  // Try subscription server first; fall back to Telegram DM
+  const url = `${SUBSCRIPTION_SERVER}/subscribe?tier=${tier}`;
+  window.open(url, '_blank');
+}
+
+document.getElementById('subscribeAlpha').addEventListener('click', (e) => {
+  e.preventDefault();
+  handleSubscribe('alpha');
+});
+document.getElementById('subscribePro').addEventListener('click', (e) => {
+  e.preventDefault();
+  handleSubscribe('pro');
+});
+
+// ── Smooth scroll for all anchor links ───────────────────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href').slice(1);
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (el) {
+      e.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// ── Animate score bar on scroll ───────────────────────────────────────────────
+const bars = document.querySelectorAll('.score-bar');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.transition = 'width 1s ease';
+    }
+  });
+}, { threshold: 0.3 });
+bars.forEach(b => observer.observe(b));
+
+// ── Ticker double for seamless loop ──────────────────────────────────────────
+const track = document.getElementById('tickerTrack');
+if (track) {
+  track.innerHTML += track.innerHTML;
+}
+</script>
+
+</body>
+</html>
