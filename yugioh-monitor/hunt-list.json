@@ -1,0 +1,1085 @@
+{
+  "version": "1.0",
+  "updated": "2026-02-26",
+  "description": "Top 15 grading targets per TCG — sorted by hold potential. Tier S = blue chips, A = strong holds, B = arb plays, C = speculative.",
+  "cards": [
+
+    // ═══════════════════════════════════════════════
+    // POKÉMON
+    // ═══════════════════════════════════════════════
+    {
+      "id": "poke-001", "game": "Pokémon", "tier": "S",
+      "cardName": "Charizard Base Set 1st Edition Holo",
+      "searchQuery": "Charizard Base Set 1st Edition Holo -PSA -BGS -CGC -graded -slab",
+      "psa10Query": "Charizard Base Set 1st Edition Holo PSA 10",
+      "rawEstimateEur": 6000, "psa10EstimateEur": 120000,
+      "gradingCost": 100, "multiplier": 20,
+      "holdHorizon": "10+ years",
+      "notes": "The holy grail. Centering is #1 issue — most copies are off-center. Gem Mint extremely rare."
+    },
+    {
+      "id": "poke-002", "game": "Pokémon", "tier": "S",
+      "cardName": "Charizard Base Set Shadowless Holo",
+      "searchQuery": "Charizard Base Set Shadowless Holo -PSA -BGS -CGC -graded -1st",
+      "psa10Query": "Charizard Shadowless Base Set PSA 10",
+      "rawEstimateEur": 2500, "psa10EstimateEur": 40000,
+      "gradingCost": 80, "multiplier": 16,
+      "holdHorizon": "10+ years",
+      "notes": "Often misidentified as Unlimited. Check: no shadow under card art box. PSA 10 pop tiny."
+    },
+    {
+      "id": "poke-003", "game": "Pokémon", "tier": "A",
+      "cardName": "Lugia Neo Genesis 1st Edition Holo",
+      "searchQuery": "Lugia Neo Genesis 1st Edition Holo -PSA -BGS -CGC -graded",
+      "psa10Query": "Lugia Neo Genesis 1st Edition PSA 10",
+      "rawEstimateEur": 1800, "psa10EstimateEur": 22000,
+      "gradingCost": 80, "multiplier": 12,
+      "holdHorizon": "5-10 years",
+      "notes": "Next Charizard for Gen 2 players. Undervalued vs 1st Ed Zard. Strong buy under €1500."
+    },
+    {
+      "id": "poke-004", "game": "Pokémon", "tier": "A",
+      "cardName": "Blastoise Base Set 1st Edition Holo",
+      "searchQuery": "Blastoise Base Set 1st Edition Holo -PSA -BGS -CGC -graded",
+      "psa10Query": "Blastoise Base Set 1st Edition PSA 10",
+      "rawEstimateEur": 1200, "psa10EstimateEur": 18000,
+      "gradingCost": 80, "multiplier": 15,
+      "holdHorizon": "5-10 years",
+      "notes": "Underrated vs Charizard. Starter bias means many copies exist in played condition — NM is rarer than people think."
+    },
+    {
+      "id": "poke-005", "game": "Pokémon", "tier": "A",
+      "cardName": "Ho-Oh Neo Revelation 1st Edition Holo",
+      "searchQuery": "Ho-Oh Neo Revelation 1st Edition Holo -PSA -BGS -CGC -graded",
+      "psa10Query": "Ho-Oh Neo Revelation 1st Edition PSA 10",
+      "rawEstimateEur": 800, "psa10EstimateEur": 12000,
+      "gradingCost": 60, "multiplier": 15,
+      "holdHorizon": "5-10 years",
+      "notes": "Hugely overlooked. PSA 10 pop comparable to Lugia but cheaper entry. Gen 2 nostalgia catalyst incoming."
+    },
+    {
+      "id": "poke-006", "game": "Pokémon", "tier": "A",
+      "cardName": "Venusaur Base Set 1st Edition Holo",
+      "searchQuery": "Venusaur Base Set 1st Edition Holo -PSA -BGS -CGC -graded",
+      "psa10Query": "Venusaur Base Set 1st Edition PSA 10",
+      "rawEstimateEur": 900, "psa10EstimateEur": 14000,
+      "gradingCost": 80, "multiplier": 15,
+      "holdHorizon": "5-10 years",
+      "notes": "Third starter, often overlooked but same rarity as Blastoise. Centering is the kill shot for most."
+    },
+    {
+      "id": "poke-007", "game": "Pokémon", "tier": "B",
+      "cardName": "Mewtwo Base Set 1st Edition Holo",
+      "searchQuery": "Mewtwo Base Set 1st Edition Holo -PSA -BGS -CGC -graded",
+      "psa10Query": "Mewtwo Base Set 1st Edition PSA 10",
+      "rawEstimateEur": 600, "psa10EstimateEur": 6000,
+      "gradingCost": 60, "multiplier": 10,
+      "holdHorizon": "3-5 years",
+      "notes": "Most iconic Pokémon after Pikachu. PSA 10 premium solid. Surface scratches common."
+    },
+    {
+      "id": "poke-008", "game": "Pokémon", "tier": "B",
+      "cardName": "Gengar Fossil 1st Edition Holo",
+      "searchQuery": "Gengar Fossil 1st Edition Holo -PSA -BGS -CGC -graded",
+      "psa10Query": "Gengar Fossil 1st Edition PSA 10",
+      "rawEstimateEur": 400, "psa10EstimateEur": 5000,
+      "gradingCost": 60, "multiplier": 12,
+      "holdHorizon": "3-5 years",
+      "notes": "Fan favourite. Pop report thin in PSA 10. Strong upside if you find NM copy."
+    },
+    {
+      "id": "poke-009", "game": "Pokémon", "tier": "B",
+      "cardName": "Raichu Base Set 1st Edition Holo",
+      "searchQuery": "Raichu Base Set 1st Edition Holo -PSA -BGS -CGC -graded",
+      "psa10Query": "Raichu Base Set 1st Edition PSA 10",
+      "rawEstimateEur": 350, "psa10EstimateEur": 4500,
+      "gradingCost": 60, "multiplier": 12,
+      "holdHorizon": "3-5 years",
+      "notes": "Pikachu's evolution. Undervalued relative to Pikachu hype. Solid 3-year play."
+    },
+    {
+      "id": "poke-010", "game": "Pokémon", "tier": "B",
+      "cardName": "Alakazam Base Set 1st Edition Holo",
+      "searchQuery": "Alakazam Base Set 1st Edition Holo -PSA -BGS -CGC -graded",
+      "psa10Query": "Alakazam Base Set 1st Edition PSA 10",
+      "rawEstimateEur": 300, "psa10EstimateEur": 4000,
+      "gradingCost": 60, "multiplier": 13,
+      "holdHorizon": "3-5 years",
+      "notes": "Psychic fan favourite. Original 151 nostalgia drives consistent demand."
+    },
+    {
+      "id": "poke-011", "game": "Pokémon", "tier": "B",
+      "cardName": "Gyarados Base Set 1st Edition Holo",
+      "searchQuery": "Gyarados Base Set 1st Edition Holo -PSA -BGS -CGC -graded",
+      "psa10Query": "Gyarados Base Set 1st Edition PSA 10",
+      "rawEstimateEur": 250, "psa10EstimateEur": 3500,
+      "gradingCost": 60, "multiplier": 14,
+      "holdHorizon": "3-5 years",
+      "notes": "Best arb play in base set outside the big 3. Low raw price, big PSA10 premium."
+    },
+    {
+      "id": "poke-012", "game": "Pokémon", "tier": "C",
+      "cardName": "Charizard ex 151 Special Illustration Rare",
+      "searchQuery": "Charizard ex 151 Special Illustration Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Charizard ex 151 Special Illustration Rare PSA 10",
+      "rawEstimateEur": 280, "psa10EstimateEur": 1200,
+      "gradingCost": 35, "multiplier": 4,
+      "holdHorizon": "1-3 years",
+      "notes": "Modern Charizard. Already heavily graded but PSA 10 premium still holds. Sell before next reprint."
+    },
+    {
+      "id": "poke-013", "game": "Pokémon", "tier": "C",
+      "cardName": "Umbreon ex Prismatic Evolutions Special Illustration Rare",
+      "searchQuery": "Umbreon ex Prismatic Evolutions Special Illustration -PSA -BGS -CGC -graded",
+      "psa10Query": "Umbreon ex Prismatic Evolutions Special Illustration PSA 10",
+      "rawEstimateEur": 320, "psa10EstimateEur": 1500,
+      "gradingCost": 35, "multiplier": 4.5,
+      "holdHorizon": "1-2 years",
+      "notes": "Hot right now. Grade immediately — premium will drop as more PSA10s enter market."
+    },
+    {
+      "id": "poke-014", "game": "Pokémon", "tier": "C",
+      "cardName": "Espeon ex Golden Sky Silvery Ocean 2005 Japanese Holo",
+      "searchQuery": "Espeon ex Golden Sky Silvery Ocean Japanese Holo -PSA -BGS -CGC -graded",
+      "psa10Query": "Espeon ex Golden Sky Silvery Ocean PSA 10",
+      "rawEstimateEur": 600, "psa10EstimateEur": 5000,
+      "gradingCost": 60, "multiplier": 8,
+      "holdHorizon": "2-4 years",
+      "notes": "Japanese-only. Eevee-lution mania drives this. Global collector demand growing."
+    },
+    {
+      "id": "poke-015", "game": "Pokémon", "tier": "C",
+      "cardName": "CoroCoro Shining Mew Japanese Promo 2001",
+      "searchQuery": "CoroCoro Shining Mew Japanese Promo -PSA -BGS -CGC -graded",
+      "psa10Query": "CoroCoro Shining Mew PSA 9",
+      "rawEstimateEur": 800, "psa10EstimateEur": 6000,
+      "gradingCost": 60, "multiplier": 7,
+      "holdHorizon": "3-5 years",
+      "notes": "Magazine insert — many came folded. NM copies extremely rare. PSA 9 often best realistic target."
+    },
+
+    // ═══════════════════════════════════════════════
+    // YU-GI-OH
+    // ═══════════════════════════════════════════════
+    {
+      "id": "ygo-001", "game": "Yu-Gi-Oh", "tier": "S",
+      "cardName": "Blue-Eyes White Dragon LOB 1st Edition",
+      "searchQuery": "Blue-Eyes White Dragon LOB 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Blue-Eyes White Dragon LOB 1st Edition PSA 10",
+      "rawEstimateEur": 800, "psa10EstimateEur": 25000,
+      "gradingCost": 60, "multiplier": 30,
+      "holdHorizon": "10+ years",
+      "notes": "The YGO Charizard. Print lines and centering are common issues. Any NM copy is worth grading."
+    },
+    {
+      "id": "ygo-002", "game": "Yu-Gi-Oh", "tier": "S",
+      "cardName": "Exodia the Forbidden One LOB 1st Edition",
+      "searchQuery": "Exodia the Forbidden One LOB 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Exodia the Forbidden One LOB 1st Edition PSA 10",
+      "rawEstimateEur": 600, "psa10EstimateEur": 18000,
+      "gradingCost": 60, "multiplier": 28,
+      "holdHorizon": "10+ years",
+      "notes": "One of five Exodia pieces — collect all five for legendary set value. PSA 10 pop tiny."
+    },
+    {
+      "id": "ygo-003", "game": "Yu-Gi-Oh", "tier": "A",
+      "cardName": "Dark Magician LOB 1st Edition",
+      "searchQuery": "Dark Magician LOB 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Dark Magician LOB 1st Edition PSA 10",
+      "rawEstimateEur": 400, "psa10EstimateEur": 12000,
+      "gradingCost": 60, "multiplier": 29,
+      "holdHorizon": "7-10 years",
+      "notes": "Yugi's signature monster. Iconic beyond competitive. Print lines are the enemy."
+    },
+    {
+      "id": "ygo-004", "game": "Yu-Gi-Oh", "tier": "A",
+      "cardName": "Red-Eyes Black Dragon LOB 1st Edition",
+      "searchQuery": "Red-Eyes Black Dragon LOB 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Red-Eyes Black Dragon LOB 1st Edition PSA 10",
+      "rawEstimateEur": 350, "psa10EstimateEur": 10000,
+      "gradingCost": 60, "multiplier": 28,
+      "holdHorizon": "7-10 years",
+      "notes": "Joey's dragon. Undervalued vs Blue-Eyes — same rarity, half the price. Strong buy."
+    },
+    {
+      "id": "ygo-005", "game": "Yu-Gi-Oh", "tier": "A",
+      "cardName": "Monster Reborn LOB 1st Edition",
+      "searchQuery": "Monster Reborn LOB 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Monster Reborn LOB 1st Edition PSA 10",
+      "rawEstimateEur": 150, "psa10EstimateEur": 4000,
+      "gradingCost": 40, "multiplier": 26,
+      "holdHorizon": "5-8 years",
+      "notes": "Banned spell, iconic art. Cheap raw entry, massive PSA 10 multiple. Best arb in LOB."
+    },
+    {
+      "id": "ygo-006", "game": "Yu-Gi-Oh", "tier": "A",
+      "cardName": "Pot of Greed LOB 1st Edition",
+      "searchQuery": "Pot of Greed LOB 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Pot of Greed LOB 1st Edition PSA 10",
+      "rawEstimateEur": 200, "psa10EstimateEur": 5000,
+      "gradingCost": 40, "multiplier": 24,
+      "holdHorizon": "5-8 years",
+      "notes": "The most memed card in YGO history. Permanently banned. Cultural icon. Grade every NM copy you find."
+    },
+    {
+      "id": "ygo-007", "game": "Yu-Gi-Oh", "tier": "A",
+      "cardName": "Raigeki LOB 1st Edition",
+      "searchQuery": "Raigeki LOB 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Raigeki LOB 1st Edition PSA 10",
+      "rawEstimateEur": 180, "psa10EstimateEur": 5500,
+      "gradingCost": 40, "multiplier": 29,
+      "holdHorizon": "5-8 years",
+      "notes": "Banned since 2004 on and off. The lightning bolt is iconic. Same arb logic as Pot of Greed."
+    },
+    {
+      "id": "ygo-008", "game": "Yu-Gi-Oh", "tier": "B",
+      "cardName": "Jinzo PSV 1st Edition",
+      "searchQuery": "Jinzo PSV 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Jinzo PSV 1st Edition PSA 10",
+      "rawEstimateEur": 150, "psa10EstimateEur": 3000,
+      "gradingCost": 35, "multiplier": 19,
+      "holdHorizon": "3-5 years",
+      "notes": "Mid-tier holy grail. Strong PSA 10 premium. Often found in played collections."
+    },
+    {
+      "id": "ygo-009", "game": "Yu-Gi-Oh", "tier": "B",
+      "cardName": "Mirror Force MRD 1st Edition",
+      "searchQuery": "Mirror Force MRD Metal Raiders 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Mirror Force MRD 1st Edition PSA 10",
+      "rawEstimateEur": 120, "psa10EstimateEur": 2800,
+      "gradingCost": 35, "multiplier": 22,
+      "holdHorizon": "3-5 years",
+      "notes": "One of the most replayed traps in history. First print has distinct holo pattern."
+    },
+    {
+      "id": "ygo-010", "game": "Yu-Gi-Oh", "tier": "B",
+      "cardName": "Witch of the Black Forest MRL 1st Edition",
+      "searchQuery": "Witch of the Black Forest MRL 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Witch of the Black Forest MRL 1st Edition PSA 10",
+      "rawEstimateEur": 100, "psa10EstimateEur": 2500,
+      "gradingCost": 35, "multiplier": 24,
+      "holdHorizon": "3-5 years",
+      "notes": "Banned. Essential combo piece from original meta. Underrated grading target."
+    },
+    {
+      "id": "ygo-011", "game": "Yu-Gi-Oh", "tier": "B",
+      "cardName": "Summoned Skull LOB 1st Edition",
+      "searchQuery": "Summoned Skull LOB 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Summoned Skull LOB 1st Edition PSA 10",
+      "rawEstimateEur": 200, "psa10EstimateEur": 5000,
+      "gradingCost": 40, "multiplier": 24,
+      "holdHorizon": "3-6 years",
+      "notes": "Iconic demon. LOB holo. Print lines kill most copies — NM is genuinely rare."
+    },
+    {
+      "id": "ygo-012", "game": "Yu-Gi-Oh", "tier": "B",
+      "cardName": "Thousand-Eyes Restrict MFC 1st Edition",
+      "searchQuery": "Thousand-Eyes Restrict MFC 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Thousand-Eyes Restrict MFC 1st Edition PSA 10",
+      "rawEstimateEur": 80, "psa10EstimateEur": 2000,
+      "gradingCost": 35, "multiplier": 24,
+      "holdHorizon": "3-5 years",
+      "notes": "Banned. Nightmare of early competitive. Low raw price = low barrier to entry for grading."
+    },
+    {
+      "id": "ygo-013", "game": "Yu-Gi-Oh", "tier": "C",
+      "cardName": "Dark Hole LOB 1st Edition",
+      "searchQuery": "Dark Hole LOB 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Dark Hole LOB 1st Edition PSA 10",
+      "rawEstimateEur": 80, "psa10EstimateEur": 1800,
+      "gradingCost": 35, "multiplier": 21,
+      "holdHorizon": "2-4 years",
+      "notes": "LOB spell. Strong multiple but smaller absolute profit. Good bulk grading candidate."
+    },
+    {
+      "id": "ygo-014", "game": "Yu-Gi-Oh", "tier": "C",
+      "cardName": "Change of Heart LOB 1st Edition",
+      "searchQuery": "Change of Heart LOB 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Change of Heart LOB 1st Edition PSA 10",
+      "rawEstimateEur": 70, "psa10EstimateEur": 1600,
+      "gradingCost": 35, "multiplier": 22,
+      "holdHorizon": "2-4 years",
+      "notes": "Banned spell. Angel art iconic. Same tier as Dark Hole but slightly lower demand."
+    },
+    {
+      "id": "ygo-015", "game": "Yu-Gi-Oh", "tier": "C",
+      "cardName": "Blue-Eyes White Dragon SDK 1st Edition",
+      "searchQuery": "Blue-Eyes White Dragon SDK Kaiba 1st Edition -PSA -BGS -CGC -graded",
+      "psa10Query": "Blue-Eyes White Dragon SDK 1st Edition PSA 10",
+      "rawEstimateEur": 60, "psa10EstimateEur": 1200,
+      "gradingCost": 35, "multiplier": 19,
+      "holdHorizon": "2-4 years",
+      "notes": "Starter deck print. Lower than LOB but accessible entry point. Surface damage is common."
+    },
+
+    // ═══════════════════════════════════════════════
+    // MAGIC: THE GATHERING
+    // ═══════════════════════════════════════════════
+    {
+      "id": "mtg-001", "game": "Magic: The Gathering", "tier": "S",
+      "cardName": "Black Lotus Alpha MTG",
+      "searchQuery": "Black Lotus Alpha Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Black Lotus Alpha PSA 10",
+      "rawEstimateEur": 80000, "psa10EstimateEur": 600000,
+      "gradingCost": 200, "multiplier": 7,
+      "holdHorizon": "10+ years",
+      "notes": "The most valuable TCG card ever printed. If you find one, grade it same day. Plays, bends, fakes all common."
+    },
+    {
+      "id": "mtg-002", "game": "Magic: The Gathering", "tier": "S",
+      "cardName": "Black Lotus Beta MTG",
+      "searchQuery": "Black Lotus Beta Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Black Lotus Beta PSA 10",
+      "rawEstimateEur": 40000, "psa10EstimateEur": 200000,
+      "gradingCost": 150, "multiplier": 5,
+      "holdHorizon": "10+ years",
+      "notes": "Beta has rounder corners than Alpha. Still the holy grail. PSA 9 already €50k+."
+    },
+    {
+      "id": "mtg-003", "game": "Magic: The Gathering", "tier": "S",
+      "cardName": "Ancestral Recall Alpha MTG",
+      "searchQuery": "Ancestral Recall Alpha Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Ancestral Recall Alpha PSA 9",
+      "rawEstimateEur": 20000, "psa10EstimateEur": 80000,
+      "gradingCost": 150, "multiplier": 4,
+      "holdHorizon": "10+ years",
+      "notes": "Power Nine card. PSA 10 virtually non-existent. PSA 9 is the realistic ceiling for most copies."
+    },
+    {
+      "id": "mtg-004", "game": "Magic: The Gathering", "tier": "A",
+      "cardName": "Mox Sapphire Alpha MTG",
+      "searchQuery": "Mox Sapphire Alpha Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Mox Sapphire Alpha PSA 10",
+      "rawEstimateEur": 15000, "psa10EstimateEur": 70000,
+      "gradingCost": 150, "multiplier": 4.5,
+      "holdHorizon": "7-10 years",
+      "notes": "Power Nine. Blue = highest demand colour in MTG. Strong and growing."
+    },
+    {
+      "id": "mtg-005", "game": "Magic: The Gathering", "tier": "A",
+      "cardName": "Time Walk Alpha MTG",
+      "searchQuery": "Time Walk Alpha Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Time Walk Alpha PSA 10",
+      "rawEstimateEur": 12000, "psa10EstimateEur": 55000,
+      "gradingCost": 150, "multiplier": 4.5,
+      "holdHorizon": "7-10 years",
+      "notes": "Power Nine. One of the most broken cards ever. Condition rarely seen above PSA 8."
+    },
+    {
+      "id": "mtg-006", "game": "Magic: The Gathering", "tier": "A",
+      "cardName": "Tropical Island Alpha MTG Dual Land",
+      "searchQuery": "Tropical Island Alpha Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Tropical Island Alpha PSA 10",
+      "rawEstimateEur": 8000, "psa10EstimateEur": 40000,
+      "gradingCost": 100, "multiplier": 5,
+      "holdHorizon": "5-10 years",
+      "notes": "Alpha dual lands are the next Power Nine target. Tropical Island is top demand."
+    },
+    {
+      "id": "mtg-007", "game": "Magic: The Gathering", "tier": "B",
+      "cardName": "Force of Will Alliances MTG",
+      "searchQuery": "Force of Will Alliances Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Force of Will Alliances PSA 10",
+      "rawEstimateEur": 80, "psa10EstimateEur": 1500,
+      "gradingCost": 40, "multiplier": 18,
+      "holdHorizon": "3-5 years",
+      "notes": "Format-defining counterspell. Never reprinted in original art at same scarcity. Strong arb."
+    },
+    {
+      "id": "mtg-008", "game": "Magic: The Gathering", "tier": "B",
+      "cardName": "Underground Sea Revised MTG Dual Land",
+      "searchQuery": "Underground Sea Revised Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Underground Sea Revised PSA 10",
+      "rawEstimateEur": 300, "psa10EstimateEur": 4000,
+      "gradingCost": 60, "multiplier": 13,
+      "holdHorizon": "3-5 years",
+      "notes": "Revised duals are accessible entry to Legacy staples. PSA 10 premium strong."
+    },
+    {
+      "id": "mtg-009", "game": "Magic: The Gathering", "tier": "B",
+      "cardName": "Volcanic Island Beta MTG Dual Land",
+      "searchQuery": "Volcanic Island Beta Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Volcanic Island Beta PSA 10",
+      "rawEstimateEur": 2500, "psa10EstimateEur": 20000,
+      "gradingCost": 100, "multiplier": 8,
+      "holdHorizon": "4-7 years",
+      "notes": "Beta duals are the next alpha. Fire-themed lands always outperform."
+    },
+    {
+      "id": "mtg-010", "game": "Magic: The Gathering", "tier": "B",
+      "cardName": "Tarmogoyf Future Sight MTG",
+      "searchQuery": "Tarmogoyf Future Sight Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Tarmogoyf Future Sight PSA 10",
+      "rawEstimateEur": 60, "psa10EstimateEur": 800,
+      "gradingCost": 40, "multiplier": 13,
+      "holdHorizon": "2-4 years",
+      "notes": "The Eternal format creature. Future Sight print is the most desirable. Low pop in PSA 10."
+    },
+    {
+      "id": "mtg-011", "game": "Magic: The Gathering", "tier": "C",
+      "cardName": "Tabernacle at Pendrell Vale Legends MTG",
+      "searchQuery": "Tabernacle Pendrell Vale Legends Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Tabernacle Pendrell Vale PSA 10",
+      "rawEstimateEur": 2500, "psa10EstimateEur": 12000,
+      "gradingCost": 100, "multiplier": 4.7,
+      "holdHorizon": "3-6 years",
+      "notes": "Legendary Legends card. Sees Legacy play. PSA 10 pop extremely low — most copies heavily played."
+    },
+    {
+      "id": "mtg-012", "game": "Magic: The Gathering", "tier": "C",
+      "cardName": "Traveling Chocobo Final Fantasy MTG Borderless",
+      "searchQuery": "Traveling Chocobo Final Fantasy MTG Borderless -PSA -BGS -CGC -graded",
+      "psa10Query": "Traveling Chocobo Final Fantasy PSA 10",
+      "rawEstimateEur": 3000, "psa10EstimateEur": 15000,
+      "gradingCost": 80, "multiplier": 5,
+      "holdHorizon": "2-5 years",
+      "notes": "Crossover hype. FF fans + MTG collectors. Neon Ink variants most valuable. Speculative but strong short-term."
+    },
+    {
+      "id": "mtg-013", "game": "Magic: The Gathering", "tier": "C",
+      "cardName": "Sol Ring Alpha MTG",
+      "searchQuery": "Sol Ring Alpha Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Sol Ring Alpha PSA 10",
+      "rawEstimateEur": 500, "psa10EstimateEur": 5000,
+      "gradingCost": 80, "multiplier": 10,
+      "holdHorizon": "3-5 years",
+      "notes": "Evergreen Commander staple + Alpha print. PSA 10 pop near zero. Always relevant."
+    },
+    {
+      "id": "mtg-014", "game": "Magic: The Gathering", "tier": "C",
+      "cardName": "Mox Ruby Alpha MTG",
+      "searchQuery": "Mox Ruby Alpha Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Mox Ruby Alpha PSA 10",
+      "rawEstimateEur": 8000, "psa10EstimateEur": 40000,
+      "gradingCost": 150, "multiplier": 5,
+      "holdHorizon": "5-10 years",
+      "notes": "Most accessible Power Nine by demand. Red players always want this."
+    },
+    {
+      "id": "mtg-015", "game": "Magic: The Gathering", "tier": "C",
+      "cardName": "Summer Magic Hurricane Blue MTG",
+      "searchQuery": "Summer Magic Hurricane Blue Magic the Gathering -PSA -BGS -CGC -graded",
+      "psa10Query": "Summer Magic Hurricane PSA 10",
+      "rawEstimateEur": 3000, "psa10EstimateEur": 18000,
+      "gradingCost": 100, "multiplier": 6,
+      "holdHorizon": "4-7 years",
+      "notes": "Summer Magic (1994 recall) is rarer than Alpha. Blue Hurricane specifically — unique misprint era."
+    },
+
+    // ═══════════════════════════════════════════════
+    // ONE PIECE
+    // ═══════════════════════════════════════════════
+    {
+      "id": "op-001", "game": "One Piece", "tier": "S",
+      "cardName": "Monkey D Luffy OP01 Secret Rare",
+      "searchQuery": "Monkey D Luffy OP01 OP-01 Secret Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Monkey D Luffy OP01 Secret Rare PSA 10",
+      "rawEstimateEur": 800, "psa10EstimateEur": 8000,
+      "gradingCost": 50, "multiplier": 10,
+      "holdHorizon": "5-10 years",
+      "notes": "THE card of One Piece TCG. First print, first set, main character. Buy and hold all NM copies."
+    },
+    {
+      "id": "op-002", "game": "One Piece", "tier": "A",
+      "cardName": "Monkey D Luffy OP05 Manga Alt Art Secret Rare",
+      "searchQuery": "Luffy OP05 OP-05 Manga Alt Art Secret Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Luffy OP05 Manga Alt Art PSA 10",
+      "rawEstimateEur": 1000, "psa10EstimateEur": 4500,
+      "gradingCost": 50, "multiplier": 4.4,
+      "holdHorizon": "3-7 years",
+      "notes": "Manga art drives premium. Early alt art pulls > standard SRs long-term."
+    },
+    {
+      "id": "op-003", "game": "One Piece", "tier": "A",
+      "cardName": "Roronoa Zoro OP01 Secret Rare",
+      "searchQuery": "Roronoa Zoro OP01 OP-01 Secret Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Roronoa Zoro OP01 Secret Rare PSA 10",
+      "rawEstimateEur": 500, "psa10EstimateEur": 4000,
+      "gradingCost": 50, "multiplier": 8,
+      "holdHorizon": "4-8 years",
+      "notes": "Zoro arguably more popular than Luffy in certain markets (EU, JP). OP01 first print scarcity."
+    },
+    {
+      "id": "op-004", "game": "One Piece", "tier": "A",
+      "cardName": "Nami OP01 Secret Rare",
+      "searchQuery": "Nami OP01 OP-01 Secret Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Nami OP01 Secret Rare PSA 10",
+      "rawEstimateEur": 300, "psa10EstimateEur": 2500,
+      "gradingCost": 50, "multiplier": 8,
+      "holdHorizon": "3-6 years",
+      "notes": "Female character collector premium. OP01 scarcity. Undervalued vs Luffy/Zoro."
+    },
+    {
+      "id": "op-005", "game": "One Piece", "tier": "A",
+      "cardName": "Portgas D Ace OP02 Secret Rare",
+      "searchQuery": "Portgas D Ace OP02 OP-02 Secret Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Portgas D Ace OP02 Secret Rare PSA 10",
+      "rawEstimateEur": 400, "psa10EstimateEur": 3500,
+      "gradingCost": 50, "multiplier": 8.6,
+      "holdHorizon": "3-6 years",
+      "notes": "Ace is emotionally significant in the fandom (death scene). Drives collector premium beyond gameplay."
+    },
+    {
+      "id": "op-006", "game": "One Piece", "tier": "B",
+      "cardName": "Boa Hancock OP03 Secret Rare",
+      "searchQuery": "Boa Hancock OP03 OP-03 Secret Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Boa Hancock OP03 Secret Rare PSA 10",
+      "rawEstimateEur": 250, "psa10EstimateEur": 2000,
+      "gradingCost": 50, "multiplier": 8,
+      "holdHorizon": "2-5 years",
+      "notes": "Female character + popular arc. Early set scarcity kicking in."
+    },
+    {
+      "id": "op-007", "game": "One Piece", "tier": "B",
+      "cardName": "Trafalgar Law OP04 Secret Rare",
+      "searchQuery": "Trafalgar Law OP04 OP-04 Secret Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Trafalgar Law OP04 Secret Rare PSA 10",
+      "rawEstimateEur": 200, "psa10EstimateEur": 1800,
+      "gradingCost": 50, "multiplier": 9,
+      "holdHorizon": "2-5 years",
+      "notes": "Law has massive fanbase. OP04 becoming harder to find. Good entry point."
+    },
+    {
+      "id": "op-008", "game": "One Piece", "tier": "B",
+      "cardName": "Shanks OP01 Leader Parallel",
+      "searchQuery": "Shanks OP01 OP-01 Leader Parallel -PSA -BGS -CGC -graded",
+      "psa10Query": "Shanks OP01 Leader Parallel PSA 10",
+      "rawEstimateEur": 150, "psa10EstimateEur": 1500,
+      "gradingCost": 50, "multiplier": 10,
+      "holdHorizon": "2-5 years",
+      "notes": "Shanks arc is peak in anime right now. OP01 parallel. Buy on Shanks hype waves."
+    },
+    {
+      "id": "op-009", "game": "One Piece", "tier": "B",
+      "cardName": "Yamato OP03 Alt Art",
+      "searchQuery": "Yamato OP03 OP-03 Alt Art -PSA -BGS -CGC -graded",
+      "psa10Query": "Yamato OP03 Alt Art PSA 10",
+      "rawEstimateEur": 120, "psa10EstimateEur": 1200,
+      "gradingCost": 50, "multiplier": 10,
+      "holdHorizon": "2-4 years",
+      "notes": "Popular character, competitive play demand + collector demand. Alt art premium."
+    },
+    {
+      "id": "op-010", "game": "One Piece", "tier": "B",
+      "cardName": "Robin OP02 Secret Rare",
+      "searchQuery": "Robin OP02 OP-02 Secret Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Robin OP02 Secret Rare PSA 10",
+      "rawEstimateEur": 150, "psa10EstimateEur": 1400,
+      "gradingCost": 50, "multiplier": 9,
+      "holdHorizon": "2-4 years",
+      "notes": "Consistently popular character. OP02 scarcity growing. Undervalued vs Luffy/Zoro SRs."
+    },
+    {
+      "id": "op-011", "game": "One Piece", "tier": "C",
+      "cardName": "Gear 5 Luffy OP07 Secret Rare",
+      "searchQuery": "Gear 5 Luffy OP07 OP-07 Secret Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Gear 5 Luffy OP07 Secret Rare PSA 10",
+      "rawEstimateEur": 300, "psa10EstimateEur": 2000,
+      "gradingCost": 50, "multiplier": 6.5,
+      "holdHorizon": "1-3 years",
+      "notes": "Gear 5 anime hype. Grade quickly before pop swells. Best ROI window is now."
+    },
+    {
+      "id": "op-012", "game": "One Piece", "tier": "C",
+      "cardName": "Whitebeard OP01 Secret Rare",
+      "searchQuery": "Whitebeard Edward Newgate OP01 OP-01 Secret Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Whitebeard OP01 Secret Rare PSA 10",
+      "rawEstimateEur": 200, "psa10EstimateEur": 1600,
+      "gradingCost": 50, "multiplier": 8,
+      "holdHorizon": "2-4 years",
+      "notes": "Fan favourite, emotionally resonant. OP01 scarcity baseline keeps floor solid."
+    },
+    {
+      "id": "op-013", "game": "One Piece", "tier": "C",
+      "cardName": "Sanji OP01 Secret Rare",
+      "searchQuery": "Sanji OP01 OP-01 Secret Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Sanji OP01 Secret Rare PSA 10",
+      "rawEstimateEur": 180, "psa10EstimateEur": 1500,
+      "gradingCost": 50, "multiplier": 8,
+      "holdHorizon": "2-4 years",
+      "notes": "Straw Hat crew completionist demand. OP01 is the set to own."
+    },
+    {
+      "id": "op-014", "game": "One Piece", "tier": "C",
+      "cardName": "Big Mom OP04 Secret Rare",
+      "searchQuery": "Big Mom Charlotte Linlin OP04 Secret Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Big Mom OP04 Secret Rare PSA 10",
+      "rawEstimateEur": 100, "psa10EstimateEur": 900,
+      "gradingCost": 50, "multiplier": 9,
+      "holdHorizon": "1-3 years",
+      "notes": "Emperor card. Cheaper entry point. Watch for arc-based price spikes."
+    },
+    {
+      "id": "op-015", "game": "One Piece", "tier": "C",
+      "cardName": "Crocodile OP01 Parallel Rare",
+      "searchQuery": "Crocodile OP01 OP-01 Parallel Rare -PSA -BGS -CGC -graded",
+      "psa10Query": "Crocodile OP01 Parallel PSA 10",
+      "rawEstimateEur": 60, "psa10EstimateEur": 600,
+      "gradingCost": 50, "multiplier": 10,
+      "holdHorizon": "1-3 years",
+      "notes": "Early villain, OP01 scarcity. Good low-cost grading volume play."
+    },
+
+    // ═══════════════════════════════════════════════
+    // DRAGON BALL SUPER
+    // ═══════════════════════════════════════════════
+    {
+      "id": "dbs-001", "game": "Dragon Ball", "tier": "S",
+      "cardName": "SS3 Son Goku Universe at Stake Dragon Ball Super",
+      "searchQuery": "Son Goku Universe at Stake Dragon Ball Super Card -PSA -BGS -CGC -graded",
+      "psa10Query": "Son Goku Universe at Stake Dragon Ball Super BGS 10",
+      "rawEstimateEur": 5000, "psa10EstimateEur": 30000,
+      "gradingCost": 100, "multiplier": 6,
+      "holdHorizon": "7-10 years",
+      "notes": "The Dragon Ball holy grail. Serial numbered. BGS 10 sold $25k+. PSA 10 is the ceiling. Ultra rare."
+    },
+    {
+      "id": "dbs-002", "game": "Dragon Ball", "tier": "A",
+      "cardName": "Son Goku SR Manga FB05 Dragon Ball Super Fusion World",
+      "searchQuery": "Son Goku SR Manga FB05 Dragon Ball Fusion World -PSA -BGS -CGC -graded",
+      "psa10Query": "Son Goku FB05 Manga Dragon Ball PSA 10",
+      "rawEstimateEur": 800, "psa10EstimateEur": 5000,
+      "gradingCost": 60, "multiplier": 6,
+      "holdHorizon": "3-6 years",
+      "notes": "Manga alt art in Fusion World. Already commanding strong premium."
+    },
+    {
+      "id": "dbs-003", "game": "Dragon Ball", "tier": "A",
+      "cardName": "Frieza God Rare Dragon Ball Super",
+      "searchQuery": "Frieza God Rare Dragon Ball Super Card -PSA -BGS -CGC -graded",
+      "psa10Query": "Frieza God Rare Dragon Ball Super PSA 10",
+      "rawEstimateEur": 600, "psa10EstimateEur": 4000,
+      "gradingCost": 60, "multiplier": 6.5,
+      "holdHorizon": "3-6 years",
+      "notes": "God Rares are the premium tier in DBS. Frieza global icon. Strong EU market."
+    },
+    {
+      "id": "dbs-004", "game": "Dragon Ball", "tier": "A",
+      "cardName": "Vegeta God Rare Dragon Ball Super",
+      "searchQuery": "Vegeta God Rare Dragon Ball Super Card -PSA -BGS -CGC -graded",
+      "psa10Query": "Vegeta God Rare Dragon Ball Super PSA 10",
+      "rawEstimateEur": 500, "psa10EstimateEur": 3500,
+      "gradingCost": 60, "multiplier": 7,
+      "holdHorizon": "3-6 years",
+      "notes": "Vegeta arguably more popular than Goku among competitive players. God Rare premium."
+    },
+    {
+      "id": "dbs-005", "game": "Dragon Ball", "tier": "B",
+      "cardName": "Broly God Rare Dragon Ball Super",
+      "searchQuery": "Broly God Rare Dragon Ball Super Card -PSA -BGS -CGC -graded",
+      "psa10Query": "Broly God Rare Dragon Ball Super PSA 10",
+      "rawEstimateEur": 400, "psa10EstimateEur": 3000,
+      "gradingCost": 60, "multiplier": 7.4,
+      "holdHorizon": "2-5 years",
+      "notes": "Movie Broly revived the character globally. God Rare with movie tie-in premium."
+    },
+    {
+      "id": "dbs-006", "game": "Dragon Ball", "tier": "B",
+      "cardName": "Bardock God Rare Dragon Ball Super",
+      "searchQuery": "Bardock God Rare Dragon Ball Super Card -PSA -BGS -CGC -graded",
+      "psa10Query": "Bardock God Rare Dragon Ball Super PSA 10",
+      "rawEstimateEur": 250, "psa10EstimateEur": 2000,
+      "gradingCost": 60, "multiplier": 8,
+      "holdHorizon": "2-4 years",
+      "notes": "Bardock is a fan favourite. Father of Goku narrative resonates."
+    },
+    {
+      "id": "dbs-007", "game": "Dragon Ball", "tier": "B",
+      "cardName": "Android 18 Secret Rare Dragon Ball Super",
+      "searchQuery": "Android 18 Secret Rare Dragon Ball Super Card -PSA -BGS -CGC -graded",
+      "psa10Query": "Android 18 Dragon Ball Super PSA 10",
+      "rawEstimateEur": 150, "psa10EstimateEur": 1400,
+      "gradingCost": 50, "multiplier": 9,
+      "holdHorizon": "2-4 years",
+      "notes": "Crossover appeal — female character + iconic villain. Under-graded relative to demand."
+    },
+    {
+      "id": "dbs-008", "game": "Dragon Ball", "tier": "B",
+      "cardName": "Goku Black God Rare Dragon Ball Super",
+      "searchQuery": "Goku Black God Rare Dragon Ball Super Card -PSA -BGS -CGC -graded",
+      "psa10Query": "Goku Black God Rare Dragon Ball Super PSA 10",
+      "rawEstimateEur": 300, "psa10EstimateEur": 2500,
+      "gradingCost": 60, "multiplier": 8.2,
+      "holdHorizon": "2-4 years",
+      "notes": "Goku Black is the most popular DBS-original character. Strong villain premium."
+    },
+    {
+      "id": "dbs-009", "game": "Dragon Ball", "tier": "C",
+      "cardName": "Ultra Instinct Goku Secret Rare Dragon Ball Super",
+      "searchQuery": "Ultra Instinct Goku Secret Rare Dragon Ball Super -PSA -BGS -CGC -graded",
+      "psa10Query": "Ultra Instinct Goku Dragon Ball PSA 10",
+      "rawEstimateEur": 200, "psa10EstimateEur": 1600,
+      "gradingCost": 50, "multiplier": 8,
+      "holdHorizon": "1-3 years",
+      "notes": "Tournament peak card. Competitive + collector demand. Price tied to meta relevance."
+    },
+    {
+      "id": "dbs-010", "game": "Dragon Ball", "tier": "C",
+      "cardName": "Hit Secret Rare Dragon Ball Super",
+      "searchQuery": "Hit Secret Rare Dragon Ball Super Card -PSA -BGS -CGC -graded",
+      "psa10Query": "Hit Secret Rare Dragon Ball Super PSA 10",
+      "rawEstimateEur": 100, "psa10EstimateEur": 900,
+      "gradingCost": 50, "multiplier": 9,
+      "holdHorizon": "1-3 years",
+      "notes": "Universal 6 assassin. Competitive and fan favourite. Good volume grading play."
+    },
+    {
+      "id": "dbs-011", "game": "Dragon Ball", "tier": "C",
+      "cardName": "Kefla Secret Rare Dragon Ball Super",
+      "searchQuery": "Kefla Secret Rare Dragon Ball Super Card -PSA -BGS -CGC -graded",
+      "psa10Query": "Kefla Dragon Ball Super PSA 10",
+      "rawEstimateEur": 80, "psa10EstimateEur": 800,
+      "gradingCost": 50, "multiplier": 10,
+      "holdHorizon": "1-3 years",
+      "notes": "Popular female fusion. Crossover appeal. Underrated grading target."
+    },
+    {
+      "id": "dbs-012", "game": "Dragon Ball", "tier": "C",
+      "cardName": "Super Saiyan 4 Son Goku God Rare Dragon Ball Super",
+      "searchQuery": "Super Saiyan 4 Son Goku God Rare Dragon Ball Super -PSA -BGS -CGC -graded",
+      "psa10Query": "SS4 Son Goku God Rare Dragon Ball PSA 10",
+      "rawEstimateEur": 150, "psa10EstimateEur": 1500,
+      "gradingCost": 50, "multiplier": 10,
+      "holdHorizon": "2-4 years",
+      "notes": "GT nostalgia wave. SS4 Goku/Vegeta demand growing as GT gets re-evaluated."
+    },
+    {
+      "id": "dbs-013", "game": "Dragon Ball", "tier": "C",
+      "cardName": "Piccolo Alt Art Dragon Ball Super",
+      "searchQuery": "Piccolo Alt Art Dragon Ball Super Card -PSA -BGS -CGC -graded",
+      "psa10Query": "Piccolo Alt Art Dragon Ball PSA 10",
+      "rawEstimateEur": 60, "psa10EstimateEur": 600,
+      "gradingCost": 50, "multiplier": 10,
+      "holdHorizon": "1-3 years",
+      "notes": "Post-movie Piccolo hype (DBS: Super Hero). Good low-cost play."
+    },
+    {
+      "id": "dbs-014", "game": "Dragon Ball", "tier": "C",
+      "cardName": "Gohan Beast God Rare Dragon Ball Super",
+      "searchQuery": "Gohan Beast God Rare Dragon Ball Super -PSA -BGS -CGC -graded",
+      "psa10Query": "Gohan Beast Dragon Ball PSA 10",
+      "rawEstimateEur": 120, "psa10EstimateEur": 1200,
+      "gradingCost": 50, "multiplier": 10,
+      "holdHorizon": "1-3 years",
+      "notes": "Super Hero movie hype. Gohan's revival drove collector demand. Watch for resurgence."
+    },
+    {
+      "id": "dbs-015", "game": "Dragon Ball", "tier": "C",
+      "cardName": "Dragon Ball Super 2025 God Rare Son Goku Mini PSA 10",
+      "searchQuery": "Dragon Ball Super 2025 God Rare Son Goku Mini BT28 -PSA -BGS -CGC -graded",
+      "psa10Query": "Dragon Ball Super God Rare Son Goku Mini BT28 PSA 10",
+      "rawEstimateEur": 300, "psa10EstimateEur": 3500,
+      "gradingCost": 60, "multiplier": 11,
+      "holdHorizon": "1-2 years",
+      "notes": "Current 2025 release. Grade now while pop is low. New God Rare format commands premium."
+    },
+
+    // ═══════════════════════════════════════════════
+    // LORCANA
+    // ═══════════════════════════════════════════════
+    {
+      "id": "lor-001", "game": "Lorcana", "tier": "S",
+      "cardName": "Mickey Mouse Sorcerer's Apprentice Enchanted Lorcana",
+      "searchQuery": "Mickey Mouse Sorcerer Apprentice Enchanted Lorcana -PSA -BGS -CGC -graded",
+      "psa10Query": "Mickey Mouse Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 2000, "psa10EstimateEur": 15000,
+      "gradingCost": 60, "multiplier": 7.5,
+      "holdHorizon": "5-10 years",
+      "notes": "Disney's most iconic character, Enchanted rarity (1:500 packs). The Charizard of Lorcana."
+    },
+    {
+      "id": "lor-002", "game": "Lorcana", "tier": "A",
+      "cardName": "Elsa Enchanted Into the Unknown Lorcana",
+      "searchQuery": "Elsa Enchanted Into the Unknown Lorcana -PSA -BGS -CGC -graded",
+      "psa10Query": "Elsa Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 1200, "psa10EstimateEur": 8000,
+      "gradingCost": 60, "multiplier": 6.6,
+      "holdHorizon": "4-8 years",
+      "notes": "Frozen IP + Enchanted rarity. Massive female collector demographic."
+    },
+    {
+      "id": "lor-003", "game": "Lorcana", "tier": "A",
+      "cardName": "Simba Enchanted Lorcana",
+      "searchQuery": "Simba Enchanted Lorcana TCG -PSA -BGS -CGC -graded",
+      "psa10Query": "Simba Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 1000, "psa10EstimateEur": 7000,
+      "gradingCost": 60, "multiplier": 7,
+      "holdHorizon": "4-7 years",
+      "notes": "Lion King nostalgia is immortal. Strong multi-generational appeal."
+    },
+    {
+      "id": "lor-004", "game": "Lorcana", "tier": "A",
+      "cardName": "Maleficent Enchanted Lorcana",
+      "searchQuery": "Maleficent Enchanted Lorcana TCG -PSA -BGS -CGC -graded",
+      "psa10Query": "Maleficent Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 900, "psa10EstimateEur": 6000,
+      "gradingCost": 60, "multiplier": 6.6,
+      "holdHorizon": "3-6 years",
+      "notes": "Villain premium + Enchanted rarity. Classic villain collector demand strong."
+    },
+    {
+      "id": "lor-005", "game": "Lorcana", "tier": "A",
+      "cardName": "Cruella De Vil Enchanted Lorcana",
+      "searchQuery": "Cruella De Vil Enchanted Lorcana TCG -PSA -BGS -CGC -graded",
+      "psa10Query": "Cruella De Vil Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 800, "psa10EstimateEur": 5500,
+      "gradingCost": 60, "multiplier": 6.8,
+      "holdHorizon": "3-6 years",
+      "notes": "Fashion icon villain. Crossover appeal beyond TCG players."
+    },
+    {
+      "id": "lor-006", "game": "Lorcana", "tier": "B",
+      "cardName": "Ursula Enchanted Lorcana",
+      "searchQuery": "Ursula Enchanted Lorcana TCG -PSA -BGS -CGC -graded",
+      "psa10Query": "Ursula Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 600, "psa10EstimateEur": 4500,
+      "gradingCost": 60, "multiplier": 7.4,
+      "holdHorizon": "2-5 years",
+      "notes": "Little Mermaid IP surge after live-action. Strong competitive play + collector demand."
+    },
+    {
+      "id": "lor-007", "game": "Lorcana", "tier": "B",
+      "cardName": "Hades Enchanted Lorcana",
+      "searchQuery": "Hades Enchanted Lorcana TCG -PSA -BGS -CGC -graded",
+      "psa10Query": "Hades Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 500, "psa10EstimateEur": 4000,
+      "gradingCost": 60, "multiplier": 8,
+      "holdHorizon": "2-4 years",
+      "notes": "Hercules villain. GOAT villain energy. Undervalued relative to other Enchanted."
+    },
+    {
+      "id": "lor-008", "game": "Lorcana", "tier": "B",
+      "cardName": "Moana Enchanted Lorcana",
+      "searchQuery": "Moana Enchanted Lorcana TCG -PSA -BGS -CGC -graded",
+      "psa10Query": "Moana Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 400, "psa10EstimateEur": 3000,
+      "gradingCost": 60, "multiplier": 7.4,
+      "holdHorizon": "2-4 years",
+      "notes": "Sequel coming soon. IP momentum will lift card prices. Buy before announcement catalyst."
+    },
+    {
+      "id": "lor-009", "game": "Lorcana", "tier": "B",
+      "cardName": "Stitch Enchanted Lorcana",
+      "searchQuery": "Stitch Enchanted Lorcana TCG -PSA -BGS -CGC -graded",
+      "psa10Query": "Stitch Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 700, "psa10EstimateEur": 5000,
+      "gradingCost": 60, "multiplier": 7,
+      "holdHorizon": "3-5 years",
+      "notes": "Stitch is Disney's most merchandise-able character globally. Underrated for Lorcana."
+    },
+    {
+      "id": "lor-010", "game": "Lorcana", "tier": "B",
+      "cardName": "Mickey Mouse Brave Little Tailor Lorcana Foil",
+      "searchQuery": "Mickey Mouse Brave Little Tailor Lorcana Foil -PSA -BGS -CGC -graded",
+      "psa10Query": "Mickey Mouse Brave Little Tailor Lorcana PSA 10",
+      "rawEstimateEur": 300, "psa10EstimateEur": 2500,
+      "gradingCost": 60, "multiplier": 8.2,
+      "holdHorizon": "2-4 years",
+      "notes": "Classic Mickey variant, strong foil premium. Good arb if found under €250."
+    },
+    {
+      "id": "lor-011", "game": "Lorcana", "tier": "C",
+      "cardName": "Rapunzel Enchanted Lorcana",
+      "searchQuery": "Rapunzel Enchanted Lorcana TCG -PSA -BGS -CGC -graded",
+      "psa10Query": "Rapunzel Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 350, "psa10EstimateEur": 2800,
+      "gradingCost": 60, "multiplier": 7.9,
+      "holdHorizon": "1-3 years",
+      "notes": "Tangled fanbase strong but smaller. Speculative on sequel news."
+    },
+    {
+      "id": "lor-012", "game": "Lorcana", "tier": "C",
+      "cardName": "Captain Hook Enchanted Lorcana",
+      "searchQuery": "Captain Hook Enchanted Lorcana TCG -PSA -BGS -CGC -graded",
+      "psa10Query": "Captain Hook Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 300, "psa10EstimateEur": 2400,
+      "gradingCost": 60, "multiplier": 8,
+      "holdHorizon": "1-3 years",
+      "notes": "Peter Pan IP. Classic villain collector. Decent arb but limited ceiling."
+    },
+    {
+      "id": "lor-013", "game": "Lorcana", "tier": "C",
+      "cardName": "Aurora Enchanted Lorcana",
+      "searchQuery": "Aurora Enchanted Sleeping Beauty Lorcana -PSA -BGS -CGC -graded",
+      "psa10Query": "Aurora Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 250, "psa10EstimateEur": 2000,
+      "gradingCost": 60, "multiplier": 8,
+      "holdHorizon": "1-3 years",
+      "notes": "Sleeping Beauty princess. Collector demand steady but not surging."
+    },
+    {
+      "id": "lor-014", "game": "Lorcana", "tier": "C",
+      "cardName": "Tinker Bell Enchanted Lorcana",
+      "searchQuery": "Tinker Bell Enchanted Lorcana TCG -PSA -BGS -CGC -graded",
+      "psa10Query": "Tinker Bell Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 280, "psa10EstimateEur": 2200,
+      "gradingCost": 60, "multiplier": 7.8,
+      "holdHorizon": "1-3 years",
+      "notes": "Fairy IP. Collector demographic skews female, broad appeal."
+    },
+    {
+      "id": "lor-015", "game": "Lorcana", "tier": "C",
+      "cardName": "Kuzco Enchanted Championship Promo Lorcana",
+      "searchQuery": "Kuzco Enchanted Championship Promo Lorcana -PSA -BGS -CGC -graded",
+      "psa10Query": "Kuzco Enchanted Lorcana PSA 10",
+      "rawEstimateEur": 4000, "psa10EstimateEur": 18000,
+      "gradingCost": 80, "multiplier": 4.5,
+      "holdHorizon": "3-7 years",
+      "notes": "Tournament promo, limited distribution. Emperor's New Groove cult status. Niche but very limited supply."
+    },
+
+    // ═══════════════════════════════════════════════
+    // WEIΒ SCHWARZ
+    // ═══════════════════════════════════════════════
+    {
+      "id": "ws-001", "game": "Weiß Schwarz", "tier": "S",
+      "cardName": "Hatsune Miku Weiss Schwarz PR Signed Promo",
+      "searchQuery": "Hatsune Miku Weiss Schwarz PR Signed Promo -PSA -BGS -CGC -graded",
+      "psa10Query": "Hatsune Miku Weiss Schwarz Signed PSA 10",
+      "rawEstimateEur": 500, "psa10EstimateEur": 5000,
+      "gradingCost": 60, "multiplier": 10,
+      "holdHorizon": "5-10 years",
+      "notes": "Vocaloid icon. Signed promos are the top tier in Weiß Schwarz. Miku transcends TCG — cultural artifact."
+    },
+    {
+      "id": "ws-002", "game": "Weiß Schwarz", "tier": "A",
+      "cardName": "Dandadan Auto Signed SP Weiss Schwarz",
+      "searchQuery": "Dandadan Signed SP Weiss Schwarz -PSA -BGS -CGC -graded",
+      "psa10Query": "Dandadan Signed SP Weiss Schwarz PSA 10",
+      "rawEstimateEur": 400, "psa10EstimateEur": 3000,
+      "gradingCost": 60, "multiplier": 7.4,
+      "holdHorizon": "3-6 years",
+      "notes": "Anime of the moment. Signed SP while market is hot. Mikel's personal interest. Grade immediately."
+    },
+    {
+      "id": "ws-003", "game": "Weiß Schwarz", "tier": "A",
+      "cardName": "Attack on Titan Signed SP Weiss Schwarz",
+      "searchQuery": "Attack on Titan Signed SP Weiss Schwarz -PSA -BGS -CGC -graded",
+      "psa10Query": "Attack on Titan Signed SP Weiss Schwarz PSA 10",
+      "rawEstimateEur": 300, "psa10EstimateEur": 2500,
+      "gradingCost": 60, "multiplier": 8.2,
+      "holdHorizon": "4-7 years",
+      "notes": "Cultural phenomenon. Signed SPs from iconic voice actors. Permanent IP value."
+    },
+    {
+      "id": "ws-004", "game": "Weiß Schwarz", "tier": "A",
+      "cardName": "Kaguya-sama Love is War Signed SP Weiss Schwarz",
+      "searchQuery": "Kaguya-sama Signed SP Weiss Schwarz -PSA -BGS -CGC -graded",
+      "psa10Query": "Kaguya-sama Signed SP Weiss Schwarz PSA 10",
+      "rawEstimateEur": 250, "psa10EstimateEur": 2000,
+      "gradingCost": 60, "multiplier": 8,
+      "holdHorizon": "3-5 years",
+      "notes": "Romance anime crossover appeal. Signed SP with distinct character art."
+    },
+    {
+      "id": "ws-005", "game": "Weiß Schwarz", "tier": "B",
+      "cardName": "Sword Art Online Signed SP Weiss Schwarz",
+      "searchQuery": "Sword Art Online Signed SP Weiss Schwarz -PSA -BGS -CGC -graded",
+      "psa10Query": "Sword Art Online Signed SP Weiss Schwarz PSA 10",
+      "rawEstimateEur": 200, "psa10EstimateEur": 1800,
+      "gradingCost": 60, "multiplier": 9,
+      "holdHorizon": "3-5 years",
+      "notes": "Isekai OG. Massive global fanbase. SAO signed SPs consistently well-priced."
+    },
+    {
+      "id": "ws-006", "game": "Weiß Schwarz", "tier": "B",
+      "cardName": "Demon Slayer Kimetsu no Yaiba SP Weiss Schwarz",
+      "searchQuery": "Demon Slayer Kimetsu no Yaiba SP Weiss Schwarz -PSA -BGS -CGC -graded",
+      "psa10Query": "Demon Slayer SP Weiss Schwarz PSA 10",
+      "rawEstimateEur": 150, "psa10EstimateEur": 1200,
+      "gradingCost": 50, "multiplier": 8,
+      "holdHorizon": "2-4 years",
+      "notes": "Biggest anime of the 2020s. SP premium strong. Grade Tanjiro/Nezuko/Rengoku SPs."
+    },
+    {
+      "id": "ws-007", "game": "Weiß Schwarz", "tier": "B",
+      "cardName": "Jujutsu Kaisen SP Weiss Schwarz",
+      "searchQuery": "Jujutsu Kaisen SP Weiss Schwarz -PSA -BGS -CGC -graded",
+      "psa10Query": "Jujutsu Kaisen SP Weiss Schwarz PSA 10",
+      "rawEstimateEur": 120, "psa10EstimateEur": 1000,
+      "gradingCost": 50, "multiplier": 8.3,
+      "holdHorizon": "2-4 years",
+      "notes": "Current top anime. SP premium growing. Grade while it's hot."
+    },
+    {
+      "id": "ws-008", "game": "Weiß Schwarz", "tier": "B",
+      "cardName": "Re:Zero Rem Signed SP Weiss Schwarz",
+      "searchQuery": "Re:Zero Rem Signed SP Weiss Schwarz -PSA -BGS -CGC -graded",
+      "psa10Query": "Re:Zero Rem Signed SP Weiss Schwarz PSA 10",
+      "rawEstimateEur": 200, "psa10EstimateEur": 1800,
+      "gradingCost": 60, "multiplier": 9,
+      "holdHorizon": "3-5 years",
+      "notes": "Rem is arguably the most popular anime waifu globally. Signed = massive premium."
+    },
+    {
+      "id": "ws-009", "game": "Weiß Schwarz", "tier": "B",
+      "cardName": "Fate Stay Night Saber Signed SP Weiss Schwarz",
+      "searchQuery": "Fate Stay Night Saber Signed SP Weiss Schwarz -PSA -BGS -CGC -graded",
+      "psa10Query": "Fate Stay Night Saber Signed SP Weiss Schwarz PSA 10",
+      "rawEstimateEur": 250, "psa10EstimateEur": 2200,
+      "gradingCost": 60, "multiplier": 8.7,
+      "holdHorizon": "3-5 years",
+      "notes": "Fate IP is timeless. Saber is the face of the franchise. Original signed SPs from first sets."
+    },
+    {
+      "id": "ws-010", "game": "Weiß Schwarz", "tier": "B",
+      "cardName": "My Hero Academia Deku Signed SP Weiss Schwarz",
+      "searchQuery": "My Hero Academia Deku Signed SP Weiss Schwarz -PSA -BGS -CGC -graded",
+      "psa10Query": "My Hero Academia Signed SP Weiss Schwarz PSA 10",
+      "rawEstimateEur": 100, "psa10EstimateEur": 900,
+      "gradingCost": 50, "multiplier": 9,
+      "holdHorizon": "2-4 years",
+      "notes": "Finished manga gives complete story arc collectability. Post-series premiums tend to rise."
+    },
+    {
+      "id": "ws-011", "game": "Weiß Schwarz", "tier": "C",
+      "cardName": "Oshi no Ko SP Weiss Schwarz",
+      "searchQuery": "Oshi no Ko SP Weiss Schwarz -PSA -BGS -CGC -graded",
+      "psa10Query": "Oshi no Ko SP Weiss Schwarz PSA 10",
+      "rawEstimateEur": 80, "psa10EstimateEur": 700,
+      "gradingCost": 50, "multiplier": 8.7,
+      "holdHorizon": "1-3 years",
+      "notes": "New IP, explosive popularity. Grade early in set cycle before pop inflates."
+    },
+    {
+      "id": "ws-012", "game": "Weiß Schwarz", "tier": "C",
+      "cardName": "Bocchi the Rock SP Weiss Schwarz",
+      "searchQuery": "Bocchi the Rock SP Weiss Schwarz -PSA -BGS -CGC -graded",
+      "psa10Query": "Bocchi the Rock SP Weiss Schwarz PSA 10",
+      "rawEstimateEur": 60, "psa10EstimateEur": 600,
+      "gradingCost": 50, "multiplier": 10,
+      "holdHorizon": "1-2 years",
+      "notes": "Cult anime. Intense dedicated fandom. Niche but strong PSA premium in that community."
+    },
+    {
+      "id": "ws-013", "game": "Weiß Schwarz", "tier": "C",
+      "cardName": "Chainsaw Man Makima SP Weiss Schwarz",
+      "searchQuery": "Chainsaw Man Makima SP Weiss Schwarz -PSA -BGS -CGC -graded",
+      "psa10Query": "Chainsaw Man Makima SP Weiss Schwarz PSA 10",
+      "rawEstimateEur": 100, "psa10EstimateEur": 900,
+      "gradingCost": 50, "multiplier": 9,
+      "holdHorizon": "1-3 years",
+      "notes": "Makima is the breakout villain. Chainsaw Man has massive Gen Z fanbase."
+    },
+    {
+      "id": "ws-014", "game": "Weiß Schwarz", "tier": "C",
+      "cardName": "Cheers Kadokawa Vol2 Auto BGS 9.5 Weiss Schwarz",
+      "searchQuery": "Cheers Weiss Schwarz W123 Kadokawa Auto -PSA -BGS -CGC -graded",
+      "psa10Query": "Cheers Weiss Schwarz Auto BGS 9.5",
+      "rawEstimateEur": 500, "psa10EstimateEur": 4000,
+      "gradingCost": 80, "multiplier": 8,
+      "holdHorizon": "2-4 years",
+      "notes": "High value auto. Already appearing in grail alerts. Niche but proven demand."
+    },
+    {
+      "id": "ws-015", "game": "Weiß Schwarz", "tier": "C",
+      "cardName": "One Piece Film Red SP Weiss Schwarz",
+      "searchQuery": "One Piece Film Red SP Weiss Schwarz -PSA -BGS -CGC -graded",
+      "psa10Query": "One Piece Film Red SP Weiss Schwarz PSA 10",
+      "rawEstimateEur": 70, "psa10EstimateEur": 700,
+      "gradingCost": 50, "multiplier": 10,
+      "holdHorizon": "1-3 years",
+      "notes": "OP crossover into Weiß. Dual-market demand from OP collectors AND WS players."
+    }
+  ]
+}

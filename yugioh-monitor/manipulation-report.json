@@ -1,0 +1,195 @@
+{
+  "generatedAt": "2026-02-26T17:29:41.846Z",
+  "summary": {
+    "totalFindings": 968,
+    "high": 56,
+    "medium": 899,
+    "low": 13
+  },
+  "byPattern": [
+    {
+      "patternId": "LISTING_CYCLING",
+      "description": "Same card relisted multiple times at different prices — potential price manipulation or search spam",
+      "count": 886,
+      "severity": "MEDIUM",
+      "topExamples": [
+        {
+          "title": "2008 YU-GI-OH! ANNIVERSARY PACK YAP1-EN001 BLUE-EYES WHITE DRAGON PSA 10",
+          "url": null,
+          "evidence": "29 similar listings found with 7955× price spread ($2.51401 → $20000)"
+        },
+        {
+          "title": "YuGiOh GRADED 2009 Ancient Fairy Dragon ANPR-EN040 Ghost Rare NM 7 PSA",
+          "url": null,
+          "evidence": "9 similar listings found with 2583× price spread ($2.70957 → $6999.99)"
+        },
+        {
+          "title": "Yu-Gi-Oh! Red-Eyes B. Dragon Legend of Blue Eyes 1st Ed. WAVY LOB-070 BGS 9.5",
+          "url": null,
+          "evidence": "24 similar listings found with 2779× price spread ($2.51904 → $6999.99)"
+        },
+        {
+          "title": "Blue Eyes White Dragon Lob 1st Edition Foil Shift Misprint German Yu-Gi-Oh!",
+          "url": null,
+          "evidence": "36 similar listings found with 2779× price spread ($2.51904 → $6999.99)"
+        },
+        {
+          "title": "PSA 10 Blue Eyes White Dragon SM-51 Ultimate Rare Yugioh Japanese 2001",
+          "url": null,
+          "evidence": "31 similar listings found with 2779× price spread ($2.51904 → $6999.99)"
+        }
+      ]
+    },
+    {
+      "patternId": "BULK_AS_SINGLE",
+      "description": "Bulk lot or deck bundle listed with a single-card price — misleads search results",
+      "count": 13,
+      "severity": "MEDIUM",
+      "topExamples": [
+        {
+          "title": "New ListingPikachu At The Museum Jumbo Promo X100 SEALED",
+          "price": "$5,427.20",
+          "url": "https://www.ebay.com/itm/389640865003",
+          "evidence": "Bulk indicators (x\\d+\\b) with high price $5427.2"
+        },
+        {
+          "title": "New ListingPikachu Jumbo Promo X100 Sealed",
+          "price": "$5,427.20",
+          "url": "https://www.ebay.com/itm/389640904526",
+          "evidence": "Bulk indicators (x\\d+\\b) with high price $5427.2"
+        },
+        {
+          "title": "MIKANKO DECK 27 | Ni-Ni Ha-Re Fire Purification Dance Rondo Kagure AMDE YuGiOh🔥",
+          "price": "$77,777.00",
+          "url": "https://www.ebay.com/itm/203714610589",
+          "evidence": "Bulk indicators (\\bdeck\\s*\\d+) with high price $77777"
+        },
+        {
+          "title": "YuGiOh ELEMENTAL HERO NAOS ALIUS x3 | SGX4-ENA02 1st Edition SECRET RARE",
+          "price": "$77,777.00",
+          "url": "https://www.ebay.com/itm/204346679807",
+          "evidence": "Bulk indicators (x\\d+\\b) with high price $77777"
+        },
+        {
+          "title": "KNIGHTS DECK 5 | Arcana Extra Joker Knigth Jack's King's Queen's YuGiOh",
+          "price": "$77,777.00",
+          "url": "https://www.ebay.com/itm/202828224112",
+          "evidence": "Bulk indicators (\\bdeck\\s*\\d+) with high price $77777"
+        }
+      ]
+    },
+    {
+      "patternId": "PLACEHOLDER_PRICE",
+      "description": "Listing uses a placeholder/joke price not intended for actual sale",
+      "count": 13,
+      "severity": "LOW",
+      "topExamples": [
+        {
+          "title": "MIKANKO DECK 27 | Ni-Ni Ha-Re Fire Purification Dance Rondo Kagure AMDE YuGiOh🔥",
+          "price": "$77,777.00",
+          "url": "https://www.ebay.com/itm/203714610589",
+          "evidence": "Repeating digits: $77777; Known placeholder: $77777"
+        },
+        {
+          "title": "YuGiOh ELEMENTAL HERO NAOS ALIUS x3 | SGX4-ENA02 1st Edition SECRET RARE",
+          "price": "$77,777.00",
+          "url": "https://www.ebay.com/itm/204346679807",
+          "evidence": "Repeating digits: $77777; Known placeholder: $77777"
+        },
+        {
+          "title": "KNIGHTS DECK 5 | Arcana Extra Joker Knigth Jack's King's Queen's YuGiOh",
+          "price": "$77,777.00",
+          "url": "https://www.ebay.com/itm/202828224112",
+          "evidence": "Repeating digits: $77777; Known placeholder: $77777"
+        },
+        {
+          "title": "KNIGHTS DECK 5 | Jack's King's Queen's Arcana Extra Joker Knigth Joker | YuGiOh",
+          "price": "$77,777.00",
+          "url": "https://www.ebay.com/itm/202997248128",
+          "evidence": "Repeating digits: $77777; Known placeholder: $77777"
+        },
+        {
+          "title": "YuGiOh Reflect Bounder SBC1-ENE04 x3 Secret Rare 1st Edition Streets Battle City",
+          "price": "$77,777.00",
+          "url": "https://www.ebay.com/itm/205050454466",
+          "evidence": "Repeating digits: $77777; Known placeholder: $77777"
+        }
+      ]
+    },
+    {
+      "patternId": "COUNTERFEIT_RISK",
+      "description": "Listing shows indicators commonly associated with counterfeit cards",
+      "count": 56,
+      "severity": "HIGH",
+      "topExamples": [
+        {
+          "title": "2002 Yu-Gi-Oh! 1st Edition Exodia The Forbidden One LOB-124 PSA 10 GEM MINT",
+          "url": null,
+          "evidence": "PSA 10 of a grail card for only $0 — almost certainly counterfeit; 1st Edition vintage card for $0 — likely counterfeit or heavy damage"
+        },
+        {
+          "title": "2008 YU-GI-OH! ANNIVERSARY PACK YAP1-EN001 BLUE-EYES WHITE DRAGON PSA 10",
+          "url": null,
+          "evidence": "PSA 10 of a grail card for only $0 — almost certainly counterfeit"
+        },
+        {
+          "title": "PSA 10 Blue-Eyes White Dragon SDK 1st Edition SDK-001",
+          "url": null,
+          "evidence": "PSA 10 of a grail card for only $0 — almost certainly counterfeit"
+        },
+        {
+          "title": "Yu-Gi-Oh! Red-Eyes B. Dragon Legend of Blue Eyes 1st Ed. WAVY LOB-070 BGS 9.5",
+          "url": null,
+          "evidence": "1st Edition vintage card for $0 — likely counterfeit or heavy damage"
+        },
+        {
+          "title": "Blue Eyes White Dragon Lob 1st Edition Foil Shift Misprint German Yu-Gi-Oh!",
+          "url": null,
+          "evidence": "1st Edition vintage card for $0 — likely counterfeit or heavy damage"
+        }
+      ]
+    }
+  ],
+  "reportableToEbay": [
+    {
+      "url": "https://www.ebay.de/itm/358102127530",
+      "title": "Yu-Gi-Oh! Blue Eyes White Dragon LOB-E001 1st Edition Ultra Rare PSA",
+      "price": "€4.246,80",
+      "violation": "COUNTERFEIT_RISK",
+      "evidence": "1st Edition vintage card for $4.2468 — likely counterfeit or heavy damage",
+      "detectedAt": "2026-02-26T17:29:36.923Z"
+    },
+    {
+      "url": "https://www.ebay.de/itm/376949819514",
+      "title": "2022 Yu-Gi-Oh! 1st Ed Ghosts/Past 2nd Haunting 175 Blue-Eyes White Dragon PSA 10",
+      "price": "€4.360,71",
+      "violation": "COUNTERFEIT_RISK",
+      "evidence": "PSA 10 of a grail card for only $4.36071 — almost certainly counterfeit",
+      "detectedAt": "2026-02-26T17:29:36.923Z"
+    },
+    {
+      "url": "https://www.ebay.de/itm/267452010806",
+      "title": "PSA 10 GEM MINT Blue-Eyes Toon Dragon MRL-000 1st Edition MRL Yugioh Karte 563",
+      "price": "€2.524,39",
+      "violation": "COUNTERFEIT_RISK",
+      "evidence": "PSA 10 of a grail card for only $2.52439 — almost certainly counterfeit",
+      "detectedAt": "2026-02-26T17:29:36.923Z"
+    },
+    {
+      "url": "https://www.ebay.com/itm/236635239707",
+      "title": "Black Lotus - Collector's Edition CE Power 9 Beta Reprint NM/M *CCGHouse* #WM",
+      "price": "$2,900.00",
+      "violation": "COUNTERFEIT_RISK",
+      "evidence": "Title contains counterfeit indicator: reprint",
+      "detectedAt": "2026-02-26T17:29:36.923Z"
+    },
+    {
+      "url": "https://www.ebay.de/itm/376971556816",
+      "title": "Yu-Gi-Oh! 1998 Japanese Bandai 3rd Gen English Blue-Eyes White Dragon PSA 10",
+      "price": "€4.106,69",
+      "violation": "COUNTERFEIT_RISK",
+      "evidence": "PSA 10 of a grail card for only $4.10669 — almost certainly counterfeit",
+      "detectedAt": "2026-02-26T17:29:36.923Z"
+    }
+  ]
+}
