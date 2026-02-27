@@ -667,20 +667,20 @@
   },
   "2026-02-27": {
     "yugioh": {
-      "totalListings": 119,
-      "avgPrice": 10917,
+      "totalListings": 117,
+      "avgPrice": 10856,
       "maxPrice": 99999,
-      "newAlerts": 7,
+      "newAlerts": 3,
       "platforms": {
-        "ebay": 119,
+        "ebay": 117,
         "tcgplayer": 0
       }
     },
     "pokemon": {
       "totalListings": 118,
-      "avgPrice": 4731,
+      "avgPrice": 4685,
       "maxPrice": 39000,
-      "newAlerts": 24,
+      "newAlerts": 6,
       "platforms": {
         "ebay": 118,
         "tcgplayer": 0
@@ -688,61 +688,61 @@
     },
     "mtg": {
       "totalListings": 127,
-      "avgPrice": 5527,
+      "avgPrice": 5746,
       "maxPrice": 41713,
-      "newAlerts": 3,
+      "newAlerts": 5,
       "platforms": {
         "ebay": 127,
         "tcgplayer": 0
       }
     },
     "onepiece": {
-      "totalListings": 140,
-      "avgPrice": 5105,
-      "maxPrice": 20457,
-      "newAlerts": 2,
+      "totalListings": 141,
+      "avgPrice": 5137,
+      "maxPrice": 39000,
+      "newAlerts": 10,
       "platforms": {
-        "ebay": 140,
+        "ebay": 141,
         "tcgplayer": 0
       }
     },
     "dragonball": {
-      "totalListings": 109,
-      "avgPrice": 4933,
+      "totalListings": 111,
+      "avgPrice": 4862,
       "maxPrice": 60000,
-      "newAlerts": 7,
+      "newAlerts": 1,
       "platforms": {
-        "ebay": 109,
+        "ebay": 111,
         "tcgplayer": 0
       }
     },
     "weiss": {
-      "totalListings": 56,
-      "avgPrice": 4839,
+      "totalListings": 55,
+      "avgPrice": 4869,
       "maxPrice": 22500,
-      "newAlerts": 1,
+      "newAlerts": 0,
       "platforms": {
-        "ebay": 56,
+        "ebay": 55,
         "tcgplayer": 0
       }
     },
     "dandadan": {
-      "totalListings": 34,
-      "avgPrice": 4346,
+      "totalListings": 33,
+      "avgPrice": 4381,
       "maxPrice": 22500,
       "newAlerts": 0,
       "platforms": {
-        "ebay": 34,
+        "ebay": 33,
         "tcgplayer": 0
       }
     },
     "digimon": {
-      "totalListings": 46,
-      "avgPrice": 5722,
+      "totalListings": 47,
+      "avgPrice": 5685,
       "maxPrice": 77777,
-      "newAlerts": 1,
+      "newAlerts": 0,
       "platforms": {
-        "ebay": 46,
+        "ebay": 47,
         "tcgplayer": 0
       }
     },
@@ -750,7 +750,7 @@
       "totalListings": 67,
       "avgPrice": 23054,
       "maxPrice": 111107,
-      "newAlerts": 2,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 67,
         "tcgplayer": 0

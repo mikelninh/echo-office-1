@@ -1,0 +1,83 @@
+{
+  "205688333979": {
+    "type": "deal",
+    "game": "Lorcana",
+    "title": "TOP 16 ENCHANTED FOIL KUZCO LORCANA CHAMPIONSHIP PROMO 8/C1 PSA 10",
+    "price": "$3,650.00",
+    "platform": "eBay.com",
+    "url": "https://www.ebay.com/itm/205688333979",
+    "dealPct": 36,
+    "score": 72,
+    "rating": "🔥 SOLID",
+    "loggedAt": "2026-02-27T07:45:54.298Z",
+    "id": "alert-1772178354298",
+    "itemId": "205688333979",
+    "checkedAt": "2026-02-27T19:39:36.795Z",
+    "status": "active",
+    "currentPrice": null,
+    "roi": {
+      "buyPrice": 3650,
+      "gradingCost": 75,
+      "totalCost": 3725,
+      "estimatedGradedValue": 5840,
+      "exitPrice": 5840,
+      "netProfit": 2115,
+      "roi": 57,
+      "isRealData": false
+    }
+  },
+  "326717863380": {
+    "type": "deal",
+    "game": "Dragon Ball",
+    "title": "2025 DRAGON BALL SUPER CARD  FUSION WORLD MANGA  #FB05-119 SON GOKU S.R PSA 10",
+    "price": "$3,499.99",
+    "platform": "eBay.com",
+    "url": "https://www.ebay.com/itm/326717863380",
+    "dealPct": 43,
+    "score": 96,
+    "rating": "🔥🔥🔥 LEGENDARY",
+    "loggedAt": "2026-02-27T07:45:18.629Z",
+    "id": "alert-1772178318629",
+    "itemId": "326717863380",
+    "checkedAt": "2026-02-27T19:39:39.747Z",
+    "status": "active",
+    "currentPrice": null,
+    "roi": {
+      "buyPrice": 3499.99,
+      "gradingCost": 75,
+      "totalCost": 3574.99,
+      "estimatedGradedValue": 8750,
+      "exitPrice": 8750,
+      "netProfit": 5175,
+      "roi": 145,
+      "isRealData": false
+    }
+  },
+  "317611988672": {
+    "type": "deal",
+    "game": "One Piece",
+    "title": "OP05-119 Monkey.D.Luffy : Special Card SEC Silver English One Piece TCG Card",
+    "price": "$2,592.37",
+    "platform": "eBay.com",
+    "url": "https://www.ebay.com/itm/317611988672",
+    "dealPct": 37,
+    "score": 74,
+    "rating": "🔥 SOLID",
+    "loggedAt": "2026-02-27T07:45:09.193Z",
+    "id": "alert-1772178309193",
+    "itemId": "317611988672",
+    "checkedAt": "2026-02-27T19:39:43.166Z",
+    "status": "active",
+    "currentPrice": null,
+    "roi": {
+      "buyPrice": 2592.37,
+      "gradingCost": 75,
+      "totalCost": 2667.37,
+      "estimatedGradedValue": 4148,
+      "exitPrice": 4148,
+      "netProfit": 1480,
+      "roi": 56,
+      "isRealData": false
+    }
+  }
+}

@@ -1,49 +1,49 @@
 {
-  "generatedAt": "2026-02-26T17:29:41.846Z",
+  "generatedAt": "2026-02-27T11:45:48.406Z",
   "summary": {
-    "totalFindings": 968,
+    "totalFindings": 1095,
     "high": 56,
-    "medium": 899,
-    "low": 13
+    "medium": 1025,
+    "low": 14
   },
   "byPattern": [
     {
       "patternId": "LISTING_CYCLING",
       "description": "Same card relisted multiple times at different prices — potential price manipulation or search spam",
-      "count": 886,
+      "count": 1010,
       "severity": "MEDIUM",
       "topExamples": [
         {
           "title": "2008 YU-GI-OH! ANNIVERSARY PACK YAP1-EN001 BLUE-EYES WHITE DRAGON PSA 10",
           "url": null,
-          "evidence": "29 similar listings found with 7955× price spread ($2.51401 → $20000)"
+          "evidence": "44 similar listings found with 7947× price spread ($2.51678 → $20000)"
+        },
+        {
+          "title": "2019 Yu-Gi-Oh! Japanese Promo 10k Cards Com. Kanan Swordmistress PSA 10",
+          "url": null,
+          "evidence": "8 similar listings found with 1229× price spread ($4.02645 → $4950)"
         },
         {
           "title": "YuGiOh GRADED 2009 Ancient Fairy Dragon ANPR-EN040 Ghost Rare NM 7 PSA",
           "url": null,
-          "evidence": "9 similar listings found with 2583× price spread ($2.70957 → $6999.99)"
+          "evidence": "12 similar listings found with 2581× price spread ($2.71255 → $6999.99)"
         },
         {
           "title": "Yu-Gi-Oh! Red-Eyes B. Dragon Legend of Blue Eyes 1st Ed. WAVY LOB-070 BGS 9.5",
           "url": null,
-          "evidence": "24 similar listings found with 2779× price spread ($2.51904 → $6999.99)"
+          "evidence": "32 similar listings found with 2776× price spread ($2.52182 → $6999.99)"
         },
         {
           "title": "Blue Eyes White Dragon Lob 1st Edition Foil Shift Misprint German Yu-Gi-Oh!",
           "url": null,
-          "evidence": "36 similar listings found with 2779× price spread ($2.51904 → $6999.99)"
-        },
-        {
-          "title": "PSA 10 Blue Eyes White Dragon SM-51 Ultimate Rare Yugioh Japanese 2001",
-          "url": null,
-          "evidence": "31 similar listings found with 2779× price spread ($2.51904 → $6999.99)"
+          "evidence": "45 similar listings found with 2776× price spread ($2.52182 → $6999.99)"
         }
       ]
     },
     {
       "patternId": "BULK_AS_SINGLE",
       "description": "Bulk lot or deck bundle listed with a single-card price — misleads search results",
-      "count": 13,
+      "count": 15,
       "severity": "MEDIUM",
       "topExamples": [
         {
@@ -81,7 +81,7 @@
     {
       "patternId": "PLACEHOLDER_PRICE",
       "description": "Listing uses a placeholder/joke price not intended for actual sale",
-      "count": 13,
+      "count": 14,
       "severity": "LOW",
       "topExamples": [
         {
@@ -154,18 +154,18 @@
     {
       "url": "https://www.ebay.de/itm/358102127530",
       "title": "Yu-Gi-Oh! Blue Eyes White Dragon LOB-E001 1st Edition Ultra Rare PSA",
-      "price": "€4.246,80",
+      "price": "€4.227,34",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "1st Edition vintage card for $4.2468 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-02-26T17:29:36.923Z"
+      "evidence": "1st Edition vintage card for $4.22734 — likely counterfeit or heavy damage",
+      "detectedAt": "2026-02-27T11:45:30.968Z"
     },
     {
       "url": "https://www.ebay.de/itm/376949819514",
       "title": "2022 Yu-Gi-Oh! 1st Ed Ghosts/Past 2nd Haunting 175 Blue-Eyes White Dragon PSA 10",
-      "price": "€4.360,71",
+      "price": "€4.365,52",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $4.36071 — almost certainly counterfeit",
-      "detectedAt": "2026-02-26T17:29:36.923Z"
+      "evidence": "PSA 10 of a grail card for only $4.36552 — almost certainly counterfeit",
+      "detectedAt": "2026-02-27T11:45:30.968Z"
     },
     {
       "url": "https://www.ebay.de/itm/267452010806",
@@ -173,7 +173,7 @@
       "price": "€2.524,39",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $2.52439 — almost certainly counterfeit",
-      "detectedAt": "2026-02-26T17:29:36.923Z"
+      "detectedAt": "2026-02-27T11:45:30.968Z"
     },
     {
       "url": "https://www.ebay.com/itm/236635239707",
@@ -181,15 +181,15 @@
       "price": "$2,900.00",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "Title contains counterfeit indicator: reprint",
-      "detectedAt": "2026-02-26T17:29:36.923Z"
+      "detectedAt": "2026-02-27T11:45:30.968Z"
     },
     {
       "url": "https://www.ebay.de/itm/376971556816",
       "title": "Yu-Gi-Oh! 1998 Japanese Bandai 3rd Gen English Blue-Eyes White Dragon PSA 10",
-      "price": "€4.106,69",
+      "price": "€4.111,21",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $4.10669 — almost certainly counterfeit",
-      "detectedAt": "2026-02-26T17:29:36.923Z"
+      "evidence": "PSA 10 of a grail card for only $4.11121 — almost certainly counterfeit",
+      "detectedAt": "2026-02-27T11:45:30.968Z"
     }
   ]
 }
