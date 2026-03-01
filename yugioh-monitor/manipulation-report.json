@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-02-27T11:45:48.406Z",
+  "generatedAt": "2026-02-28T11:00:19.728Z",
   "summary": {
-    "totalFindings": 1095,
-    "high": 56,
-    "medium": 1025,
+    "totalFindings": 1118,
+    "high": 55,
+    "medium": 1049,
     "low": 14
   },
   "byPattern": [
     {
       "patternId": "LISTING_CYCLING",
       "description": "Same card relisted multiple times at different prices — potential price manipulation or search spam",
-      "count": 1010,
+      "count": 1034,
       "severity": "MEDIUM",
       "topExamples": [
         {
@@ -31,12 +31,12 @@
         {
           "title": "Yu-Gi-Oh! Red-Eyes B. Dragon Legend of Blue Eyes 1st Ed. WAVY LOB-070 BGS 9.5",
           "url": null,
-          "evidence": "32 similar listings found with 2776× price spread ($2.52182 → $6999.99)"
+          "evidence": "31 similar listings found with 2776× price spread ($2.52182 → $6999.99)"
         },
         {
           "title": "Blue Eyes White Dragon Lob 1st Edition Foil Shift Misprint German Yu-Gi-Oh!",
           "url": null,
-          "evidence": "45 similar listings found with 2776× price spread ($2.52182 → $6999.99)"
+          "evidence": "44 similar listings found with 2776× price spread ($2.52182 → $6999.99)"
         }
       ]
     },
@@ -119,7 +119,7 @@
     {
       "patternId": "COUNTERFEIT_RISK",
       "description": "Listing shows indicators commonly associated with counterfeit cards",
-      "count": 56,
+      "count": 55,
       "severity": "HIGH",
       "topExamples": [
         {
@@ -157,7 +157,7 @@
       "price": "€4.227,34",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "1st Edition vintage card for $4.22734 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-02-27T11:45:30.968Z"
+      "detectedAt": "2026-02-28T11:00:03.627Z"
     },
     {
       "url": "https://www.ebay.de/itm/376949819514",
@@ -165,7 +165,7 @@
       "price": "€4.365,52",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $4.36552 — almost certainly counterfeit",
-      "detectedAt": "2026-02-27T11:45:30.968Z"
+      "detectedAt": "2026-02-28T11:00:03.627Z"
     },
     {
       "url": "https://www.ebay.de/itm/267452010806",
@@ -173,7 +173,7 @@
       "price": "€2.524,39",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $2.52439 — almost certainly counterfeit",
-      "detectedAt": "2026-02-27T11:45:30.968Z"
+      "detectedAt": "2026-02-28T11:00:03.627Z"
     },
     {
       "url": "https://www.ebay.com/itm/236635239707",
@@ -181,7 +181,7 @@
       "price": "$2,900.00",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "Title contains counterfeit indicator: reprint",
-      "detectedAt": "2026-02-27T11:45:30.968Z"
+      "detectedAt": "2026-02-28T11:00:03.627Z"
     },
     {
       "url": "https://www.ebay.de/itm/376971556816",
@@ -189,7 +189,7 @@
       "price": "€4.111,21",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $4.11121 — almost certainly counterfeit",
-      "detectedAt": "2026-02-27T11:45:30.968Z"
+      "detectedAt": "2026-02-28T11:00:03.627Z"
     }
   ]
 }
