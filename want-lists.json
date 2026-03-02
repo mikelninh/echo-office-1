@@ -1,0 +1,33 @@
+[
+  {
+    "subscriberId": "938367498",
+    "telegramId": "938367498",
+    "name": "Mikel",
+    "tier": "dealer",
+    "active": true,
+    "targets": [
+      {
+        "cardName": "Blue-Eyes White Dragon LOB 1st Edition",
+        "game": "yugioh",
+        "maxRawPrice": 600,
+        "notes": "NM or better, check centering",
+        "active": true
+      },
+      {
+        "cardName": "Luffy Manga Alternate Art OP-01",
+        "game": "onepiece",
+        "maxRawPrice": 800,
+        "notes": "Any condition — high grade rate",
+        "active": true
+      },
+      {
+        "cardName": "Charizard 1st Edition Base Set",
+        "game": "pokemon",
+        "maxRawPrice": 4000,
+        "notes": "PSA 9+ target",
+        "active": true
+      }
+    ],
+    "createdAt": "2026-02-24T19:48:25.632Z"
+  }
+]
