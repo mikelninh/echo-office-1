@@ -1080,6 +1080,113 @@
       "gradingCost": 50, "multiplier": 10,
       "holdHorizon": "1-3 years",
       "notes": "OP crossover into Weiß. Dual-market demand from OP collectors AND WS players."
+    },
+
+    // ═══════════════════════════════════════════════
+    // RIFTBOUND (League of Legends TCG, Riot Games 2025)
+    // ═══════════════════════════════════════════════
+    // NOTE: psa10EstimateEur = current RAW market price (Riftbound sigs ARE the premium card,
+    // equivalent to PSA 10 for other TCGs — no grading multiplier applies yet).
+    // Grading arb here = finding underpriced raw copies of signatures, not grade submissions.
+    {
+      "id": "rb-001", "game": "Riftbound", "tier": "S",
+      "cardName": "Ahri Nine-Tailed Fox Signature Riftbound",
+      "searchQuery": "riftbound ahri signature -proxy -custom -fan",
+      "psa10Query": "riftbound ahri signature",
+      "rawEstimateEur": 1100, "psa10EstimateEur": 1200,
+      "gradingCost": 35, "multiplier": 1.1,
+      "holdHorizon": "3-7 years",
+      "notes": "The face of Riftbound. Ahri is LoL's most iconic champion. Any copy under $900 is a buy."
+    },
+    {
+      "id": "rb-002", "game": "Riftbound", "tier": "S",
+      "cardName": "Kai'Sa Daughter of the Void Signature Riftbound",
+      "searchQuery": "riftbound kaisa signature -proxy -custom",
+      "psa10Query": "riftbound kaisa signature",
+      "rawEstimateEur": 1200, "psa10EstimateEur": 1300,
+      "gradingCost": 35, "multiplier": 1.1,
+      "holdHorizon": "3-7 years",
+      "notes": "Highest priced signature in Set 1. Kai'Sa has massive global following. Strong floor."
+    },
+    {
+      "id": "rb-003", "game": "Riftbound", "tier": "S",
+      "cardName": "Jinx Loose Cannon Signature Riftbound",
+      "searchQuery": "riftbound jinx signature -proxy -custom",
+      "psa10Query": "riftbound jinx signature",
+      "rawEstimateEur": 1100, "psa10EstimateEur": 1200,
+      "gradingCost": 35, "multiplier": 1.1,
+      "holdHorizon": "3-7 years",
+      "notes": "Arcane (Netflix) skyrocketed Jinx's global recognition. Crossover collector demand is real."
+    },
+    {
+      "id": "rb-004", "game": "Riftbound", "tier": "A",
+      "cardName": "Lee Sin Blind Monk Signature Riftbound",
+      "searchQuery": "riftbound lee sin signature -proxy",
+      "psa10Query": "riftbound lee sin signature blind monk",
+      "rawEstimateEur": 750, "psa10EstimateEur": 900,
+      "gradingCost": 35, "multiplier": 1.2,
+      "holdHorizon": "3-5 years",
+      "notes": "Most popular skill-expression champion in LoL. Lower than Ahri/Jinx — better entry."
+    },
+    {
+      "id": "rb-005", "game": "Riftbound", "tier": "A",
+      "cardName": "Volibear Signature Riftbound",
+      "searchQuery": "riftbound volibear signature -proxy",
+      "psa10Query": "riftbound volibear signature",
+      "rawEstimateEur": 580, "psa10EstimateEur": 650,
+      "gradingCost": 35, "multiplier": 1.1,
+      "holdHorizon": "2-5 years",
+      "notes": "Underdog pick. Lower price = wider buyer pool. Alert under €480."
+    },
+    {
+      "id": "rb-006", "game": "Riftbound", "tier": "A",
+      "cardName": "Miss Fortune Signature Riftbound",
+      "searchQuery": "riftbound miss fortune signature -proxy",
+      "psa10Query": "riftbound miss fortune signature",
+      "rawEstimateEur": 600, "psa10EstimateEur": 700,
+      "gradingCost": 35, "multiplier": 1.2,
+      "holdHorizon": "2-5 years",
+      "notes": "Pirate captain with iconic art. Female champion collector premium applies."
+    },
+    {
+      "id": "rb-007", "game": "Riftbound", "tier": "A",
+      "cardName": "Soraka Signature Riftbound",
+      "searchQuery": "riftbound soraka signature -proxy",
+      "psa10Query": "riftbound soraka signature",
+      "rawEstimateEur": 500, "psa10EstimateEur": 600,
+      "gradingCost": 35, "multiplier": 1.2,
+      "holdHorizon": "2-5 years",
+      "notes": "Support main community is loyal. Often undervalued vs damage dealer cards."
+    },
+    {
+      "id": "rb-008", "game": "Riftbound", "tier": "B",
+      "cardName": "Ahri Overnumbered Riftbound",
+      "searchQuery": "riftbound ahri overnumbered",
+      "psa10Query": "riftbound ahri overnumbered",
+      "rawEstimateEur": 130, "psa10EstimateEur": 146,
+      "gradingCost": 35, "multiplier": 1.1,
+      "holdHorizon": "1-3 years",
+      "notes": "Budget Ahri entry. Oversize numbered parallel. Alert under €100."
+    },
+    {
+      "id": "rb-009", "game": "Riftbound", "tier": "B",
+      "cardName": "Ahri Launch Exclusive Riftbound",
+      "searchQuery": "riftbound ahri launch exclusive alluring",
+      "psa10Query": "riftbound ahri launch exclusive",
+      "rawEstimateEur": 130, "psa10EstimateEur": 153,
+      "gradingCost": 35, "multiplier": 1.2,
+      "holdHorizon": "1-3 years",
+      "notes": "Launch promo — supply is fixed, will only get scarcer. Buy under €100."
+    },
+    {
+      "id": "rb-010", "game": "Riftbound", "tier": "B",
+      "cardName": "Spiritforged Signature Riftbound Set 2",
+      "searchQuery": "riftbound spiritforged signature -proxy",
+      "psa10Query": "riftbound spiritforged signature",
+      "rawEstimateEur": 600, "psa10EstimateEur": 800,
+      "gradingCost": 35, "multiplier": 1.3,
+      "holdHorizon": "2-5 years",
+      "notes": "Set 2 chase. Monitor for underpriced early sales before market sets the floor."
     }
   ]
 }

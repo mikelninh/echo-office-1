@@ -1,7 +1,7 @@
 {
   "blue-eyes-white-dragon-lob-1st-edition--psa--bgs--cgc--grade::raw": {
     "result": {
-      "cmv": 58,
+      "cmv": 48,
       "confidence": {
         "label": "🔴 LOW",
         "minSamples": 1,
@@ -12,13 +12,13 @@
       "rawSamples": 5,
       "min": 38,
       "max": 483,
-      "cv": 125,
+      "cv": 127,
       "grade": "raw",
       "query": "Blue-Eyes White Dragon LOB 1st Edition -PSA -BGS -CGC -graded",
-      "computedAt": 1772348523309,
+      "computedAt": 1772434826038,
       "recentSales": [
         {
-          "price": 58,
+          "price": 48,
           "date": null,
           "title": "Flame Swordsman LOB-003 The Legend of Blue Eyes White Dragon 1st Edition -NM",
           "url": "https://www.ebay.com/itm/389575028226"
@@ -49,7 +49,7 @@
         }
       ]
     },
-    "cachedAt": 1772348523309
+    "cachedAt": 1772434826038
   },
   "blue-eyes-white-dragon-lob-1st-edition-psa-10::psa10": {
     "result": {
@@ -67,7 +67,7 @@
       "cv": 108,
       "grade": "psa10",
       "query": "Blue-Eyes White Dragon LOB 1st Edition PSA 10",
-      "computedAt": 1772348574682,
+      "computedAt": 1772434829390,
       "recentSales": [
         {
           "price": 1450,
@@ -101,26 +101,32 @@
         }
       ]
     },
-    "cachedAt": 1772348574682
+    "cachedAt": 1772434829390
   },
   "blue-eyes-white-dragon-lob-1st-edition-psa-9::psa9": {
     "result": {
-      "cmv": 299,
+      "cmv": 280,
       "confidence": {
         "label": "🔴 LOW",
         "minSamples": 1,
         "maxCVpct": 999
       },
       "trend": "STABLE",
-      "samples": 21,
+      "samples": 22,
       "rawSamples": 25,
-      "min": 134,
-      "max": 6761,
-      "cv": 161,
+      "min": 65,
+      "max": 6741,
+      "cv": 178,
       "grade": "psa9",
       "query": "Blue-Eyes White Dragon LOB 1st Edition PSA 9",
-      "computedAt": 1772348578523,
+      "computedAt": 1772434833596,
       "recentSales": [
+        {
+          "price": 255.07,
+          "date": null,
+          "title": "2002 YU-GI-OH! LOB-LEGEND OF BLUE EYES WHITE DRAGON #005 DARK MAGICIAN PSA 9",
+          "url": "https://www.ebay.com/itm/298039639680"
+        },
         {
           "price": 1450,
           "date": null,
@@ -144,16 +150,10 @@
           "date": null,
           "title": "2002 YU-GI-OH! LOB-LEGEND OF BLUE EYES WHITE DRAGON RED-EYES B. DRAGON PSA 9",
           "url": "https://www.ebay.com/itm/306404900632"
-        },
-        {
-          "price": 185,
-          "date": null,
-          "title": "2002 YU-GI-OH! LOB-LEGEND OF BLUE EYES WHITE DRAGON 1ST ED #052 DARK HOLE PSA 9",
-          "url": "https://www.ebay.com/itm/188051145632"
         }
       ]
     },
-    "cachedAt": 1772348578523
+    "cachedAt": 1772434833596
   },
   "blue-eyes-white-dragon-lob-1st-edition-psa-8::psa8": {
     "result": {
@@ -166,13 +166,19 @@
       "trend": "STABLE",
       "samples": 22,
       "rawSamples": 25,
-      "min": 63,
+      "min": 31,
       "max": 40000,
-      "cv": 170,
+      "cv": 172,
       "grade": "psa8",
       "query": "Blue-Eyes White Dragon LOB 1st Edition PSA 8",
-      "computedAt": 1772348582949,
+      "computedAt": 1772434837779,
       "recentSales": [
+        {
+          "price": 144.5,
+          "date": null,
+          "title": "2002 YU-GI-OH! LOB-LEGEND OF BLUE EYES WHITE DRAGON 1ST ED POLYMERIZATION PSA 8",
+          "url": "https://www.ebay.com/itm/117042694654"
+        },
         {
           "price": 20000,
           "date": null,
@@ -196,20 +202,14 @@
           "date": null,
           "title": "Yu-Gi-Oh! 1st Edition LOB - Blue-Eyes White Dragon PSA 8 & Dark Magician PSA 9",
           "url": "https://www.ebay.com/itm/177845794793"
-        },
-        {
-          "price": 6741,
-          "date": null,
-          "title": "Yu-GI-Oh - PSA 9 1st Edition LOB-001 Blue Eyes White Dragon - North American",
-          "url": "https://www.ebay.com/itm/287129492418"
         }
       ]
     },
-    "cachedAt": 1772348582949
+    "cachedAt": 1772434837779
   },
   "black-lotus-beta-psa-10::psa10": {
     "result": {
-      "cmv": 478,
+      "cmv": 415,
       "confidence": {
         "label": "🔴 LOW",
         "minSamples": 1,
@@ -218,18 +218,18 @@
       "trend": "STABLE",
       "samples": 21,
       "rawSamples": 25,
-      "min": 131,
-      "max": 7600,
-      "cv": 136,
+      "min": 135,
+      "max": 15755,
+      "cv": 165,
       "grade": "psa10",
       "query": "Black Lotus Beta PSA 10",
-      "computedAt": 1772348557625,
+      "computedAt": 1772434849629,
       "recentSales": [
         {
-          "price": 202.5,
+          "price": 599,
           "date": null,
-          "title": "Black Lotus Limited Edition - Beta Edition Regular",
-          "url": "https://www.ebay.com/itm/257337125270"
+          "title": "Radiant Lotus Fracture Foil #416 Aetherdrift MTG  PSA 10",
+          "url": "https://www.ebay.com/itm/389467245874"
         },
         {
           "price": 4499,
@@ -238,62 +238,50 @@
           "url": "https://www.ebay.com/itm/297966761861"
         },
         {
-          "price": 236,
+          "price": 15755,
           "date": null,
-          "title": "2025 POKEMON MEP EN-ME BLACK STAR PROMO #023 MEGA CHARIZARD X EX PSA 10",
-          "url": "https://www.ebay.com/itm/117004680197"
+          "title": "1993 Magic The Gathering Unlimited Black Lotus PSA 7 NM",
+          "url": "https://www.ebay.com/itm/389587036704"
+        },
+        {
+          "price": 8500,
+          "date": null,
+          "title": "1993 MAGIC THE GATHERING BETA BLACK LOTUS PSA 4",
+          "url": "https://www.ebay.com/itm/317709050126"
         },
         {
           "price": 135,
           "date": null,
           "title": "PSA10 Black Lotus S1/S15 MTG Collaboration Card EX18 2022 Duel Masters Japanese",
           "url": "https://www.ebay.com/itm/177551664813"
-        },
-        {
-          "price": 5495,
-          "date": null,
-          "title": "1993 MTG COLLECTOR'S ED BLACK LOTUS PSA 9",
-          "url": "https://www.ebay.com/itm/297913875064"
         }
       ]
     },
-    "cachedAt": 1772348557625
+    "cachedAt": 1772434849629
   },
   "black-lotus-beta-psa-9::psa9": {
     "result": {
-      "cmv": 99,
+      "cmv": 203,
       "confidence": {
         "label": "🔴 LOW",
         "minSamples": 1,
         "maxCVpct": 999
       },
       "trend": "STABLE",
-      "samples": 22,
+      "samples": 21,
       "rawSamples": 25,
       "min": 60,
-      "max": 4499,
-      "cv": 204,
+      "max": 17211,
+      "cv": 188,
       "grade": "psa9",
       "query": "Black Lotus Beta PSA 9",
-      "computedAt": 1772348561478,
+      "computedAt": 1772434853222,
       "recentSales": [
-        {
-          "price": 202.5,
-          "date": null,
-          "title": "Black Lotus Limited Edition - Beta Edition Regular",
-          "url": "https://www.ebay.com/itm/257337125270"
-        },
         {
           "price": 4499,
           "date": null,
           "title": "1993 MTG COLLECTOR'S ED BLACK LOTUS PSA 7",
           "url": "https://www.ebay.com/itm/297966761861"
-        },
-        {
-          "price": 2950,
-          "date": null,
-          "title": "BLACK LOTUS CGC 8 1993 MTG MAGIC: THE GATHERING COLLECTORS' EDITION RARE",
-          "url": "https://www.ebay.com/itm/177624805943"
         },
         {
           "price": 272.86,
@@ -302,18 +290,30 @@
           "url": "https://www.ebay.com/itm/136965048368"
         },
         {
-          "price": 70,
+          "price": 5495,
           "date": null,
-          "title": "6x9 MTG Black Lotus Oversized 1996 Scrye Promo",
-          "url": "https://www.ebay.com/itm/187991850391"
+          "title": "1993 MTG COLLECTOR'S ED BLACK LOTUS PSA 9",
+          "url": "https://www.ebay.com/itm/297913875064"
+        },
+        {
+          "price": 99,
+          "date": null,
+          "title": "2022 #S1 BLACK LOTUS PSA 10",
+          "url": "https://www.ebay.com/itm/306744964137"
+        },
+        {
+          "price": 90,
+          "date": null,
+          "title": "2023 MTG COMMANDER MASTERS SC #702 JEWELED LOTUS PSA 9",
+          "url": "https://www.ebay.com/itm/298006100365"
         }
       ]
     },
-    "cachedAt": 1772348561478
+    "cachedAt": 1772434853222
   },
   "black-lotus-beta-psa-8::psa8": {
     "result": {
-      "cmv": 149,
+      "cmv": 203,
       "confidence": {
         "label": "🔴 LOW",
         "minSamples": 1,
@@ -322,30 +322,24 @@
       "trend": "STABLE",
       "samples": 21,
       "rawSamples": 25,
-      "min": 44,
-      "max": 15755,
-      "cv": 207,
+      "min": 37,
+      "max": 17211,
+      "cv": 183,
       "grade": "psa8",
       "query": "Black Lotus Beta PSA 8",
-      "computedAt": 1772348565332,
+      "computedAt": 1772434857083,
       "recentSales": [
-        {
-          "price": 15755,
-          "date": null,
-          "title": "1993 Magic The Gathering Unlimited Black Lotus PSA 7 NM",
-          "url": "https://www.ebay.com/itm/389587036704"
-        },
-        {
-          "price": 202.5,
-          "date": null,
-          "title": "Black Lotus Limited Edition - Beta Edition Regular",
-          "url": "https://www.ebay.com/itm/257337125270"
-        },
         {
           "price": 4499,
           "date": null,
           "title": "1993 MTG COLLECTOR'S ED BLACK LOTUS PSA 7",
           "url": "https://www.ebay.com/itm/297966761861"
+        },
+        {
+          "price": 44,
+          "date": null,
+          "title": "PSA 9 Black Lotus S1/S15 MTG Collaboration Card MTG EX18 2022 Duel Masters",
+          "url": "https://www.ebay.com/itm/406444949738"
         },
         {
           "price": 2950,
@@ -354,14 +348,20 @@
           "url": "https://www.ebay.com/itm/177624805943"
         },
         {
-          "price": 44,
+          "price": 99,
           "date": null,
-          "title": "PSA 9 Black Lotus S1/S15 MTG Collaboration Card MTG EX18 2022 Duel Masters",
-          "url": "https://www.ebay.com/itm/406444949738"
+          "title": "2022 #S1 BLACK LOTUS PSA 10",
+          "url": "https://www.ebay.com/itm/306744964137"
+        },
+        {
+          "price": 45,
+          "date": null,
+          "title": "Black Lotus Beta Edition Novelty PR0XY",
+          "url": "https://www.ebay.com/itm/127568665927"
         }
       ]
     },
-    "cachedAt": 1772348565332
+    "cachedAt": 1772434857083
   },
   "charizard-base-set-1st-edition-holo--psa--bgs--cgc--graded--::raw": {
     "result": {
@@ -379,7 +379,7 @@
       "cv": 89,
       "grade": "raw",
       "query": "Charizard Base Set 1st Edition Holo -PSA -BGS -CGC -graded -slab",
-      "computedAt": 1772348503298,
+      "computedAt": 1772434862207,
       "recentSales": [
         {
           "price": 1832.84,
@@ -395,7 +395,7 @@
         }
       ]
     },
-    "cachedAt": 1772348503298
+    "cachedAt": 1772434862207
   },
   "charizard-base-set-1st-edition-holo-psa-10::psa10": {
     "result": {
@@ -413,8 +413,14 @@
       "cv": 82,
       "grade": "psa10",
       "query": "Charizard Base Set 1st Edition Holo PSA 10",
-      "computedAt": 1772348506885,
+      "computedAt": 1772434865811,
       "recentSales": [
+        {
+          "price": 190.61,
+          "date": null,
+          "title": "PSA 10 Umbreon GX 80/149 Ultra Rare 2017 Pokemon Sun & Moon Base Set",
+          "url": "https://www.ebay.com/itm/397564791205"
+        },
         {
           "price": 199.99,
           "date": null,
@@ -438,20 +444,14 @@
           "date": null,
           "title": "PSA 10 Giratina EX Full Art 091/081 Japanese Pokemon Bandit Ring Ancient Origins",
           "url": "https://www.ebay.com/itm/317481471134"
-        },
-        {
-          "price": 256.16,
-          "date": null,
-          "title": "Pidgey Base Set 4th Print 1999 2000 UK PSA 10 Pokemon Card #57",
-          "url": "https://www.ebay.com/itm/317875408958"
         }
       ]
     },
-    "cachedAt": 1772348506885
+    "cachedAt": 1772434865811
   },
   "charizard-base-set-1st-edition-holo-psa-9::psa9": {
     "result": {
-      "cmv": 800,
+      "cmv": 2500,
       "confidence": {
         "label": "🔴 LOW",
         "minSamples": 1,
@@ -461,12 +461,24 @@
       "samples": 20,
       "rawSamples": 25,
       "min": 130,
-      "max": 63106,
-      "cv": 227,
+      "max": 71105,
+      "cv": 198,
       "grade": "psa9",
       "query": "Charizard Base Set 1st Edition Holo PSA 9",
-      "computedAt": 1772348510606,
+      "computedAt": 1772434869458,
       "recentSales": [
+        {
+          "price": 71105,
+          "date": null,
+          "title": "1999 Pokemon WOTC 1st Edition Base Set Shadowless Charizard Holo PSA 9",
+          "url": "https://www.ebay.com/itm/389660654586"
+        },
+        {
+          "price": 4723.62,
+          "date": null,
+          "title": "1999 Pokemon GERMAN 1st Edition Base Set Glurak-Charizard Holo 4/102 PSA 9 MINT",
+          "url": "https://www.ebay.com/itm/116510374734"
+        },
         {
           "price": 2499.99,
           "date": null,
@@ -484,26 +496,14 @@
           "date": null,
           "title": "PSA 9 MINT Sylveon 72/111 Reverse Holo Foil Pokemon XY Furious Fists *POP 9",
           "url": "https://www.ebay.com/itm/317529795592"
-        },
-        {
-          "price": 3999,
-          "date": null,
-          "title": "2000 Complete Pokemon Holo Base Set Italian 16 TCG Lot. PSA 9 Venusaur Charizard",
-          "url": "https://www.ebay.com/itm/206074593371"
-        },
-        {
-          "price": 600,
-          "date": null,
-          "title": "Mewtu / Mewtwo #10 PSA 9 German 1st Edition Base 1999 Pokemon Holo Set 2813",
-          "url": "https://www.ebay.com/itm/393648241828"
         }
       ]
     },
-    "cachedAt": 1772348510606
+    "cachedAt": 1772434869458
   },
   "charizard-base-set-1st-edition-holo-psa-8::psa8": {
     "result": {
-      "cmv": 1955,
+      "cmv": 1200,
       "confidence": {
         "label": "🔴 LOW",
         "minSamples": 1,
@@ -514,11 +514,17 @@
       "rawSamples": 25,
       "min": 80,
       "max": 39950,
-      "cv": 208,
+      "cv": 214,
       "grade": "psa8",
       "query": "Charizard Base Set 1st Edition Holo PSA 8",
-      "computedAt": 1772348514889,
+      "computedAt": 1772434873421,
       "recentSales": [
+        {
+          "price": 199.99,
+          "date": null,
+          "title": "PSA 8 Ninetales 7/123 Cracked Ice Holo Error Misprint Pokemon Low Pop Beautiful",
+          "url": "https://www.ebay.com/itm/317084458018"
+        },
         {
           "price": 39899.99,
           "date": null,
@@ -542,16 +548,10 @@
           "date": null,
           "title": "PSA 8 Kyogre EX 037 Holo Pokemon Black Star Promo 2006 Vintage Tin Promo",
           "url": "https://www.ebay.com/itm/317820355786"
-        },
-        {
-          "price": 80.01,
-          "date": null,
-          "title": "1999 Pokemon Base Set 1st Edition #8 Machamp HOLO R PSA 8 NM-MT",
-          "url": "https://www.ebay.com/itm/137034218407"
         }
       ]
     },
-    "cachedAt": 1772348514889
+    "cachedAt": 1772434873421
   },
   "ancestral-recall-alpha-psa-9::psa10": {
     "result": {
@@ -725,7 +725,7 @@
       "cv": 0,
       "grade": "raw",
       "query": "Exodia the Forbidden One LOB 1st Edition -PSA -BGS -CGC -graded",
-      "computedAt": 1772348463514,
+      "computedAt": 1772434901959,
       "recentSales": [
         {
           "price": 530,
@@ -735,11 +735,11 @@
         }
       ]
     },
-    "cachedAt": 1772348463514
+    "cachedAt": 1772434901959
   },
   "exodia-the-forbidden-one-lob-1st-edition-psa-10::psa10": {
     "result": {
-      "cmv": 1250,
+      "cmv": 1300,
       "confidence": {
         "label": "🔴 LOW",
         "minSamples": 1,
@@ -749,12 +749,18 @@
       "samples": 21,
       "rawSamples": 25,
       "min": 700,
-      "max": 6000,
+      "max": 6500,
       "cv": 87,
       "grade": "psa10",
       "query": "Exodia the Forbidden One LOB 1st Edition PSA 10",
-      "computedAt": 1772348467087,
+      "computedAt": 1772434906242,
       "recentSales": [
+        {
+          "price": 6500,
+          "date": null,
+          "title": "Yu-Gi-Oh! Exodia Forbidden One Legend of Blue Eyes 1st Ed LOB-124 WAVY PSA 10",
+          "url": "https://www.ebay.com/itm/286776063803"
+        },
         {
           "price": 5999.99,
           "date": null,
@@ -778,35 +784,35 @@
           "date": null,
           "title": "2002 YU-GI-OH! LOB 1st Edition Exodia The Forbidden One #124 Holo PSA 8",
           "url": "https://www.ebay.com/itm/358251562536"
-        },
-        {
-          "price": 1000,
-          "date": null,
-          "title": "Exodia Necross DCR-020 1st Edition Ultra Rare Yugioh PSA 10 *183",
-          "url": "https://www.ebay.com/itm/287168307844"
         }
       ]
     },
-    "cachedAt": 1772348467087
+    "cachedAt": 1772434906242
   },
   "exodia-the-forbidden-one-lob-1st-edition-psa-9::psa9": {
     "result": {
-      "cmv": 759,
+      "cmv": 750,
       "confidence": {
-        "label": "🟡 MED",
-        "minSamples": 3,
-        "maxCVpct": 55
+        "label": "🔴 LOW",
+        "minSamples": 1,
+        "maxCVpct": 999
       },
       "trend": "STABLE",
       "samples": 21,
       "rawSamples": 25,
-      "min": 530,
-      "max": 2499,
-      "cv": 52,
+      "min": 471,
+      "max": 2750,
+      "cv": 60,
       "grade": "psa9",
       "query": "Exodia the Forbidden One LOB 1st Edition PSA 9",
-      "computedAt": 1772348471073,
+      "computedAt": 1772434909864,
       "recentSales": [
+        {
+          "price": 2750,
+          "date": null,
+          "title": "Yu-Gi-Oh! Exodia The Forbidden One 1st Edition Lob-124 PSA 9 WAVY",
+          "url": "https://www.ebay.com/itm/257332386635"
+        },
         {
           "price": 1850,
           "date": null,
@@ -830,34 +836,28 @@
           "date": null,
           "title": "Yu-Gi-Oh! Exodia The Forbidden One Legend of Blue Eyes 1st Edition LOB-124 PSA 9",
           "url": "https://www.ebay.com/itm/286939959510"
-        },
-        {
-          "price": 725,
-          "date": null,
-          "title": "2002 YU-GI-OH! LOB 1st Edition Exodia The Forbidden One #124 Holo PSA 8",
-          "url": "https://www.ebay.com/itm/358251562536"
         }
       ]
     },
-    "cachedAt": 1772348471073
+    "cachedAt": 1772434909864
   },
   "exodia-the-forbidden-one-lob-1st-edition-psa-8::psa8": {
     "result": {
-      "cmv": 680,
+      "cmv": 690,
       "confidence": {
-        "label": "🟡 MED",
-        "minSamples": 3,
-        "maxCVpct": 55
+        "label": "🔴 LOW",
+        "minSamples": 1,
+        "maxCVpct": 999
       },
       "trend": "STABLE",
       "samples": 21,
       "rawSamples": 25,
       "min": 320,
-      "max": 1850,
-      "cv": 51,
+      "max": 2000,
+      "cv": 58,
       "grade": "psa8",
       "query": "Exodia the Forbidden One LOB 1st Edition PSA 8",
-      "computedAt": 1772348474795,
+      "computedAt": 1772434913777,
       "recentSales": [
         {
           "price": 725,
@@ -872,6 +872,12 @@
           "url": "https://www.ebay.com/itm/287111472202"
         },
         {
+          "price": 2000,
+          "date": null,
+          "title": "Sequential PSA 6 to 8 1st Edition Exodia The Forbidden One LOB-124 Yu-Gi-Oh All",
+          "url": "https://www.ebay.com/itm/188010726530"
+        },
+        {
           "price": 700,
           "date": null,
           "title": "2002 YU-GI-OH! LOB-1ST EDITION #124 EXODIA THE FORBIDDEN ONE PSA 8",
@@ -882,16 +888,10 @@
           "date": null,
           "title": "Exodia The Forbidden One LOB-124 1st Edition Glossy Ultra Rare Yugioh PSA 8 *919",
           "url": "https://www.ebay.com/itm/277596981869"
-        },
-        {
-          "price": 1050,
-          "date": null,
-          "title": "2002 Yu-Gi-Oh! LOB Exodia Head The Fobidden One 1st Edition NM-MT LOB#124 PSA 8",
-          "url": "https://www.ebay.com/itm/197956545481"
         }
       ]
     },
-    "cachedAt": 1772348474795
+    "cachedAt": 1772434913777
   },
   "charizard-base-set-shadowless-holo--psa--bgs--cgc--graded--1::raw": {
     "result": {
@@ -909,7 +909,7 @@
       "cv": 0,
       "grade": "raw",
       "query": "Charizard Base Set Shadowless Holo -PSA -BGS -CGC -graded -1st",
-      "computedAt": 1772348605403,
+      "computedAt": 1772434881765,
       "recentSales": [
         {
           "price": 2499,
@@ -919,11 +919,11 @@
         }
       ]
     },
-    "cachedAt": 1772348605403
+    "cachedAt": 1772434881765
   },
   "charizard-shadowless-base-set-psa-10::psa10": {
     "result": {
-      "cmv": 5000,
+      "cmv": 4045,
       "confidence": {
         "label": "🔴 LOW",
         "minSamples": 1,
@@ -933,11 +933,11 @@
       "samples": 23,
       "rawSamples": 25,
       "min": 3000,
-      "max": 63106,
-      "cv": 136,
+      "max": 20000,
+      "cv": 81,
       "grade": "psa10",
       "query": "Charizard Shadowless Base Set PSA 10",
-      "computedAt": 1772348609644,
+      "computedAt": 1772434885803,
       "recentSales": [
         {
           "price": 2999.99,
@@ -971,7 +971,7 @@
         }
       ]
     },
-    "cachedAt": 1772348609644
+    "cachedAt": 1772434885803
   },
   "charizard-shadowless-base-set-psa-9::psa9": {
     "result": {
@@ -989,8 +989,14 @@
       "cv": 102,
       "grade": "psa9",
       "query": "Charizard Shadowless Base Set PSA 9",
-      "computedAt": 1772348613433,
+      "computedAt": 1772434889774,
       "recentSales": [
+        {
+          "price": 71105,
+          "date": null,
+          "title": "1999 Pokemon WOTC 1st Edition Base Set Shadowless Charizard Holo PSA 9",
+          "url": "https://www.ebay.com/itm/389660654586"
+        },
         {
           "price": 12999,
           "date": null,
@@ -1014,16 +1020,10 @@
           "date": null,
           "title": "1999 Pokemon Shadowless Charizard PSA 9 Mint Holo #4 Base Set",
           "url": "https://www.ebay.com/itm/177850181779"
-        },
-        {
-          "price": 3949,
-          "date": null,
-          "title": "Pokemon Shadowless Charizard HOLO 1999 Base Set PSA 8 NM-MINT 9 CERT",
-          "url": "https://www.ebay.com/itm/376930656993"
         }
       ]
     },
-    "cachedAt": 1772348613433
+    "cachedAt": 1772434889774
   },
   "hatsune-miku-weiss-schwarz-signed-psa-10::psa10": {
     "result": {
@@ -1183,111 +1183,111 @@
   },
   "son-goku-universe-at-stake-dragon-ball-super-bgs-10::psa10": {
     "result": {
-      "cmv": 243,
+      "cmv": 400,
       "confidence": {
-        "label": "🟡 MED",
-        "minSamples": 3,
-        "maxCVpct": 55
+        "label": "🔴 LOW",
+        "minSamples": 1,
+        "maxCVpct": 999
       },
       "trend": "STABLE",
       "samples": 21,
       "rawSamples": 25,
-      "min": 135,
-      "max": 600,
-      "cv": 43,
+      "min": 128,
+      "max": 1925,
+      "cv": 86,
       "grade": "psa10",
       "query": "Son Goku Universe at Stake Dragon Ball Super BGS 10",
-      "computedAt": 1772348450648,
+      "computedAt": 1772434947838,
       "recentSales": [
         {
-          "price": 175,
+          "price": 157.49,
           "date": null,
-          "title": "2022 Difference Of Status BT14-029 History Of Son Goku Dragon Ball Super PSA 10",
-          "url": "https://www.ebay.com/itm/406684393902"
+          "title": "2022 SUPER DRAGON BALL HEROES PROMO #PUMS12-SEC SON GOKU PSA 10",
+          "url": "https://www.ebay.com/itm/397639935487"
         },
         {
-          "price": 225,
+          "price": 750,
           "date": null,
-          "title": "PSA 10 Bandai Super Dragon Ball Heroes MM2-038 Son Goku GT UR Holo Japanese",
-          "url": "https://www.ebay.com/itm/397645458118"
+          "title": "Dragon Ball PSA 10 Son Goku SCR Super Alternate Art 2024 FB01-139 FB01 Japanese",
+          "url": "https://www.ebay.com/itm/389658150566"
         },
         {
-          "price": 242.68,
+          "price": 127.5,
           "date": null,
-          "title": "Super Dragon Ball Heroes SDBH 13th Anniversary Set Son Goku Vegeta Trunks Psa 10",
-          "url": "https://www.ebay.com/itm/137071240267"
+          "title": "PSA 10 SS Son Goku Pride Of The Saiyans BT10-065 Dragon Ball Super History Theme",
+          "url": "https://www.ebay.com/itm/277687824006"
+        },
+        {
+          "price": 1925,
+          "date": null,
+          "title": "DBZ DBS Dragon Ball Z SS Son Goku Frieza Miraculous Conclusion BGS 10 PSA Black",
+          "url": "https://www.ebay.com/itm/406639694048"
+        },
+        {
+          "price": 700,
+          "date": null,
+          "title": "Dragon Ball Super Card Game PSA 10 Ultra Instinct Son Goku State of the Gods SCR",
+          "url": "https://www.ebay.com/itm/317865797356"
+        }
+      ]
+    },
+    "cachedAt": 1772434947838
+  },
+  "son-goku-universe-at-stake-dragon-ball-super-bgs-10::psa9": {
+    "result": {
+      "cmv": 255,
+      "confidence": {
+        "label": "🔴 LOW",
+        "minSamples": 1,
+        "maxCVpct": 999
+      },
+      "trend": "STABLE",
+      "samples": 21,
+      "rawSamples": 25,
+      "min": 75,
+      "max": 1477,
+      "cv": 102,
+      "grade": "psa9",
+      "query": "Son Goku Universe at Stake Dragon Ball Super BGS 10",
+      "computedAt": 1772434951558,
+      "recentSales": [
+        {
+          "price": 290,
+          "date": null,
+          "title": "BGS 10 Super Dragon Ball Heroes UM8-SEC Son Goku Card from Japanese",
+          "url": "https://www.ebay.com/itm/397639944628"
+        },
+        {
+          "price": 1400,
+          "date": null,
+          "title": "2020 Dragon Ball Super Universal Onslaught Son Goku & Vegeta #BT9-136 PSA 10",
+          "url": "https://www.ebay.com/itm/127661154821"
+        },
+        {
+          "price": 132.5,
+          "date": null,
+          "title": "Dragon Ball Super DBS SS4 Son Goku Rapid Reversal Z TNMT 9 Winner P-625 PSA 10",
+          "url": "https://www.ebay.com/itm/287136217529"
         },
         {
           "price": 260,
           "date": null,
-          "title": "SS Son Goku, Beginning of a Legend BT24-055 SLR Dragon Ball Super PSA 10 GM",
-          "url": "https://www.ebay.com/itm/277697864679"
+          "title": "2019 SUPER DRAGON BALL HEROES UNIVERSE MISSION 8 SECRET #SEC SON GOKU PSA 10",
+          "url": "https://www.ebay.com/itm/297962528116"
         },
         {
-          "price": 285,
+          "price": 270,
           "date": null,
-          "title": "Super Dragon Ball Heroes | Son Goku UM4 |SEC|Universe Mission 4 | BGS10 PSA CGC",
-          "url": "https://www.ebay.com/itm/397516211716"
+          "title": "2019 SUPER DRAGON BALL HEROES UNIVERSE MISSION 8 SECRET #SEC SON GOKU PSA 10",
+          "url": "https://www.ebay.com/itm/117010151138"
         }
       ]
     },
-    "cachedAt": 1772348450648
-  },
-  "son-goku-universe-at-stake-dragon-ball-super-bgs-10::psa9": {
-    "result": {
-      "cmv": 240,
-      "confidence": {
-        "label": "🔴 LOW",
-        "minSamples": 1,
-        "maxCVpct": 999
-      },
-      "trend": "STABLE",
-      "samples": 21,
-      "rawSamples": 25,
-      "min": 64,
-      "max": 1169,
-      "cv": 86,
-      "grade": "psa9",
-      "query": "Son Goku Universe at Stake Dragon Ball Super BGS 10",
-      "computedAt": 1772348454715,
-      "recentSales": [
-        {
-          "price": 699,
-          "date": null,
-          "title": "Dragon Ball Super Son Goku Hope of Universe 7 TB1-052 Special Rare French PSA 9",
-          "url": "https://www.ebay.com/itm/277682024553"
-        },
-        {
-          "price": 225,
-          "date": null,
-          "title": "PSA 10 Bandai Super Dragon Ball Heroes MM2-038 Son Goku GT UR Holo Japanese",
-          "url": "https://www.ebay.com/itm/397645458118"
-        },
-        {
-          "price": 285,
-          "date": null,
-          "title": "Super Dragon Ball Heroes | Son Goku UM4 |SEC|Universe Mission 4 | BGS10 PSA CGC",
-          "url": "https://www.ebay.com/itm/397516211716"
-        },
-        {
-          "price": 125,
-          "date": null,
-          "title": "Dragon Ball Super Ultra Instinct Son Goku, Hero Of Universe 7 SD11-01 PSA 10",
-          "url": "https://www.ebay.com/itm/298018114705"
-        },
-        {
-          "price": 95.72,
-          "date": null,
-          "title": "Super Dragon Ball Heroes - BGS 10 Son Goku UM4 - Universe Mission 4 - PSA CGC",
-          "url": "https://www.ebay.com/itm/286969696113"
-        }
-      ]
-    },
-    "cachedAt": 1772348454715
+    "cachedAt": 1772434951558
   },
   "son-goku-universe-at-stake-dragon-ball-super-bgs-10::psa8": {
     "result": {
-      "cmv": 260,
+      "cmv": 218,
       "confidence": {
         "label": "🔴 LOW",
         "minSamples": 1,
@@ -1296,46 +1296,46 @@
       "trend": "STABLE",
       "samples": 21,
       "rawSamples": 25,
-      "min": 58,
-      "max": 1000,
-      "cv": 81,
+      "min": 42,
+      "max": 1400,
+      "cv": 123,
       "grade": "psa8",
       "query": "Son Goku Universe at Stake Dragon Ball Super BGS 10",
-      "computedAt": 1772348458679,
+      "computedAt": 1772434955073,
       "recentSales": [
         {
-          "price": 699,
+          "price": 290,
           "date": null,
-          "title": "Dragon Ball Super Son Goku Hope of Universe 7 TB1-052 Special Rare French PSA 9",
-          "url": "https://www.ebay.com/itm/277682024553"
+          "title": "BGS 10 Super Dragon Ball Heroes UM8-SEC Son Goku Card from Japanese",
+          "url": "https://www.ebay.com/itm/397639944628"
         },
         {
-          "price": 285,
+          "price": 53,
           "date": null,
-          "title": "Super Dragon Ball Heroes | Son Goku UM4 |SEC|Universe Mission 4 | BGS10 PSA CGC",
-          "url": "https://www.ebay.com/itm/397516211716"
+          "title": "Dragon Ball Super | Son Goku Alt Art | FB07-104 | CGC Gem Mint 10 BGS PSA",
+          "url": "https://www.ebay.com/itm/397633976085"
         },
         {
-          "price": 125,
+          "price": 42,
           "date": null,
-          "title": "Dragon Ball Super Ultra Instinct Son Goku, Hero Of Universe 7 SD11-01 PSA 10",
-          "url": "https://www.ebay.com/itm/298018114705"
+          "title": "Dragon Ball Super - SS3 Son Goku, Universe at Stake - BT20-095 PSA 10",
+          "url": "https://www.ebay.com/itm/177828064258"
         },
         {
-          "price": 95.72,
+          "price": 260,
           "date": null,
-          "title": "Super Dragon Ball Heroes - BGS 10 Son Goku UM4 - Universe Mission 4 - PSA CGC",
-          "url": "https://www.ebay.com/itm/286969696113"
+          "title": "2019 SUPER DRAGON BALL HEROES UNIVERSE MISSION 8 SECRET #SEC SON GOKU PSA 10",
+          "url": "https://www.ebay.com/itm/297962528116"
         },
         {
-          "price": 57.97,
+          "price": 270,
           "date": null,
-          "title": "Super Dragon Ball Heroes - BGS 10 Son Goku UM4 - Universe Mission 4 - PSA",
-          "url": "https://www.ebay.com/itm/286969696018"
+          "title": "2019 SUPER DRAGON BALL HEROES UNIVERSE MISSION 8 SECRET #SEC SON GOKU PSA 10",
+          "url": "https://www.ebay.com/itm/117010151138"
         }
       ]
     },
-    "cachedAt": 1772348458679
+    "cachedAt": 1772434955073
   },
   "charizard-shadowless-base-set-psa-8::psa8": {
     "result": {
@@ -1348,12 +1348,12 @@
       "trend": "STABLE",
       "samples": 21,
       "rawSamples": 25,
-      "min": 1750,
+      "min": 1618,
       "max": 6250,
       "cv": 37,
       "grade": "psa8",
       "query": "Charizard Shadowless Base Set PSA 8",
-      "computedAt": 1772348618489,
+      "computedAt": 1772434893604,
       "recentSales": [
         {
           "price": 3777.77,
@@ -1387,7 +1387,7 @@
         }
       ]
     },
-    "cachedAt": 1772348618489
+    "cachedAt": 1772434893604
   },
   "mickey-mouse-enchanted-lorcana-psa-10::psa10": {
     "result": {
@@ -1405,7 +1405,7 @@
       "cv": 31,
       "grade": "psa10",
       "query": "Mickey Mouse Enchanted Lorcana PSA 10",
-      "computedAt": 1772348431740,
+      "computedAt": 1772434814034,
       "recentSales": [
         {
           "price": 200,
@@ -1439,11 +1439,11 @@
         }
       ]
     },
-    "cachedAt": 1772348431740
+    "cachedAt": 1772434814034
   },
   "mickey-mouse-enchanted-lorcana-psa-9::psa9": {
     "result": {
-      "cmv": 150,
+      "cmv": 155,
       "confidence": {
         "label": "🔴 LOW",
         "minSamples": 1,
@@ -1454,11 +1454,17 @@
       "rawSamples": 25,
       "min": 77,
       "max": 600,
-      "cv": 71,
+      "cv": 69,
       "grade": "psa9",
       "query": "Mickey Mouse Enchanted Lorcana PSA 9",
-      "computedAt": 1772348435394,
+      "computedAt": 1772434817819,
       "recentSales": [
+        {
+          "price": 200,
+          "date": null,
+          "title": "2023 DISNEY LORCANA EN 1-THE FIRST CHAPTER #210 MICKEY MOUSE ENCHANTED PSA 9",
+          "url": "https://www.ebay.com/itm/267588654513"
+        },
         {
           "price": 174.99,
           "date": null,
@@ -1482,34 +1488,28 @@
           "date": null,
           "title": "2023 DISNEY LORCANA EN 1-THE FIRST CHAPTER ENCHANTED #208 MICKEY MOUSE PSA 9",
           "url": "https://www.ebay.com/itm/297994499084"
-        },
-        {
-          "price": 83,
-          "date": null,
-          "title": "2025 DISNEY LORCANA EN 9-FABLED ENCHANTED MICKEY MOUSE - STEAMBOAT PILOT PSA 7",
-          "url": "https://www.ebay.com/itm/117008272944"
         }
       ]
     },
-    "cachedAt": 1772348435394
+    "cachedAt": 1772434817819
   },
   "mickey-mouse-enchanted-lorcana-psa-8::psa8": {
     "result": {
-      "cmv": 132,
+      "cmv": 130,
       "confidence": {
-        "label": "🔴 LOW",
-        "minSamples": 1,
-        "maxCVpct": 999
+        "label": "🟡 MED",
+        "minSamples": 3,
+        "maxCVpct": 55
       },
       "trend": "STABLE",
       "samples": 21,
       "rawSamples": 25,
       "min": 64,
-      "max": 459,
-      "cv": 59,
+      "max": 315,
+      "cv": 45,
       "grade": "psa8",
       "query": "Mickey Mouse Enchanted Lorcana PSA 8",
-      "computedAt": 1772348439549,
+      "computedAt": 1772434821324,
       "recentSales": [
         {
           "price": 159,
@@ -1543,7 +1543,7 @@
         }
       ]
     },
-    "cachedAt": 1772348439549
+    "cachedAt": 1772434821324
   },
   "monkey-d-luffy-op01-secret-rare-psa-10::psa10": {
     "result": {
