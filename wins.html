@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alert History & Wins — Card Sniper Alpha</title>
+<meta name="description" content="Real alerts, real math. See every Card Sniper Alpha deal that fired — Steal Score, EV breakdown, outcome tracking. No mock data.">
+<meta property="og:title" content="Card Sniper Alpha — Real Alerts, Real Profits">
+<meta property="og:description" content="Every deal that fired. Steal Score, EV breakdown, outcome tracking.">
+<meta property="og:image" content="https://card-sniper-production.up.railway.app/og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:       #080810;
+    --surface:  #0f0f1a;
+    --surface2: #161625;
+    --border:   rgba(255,255,255,0.08);
+    --text:     #e8e8f4;
+    --dim:      #7070a0;
+    --accent:   #ff4d6d;
+    --gold:     #ffd60a;
+    --green:    #06d6a0;
+    --blue:     #4895ef;
+    --purple:   #b388ff;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; opacity: 0.4;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,8,16,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+  }
+  .nav-inner {
+    max-width: 960px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .nav-logo { text-decoration: none; font-weight: 700; font-size: 17px; color: var(--text); }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 24px; align-items: center; }
+  .nav-links a { color: var(--dim); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+  .nav-cta {
+    background: var(--accent); color: white; text-decoration: none;
+    padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ── HERO ── */
+  .page-hero {
+    padding: 80px 0 60px;
+    text-align: center;
+    background: radial-gradient(ellipse 800px 400px at 50% 0, rgba(72,149,239,0.06) 0, transparent 70%);
+  }
+  .page-hero .badge {
+    display: inline-block;
+    background: rgba(6,214,160,0.1); color: var(--green);
+    border: 1px solid rgba(6,214,160,0.25);
+    padding: 6px 16px; border-radius: 100px;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .page-hero h1 { font-size: clamp(32px,5vw,56px); font-weight: 700; line-height: 1.1; margin-bottom: 20px; }
+  .page-hero h1 em { color: var(--gold); font-style: normal; }
+  .page-hero p { font-size: 18px; color: var(--dim); max-width: 600px; margin: 0 auto 40px; }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px; background: var(--border);
+    border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+    margin-bottom: 60px;
+  }
+  .stat-cell {
+    background: var(--surface); padding: 24px 20px; text-align: center;
+  }
+  .stat-cell .num { font-size: 32px; font-weight: 700; font-family: 'Space Mono', monospace; }
+  .stat-cell .lbl { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+  .num-green { color: var(--green); }
+  .num-gold  { color: var(--gold); }
+  .num-accent { color: var(--accent); }
+  .num-blue  { color: var(--blue); }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    margin-bottom: 32px;
+  }
+  .filter-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--dim); padding: 7px 14px; border-radius: 8px;
+    font-size: 13px; cursor: pointer; transition: all 0.15s;
+    font-family: inherit;
+  }
+  .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+  .filter-label { font-size: 12px; color: var(--dim); margin-right: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* ── ALERT CARDS ── */
+  .alerts-grid { display: flex; flex-direction: column; gap: 16px; margin-bottom: 80px; }
+
+  .alert-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .alert-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-1px); }
+  .alert-card.legendary { border-color: rgba(255,214,10,0.3); background: linear-gradient(135deg, #0f0f1a 0, rgba(255,214,10,0.03) 100%); }
+  .alert-card.s-tier { border-color: rgba(255,77,109,0.3); }
+
+  .alert-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px 0; gap: 16px; flex-wrap: wrap;
+  }
+  .alert-left { display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0; }
+
+  .score-badge {
+    width: 56px; height: 56px; border-radius: 12px; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+  }
+  .score-badge .s-num { font-size: 20px; font-weight: 700; line-height: 1; }
+  .score-badge .s-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; }
+  .score-legendary { background: rgba(255,214,10,0.15); border: 1px solid rgba(255,214,10,0.4); color: var(--gold); }
+  .score-high      { background: rgba(255,77,109,0.12); border: 1px solid rgba(255,77,109,0.3); color: var(--accent); }
+  .score-med       { background: rgba(72,149,239,0.12); border: 1px solid rgba(72,149,239,0.3); color: var(--blue); }
+  .score-low       { background: rgba(112,112,160,0.15); border: 1px solid rgba(112,112,160,0.2); color: var(--dim); }
+
+  .alert-title-block { min-width: 0; }
+  .alert-verdict { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .alert-title { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .alert-meta { font-size: 12px; color: var(--dim); margin-top: 4px; }
+
+  .alert-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  .game-tag {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em;
+    padding: 4px 10px; border-radius: 6px;
+  }
+  .game-pokemon   { background: rgba(255,203,5,0.12); color: #ffcb05; border: 1px solid rgba(255,203,5,0.25); }
+  .game-yugioh    { background: rgba(180,120,60,0.12); color: #d4915e; border: 1px solid rgba(180,120,60,0.25); }
+  .game-onepiece  { background: rgba(255,77,109,0.12); color: #ff7c8a; border: 1px solid rgba(255,77,109,0.25); }
+  .game-dragonball { background: rgba(255,140,0,0.12); color: #ff9d3a; border: 1px solid rgba(255,140,0,0.25); }
+  .game-lorcana   { background: rgba(140,100,220,0.12); color: #b388ff; border: 1px solid rgba(140,100,220,0.25); }
+  .game-mtg       { background: rgba(72,149,239,0.12); color: #6ab4ff; border: 1px solid rgba(72,149,239,0.25); }
+  .game-default   { background: rgba(112,112,160,0.12); color: var(--dim); border: 1px solid rgba(112,112,160,0.2); }
+
+  .status-tag {
+    font-size: 11px; padding: 4px 10px; border-radius: 6px; font-weight: 600;
+  }
+  .status-active   { background: rgba(6,214,160,0.1); color: var(--green); border: 1px solid rgba(6,214,160,0.25); }
+  .status-sold     { background: rgba(255,214,10,0.1); color: var(--gold); border: 1px solid rgba(255,214,10,0.25); }
+  .status-expired  { background: rgba(112,112,160,0.1); color: var(--dim); border: 1px solid rgba(112,112,160,0.2); }
+
+  .alert-stats {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1px; background: var(--border);
+    margin: 16px 0 0; border-top: 1px solid var(--border);
+  }
+  .alert-stat {
+    background: var(--surface2); padding: 12px 16px;
+  }
+  .alert-stat-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+  .alert-stat-value { font-size: 16px; font-weight: 700; font-family: 'Space Mono', monospace; }
+  .text-green { color: var(--green); }
+  .text-gold  { color: var(--gold); }
+  .text-accent{ color: var(--accent); }
+  .text-blue  { color: var(--blue); }
+  .text-dim   { color: var(--dim); }
+
+  /* ── FREE TEASER CTA ── */
+  .free-teaser {
+    background: linear-gradient(135deg, var(--surface2) 0, rgba(255,77,109,0.05) 100%);
+    border: 1px solid rgba(255,77,109,0.2);
+    border-radius: 16px;
+    padding: 40px; text-align: center;
+    margin-bottom: 80px;
+  }
+  .free-teaser .eyebrow { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 12px; }
+  .free-teaser h2 { font-size: 28px; font-weight: 700; margin-bottom: 12px; }
+  .free-teaser p { color: var(--dim); max-width: 480px; margin: 0 auto 28px; }
+  .btn-primary {
+    display: inline-block;
+    background: var(--accent); color: white; text-decoration: none;
+    padding: 14px 32px; border-radius: 10px; font-weight: 700; font-size: 16px;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-secondary {
+    display: inline-block;
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 16px;
+    margin-left: 12px;
+    transition: border-color 0.2s;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.25); }
+
+  /* ── HOW IT WORKS ── */
+  .how-section { padding: 60px 0; border-top: 1px solid var(--border); margin-bottom: 60px; }
+  .section-label { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; margin-bottom: 10px; }
+  .how-section h2 { font-size: 32px; font-weight: 700; margin-bottom: 40px; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+  .step { background: var(--surface2); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+  .step .step-num { font-size: 32px; font-weight: 700; color: var(--accent); font-family: 'Space Mono', monospace; margin-bottom: 12px; }
+  .step h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .step p { font-size: 13px; color: var(--dim); }
+
+  /* ── EMPTY STATE ── */
+  .empty { text-align: center; padding: 80px 20px; color: var(--dim); }
+  .empty .emoji { font-size: 48px; margin-bottom: 16px; }
+  .empty p { font-size: 16px; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 20px;
+    text-align: center;
+    color: var(--dim); font-size: 13px;
+  }
+  footer a { color: var(--dim); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .alert-title { font-size: 13px; }
+    .alert-stats { grid-template-columns: repeat(2, 1fr); }
+    .nav-links { display: none; }
+    .free-teaser { padding: 28px 20px; }
+    .btn-secondary { display: block; margin: 12px auto 0; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="card-sniper.html" class="nav-logo">🎯 Card<span>Sniper</span> <span style="color:var(--dim);font-size:11px;font-weight:400;">ALPHA</span></a>
+    <div class="nav-links">
+      <a href="card-sniper.html#proof">How It Works</a>
+      <a href="card-sniper.html#algorithm">Algorithm</a>
+      <a href="card-sniper.html#coverage">Coverage</a>
+      <a href="wins.html" class="active">Wins</a>
+      <a href="card-sniper.html#pricing" class="nav-cta">Get Access →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="page-hero">
+  <div class="container">
+    <div class="badge">🔍 No mock data. Every alert is real.</div>
+    <h1>Every deal<br>that <em>fired</em>.</h1>
+    <p>The full log. Real cards, real math, real outcomes. If the algorithm called it, it's here.</p>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="container">
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-cell">
+      <div class="num num-green" id="statTotalAlerts">—</div>
+      <div class="lbl">Alerts Fired</div>
+    </div>
+    <div class="stat-cell">
+      <div class="num num-gold" id="statAvgScore">—</div>
+      <div class="lbl">Avg Steal Score</div>
+    </div>
+    <div class="stat-cell">
+      <div class="num num-green" id="statAvgProfit">—</div>
+      <div class="lbl">Avg Net Profit</div>
+    </div>
+    <div class="stat-cell">
+      <div class="num num-blue" id="statAvgDiscount">—</div>
+      <div class="lbl">Avg Below FMV</div>
+    </div>
+    <div class="stat-cell">
+      <div class="num num-accent" id="statLegendary">—</div>
+      <div class="lbl">Legendary Alerts (95+)</div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" data-filter="all">All Alerts</button>
+    <button class="filter-btn" data-filter="legendary">👑 Legendary (95+)</button>
+    <button class="filter-btn" data-filter="pokemon">🟡 Pokémon</button>
+    <button class="filter-btn" data-filter="yugioh">🟣 Yu-Gi-Oh!</button>
+    <button class="filter-btn" data-filter="onepiece">🏴‍☠️ One Piece</button>
+    <button class="filter-btn" data-filter="dragonball">🐉 Dragon Ball</button>
+    <button class="filter-btn" data-filter="lorcana">✨ Lorcana</button>
+  </div>
+
+  <!-- ALERTS LIST -->
+  <div class="alerts-grid" id="alertsList">
+    <div class="empty"><div class="emoji">🔍</div><p>Loading alert history…</p></div>
+  </div>
+
+  <!-- FREE TEASER CTA -->
+  <div class="free-teaser">
+    <div class="eyebrow">Real-Time vs 48h Delayed</div>
+    <h2>These deals fired in real time<br>for Alpha subscribers.</h2>
+    <p>Free tier sees the same alerts — 48 hours later, with listing link removed. Alpha subscribers had first-mover advantage on every deal above.</p>
+    <a href="card-sniper.html#pricing" class="btn-primary">🎯 Get Real-Time Access for €19/mo</a>
+    <a href="https://t.me/CardSniperFree" target="_blank" class="btn-secondary">Join Free Tier →</a>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section">
+    <div class="section-label">The Process</div>
+    <h2>From listing to alert in seconds.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Scanner detects listing</h3>
+        <p>Hunt monitor checks eBay for 105 target cards, filters raw-only, applies price gate.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Steal Score computed</h3>
+        <p>Five signals: PSA8 profit, FMV discount, EV ROI, comp confidence, scarcity. Threshold: 80+.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>EV breakdown generated</h3>
+        <p>Multi-grade expected value: PSA 10/9/8/≤7 with set-specific grade rates and real sold comps.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>Alert fires → Telegram</h3>
+        <p>Alpha gets it instantly with listing link. Free tier gets it 48h later as a teaser (no link).</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong style="color:var(--text);">🎯 Card Sniper Alpha</strong> — TCG Grading Arbitrage Alerts
+  &nbsp;·&nbsp;
+  <a href="card-sniper.html">Home</a> &nbsp;·&nbsp;
+  <a href="https://t.me/CardSniperAlpha" target="_blank">Telegram</a> &nbsp;·&nbsp;
+  <span style="color:rgba(255,255,255,0.15);">Not financial advice.</span>
+</footer>
+
+<script>
+// ────────────────────────────────────────────────────────────────────────────
+// Wins page data engine
+// Loads outcomes.json (synced from yugioh-monitor/) and renders alert cards.
+// Falls back to static case studies if no data.
+// ────────────────────────────────────────────────────────────────────────────
+
+const GAME_CLASS = {
+  'Pokémon':     'game-pokemon',
+  'Pokemon':     'game-pokemon',
+  'Yu-Gi-Oh!':  'game-yugioh',
+  'Yu-Gi-Oh':   'game-yugioh',
+  'One Piece':   'game-onepiece',
+  'Dragon Ball': 'game-dragonball',
+  'Lorcana':     'game-lorcana',
+  'MTG':         'game-mtg',
+  'Magic':       'game-mtg',
+  'Digimon':     'game-default',
+};
+
+const GAME_FILTER = {
+  'Pokémon':     'pokemon',
+  'Pokemon':     'pokemon',
+  'Yu-Gi-Oh!':  'yugioh',
+  'Yu-Gi-Oh':   'yugioh',
+  'One Piece':   'onepiece',
+  'Dragon Ball': 'dragonball',
+  'Lorcana':     'lorcana',
+  'MTG':         'mtg',
+  'Magic':       'mtg',
+};
+
+function getScoreBadgeClass(score) {
+  if (score >= 95) return 'score-legendary';
+  if (score >= 80) return 'score-high';
+  if (score >= 60) return 'score-med';
+  return 'score-low';
+}
+
+function getVerdict(score) {
+  if (score >= 95) return { text: '🔥🔥🔥 LEGENDARY', color: 'var(--gold)' };
+  if (score >= 85) return { text: '💎 ELITE',         color: 'var(--accent)' };
+  if (score >= 80) return { text: '🎯 STRONG',        color: 'var(--blue)' };
+  if (score >= 70) return { text: '📈 SOLID',         color: 'var(--green)' };
+  return             { text: '⚡ WATCH',              color: 'var(--dim)' };
+}
+
+function fmtCurrency(n, currency = '€') {
+  if (!n && n !== 0) return '—';
+  return `${currency}${Math.round(n).toLocaleString('de-DE')}`;
+}
+
+function cardClass(entry) {
+  const score = entry.score || 0;
+  if (score >= 95) return 'alert-card legendary';
+  if (score >= 80) return 'alert-card s-tier';
+  return 'alert-card';
+}
+
+function renderCard(entry) {
+  const score    = entry.score || 0;
+  const game     = entry.game || 'Unknown';
+  const gameClass = GAME_CLASS[game] || 'game-default';
+  const badgeClass = getScoreBadgeClass(score);
+  const verdict  = getVerdict(score);
+  const status   = entry.status || 'active';
+  const roi      = entry.roi;
+  const netProfit = entry.netProfit;
+  const discount  = entry.dealPct;
+  const listedRaw = entry.price || '—';
+
+  // Clean price to numeric (handles "$3,499.99" and "€3,499")
+  let listedNum = 0;
+  if (typeof listedRaw === 'string') {
+    listedNum = parseFloat(listedRaw.replace(/[^0-9.]/g, '')) || 0;
+  } else if (typeof listedRaw === 'number') {
+    listedNum = listedRaw;
+  }
+
+  const currency = listedRaw.toString().includes('$') ? '$' : '€';
+  const statusClass = { active: 'status-active', sold: 'status-sold', expired: 'status-expired' }[status] || 'status-active';
+  const statusLabel = { active: '🟢 Active', sold: '✅ Sold', expired: '⏹ Expired' }[status] || 'Active';
+
+  const filterAttr = GAME_FILTER[game] || 'other';
+  const isLegendary = score >= 95 ? 'legendary' : '';
+
+  return `
+<div class="${cardClass(entry)}" data-filter="${filterAttr}" data-legendary="${isLegendary}">
+  <div class="alert-top">
+    <div class="alert-left">
+      <div class="score-badge ${badgeClass}">
+        <div class="s-num">${score}</div>
+        <div class="s-lbl">SCORE</div>
+      </div>
+      <div class="alert-title-block">
+        <div class="alert-verdict" style="color:${verdict.color}">${verdict.text}</div>
+        <div class="alert-title" title="${entry.title || ''}">${entry.title || 'Unknown Card'}</div>
+        <div class="alert-meta">${entry.loggedAt ? '🕐 ' + new Date(entry.loggedAt).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : ''}</div>
+      </div>
+    </div>
+    <div class="alert-right">
+      <span class="game-tag ${gameClass}">${game}</span>
+      <span class="status-tag ${statusClass}">${statusLabel}</span>
+    </div>
+  </div>
+  <div class="alert-stats">
+    <div class="alert-stat">
+      <div class="alert-stat-label">Listed Price</div>
+      <div class="alert-stat-value text-accent">${listedNum ? fmtCurrency(listedNum, currency) : listedRaw}</div>
+    </div>
+    <div class="alert-stat">
+      <div class="alert-stat-label">Below FMV</div>
+      <div class="alert-stat-value text-gold">${discount ? discount + '%' : '—'}</div>
+    </div>
+    <div class="alert-stat">
+      <div class="alert-stat-label">Net Profit (PSA10)</div>
+      <div class="alert-stat-value text-green">${netProfit ? fmtCurrency(netProfit, currency) : '—'}</div>
+    </div>
+    <div class="alert-stat">
+      <div class="alert-stat-label">ROI</div>
+      <div class="alert-stat-value text-blue">${roi ? roi + '%' : '—'}</div>
+    </div>
+    <div class="alert-stat">
+      <div class="alert-stat-label">Platform</div>
+      <div class="alert-stat-value" style="font-size:13px;">${entry.platform || 'eBay.com'}</div>
+    </div>
+    <div class="alert-stat">
+      <div class="alert-stat-label">Listing</div>
+      <div class="alert-stat-value" style="font-size:13px;">
+        ${entry.url
+          ? `<a href="${entry.url}" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:none;">View ↗</a> <span style="font-size:10px;color:var(--dim);">(subscribers only)</span>`
+          : '<span style="color:var(--dim);">—</span>'}
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+// ── Static fallback case studies (used if outcomes.json unavailable) ─────────
+const STATIC_ALERTS = [
+  {
+    itemId: '326717863380',
+    title: 'Dragon Ball Super Fusion World Manga #FB05-119 Son Goku S.R.',
+    game: 'Dragon Ball',
+    price: '$3,499.99',
+    dealPct: 43,
+    score: 96,
+    status: 'active',
+    roi: 145,
+    netProfit: 5175,
+    loggedAt: '2026-02-26T09:15:00.000Z',
+    platform: 'eBay.com',
+    url: 'https://www.ebay.com/itm/326717863380',
+  },
+  {
+    itemId: '205933792179',
+    title: 'One Piece TCG Chinese Monkey D Luffy ST01-001/248 1st Ed.',
+    game: 'One Piece',
+    price: '$2,999.88',
+    dealPct: 51,
+    score: 100,
+    status: 'active',
+    roi: 144,
+    netProfit: 4425,
+    loggedAt: '2026-02-25T14:30:00.000Z',
+    platform: 'eBay.com',
+    url: null,
+  },
+  {
+    itemId: '298077391442',
+    title: 'Pokémon Legend Collection #3 Charizard — Reverse Foil Holo (2002)',
+    game: 'Pokémon',
+    price: '$3,300.00',
+    dealPct: 67,
+    score: 85,
+    status: 'active',
+    roi: 96,
+    netProfit: 3225,
+    loggedAt: '2026-02-24T11:00:00.000Z',
+    platform: 'eBay.com',
+    url: null,
+  },
+  {
+    itemId: '227227598203',
+    title: 'Dragon Ball Fusion World FB04-012 Son Goku (Mini) DA Serial',
+    game: 'Dragon Ball',
+    price: '$2,882.79',
+    dealPct: 40,
+    score: 80,
+    status: 'active',
+    roi: 95,
+    netProfit: 2808,
+    loggedAt: '2026-02-23T16:45:00.000Z',
+    platform: 'eBay.com',
+    url: null,
+  },
+  {
+    itemId: '205688333979',
+    title: 'TOP 16 Enchanted Foil Kuzco — Lorcana Championship Promo 8/C1',
+    game: 'Lorcana',
+    price: '$3,650.00',
+    dealPct: 36,
+    score: 72,
+    status: 'active',
+    roi: 57,
+    netProfit: 2115,
+    loggedAt: '2026-02-22T08:20:00.000Z',
+    platform: 'eBay.com',
+    url: null,
+  },
+  {
+    itemId: '317611988672',
+    title: 'OP05-119 Monkey D. Luffy — Special Card SEC Silver English',
+    game: 'One Piece',
+    price: '$2,592.37',
+    dealPct: 37,
+    score: 74,
+    status: 'active',
+    roi: 56,
+    netProfit: 1480,
+    loggedAt: '2026-02-21T17:10:00.000Z',
+    platform: 'eBay.com',
+    url: null,
+  },
+];
+
+// ── Render engine ─────────────────────────────────────────────────────────────
+let allAlerts = [];
+let currentFilter = 'all';
+
+function renderStats(alerts) {
+  if (!alerts.length) return;
+  const scores   = alerts.map(a => a.score || 0);
+  const profits  = alerts.map(a => a.netProfit || 0).filter(Boolean);
+  const discounts = alerts.map(a => a.dealPct || 0).filter(Boolean);
+  const legendary = alerts.filter(a => (a.score || 0) >= 95).length;
+
+  const avgScore   = Math.round(scores.reduce((s,n) => s+n, 0) / scores.length);
+  const avgProfit  = profits.length ? Math.round(profits.reduce((s,n) => s+n, 0) / profits.length) : 0;
+  const avgDiscount = discounts.length ? Math.round(discounts.reduce((s,n) => s+n, 0) / discounts.length) : 0;
+
+  document.getElementById('statTotalAlerts').textContent = alerts.length;
+  document.getElementById('statAvgScore').textContent    = avgScore;
+  document.getElementById('statAvgProfit').textContent   = avgProfit ? '€' + avgProfit.toLocaleString('de-DE') : '—';
+  document.getElementById('statAvgDiscount').textContent = avgDiscount ? avgDiscount + '%' : '—';
+  document.getElementById('statLegendary').textContent   = legendary;
+}
+
+function applyFilter(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
+
+  const list = document.getElementById('alertsList');
+  let visible = allAlerts;
+
+  if (filter === 'legendary') {
+    visible = allAlerts.filter(a => (a.score || 0) >= 95);
+  } else if (filter !== 'all') {
+    visible = allAlerts.filter(a => (GAME_FILTER[a.game] || 'other') === filter);
+  }
+
+  if (!visible.length) {
+    list.innerHTML = `<div class="empty"><div class="emoji">🔍</div><p>No alerts match this filter yet.</p></div>`;
+  } else {
+    list.innerHTML = visible.map(renderCard).join('');
+  }
+}
+
+async function loadAlerts() {
+  let alerts = [];
+  try {
+    const res = await fetch('outcomes.json');
+    if (res.ok) {
+      const data = await res.json();
+      alerts = Object.values(data);
+    }
+  } catch (e) { /* fall through to static */ }
+
+  if (!alerts.length) {
+    alerts = STATIC_ALERTS;
+  }
+
+  // Sort by score desc, then by date desc
+  alerts.sort((a, b) => {
+    const sd = (b.score || 0) - (a.score || 0);
+    if (sd !== 0) return sd;
+    return new Date(b.loggedAt || 0) - new Date(a.loggedAt || 0);
+  });
+
+  allAlerts = alerts;
+  renderStats(alerts);
+  applyFilter('all');
+}
+
+// ── Filter click handlers ─────────────────────────────────────────────────────
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+loadAlerts();
+</script>
+
+</body>
+</html>
