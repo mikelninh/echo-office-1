@@ -1,0 +1,23 @@
+[meta] TELEGRAM_CHANNEL_FREE=
+[meta] TELEGRAM_CHANNEL_FREE not set in current env
+[meta] checking .env.example
+7:TELEGRAM_CHANNEL_FREE=                 # Optional: public free/teaser channel ID
+[meta] running dispatcher at 2026-03-13T02:16:39+01:00
+[dispatcher] 🚀 Free Tier Dispatcher starting — 13.3.2026, 02:16:39
+[dispatcher] 📊 Queue: 0 pending | 13 due | 0 sent | 13 total queued
+[dispatcher] 📤 13 alert(s) ready to dispatch
+[dispatcher] ⚠️  TELEGRAM_CHANNEL_FREE not set. Set the env var to enable free channel posting.
+[dispatcher] 📋 Would have sent: 13 alerts
+  - Unknown Card (S-tier, score 85) — queued 2026-03-03T07:17:44.770Z
+  - Unknown Card (S-tier, score 85) — queued 2026-03-03T07:17:45.751Z
+  - Unknown Card (S-tier, score 100) — queued 2026-03-03T07:17:46.696Z
+  - Unknown Card (S-tier, score 100) — queued 2026-03-03T07:17:47.933Z
+  - Unknown Card (S-tier, score 100) — queued 2026-03-03T07:17:48.934Z
+  - Unknown Card (S-tier, score 93) — queued 2026-03-03T07:17:49.904Z
+  - Unknown Card (A-tier, score 92) — queued 2026-03-03T07:17:50.897Z
+  - Unknown Card (A-tier, score 92) — queued 2026-03-03T07:17:51.856Z
+  - Unknown Card (A-tier, score 100) — queued 2026-03-03T07:17:52.839Z
+  - Unknown Card (A-tier, score 92) — queued 2026-03-03T07:17:53.821Z
+  - Unknown Card (A-tier, score 92) — queued 2026-03-03T07:17:54.936Z
+  - Unknown Card (A-tier, score 85) — queued 2026-03-03T07:17:55.919Z
+  - Unknown Card (A-tier, score 80) — queued 2026-03-03T07:17:56.870Z
