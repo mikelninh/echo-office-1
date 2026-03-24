@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EU Deal Scanner — Card Sniper Alpha × Cardmarket</title>
+<meta name="description" content="Live EU opportunity scanner. Card Sniper Alpha hunts mispriced raw cards on Cardmarket.com — NM/EX condition, grading arb potential, real-time steal scores.">
+<meta property="og:title" content="EU Card Deals — Card Sniper Alpha">
+<meta property="og:description" content="Cardmarket price scanner. NM/EX listings below grading arb thresholds — spotted in real time.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:       #080810;
+    --surface:  #0f0f1a;
+    --surface2: #161625;
+    --border:   rgba(255,255,255,0.08);
+    --text:     #e8e8f4;
+    --dim:      #7070a0;
+    --accent:   #ff4d6d;
+    --gold:     #ffd60a;
+    --green:    #06d6a0;
+    --blue:     #4895ef;
+    --purple:   #b388ff;
+    --orange:   #ff8c42;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; opacity: 0.4;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,8,16,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+  }
+  .nav-inner {
+    max-width: 960px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .nav-logo { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 1rem; color: var(--text); text-decoration: none; }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 24px; align-items: center; }
+  .nav-links a { color: var(--dim); text-decoration: none; font-size: 0.875rem; transition: color 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+  .nav-cta {
+    background: var(--accent); color: white;
+    padding: 6px 14px; border-radius: 6px;
+    font-size: 0.8rem; font-weight: 600; text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.85; color: white; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 72px 0 48px;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(4,186,126,0.12); border: 1px solid rgba(4,186,126,0.3);
+    color: var(--green);
+    padding: 6px 16px; border-radius: 100px;
+    font-size: 0.8rem; font-weight: 600; letter-spacing: 0.06em;
+    margin-bottom: 24px;
+  }
+  .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
+
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700; line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p {
+    font-size: 1.1rem; color: var(--dim);
+    max-width: 560px; margin: 0 auto 32px;
+  }
+  .hero-meta {
+    display: flex; align-items: center; justify-content: center; gap: 32px;
+    flex-wrap: wrap;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat .val {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--green);
+  }
+  .hero-stat .lbl { font-size: 0.75rem; color: var(--dim); margin-top: 2px; }
+
+  /* ── HOW IT WORKS ── */
+  .how-section { padding: 40px 0; }
+  .how-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin-top: 24px;
+  }
+  .how-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .how-icon { font-size: 1.8rem; margin-bottom: 10px; }
+  .how-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
+  .how-card p { font-size: 0.82rem; color: var(--dim); }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap;
+    padding: 16px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .filter-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--dim); border-radius: 8px;
+    padding: 7px 16px; font-size: 0.82rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; font-family: inherit;
+  }
+  .filter-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .filter-btn.active {
+    background: rgba(255,77,109,0.15); border-color: var(--accent);
+    color: var(--accent);
+  }
+  .filter-spacer { flex: 1; }
+  .scan-status {
+    font-size: 0.78rem; color: var(--dim);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ── DEALS GRID ── */
+  .deals-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .deals-header h2 { font-size: 1.1rem; font-weight: 600; }
+  .deals-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem; color: var(--dim);
+  }
+
+  .deals-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .deal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    position: relative; overflow: hidden;
+  }
+  .deal-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,77,109,0.04) 0%, transparent 60%);
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .deal-card:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-2px); }
+  .deal-card:hover::before { opacity: 1; }
+  .deal-card.holy-grail { border-color: rgba(255, 214, 10, 0.5); }
+  .deal-card.holy-grail::before { background: linear-gradient(135deg, rgba(255,214,10,0.06) 0%, transparent 60%); opacity: 1; }
+  .deal-card.obvious { border-color: rgba(255,77,109,0.4); }
+
+  .deal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+  .deal-tier {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+    padding: 3px 8px; border-radius: 4px;
+  }
+  .tier-S { background: rgba(255,214,10,0.15); color: var(--gold); }
+  .tier-A { background: rgba(72,149,239,0.15); color: var(--blue); }
+  .tier-B { background: rgba(6,214,160,0.15); color: var(--green); }
+  .tier-C { background: rgba(179,136,255,0.15); color: var(--purple); }
+  .deal-steal-label {
+    font-size: 0.72rem; font-weight: 600; color: var(--dim);
+  }
+
+  .deal-name {
+    font-size: 0.98rem; font-weight: 600;
+    line-height: 1.3; margin-bottom: 4px;
+  }
+  .deal-game {
+    font-size: 0.78rem; color: var(--dim); margin-bottom: 14px;
+  }
+
+  .deal-prices {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 14px;
+  }
+  .price-box {
+    background: var(--surface2);
+    border-radius: 8px; padding: 10px;
+  }
+  .price-box .lbl { font-size: 0.68rem; color: var(--dim); margin-bottom: 3px; }
+  .price-box .val {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.05rem; font-weight: 700;
+  }
+  .price-box.listed .val { color: var(--green); }
+  .price-box.estimate .val { color: var(--dim); }
+
+  .deal-score-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+  .score-bar-wrap {
+    flex: 1; height: 6px;
+    background: var(--surface2); border-radius: 3px;
+    overflow: hidden;
+  }
+  .score-bar {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--green), var(--accent));
+    transition: width 0.5s ease;
+  }
+  .score-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem; font-weight: 700; color: var(--text);
+    min-width: 46px; text-align: right;
+  }
+
+  .deal-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.75rem;
+  }
+  .deal-condition {
+    padding: 2px 8px; border-radius: 4px;
+    font-weight: 600; font-size: 0.7rem;
+  }
+  .cond-MT { background: rgba(255,214,10,0.15); color: var(--gold); }
+  .cond-NM { background: rgba(6,214,160,0.15); color: var(--green); }
+  .cond-EX { background: rgba(72,149,239,0.15); color: var(--blue); }
+  .deal-savings { color: var(--accent); font-weight: 600; }
+
+  .deal-cm-link {
+    display: block; margin-top: 12px;
+    text-align: center;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px;
+    color: var(--dim); font-size: 0.8rem;
+    text-decoration: none; transition: all 0.2s;
+  }
+  .deal-cm-link:hover {
+    background: rgba(255,255,255,0.09);
+    color: var(--text);
+    border-color: rgba(255,255,255,0.18);
+  }
+
+  /* ── SCAN TABLE ── */
+  .scan-table-section { padding: 40px 0; }
+  .scan-table-section h2 { font-size: 1.1rem; margin-bottom: 16px; }
+
+  .scan-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.83rem;
+  }
+  .scan-table th {
+    text-align: left; padding: 10px 12px;
+    color: var(--dim); font-weight: 600; font-size: 0.75rem;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  .scan-table td {
+    padding: 11px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+  .scan-table tr:last-child td { border-bottom: none; }
+  .scan-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .tbl-score {
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+  }
+  .score-high { color: var(--accent); }
+  .score-mid  { color: var(--orange); }
+  .score-low  { color: var(--dim); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 64px 20px;
+    color: var(--dim);
+  }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+  .empty-state h3 { font-size: 1.1rem; margin-bottom: 8px; color: var(--text); }
+  .empty-state p { font-size: 0.875rem; max-width: 400px; margin: 0 auto; }
+
+  /* ── ALERT STRIP ── */
+  .alert-strip {
+    background: rgba(255,77,109,0.06);
+    border: 1px solid rgba(255,77,109,0.2);
+    border-radius: 12px; padding: 20px 24px;
+    display: flex; align-items: center; gap: 20px;
+    margin: 32px 0;
+    flex-wrap: wrap;
+  }
+  .alert-strip-icon { font-size: 2rem; flex-shrink: 0; }
+  .alert-strip-text flex: 1; {}
+  .alert-strip-text h3 { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+  .alert-strip-text p { font-size: 0.85rem; color: var(--dim); }
+  .alert-strip-cta {
+    flex-shrink: 0;
+    background: var(--accent); color: white;
+    padding: 10px 20px; border-radius: 8px;
+    font-weight: 600; font-size: 0.875rem;
+    text-decoration: none; white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+  .alert-strip-cta:hover { opacity: 0.85; color: white; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 0; margin-top: 80px;
+    font-size: 0.8rem; color: var(--dim);
+    text-align: center;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+    .hero { padding: 48px 0 32px; }
+    .deals-grid { grid-template-columns: 1fr; }
+    .scan-table-section { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Card<span>Sniper</span> Alpha</a>
+    <div class="nav-links">
+      <a href="/card-sniper.html">Dashboard</a>
+      <a href="/wins.html">Wins</a>
+      <a href="/cardmarket.html" class="active">EU Deals</a>
+      <a href="/blog.html">Blog</a>
+      <a href="/free.html">Free Tier</a>
+      <a href="https://t.me/CardSniperAlphaBot" class="nav-cta">Join Alpha →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="container">
+  <div class="hero">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      EU DEAL SCANNER · CARDMARKET.COM
+    </div>
+    <h1>Raw Cards.<br><span>European Prices.</span></h1>
+    <p>
+      Card Sniper Alpha scans Cardmarket for NM/EX raw copies of blue-chip TCG cards
+      priced below grading arb thresholds. EU sellers often don't know what they have.
+    </p>
+    <div class="hero-meta">
+      <div class="hero-stat">
+        <div class="val" id="stat-cards">—</div>
+        <div class="lbl">Cards Monitored</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val" id="stat-deals">—</div>
+        <div class="lbl">Active Deals</div>
+      </div>
+      <div class="hero-stat">
+        <div class="val" id="stat-scan">—</div>
+        <div class="lbl">Last Scan</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section">
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-icon">🌍</div>
+        <h3>EU Market Coverage</h3>
+        <p>Cardmarket.com is Europe's #1 TCG marketplace — thousands of private sellers, many underpricing rare cards.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-icon">🧾</div>
+        <h3>NM/EX Only</h3>
+        <p>We filter to Near Mint and Excellent condition only — the grades worth sending to PSA. Played cards are noise.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-icon">📊</div>
+        <h3>Steal Score</h3>
+        <p>Price vs. raw market estimate. Score 80+ = no-brainer. 90+ = obvious steal. 95+ = holy grail territory.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-icon">⚡</div>
+        <h3>Paid = Real-Time</h3>
+        <p>Alpha subscribers get EU alerts instantly via Telegram. Free tier sees the same deals — 48 hours later.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERT STRIP -->
+  <div class="alert-strip">
+    <div class="alert-strip-icon">🔔</div>
+    <div class="alert-strip-text">
+      <h3>Get EU deals as they happen</h3>
+      <p>Alpha subscribers get Cardmarket steals in real-time. Free tier shows the same alerts — 48h late.</p>
+    </div>
+    <a href="https://t.me/CardSniperAlphaBot" class="alert-strip-cta">Join Alpha — €19/mo →</a>
+  </div>
+
+  <!-- DEALS SECTION -->
+  <div id="deals-section">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterDeals('all')">All</button>
+      <button class="filter-btn" onclick="filterDeals('Pokemon')">Pokémon</button>
+      <button class="filter-btn" onclick="filterDeals('YuGiOh')">Yu-Gi-Oh!</button>
+      <button class="filter-btn" onclick="filterDeals('Magic')">Magic</button>
+      <button class="filter-btn" onclick="filterDeals('tier-S')">S-Tier 👑</button>
+      <div class="filter-spacer"></div>
+      <span class="scan-status" id="scan-status">Loading scan data...</span>
+    </div>
+
+    <div class="deals-header">
+      <h2>🔥 Active Deals</h2>
+      <span class="deals-count" id="deals-count">— deals</span>
+    </div>
+
+    <div class="deals-grid" id="deals-grid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+  <!-- FULL SCAN TABLE -->
+  <div class="scan-table-section">
+    <h2>📋 Full Scan — All Cards</h2>
+    <div id="scan-table-wrap">
+      <table class="scan-table" id="scan-table">
+        <thead>
+          <tr>
+            <th>Card</th>
+            <th>Game</th>
+            <th>Tier</th>
+            <th>CM Price</th>
+            <th>Cond.</th>
+            <th>Estimate</th>
+            <th>Score</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="scan-tbody">
+          <tr><td colspan="8" style="text-align:center;color:var(--dim);padding:32px">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  <p>Card Sniper Alpha · EU Deal Scanner · cardsniperalpha.com · Data from Cardmarket.com</p>
+  <p style="margin-top:8px">Scan frequency: every 8 hours · NM/EX condition only · Deals ≤60% of raw market estimate</p>
+</footer>
+
+<script>
+// ── Data Loading ──────────────────────────────────────────────────────────────
+
+const STEAL_LABELS = {
+  98: '🚨 HOLY GRAIL',
+  92: '💀 OBVIOUS STEAL',
+  85: '🔥 NO-BRAINER',
+  75: '✅ FREE WIN',
+  62: '📈 DEAL',
+};
+
+function getStealLabel(score) {
+  if (score >= 95) return '🚨 HOLY GRAIL';
+  if (score >= 88) return '💀 OBVIOUS STEAL';
+  if (score >= 80) return '🔥 NO-BRAINER';
+  if (score >= 70) return '✅ FREE WIN';
+  if (score >= 55) return '📈 DEAL';
+  return '📍 FAIR';
+}
+
+function fmtEur(n) {
+  if (n == null) return '—';
+  return '€' + Math.round(n).toLocaleString('de-DE');
+}
+
+function timeAgo(isoStr) {
+  if (!isoStr) return '—';
+  const diff = (Date.now() - new Date(isoStr).getTime()) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.round(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.round(diff / 3600) + 'h ago';
+  return Math.round(diff / 86400) + 'd ago';
+}
+
+// Active filter state
+let activeFilter = 'all';
+let scanData = null;
+
+async function loadScanData() {
+  try {
+    const res = await fetch('./cardmarket-data.json?t=' + Date.now());
+    if (!res.ok) throw new Error('No scan data yet');
+    scanData = await res.json();
+    renderPage(scanData);
+  } catch (err) {
+    renderEmpty(err.message);
+  }
+}
+
+function renderPage(data) {
+  // Stats
+  document.getElementById('stat-cards').textContent = data.cardsScanned ?? '—';
+  document.getElementById('stat-deals').textContent = data.dealsFound ?? '0';
+  document.getElementById('stat-scan').textContent  = timeAgo(data.lastScan);
+  document.getElementById('scan-status').textContent =
+    `Last scan: ${timeAgo(data.lastScan)} · ${data.cardsScanned} cards`;
+
+  renderDeals(data, activeFilter);
+  renderTable(data, activeFilter);
+}
+
+function renderDeals(data, filter) {
+  const grid = document.getElementById('deals-grid');
+  const countEl = document.getElementById('deals-count');
+
+  let deals = (data.topDeals || []);
+
+  // Apply filter
+  if (filter !== 'all') {
+    if (filter === 'tier-S') {
+      deals = deals.filter(d => d.tier === 'S' || d.tier === 'A');
+    } else {
+      const gameMap = { Pokemon: 'Pokémon', YuGiOh: 'Yu-Gi-Oh', Magic: 'Magic' };
+      const gameName = gameMap[filter] || filter;
+      deals = deals.filter(d => d.game && d.game.includes(gameName.slice(0, 5)));
+    }
+  }
+
+  countEl.textContent = deals.length + ' deal' + (deals.length !== 1 ? 's' : '');
+
+  if (!deals.length) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="icon">🔍</div>
+        <h3>No active deals right now</h3>
+        <p>The scanner runs every 8 hours. When a mispriced NM/EX card surfaces on Cardmarket, it'll appear here — and Alpha subscribers get it instantly via Telegram.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = deals.map(deal => {
+    const stealLabel = getStealLabel(deal.stealScore);
+    const isHolyGrail = deal.stealScore >= 95;
+    const isObvious   = deal.stealScore >= 88;
+    const cardClass   = isHolyGrail ? 'holy-grail' : isObvious ? 'obvious' : '';
+    const condClass   = `cond-${deal.condition || 'NM'}`;
+    const tierClass   = `tier-${deal.tier || 'B'}`;
+    const savings     = deal.rawEstimate - deal.price;
+    const savingsPct  = Math.round((savings / deal.rawEstimate) * 100);
+    const barWidth    = Math.min(deal.stealScore, 100);
+
+    return `
+    <div class="deal-card ${cardClass}">
+      <div class="deal-header">
+        <span class="deal-tier ${tierClass}">TIER ${deal.tier}</span>
+        <span class="deal-steal-label">${stealLabel}</span>
+      </div>
+      <div class="deal-name">${deal.cardName}</div>
+      <div class="deal-game">${deal.game || '—'}</div>
+      <div class="deal-prices">
+        <div class="price-box listed">
+          <div class="lbl">CM Listed</div>
+          <div class="val">${fmtEur(deal.price)}</div>
+        </div>
+        <div class="price-box estimate">
+          <div class="lbl">Raw Estimate</div>
+          <div class="val">${fmtEur(deal.rawEstimate)}</div>
+        </div>
+      </div>
+      <div class="deal-score-row">
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:${barWidth}%"></div>
+        </div>
+        <div class="score-num">score ${deal.stealScore}</div>
+      </div>
+      <div class="deal-footer">
+        <span class="deal-condition ${condClass}">${deal.condition || 'NM'}</span>
+        <span class="deal-savings">Save ${fmtEur(savings)} (${savingsPct}% off)</span>
+      </div>
+      ${deal.productUrl
+        ? `<a href="${deal.productUrl}" target="_blank" rel="noopener" class="deal-cm-link">View on Cardmarket →</a>`
+        : `<div class="deal-cm-link" style="cursor:default">Cardmarket · Paid subscribers get direct link</div>`
+      }
+    </div>`;
+  }).join('');
+}
+
+function renderTable(data, filter) {
+  const tbody = document.getElementById('scan-tbody');
+  let rows = (data.summary || []);
+
+  if (filter !== 'all') {
+    if (filter === 'tier-S') {
+      rows = rows.filter(r => r.tier === 'S' || r.tier === 'A');
+    } else {
+      const gameMap = { Pokemon: 'Pokémon', YuGiOh: 'Yu-Gi-Oh', Magic: 'Magic' };
+      const gameName = gameMap[filter] || filter;
+      rows = rows.filter(r => r.game && r.game.includes(gameName.slice(0, 5)));
+    }
+  }
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--dim);padding:32px">No data for this filter</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const hasPrice = r.cheapestPrice != null;
+    const score = r.stealScore ?? 0;
+    const scoreClass = score >= 75 ? 'score-high' : score >= 55 ? 'score-mid' : 'score-low';
+    const status = r.isDeal
+      ? `<span style="color:var(--green);font-weight:600">✅ Deal</span>`
+      : r.status === 'no_listings'
+        ? `<span style="color:var(--dim)">No NM listings</span>`
+        : `<span style="color:var(--dim)">Fair price</span>`;
+    const tierClass = `tier-${r.tier || 'B'}`;
+
+    return `<tr>
+      <td style="max-width:220px">${r.cardName}</td>
+      <td style="color:var(--dim)">${r.game || '—'}</td>
+      <td><span class="deal-tier ${tierClass}" style="font-size:0.68rem">${r.tier}</span></td>
+      <td style="font-family:'Space Mono',monospace">${hasPrice ? fmtEur(r.cheapestPrice) : '—'}</td>
+      <td>${hasPrice ? `<span class="deal-condition cond-${r.condition || 'NM'}" style="font-size:0.68rem;padding:2px 6px;border-radius:4px">${r.condition || 'NM'}</span>` : '—'}</td>
+      <td style="color:var(--dim);font-family:'Space Mono',monospace">${fmtEur(r.rawEstimate)}</td>
+      <td class="tbl-score ${scoreClass}">${hasPrice ? score : '—'}</td>
+      <td>${status}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderEmpty(msg) {
+  document.getElementById('scan-status').textContent = 'Scan pending...';
+  document.getElementById('stat-scan').textContent = 'Pending';
+  document.getElementById('deals-grid').innerHTML = `
+    <div class="empty-state" style="grid-column:1/-1">
+      <div class="icon">🌍</div>
+      <h3>EU Scanner Warming Up</h3>
+      <p>The Cardmarket scanner is being initialized. First scan results will appear here after the next scheduled run. ${msg ? '(' + msg + ')' : ''}</p>
+    </div>`;
+  document.getElementById('scan-tbody').innerHTML =
+    `<tr><td colspan="8" style="text-align:center;color:var(--dim);padding:32px">Scan data not yet available</td></tr>`;
+}
+
+function filterDeals(filter) {
+  activeFilter = filter;
+  // Update button states
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+
+  if (scanData) {
+    renderDeals(scanData, filter);
+    renderTable(scanData, filter);
+  }
+}
+
+// Kick off
+loadScanData();
+// Auto-refresh every 15 minutes
+setInterval(loadScanData, 15 * 60 * 1000);
+</script>
+</body>
+</html>
