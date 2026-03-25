@@ -1,0 +1,277 @@
+{
+  "cards": {
+    "poke-001": {
+      "ts": 1774418424340,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "poke-002": {
+      "ts": 1774418434998,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "ygo-001": {
+      "ts": 1774418445592,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "ygo-002": {
+      "ts": 1774418456162,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "mtg-001": {
+      "ts": 1774418466780,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "mtg-002": {
+      "ts": 1774418477391,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "mtg-003": {
+      "ts": 1774418488140,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "op-001": {
+      "ts": 1774418498734,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "dbs-001": {
+      "ts": 1774418509388,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "lor-001": {
+      "ts": 1774418520832,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "ws-001": {
+      "ts": 1774418531683,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "poke-003": {
+      "ts": 1774418543388,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "poke-004": {
+      "ts": 1774418554085,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "poke-005": {
+      "ts": 1774418564725,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "poke-006": {
+      "ts": 1774418575355,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "ygo-003": {
+      "ts": 1774418586055,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "ygo-004": {
+      "ts": 1774418596701,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "ygo-005": {
+      "ts": 1774418607394,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "ygo-006": {
+      "ts": 1774418618131,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "ygo-007": {
+      "ts": 1774418628726,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "mtg-004": {
+      "ts": 1774418639387,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "mtg-005": {
+      "ts": 1774418650016,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "mtg-006": {
+      "ts": 1774418660668,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "op-002": {
+      "ts": 1774418671289,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "op-003": {
+      "ts": 1774418682313,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "op-004": {
+      "ts": 1774418692973,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "op-005": {
+      "ts": 1774418703620,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "dbs-002": {
+      "ts": 1774393336143,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "dbs-003": {
+      "ts": 1774393346562,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    },
+    "dbs-004": {
+      "ts": 1774393356882,
+      "listingCount": 0,
+      "bestPrice": null,
+      "bestCondition": null,
+      "isDeal": false,
+      "productUrl": null,
+      "bestScore": 0
+    }
+  },
+  "lastRun": "2026-03-25T06:05:04.139Z",
+  "totalScanned": 87,
+  "totalDeals": 0
+}

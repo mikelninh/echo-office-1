@@ -207,9 +207,25 @@
       },
       "sent": false,
       "sentAt": null
+    },
+    {
+      "id": "free-1774336738593-n5f0zq",
+      "enqueuedAt": "2026-03-24T07:18:58.593Z",
+      "releaseAt": "2026-03-26T07:18:58.593Z",
+      "releaseAtMs": 1774509538593,
+      "alertText": "🔥 NO-BRAINER  [85/100]\n👑 S-TIER | Dragon Ball\n\nSS3 Son Goku Universe at Stake Dragon Ball Super\n\nSomeone listed this for €65.828.\nPSA 10 sells for €750.434.\nYou're buying at 9% of graded value.\n\n🔗 https://www.ebay.com/itm/205069024477\n\n── THE MATH ─────────────────────\nBuy raw:    €65.828\nGrade (PSA): €100\nAll in:     €65.928\n\n── WHAT COMES BACK ──────────────\nPSA 10  15%   → €750.434   profit €684.507\nPSA  9  27%   → €473.168   profit €407.241\nPSA  8  18%   → €369.213   profit €303.286\nPSA ≤7  40%   → €52.662    (sell back raw)\n\nExpected value: €261.866  (397% weighted ROI)\n✅ PSA 8 still profitable — low-risk play\n\n── IF YOU GRADE PSA 10 ──────────\nFlip now:    €684.507  (1038% ROI, 11.4× your money)\nHold 10 yrs:  €2.935.809  (4× today's price)\n\n── VERDICT ──────────────────────\n🏦 HOLD LONG — Blue chip. Slab and hold 7-10 years. Do not sell early — these only go up.\n\n📌 The Dragon Ball holy grail. Serial numbered. BGS 10 sold $25k+. PSA 10 is the ceiling. Ultra rare.\n\nConfidence: 🟡 MED (4 comps) | Hold: 7-10 years",
+      "meta": {
+        "cardName": "Unknown Card",
+        "game": "Dragon Ball",
+        "tier": "S",
+        "stealScore": 85,
+        "listingUrl": "https://www.ebay.com/itm/205069024477"
+      },
+      "sent": false,
+      "sentAt": null
     }
   ],
   "lastFlushed": null,
-  "totalQueued": 13,
+  "totalQueued": 14,
   "totalSent": 0
 }
