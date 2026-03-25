@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Japan Arbitrage Scanner — Card Sniper Alpha</title>
+<meta name="description" content="Live Japan → EU arbitrage scanner. Card Sniper Alpha monitors Mercari JP and Yahoo Auctions JP via Buyee for cards 40%+ below EU market. Real-time geo-arb alerts.">
+<meta property="og:title" content="Japan Card Arb Scanner — Card Sniper Alpha">
+<meta property="og:description" content="Japan → EU geo-arbitrage. Buy on Mercari JP/Yahoo Auctions via Buyee. Sell on eBay.de/Cardmarket EU. Live alerts when margin hits 40%+.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:       #080810;
+    --surface:  #0f0f1a;
+    --surface2: #161625;
+    --border:   rgba(255,255,255,0.08);
+    --text:     #e8e8f4;
+    --dim:      #7070a0;
+    --accent:   #ff4d6d;
+    --gold:     #ffd60a;
+    --green:    #06d6a0;
+    --blue:     #4895ef;
+    --purple:   #b388ff;
+    --orange:   #ff8c42;
+    --jp-red:   #ff3b3b;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; opacity: 0.4;
+  }
+
+  .container { max-width: 1020px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,8,16,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+  }
+  .nav-inner {
+    max-width: 1020px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .nav-logo { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 1rem; color: var(--text); text-decoration: none; }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 24px; align-items: center; }
+  .nav-links a { color: var(--dim); text-decoration: none; font-size: 0.875rem; transition: color 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+  .nav-cta {
+    background: var(--accent); color: white;
+    padding: 6px 14px; border-radius: 6px;
+    font-size: 0.8rem; font-weight: 600; text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.85; color: white; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 72px 0 48px;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,59,59,0.12); border: 1px solid rgba(255,59,59,0.3);
+    color: var(--jp-red);
+    padding: 6px 16px; border-radius: 100px;
+    font-size: 0.8rem; font-weight: 600; letter-spacing: 0.06em;
+    margin-bottom: 24px;
+  }
+  .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--jp-red); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700; line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .hero h1 span { color: var(--jp-red); }
+  .hero p { font-size: 1.1rem; color: var(--dim); max-width: 580px; margin: 0 auto 32px; }
+  .hero-flags { font-size: 2.5rem; letter-spacing: 0.1em; margin-bottom: 12px; }
+
+  /* ── RATE BAR ── */
+  .rate-bar {
+    display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 28px; margin-bottom: 40px;
+  }
+  .rate-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .rate-label { font-size: 0.7rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .rate-value { font-family: 'Space Mono', monospace; font-size: 1rem; font-weight: 700; color: var(--text); }
+  .rate-value.green { color: var(--green); }
+  .rate-value.orange { color: var(--orange); }
+  .rate-div { width: 1px; background: var(--border); align-self: stretch; margin: 0 4px; }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 24px;
+  }
+  .section-header h2 { font-size: 1.5rem; font-weight: 700; }
+  .section-header .count {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 2px 10px;
+    font-size: 0.8rem; font-family: 'Space Mono', monospace;
+    color: var(--dim);
+  }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .filter-btn {
+    padding: 6px 16px; border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent; color: var(--dim);
+    cursor: pointer; font-size: 0.8rem; font-family: 'Space Grotesk', sans-serif;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .filter-btn.active {
+    background: var(--jp-red); color: white; border-color: var(--jp-red);
+  }
+
+  /* ── TARGET CARDS ── */
+  .targets-grid {
+    display: grid; grid-template-columns: 1fr;
+    gap: 16px; margin-bottom: 60px;
+  }
+
+  .target-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .target-card:hover { border-color: rgba(255,59,59,0.35); transform: translateY(-2px); }
+  .target-card.tier-s { border-left: 3px solid var(--gold); }
+  .target-card.tier-a { border-left: 3px solid var(--jp-red); }
+  .target-card.tier-b { border-left: 3px solid var(--blue); }
+  .target-card.hidden { display: none; }
+
+  .target-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px 12px;
+    cursor: pointer;
+  }
+  .target-info { display: flex; flex-direction: column; gap: 4px; }
+  .target-name { font-size: 1rem; font-weight: 600; }
+  .target-meta { display: flex; align-items: center; gap: 8px; }
+  .game-tag {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 2px 8px; border-radius: 4px;
+  }
+  .game-pokemon { background: rgba(255,214,10,0.15); color: var(--gold); border: 1px solid rgba(255,214,10,0.25); }
+  .game-yugioh  { background: rgba(72,149,239,0.12); color: var(--blue); border: 1px solid rgba(72,149,239,0.25); }
+  .game-onepiece { background: rgba(255,140,66,0.15); color: var(--orange); border: 1px solid rgba(255,140,66,0.25); }
+  .game-weiss   { background: rgba(179,136,255,0.15); color: var(--purple); border: 1px solid rgba(179,136,255,0.25); }
+  .tier-badge {
+    font-size: 0.7rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 4px;
+    font-family: 'Space Mono', monospace;
+  }
+  .tier-s-badge { background: rgba(255,214,10,0.15); color: var(--gold); border: 1px solid rgba(255,214,10,0.3); }
+  .tier-a-badge { background: rgba(255,59,59,0.12); color: var(--jp-red); border: 1px solid rgba(255,59,59,0.25); }
+  .tier-b-badge { background: rgba(72,149,239,0.1); color: var(--blue); border: 1px solid rgba(72,149,239,0.2); }
+
+  .target-arb-summary {
+    display: flex; align-items: center; gap: 20px;
+    flex-shrink: 0;
+  }
+  .arb-profit {
+    text-align: right;
+  }
+  .arb-profit-label { font-size: 0.65rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+  .arb-profit-value {
+    font-family: 'Space Mono', monospace; font-size: 1.1rem; font-weight: 700; color: var(--green);
+  }
+  .arb-roi {
+    font-size: 0.75rem; color: var(--dim);
+  }
+
+  /* ── ARB MATH BREAKDOWN ── */
+  .target-body { padding: 0 20px 20px; }
+  .arb-flow {
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .arb-step {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; min-width: 90px;
+  }
+  .arb-step-label { font-size: 0.65rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+  .arb-step-value { font-family: 'Space Mono', monospace; font-size: 0.95rem; font-weight: 700; }
+  .arb-step-value.jpy { color: var(--orange); }
+  .arb-step-value.cost { color: var(--jp-red); }
+  .arb-step-value.eu { color: var(--blue); }
+  .arb-step-value.net { color: var(--green); }
+  .arb-arrow { color: var(--dim); font-size: 1rem; }
+
+  .arb-bar-wrap { margin-bottom: 14px; }
+  .arb-bar-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.72rem; color: var(--dim); margin-bottom: 5px;
+  }
+  .arb-bar-track {
+    height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden;
+  }
+  .arb-bar-fill {
+    height: 100%; border-radius: 3px; background: var(--green);
+    transition: width 0.6s ease;
+  }
+
+  .buyee-links { display: flex; gap: 8px; flex-wrap: wrap; }
+  .buyee-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 7px;
+    background: rgba(255,59,59,0.1); border: 1px solid rgba(255,59,59,0.25);
+    color: var(--jp-red); text-decoration: none; font-size: 0.8rem; font-weight: 500;
+    transition: all 0.2s;
+  }
+  .buyee-link:hover { background: rgba(255,59,59,0.18); color: var(--jp-red); }
+  .buyee-link .icon { font-size: 1rem; }
+  .notes-text { font-size: 0.8rem; color: var(--dim); margin-top: 10px; font-style: italic; }
+  .psa-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,214,10,0.1); border: 1px solid rgba(255,214,10,0.25);
+    color: var(--gold); font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; margin-top: 6px;
+  }
+
+  /* ── LIVE ALERTS ── */
+  .alerts-section { margin-bottom: 60px; }
+  .alert-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 12px; padding: 20px 24px; margin-bottom: 12px;
+  }
+  .alert-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .alert-name { font-weight: 600; font-size: 1rem; }
+  .alert-profit-badge {
+    background: rgba(6,214,160,0.15); border: 1px solid rgba(6,214,160,0.3);
+    color: var(--green); font-family: 'Space Mono', monospace;
+    font-size: 0.9rem; font-weight: 700; padding: 3px 12px; border-radius: 6px;
+  }
+  .alert-economics {
+    display: flex; gap: 20px; flex-wrap: wrap;
+    font-size: 0.8rem;
+  }
+  .alert-econ-item { display: flex; flex-direction: column; gap: 2px; }
+  .alert-econ-label { color: var(--dim); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .alert-econ-value { font-family: 'Space Mono', monospace; font-weight: 600; }
+  .alert-link {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: var(--jp-red); text-decoration: none; font-size: 0.8rem;
+    margin-top: 10px;
+  }
+  .alert-link:hover { text-decoration: underline; }
+  .alert-source-badge {
+    font-size: 0.7rem; padding: 2px 8px; border-radius: 4px;
+    background: var(--surface2); color: var(--dim); border: 1px solid var(--border);
+  }
+
+  .empty-alerts {
+    text-align: center; padding: 60px 20px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; color: var(--dim);
+  }
+  .empty-alerts .emoji { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty-alerts h3 { font-size: 1rem; margin-bottom: 8px; color: var(--text); }
+  .empty-alerts p { font-size: 0.85rem; }
+
+  /* ── HOW IT WORKS ── */
+  .how-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px; margin-bottom: 60px;
+  }
+  .how-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px 20px;
+  }
+  .how-icon { font-size: 2rem; margin-bottom: 12px; }
+  .how-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; }
+  .how-text { font-size: 0.82rem; color: var(--dim); line-height: 1.6; }
+
+  /* ── CTA ── */
+  .cta-block {
+    background: linear-gradient(135deg, rgba(255,59,59,0.12), rgba(72,149,239,0.08));
+    border: 1px solid rgba(255,59,59,0.2); border-radius: 16px;
+    padding: 48px 32px; text-align: center; margin-bottom: 60px;
+  }
+  .cta-block h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; }
+  .cta-block p { font-size: 1rem; color: var(--dim); max-width: 480px; margin: 0 auto 28px; }
+  .cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .cta-btn-primary {
+    background: var(--jp-red); color: white;
+    padding: 12px 28px; border-radius: 8px;
+    font-weight: 600; text-decoration: none; font-size: 0.95rem;
+    transition: opacity 0.2s;
+  }
+  .cta-btn-primary:hover { opacity: 0.85; color: white; }
+  .cta-btn-secondary {
+    background: transparent; color: var(--text);
+    padding: 12px 28px; border-radius: 8px;
+    border: 1px solid var(--border); font-size: 0.95rem;
+    text-decoration: none; transition: border-color 0.2s;
+  }
+  .cta-btn-secondary:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 20px; text-align: center;
+    color: var(--dim); font-size: 0.8rem;
+  }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 20px;
+    margin-bottom: 32px; font-size: 0.8rem;
+  }
+  .status-left { display: flex; align-items: center; gap: 10px; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .status-dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+  .status-dot.dim { background: var(--dim); }
+  .status-right { color: var(--dim); }
+
+  /* ── GRAIL CARD ── */
+  .grail-card {
+    background: linear-gradient(135deg, rgba(255,214,10,0.08), rgba(255,59,59,0.05));
+    border: 1px solid rgba(255,214,10,0.3);
+  }
+  .grail-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,214,10,0.15); border: 1px solid rgba(255,214,10,0.3);
+    color: var(--gold); font-size: 0.72rem; font-weight: 700;
+    padding: 2px 10px; border-radius: 4px;
+  }
+
+  @media (max-width: 640px) {
+    .nav-links { gap: 12px; }
+    .nav-links a:not(.nav-cta) { display: none; }
+    .target-arb-summary { gap: 10px; }
+    .arb-flow { gap: 5px; }
+    .arb-step { min-width: 75px; padding: 8px 10px; }
+    .rate-bar { gap: 10px; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">Card<span>Sniper</span></a>
+    <div class="nav-links">
+      <a href="index.html">Dashboard</a>
+      <a href="wins.html">Wins</a>
+      <a href="cardmarket.html">EU Deals</a>
+      <a href="japan-arb.html" class="active">🇯🇵 Japan Arb</a>
+      <a href="blog.html">Blog</a>
+      <a href="free.html">Free Tier</a>
+      <a href="card-sniper.html" class="nav-cta">Get Alerts →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ── HERO ── -->
+  <div class="hero">
+    <div class="hero-flags">🇯🇵 → 🇩🇪</div>
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      GEO-ARBITRAGE ACTIVE
+    </div>
+    <h1>Japan → EU<br><span>Card Arbitrage</span></h1>
+    <p>Cards sell for 40–80% less in Japan than in Europe. Card Sniper monitors Mercari JP and Yahoo Auctions JP via Buyee — alerting you when the spread is real money.</p>
+  </div>
+
+  <!-- ── EXCHANGE RATE BAR ── -->
+  <div class="rate-bar">
+    <div class="rate-item">
+      <div class="rate-label">Exchange Rate</div>
+      <div class="rate-value orange">¥148 = €1</div>
+    </div>
+    <div class="rate-div"></div>
+    <div class="rate-item">
+      <div class="rate-label">Buyee Fees</div>
+      <div class="rate-value">¥300 + ¥800</div>
+    </div>
+    <div class="rate-div"></div>
+    <div class="rate-item">
+      <div class="rate-label">Intl Shipping</div>
+      <div class="rate-value">~€12</div>
+    </div>
+    <div class="rate-div"></div>
+    <div class="rate-item">
+      <div class="rate-label">eBay.de Fees</div>
+      <div class="rate-value">12.35% + €0.35</div>
+    </div>
+    <div class="rate-div"></div>
+    <div class="rate-item">
+      <div class="rate-label">Alert Threshold</div>
+      <div class="rate-value green">≥40% + €30 net</div>
+    </div>
+    <div class="rate-div"></div>
+    <div class="rate-item">
+      <div class="rate-label">Targets Monitored</div>
+      <div class="rate-value" id="target-count">14</div>
+    </div>
+  </div>
+
+  <!-- ── LIVE ALERTS ── -->
+  <div class="alerts-section">
+    <div class="section-header">
+      <h2>🚨 Live Alerts</h2>
+      <span class="count" id="alert-count-badge">0</span>
+    </div>
+    <div class="status-bar">
+      <div class="status-left">
+        <div class="status-dot dim" id="scan-status-dot"></div>
+        <span id="scan-status-text">Loading scan status…</span>
+      </div>
+      <div class="status-right" id="last-scan-time">—</div>
+    </div>
+    <div id="alerts-container">
+      <div class="empty-alerts">
+        <div class="emoji">🔭</div>
+        <h3>Scanner is watching</h3>
+        <p>No geo-arb alerts yet. Scanner runs every 12 hours, checking 14 targets across Mercari JP and Yahoo Auctions JP.</p>
+        <p style="margin-top: 8px; font-size: 0.78rem;">Subscribe to get real-time Telegram alerts when a deal hits.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TARGET WATCHLIST ── -->
+  <div class="section-header">
+    <h2>🎯 Watchlist</h2>
+    <span class="count" id="visible-count">14</span>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" data-game="all">All Games</button>
+    <button class="filter-btn" data-game="Pokémon">Pokémon</button>
+    <button class="filter-btn" data-game="Yu-Gi-Oh OCG">Yu-Gi-Oh</button>
+    <button class="filter-btn" data-game="One Piece">One Piece</button>
+    <button class="filter-btn" data-game="Weiß Schwarz">Weiß Schwarz</button>
+    <button class="filter-btn" data-game="tier-s">⭐ S Tier Only</button>
+  </div>
+
+  <div class="targets-grid" id="targets-grid"></div>
+
+  <!-- ── HOW IT WORKS ── -->
+  <div style="margin-bottom: 28px;">
+    <div class="section-header">
+      <h2>How It Works</h2>
+    </div>
+  </div>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-icon">🇯🇵</div>
+      <div class="how-title">Monitor Japan Marketplaces</div>
+      <div class="how-text">Card Sniper scans Mercari Japan and Yahoo Auctions Japan via Buyee every 12 hours, looking for NM-condition cards listed by Japanese sellers who don't know EU prices.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-icon">🧮</div>
+      <div class="how-title">Calculate Real Costs</div>
+      <div class="how-text">Every listing is scored after deducting Buyee purchase fees (¥300), domestic shipping (¥800), international EMS shipping (~€12), and eBay.de final value fees (12.35%).</div>
+    </div>
+    <div class="how-card">
+      <div class="how-icon">🚨</div>
+      <div class="how-title">Alert When It's Real Money</div>
+      <div class="how-text">Alert fires when: net margin ≥40% AND net profit ≥€30. S-tier cards with PSA upside get priority. You get the Buyee link directly in Telegram.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-icon">📈</div>
+      <div class="how-title">Grade or Flip</div>
+      <div class="how-text">Japan cards often grade well — the JP domestic market doesn't heavily play these vintage cards. Buy on Buyee, ship to PSA, sell PSA graded on eBay.de for 2–20× multiplier.</div>
+    </div>
+  </div>
+
+  <!-- ── CTA ── -->
+  <div class="cta-block">
+    <h2>Get Japan Arb Alerts on Telegram</h2>
+    <p>When a geo-arb deal drops — Charizard JP Base Set at 80% below EU, Lugia Neo Genesis, Blue-Eyes OCG original — you want to know first.</p>
+    <div class="cta-buttons">
+      <a href="card-sniper.html" class="cta-btn-primary">Subscribe — Paid Tier →</a>
+      <a href="free.html" class="cta-btn-secondary">Free Tier (48h delay)</a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div>Card Sniper Alpha — Japan Arbitrage Scanner</div>
+  <div style="margin-top: 6px;">Monitoring Mercari JP + Yahoo Auctions JP via Buyee · ¥ → € geo-arb · Data updates every 12h</div>
+</footer>
+
+<script>
+// ── Constants (mirror of japan-arb-monitor.mjs) ───────────────────────────
+const JPY_EUR = 0.00617;
+const BUYEE_PURCHASE_FEE_JPY = 300;
+const BUYEE_DOMESTIC_SHIP_JPY = 800;
+const INTL_SHIP_EUR = 12;
+const EBAY_FEE_PCT = 0.1235;
+const EBAY_INSERTION = 0.35;
+
+// Typical JP market prices (mid-range estimate)
+const TYPICAL_JP_PRICES = {
+  'jp-poke-001': 18000,
+  'jp-poke-002': 28000,
+  'jp-poke-003': 17000,
+  'jp-poke-004': 13000,
+  'jp-poke-005': 15000,
+  'jp-poke-006': 9000,
+  'jp-poke-007': 11000,
+  'jp-poke-008': null,   // GRAIL — no typical price
+  'jp-yugi-001': 40000,
+  'jp-yugi-002': 22000,
+  'jp-yugi-003': 18000,
+  'jp-op-001':   8000,
+  'jp-op-002':   7000,
+  'jp-ws-001':   6000,
+};
+
+const TARGETS = [
+  { id:'jp-poke-001', name:'Charizard Japanese Base Set Holo', game:'Pokémon', tier:'S', euPriceEur:750, psaUpside:true, buyeeQuery:'リザードン 旧裏 ホロ', yahooQuery:'リザードン 旧裏面 ホロ', notes:'JP Base Set Charizard ~¥16k–22k on Mercari. EU sells €650–900 NM. Pure geo-arb + PSA upside.' },
+  { id:'jp-poke-002', name:'Lugia Neo Genesis Japanese Holo', game:'Pokémon', tier:'A', euPriceEur:380, psaUpside:true, buyeeQuery:'ルギア ネオジェネシス ホロ', yahooQuery:'ルギア neo genesis holo', notes:'JP Neo Lugia. EU asks €300–450. JP Mercari often ¥25k–35k = €155–215. Strong spread.' },
+  { id:'jp-poke-003', name:'Umbreon Neo Discovery Japanese Holo', game:'Pokémon', tier:'A', euPriceEur:280, psaUpside:true, buyeeQuery:'ブラッキー neo discovery holo', yahooQuery:'ブラッキー ネオディスカバリー', notes:'Cult collector card. JP ~¥15k–20k. EU €220–350. Shrine collectors pay premium.' },
+  { id:'jp-poke-004', name:'Espeon Neo Discovery Japanese Holo', game:'Pokémon', tier:'A', euPriceEur:220, psaUpside:true, buyeeQuery:'エーフィ neo discovery holo', yahooQuery:'エーフィ ネオディスカバリー holo', notes:'Paired with Umbreon. JP cheaper. EU collectors pay well.' },
+  { id:'jp-poke-005', name:'Blastoise Japanese Base Set Holo', game:'Pokémon', tier:'A', euPriceEur:320, psaUpside:true, buyeeQuery:'カメックス 旧裏 ホロ', yahooQuery:'カメックス 旧裏面 ホロ', notes:'JP Base Blastoise. EU €280–380. Often overlooked on Mercari.' },
+  { id:'jp-poke-006', name:'Mewtwo Japanese Base Set Holo', game:'Pokémon', tier:'B', euPriceEur:140, psaUpside:true, buyeeQuery:'ミュウツー 旧裏 ホロ', yahooQuery:'ミュウツー 旧裏面 ホロ', notes:'High volume but reliable spread. JP ¥8k–12k. EU €120–160.' },
+  { id:'jp-poke-007', name:'Venusaur Japanese Base Set Holo', game:'Pokémon', tier:'B', euPriceEur:200, psaUpside:true, buyeeQuery:'フシギバナ 旧裏 ホロ', yahooQuery:'フシギバナ 旧裏面 ホロ', notes:'Least hyped starter. JP ¥10k–14k. EU €170–240.' },
+  { id:'jp-poke-008', name:'Pikachu Illustrator Japanese', game:'Pokémon', tier:'S', euPriceEur:350000, psaUpside:true, buyeeQuery:'ピカチュウイラストレーター', yahooQuery:'ピカチュウ イラストレーター', notes:'GRAIL. Extremely rare. If it appears unrecognized — historic find.' },
+  { id:'jp-yugi-001', name:'Blue-Eyes White Dragon Vol.1 OCG', game:'Yu-Gi-Oh OCG', tier:'S', euPriceEur:800, psaUpside:true, buyeeQuery:'青眼の白龍 Vol.1', yahooQuery:'青眼の白龍 初期', notes:'OCG Vol.1 BEWD. EN LOB gets all the hype but JP original often cheaper. EU asks €600–1000.' },
+  { id:'jp-yugi-002', name:'Dark Magician Girl Japanese OCG', game:'Yu-Gi-Oh OCG', tier:'S', euPriceEur:600, psaUpside:true, buyeeQuery:'ブラック・マジシャン・ガール', yahooQuery:'ブラックマジシャンガール レア', notes:'JP collectors sell DMG cheaper than EN. EU pays premium for character.' },
+  { id:'jp-yugi-003', name:'Exodia the Forbidden One Japanese', game:'Yu-Gi-Oh OCG', tier:'A', euPriceEur:400, psaUpside:true, buyeeQuery:'エクゾディア 封印されし者', yahooQuery:'エクゾディア 初期', notes:'Original JP Exodia. EU collectors hunt the complete set.' },
+  { id:'jp-op-001', name:'Monkey D. Luffy OP01 SEC Japanese', game:'One Piece', tier:'A', euPriceEur:180, psaUpside:true, buyeeQuery:'モンキー・D・ルフィ OP-01 シークレット', yahooQuery:'ルフィ OP01 SEC', notes:'OP01 SEC. JP releases 2–3 months before EU. JP Mercari often 30% cheaper.' },
+  { id:'jp-op-002', name:'Roronoa Zoro OP01 SEC Japanese', game:'One Piece', tier:'A', euPriceEur:160, psaUpside:true, buyeeQuery:'ロロノア・ゾロ OP-01 シークレット', yahooQuery:'ゾロ OP01 SEC', notes:'Second most-wanted OP01 SEC. Same dynamic as Luffy.' },
+  { id:'jp-ws-001', name:'Dandadan SP Signed Japanese', game:'Weiß Schwarz', tier:'A', euPriceEur:200, psaUpside:true, buyeeQuery:'ダンダダン SP サイン', yahooQuery:'ダンダダン WS サイン レア', notes:'Mikel target. VA autos while pop low. JP Mercari often 40–60% under EU.' },
+];
+
+// ── Arb Math ──────────────────────────────────────────────────────────────
+function calcArb(jpyPrice, euRefPrice) {
+  const itemEur = jpyPrice * JPY_EUR;
+  const buyeeFeeEur = (BUYEE_PURCHASE_FEE_JPY + BUYEE_DOMESTIC_SHIP_JPY) * JPY_EUR;
+  const totalCost = itemEur + buyeeFeeEur + INTL_SHIP_EUR;
+  const fees = (euRefPrice * EBAY_FEE_PCT) + EBAY_INSERTION;
+  const sellNet = euRefPrice - fees;
+  const netProfit = sellNet - totalCost;
+  const discount = 1 - (totalCost / sellNet);
+  const roi = (netProfit / totalCost) * 100;
+  return { totalCost, sellNet, netProfit, discount, roi, itemEur, buyeeFeeEur };
+}
+
+function fmt(n, prefix='€') { return `${prefix}${Math.round(n).toLocaleString()}`; }
+
+// ── Game tag class ─────────────────────────────────────────────────────────
+function gameClass(game) {
+  if (game.includes('Pokémon')) return 'game-pokemon';
+  if (game.includes('Yu-Gi')) return 'game-yugioh';
+  if (game.includes('One Piece')) return 'game-onepiece';
+  if (game.includes('Weiß')) return 'game-weiss';
+  return '';
+}
+function gameShort(game) {
+  if (game.includes('Pokémon')) return 'Pokémon';
+  if (game.includes('Yu-Gi')) return 'Yu-Gi-Oh';
+  if (game.includes('One Piece')) return 'One Piece';
+  if (game.includes('Weiß')) return 'Weiß Schwarz';
+  return game;
+}
+
+// ── Render Targets ─────────────────────────────────────────────────────────
+function renderTargets(filterGame) {
+  const grid = document.getElementById('targets-grid');
+  grid.innerHTML = '';
+  let visible = 0;
+
+  for (const t of TARGETS) {
+    const jpyTypical = TYPICAL_JP_PRICES[t.id];
+    const tierClass = 'tier-' + t.tier.toLowerCase();
+    const tierBadgeClass = 'tier-' + t.tier.toLowerCase() + '-badge';
+    const isGrail = !jpyTypical;
+
+    // Filter logic
+    let hidden = false;
+    if (filterGame === 'tier-s') { hidden = t.tier !== 'S'; }
+    else if (filterGame !== 'all') { hidden = t.game !== filterGame; }
+    if (!hidden) visible++;
+
+    let arbHTML = '';
+    if (isGrail) {
+      arbHTML = `<div class="grail-badge">🏆 GRAIL — IF IT APPEARS, IT'S HISTORY</div>`;
+    } else {
+      const arb = calcArb(jpyTypical, t.euPriceEur);
+      const discPct = Math.round(arb.discount * 100);
+      const barW = Math.min(Math.max(discPct, 0), 100);
+
+      arbHTML = `
+        <div class="arb-flow">
+          <div class="arb-step">
+            <div class="arb-step-label">Buy JP (typical)</div>
+            <div class="arb-step-value jpy">¥${jpyTypical.toLocaleString()}</div>
+          </div>
+          <span class="arb-arrow">→</span>
+          <div class="arb-step">
+            <div class="arb-step-label">Total Cost</div>
+            <div class="arb-step-value cost">${fmt(arb.totalCost)}</div>
+          </div>
+          <span class="arb-arrow">→</span>
+          <div class="arb-step">
+            <div class="arb-step-label">EU Ref Price</div>
+            <div class="arb-step-value eu">${fmt(t.euPriceEur)}</div>
+          </div>
+          <span class="arb-arrow">→</span>
+          <div class="arb-step">
+            <div class="arb-step-label">Net Profit</div>
+            <div class="arb-step-value net">${fmt(arb.netProfit)}</div>
+          </div>
+        </div>
+        <div class="arb-bar-wrap">
+          <div class="arb-bar-label">
+            <span>Cost vs EU Sell</span>
+            <span>${discPct}% under EU market · ${Math.round(arb.roi)}% ROI</span>
+          </div>
+          <div class="arb-bar-track">
+            <div class="arb-bar-fill" style="width:${barW}%"></div>
+          </div>
+        </div>`;
+    }
+
+    const mercariUrl = `https://buyee.jp/mercari/search?keyword=${encodeURIComponent(t.buyeeQuery)}&status=on_sale&sort=price&order=asc`;
+    const yahooUrl = `https://buyee.jp/yahoo/auction/search?query=${encodeURIComponent(t.yahooQuery)}&sort=price&order=asc&status=new`;
+
+    let profitBadge = '';
+    if (!isGrail) {
+      const arb = calcArb(jpyTypical, t.euPriceEur);
+      profitBadge = `
+        <div class="arb-profit">
+          <div class="arb-profit-label">Typical Profit</div>
+          <div class="arb-profit-value">${fmt(arb.netProfit)}</div>
+          <div class="arb-roi">${Math.round(arb.roi)}% ROI</div>
+        </div>`;
+    } else {
+      profitBadge = `<div class="grail-badge">🏆 GRAIL</div>`;
+    }
+
+    const card = document.createElement('div');
+    card.className = `target-card ${tierClass}${isGrail ? ' grail-card' : ''}${hidden ? ' hidden' : ''}`;
+    card.dataset.game = t.game;
+    card.dataset.tier = t.tier;
+
+    card.innerHTML = `
+      <div class="target-header">
+        <div class="target-info">
+          <div class="target-name">${t.name}</div>
+          <div class="target-meta">
+            <span class="game-tag ${gameClass(t.game)}">${gameShort(t.game)}</span>
+            <span class="tier-badge ${tierBadgeClass}">Tier ${t.tier}</span>
+            ${t.psaUpside ? '<span style="font-size:0.72rem;color:var(--gold)">⭐ PSA Upside</span>' : ''}
+          </div>
+        </div>
+        <div class="target-arb-summary">
+          ${profitBadge}
+        </div>
+      </div>
+      <div class="target-body">
+        ${arbHTML}
+        <div class="buyee-links">
+          <a href="${mercariUrl}" target="_blank" rel="noopener" class="buyee-link">
+            <span class="icon">🛒</span> Mercari JP via Buyee
+          </a>
+          <a href="${yahooUrl}" target="_blank" rel="noopener" class="buyee-link">
+            <span class="icon">🔨</span> Yahoo Auctions JP
+          </a>
+        </div>
+        <div class="notes-text">${t.notes}</div>
+        ${t.psaUpside ? '<div class="psa-badge">⭐ Grade potential: PSA 10 could 5–20× the value</div>' : ''}
+      </div>`;
+
+    grid.appendChild(card);
+  }
+
+  document.getElementById('visible-count').textContent = visible;
+  document.getElementById('target-count').textContent = TARGETS.length;
+}
+
+// ── Filters ────────────────────────────────────────────────────────────────
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTargets(btn.dataset.game);
+  });
+});
+
+// ── Load Live Alerts ───────────────────────────────────────────────────────
+async function loadAlerts() {
+  const container = document.getElementById('alerts-container');
+  const badge = document.getElementById('alert-count-badge');
+  const statusDot = document.getElementById('scan-status-dot');
+  const statusText = document.getElementById('scan-status-text');
+  const lastScanEl = document.getElementById('last-scan-time');
+
+  try {
+    const res = await fetch('japan-arb-log.json?t=' + Date.now());
+    if (!res.ok) throw new Error('no data');
+    const alerts = await res.json();
+
+    if (!Array.isArray(alerts) || alerts.length === 0) {
+      statusDot.className = 'status-dot dim';
+      statusText.textContent = 'Scanner active — no geo-arb deals found yet';
+      lastScanEl.textContent = 'Checks every 12h';
+      badge.textContent = '0';
+      return;
+    }
+
+    // Sort newest first, show last 30
+    const sorted = [...alerts].sort((a, b) => new Date(b.ts) - new Date(a.ts)).slice(0, 30);
+    badge.textContent = sorted.length;
+
+    statusDot.className = 'status-dot green';
+    const latest = new Date(sorted[0].ts);
+    statusText.textContent = `${sorted.length} geo-arb alert${sorted.length !== 1 ? 's' : ''} found`;
+    lastScanEl.textContent = 'Latest: ' + latest.toLocaleString();
+
+    container.innerHTML = sorted.map(a => {
+      const econ = a.economics;
+      const listing = a.listing;
+      return `
+        <div class="alert-card">
+          <div class="alert-card-header">
+            <div>
+              <div class="alert-name">${a.target}</div>
+              <div style="display:flex;gap:6px;align-items:center;margin-top:4px;">
+                <span class="game-tag ${gameClass(a.game)}">${gameShort(a.game)}</span>
+                <span class="alert-source-badge">${listing.source}</span>
+                ${a.psaUpside ? '<span style="font-size:0.7rem;color:var(--gold)">⭐ PSA upside</span>' : ''}
+              </div>
+            </div>
+            <div class="alert-profit-badge">+${fmt(econ.netProfitEur)}</div>
+          </div>
+          <div class="alert-economics">
+            <div class="alert-econ-item">
+              <div class="alert-econ-label">JP Price</div>
+              <div class="alert-econ-value" style="color:var(--orange)">¥${listing.priceJpy.toLocaleString()} (${fmt(listing.priceEur)})</div>
+            </div>
+            <div class="alert-econ-item">
+              <div class="alert-econ-label">All-in Cost</div>
+              <div class="alert-econ-value" style="color:var(--jp-red)">${fmt(econ.totalCostEur)}</div>
+            </div>
+            <div class="alert-econ-item">
+              <div class="alert-econ-label">EU Sell (net)</div>
+              <div class="alert-econ-value" style="color:var(--blue)">${fmt(econ.sellNetEur)}</div>
+            </div>
+            <div class="alert-econ-item">
+              <div class="alert-econ-label">Discount vs EU</div>
+              <div class="alert-econ-value" style="color:var(--green)">${econ.discountVsEU}</div>
+            </div>
+            <div class="alert-econ-item">
+              <div class="alert-econ-label">ROI</div>
+              <div class="alert-econ-value" style="color:var(--purple)">${econ.roi}</div>
+            </div>
+          </div>
+          <div style="margin-top:10px;font-size:0.8rem;color:var(--dim);">${listing.title}</div>
+          <a href="${listing.url}" target="_blank" rel="noopener" class="alert-link">
+            🛒 View on Buyee →
+          </a>
+        </div>`;
+    }).join('');
+
+  } catch {
+    statusDot.className = 'status-dot dim';
+    statusText.textContent = 'Scanner active — no geo-arb data yet';
+    lastScanEl.textContent = 'Checks every 12h';
+    badge.textContent = '0';
+  }
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+renderTargets('all');
+loadAlerts();
+setInterval(loadAlerts, 10 * 60 * 1000); // refresh every 10 min
+</script>
+
+</body>
+</html>
