@@ -339,6 +339,26 @@
       "profit": 2945,
       "confidence": "🟡 MED",
       "url": "https://www.ebay.com/itm/176500562467"
+    },
+    {
+      "timestamp": "2026-03-24T07:09:07.608Z",
+      "cardId": "dbs-001",
+      "cardName": "SS3 Son Goku Universe at Stake Dragon Ball Super",
+      "game": "Dragon Ball",
+      "tier": "S",
+      "stealScore": 85,
+      "stealTier": "🚨 HOLY GRAIL",
+      "listingPrice": 65827.5,
+      "psa10CMV": 750434,
+      "psa9CMV": 473168,
+      "psa8CMV": 369213,
+      "rawCMV": 184054,
+      "trend": "STABLE",
+      "ev": 261936,
+      "evRoi": 397,
+      "profit": 684506.5,
+      "confidence": "🟡 MED",
+      "url": "https://www.ebay.com/itm/205069024477"
     }
   ]
 }
