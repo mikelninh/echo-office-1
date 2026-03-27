@@ -223,9 +223,41 @@
       },
       "sent": false,
       "sentAt": null
+    },
+    {
+      "id": "free-1774595695628-7cdpft",
+      "enqueuedAt": "2026-03-27T07:14:55.628Z",
+      "releaseAt": "2026-03-29T07:14:55.628Z",
+      "releaseAtMs": 1774768495628,
+      "alertText": "🔥 NO-BRAINER  [85/100]\n👑 S-TIER | Dragon Ball\n\nSS3 Son Goku Universe at Stake Dragon Ball Super\n\nSomeone listed this for €36.872.\nPSA 10 sells for €790.320.\nYou're buying at 5% of graded value.\n\n🔗 https://www.ebay.com/itm/266572788145\n\n── THE MATH ─────────────────────\nBuy raw:    €36.872\nGrade (PSA): €100\nAll in:     €36.972\n\n── WHAT COMES BACK ──────────────\nPSA 10  15%   → €790.320   profit €753.348\nPSA  9  27%   → €473.665   profit €436.693\nPSA  8  18%   → €473.665   profit €436.693\nPSA ≤7  40%   → €29.498    (sell back raw)\n\nExpected value: €306.474  (828% weighted ROI)\n✅ PSA 8 still profitable — low-risk play\n\n── IF YOU GRADE PSA 10 ──────────\nFlip now:    €753.348  (2038% ROI, 21.4× your money)\nHold 10 yrs:  €3.124.308  (4× today's price)\n\n── VERDICT ──────────────────────\n🏦 HOLD LONG — Blue chip. Slab and hold 7-10 years. Do not sell early — these only go up.\n\n📌 The Dragon Ball holy grail. Serial numbered. BGS 10 sold $25k+. PSA 10 is the ceiling. Ultra rare.\n\nConfidence: 🔴 LOW (1 comps) | Hold: 7-10 years",
+      "meta": {
+        "cardName": "Unknown Card",
+        "game": "Dragon Ball",
+        "tier": "S",
+        "stealScore": 85,
+        "listingUrl": "https://www.ebay.com/itm/266572788145"
+      },
+      "sent": false,
+      "sentAt": null
+    },
+    {
+      "id": "free-1774595696976-dzyhz4",
+      "enqueuedAt": "2026-03-27T07:14:56.976Z",
+      "releaseAt": "2026-03-29T07:14:56.976Z",
+      "releaseAtMs": 1774768496976,
+      "alertText": "💀 OBVIOUS STEAL  [92/100]\n💎 A-TIER | Riftbound\n\nVolibear Signature Riftbound\n\nSomeone listed this for €26.081.\nPSA 10 sells for €790.320.\nYou're buying at 3% of graded value.\n\n🔗 https://www.ebay.com/itm/377065572995\n\n── THE MATH ─────────────────────\nBuy raw:    €26.081\nGrade (PSA): €35\nAll in:     €26.116\n\n── WHAT COMES BACK ──────────────\nPSA 10  15%   → €790.320   profit €764.204\nPSA  9  27%   → €790.320   profit €764.204\nPSA  8  18%   → €711.288   profit €685.172\nPSA ≤7  40%   → €20.864    (sell back raw)\n\nExpected value: €442.151  (1690% weighted ROI)\n✅ PSA 8 still profitable — low-risk play\n\n── IF YOU GRADE PSA 10 ──────────\nFlip now:    €764.204  (2926% ROI, 30.3× your money)\nHold 7 yrs:  €1.949.684  (2.5× today's price)\n\n── VERDICT ──────────────────────\n⚡ FLIP FAST — Exceptional ROI. List PSA 10 within 3 months of receiving slab.\n\n📌 Underdog pick. Lower price = wider buyer pool. Alert under €480.\n\nConfidence: 🟡 MED (4 comps) | Hold: 2-5 years",
+      "meta": {
+        "cardName": "Unknown Card",
+        "game": "Riftbound",
+        "tier": "A",
+        "stealScore": 92,
+        "listingUrl": "https://www.ebay.com/itm/377065572995"
+      },
+      "sent": false,
+      "sentAt": null
     }
   ],
   "lastFlushed": null,
-  "totalQueued": 14,
+  "totalQueued": 16,
   "totalSent": 0
 }

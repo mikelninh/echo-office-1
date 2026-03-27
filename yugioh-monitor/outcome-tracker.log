@@ -258,3 +258,71 @@ Total Paper Profit: $326,130
 ✅ Outcomes synced to vault-dashboard
 
 ✅ Done. Results saved to /Users/mikel/.openclaw/workspace/scripts/yugioh-monitor/outcomes.json
+📊 Outcome Tracker — Checking alert results...
+
+Found 469 alerts to track.
+
+50 unique listings to check.
+
+  [1/50] Riftbound | 2025 RIFTBOUND ORIGINS SIGNATURE OVERNUMBER #303* ... active
+  [2/50] Riftbound | 2025 RIFTBOUND ORIGINS LEAGUE OF LEGENDS SIGNATURE... active
+  [3/50] Riftbound | 2025 RIFTBOUND ORIGINS LEAGUE OF LEGENDS SIGNATURE... active
+  [4/50] Riftbound | LOL Riftbound Chinese Soul Forging & Tempering Ahr... active
+  [5/50] Union Arena | One Piece TCG Card Game Chinese Monkey D Luffy ST0... active
+  [6/50] Dandadan (Weiß Schwarz) | 2025 Pokemon Simplified Chinese SV-P Promo Pokemon... active
+  [7/50] Dandadan (Weiß Schwarz) | 2025 Pokemon Simplified Chinese SV-P Promo Pokemon... active
+  [8/50] Dandadan (Weiß Schwarz) | 2025 Pokemon Simplified Chinese SV-P Promo Pokemon... active
+  [9/50] Dandadan (Weiß Schwarz) | 2025 Pokemon Simplified Chinese SV-P Promo Pokemon... active
+  [10/50] Yu-Gi-Oh | Yu-Gi-Oh 2003! MFC-MAGICIAN'S FORCE 1ST ED #000 DA... active
+  [11/50] Riftbound | 2025 RIFTBOUND ORIGINS LEAGUE OF LEGENDS SIGNATURE... active
+  [12/50] Riftbound | KARMA SIGNATURE Channeler Showcase Overnumber Rift... active
+  [13/50] Riftbound | KARMA SIGNATURE Channeler Showcase Overnumber Rift... active
+  [14/50] Dragon Ball | 2025 Dragon Ball Super Card Fusion World Manga #FB... active
+  [15/50] Riftbound | 2025 Riftbound Origins Miss Fortune Bounty Hunter ... active
+  [16/50] Riftbound | 2025 RIFTBOUND: LEAGUE OF LEGENDS OGN-ORIGINS #301... active
+  [17/50] Riftbound | 2026 RIFTBOUND: SIGNATURE OVERNUMBER SPIRITFORGED ... active
+  [18/50] Riftbound | 2025 RIFTBOUND ORIGINS SIGNATURE OVERNUMBER #303* ... active
+  [19/50] Magic: The Gathering | 1993 Magic the Gathering Beta Black Lotus PSA 4... active
+  [20/50] Riftbound | 2025 RIFTBOUND ORIGINS LEAGUE OF LEGENDS SIGNATURE... active
+  [21/50] Riftbound | 2025 RIFTBOUND: LEAGUE OF LEGENDS OGN #299* KAI'SA... active
+  [22/50] Riftbound | Jinx - Loose Cannon - Signature - 301*/298 - Riftb... active
+  [23/50] Digimon | One Piece TCG Card Game Chinese Monkey D Luffy ST0... active
+  [24/50] Dragon Ball | 2025 DRAGON BALL SUPER CARD  FUSION WORLD MANGA  #... active
+  [25/50] Dragon Ball | 2025 DRAGON BALL SUPER CARD FUSION WORLD MANGA #FB... active
+  [26/50] Yu-Gi-Oh | 2003 YU-GI-OH! MFC-MAGICIAN'S FORCE 1ST ED #000 DA... active
+  [27/50] Riftbound | Ahri Nine-Tailed Fox 303 Overnumbered - PSA 10 LOW... active
+  [28/50] Riftbound | 2025 RIFTBOUND: LEAGUE OF LEGENDS OGN #299* KAI'SA... active
+  [29/50] Pokémon | 2012 Pokemon Rayquaza EX Promo bw6 release #051-P ... active
+  [30/50] Pokémon | 2025 Pokemon Simplified Chinese SV-P Promo Pokemon... active
+  [31/50] Riftbound | 2025 RIFTBOUND ORIGINS LEAGUE OF LEGENDS SIGNATURE... active
+  [32/50] Riftbound | 2025 RIFTBOUND ORIGINS SIGNATURE OVERNUMBER #303* ... active
+  [33/50] Riftbound | Ahri Nine-Tailed Fox 303 Overnumbered - PSA 10 LOW... active
+  [34/50] Riftbound | 2025 Riftbound Origins Miss Fortune Bounty Hunter ... active
+  [35/50] Riftbound | 2025 RIFTBOUND: LEAGUE OF LEGENDS OGN-ORIGINS #301... active
+  [36/50] Dragon Ball | Dragon Ball Fusion World FB04-012 Son Goku (Mini) ... active
+  [37/50] Yu-Gi-Oh | Yu-Gi-Oh! Blue-Eyes White Dragon Starter Deck 1st ... active
+  [38/50] Yu-Gi-Oh | Yu-Gi-Oh! Blue-Eyes White Dragon Legend of Blue Ey... active
+  [39/50] Yu-Gi-Oh | Yu-Gi-Oh! Blue-Eyes White Dragon Legend of Blue Ey... active
+  [40/50] Lorcana | TOP 16 ENCHANTED FOIL KUZCO LORCANA CHAMPIONSHIP P... active
+  [41/50] Pokémon | 2002 POKEMON LEGENDARY COLLECTION #3 CHARIZARD-REV... active
+  [42/50] Yu-Gi-Oh | 2003 YU-GI-OH! MFC-MAGICIAN'S FORCE 1ST ED #000 DA... active
+  [43/50] Pokémon | Pokemon Cards Collection Reserved... active
+  [44/50] Riftbound | 2025 RIFTBOUND: LEAGUE OF LEGENDS OGN #299* KAI'SA... active
+  [45/50] Pokémon | One Piece TCG OP05 Monkey D. Luffy ST01-012 SR Oda... active
+  [46/50] Pokémon | New Listing2002 POKEMON LEGEND COLL #3 CHARIZARD-R... active
+
+──────────────────────────────────────────────────
+📊 OUTCOME SUMMARY
+──────────────────────────────────────────────────
+Total tracked:     41
+Active:            46
+Sold:              0
+Expired/Removed:   0
+Errors:            0
+Avg Paper ROI:     83%
+Total Paper Profit: $409,626
+──────────────────────────────────────────────────
+
+✅ Outcomes synced to vault-dashboard
+
+✅ Done. Results saved to /Users/mikel/.openclaw/workspace/scripts/yugioh-monitor/outcomes.json

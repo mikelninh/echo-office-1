@@ -1,7 +1,7 @@
 {
   "cards": {
     "poke-001": {
-      "ts": 1774418424340,
+      "ts": 1774625075732,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -10,7 +10,7 @@
       "bestScore": 0
     },
     "poke-002": {
-      "ts": 1774418434998,
+      "ts": 1774625086069,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -19,7 +19,7 @@
       "bestScore": 0
     },
     "ygo-001": {
-      "ts": 1774418445592,
+      "ts": 1774625096395,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -28,7 +28,7 @@
       "bestScore": 0
     },
     "ygo-002": {
-      "ts": 1774418456162,
+      "ts": 1774625106770,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -37,7 +37,7 @@
       "bestScore": 0
     },
     "mtg-001": {
-      "ts": 1774418466780,
+      "ts": 1774625117101,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -46,7 +46,7 @@
       "bestScore": 0
     },
     "mtg-002": {
-      "ts": 1774418477391,
+      "ts": 1774625127454,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -55,7 +55,7 @@
       "bestScore": 0
     },
     "mtg-003": {
-      "ts": 1774418488140,
+      "ts": 1774625137841,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -64,7 +64,7 @@
       "bestScore": 0
     },
     "op-001": {
-      "ts": 1774418498734,
+      "ts": 1774625148216,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -73,7 +73,7 @@
       "bestScore": 0
     },
     "dbs-001": {
-      "ts": 1774418509388,
+      "ts": 1774625158663,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -82,7 +82,7 @@
       "bestScore": 0
     },
     "lor-001": {
-      "ts": 1774418520832,
+      "ts": 1774625169037,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -91,7 +91,7 @@
       "bestScore": 0
     },
     "ws-001": {
-      "ts": 1774418531683,
+      "ts": 1774625179512,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -100,7 +100,7 @@
       "bestScore": 0
     },
     "poke-003": {
-      "ts": 1774418543388,
+      "ts": 1774584604946,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -109,7 +109,7 @@
       "bestScore": 0
     },
     "poke-004": {
-      "ts": 1774418554085,
+      "ts": 1774584615266,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -118,7 +118,7 @@
       "bestScore": 0
     },
     "poke-005": {
-      "ts": 1774418564725,
+      "ts": 1774584625557,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -127,7 +127,7 @@
       "bestScore": 0
     },
     "poke-006": {
-      "ts": 1774418575355,
+      "ts": 1774584635886,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -136,7 +136,7 @@
       "bestScore": 0
     },
     "ygo-003": {
-      "ts": 1774418586055,
+      "ts": 1774584646204,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -145,7 +145,7 @@
       "bestScore": 0
     },
     "ygo-004": {
-      "ts": 1774418596701,
+      "ts": 1774584656536,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -154,7 +154,7 @@
       "bestScore": 0
     },
     "ygo-005": {
-      "ts": 1774418607394,
+      "ts": 1774584666827,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -163,7 +163,7 @@
       "bestScore": 0
     },
     "ygo-006": {
-      "ts": 1774418618131,
+      "ts": 1774584677136,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -172,7 +172,7 @@
       "bestScore": 0
     },
     "ygo-007": {
-      "ts": 1774418628726,
+      "ts": 1774584687465,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -181,7 +181,7 @@
       "bestScore": 0
     },
     "mtg-004": {
-      "ts": 1774418639387,
+      "ts": 1774584697800,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -190,7 +190,7 @@
       "bestScore": 0
     },
     "mtg-005": {
-      "ts": 1774418650016,
+      "ts": 1774584708324,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -199,7 +199,7 @@
       "bestScore": 0
     },
     "mtg-006": {
-      "ts": 1774418660668,
+      "ts": 1774584718630,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -208,7 +208,7 @@
       "bestScore": 0
     },
     "op-002": {
-      "ts": 1774418671289,
+      "ts": 1774584728945,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -217,7 +217,7 @@
       "bestScore": 0
     },
     "op-003": {
-      "ts": 1774418682313,
+      "ts": 1774584739246,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -226,7 +226,7 @@
       "bestScore": 0
     },
     "op-004": {
-      "ts": 1774418692973,
+      "ts": 1774584749548,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -235,7 +235,7 @@
       "bestScore": 0
     },
     "op-005": {
-      "ts": 1774418703620,
+      "ts": 1774584759908,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -244,7 +244,7 @@
       "bestScore": 0
     },
     "dbs-002": {
-      "ts": 1774393336143,
+      "ts": 1774584770245,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -253,7 +253,7 @@
       "bestScore": 0
     },
     "dbs-003": {
-      "ts": 1774393346562,
+      "ts": 1774584780552,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -262,7 +262,7 @@
       "bestScore": 0
     },
     "dbs-004": {
-      "ts": 1774393356882,
+      "ts": 1774584790841,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -271,7 +271,7 @@
       "bestScore": 0
     }
   },
-  "lastRun": "2026-03-25T06:05:04.139Z",
-  "totalScanned": 87,
+  "lastRun": "2026-03-27T15:26:21.762Z",
+  "totalScanned": 228,
   "totalDeals": 0
 }
