@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCG Portfolio Tracker — Card Sniper</title>
+<meta name="description" content="Track your TCG collection value, P&L, and performance across Pokémon, Yu-Gi-Oh!, One Piece, Riftbound, MTG and more. Free browser-based portfolio tracker.">
+<meta property="og:title" content="TCG Portfolio Tracker — Know Your Collection's Worth">
+<meta property="og:description" content="Track buy prices, current values, P&L, and best performers across every TCG. Free forever. Upgrade for live price alerts.">
+<meta property="og:image" content="https://card-sniper-production.up.railway.app/og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:       #080810;
+    --surface:  #0f0f1a;
+    --surface2: #161625;
+    --surface3: #1e1e30;
+    --border:   rgba(255,255,255,0.08);
+    --text:     #e8e8f4;
+    --dim:      #7070a0;
+    --accent:   #ff4d6d;
+    --gold:     #ffd60a;
+    --green:    #06d6a0;
+    --blue:     #4895ef;
+    --purple:   #b388ff;
+    --red:      #ff4d6d;
+    --orange:   #ff8c42;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; opacity: 0.4;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,8,16,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 15px; font-weight: 700;
+    color: var(--accent); text-decoration: none;
+    margin-right: 8px;
+  }
+  .nav-link {
+    color: var(--dim); text-decoration: none;
+    font-size: 13px; font-weight: 500;
+    padding: 5px 10px; border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .nav-link:hover, .nav-link.active { color: var(--text); background: var(--surface2); }
+  .nav-cta {
+    margin-left: auto;
+    background: var(--accent); color: #fff;
+    text-decoration: none; font-size: 13px; font-weight: 600;
+    padding: 6px 14px; border-radius: 8px;
+    transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 48px 0 32px;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(72,149,239,0.12);
+    border: 1px solid rgba(72,149,239,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px; font-weight: 600; color: var(--blue);
+    margin-bottom: 16px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700; line-height: 1.15;
+    margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--green); }
+  .hero p {
+    font-size: 16px; color: var(--dim);
+    max-width: 520px; margin: 0 auto 24px;
+  }
+  .hero-actions {
+    display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--green); color: #020c09; }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--dim);
+  }
+  .btn-outline:hover { border-color: var(--text); color: var(--text); }
+  .btn-accent { background: var(--accent); color: #fff; }
+  .btn-accent:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-danger { background: rgba(255,77,109,0.15); color: var(--red); border: 1px solid rgba(255,77,109,0.25); }
+  .btn-danger:hover { background: rgba(255,77,109,0.25); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 7px; }
+
+  /* ── STATS GRID ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: rgba(255,255,255,0.16); }
+  .stat-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--dim); margin-bottom: 6px;
+  }
+  .stat-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 22px; font-weight: 700;
+    color: var(--text);
+  }
+  .stat-value.positive { color: var(--green); }
+  .stat-value.negative { color: var(--red); }
+  .stat-sub { font-size: 11px; color: var(--dim); margin-top: 3px; }
+
+  /* ── GAME PERFORMANCE BARS ── */
+  .perf-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .perf-title {
+    font-size: 13px; font-weight: 600; color: var(--dim);
+    text-transform: uppercase; letter-spacing: 0.07em;
+    margin-bottom: 16px;
+  }
+  .perf-bar-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 80px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .perf-game-label { font-size: 12px; font-weight: 600; color: var(--text); }
+  .perf-bar-track {
+    height: 8px; background: var(--surface3); border-radius: 4px; overflow: hidden;
+  }
+  .perf-bar-fill {
+    height: 100%; border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+  .perf-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px; text-align: right;
+  }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: flex; align-items: center; gap: 12px;
+    flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .game-tabs {
+    display: flex; gap: 6px; flex-wrap: wrap; flex: 1;
+  }
+  .game-tab {
+    padding: 6px 14px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; font-weight: 600;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--dim); transition: all 0.2s;
+  }
+  .game-tab:hover { color: var(--text); }
+  .game-tab.active {
+    background: rgba(72,149,239,0.15);
+    border-color: rgba(72,149,239,0.35);
+    color: var(--blue);
+  }
+  .toolbar-right { display: flex; gap: 8px; margin-left: auto; }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .empty-state {
+    text-align: center; padding: 60px 24px;
+    color: var(--dim);
+  }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state h3 { font-size: 18px; color: var(--text); margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; max-width: 380px; margin: 0 auto 24px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 12px 16px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--dim);
+    text-align: left; cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    user-select: none;
+  }
+  thead th:hover { color: var(--text); }
+  thead th.sorted { color: var(--blue); }
+  tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
+  tbody td {
+    padding: 12px 16px;
+    font-size: 14px; color: var(--text);
+    vertical-align: middle;
+  }
+  .td-mono { font-family: 'Space Mono', monospace; font-size: 13px; }
+  .td-name { font-weight: 600; max-width: 240px; }
+  .td-name small { display: block; font-size: 11px; color: var(--dim); font-weight: 400; margin-top: 2px; }
+  .game-pill {
+    display: inline-block;
+    padding: 2px 8px; border-radius: 12px;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase;
+  }
+  .status-pill {
+    display: inline-block;
+    padding: 2px 8px; border-radius: 12px;
+    font-size: 11px; font-weight: 600;
+  }
+  .pl-positive { color: var(--green); }
+  .pl-negative { color: var(--red); }
+  .pl-zero { color: var(--dim); }
+  .action-btns { display: flex; gap: 6px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    padding: 28px;
+    width: 100%; max-width: 540px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h2 { font-size: 20px; margin-bottom: 6px; }
+  .modal p { font-size: 13px; color: var(--dim); margin-bottom: 20px; }
+  .modal-close {
+    float: right; background: var(--surface2); border: none;
+    width: 28px; height: 28px; border-radius: 8px;
+    color: var(--dim); font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .form-group label { font-size: 12px; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+  .form-group input, .form-group select, .form-group textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none; border-color: var(--blue);
+  }
+  .form-group select option { background: #1a1a2e; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; padding-top: 8px; }
+
+  /* ── CTA BANNER ── */
+  .cta-banner {
+    background: linear-gradient(135deg, rgba(255,77,109,0.12), rgba(72,149,239,0.08));
+    border: 1px solid rgba(255,77,109,0.25);
+    border-radius: 14px;
+    padding: 24px 28px;
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .cta-banner-icon { font-size: 36px; flex-shrink: 0; }
+  .cta-banner-text { flex: 1; min-width: 200px; }
+  .cta-banner-text h3 { font-size: 17px; margin-bottom: 4px; }
+  .cta-banner-text p { font-size: 13px; color: var(--dim); }
+  .cta-banner-action { flex-shrink: 0; }
+
+  /* ── IMPORT/EXPORT ── */
+  .io-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .io-section-title { font-size: 13px; font-weight: 600; color: var(--dim); flex: 1; }
+  .io-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ── BEST/WORST ── */
+  .performers-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    margin-bottom: 24px;
+  }
+  .performer-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .performer-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--dim); margin-bottom: 8px; }
+  .performer-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .performer-pl { font-family: 'Space Mono', monospace; font-size: 20px; font-weight: 700; }
+
+  /* ── SORT ARROW ── */
+  .sort-arrow { margin-left: 4px; opacity: 0.5; }
+  .sorted .sort-arrow { opacity: 1; }
+
+  /* ── TOOLTIP ── */
+  .tip {
+    display: inline-block;
+    background: var(--surface3); border: 1px solid var(--border);
+    border-radius: 6px; padding: 2px 6px;
+    font-size: 10px; color: var(--dim);
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .form-row { grid-template-columns: 1fr; }
+    .performers-grid { grid-template-columns: 1fr; }
+    thead th:nth-child(4), tbody td:nth-child(4),
+    thead th:nth-child(5), tbody td:nth-child(5) { display: none; }
+    .cta-banner { flex-direction: column; text-align: center; }
+    .cta-banner-action { width: 100%; }
+    .cta-banner-action .btn { width: 100%; justify-content: center; }
+  }
+
+  /* ── IMPORT DEMO NOTICE ── */
+  .demo-bar {
+    background: rgba(255,214,10,0.08);
+    border: 1px solid rgba(255,214,10,0.2);
+    border-radius: 10px; padding: 10px 16px;
+    font-size: 13px; color: var(--gold);
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .demo-bar span { flex: 1; }
+  .demo-clear-btn {
+    background: rgba(255,214,10,0.15); border: 1px solid rgba(255,214,10,0.25);
+    color: var(--gold); padding: 4px 10px; border-radius: 6px;
+    font-size: 12px; font-weight: 600; cursor: pointer; border: none;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html">🃏 CS</a>
+    <a class="nav-link" href="dashboard.html">Dashboard</a>
+    <a class="nav-link" href="wins.html">Wins</a>
+    <a class="nav-link" href="cardmarket-deals.html">EU Deals</a>
+    <a class="nav-link" href="japan-arb.html">🇯🇵 Japan Arb</a>
+    <a class="nav-link" href="grade-calc.html">EV Calc</a>
+    <a class="nav-link active" href="portfolio.html">📊 Portfolio</a>
+    <a class="nav-link" href="free.html">Free Tier</a>
+    <a class="nav-cta" href="card-sniper.html">Get Alerts →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="container">
+  <div class="hero">
+    <div class="hero-badge">🔒 Private — Stored in Your Browser</div>
+    <h1>Track Your TCG Portfolio.<br><span>Know What It's Worth.</span></h1>
+    <p>Add cards with buy prices. Update current values. See your P&L, best performers, and exactly when to sell.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="openAddModal()">＋ Add Card</button>
+      <button class="btn btn-outline" onclick="loadDemoData()">Load Demo Data</button>
+    </div>
+  </div>
+
+  <!-- DEMO NOTICE -->
+  <div id="demoBar" class="demo-bar" style="display:none">
+    <span>📋 <strong>Demo Mode</strong> — This is sample data. Clear it and add your own cards.</span>
+    <button class="demo-clear-btn" onclick="clearAllCards()">Clear Demo Data</button>
+  </div>
+
+  <!-- STATS GRID -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card">
+      <div class="stat-label">Total Value</div>
+      <div class="stat-value" id="statTotalValue">€0</div>
+      <div class="stat-sub" id="statCardCount">0 cards</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Invested</div>
+      <div class="stat-value" id="statTotalInvested">€0</div>
+      <div class="stat-sub">Your capital deployed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Unrealized P&L</div>
+      <div class="stat-value" id="statUnrealizedPL">€0</div>
+      <div class="stat-sub" id="statUnrealizedPct">+0.0%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Realized Profit</div>
+      <div class="stat-value" id="statRealizedProfit">€0</div>
+      <div class="stat-sub" id="statSoldCount">0 sold</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Best Performer</div>
+      <div class="stat-value positive" id="statBestPct">—</div>
+      <div class="stat-sub" id="statBestName">No cards yet</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Worst Performer</div>
+      <div class="stat-value" id="statWorstPct">—</div>
+      <div class="stat-sub" id="statWorstName">No cards yet</div>
+    </div>
+  </div>
+
+  <!-- GAME PERFORMANCE BARS -->
+  <div class="perf-section" id="perfSection" style="display:none">
+    <div class="perf-title">📊 Portfolio by Game</div>
+    <div id="perfBars"></div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="game-tabs" id="gameTabs">
+      <div class="game-tab active" data-game="all" onclick="setGameFilter('all', this)">All</div>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn btn-outline btn-sm" onclick="openAddModal()">＋ Add Card</button>
+      <select id="sortSelect" onchange="renderTable()" style="
+        background: var(--surface2); border: 1px solid var(--border);
+        border-radius: 8px; color: var(--dim); font-family: 'Space Grotesk', sans-serif;
+        font-size: 13px; padding: 5px 10px; cursor: pointer;
+      ">
+        <option value="pl_desc">Sort: P&L % ↓</option>
+        <option value="pl_asc">Sort: P&L % ↑</option>
+        <option value="value_desc">Sort: Value ↓</option>
+        <option value="name_asc">Sort: Name A-Z</option>
+        <option value="recent">Sort: Recently Added</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- CARDS TABLE -->
+  <div class="table-wrap" id="tableWrap">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">📭</div>
+      <h3>No cards yet</h3>
+      <p>Add your first card to start tracking your TCG portfolio value and P&L.</p>
+      <button class="btn btn-primary" onclick="openAddModal()">＋ Add Your First Card</button>
+    </div>
+    <table id="cardTable" style="display:none">
+      <thead>
+        <tr>
+          <th onclick="setSortFromHeader('name_asc')">Card <span class="sort-arrow">↕</span></th>
+          <th onclick="setSortFromHeader('game_asc')">Game</th>
+          <th onclick="setSortFromHeader('value_desc')" class="sorted">Buy <span class="sort-arrow">↓</span></th>
+          <th onclick="setSortFromHeader('current_desc')">Current</th>
+          <th onclick="setSortFromHeader('pl_desc')">P&L</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="cardTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- IO SECTION -->
+  <div class="io-section">
+    <div class="io-section-title">🗂 Import / Export your portfolio data</div>
+    <div class="io-buttons">
+      <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn btn-outline btn-sm" onclick="exportJSON()">⬇ Export JSON</button>
+      <label class="btn btn-outline btn-sm" style="cursor:pointer">
+        ⬆ Import JSON
+        <input type="file" accept=".json" onchange="importJSON(event)" style="display:none">
+      </label>
+    </div>
+  </div>
+
+  <!-- CTA BANNER -->
+  <div class="cta-banner">
+    <div class="cta-banner-icon">🔔</div>
+    <div class="cta-banner-text">
+      <h3>Your current values are manual — Card Sniper can update them automatically.</h3>
+      <p>Subscribe to get live alerts when any of your portfolio cards spike, dip, or hit a deal price on eBay. Never leave money on the table again.</p>
+    </div>
+    <div class="cta-banner-action">
+      <a href="card-sniper.html" class="btn btn-accent">Get Live Alerts — €19/mo →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 id="modalTitle">Add Card</h2>
+    <p id="modalSubtitle">Track a new card in your portfolio.</p>
+
+    <input type="hidden" id="editCardId">
+
+    <div class="form-group">
+      <label>Card Name *</label>
+      <input type="text" id="fieldName" placeholder="e.g. Charizard Base Set 1st Edition Holo">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Game *</label>
+        <select id="fieldGame">
+          <option value="">Select game…</option>
+          <option value="Pokémon">Pokémon</option>
+          <option value="Yu-Gi-Oh!">Yu-Gi-Oh!</option>
+          <option value="One Piece">One Piece</option>
+          <option value="Riftbound">Riftbound</option>
+          <option value="MTG">MTG</option>
+          <option value="Dragon Ball">Dragon Ball</option>
+          <option value="Lorcana">Lorcana</option>
+          <option value="Weiss Schwarz">Weiss Schwarz</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="fieldStatus">
+          <option value="HOLD">Hold</option>
+          <option value="WATCHING">Watching</option>
+          <option value="LISTED">Listed for Sale</option>
+          <option value="SOLD">Sold</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Buy Price (€) *</label>
+        <input type="number" id="fieldBuyPrice" placeholder="0.00" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label>Current Value (€)</label>
+        <input type="number" id="fieldCurrentValue" placeholder="0.00" step="0.01" min="0">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Condition / Grade</label>
+        <input type="text" id="fieldGrade" placeholder="e.g. NM, PSA 9, BGS 8.5">
+      </div>
+      <div class="form-group">
+        <label>Platform</label>
+        <input type="text" id="fieldPlatform" placeholder="e.g. eBay, CardMarket">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Buy Date</label>
+        <input type="date" id="fieldBuyDate">
+      </div>
+      <div class="form-group" id="sellPriceGroup" style="display:none">
+        <label>Sell Price (€)</label>
+        <input type="number" id="fieldSellPrice" placeholder="0.00" step="0.01" min="0">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Set / Edition</label>
+      <input type="text" id="fieldSetName" placeholder="e.g. LOB-001, Base Set, OP-01">
+    </div>
+
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="fieldNotes" rows="2" placeholder="Centering issues, provenance, watch notes…"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCard()">Save Card</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="deleteOverlay">
+  <div class="modal" style="max-width: 380px; text-align: center;">
+    <h2>Remove Card?</h2>
+    <p style="margin-bottom: 24px;">This will permanently remove <strong id="deleteCardName"></strong> from your portfolio.</p>
+    <div class="modal-actions" style="justify-content: center;">
+      <button class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Remove</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STORAGE KEY ───────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'cs_portfolio_v1';
+
+// ─── GAME COLORS ──────────────────────────────────────────────────────────────
+const GAME_COLORS = {
+  'Pokémon':        { bg: 'rgba(255,203,5,0.15)',   color: '#ffcb05', border: 'rgba(255,203,5,0.3)' },
+  'Yu-Gi-Oh!':      { bg: 'rgba(72,149,239,0.15)',  color: '#4895ef', border: 'rgba(72,149,239,0.3)' },
+  'One Piece':      { bg: 'rgba(255,77,109,0.15)',  color: '#ff4d6d', border: 'rgba(255,77,109,0.3)' },
+  'Riftbound':      { bg: 'rgba(179,136,255,0.15)', color: '#b388ff', border: 'rgba(179,136,255,0.3)' },
+  'MTG':            { bg: 'rgba(255,140,66,0.15)',  color: '#ff8c42', border: 'rgba(255,140,66,0.3)' },
+  'Dragon Ball':    { bg: 'rgba(255,140,66,0.15)',  color: '#f7a600', border: 'rgba(247,166,0,0.3)' },
+  'Lorcana':        { bg: 'rgba(6,214,160,0.12)',   color: '#06d6a0', border: 'rgba(6,214,160,0.3)' },
+  'Weiss Schwarz':  { bg: 'rgba(255,255,255,0.08)', color: '#e8e8f4', border: 'rgba(255,255,255,0.15)' },
+  'Other':          { bg: 'rgba(112,112,160,0.15)', color: '#7070a0', border: 'rgba(112,112,160,0.3)' },
+};
+
+function getGameStyle(game) {
+  return GAME_COLORS[game] || GAME_COLORS['Other'];
+}
+
+// ─── DATA LAYER ───────────────────────────────────────────────────────────────
+function loadCards() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveCards(cards) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+}
+
+function generateId() {
+  return 'card-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+}
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let currentGame = 'all';
+let pendingDeleteId = null;
+
+// ─── DEMO DATA ────────────────────────────────────────────────────────────────
+const DEMO_CARDS = [
+  {
+    id: 'demo-1', name: 'Charizard Base Set 1st Edition Holo',
+    game: 'Pokémon', grade: 'NM (raw)',
+    buyPrice: 5800, currentValue: 7200,
+    status: 'HOLD', platform: 'eBay',
+    buyDate: '2026-01-12', setName: 'Base Set',
+    notes: 'Centering 60/40 L-R. Lightly played corners.', isDemo: true
+  },
+  {
+    id: 'demo-2', name: 'Luffy Manga Alternate Art OP-01',
+    game: 'One Piece', grade: 'NM (raw)',
+    buyPrice: 720, currentValue: 1100,
+    status: 'HOLD', platform: 'CardMarket',
+    buyDate: '2026-02-05', setName: 'OP-01',
+    notes: 'Strong grading candidate — high gem rate on OP-01.', isDemo: true
+  },
+  {
+    id: 'demo-3', name: 'Blue-Eyes White Dragon LOB 1st Edition',
+    game: 'Yu-Gi-Oh!', grade: 'LP (raw)',
+    buyPrice: 380, currentValue: 420,
+    status: 'WATCHING', platform: 'eBay.de',
+    buyDate: '2026-01-28', setName: 'LOB-001',
+    notes: 'Watch for grade spike — LP makes PSA 7-8 realistic.', isDemo: true
+  },
+  {
+    id: 'demo-4', name: 'Ahri Signature Overnumber #303 Riftbound Origins',
+    game: 'Riftbound', grade: 'Sealed (raw)',
+    buyPrice: 980, currentValue: 1620,
+    status: 'HOLD', platform: 'eBay.de',
+    buyDate: '2026-03-20', setName: 'Origins',
+    notes: 'Massive PSA 10 upside. Grade rate 25%+ on Riftbound.', isDemo: true
+  },
+  {
+    id: 'demo-5', name: 'Black Lotus Alpha PSA 5',
+    game: 'MTG', grade: 'PSA 5',
+    buyPrice: 22000, currentValue: 28500,
+    status: 'HOLD', platform: 'Heritage Auctions',
+    buyDate: '2025-11-04', setName: 'Alpha',
+    notes: 'Long hold target. Alpha print run extremely limited.', isDemo: true
+  },
+  {
+    id: 'demo-6', name: 'Kaiba Starter Deck Obelisk the Tormentor Ultra Rare',
+    game: 'Yu-Gi-Oh!', grade: 'MP (raw)',
+    buyPrice: 145, currentValue: 110,
+    status: 'WATCHING', platform: 'eBay',
+    buyDate: '2026-02-18', setName: 'SDY',
+    notes: 'Market soft. Might dip further — watch for recovery.', isDemo: true
+  },
+  {
+    id: 'demo-7', name: 'Charizard Base Set 1st Edition Holo',
+    game: 'Pokémon', grade: 'PSA 9',
+    buyPrice: 38000, currentValue: 44000,
+    status: 'SOLD', platform: 'eBay', sellPrice: 44000,
+    buyDate: '2025-09-15', setName: 'Base Set',
+    notes: 'Flipped successfully. Clean centering sealed the grade.', isDemo: true
+  },
+];
+
+function isDemoLoaded() {
+  const cards = loadCards();
+  return cards.some(c => c.isDemo);
+}
+
+function loadDemoData() {
+  const existing = loadCards();
+  const demoIds = DEMO_CARDS.map(c => c.id);
+  const withoutDemo = existing.filter(c => !demoIds.includes(c.id));
+  saveCards([...withoutDemo, ...DEMO_CARDS]);
+  document.getElementById('demoBar').style.display = 'flex';
+  renderAll();
+}
+
+function clearAllCards() {
+  if (!confirm('Remove all cards from your portfolio?')) return;
+  saveCards([]);
+  document.getElementById('demoBar').style.display = 'none';
+  renderAll();
+}
+
+// ─── STATS ────────────────────────────────────────────────────────────────────
+function computeStats(cards) {
+  const held = cards.filter(c => c.status !== 'SOLD');
+  const sold = cards.filter(c => c.status === 'SOLD');
+
+  const totalValue = held.reduce((s, c) => s + (c.currentValue || c.buyPrice || 0), 0);
+  const totalInvested = held.reduce((s, c) => s + (c.buyPrice || 0), 0);
+  const unrealizedPL = totalValue - totalInvested;
+  const unrealizedPct = totalInvested > 0 ? (unrealizedPL / totalInvested) * 100 : 0;
+
+  const realizedProfit = sold.reduce((s, c) => s + ((c.sellPrice || 0) - (c.buyPrice || 0)), 0);
+
+  let best = null, worst = null;
+  for (const c of held) {
+    if (!c.buyPrice || !c.currentValue) continue;
+    const pl = ((c.currentValue - c.buyPrice) / c.buyPrice) * 100;
+    if (!best || pl > best.pl) best = { name: c.name, pl };
+    if (!worst || pl < worst.pl) worst = { name: c.name, pl };
+  }
+
+  const byGame = {};
+  for (const c of held) {
+    if (!byGame[c.game]) byGame[c.game] = { invested: 0, value: 0, count: 0 };
+    byGame[c.game].invested += c.buyPrice || 0;
+    byGame[c.game].value += c.currentValue || c.buyPrice || 0;
+    byGame[c.game].count++;
+  }
+
+  return { totalValue, totalInvested, unrealizedPL, unrealizedPct, realizedProfit, sold: sold.length, best, worst, byGame, held: held.length };
+}
+
+function fmt(n) {
+  const abs = Math.abs(n);
+  let s;
+  if (abs >= 1000) {
+    s = '€' + (abs / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  } else {
+    s = '€' + abs.toFixed(0);
+  }
+  return n < 0 ? '-' + s : s;
+}
+
+function fmtPct(n) {
+  return (n >= 0 ? '+' : '') + n.toFixed(1) + '%';
+}
+
+function renderStats() {
+  const cards = loadCards();
+  const s = computeStats(cards);
+
+  const tvEl = document.getElementById('statTotalValue');
+  tvEl.textContent = fmt(s.totalValue);
+  tvEl.className = 'stat-value';
+
+  document.getElementById('statCardCount').textContent = s.held + ' cards held';
+  document.getElementById('statTotalInvested').textContent = fmt(s.totalInvested);
+
+  const plEl = document.getElementById('statUnrealizedPL');
+  plEl.textContent = fmt(s.unrealizedPL);
+  plEl.className = 'stat-value ' + (s.unrealizedPL >= 0 ? 'positive' : 'negative');
+
+  document.getElementById('statUnrealizedPct').textContent = fmtPct(s.unrealizedPct);
+
+  const rpEl = document.getElementById('statRealizedProfit');
+  rpEl.textContent = fmt(s.realizedProfit);
+  rpEl.className = 'stat-value ' + (s.realizedProfit >= 0 ? 'positive' : 'negative');
+  document.getElementById('statSoldCount').textContent = s.sold + ' sold';
+
+  const bpEl = document.getElementById('statBestPct');
+  const bnEl = document.getElementById('statBestName');
+  if (s.best) {
+    bpEl.textContent = fmtPct(s.best.pl);
+    bpEl.className = 'stat-value ' + (s.best.pl >= 0 ? 'positive' : 'negative');
+    bnEl.textContent = s.best.name.length > 28 ? s.best.name.slice(0, 28) + '…' : s.best.name;
+  } else {
+    bpEl.textContent = '—'; bnEl.textContent = 'No cards yet';
+  }
+
+  const wpEl = document.getElementById('statWorstPct');
+  const wnEl = document.getElementById('statWorstName');
+  if (s.worst) {
+    wpEl.textContent = fmtPct(s.worst.pl);
+    wpEl.className = 'stat-value ' + (s.worst.pl >= 0 ? 'positive' : 'negative');
+    wnEl.textContent = s.worst.name.length > 28 ? s.worst.name.slice(0, 28) + '…' : s.worst.name;
+  } else {
+    wpEl.textContent = '—'; wnEl.textContent = 'No cards yet';
+  }
+
+  // Game bars
+  const perfSection = document.getElementById('perfSection');
+  const perfBars = document.getElementById('perfBars');
+  const games = Object.entries(s.byGame).sort((a, b) => b[1].value - a[1].value);
+  if (games.length === 0) {
+    perfSection.style.display = 'none';
+    return;
+  }
+  perfSection.style.display = 'block';
+  const maxVal = Math.max(...games.map(([, g]) => g.value));
+  perfBars.innerHTML = games.map(([game, g]) => {
+    const pct = g.invested > 0 ? ((g.value - g.invested) / g.invested * 100) : 0;
+    const barWidth = maxVal > 0 ? (g.value / maxVal * 100) : 0;
+    const gs = getGameStyle(game);
+    const pctStr = fmtPct(pct);
+    const pctColor = pct >= 0 ? 'var(--green)' : 'var(--red)';
+    return `
+      <div class="perf-bar-row">
+        <div class="perf-game-label">${game}</div>
+        <div class="perf-bar-track">
+          <div class="perf-bar-fill" style="width:${barWidth}%;background:${gs.color}"></div>
+        </div>
+        <div class="perf-pct" style="color:${pctColor}">${pctStr}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─── GAME FILTER TABS ─────────────────────────────────────────────────────────
+function setGameFilter(game, el) {
+  currentGame = game;
+  document.querySelectorAll('.game-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+function renderGameTabs() {
+  const cards = loadCards();
+  const games = [...new Set(cards.map(c => c.game))].sort();
+  const tabsEl = document.getElementById('gameTabs');
+
+  const existing = [...tabsEl.querySelectorAll('.game-tab')];
+  // always keep 'All' tab
+  tabsEl.innerHTML = '<div class="game-tab ' + (currentGame === 'all' ? 'active' : '') + '" data-game="all" onclick="setGameFilter(\'all\', this)">All</div>';
+
+  for (const game of games) {
+    const isActive = currentGame === game;
+    tabsEl.innerHTML += `<div class="game-tab ${isActive ? 'active' : ''}" data-game="${game}" onclick="setGameFilter('${game.replace(/'/g, "\\'")}', this)">${game}</div>`;
+  }
+}
+
+// ─── TABLE ────────────────────────────────────────────────────────────────────
+function renderTable() {
+  let cards = loadCards();
+  if (currentGame !== 'all') {
+    cards = cards.filter(c => c.game === currentGame);
+  }
+
+  const sort = document.getElementById('sortSelect').value;
+  cards = sortCards(cards, sort);
+
+  const empty = document.getElementById('emptyState');
+  const table = document.getElementById('cardTable');
+  const tbody = document.getElementById('cardTableBody');
+
+  if (cards.length === 0) {
+    empty.style.display = 'block';
+    table.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  table.style.display = 'table';
+
+  tbody.innerHTML = cards.map(card => {
+    const buy = card.buyPrice || 0;
+    const cur = card.currentValue || buy;
+    const pl = buy > 0 ? ((cur - buy) / buy * 100) : 0;
+    const plEur = cur - buy;
+    const plClass = plEur > 0 ? 'pl-positive' : plEur < 0 ? 'pl-negative' : 'pl-zero';
+    const gs = getGameStyle(card.game);
+    const statusColor = {
+      'HOLD': '#06d6a0', 'WATCHING': '#ffd60a',
+      'LISTED': '#ff8c42', 'SOLD': '#7070a0'
+    }[card.status] || '#7070a0';
+
+    const setNote = card.setName ? `<small>${card.setName}${card.grade ? ' · ' + card.grade : ''}</small>` : (card.grade ? `<small>${card.grade}</small>` : '');
+    const nameShort = card.name.length > 38 ? card.name.slice(0, 38) + '…' : card.name;
+
+    const buyStr = '€' + buy.toLocaleString('de-DE');
+    const curStr = '€' + cur.toLocaleString('de-DE');
+    const plStr = (plEur >= 0 ? '+' : '') + '€' + Math.abs(Math.round(plEur)).toLocaleString('de-DE') + ' (' + fmtPct(pl) + ')';
+
+    return `<tr>
+      <td class="td-name">${nameShort}${setNote}</td>
+      <td><span class="game-pill" style="background:${gs.bg};color:${gs.color};border:1px solid ${gs.border}">${card.game}</span></td>
+      <td class="td-mono">${buyStr}</td>
+      <td class="td-mono">${curStr}</td>
+      <td class="td-mono ${plClass}">${plStr}</td>
+      <td><span class="status-pill" style="background:${statusColor}22;color:${statusColor}">${card.status}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-outline btn-sm" onclick="openEditModal('${card.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="openDeleteModal('${card.id}')">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function sortCards(cards, sort) {
+  switch (sort) {
+    case 'pl_desc':
+      return [...cards].sort((a, b) => plPct(b) - plPct(a));
+    case 'pl_asc':
+      return [...cards].sort((a, b) => plPct(a) - plPct(b));
+    case 'value_desc':
+      return [...cards].sort((a, b) => (b.currentValue || b.buyPrice || 0) - (a.currentValue || a.buyPrice || 0));
+    case 'name_asc':
+      return [...cards].sort((a, b) => a.name.localeCompare(b.name));
+    case 'game_asc':
+      return [...cards].sort((a, b) => a.game.localeCompare(b.game));
+    case 'current_desc':
+      return [...cards].sort((a, b) => (b.currentValue || 0) - (a.currentValue || 0));
+    case 'recent':
+      return [...cards].sort((a, b) => (b.addedAt || '').localeCompare(a.addedAt || ''));
+    default:
+      return cards;
+  }
+}
+
+function plPct(c) {
+  const buy = c.buyPrice || 0;
+  const cur = c.currentValue || buy;
+  return buy > 0 ? ((cur - buy) / buy * 100) : 0;
+}
+
+function setSortFromHeader(sortVal) {
+  document.getElementById('sortSelect').value = sortVal;
+  renderTable();
+}
+
+// ─── RENDER ALL ───────────────────────────────────────────────────────────────
+function renderAll() {
+  renderStats();
+  renderGameTabs();
+  renderTable();
+
+  // Show demo bar if demo cards present
+  if (isDemoLoaded()) {
+    document.getElementById('demoBar').style.display = 'flex';
+  }
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('modalTitle').textContent = 'Add Card';
+  document.getElementById('modalSubtitle').textContent = 'Track a new card in your portfolio.';
+  document.getElementById('editCardId').value = '';
+  document.getElementById('fieldName').value = '';
+  document.getElementById('fieldGame').value = '';
+  document.getElementById('fieldStatus').value = 'HOLD';
+  document.getElementById('fieldBuyPrice').value = '';
+  document.getElementById('fieldCurrentValue').value = '';
+  document.getElementById('fieldGrade').value = '';
+  document.getElementById('fieldPlatform').value = '';
+  document.getElementById('fieldBuyDate').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('fieldSetName').value = '';
+  document.getElementById('fieldNotes').value = '';
+  document.getElementById('fieldSellPrice').value = '';
+  document.getElementById('sellPriceGroup').style.display = 'none';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function openEditModal(id) {
+  const cards = loadCards();
+  const card = cards.find(c => c.id === id);
+  if (!card) return;
+
+  document.getElementById('modalTitle').textContent = 'Edit Card';
+  document.getElementById('modalSubtitle').textContent = 'Update price, status, or details.';
+  document.getElementById('editCardId').value = id;
+  document.getElementById('fieldName').value = card.name || '';
+  document.getElementById('fieldGame').value = card.game || '';
+  document.getElementById('fieldStatus').value = card.status || 'HOLD';
+  document.getElementById('fieldBuyPrice').value = card.buyPrice || '';
+  document.getElementById('fieldCurrentValue').value = card.currentValue || '';
+  document.getElementById('fieldGrade').value = card.grade || '';
+  document.getElementById('fieldPlatform').value = card.platform || '';
+  document.getElementById('fieldBuyDate').value = card.buyDate || '';
+  document.getElementById('fieldSetName').value = card.setName || '';
+  document.getElementById('fieldNotes').value = card.notes || '';
+
+  const isSold = card.status === 'SOLD';
+  document.getElementById('sellPriceGroup').style.display = isSold ? 'flex' : 'none';
+  document.getElementById('fieldSellPrice').value = card.sellPrice || '';
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+document.getElementById('fieldStatus').addEventListener('change', function() {
+  document.getElementById('sellPriceGroup').style.display = this.value === 'SOLD' ? 'flex' : 'none';
+});
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function saveCard() {
+  const name = document.getElementById('fieldName').value.trim();
+  const game = document.getElementById('fieldGame').value;
+  if (!name) { alert('Please enter a card name.'); return; }
+  if (!game) { alert('Please select a game.'); return; }
+
+  const buyPrice = parseFloat(document.getElementById('fieldBuyPrice').value) || 0;
+  const currentValue = parseFloat(document.getElementById('fieldCurrentValue').value) || buyPrice;
+  const status = document.getElementById('fieldStatus').value;
+  const sellPrice = status === 'SOLD' ? (parseFloat(document.getElementById('fieldSellPrice').value) || null) : null;
+
+  const cards = loadCards();
+  const editId = document.getElementById('editCardId').value;
+
+  if (editId) {
+    const idx = cards.findIndex(c => c.id === editId);
+    if (idx >= 0) {
+      cards[idx] = {
+        ...cards[idx],
+        name, game, status, buyPrice, currentValue, sellPrice,
+        grade: document.getElementById('fieldGrade').value.trim(),
+        platform: document.getElementById('fieldPlatform').value.trim(),
+        buyDate: document.getElementById('fieldBuyDate').value,
+        setName: document.getElementById('fieldSetName').value.trim(),
+        notes: document.getElementById('fieldNotes').value.trim(),
+        updatedAt: new Date().toISOString(),
+        isDemo: false,
+      };
+    }
+  } else {
+    cards.push({
+      id: generateId(),
+      name, game, status, buyPrice, currentValue, sellPrice,
+      grade: document.getElementById('fieldGrade').value.trim(),
+      platform: document.getElementById('fieldPlatform').value.trim(),
+      buyDate: document.getElementById('fieldBuyDate').value,
+      setName: document.getElementById('fieldSetName').value.trim(),
+      notes: document.getElementById('fieldNotes').value.trim(),
+      addedAt: new Date().toISOString(),
+      isDemo: false,
+    });
+  }
+
+  saveCards(cards);
+  closeModal();
+  renderAll();
+}
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ─── DELETE ───────────────────────────────────────────────────────────────────
+function openDeleteModal(id) {
+  const cards = loadCards();
+  const card = cards.find(c => c.id === id);
+  if (!card) return;
+  pendingDeleteId = id;
+  document.getElementById('deleteCardName').textContent = card.name;
+  document.getElementById('deleteOverlay').classList.add('open');
+}
+
+function closeDeleteModal() {
+  pendingDeleteId = null;
+  document.getElementById('deleteOverlay').classList.remove('open');
+}
+
+function confirmDelete() {
+  if (!pendingDeleteId) return;
+  const cards = loadCards().filter(c => c.id !== pendingDeleteId);
+  saveCards(cards);
+  closeDeleteModal();
+  renderAll();
+}
+
+document.getElementById('deleteOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+
+// ─── EXPORT / IMPORT ─────────────────────────────────────────────────────────
+function exportJSON() {
+  const cards = loadCards();
+  const blob = new Blob([JSON.stringify(cards, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'card-sniper-portfolio-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+}
+
+function exportCSV() {
+  const cards = loadCards();
+  const headers = ['Name', 'Game', 'Grade', 'Buy Price', 'Current Value', 'P&L €', 'P&L %', 'Status', 'Platform', 'Buy Date', 'Set', 'Notes'];
+  const rows = cards.map(c => {
+    const buy = c.buyPrice || 0;
+    const cur = c.currentValue || buy;
+    const pl = cur - buy;
+    const plPct = buy > 0 ? ((cur - buy) / buy * 100).toFixed(1) : '0.0';
+    return [
+      `"${(c.name || '').replace(/"/g, '""')}"`,
+      `"${c.game || ''}"`,
+      `"${c.grade || ''}"`,
+      buy.toFixed(2),
+      cur.toFixed(2),
+      pl.toFixed(2),
+      plPct + '%',
+      c.status || '',
+      `"${c.platform || ''}"`,
+      c.buyDate || '',
+      `"${c.setName || ''}"`,
+      `"${(c.notes || '').replace(/"/g, '""')}"`,
+    ].join(',');
+  });
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'card-sniper-portfolio-' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error('Expected an array');
+      const existing = loadCards();
+      const existingIds = new Set(existing.map(c => c.id));
+      const newCards = data.filter(c => !existingIds.has(c.id));
+      saveCards([...existing, ...newCards]);
+      renderAll();
+      alert(`✅ Imported ${newCards.length} new card(s).`);
+    } catch (err) {
+      alert('❌ Could not parse JSON: ' + err.message);
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ─── KEYBOARD SHORTCUT ───────────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeModal(); closeDeleteModal(); }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    if (document.getElementById('modalOverlay').classList.contains('open')) saveCard();
+  }
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderAll();
+</script>
+</body>
+</html>
