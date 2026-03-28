@@ -100,7 +100,7 @@
       "bestScore": 0
     },
     "poke-003": {
-      "ts": 1774584604946,
+      "ts": 1774652535821,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -109,7 +109,7 @@
       "bestScore": 0
     },
     "poke-004": {
-      "ts": 1774584615266,
+      "ts": 1774652546105,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -118,7 +118,7 @@
       "bestScore": 0
     },
     "poke-005": {
-      "ts": 1774584625557,
+      "ts": 1774652556375,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -127,7 +127,7 @@
       "bestScore": 0
     },
     "poke-006": {
-      "ts": 1774584635886,
+      "ts": 1774652566647,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -136,7 +136,7 @@
       "bestScore": 0
     },
     "ygo-003": {
-      "ts": 1774584646204,
+      "ts": 1774652576928,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -145,7 +145,7 @@
       "bestScore": 0
     },
     "ygo-004": {
-      "ts": 1774584656536,
+      "ts": 1774652587200,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -154,7 +154,7 @@
       "bestScore": 0
     },
     "ygo-005": {
-      "ts": 1774584666827,
+      "ts": 1774652597469,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -163,7 +163,7 @@
       "bestScore": 0
     },
     "ygo-006": {
-      "ts": 1774584677136,
+      "ts": 1774652607762,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -172,7 +172,7 @@
       "bestScore": 0
     },
     "ygo-007": {
-      "ts": 1774584687465,
+      "ts": 1774652618033,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -181,7 +181,7 @@
       "bestScore": 0
     },
     "mtg-004": {
-      "ts": 1774584697800,
+      "ts": 1774652628305,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -190,7 +190,7 @@
       "bestScore": 0
     },
     "mtg-005": {
-      "ts": 1774584708324,
+      "ts": 1774652638580,
       "listingCount": 0,
       "bestPrice": null,
       "bestCondition": null,
@@ -271,7 +271,7 @@
       "bestScore": 0
     }
   },
-  "lastRun": "2026-03-27T15:26:21.762Z",
-  "totalScanned": 228,
+  "lastRun": "2026-03-27T23:04:02.976Z",
+  "totalScanned": 250,
   "totalDeals": 0
 }
