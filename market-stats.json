@@ -1632,8 +1632,8 @@
   "2026-03-27": {
     "yugioh": {
       "totalListings": 120,
-      "avgPrice": 6409,
-      "maxPrice": 34605,
+      "avgPrice": 6434,
+      "maxPrice": 34701,
       "newAlerts": 0,
       "platforms": {
         "ebay": 120,
@@ -1641,80 +1641,80 @@
       }
     },
     "pokemon": {
-      "totalListings": 116,
-      "avgPrice": 5315,
-      "maxPrice": 35903,
-      "newAlerts": 10,
+      "totalListings": 118,
+      "avgPrice": 5165,
+      "maxPrice": 36002,
+      "newAlerts": 6,
       "platforms": {
-        "ebay": 116,
+        "ebay": 118,
         "tcgplayer": 0
       }
     },
     "mtg": {
-      "totalListings": 116,
-      "avgPrice": 5371,
-      "maxPrice": 42203,
-      "newAlerts": 1,
+      "totalListings": 115,
+      "avgPrice": 5259,
+      "maxPrice": 42209,
+      "newAlerts": 0,
       "platforms": {
-        "ebay": 116,
+        "ebay": 115,
         "tcgplayer": 0
       }
     },
     "onepiece": {
-      "totalListings": 81,
-      "avgPrice": 5063,
-      "maxPrice": 25954,
+      "totalListings": 78,
+      "avgPrice": 4978,
+      "maxPrice": 17000,
       "newAlerts": 0,
       "platforms": {
-        "ebay": 81,
+        "ebay": 78,
         "tcgplayer": 0
       }
     },
     "dragonball": {
-      "totalListings": 60,
-      "avgPrice": 3884,
-      "maxPrice": 8650,
+      "totalListings": 61,
+      "avgPrice": 3949,
+      "maxPrice": 8674,
       "newAlerts": 1,
       "platforms": {
-        "ebay": 60,
+        "ebay": 61,
         "tcgplayer": 0
       }
     },
     "weiss": {
-      "totalListings": 39,
-      "avgPrice": 4102,
-      "maxPrice": 9592,
-      "newAlerts": 1,
+      "totalListings": 36,
+      "avgPrice": 4231,
+      "maxPrice": 9534,
+      "newAlerts": 0,
       "platforms": {
-        "ebay": 39,
+        "ebay": 36,
         "tcgplayer": 0
       }
     },
     "dandadan": {
       "totalListings": 68,
-      "avgPrice": 6494,
-      "maxPrice": 18254,
-      "newAlerts": 1,
+      "avgPrice": 6489,
+      "maxPrice": 18305,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 68,
         "tcgplayer": 0
       }
     },
     "digimon": {
-      "totalListings": 17,
-      "avgPrice": 4942,
-      "maxPrice": 8555,
+      "totalListings": 16,
+      "avgPrice": 5100,
+      "maxPrice": 8579,
       "newAlerts": 0,
       "platforms": {
-        "ebay": 17,
+        "ebay": 16,
         "tcgplayer": 0
       }
     },
     "lorcana": {
       "totalListings": 40,
-      "avgPrice": 3958,
-      "maxPrice": 8651,
-      "newAlerts": 1,
+      "avgPrice": 3967,
+      "maxPrice": 8675,
+      "newAlerts": 0,
       "platforms": {
         "ebay": 40,
         "tcgplayer": 0
@@ -1722,8 +1722,8 @@
     },
     "unionarena": {
       "totalListings": 57,
-      "avgPrice": 5050,
-      "maxPrice": 12103,
+      "avgPrice": 4992,
+      "maxPrice": 12137,
       "newAlerts": 0,
       "platforms": {
         "ebay": 57,
@@ -1731,12 +1731,12 @@
       }
     },
     "riftbound": {
-      "totalListings": 588,
+      "totalListings": 589,
       "avgPrice": 1432,
-      "maxPrice": 12285,
-      "newAlerts": 7,
+      "maxPrice": 12319,
+      "newAlerts": 1,
       "platforms": {
-        "ebay": 588,
+        "ebay": 589,
         "tcgplayer": 0
       }
     }

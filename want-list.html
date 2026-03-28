@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Want List Wizard — Card Sniper</title>
+<meta name="description" content="Track every card you're hunting. Set target prices, monitor market gaps, and get notified the instant a deal hits your target. Never miss a grail again.">
+<meta property="og:title" content="Want List Wizard — Hunt Smarter">
+<meta property="og:description" content="Add cards you want, set target prices, see what's in range today. Upgrade for live alerts the moment they hit.">
+<meta property="og:image" content="https://card-sniper-production.up.railway.app/og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:       #080810;
+    --surface:  #0f0f1a;
+    --surface2: #161625;
+    --surface3: #1e1e30;
+    --border:   rgba(255,255,255,0.08);
+    --text:     #e8e8f4;
+    --dim:      #7070a0;
+    --accent:   #ff4d6d;
+    --gold:     #ffd60a;
+    --green:    #06d6a0;
+    --blue:     #4895ef;
+    --purple:   #b388ff;
+    --red:      #ff4d6d;
+    --orange:   #ff8c42;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; opacity: 0.4;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,8,16,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+  }
+  .nav-inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 15px; font-weight: 700;
+    color: var(--accent); text-decoration: none; margin-right: 8px;
+  }
+  .nav-link {
+    color: var(--dim); text-decoration: none;
+    font-size: 13px; font-weight: 500;
+    padding: 5px 10px; border-radius: 6px; transition: all 0.2s;
+  }
+  .nav-link:hover, .nav-link.active { color: var(--text); background: var(--surface2); }
+  .nav-cta {
+    margin-left: auto;
+    background: var(--accent); color: #fff;
+    text-decoration: none; font-size: 13px; font-weight: 600;
+    padding: 6px 14px; border-radius: 8px; transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ── HERO ── */
+  .hero { padding: 48px 0 32px; text-align: center; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,140,66,0.12);
+    border: 1px solid rgba(255,140,66,0.3);
+    border-radius: 20px; padding: 4px 14px;
+    font-size: 12px; font-weight: 600; color: var(--orange);
+    margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .hero h1 { font-size: clamp(28px, 5vw, 44px); font-weight: 700; line-height: 1.15; margin-bottom: 12px; }
+  .hero h1 span { color: var(--orange); }
+  .hero p { font-size: 16px; color: var(--dim); max-width: 520px; margin: 0 auto 24px; }
+  .hero-actions { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+  /* ── BTNS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; text-decoration: none; transition: all 0.2s;
+  }
+  .btn-primary { background: var(--orange); color: #1a0800; }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--dim); }
+  .btn-outline:hover { border-color: var(--text); color: var(--text); }
+  .btn-accent { background: var(--accent); color: #fff; }
+  .btn-accent:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-green { background: var(--green); color: #020c09; }
+  .btn-green:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-danger { background: rgba(255,77,109,0.15); color: var(--red); border: 1px solid rgba(255,77,109,0.25); }
+  .btn-danger:hover { background: rgba(255,77,109,0.25); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 7px; }
+
+  /* ── STATS GRID ── */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px; margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px; transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: rgba(255,255,255,0.16); }
+  .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--dim); margin-bottom: 6px; }
+  .stat-value { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; color: var(--text); }
+  .stat-value.fire { color: var(--orange); }
+  .stat-value.green { color: var(--green); }
+  .stat-sub { font-size: 12px; color: var(--dim); margin-top: 3px; }
+
+  /* ── ALERT BANNER ── */
+  .alert-banner {
+    background: linear-gradient(135deg, rgba(255,77,109,0.12) 0%, rgba(255,140,66,0.08) 100%);
+    border: 1px solid rgba(255,77,109,0.3);
+    border-radius: 14px; padding: 18px 24px; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .alert-banner-icon { font-size: 28px; flex-shrink: 0; }
+  .alert-banner-text { flex: 1; }
+  .alert-banner-text strong { font-size: 15px; color: var(--text); }
+  .alert-banner-text p { font-size: 13px; color: var(--dim); margin-top: 2px; }
+  .alert-banner-cta { flex-shrink: 0; }
+
+  /* ── FILTER TABS ── */
+  .filter-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .tab {
+    padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--dim);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+  }
+  .tab:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .tab.active { background: var(--surface2); border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .tab .tab-count {
+    display: inline-block; background: rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 0 7px; font-size: 11px; margin-left: 4px;
+  }
+  .filter-spacer { flex: 1; }
+
+  /* ── SEARCH ── */
+  .search-input {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 14px;
+    color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 13px;
+    width: 200px; outline: none;
+  }
+  .search-input:focus { border-color: var(--orange); }
+  .search-input::placeholder { color: var(--dim); }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: var(--surface2); }
+  th {
+    padding: 12px 16px; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.07em; color: var(--dim);
+    text-align: left; white-space: nowrap; cursor: pointer; user-select: none;
+  }
+  th:hover { color: var(--text); }
+  th .sort-arrow { opacity: 0.4; margin-left: 4px; }
+  th.sorted .sort-arrow { opacity: 1; color: var(--orange); }
+  td { padding: 13px 16px; font-size: 14px; border-top: 1px solid var(--border); vertical-align: middle; }
+  tr:hover td { background: rgba(255,255,255,0.015); }
+
+  .card-name { font-weight: 600; color: var(--text); }
+  .card-set { font-size: 12px; color: var(--dim); margin-top: 2px; }
+  .card-notes { font-size: 11px; color: rgba(112,112,160,0.7); margin-top: 2px; font-style: italic; }
+
+  /* Game badges */
+  .game-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 5px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .game-yugioh   { background: rgba(255,214,10,0.15);  color: var(--gold); }
+  .game-pokemon  { background: rgba(255,140,66,0.15);  color: var(--orange); }
+  .game-onepiece { background: rgba(255,77,109,0.15);  color: var(--red); }
+  .game-mtg      { background: rgba(72,149,239,0.15);  color: var(--blue); }
+  .game-riftbound { background: rgba(179,136,255,0.15); color: var(--purple); }
+  .game-dragonball { background: rgba(6,214,160,0.15); color: var(--green); }
+  .game-lorcana  { background: rgba(255,140,66,0.12);  color: #ffb347; }
+
+  /* Priority badges */
+  .priority-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 9px; border-radius: 12px; font-size: 11px; font-weight: 600;
+  }
+  .priority-grail    { background: rgba(255,77,109,0.2);   color: var(--red);    border: 1px solid rgba(255,77,109,0.35); }
+  .priority-hunting  { background: rgba(255,140,66,0.2);   color: var(--orange); border: 1px solid rgba(255,140,66,0.35); }
+  .priority-watching { background: rgba(72,149,239,0.15);  color: var(--blue);   border: 1px solid rgba(72,149,239,0.25); }
+  .priority-someday  { background: rgba(112,112,160,0.15); color: var(--dim);    border: 1px solid var(--border); }
+
+  /* Price columns */
+  .price-target { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--green); font-weight: 700; }
+  .price-market { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--text); }
+  .price-above  { color: var(--dim) !important; }
+
+  /* Gap column */
+  .gap-val { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; }
+  .gap-positive { color: var(--green); }
+  .gap-negative { color: var(--red); }
+  .gap-close    { color: var(--orange); }
+
+  /* Heat score */
+  .heat-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .heat-bar {
+    width: 80px; height: 6px; border-radius: 3px;
+    background: var(--surface3); overflow: hidden; flex-shrink: 0;
+  }
+  .heat-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+  .heat-cold  { background: var(--dim); }
+  .heat-warm  { background: var(--blue); }
+  .heat-hot   { background: var(--orange); }
+  .heat-fire  { background: linear-gradient(90deg, var(--orange), var(--red)); }
+  .heat-label { font-size: 12px; font-weight: 600; white-space: nowrap; }
+
+  /* In-range flash */
+  @keyframes pulse-row {
+    0%, 100% { background: transparent; }
+    50% { background: rgba(6,214,160,0.04); }
+  }
+  tr.in-range td { animation: pulse-row 3s ease-in-out infinite; }
+  tr.in-range .card-name::after {
+    content: ' 🎯'; font-size: 12px;
+  }
+
+  /* Action buttons */
+  .row-actions { display: flex; align-items: center; gap: 6px; }
+  .icon-btn {
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 8px;
+    color: var(--dim); cursor: pointer; font-size: 13px;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .icon-btn:hover { border-color: rgba(255,255,255,0.25); color: var(--text); }
+  .icon-btn.edit-btn:hover { color: var(--blue); border-color: var(--blue); }
+  .icon-btn.del-btn:hover  { color: var(--red);  border-color: var(--red); }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center; padding: 60px 24px; color: var(--dim);
+  }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state h3 { font-size: 18px; color: var(--text); margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; max-width: 360px; margin: 0 auto 20px; }
+
+  /* ── MODAL ── */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px; padding: 28px 32px; width: 100%; max-width: 520px;
+    transform: translateY(16px); transition: transform 0.2s;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-backdrop.open .modal { transform: translateY(0); }
+  .modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+  .form-grid { display: grid; gap: 14px; }
+  .form-row { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dim); }
+  .form-input, .form-select, .form-textarea {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 12px;
+    color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 14px; outline: none;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--orange); }
+  .form-input::placeholder { color: var(--dim); }
+  .form-select option { background: var(--surface2); }
+  .form-textarea { resize: vertical; min-height: 60px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* ── MISSED DEALS SECTION ── */
+  .missed-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px; margin-top: 28px;
+  }
+  .missed-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .missed-section .sub { font-size: 13px; color: var(--dim); margin-bottom: 16px; }
+  .missed-list { display: grid; gap: 10px; }
+  .missed-item {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .missed-item.hit { border-color: rgba(255,77,109,0.3); background: rgba(255,77,109,0.04); }
+  .missed-time { font-size: 11px; color: var(--dim); white-space: nowrap; flex-shrink: 0; }
+  .missed-card { flex: 1; }
+  .missed-card strong { font-size: 14px; color: var(--text); }
+  .missed-card span { font-size: 12px; color: var(--dim); display: block; }
+  .missed-price { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--red); font-weight: 700; flex-shrink: 0; }
+  .missed-price.would-match { color: var(--red); }
+  .lock-overlay {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--dim); flex-shrink: 0;
+  }
+  .lock-overlay .lock { font-size: 16px; }
+
+  /* ── CTA SECTION ── */
+  .cta-section {
+    background: linear-gradient(135deg, rgba(255,77,109,0.1) 0%, rgba(72,149,239,0.08) 100%);
+    border: 1px solid rgba(255,77,109,0.25);
+    border-radius: 16px; padding: 32px; margin-top: 28px; text-align: center;
+  }
+  .cta-section h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .cta-section p { font-size: 15px; color: var(--dim); margin-bottom: 20px; max-width: 440px; margin-left: auto; margin-right: auto; }
+  .cta-bullets {
+    display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
+    font-size: 13px; color: var(--dim); margin-bottom: 24px;
+  }
+  .cta-bullet { display: flex; align-items: center; gap: 6px; }
+  .cta-bullet .check { color: var(--green); }
+
+  /* ── DEMO BANNER ── */
+  .demo-bar {
+    background: rgba(72,149,239,0.08); border: 1px solid rgba(72,149,239,0.2);
+    border-radius: 10px; padding: 10px 16px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--dim);
+  }
+  .demo-bar strong { color: var(--blue); }
+
+  /* ── FOOTER ── */
+  footer { text-align: center; padding: 40px 24px; color: var(--dim); font-size: 13px; }
+  footer a { color: var(--dim); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .form-row { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    table { font-size: 13px; }
+    th, td { padding: 10px 10px; }
+    .heat-bar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">⚡ CARD SNIPER</a>
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="wins.html" class="nav-link">Wins</a>
+    <a href="cardmarket-deals.html" class="nav-link">EU Deals</a>
+    <a href="japan-arb.html" class="nav-link">🇯🇵 Japan Arb</a>
+    <a href="grade-calc.html" class="nav-link">EV Calc</a>
+    <a href="portfolio.html" class="nav-link">Portfolio</a>
+    <a href="want-list.html" class="nav-link active">🎯 Want List</a>
+    <a href="free.html" class="nav-link">Free Tier</a>
+    <a href="card-sniper.html" class="nav-cta">Get Alerts →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="container">
+  <div class="hero">
+    <div class="hero-badge">🎯 Hunt Mode</div>
+    <h1>Your <span>Want List</span> Wizard</h1>
+    <p>Track every card you're chasing. Set target prices, watch the gap close, and know the second you should pull the trigger.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="openModal()">＋ Add Card to Hunt</button>
+      <button class="btn btn-outline btn-sm" onclick="loadDemo()">Load Demo Cards</button>
+      <button class="btn btn-outline btn-sm" onclick="exportJSON()">Export JSON</button>
+      <label class="btn btn-outline btn-sm" style="cursor:pointer">
+        Import <input type="file" accept=".json" onchange="importJSON(event)" style="display:none">
+      </label>
+    </div>
+  </div>
+
+  <!-- DEMO BAR -->
+  <div class="demo-bar" id="demoBanner" style="display:none">
+    <strong>DEMO DATA</strong> — These are simulated cards and prices to show you how the Want List Wizard works.
+    <button class="btn btn-outline btn-sm" onclick="clearDemo()" style="margin-left:auto">Clear Demo</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card">
+      <div class="stat-label">Cards Hunting</div>
+      <div class="stat-value" id="statTotal">0</div>
+      <div class="stat-sub" id="statByPriority">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Budget to Fill List</div>
+      <div class="stat-value" id="statBudget">€0</div>
+      <div class="stat-sub" id="statBudgetSub">at target prices</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">🎯 In Range Now</div>
+      <div class="stat-value fire" id="statInRange">0</div>
+      <div class="stat-sub">market ≤ target</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">🔥 Hot (within 10%)</div>
+      <div class="stat-value green" id="statHot">0</div>
+      <div class="stat-sub" id="statHotSub">close to target</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Best Opportunity</div>
+      <div class="stat-value" id="statBestCard" style="font-size:14px;font-weight:600;">—</div>
+      <div class="stat-sub" id="statBestSub">—</div>
+    </div>
+  </div>
+
+  <!-- ALERT BANNER (shown when cards are in range) -->
+  <div class="alert-banner" id="alertBanner" style="display:none">
+    <div class="alert-banner-icon">🚨</div>
+    <div class="alert-banner-text">
+      <strong id="alertBannerTitle">Cards on your list are in range right now</strong>
+      <p id="alertBannerText">These listings exist today — but you'd only know if you're watching 24/7. That's what we do.</p>
+    </div>
+    <div class="alert-banner-cta">
+      <a href="card-sniper.html" class="btn btn-accent btn-sm">Get Live Alerts →</a>
+    </div>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="filter-row">
+    <button class="tab active" data-filter="all" onclick="setFilter('all',this)">All <span class="tab-count" id="tabAll">0</span></button>
+    <button class="tab" data-filter="in-range" onclick="setFilter('in-range',this)">🎯 In Range <span class="tab-count" id="tabInRange">0</span></button>
+    <button class="tab" data-filter="hot" onclick="setFilter('hot',this)">🔥 Hot <span class="tab-count" id="tabHot">0</span></button>
+    <button class="tab" data-filter="grail" onclick="setFilter('grail',this)">🏆 Grail</button>
+    <button class="tab" data-filter="hunting" onclick="setFilter('hunting',this)">🔍 Hunting</button>
+    <button class="tab" data-filter="watching" onclick="setFilter('watching',this)">👁️ Watching</button>
+    <button class="tab" data-filter="someday" onclick="setFilter('someday',this)">🌙 Someday</button>
+    <div class="filter-spacer"></div>
+    <input type="text" class="search-input" placeholder="Search cards..." oninput="renderTable()" id="searchInput">
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table id="wantTable">
+      <thead>
+        <tr>
+          <th onclick="sortBy('name')" title="Sort by name">Card <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('game')" title="Sort by game">Game <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('priority')" title="Sort by priority">Priority <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('target')" title="Sort by target price">Target Price <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('market')" title="Sort by market price">Market Now <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('gap')" title="Sort by gap">Gap <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('heat')" title="Sort by heat score">Heat <span class="sort-arrow">↕</span></th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="emptyState" class="empty-state" style="display:none">
+      <div class="empty-icon">🎯</div>
+      <h3>Nothing on your hunt list yet</h3>
+      <p>Add cards you're looking to buy. Set your max price and we'll tell you when the market gets close.</p>
+      <button class="btn btn-primary" onclick="openModal()">＋ Add Your First Card</button>
+    </div>
+  </div>
+
+  <!-- MISSED DEALS SECTION -->
+  <div class="missed-section" id="missedSection" style="display:none">
+    <h3>⏰ What You Missed This Week</h3>
+    <p class="sub">Based on your want list, these listings appeared in the last 7 days. Live subscribers got instant alerts.</p>
+    <div class="missed-list" id="missedList"></div>
+    <div style="margin-top:16px; text-align:center;">
+      <a href="card-sniper.html" class="btn btn-accent">Don't Miss The Next One — €19/mo →</a>
+    </div>
+  </div>
+
+  <!-- CTA SECTION -->
+  <div class="cta-section">
+    <h2>🔔 This list is useless without live alerts</h2>
+    <p>You've built your hunt list. Now let the algorithm do the watching. The moment a card hits your target, you get a Telegram push — price, EV breakdown, buy link, done.</p>
+    <div class="cta-bullets">
+      <div class="cta-bullet"><span class="check">✓</span> Instant Telegram push when target price hits</div>
+      <div class="cta-bullet"><span class="check">✓</span> Full EV breakdown included in every alert</div>
+      <div class="cta-bullet"><span class="check">✓</span> eBay.de, Cardmarket, Fanatics monitored 24/7</div>
+      <div class="cta-bullet"><span class="check">✓</span> Cancel anytime — no contracts</div>
+    </div>
+    <a href="card-sniper.html" class="btn btn-accent">Activate Live Alerts — €19/mo →</a>
+    <div style="margin-top:10px; font-size:12px; color:var(--dim);">or try <a href="free.html" style="color:var(--blue)">Free Tier</a> first — 24h delayed alerts, no credit card</div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <p>Card Sniper — TCG deal intelligence · <a href="index.html">Home</a> · <a href="card-sniper.html">Get Alerts</a> · <a href="free.html">Free Tier</a></p>
+    <p style="margin-top:6px; font-size:11px;">Market prices are simulated for demo purposes. Live data requires active subscription.</p>
+  </div>
+</footer>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModalOnBackdrop(event)">
+  <div class="modal" id="modal">
+    <h2 id="modalTitle">Add Card to Hunt List</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Card Name *</label>
+        <input type="text" id="fName" class="form-input" placeholder="e.g. Blue-Eyes White Dragon LOB 1st Edition">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Game *</label>
+          <select id="fGame" class="form-select">
+            <option value="yugioh">Yu-Gi-Oh!</option>
+            <option value="pokemon">Pokémon</option>
+            <option value="onepiece">One Piece</option>
+            <option value="mtg">Magic: The Gathering</option>
+            <option value="riftbound">Riftbound</option>
+            <option value="dragonball">Dragon Ball</option>
+            <option value="lorcana">Lorcana</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select id="fPriority" class="form-select">
+            <option value="grail">🏆 Grail — dream card</option>
+            <option value="hunting" selected>🔍 Hunting — actively looking</option>
+            <option value="watching">👁️ Watching — waiting for dip</option>
+            <option value="someday">🌙 Someday — no rush</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Target Price (€) *</label>
+          <input type="number" id="fTarget" class="form-input" placeholder="0" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Max Quantity</label>
+          <input type="number" id="fQty" class="form-input" placeholder="1" min="1" value="1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Set / Edition</label>
+        <input type="text" id="fSet" class="form-input" placeholder="e.g. Legend of Blue Eyes White Dragon, 1st Ed">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Condition Notes</label>
+        <textarea id="fNotes" class="form-textarea" placeholder="e.g. NM or better, raw only, check centering"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCard()">💾 Save to Hunt List</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'cs_wantlist_v2';
+let cards = [];
+let editingId = null;
+let filterMode = 'all';
+let sortKey = 'heat';
+let sortDir = -1; // -1 = desc
+
+// Simulated market prices (refreshed per session with small variation to feel "live")
+const MARKET_SEED = Date.now();
+function seededRand(id, min, max) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (Math.imul(31, h) + id.charCodeAt(i)) | 0;
+  h ^= MARKET_SEED & 0xffff; // daily variation
+  const t = Math.sin(h) * 10000;
+  const r = t - Math.floor(t);
+  return min + r * (max - min);
+}
+
+// Generate realistic market price for a card given its target
+function getMarketPrice(card) {
+  if (card._marketOverride) return card._marketOverride;
+  const target = card.target;
+  // Market hovers 80–130% of target with daily variance
+  const ratio = seededRand(card.id + 'market', 0.82, 1.28);
+  return Math.round(target * ratio * 100) / 100;
+}
+
+// ── Heat score ─────────────────────────────────────────────────────────────────
+// 0-100, higher = closer to / below target
+function calcHeat(card) {
+  const market = getMarketPrice(card);
+  const target = card.target;
+  if (market <= target) return 100;
+  const over = (market - target) / target; // 0 = at target, 1 = 100% over
+  return Math.max(0, Math.round((1 - Math.min(over, 1)) * 100));
+}
+
+function heatClass(heat) {
+  if (heat === 100) return 'heat-fire';
+  if (heat >= 85)   return 'heat-hot';
+  if (heat >= 60)   return 'heat-warm';
+  return 'heat-cold';
+}
+function heatLabel(heat) {
+  if (heat === 100) return '🔥 IN RANGE';
+  if (heat >= 85)   return '🌶️ Very Hot';
+  if (heat >= 60)   return '📈 Warm';
+  if (heat >= 35)   return '🌡️ Cooling';
+  return '❄️ Cold';
+}
+
+// ── Persistence ────────────────────────────────────────────────────────────────
+function load() {
+  try { cards = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { cards = []; }
+}
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(cards)); }
+
+// ── Rendering ──────────────────────────────────────────────────────────────────
+const GAME_LABELS = {
+  yugioh: 'Yu-Gi-Oh!', pokemon: 'Pokémon', onepiece: 'One Piece',
+  mtg: 'MTG', riftbound: 'Riftbound', dragonball: 'Dragon Ball',
+  lorcana: 'Lorcana', other: 'Other'
+};
+const PRIORITY_ORDER = { grail: 0, hunting: 1, watching: 2, someday: 3 };
+const PRIORITY_LABEL = { grail: '🏆 Grail', hunting: '🔍 Hunting', watching: '👁️ Watching', someday: '🌙 Someday' };
+
+function fmt(n) {
+  return '€' + Number(n).toLocaleString('de-DE', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function filteredCards() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  return cards.filter(c => {
+    if (search && !c.name.toLowerCase().includes(search) && !(c.set||'').toLowerCase().includes(search)) return false;
+    if (filterMode === 'all') return true;
+    if (filterMode === 'in-range') return calcHeat(c) === 100;
+    if (filterMode === 'hot') return calcHeat(c) >= 85 && calcHeat(c) < 100;
+    if (filterMode === 'grail') return c.priority === 'grail';
+    if (filterMode === 'hunting') return c.priority === 'hunting';
+    if (filterMode === 'watching') return c.priority === 'watching';
+    if (filterMode === 'someday') return c.priority === 'someday';
+    return true;
+  }).sort((a, b) => {
+    let av, bv;
+    if (sortKey === 'name')     { av = a.name; bv = b.name; return sortDir * av.localeCompare(bv); }
+    if (sortKey === 'game')     { av = a.game; bv = b.game; return sortDir * av.localeCompare(bv); }
+    if (sortKey === 'priority') { av = PRIORITY_ORDER[a.priority]; bv = PRIORITY_ORDER[b.priority]; }
+    if (sortKey === 'target')   { av = a.target; bv = b.target; }
+    if (sortKey === 'market')   { av = getMarketPrice(a); bv = getMarketPrice(b); }
+    if (sortKey === 'gap')      { av = getMarketPrice(a) - a.target; bv = getMarketPrice(b) - b.target; }
+    if (sortKey === 'heat')     { av = calcHeat(a); bv = calcHeat(b); }
+    return sortDir * ((bv ?? 0) - (av ?? 0));
+  });
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+  const visible = filteredCards();
+
+  if (cards.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    tbody.closest('table').style.display = 'none';
+  } else {
+    empty.style.display = 'none';
+    tbody.closest('table').style.display = '';
+    tbody.innerHTML = visible.map(c => {
+      const heat = calcHeat(c);
+      const market = getMarketPrice(c);
+      const gap = market - c.target;
+      const inRange = heat === 100;
+      const isHot = heat >= 85;
+      const hFill = heat;
+      const hCls = heatClass(heat);
+      const hLbl = heatLabel(heat);
+      const gapCls = gap < 0 ? 'gap-positive' : (gap / c.target < 0.12 ? 'gap-close' : 'gap-negative');
+      const gapStr = gap < 0 ? `-${fmt(Math.abs(gap))}` : `+${fmt(gap)}`;
+
+      return `<tr class="${inRange ? 'in-range' : ''}">
+        <td>
+          <div class="card-name">${escHtml(c.name)}</div>
+          ${c.set ? `<div class="card-set">${escHtml(c.set)}</div>` : ''}
+          ${c.notes ? `<div class="card-notes">${escHtml(c.notes)}</div>` : ''}
+        </td>
+        <td><span class="game-badge game-${c.game}">${GAME_LABELS[c.game]||c.game}</span></td>
+        <td><span class="priority-badge priority-${c.priority}">${PRIORITY_LABEL[c.priority]}</span></td>
+        <td><span class="price-target">${fmt(c.target)}</span>${c.qty > 1 ? `<span style="font-size:11px;color:var(--dim);"> ×${c.qty}</span>` : ''}</td>
+        <td><span class="price-market ${!inRange && !isHot ? 'price-above' : ''}">${fmt(market)}</span></td>
+        <td><span class="gap-val ${gapCls}">${gapStr}</span></td>
+        <td>
+          <div class="heat-bar-wrap">
+            <div class="heat-bar"><div class="heat-fill ${hCls}" style="width:${hFill}%"></div></div>
+            <span class="heat-label" style="color:${hFill===100?'var(--red)':hFill>=85?'var(--orange)':hFill>=60?'var(--blue)':'var(--dim)'}">${hLbl}</span>
+          </div>
+        </td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn edit-btn" onclick="editCard('${c.id}')">✏️ Edit</button>
+            <button class="icon-btn del-btn" onclick="deleteCard('${c.id}')">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  updateStats();
+  updateTabCounts();
+  updateAlertBanner();
+  updateMissedDeals();
+}
+
+function updateStats() {
+  const total = cards.length;
+  const inRange = cards.filter(c => calcHeat(c) === 100).length;
+  const hot = cards.filter(c => { const h = calcHeat(c); return h >= 85 && h < 100; }).length;
+  const budget = cards.reduce((s,c) => s + c.target * (c.qty||1), 0);
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statInRange').textContent = inRange;
+  document.getElementById('statHot').textContent = hot;
+  document.getElementById('statBudget').textContent = fmt(budget);
+
+  const grail = cards.filter(c=>c.priority==='grail').length;
+  const hunting = cards.filter(c=>c.priority==='hunting').length;
+  const parts = [];
+  if (grail) parts.push(`${grail} grail`);
+  if (hunting) parts.push(`${hunting} hunting`);
+  document.getElementById('statByPriority').textContent = parts.length ? parts.join(', ') : 'across all priorities';
+
+  // Best opportunity
+  if (cards.length) {
+    const best = [...cards].sort((a,b) => calcHeat(b) - calcHeat(a))[0];
+    const h = calcHeat(best);
+    document.getElementById('statBestCard').textContent = best.name.length > 22 ? best.name.slice(0,21)+'…' : best.name;
+    document.getElementById('statBestSub').textContent = `Heat ${h}% — ${heatLabel(h)}`;
+  }
+}
+
+function updateTabCounts() {
+  document.getElementById('tabAll').textContent = cards.length;
+  document.getElementById('tabInRange').textContent = cards.filter(c => calcHeat(c) === 100).length;
+  document.getElementById('tabHot').textContent = cards.filter(c => { const h = calcHeat(c); return h >= 85 && h < 100; }).length;
+}
+
+function updateAlertBanner() {
+  const banner = document.getElementById('alertBanner');
+  const inRange = cards.filter(c => calcHeat(c) === 100);
+  if (inRange.length > 0) {
+    banner.style.display = 'flex';
+    document.getElementById('alertBannerTitle').textContent =
+      inRange.length === 1
+        ? `${inRange[0].name} is within your target range right now`
+        : `${inRange.length} cards on your list are in range right now`;
+    document.getElementById('alertBannerText').textContent =
+      'These prices exist on the market today — but live deals sell in minutes. Get instant alerts before they\'re gone.';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+function updateMissedDeals() {
+  const section = document.getElementById('missedSection');
+  const list = document.getElementById('missedList');
+  if (cards.length === 0) { section.style.display = 'none'; return; }
+
+  // Generate simulated "missed deals" from want list — realistic weekly data
+  const now = Date.now();
+  const DAY = 86400000;
+  const missedDeals = cards
+    .filter(c => c.priority !== 'someday')
+    .slice(0, 5)
+    .map(c => {
+      const market = getMarketPrice(c);
+      const hitPrice = Math.round(c.target * seededRand(c.id+'hit', 0.88, 1.0) * 100) / 100;
+      const daysAgo = Math.ceil(seededRand(c.id+'days', 0.5, 6));
+      const platform = ['eBay.de', 'Cardmarket', 'Fanatics'][Math.floor(seededRand(c.id+'plat', 0, 3))];
+      const wouldMatch = hitPrice <= c.target;
+      return { card: c, hitPrice, daysAgo, platform, wouldMatch };
+    });
+
+  if (missedDeals.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+
+  list.innerHTML = missedDeals.map(({ card, hitPrice, daysAgo, platform, wouldMatch }) => `
+    <div class="missed-item ${wouldMatch ? 'hit' : ''}">
+      <div class="missed-time">${daysAgo}d ago</div>
+      <div class="missed-card">
+        <strong>${escHtml(card.name)}</strong>
+        <span>${platform} · ${GAME_LABELS[card.game]||card.game}</span>
+      </div>
+      <div class="missed-price ${wouldMatch ? 'would-match' : ''}">${fmt(hitPrice)}</div>
+      <div class="lock-overlay">
+        ${wouldMatch ? '<span class="lock">🔒</span> Would have alerted you' : '<span style="color:var(--dim)">Above target</span>'}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Sorting & filtering ────────────────────────────────────────────────────────
+function setFilter(f, el) {
+  filterMode = f;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+function sortBy(key) {
+  if (sortKey === key) sortDir *= -1;
+  else { sortKey = key; sortDir = -1; }
+  document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
+  const headers = document.querySelectorAll('th');
+  const keys = ['name','game','priority','target','market','gap','heat'];
+  const idx = keys.indexOf(key);
+  if (idx >= 0 && headers[idx]) headers[idx].classList.add('sorted');
+  renderTable();
+}
+
+// ── Modal ──────────────────────────────────────────────────────────────────────
+function openModal(id) {
+  editingId = id || null;
+  document.getElementById('modalTitle').textContent = id ? 'Edit Want List Card' : 'Add Card to Hunt List';
+  if (id) {
+    const c = cards.find(x => x.id === id);
+    if (c) {
+      document.getElementById('fName').value = c.name;
+      document.getElementById('fGame').value = c.game;
+      document.getElementById('fPriority').value = c.priority;
+      document.getElementById('fTarget').value = c.target;
+      document.getElementById('fQty').value = c.qty || 1;
+      document.getElementById('fSet').value = c.set || '';
+      document.getElementById('fNotes').value = c.notes || '';
+    }
+  } else {
+    document.getElementById('fName').value = '';
+    document.getElementById('fGame').value = 'yugioh';
+    document.getElementById('fPriority').value = 'hunting';
+    document.getElementById('fTarget').value = '';
+    document.getElementById('fQty').value = '1';
+    document.getElementById('fSet').value = '';
+    document.getElementById('fNotes').value = '';
+  }
+  document.getElementById('modalBackdrop').classList.add('open');
+  setTimeout(() => document.getElementById('fName').focus(), 100);
+}
+function closeModal() { document.getElementById('modalBackdrop').classList.remove('open'); editingId = null; }
+function closeModalOnBackdrop(e) { if (e.target === document.getElementById('modalBackdrop')) closeModal(); }
+function editCard(id) { openModal(id); }
+
+function saveCard() {
+  const name = document.getElementById('fName').value.trim();
+  const target = parseFloat(document.getElementById('fTarget').value);
+  if (!name) { alert('Please enter a card name.'); return; }
+  if (!target || target <= 0) { alert('Please enter a valid target price.'); return; }
+
+  const card = {
+    id: editingId || ('c' + Date.now() + Math.random().toString(36).slice(2,6)),
+    name,
+    game: document.getElementById('fGame').value,
+    priority: document.getElementById('fPriority').value,
+    target,
+    qty: parseInt(document.getElementById('fQty').value) || 1,
+    set: document.getElementById('fSet').value.trim(),
+    notes: document.getElementById('fNotes').value.trim(),
+    addedAt: editingId ? (cards.find(c=>c.id===editingId)?.addedAt || new Date().toISOString()) : new Date().toISOString(),
+  };
+
+  if (editingId) {
+    const idx = cards.findIndex(c => c.id === editingId);
+    if (idx >= 0) cards[idx] = card;
+  } else {
+    cards.unshift(card);
+  }
+  save();
+  closeModal();
+  renderTable();
+}
+
+function deleteCard(id) {
+  if (!confirm('Remove this card from your hunt list?')) return;
+  cards = cards.filter(c => c.id !== id);
+  save();
+  renderTable();
+}
+
+// ── Demo data ──────────────────────────────────────────────────────────────────
+const DEMO_CARDS = [
+  { id: 'demo1', name: 'Blue-Eyes White Dragon LOB-001 1st Edition', game: 'yugioh', priority: 'grail', target: 550, qty: 1, set: 'Legend of Blue Eyes, 1st Ed', notes: 'NM or better, check centering', addedAt: '2026-03-01T10:00:00Z' },
+  { id: 'demo2', name: 'Charizard Base Set 1st Edition Holo', game: 'pokemon', priority: 'grail', target: 3800, qty: 1, set: 'Base Set, 1st Edition', notes: 'Raw only — grading candidate', addedAt: '2026-03-02T10:00:00Z' },
+  { id: 'demo3', name: 'Luffy Manga Alternate Art OP-01', game: 'onepiece', priority: 'hunting', target: 750, qty: 2, set: 'OP-01 Romance Dawn', notes: 'Any condition accepted', addedAt: '2026-03-05T10:00:00Z' },
+  { id: 'demo4', name: 'Dark Magician MFC-000 Super Rare', game: 'yugioh', priority: 'hunting', target: 180, qty: 1, set: 'Magician\'s Force, 1st Ed', notes: '', addedAt: '2026-03-10T10:00:00Z', _marketOverride: 165 },
+  { id: 'demo5', name: 'Black Lotus Alpha', game: 'mtg', priority: 'someday', target: 12000, qty: 1, set: 'Alpha Edition', notes: 'Heavy played acceptable', addedAt: '2026-03-12T10:00:00Z' },
+  { id: 'demo6', name: 'Ahri Moonlit Wilds Riftbound', game: 'riftbound', priority: 'watching', target: 95, qty: 3, set: 'Moonlit Wilds', notes: 'Foil preferred', addedAt: '2026-03-14T10:00:00Z', _marketOverride: 88 },
+  { id: 'demo7', name: 'Son Goku Awakening Secret Rare DB-001', game: 'dragonball', priority: 'hunting', target: 220, qty: 1, set: 'Awakening Box', notes: '', addedAt: '2026-03-15T10:00:00Z' },
+  { id: 'demo8', name: 'Exodia the Forbidden One LOB 1st Edition', game: 'yugioh', priority: 'watching', target: 400, qty: 1, set: 'Legend of Blue Eyes, 1st Ed', notes: 'Complete set bonus if available', addedAt: '2026-03-18T10:00:00Z' },
+];
+
+function loadDemo() {
+  if (cards.length > 0 && !confirm('Load demo data? This will add demo cards to your list.')) return;
+  const demoIds = DEMO_CARDS.map(c => c.id);
+  cards = cards.filter(c => !demoIds.includes(c.id));
+  cards = [...DEMO_CARDS.map(c => ({...c})), ...cards];
+  save();
+  document.getElementById('demoBanner').style.display = 'flex';
+  localStorage.setItem('cs_wl_demo', '1');
+  renderTable();
+}
+
+function clearDemo() {
+  const demoIds = DEMO_CARDS.map(c => c.id);
+  cards = cards.filter(c => !demoIds.includes(c.id));
+  save();
+  document.getElementById('demoBanner').style.display = 'none';
+  localStorage.removeItem('cs_wl_demo');
+  renderTable();
+}
+
+// ── Export / Import ────────────────────────────────────────────────────────────
+function exportJSON() {
+  if (!cards.length) { alert('Nothing to export yet.'); return; }
+  const blob = new Blob([JSON.stringify(cards, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `want-list-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = evt => {
+    try {
+      const imported = JSON.parse(evt.target.result);
+      if (!Array.isArray(imported)) { alert('Invalid format — expected an array of cards.'); return; }
+      const existingIds = new Set(cards.map(c => c.id));
+      const newCards = imported.filter(c => c.id && c.name && c.target && !existingIds.has(c.id));
+      cards = [...newCards, ...cards];
+      save();
+      renderTable();
+      alert(`Imported ${newCards.length} card(s). Skipped ${imported.length - newCards.length} duplicate(s).`);
+    } catch { alert('Failed to parse JSON file.'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ── Keyboard shortcuts ─────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    if (document.getElementById('modalBackdrop').classList.contains('open')) saveCard();
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
+    if (!document.getElementById('modalBackdrop').classList.contains('open')) {
+      e.preventDefault(); openModal();
+    }
+  }
+});
+
+// ── Utils ──────────────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+load();
+if (localStorage.getItem('cs_wl_demo') === '1' && cards.some(c => c.id.startsWith('demo'))) {
+  document.getElementById('demoBanner').style.display = 'flex';
+}
+renderTable();
+// Default sort by heat descending on first load
+sortBy('heat');
+</script>
+</body>
+</html>
