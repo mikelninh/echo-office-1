@@ -1,22 +1,22 @@
 {
-  "generatedAt": "2026-03-25T14:02:31.943Z",
+  "generatedAt": "2026-03-28T11:09:34.756Z",
   "summary": {
-    "totalFindings": 4414,
-    "high": 100,
-    "medium": 4272,
+    "totalFindings": 4508,
+    "high": 101,
+    "medium": 4365,
     "low": 42
   },
   "byPattern": [
     {
       "patternId": "LISTING_CYCLING",
       "description": "Same card relisted multiple times at different prices — potential price manipulation or search spam",
-      "count": 4212,
+      "count": 4305,
       "severity": "MEDIUM",
       "topExamples": [
         {
           "title": "2002 Yu-Gi-Oh! 1st Edition Exodia The Forbidden One LOB-124 PSA 10 GEM MINT",
           "url": null,
-          "evidence": "41 similar listings found with 7330× price spread ($3.2736 → $23995)"
+          "evidence": "42 similar listings found with 7279× price spread ($3.29661 → $23995)"
         },
         {
           "title": "2008 YU-GI-OH! ANNIVERSARY PACK YAP1-EN001 BLUE-EYES WHITE DRAGON PSA 10",
@@ -26,7 +26,7 @@
         {
           "title": "PSA 10 Blue-Eyes White Dragon SDK 1st Edition SDK-001",
           "url": null,
-          "evidence": "59 similar listings found with 9775× price spread ($3.2736 → $32000)"
+          "evidence": "59 similar listings found with 9707× price spread ($3.29661 → $32000)"
         },
         {
           "title": "2019 Yu-Gi-Oh! Japanese Promo 10k Cards Com. Kanan Swordmistress PSA 10",
@@ -119,7 +119,7 @@
     {
       "patternId": "COUNTERFEIT_RISK",
       "description": "Listing shows indicators commonly associated with counterfeit cards",
-      "count": 100,
+      "count": 101,
       "severity": "HIGH",
       "topExamples": [
         {
@@ -157,7 +157,7 @@
       "price": "€4.282,02",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "1st Edition vintage card for $4.28202 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/376949819514",
@@ -165,7 +165,7 @@
       "price": "€4.497,03",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $4.49703 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/267452010806",
@@ -173,7 +173,7 @@
       "price": "€2.524,39",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $2.52439 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.com/itm/236635239707",
@@ -181,7 +181,7 @@
       "price": "$2,900.00",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "Title contains counterfeit indicator: reprint",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/376971556816",
@@ -189,7 +189,7 @@
       "price": "€4.191,15",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $4.19115 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/127524099846",
@@ -197,7 +197,7 @@
       "price": "€20.000,00",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "1st Edition vintage card for $20 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/236076594307",
@@ -205,7 +205,7 @@
       "price": "€16.000,00",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $16 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/376998154320",
@@ -213,7 +213,7 @@
       "price": "€2.800,00",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $2.8 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/377004145792",
@@ -221,7 +221,7 @@
       "price": "€2.600,00",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $2.6 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.com/itm/287167385529",
@@ -229,7 +229,7 @@
       "price": "$2,500.00",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "Title contains counterfeit indicator: reprint",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/406720873679",
@@ -237,7 +237,7 @@
       "price": "€7.400,00",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $7.4 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/205974553595",
@@ -245,7 +245,7 @@
       "price": "€4.000,00",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "1st Edition vintage card for $4 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/284624335025",
@@ -253,47 +253,47 @@
       "price": "€2.636,18",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $2.63618 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/127697730760",
       "title": "Yu-Gi-Oh! Exodia The Forbidden One LOB-124 1st Edition Ultra Rare PSA 10 Wavy",
-      "price": "€12.922,12",
+      "price": "€13.012,93",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $12.92212 — almost certainly counterfeit; 1st Edition vintage card for $12.92212 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $13.01293 — almost certainly counterfeit; 1st Edition vintage card for $13.01293 — likely counterfeit or heavy damage",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/177866502628",
       "title": "Yu-Gi-Oh! 1st Edition LOB - Blue-Eyes White Dragon PSA 8 & Dark Magician PSA 9",
-      "price": "€5.724,93",
+      "price": "€5.674,51",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "1st Edition vintage card for $5.72493 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "1st Edition vintage card for $5.67451 — likely counterfeit or heavy damage",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/227228513449",
       "title": "YuGiOh! 1st Ed Exodia The Forbidden One LOB PSA 10 Gem Mint Wavy Strong 10",
-      "price": "€11.629,91",
+      "price": "€11.711,63",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $11.62991 — almost certainly counterfeit; 1st Edition vintage card for $11.62991 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $11.71163 — almost certainly counterfeit; 1st Edition vintage card for $11.71163 — likely counterfeit or heavy damage",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/376794489786",
       "title": "PSA 10 1998 Blue-Eyes White Dragon 118 Yu-Gi-Oh Bandai Carddass English Vintage",
-      "price": "€3.272,74",
+      "price": "€3.295,74",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $3.27274 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $3.29574 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/376992244638",
       "title": "Yu-Gi-Oh! 2002 LOB 1st Edition #124 Exodia The Forbidden One PSA 10 GEM MINT",
-      "price": "€6.307,72",
+      "price": "€6.352,04",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $6.30772 — almost certainly counterfeit; 1st Edition vintage card for $6.30772 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $6.35204 — almost certainly counterfeit; 1st Edition vintage card for $6.35204 — likely counterfeit or heavy damage",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/287075433058",
@@ -301,7 +301,7 @@
       "price": "€2.535,79",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $2.53579 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/257396692778",
@@ -309,7 +309,7 @@
       "price": "€3.000,00",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $3 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/287174380804",
@@ -317,55 +317,55 @@
       "price": "€6.547,20",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $6.5472 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/127726303434",
       "title": "PSA 10 Blue-Eyes Ultimate Dragon JMP-EN005 Secret Rare Yu-Gi-Oh! *LOW POP*",
-      "price": "€2.561,42",
+      "price": "€2.538,87",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $2.56142 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $2.53887 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/389716437151",
       "title": "Yu-Gi-Oh! 1998 Japanese Bandai 3rd Gen English Blue-Eyes White Dragon PSA 10",
-      "price": "€5.944,18",
+      "price": "€5.985,95",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $5.94418 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $5.98595 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/127463865914",
       "title": "YuGiOh PSA 9 - Red-Eyes Black Dragon LOB-070 1st Ed. Ultra Rare 2002 LEGEND OF",
-      "price": "€3.015,15",
+      "price": "€3.036,34",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "1st Edition vintage card for $3.01515 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "1st Edition vintage card for $3.03634 — likely counterfeit or heavy damage",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/298031993806",
       "title": "Yu-Gi-Oh 2002! LOB-LEGEND OF BLUE EYES WHITE DRAGON #005 DARK MAGICIAN PSA 10",
-      "price": "€4.307,37",
+      "price": "€4.337,64",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $4.30737 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $4.33764 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/297716866042",
       "title": "2000 Yu-Gi-Oh! JPN DUNGEON DICE MONSTERS BOOSTER 1 BLUE-EYES WHITE DRAGON PSA 10",
-      "price": "€5.167,99",
+      "price": "€5.204,30",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $5.16799 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $5.2043 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/297750906196",
       "title": "Yu-Gi-Oh 2012! GOLD SER: HAUNTED MINE GHOST RARE BLUE-EYES WHITE DRAGON PSA 10",
-      "price": "€7.753,26",
+      "price": "€7.807,75",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $7.75326 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $7.80775 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/406086618004",
@@ -373,7 +373,7 @@
       "price": "€3.874,96",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $3.87496 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/306647757725",
@@ -381,7 +381,7 @@
       "price": "€4.320,77",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $4.32077 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/297956040579",
@@ -389,7 +389,7 @@
       "price": "€10.398,61",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $10.39861 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/157717751844",
@@ -397,7 +397,7 @@
       "price": "€7.112,77",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $7.11277 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/327021677170",
@@ -405,7 +405,7 @@
       "price": "€2.651,60",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $2.6516 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/147023463738",
@@ -413,15 +413,15 @@
       "price": "€3.413,41",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $3.41341 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/389441814452",
       "title": "Celebrations UPC Charizard #4 & Pikachu #58 Gold Metal Card Promo PSA 10 Set",
-      "price": "€14.645,07",
+      "price": "€14.747,98",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $14.64507 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $14.74798 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/336355662444",
@@ -429,23 +429,23 @@
       "price": "€3.095,17",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "1st Edition vintage card for $3.09517 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/358058338191",
       "title": "PSA 10 Charizard 06 CD Promo Holo TCG Pokemon Card Japanese Rare 1999 #4",
-      "price": "€4.263,35",
+      "price": "€4.293,31",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $4.26335 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $4.29331 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/188099364724",
       "title": "Pokemon 1999 Charizard Base Set Unlimited Holo Rare #4 PSA 10 Gem Mint",
-      "price": "€16.363,71",
+      "price": "€16.433,08",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $16.36371 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $16.43308 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/287186576267",
@@ -453,7 +453,7 @@
       "price": "€2.605,54",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "Title contains counterfeit indicator: reprint; PSA 10 of a grail card for only $2.60554 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/177956755543",
@@ -461,7 +461,7 @@
       "price": "€3.073,47",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $3.07347 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/177924955129",
@@ -469,7 +469,7 @@
       "price": "€3.630,94",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "1st Edition vintage card for $3.63094 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/177924950737",
@@ -477,39 +477,39 @@
       "price": "€2.837,31",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "1st Edition vintage card for $2.83731 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/206136292977",
       "title": "2002 YU-GI-OH! LEGEND OF BLUE EYES 1ST ED #LOB-006 GAIA THE FIERCE KNIGHT PSA 10",
-      "price": "€3.567,83",
+      "price": "€3.567,50",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $3.56783 — almost certainly counterfeit; 1st Edition vintage card for $3.56783 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $3.5675 — almost certainly counterfeit; 1st Edition vintage card for $3.5675 — likely counterfeit or heavy damage",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/227262273132",
       "title": "Yugioh Blue-Eyes Ultimate Dragon Secret Rare JMP-EN005 PSA 10 Gem Mint",
-      "price": "€3.442,64",
+      "price": "€3.442,32",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $3.44264 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $3.44232 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/168254295432",
       "title": "Neues AngebotYu-Gi-Oh Blue Eyes White Dragon 1996 1st Edition lob-001 ungraded",
-      "price": "€34.458,99",
+      "price": "€34.701,14",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "1st Edition vintage card for $34.45899 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "1st Edition vintage card for $34.70114 — likely counterfeit or heavy damage",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/117096841706",
       "title": "Yu-Gi-Oh 2002! MRL-MAGIC RULER #000 BLUE-EYES TOON DRAGON PSA 10",
-      "price": "€4.307,37",
+      "price": "€4.337,63",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $4.30737 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $4.33763 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/374714155816",
@@ -517,7 +517,7 @@
       "price": "€2.583,31",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $2.58331 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/406784373341",
@@ -525,31 +525,39 @@
       "price": "€3.500,00",
       "violation": "COUNTERFEIT_RISK",
       "evidence": "PSA 10 of a grail card for only $3.5 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/336493696689",
       "title": "Charizard Japanese CD Promo Holo Rare PSA 10 #006 Pokémon TCG 1998",
-      "price": "€3.661,27",
+      "price": "€3.687,00",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $3.66127 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $3.687 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/298150293453",
       "title": "Yu-Gi-Oh 2005! PROMO JUMP MAGAZIN #DE005 BLUE-EYES ULTIMATE DRAGON PSA 10",
-      "price": "€3.015,16",
+      "price": "€3.036,35",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "PSA 10 of a grail card for only $3.01516 — almost certainly counterfeit",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "PSA 10 of a grail card for only $3.03635 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     },
     {
       "url": "https://www.ebay.de/itm/306791685209",
       "title": "Yu-Gi-Oh 2002! LEGEND OF BLUE EYES WHITE DRAGON 1ST EDITION DARK MAGICIAN PSA 8",
-      "price": "€2.584,42",
+      "price": "€2.602,58",
       "violation": "COUNTERFEIT_RISK",
-      "evidence": "1st Edition vintage card for $2.58442 — likely counterfeit or heavy damage",
-      "detectedAt": "2026-03-25T14:01:27.976Z"
+      "evidence": "1st Edition vintage card for $2.60258 — likely counterfeit or heavy damage",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
+    },
+    {
+      "url": "https://www.ebay.de/itm/336496419237",
+      "title": "Charizard Japanese CD Promo Holo Rare PSA 10 #006 Pokémon TCG 1998",
+      "price": "€3.470,11",
+      "violation": "COUNTERFEIT_RISK",
+      "evidence": "PSA 10 of a grail card for only $3.47011 — almost certainly counterfeit",
+      "detectedAt": "2026-03-28T11:08:26.001Z"
     }
   ]
 }
