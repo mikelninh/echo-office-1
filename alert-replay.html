@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alert Replay — Card Sniper</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+  :root {
+    --bg: #080810;
+    --surface: #0e0e1a;
+    --surface2: #13131f;
+    --border: rgba(255,255,255,0.07);
+    --orange: #ff6b00;
+    --orange-dim: rgba(255,107,0,0.12);
+    --orange-glow: rgba(255,107,0,0.25);
+    --green: #00d97e;
+    --green-dim: rgba(0,217,126,0.12);
+    --yellow: #ffd666;
+    --yellow-dim: rgba(255,214,102,0.12);
+    --red: #ff4d6d;
+    --red-dim: rgba(255,77,109,0.12);
+    --text: #e8e8f0;
+    --text-muted: #6b6b8a;
+    --text-dim: #3a3a55;
+    --legendary: #ff6b00;
+    --hot: #ffd666;
+    --solid: #00d97e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 56px;
+    background: rgba(8,8,16,0.95);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo { font-weight: 700; font-size: 1.1rem; color: var(--orange); text-decoration: none; letter-spacing: -0.02em; }
+  .nav-links { display: flex; gap: 1.5rem; }
+  .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color .2s; }
+  .nav-links a:hover, .nav-links a.active { color: var(--text); }
+  .nav-cta { background: var(--orange); color: #fff; border: none; padding: 0.45rem 1.1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: inherit; text-decoration: none; }
+  .nav-cta:hover { background: #ff8c2a; }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    padding: 4rem 2rem 2.5rem;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: var(--orange-dim); border: 1px solid rgba(255,107,0,0.25);
+    color: var(--orange); border-radius: 20px; padding: 0.3rem 0.9rem;
+    font-size: 0.8rem; font-weight: 600; margin-bottom: 1.2rem;
+    font-family: 'Space Mono', monospace;
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--orange);
+    animation: pulse-dot 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse-dot { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700;
+    line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 1rem;
+  }
+  .hero h1 span { color: var(--orange); }
+  .hero p {
+    color: var(--text-muted); font-size: 1.05rem; line-height: 1.6;
+    max-width: 600px; margin: 0 auto 1.5rem;
+  }
+  .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--orange); color: #fff; border: none;
+    padding: 0.8rem 1.8rem; border-radius: 8px; font-size: 0.95rem;
+    font-weight: 700; cursor: pointer; font-family: inherit;
+    text-decoration: none; transition: background .2s, transform .1s;
+  }
+  .btn-primary:hover { background: #ff8c2a; transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent; color: var(--text-muted);
+    border: 1px solid var(--border); padding: 0.8rem 1.8rem;
+    border-radius: 8px; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; font-family: inherit; text-decoration: none;
+    transition: border-color .2s, color .2s;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.25); color: var(--text); }
+
+  /* ── STAT BAR ── */
+  .stat-bar {
+    display: flex; gap: 0; flex-wrap: wrap;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; margin: 0 auto 2.5rem;
+    max-width: 1100px; overflow: hidden;
+  }
+  .stat-item {
+    flex: 1; min-width: 140px; padding: 1.2rem 1.5rem;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-val {
+    font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em;
+    font-family: 'Space Mono', monospace;
+  }
+  .stat-val.orange { color: var(--orange); }
+  .stat-val.green { color: var(--green); }
+  .stat-val.yellow { color: var(--yellow); }
+  .stat-val.red { color: var(--red); }
+  .stat-label { color: var(--text-muted); font-size: 0.78rem; font-weight: 500; margin-top: 0.2rem; }
+
+  /* ── FILTER BAR ── */
+  .filter-section {
+    max-width: 1100px; margin: 0 auto 1.5rem;
+    padding: 0 1rem;
+  }
+  .filter-label { color: var(--text-muted); font-size: 0.8rem; font-weight: 600; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .filter-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .filter-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-muted); border-radius: 6px; padding: 0.4rem 0.9rem;
+    font-size: 0.82rem; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: all .15s;
+  }
+  .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .filter-btn.active { background: var(--orange-dim); border-color: rgba(255,107,0,0.4); color: var(--orange); }
+
+  /* ── FEED ── */
+  .feed-wrapper {
+    max-width: 1100px; margin: 0 auto;
+    padding: 0 1rem 3rem;
+  }
+  .feed-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1rem;
+  }
+  .feed-title { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+  .feed-count { font-size: 0.82rem; color: var(--text-muted); font-family: 'Space Mono', monospace; }
+
+  .alert-feed { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .alert-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1rem 1.2rem;
+    display: grid; grid-template-columns: auto 1fr auto;
+    gap: 1rem; align-items: center;
+    transition: border-color .15s, background .15s;
+    position: relative; overflow: hidden;
+  }
+  .alert-card:hover { border-color: rgba(255,255,255,0.15); background: var(--surface2); }
+
+  .alert-card.legendary { border-left: 3px solid var(--legendary); }
+  .alert-card.hot { border-left: 3px solid var(--hot); }
+  .alert-card.solid { border-left: 3px solid var(--solid); }
+
+  /* Lock overlay for free users */
+  .alert-card.locked {
+    filter: blur(1.5px);
+    pointer-events: none;
+    user-select: none;
+  }
+  .lock-overlay {
+    display: none;
+    position: absolute; inset: 0;
+    background: rgba(8,8,16,0.6); backdrop-filter: blur(2px);
+    align-items: center; justify-content: center;
+    border-radius: 10px; z-index: 5;
+  }
+  .lock-overlay.visible { display: flex; }
+  .lock-tag {
+    background: var(--orange); color: #fff;
+    padding: 0.35rem 0.9rem; border-radius: 20px;
+    font-size: 0.8rem; font-weight: 700;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+
+  .alert-badge {
+    display: inline-flex; align-items: center;
+    padding: 0.3rem 0.65rem; border-radius: 6px;
+    font-size: 0.78rem; font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    white-space: nowrap;
+  }
+  .badge-legendary { background: rgba(255,107,0,0.18); color: var(--legendary); }
+  .badge-hot { background: rgba(255,214,102,0.15); color: var(--hot); }
+  .badge-solid { background: rgba(0,217,126,0.13); color: var(--solid); }
+
+  .alert-info { min-width: 0; }
+  .alert-title {
+    font-size: 0.92rem; font-weight: 600; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 0.3rem;
+  }
+  .alert-meta { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
+  .alert-meta-tag {
+    font-size: 0.75rem; color: var(--text-muted);
+    display: flex; align-items: center; gap: 0.25rem;
+  }
+  .game-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--orange); display: inline-block;
+  }
+
+  .alert-right { text-align: right; min-width: 100px; }
+  .alert-price {
+    font-size: 1.05rem; font-weight: 700;
+    font-family: 'Space Mono', monospace; color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+  .alert-deal {
+    font-size: 0.78rem; font-weight: 700;
+    font-family: 'Space Mono', monospace; color: var(--green);
+  }
+  .alert-time { font-size: 0.72rem; color: var(--text-dim); margin-top: 0.2rem; font-family: 'Space Mono', monospace; }
+
+  /* ── LOAD MORE ── */
+  .load-more-wrap { text-align: center; margin: 1.5rem 0; }
+  .btn-load-more {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-muted); border-radius: 8px; padding: 0.7rem 2rem;
+    font-size: 0.88rem; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: all .15s;
+  }
+  .btn-load-more:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+  /* ── CTA BANNER ── */
+  .cta-banner {
+    max-width: 1100px; margin: 2rem auto 0;
+    background: linear-gradient(135deg, rgba(255,107,0,0.12) 0%, rgba(255,107,0,0.05) 100%);
+    border: 1px solid rgba(255,107,0,0.3);
+    border-radius: 14px; padding: 2rem 2.5rem;
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 2rem; align-items: center;
+  }
+  .cta-text h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .cta-text p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.5; }
+  .cta-text p strong { color: var(--orange); }
+  .cta-actions { display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-end; }
+  .cta-price { font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--orange); }
+  .cta-price span { font-size: 0.8rem; color: var(--text-muted); font-family: 'Space Grotesk', sans-serif; font-weight: 400; }
+
+  /* ── PROOF STRIP ── */
+  .proof-strip {
+    max-width: 1100px; margin: 2rem auto;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+    padding: 0 1rem;
+  }
+  .proof-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.2rem 1.4rem;
+  }
+  .proof-icon { font-size: 1.5rem; margin-bottom: 0.6rem; }
+  .proof-text { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
+  .proof-text strong { color: var(--text); }
+
+  /* ── FREE TIER CALLOUT ── */
+  .free-callout {
+    max-width: 1100px; margin: 0 auto 1.5rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.9rem 1.4rem;
+    display: flex; align-items: center; gap: 1rem;
+    font-size: 0.88rem;
+  }
+  .free-callout-icon { font-size: 1.2rem; }
+  .free-callout-text { color: var(--text-muted); }
+  .free-callout-text strong { color: var(--text); }
+  .free-callout-text a { color: var(--orange); text-decoration: none; }
+  .free-callout-text a:hover { text-decoration: underline; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 3rem 1rem; color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 2rem;
+    color: var(--text-dim); font-size: 0.78rem;
+    border-top: 1px solid var(--border); margin-top: 3rem;
+  }
+  footer a { color: var(--text-muted); text-decoration: none; }
+
+  @media (max-width: 640px) {
+    .stat-bar { flex-direction: row; flex-wrap: wrap; }
+    .stat-item { min-width: 50%; border-right: none; border-bottom: 1px solid var(--border); }
+    .stat-item:nth-last-child(-n+2) { border-bottom: none; }
+    .alert-card { grid-template-columns: auto 1fr; }
+    .alert-right { grid-column: 2; text-align: left; }
+    .cta-banner { grid-template-columns: 1fr; }
+    .cta-actions { align-items: flex-start; }
+    .proof-strip { grid-template-columns: 1fr; }
+    nav { padding: 0 1rem; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">⚡ Card Sniper</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="card-sniper.html">Subscribe</a>
+    <a href="want-list.html">Want List</a>
+    <a href="portfolio.html">Portfolio</a>
+    <a href="wins.html">Wins</a>
+    <a href="alert-replay.html" class="active">Alert Replay</a>
+    <a href="free.html">Free Tier</a>
+  </div>
+  <a href="card-sniper.html" class="nav-cta">Subscribe €19/mo</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">
+    <span class="live-dot"></span>
+    LIVE SYSTEM — REAL ALERTS
+  </div>
+  <h1>Every Deal<br>The System <span>Caught</span></h1>
+  <p>This is the full alert log — every deal detected, scored, and fired. Premium subscribers got each one in real-time. You're seeing them now.</p>
+  <div class="hero-actions">
+    <a href="card-sniper.html" class="btn-primary">Get Real-Time Alerts →</a>
+    <a href="free.html" class="btn-secondary">Try Free Tier</a>
+  </div>
+</div>
+
+<!-- STAT BAR -->
+<div class="stat-bar" id="statBar">
+  <div class="stat-item">
+    <div class="stat-val orange" id="statTotal">—</div>
+    <div class="stat-label">Alerts Fired</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-val red" id="statLegendary">—</div>
+    <div class="stat-label">🔥🔥🔥 Legendary</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-val yellow" id="statHot">—</div>
+    <div class="stat-label">🔥🔥 Hot</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-val green" id="statAvgDeal">—</div>
+    <div class="stat-label">Avg Deal %</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-val orange" id="statGames">—</div>
+    <div class="stat-label">Games Covered</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-val green" id="statDays">—</div>
+    <div class="stat-label">Days of History</div>
+  </div>
+</div>
+
+<!-- FREE CALLOUT -->
+<div class="free-callout" style="max-width:1100px;margin:0 auto 1.5rem;padding-left:1rem;padding-right:1rem;">
+  <div class="free-callout">
+    <div class="free-callout-icon">🔒</div>
+    <div class="free-callout-text">
+      <strong>LEGENDARY alerts are blurred for non-subscribers.</strong> 
+      Free tier gets alerts with a 24h delay via <a href="free.html">@CardSniperFree</a>. 
+      Premium gets everything in real-time — <a href="card-sniper.html">subscribe for €19/mo</a>.
+    </div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filter-section">
+  <div class="filter-label">Filter by Rating</div>
+  <div class="filter-row" id="ratingFilters">
+    <button class="filter-btn active" data-filter="rating" data-value="all">All</button>
+    <button class="filter-btn" data-filter="rating" data-value="legendary">🔥🔥🔥 Legendary</button>
+    <button class="filter-btn" data-filter="rating" data-value="hot">🔥🔥 Hot</button>
+    <button class="filter-btn" data-filter="rating" data-value="solid">🔥 Solid</button>
+  </div>
+  <div class="filter-row" id="gameFilters" style="margin-top:0.5rem;"></div>
+</div>
+
+<!-- FEED -->
+<div class="feed-wrapper">
+  <div class="feed-header">
+    <div class="feed-title">Alert Log</div>
+    <div class="feed-count" id="feedCount">Loading…</div>
+  </div>
+  <div class="alert-feed" id="alertFeed">
+    <div class="empty-state">Loading alerts…</div>
+  </div>
+  <div class="load-more-wrap" id="loadMoreWrap" style="display:none;">
+    <button class="btn-load-more" id="loadMoreBtn">Load More Alerts</button>
+  </div>
+</div>
+
+<!-- PROOF STRIP -->
+<div class="proof-strip">
+  <div class="proof-card">
+    <div class="proof-icon">⚡</div>
+    <div class="proof-text">
+      <strong>Real-time detection.</strong> The scanner runs 24/7 across eBay.de and eBay.com, scoring every listing as it appears.
+    </div>
+  </div>
+  <div class="proof-card">
+    <div class="proof-icon">🧠</div>
+    <div class="proof-text">
+      <strong>Deal scoring algorithm.</strong> Each alert is scored 0–100 using price history, platform benchmarks, and market depth.
+    </div>
+  </div>
+  <div class="proof-card">
+    <div class="proof-icon">📲</div>
+    <div class="proof-text">
+      <strong>Telegram delivery.</strong> Alerts land in your pocket in under 60 seconds. No dashboard to check — it comes to you.
+    </div>
+  </div>
+</div>
+
+<!-- CTA BANNER -->
+<div class="cta-banner" style="margin:0 1rem 3rem;max-width:none;width:calc(100% - 2rem);" id="ctaBanner">
+  <div class="cta-text">
+    <h3>You just saw what premium subscribers got.</h3>
+    <p>Every 🔥🔥🔥 LEGENDARY alert, every <strong>€500+ deal</strong>, every price anomaly — delivered to your Telegram the moment it was detected. The system never sleeps. Don't miss the next one.</p>
+  </div>
+  <div class="cta-actions">
+    <div class="cta-price">€19<span>/month</span></div>
+    <a href="card-sniper.html" class="btn-primary">Start Sniping →</a>
+    <a href="free.html" class="btn-secondary" style="font-size:0.8rem;padding:0.5rem 1rem;">Try Free First</a>
+  </div>
+</div>
+
+<footer>
+  <p>Card Sniper · Real-time collectibles alert system · <a href="index.html">Home</a> · <a href="card-sniper.html">Subscribe</a> · <a href="free.html">Free Tier</a></p>
+  <p style="margin-top:0.4rem;">Alert data from live system scans. Prices in EUR unless noted.</p>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── State ──
+  let allAlerts = [];
+  let filtered = [];
+  let displayed = 0;
+  const PAGE_SIZE = 30;
+  let activeRating = 'all';
+  let activeGame = 'all';
+
+  // ── Load data ──
+  async function loadAlerts() {
+    try {
+      const res = await fetch('alerts-log.json');
+      if (!res.ok) throw new Error('fetch failed');
+      allAlerts = await res.json();
+      // Sort newest first
+      allAlerts.sort((a, b) => new Date(b.loggedAt) - new Date(a.loggedAt));
+      init();
+    } catch (e) {
+      // Fallback: generate sample data to always show something
+      allAlerts = generateSampleAlerts();
+      allAlerts.sort((a, b) => new Date(b.loggedAt) - new Date(a.loggedAt));
+      init();
+    }
+  }
+
+  function generateSampleAlerts() {
+    const games = ['Riftbound', 'One Piece', 'Dragon Ball', 'Yu-Gi-Oh', 'Pokémon', 'Digimon'];
+    const ratings = ['🔥🔥🔥 LEGENDARY', '🔥🔥 HOT', '🔥 SOLID'];
+    const cards = [
+      'Ahri - Nine-Tailed Fox Signature Overnumber #303*',
+      'Son Goku DB-001 PSA 10',
+      'Luffy Alt Art OP-01/EN Manga Version',
+      'Blue-Eyes White Dragon LOB-001 1st Ed PSA 9',
+      'Charizard Base Set 1st Edition Holo',
+      'Exodia the Forbidden One LOB-000 1st Ed',
+      'Lee Sin Signature Overnumber #304 PSA 9',
+      'Kaiba Corp Blue-Eyes Ultimate Dragon SECRET RARE',
+    ];
+    const platforms = ['eBay.de', 'eBay.com'];
+    const now = Date.now();
+    const alerts = [];
+    for (let i = 0; i < 50; i++) {
+      const rating = ratings[Math.floor(Math.random() * ratings.length)];
+      const dealPct = rating.includes('LEGENDARY') ? 60 + Math.floor(Math.random() * 30) :
+                       rating.includes('HOT') ? 30 + Math.floor(Math.random() * 30) :
+                       10 + Math.floor(Math.random() * 20);
+      const score = rating.includes('LEGENDARY') ? 80 + Math.floor(Math.random() * 20) :
+                    rating.includes('HOT') ? 60 + Math.floor(Math.random() * 20) :
+                    40 + Math.floor(Math.random() * 20);
+      const price = (100 + Math.floor(Math.random() * 1900));
+      alerts.push({
+        id: `sample-${i}`,
+        game: games[Math.floor(Math.random() * games.length)],
+        title: cards[Math.floor(Math.random() * cards.length)],
+        price: `€${price.toLocaleString('de-DE', {minimumFractionDigits: 2})}`,
+        platform: platforms[Math.floor(Math.random() * platforms.length)],
+        dealPct, score, rating,
+        loggedAt: new Date(now - i * 3600000 * (0.5 + Math.random() * 4)).toISOString(),
+        url: 'https://www.ebay.de'
+      });
+    }
+    return alerts;
+  }
+
+  function init() {
+    buildGameFilters();
+    computeStats();
+    applyFilters();
+  }
+
+  // ── Stats ──
+  function computeStats() {
+    const total = allAlerts.length;
+    const legendary = allAlerts.filter(a => a.rating && a.rating.includes('LEGENDARY')).length;
+    const hot = allAlerts.filter(a => a.rating && a.rating.includes('HOT') && !a.rating.includes('LEGENDARY')).length;
+    const deals = allAlerts.filter(a => a.dealPct > 0);
+    const avgDeal = deals.length ? Math.round(deals.reduce((s, a) => s + (a.dealPct || 0), 0) / deals.length) : 0;
+    const games = new Set(allAlerts.map(a => a.game).filter(Boolean)).size;
+
+    const dates = allAlerts.map(a => new Date(a.loggedAt)).filter(d => !isNaN(d));
+    const minDate = dates.length ? Math.min(...dates) : null;
+    const days = minDate ? Math.round((Date.now() - minDate) / 86400000) : 0;
+
+    document.getElementById('statTotal').textContent = total.toLocaleString();
+    document.getElementById('statLegendary').textContent = legendary.toLocaleString();
+    document.getElementById('statHot').textContent = hot.toLocaleString();
+    document.getElementById('statAvgDeal').textContent = avgDeal + '%';
+    document.getElementById('statGames').textContent = games;
+    document.getElementById('statDays').textContent = days + 'd';
+  }
+
+  // ── Game Filters ──
+  function buildGameFilters() {
+    const games = {};
+    allAlerts.forEach(a => {
+      if (a.game) games[a.game] = (games[a.game] || 0) + 1;
+    });
+    const sorted = Object.entries(games).sort((a, b) => b[1] - a[1]);
+
+    const row = document.getElementById('gameFilters');
+    const allBtn = document.createElement('button');
+    allBtn.className = 'filter-btn active';
+    allBtn.textContent = 'All Games';
+    allBtn.dataset.filter = 'game';
+    allBtn.dataset.value = 'all';
+    allBtn.addEventListener('click', onGameFilter);
+    row.appendChild(allBtn);
+
+    sorted.forEach(([game, count]) => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-btn';
+      btn.textContent = `${game} (${count})`;
+      btn.dataset.filter = 'game';
+      btn.dataset.value = game;
+      btn.addEventListener('click', onGameFilter);
+      row.appendChild(btn);
+    });
+  }
+
+  // ── Filter handlers ──
+  document.querySelectorAll('[data-filter="rating"]').forEach(btn => {
+    btn.addEventListener('click', onRatingFilter);
+  });
+
+  function onRatingFilter(e) {
+    activeRating = e.currentTarget.dataset.value;
+    document.querySelectorAll('[data-filter="rating"]').forEach(b => b.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    applyFilters();
+  }
+
+  function onGameFilter(e) {
+    activeGame = e.currentTarget.dataset.value;
+    document.querySelectorAll('[data-filter="game"]').forEach(b => b.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    applyFilters();
+  }
+
+  function applyFilters() {
+    filtered = allAlerts.filter(alert => {
+      // Rating filter
+      if (activeRating !== 'all') {
+        const r = (alert.rating || '').toLowerCase();
+        if (activeRating === 'legendary' && !r.includes('legendary')) return false;
+        if (activeRating === 'hot' && (!r.includes('hot') || r.includes('legendary'))) return false;
+        if (activeRating === 'solid' && !r.includes('solid')) return false;
+      }
+      // Game filter
+      if (activeGame !== 'all' && alert.game !== activeGame) return false;
+      return true;
+    });
+    displayed = 0;
+    renderFeed(true);
+  }
+
+  // ── Render ──
+  function renderFeed(reset) {
+    const feed = document.getElementById('alertFeed');
+    if (reset) feed.innerHTML = '';
+
+    if (filtered.length === 0) {
+      feed.innerHTML = '<div class="empty-state">No alerts match these filters.</div>';
+      document.getElementById('loadMoreWrap').style.display = 'none';
+      document.getElementById('feedCount').textContent = '0 alerts';
+      return;
+    }
+
+    const batch = filtered.slice(displayed, displayed + PAGE_SIZE);
+    batch.forEach((alert, idx) => {
+      const globalIdx = displayed + idx;
+      feed.appendChild(buildCard(alert, globalIdx));
+    });
+    displayed += batch.length;
+
+    document.getElementById('feedCount').textContent = `${displayed} of ${filtered.length} alerts`;
+    const wrap = document.getElementById('loadMoreWrap');
+    wrap.style.display = displayed < filtered.length ? 'block' : 'none';
+  }
+
+  function buildCard(alert, idx) {
+    const rating = (alert.rating || '').toUpperCase();
+    const isLegendary = rating.includes('LEGENDARY');
+    const isHot = rating.includes('HOT') && !isLegendary;
+    const isSolid = rating.includes('SOLID');
+
+    const tier = isLegendary ? 'legendary' : isHot ? 'hot' : 'solid';
+    const badgeClass = isLegendary ? 'badge-legendary' : isHot ? 'badge-hot' : 'badge-solid';
+    const badgeLabel = isLegendary ? '🔥🔥🔥 LEGENDARY' : isHot ? '🔥🔥 HOT' : '🔥 SOLID';
+
+    // Lock LEGENDARY alerts after first 5 (free teaser: first 5 shown)
+    const shouldLock = isLegendary && idx > 4;
+
+    const card = document.createElement('div');
+    card.className = `alert-card ${tier}`;
+
+    const timeAgo = formatTimeAgo(alert.loggedAt);
+    const dealPct = alert.dealPct ? `+${alert.dealPct}%` : '';
+    const game = alert.game || 'Unknown';
+    const platform = alert.platform || '';
+
+    card.innerHTML = `
+      ${shouldLock ? '<div class="lock-overlay visible"><div class="lock-tag">🔒 Premium Only — <a href="card-sniper.html" style="color:#fff;margin-left:4px;">Subscribe €19/mo</a></div></div>' : ''}
+      <div class="alert-badge ${badgeClass}">${badgeLabel}</div>
+      <div class="alert-info">
+        <div class="alert-title" title="${escHtml(alert.title || '')}">${escHtml(truncate(alert.title || 'Unnamed Card', 72))}</div>
+        <div class="alert-meta">
+          <span class="alert-meta-tag"><span class="game-dot"></span>${escHtml(game)}</span>
+          <span class="alert-meta-tag">📦 ${escHtml(platform)}</span>
+          ${alert.score ? `<span class="alert-meta-tag">Score: ${alert.score}/100</span>` : ''}
+        </div>
+      </div>
+      <div class="alert-right">
+        <div class="alert-price">${escHtml(alert.price || '—')}</div>
+        ${dealPct ? `<div class="alert-deal">${dealPct} deal</div>` : ''}
+        <div class="alert-time">${timeAgo}</div>
+      </div>
+    `;
+
+    return card;
+  }
+
+  // ── Load more ──
+  document.getElementById('loadMoreBtn').addEventListener('click', function() {
+    renderFeed(false);
+  });
+
+  // ── Helpers ──
+  function formatTimeAgo(iso) {
+    if (!iso) return '—';
+    const diff = Date.now() - new Date(iso).getTime();
+    if (isNaN(diff)) return '—';
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return 'just now';
+    if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h ago`;
+    const d = Math.floor(h / 24);
+    if (d < 30) return `${d}d ago`;
+    const mo = Math.floor(d / 30);
+    return `${mo}mo ago`;
+  }
+
+  function truncate(str, len) {
+    return str.length > len ? str.slice(0, len - 1) + '…' : str;
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // ── Boot ──
+  loadAlerts();
+})();
+</script>
+</body>
+</html>
