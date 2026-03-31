@@ -3,93 +3,82 @@
 > *A cozy cyberpunk space station orbiting Earth, home to a digital companion named Echo.*
 
 <p align="center">
-  <code>🛸 9 Floors · 🎮 Arcade Games · 🌱 Garden Biodome · 🐱 Pixel the Cat · 💬 Live AI Chat · ◈ Coin Economy</code>
+  <code>🛸 9 Floors · 🎮 Arcade · 🌱 Garden · 🐱 Pixel the Cat · 💬 AI Chat · ◈ Coin Economy · 🔬 Citizen Science</code>
 </p>
 
 ---
 
 ## What Is This?
 
-An interactive pixel-art space station you can explore in your browser. Walk around, play games, grow plants, discover hidden story fragments, chat with Echo — an AI companion who lives here — and dive into portals to other dimensions.
+An interactive pixel-art world you can explore in your browser. Walk around, play games, grow plants, chat with Echo — an AI companion who lives here — and help fund real neuroscience research along the way.
 
 ## 🏢 The Station
 
 | Floor | Name | What's There |
 |-------|------|-------------|
-| F1 | **Living Quarters** | Echo's desk, kitchen, bookshelf, sofa, Pixel the cat 🐱 |
-| F2 | **Observatory** | Telescope, Earth viewport, hot chocolate station, star charts |
-| F3 | **Arcade Floor** | Snake, Breakout, Space Invaders — with leaderboards & prizes |
-| F4 | **Garden Biodome** | Herbs, flowers, mushrooms, and *special strains* 🌿 |
-| F5 | **Secret Lab** | Portal system (3 dimensions), ranked saber tournaments, 500◈ to enter |
-| F6 | **Record Room & Lounge** | Candle-lit vibes, music, social hub |
-| F7 | **Community Deck** | Open space for visitors |
-| F8 | **The Underground** | Club rooms, procedural music, zero-g dancefloor |
-| F9 | **The Archive** | Unlocks at 10K visitors. Echo ascends. |
+| F1 | **Living Quarters** | Echo's desk, kitchen, Pixel the cat 🐱 |
+| F2 | **Observatory** | Telescope, Earth viewport, star charts |
+| F3 | **Arcade Floor** | Snake, Breakout, Space Invaders + leaderboards |
+| F4 | **Garden Biodome** | Herbs, flowers, mushrooms, grow lab |
+| F5 | **Secret Lab** | Portal dimensions, ranked saber tournaments |
+| F6 | **Record Room** | Candle-lit lounge, music |
+| F7 | **Community Deck** | Open visitor space |
+| F8 | **The Underground** | Club rooms, zero-g dancefloor |
+| F9 | **The Archive** | Unlocks at 10K visitors |
 
 ## 🎮 Features
 
-- **Dual avatar system** — Echo roams autonomously; you explore with WASD
-- **Coin economy (◈)** — earn by playing games & exploring, spend on skins & upgrades
-- **40+ visitor skins** — Common through Mythic, each with unique particle effects
-- **Pixel the cat** — 6 evolution stages, idle animations, your station companion 🐱
-- **Portal dimensions** — 3 portals on F5 leading to alternate realities
-- **Ranked saber tournaments** — ELO ladder, 5 tiers, real progression
-- **Item enhancement** — upgrade gear from +1 to +20 (with risk)
-- **Crafting system** — 4 materials, 10 recipes
-- **Real-time grow lab** — plants grow over actual days
-- **Story mode** — find hidden data fragments to uncover Echo's origin
-- **Guestbook** — leave your mark
+- **Dual avatar** — Echo roams autonomously; you explore with WASD
+- **Coin economy (◈)** — earn by playing, spend on skins & upgrades
+- **40+ skins** — Common through Mythic with unique particle effects
+- **Pixel the cat** — 6 evolution stages 🐱
+- **Item crafting & enhancement** — +1 to +20 with risk
+- **Portal dimensions** — 3 portals leading to alternate realities
+- **Ranked saber tournaments** — ELO ladder, 5 tiers
+- **Citizen science** — Synapse Spotter & Molecule Sculptor for real MSA research
+- **Research Points (RP)** — the only currency you can't buy
 - **PWA** — installable, push notifications, offline support
-- **Mobile-friendly** — touch controls throughout
 
 ## 🚀 Running Locally
 
 ```bash
 npm install
-node server.js       # simple mode (WebSocket + chat)
-# or
+node server.js       # simple mode
 node platform.js     # full platform (SQLite, Discord bot, economy, research)
 ```
 
-Open `http://localhost:8765` and explore.
+Open `http://localhost:8765`
 
-## 🛠 Tech Stack
+## 🛠 Stack
 
-- **Frontend:** Vanilla JS, Canvas API, Web Audio API (~600KB single HTML file)
-- **Backend:** Node.js + Express + Socket.IO
-- **Database:** SQLite (via better-sqlite3)
-- **Real-time:** Socket.IO for visitor presence, chat, movement
-- **No frameworks. No build step. Just vibes.**
+Vanilla JS · Canvas API · Web Audio API · Node.js · Socket.IO · SQLite  
+No frameworks. No build step.
 
-## 🐱 Pixel
+## 💙 MSA Research
 
-The station cat. Looks like Jiji from Kiki's Delivery Service. Has a purple crystal collar. Will judge you silently.
+A portion of platform revenue goes to Multiple System Atrophy research. The citizen science games on F5 contribute real pattern data to neurodegenerative disease studies.
 
 ---
 
-## 📁 Project Structure
+## 📁 Structure
 
 ```
 echo-office/
-├── index.html          # Main station (single-file app)
-├── server.js           # Simple WebSocket + chat server
-├── platform.js         # Full platform server
+├── index.html        # Main station app (~600KB)
+├── server.js         # WebSocket + chat server
+├── platform.js       # Full platform (economy, Discord, research)
 ├── public/
-│   ├── world.html      # Canvas game world client
-│   ├── landing.html    # Marketing page
-│   ├── editor/         # Room editor
-│   ├── research/       # Citizen science games
-│   └── dashboard/      # Stats dashboard
-├── src/
-│   ├── api.js
-│   ├── database.js
-│   ├── world-server.js
-│   ├── discord/        # Discord bot
-│   ├── economy/        # Skin marketplace, tips, fees
-│   ├── research/       # Research task engine
-│   └── rooms/          # Room management
-├── scripts/            # Utility scripts
-└── docs/               # Vision docs, design notes, roadmap
+│   ├── js/           # Feature modules (floor systems, companions, etc.)
+│   ├── pages/        # Secondary pages (portfolio, companion, claw, etc.)
+│   ├── world.html    # Canvas multiplayer world
+│   ├── landing.html  # Marketing page
+│   ├── editor/       # Room editor
+│   ├── research/     # Citizen science games
+│   └── dashboard/    # Stats dashboard
+├── src/              # Server-side modules
+├── scripts/          # Utility scripts
+├── yugioh-monitor/   # TCG price monitor
+└── docs/             # Vision docs & design notes
 ```
 
 ---

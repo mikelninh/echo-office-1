@@ -1,9 +1,0 @@
-[2026-03-05 04:16:18 CET] Cron run started
-TELEGRAM_CHANNEL_FREE env: NOT set
-Checking .env files:
-./.env.example
-7:TELEGRAM_CHANNEL_FREE=                 # Optional: public free/teaser channel ID
---- dispatcher output ---
-[dispatcher] 🚀 Free Tier Dispatcher starting — 5.3.2026, 04:16:19
-[dispatcher] 📊 Queue: 13 pending | 0 due | 0 sent | 13 total queued
-[dispatcher] ✅ No alerts due for sending. Queue is clean.

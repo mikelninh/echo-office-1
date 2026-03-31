@@ -6,6 +6,12 @@ node_modules/
 *.db-shm
 *.db-wal
 
+# Logs
+*.log
+yugioh-monitor/logs/
+yugioh-monitor/outcome-tracker.log
+yugioh-monitor/manipulation-report.csv
+
 # Runtime data / caches / logs
 accounts/
 rooms/
