@@ -1,2 +1,58 @@
+# Dependencies
 node_modules/
-echo-worlds.db
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Runtime data / caches / logs
+accounts/
+rooms/
+_last-scan.json
+advisor-processed.json
+alerts-log.json
+cardmarket-cache.json
+cardmarket-data.json
+cause-state.json
+cmv-cache.json
+editorial-calendar.json
+free-alert-queue.json
+grade-risks.json
+guestbook.json
+hunt-cache.json
+hunt-list.json
+hunt-log.json
+japan-arb-log.json
+japan-arb-seen.json
+manipulation-log.json
+manipulation-report.json
+market-stats.json
+marketplace.json
+outcomes.json
+pokemon-drops-seen.json
+price-history.json
+price-trends.json
+psa-pop.json
+riftbound-reference.json
+seen.json
+sold-history.json
+station-stats.json
+veve-price-log.json
+visitor-memory.json
+want-list-matches.json
+want-lists.json
+
+# Monitor data dirs (runtime)
+yugioh-monitor/*.json
+yugioh-monitor/dashboard/railway.json
+yugioh-monitor-data/
+
+# Backup & debug
+*.backup
+screenshot-*.png
+screenshot-debug.png
+
+# OS
+.DS_Store
+Thumbs.db
