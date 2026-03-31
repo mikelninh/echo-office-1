@@ -1,0 +1,33 @@
+{
+  "luffy-manga-alternate-art-op-01-psa10": {
+    "title": "Luffy Manga Alternate Art OP-01",
+    "grade": 10,
+    "snapshots": [
+      {
+        "median": 2200,
+        "count": 3,
+        "ts": 1769370519172
+      },
+      {
+        "median": 2300,
+        "count": 4,
+        "ts": 1769888919172
+      },
+      {
+        "median": 2400,
+        "count": 3,
+        "ts": 1770493719172
+      },
+      {
+        "median": 2600,
+        "count": 5,
+        "ts": 1771098519172
+      },
+      {
+        "median": 2882,
+        "count": 4,
+        "ts": 1771703319172
+      }
+    ]
+  }
+}
