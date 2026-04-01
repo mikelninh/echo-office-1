@@ -81,21 +81,20 @@
       }));
     },
 
-    /** F2 – Observatory: slow stars + nebula wisps */
+    /** F2 – Observatory: gentle twinkling stars only (no nebula blobs — floor has its own) */
     2(pool, W, H) {
-      if (pool.length >= maxParticles()) return;
-      const isStar = Math.random() < 0.7;
+      if (pool.length >= 15) return; // keep it sparse
       pool.push(makeParticle({
         x: Math.random() * W,
-        y: Math.random() * H * 0.75,
-        vx: (Math.random() - 0.5) * 0.08,
-        vy: -0.04 - Math.random() * 0.06,
-        life: 300 + Math.random() * 300,
-        maxLife: 600,
-        size: isStar ? 1 + Math.random() : 3 + Math.random() * 4,
-        color: isStar ? '#e8f0ff' : (Math.random() < 0.5 ? '#9b80cc' : '#6080cc'),
-        alpha: isStar ? 0.5 + Math.random() * 0.4 : 0.08 + Math.random() * 0.08,
-        type: isStar ? 'star' : 'dot',
+        y: Math.random() * H * 0.7,
+        vx: (Math.random() - 0.5) * 0.04,
+        vy: -0.02 - Math.random() * 0.03,
+        life: 400 + Math.random() * 400,
+        maxLife: 800,
+        size: 1 + Math.random() * 0.8,
+        color: '#e8f0ff',
+        alpha: 0.3 + Math.random() * 0.4,
+        type: 'star',
         pulse: Math.random() * Math.PI * 2,
       }));
     },
@@ -444,13 +443,7 @@
       }
 
       case 2: {
-        // Cool starlight — blue-purple at edges (very subtle)
-        const g = ctx.createRadialGradient(cx + W / 2, cy + H / 2, H * 0.2, cx + W / 2, cy + H / 2, W * 0.75);
-        g.addColorStop(0, 'rgba(0,0,0,0)');
-        g.addColorStop(0.6, 'rgba(60,40,100,0.01)');
-        g.addColorStop(1, 'rgba(20,10,60,0.02)');
-        ctx.fillStyle = g;
-        ctx.fillRect(cx, cy, W, H);
+        // No extra tint — floor renders its own space atmosphere
         break;
       }
 
