@@ -1,7 +1,7 @@
 {
   "name": "yugioh-monitor",
   "version": "1.0.0",
-  "description": "Monitors 4 platforms for Yu-Gi-Oh card sales of **€5,000+ / $5,000+** and alerts on new finds.",
+  "description": "Monitors 4 platforms for Yu-Gi-Oh card sales of **\u20ac5,000+ / $5,000+** and alerts on new finds.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,7 +9,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "better-sqlite3": "^12.6.2",
     "express": "^5.2.1",
