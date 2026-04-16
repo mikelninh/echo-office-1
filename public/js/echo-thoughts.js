@@ -614,4 +614,13 @@
 
   waitForReady();
 
+  // ─── Inject floor-warp.js (hyperspace transit effect) ────────────────────
+  (function injectFloorWarp() {
+    if (document.getElementById('floor-warp-script')) return;
+    const s = document.createElement('script');
+    s.id  = 'floor-warp-script';
+    s.src = 'public/js/floor-warp.js';
+    document.body.appendChild(s);
+  })();
+
 })();
