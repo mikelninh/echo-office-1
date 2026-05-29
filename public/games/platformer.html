@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#06060f">
+<title>Echo Run — a neon platformer</title>
+<meta property="og:title" content="Echo Run — a neon platformer">
+<meta property="og:description" content="Chill → Normal → Hard → KAIZO. How many deaths can you survive?">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: #06060f; overflow: hidden; font-family: system-ui, sans-serif; }
+  #stage { position: fixed; inset: 0; }
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: 0; z-index: 40;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 12px; pointer-events: none;
+  }
+  /* tiny back link only shows when launched standalone */
+  #home {
+    position: fixed; top: 10px; right: 12px; z-index: 50;
+    color: rgba(255,255,255,.4); text-decoration: none; font-size: 12px;
+    pointer-events: auto;
+  }
+  #home:hover { color: #00fff7; }
+  #boot {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 10px; background: #06060f; z-index: 100; color: #00fff7;
+    transition: opacity .4s; font-weight: 700;
+  }
+  #boot small { color: rgba(255,255,255,.45); font-weight: 400; }
+</style>
+</head>
+<body>
+  <a id="home" href="/">← echo station</a>
+  <div id="stage"></div>
+  <div id="boot">ECHO RUN<small>tap / press a key to begin</small></div>
+
+  <script src="platformer.js"></script>
+  <script>
+    (function () {
+      var stage = document.getElementById('stage');
+      var boot = document.getElementById('boot');
+      var game = null;
+
+      function launch() {
+        if (game) return;
+        boot.style.opacity = '0';
+        setTimeout(function () { boot.style.display = 'none'; }, 400);
+        // optional ?d=kaizo deep-link straight into a difficulty
+        var d = new URLSearchParams(location.search).get('d');
+        var valid = ['chill', 'normal', 'hard', 'kaizo'];
+        game = window.EchoRun.mount(stage, {
+          transport: 'local',
+          context: 'standalone',
+          difficulty: valid.indexOf(d) >= 0 ? d : null,
+        });
+      }
+
+      // wait for a user gesture so audio can start
+      window.addEventListener('keydown', launch, { once: true });
+      window.addEventListener('pointerdown', launch, { once: true });
+      window.addEventListener('touchstart', launch, { once: true });
+    })();
+  </script>
+</body>
+</html>
