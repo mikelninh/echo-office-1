@@ -4,8 +4,8 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npx http-server . -p ${PORT:-8080} -c86400 --cors --gzip -d false",
-    "healthcheckPath": "/dashboard.html",
+    "startCommand": "node server.js",
+    "healthcheckPath": "/",
     "healthcheckTimeout": 10,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 5

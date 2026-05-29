@@ -1,9 +1,10 @@
 {
-  "name": "yugioh-monitor",
+  "name": "echo-office",
   "version": "1.0.0",
-  "description": "Monitors 4 platforms for Yu-Gi-Oh card sales of **\u20ac5,000+ / $5,000+** and alerts on new finds.",
-  "main": "index.js",
+  "description": "Echo's Space Station — an interactive pixel-art space station with live multiplayer mini-games, an AI companion, and citizen-science research.",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,6 +15,7 @@
     "express": "^5.2.1",
     "puppeteer": "^24.40.0",
     "puppeteer-core": "^24.37.2",
-    "stripe": "^20.4.0"
+    "stripe": "^20.4.0",
+    "ws": "^8.21.0"
   }
 }
