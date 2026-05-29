@@ -1394,6 +1394,10 @@ const server = http.createServer((req, res) => {
 // WebSocket server for visitors
 const wss = new WebSocket.Server({ server, path: '/ws' });
 
+// Party Arcade — live multiplayer mini-game sessions (room codes, spectators, state relay)
+const createPartyArcade = require('./src/party-arcade');
+const partyArcade = createPartyArcade({ visitors, broadcast, WebSocket });
+
 wss.on('connection', (visitorWs) => {
   console.log('Visitor connected');
   const visitorId = genVisitorId();
@@ -1557,6 +1561,8 @@ wss.on('connection', (visitorWs) => {
   visitorWs.on('message', (data) => {
     try {
       const msg = JSON.parse(data.toString());
+      // Party Arcade live multiplayer sessions
+      if (typeof msg.type === 'string' && msg.type.startsWith('party.')) { partyArcade.handle(visitorId, msg); return; }
       if (msg.type === 'chat.send' && msg.message) {
         console.log('Visitor says:', msg.message);
         sendChat(msg.message);
@@ -2067,6 +2073,7 @@ wss.on('connection', (visitorWs) => {
       }
     }
     
+    partyArcade.onDisconnect(visitorId);
     visitors.delete(visitorId);
     broadcast({ type: 'player.leave', id: visitorId });
     broadcastFloorPresence();

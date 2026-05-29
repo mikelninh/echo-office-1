@@ -20061,6 +20061,7 @@ const EchoWS={ws:null,connected:false,
   connect(){try{const proto=location.protocol==='https:'?'wss:':'ws:';const port=location.port?':'+location.port:'';this.ws=new WebSocket(`${proto}//${location.hostname}${port}/ws`);
     this.ws.onopen=()=>{};
     this.ws.onmessage=(e)=>{try{const msg=JSON.parse(e.data);
+      if(typeof msg.type==='string'&&msg.type.startsWith('party.')){window.PartyArcade&&window.PartyArcade.onMessage(msg);return}
       if(msg.type==='status'){this.connected=msg.connected;this.updateIndicator()}
       else if(msg.type==='chat.chunk'&&msg.text){
         if(!this._streaming){this._streaming=true;this._streamBuf='';this._streamEl=null}
@@ -20076,7 +20077,7 @@ const EchoWS={ws:null,connected:false,
       else if(msg.type==='chat.done'){this._streaming=false;this._streamEl=null;this._streamBuf='';showSuggestions()}
       else if(msg.type==='chat.message'&&msg.content){if(!this._streaming){addChatMsg('Echo',msg.content);showSuggestions()}}
       // Multiplayer messages
-      else if(msg.type==='players.init'){S.myPlayerId=msg.id;S.otherPlayers={};(msg.players||[]).forEach(p=>{S.otherPlayers[p.id]={name:p.name,x:p.x,y:p.y,tx:p.x,ty:p.y,dir:p.dir,floor:p.floor,skin:p.skin}});this._updatePlayerCount()}
+      else if(msg.type==='players.init'){S.myPlayerId=msg.id;S.otherPlayers={};(msg.players||[]).forEach(p=>{S.otherPlayers[p.id]={name:p.name,x:p.x,y:p.y,tx:p.x,ty:p.y,dir:p.dir,floor:p.floor,skin:p.skin}});this._updatePlayerCount();try{const _pc=new URLSearchParams(location.search).get('party');if(_pc&&!this._joinedParty){this._joinedParty=true;setTimeout(()=>window.PartyArcade&&window.PartyArcade.joinByCode(_pc.toUpperCase()),300)}}catch(_e){}}
       else if(msg.type==='player.join'){S.otherPlayers[msg.player.id]={name:msg.player.name,x:msg.player.x,y:msg.player.y,tx:msg.player.x,ty:msg.player.y,dir:msg.player.dir,floor:msg.player.floor,skin:msg.player.skin};this._updatePlayerCount()}
       else if(msg.type==='player.leave'){delete S.otherPlayers[msg.id];this._updatePlayerCount()}
       else if(msg.type==='floor.presence'){S._floorPresence=msg.floors;$('#player-count').textContent=msg.total||Object.keys(S.otherPlayers).length+1}
@@ -43688,5 +43689,8 @@ setTimeout(function(){
 <script src="public/js/echo-startrail.js"></script>
 <script src="public/js/echo-memory.js"></script>
 <script src="public/js/echo-thoughts.js"></script>
+<!-- Party Arcade — live multiplayer mini-games (Echo Run) -->
+<script src="public/games/platformer.js"></script>
+<script src="public/js/party-arcade.js"></script>
 </body>
 </html>

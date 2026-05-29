@@ -383,8 +383,6 @@
       function win() {
         if (G.player.win) return;
         G.player.win = true;
-        G.scene = 'win';
-        G.winT = 0;
         audio.win();
         const s = stat(G.diff);
         s.clears++;
@@ -392,6 +390,10 @@
         s.coins += G.coinsThisRun;
         saveStats();
         for (let i = 0; i < 60; i++) burst(G.player.x + Math.random() * 40 - 20, G.player.y + Math.random() * 40 - 20, ['#00fff7', '#ff6ec7', '#ffd700'][i % 3], 1);
+        // multiplayer: report finish; the net layer drives the shared results screen
+        if (opts.net && opts.net.onFinish) { opts.net.onFinish({ time: G.time, deaths: G.deathsThisRun, coins: G.coinsThisRun }); return; }
+        G.scene = 'win';
+        G.winT = 0;
       }
       function nextOrRetry() {
         const order = ['chill', 'normal', 'hard', 'kaizo'];
@@ -444,7 +446,18 @@
         if (G.scene === 'win') { G.winT += dt; return; }
         if (G.scene !== 'play') return;
         const L = G.level, p = G.player, D = DIFFICULTIES[G.diff];
+        const net = opts.net;
+        // SPECTATE: mirror the watched runner from the net stream, no local physics.
+        if (net && net.spectate) {
+          const wp = net.watchPos && net.watchPos();
+          if (wp) { p.x = wp.x; p.y = wp.y; p.vx = wp.vx || 0; p.face = wp.face || 1; p.alive = wp.alive !== false; p.anim += dt; }
+          const tgt = p.x - G.vw * 0.42 + p.face * 60;
+          G.cam += (tgt - G.cam) * Math.min(1, dt * 6);
+          G.cam = Math.max(0, Math.min(G.cam, L.W * TILE - G.vw));
+          return;
+        }
         if (!p.alive || p.win) return;
+        if (net && net.frozen) return; // multiplayer countdown gate
         G.time += dt; p.anim += dt;
 
         // moving platforms
@@ -530,6 +543,16 @@
         const target = p.x - G.vw * 0.42 + p.face * 60;
         G.cam += (target - G.cam) * Math.min(1, dt * 6);
         G.cam = Math.max(0, Math.min(G.cam, L.W * TILE - G.vw));
+
+        // multiplayer: broadcast our own authoritative state for ghosts/results
+        if (net && net.onLocalState) {
+          const goalX = (L.finish && L.finish.x) || (L.W * TILE);
+          net.onLocalState({
+            x: p.x, y: p.y, vx: p.vx, face: p.face, alive: p.alive,
+            deaths: G.deathsThisRun, coins: G.coinsThisRun, time: G.time,
+            progress: Math.max(0, Math.min(1, p.x / goalX)), finished: !!p.win,
+          });
+        }
       }
 
       function collideAxis(p, axis) {
@@ -645,6 +668,25 @@
         // particles
         G.particles.forEach(p => { ctx.globalAlpha = Math.max(0, p.life * 2); ctx.fillStyle = p.color; ctx.fillRect(p.x - p.r, p.y - p.r, p.r * 2, p.r * 2); });
         ctx.globalAlpha = 1;
+        // multiplayer ghosts (rivals) — translucent silhouettes with name + shape tag
+        if (opts.net && opts.net.ghosts) {
+          for (const g of opts.net.ghosts()) {
+            const gx = g.x, gy = g.y, col = g.color || '#ff6ec7';
+            if (g.dead) {
+              ctx.fillStyle = col; ctx.font = '16px monospace'; ctx.textAlign = 'center';
+              ctx.fillText('☠', gx + TILE * 0.35, gy + TILE * 0.6);
+            } else {
+              ctx.globalAlpha = 0.45; ctx.fillStyle = col;
+              ctx.fillRect(gx, gy, TILE * 0.7, TILE * 0.92);
+              ctx.globalAlpha = 0.9; ctx.strokeStyle = col; ctx.lineWidth = 1;
+              ctx.strokeRect(gx - 1, gy - 1, TILE * 0.7 + 2, TILE * 0.92 + 2);
+              ctx.globalAlpha = 1;
+            }
+            ctx.fillStyle = col; ctx.font = '8px monospace'; ctx.textAlign = 'center';
+            ctx.fillText((g.shape || '') + ' ' + (g.name || ''), gx + TILE * 0.35, gy - 5);
+          }
+          ctx.globalAlpha = 1;
+        }
         // player
         const p = G.player;
         if (p && (p.alive || p.win)) {
@@ -653,7 +695,7 @@
           ctx.fillStyle = 'rgba(0,255,247,.18)';
           ctx.fillRect(px - p.vx * 0.012, py + 2, p.w, p.h - 2);
           // body (neon astronaut orb)
-          ctx.fillStyle = '#00fff7';
+          ctx.fillStyle = opts.playerColor || '#00fff7';
           ctx.fillRect(px, py, p.w, p.h);
           ctx.fillStyle = '#0a2a2c'; // visor
           ctx.fillRect(px + (p.face > 0 ? p.w * 0.35 : p.w * 0.1), py + p.h * 0.2, p.w * 0.5, p.h * 0.3);
