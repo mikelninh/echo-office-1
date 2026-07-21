@@ -1,159 +1,174 @@
-<!DOCTYPE html>
-<html><head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Echo Worlds — Every Community Deserves a Place</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a14;color:#eee;font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
-a{color:#00fff7;text-decoration:none}
-a:hover{text-decoration:underline}
-
-/* Hero */
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 30%,#00fff710 0%,transparent 60%)}
-.hero h1{font-size:clamp(2.5rem,6vw,5rem);font-weight:900;margin-bottom:16px;line-height:1.1}
-.hero h1 span{color:#00fff7;text-shadow:0 0 30px #00fff744}
-.hero p{font-size:clamp(1rem,2vw,1.3rem);color:#aaa;max-width:600px;margin:0 auto 32px;line-height:1.6}
-.cta{display:inline-block;background:linear-gradient(135deg,#00fff7,#0088ff);color:#0a0a14;padding:14px 36px;border-radius:50px;font-weight:700;font-size:1.1rem;transition:transform .2s,box-shadow .2s;text-decoration:none}
-.cta:hover{transform:translateY(-2px);box-shadow:0 8px 30px #00fff733;text-decoration:none}
-.cta-secondary{display:inline-block;border:1px solid #444;color:#ddd;padding:12px 28px;border-radius:50px;font-size:1rem;margin-left:12px;transition:all .2s}
-.cta-secondary:hover{border-color:#00fff7;color:#00fff7;text-decoration:none}
-
-/* Features */
-.features{padding:80px 20px;max-width:1100px;margin:0 auto}
-.features h2{text-align:center;font-size:2rem;margin-bottom:48px;color:#ffd080}
-.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
-.feature{background:#12121e;border:1px solid #222;border-radius:12px;padding:28px;transition:border-color .2s}
-.feature:hover{border-color:#00fff744}
-.feature .icon{font-size:2rem;margin-bottom:12px}
-.feature h3{font-size:1.1rem;margin-bottom:8px;color:#fff}
-.feature p{font-size:.9rem;color:#999;line-height:1.6}
-
-/* How it works */
-.how{padding:80px 20px;background:#0d0d18}
-.how h2{text-align:center;font-size:2rem;margin-bottom:48px;color:#ffd080}
-.steps{max-width:700px;margin:0 auto}
-.step{display:flex;gap:20px;margin-bottom:32px;align-items:flex-start}
-.step-num{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#00fff7,#0088ff);color:#0a0a14;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;flex-shrink:0}
-.step-content h3{margin-bottom:4px;color:#fff}
-.step-content p{color:#999;font-size:.9rem;line-height:1.5}
-
-/* Mission */
-.mission{padding:80px 20px;text-align:center;background:linear-gradient(180deg,#0a0a14,#0a1418,#0a0a14)}
-.mission h2{font-size:2rem;margin-bottom:16px;color:#ffd700}
-.mission p{max-width:700px;margin:0 auto 24px;color:#bbb;line-height:1.7;font-size:1rem}
-.mission .stat-grid{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;margin-top:32px}
-.mission .stat{text-align:center}
-.mission .stat .num{font-size:2rem;font-weight:900;color:#00fff7}
-.mission .stat .label{font-size:.8rem;color:#888;margin-top:4px}
-
-/* Footer */
-footer{padding:40px 20px;text-align:center;color:#555;font-size:.8rem;border-top:1px solid #1a1a2e}
-footer a{color:#888}
-</style>
-</head><body>
-
-<section class="hero">
-  <h1>Every Community<br>Deserves a <span>Place</span></h1>
-  <p>Turn your Discord server into a living pixel world. Walk, talk, play, and solve real problems together.</p>
-  <div>
-    <a href="#" class="cta">Add to Discord</a>
-    <a href="#how" class="cta-secondary">How it works</a>
-  </div>
-</section>
-
-<section class="features">
-  <h2>Why Echo Worlds?</h2>
-  <div class="feature-grid">
-    <div class="feature">
-      <div class="icon">🌍</div>
-      <h3>Your Discord, Visualized</h3>
-      <p>Every channel becomes a room. Walk between them. See your community as pixel avatars moving through a living space.</p>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#080914" />
+  <meta name="description" content="Echo's Space Station — a living pixel-world concept orbiting Earth, built by Michael Ninh." />
+  <title>Echo's Space Station — v27</title>
+  <style>
+    :root{
+      --bg:#080914;--panel:#101322;--panel-2:#15192b;--ink:#f3f5ff;--muted:#9aa4bd;
+      --line:rgba(255,255,255,.11);--cyan:#67f7ee;--gold:#ffd779;--pink:#ff76c8;
+      --green:#a7ef9a;--violet:#a98cff;--danger:#ff9b86;--max:1180px;
+      --display:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      --mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+    }
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:radial-gradient(circle at 50% -15%,#192454 0,transparent 38rem),linear-gradient(180deg,#080914,#090b17 60%,#06070f);font-family:var(--display);line-height:1.55;overflow-x:hidden}a{color:inherit;text-decoration:none}button{font:inherit}.wrap{width:min(var(--max),calc(100% - 36px));margin:auto}.stars,.stars:before,.stars:after{position:fixed;inset:0;pointer-events:none;content:"";z-index:-1;background-repeat:repeat}.stars{opacity:.45;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.4px);background-size:89px 89px}.stars:before{opacity:.4;background-image:radial-gradient(circle,#8ee9ff 0 1px,transparent 1.6px);background-size:157px 157px;transform:translate(24px,31px)}.stars:after{opacity:.28;background-image:radial-gradient(circle,#ffd6ff 0 1px,transparent 1.5px);background-size:233px 233px;transform:translate(78px,11px)}
+    header{position:sticky;top:0;z-index:50;border-bottom:1px solid var(--line);background:rgba(8,9,20,.78);backdrop-filter:blur(18px)}nav{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font-weight:850;letter-spacing:-.035em}.brand span{color:var(--cyan)}.navlinks{display:flex;align-items:center;gap:18px;color:var(--muted);font-size:13px}.navlinks a:hover{color:var(--ink)}.btn{min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,.045);color:var(--ink);font-weight:800;cursor:pointer;transition:.2s}.btn:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.28);box-shadow:0 14px 35px rgba(0,0,0,.25)}.btn.primary{color:#071112;background:linear-gradient(135deg,var(--cyan),#8bbcff);border-color:transparent}.btn.secondary{background:transparent}
+    .hero{min-height:calc(100vh - 68px);display:grid;grid-template-columns:1.05fr .95fr;gap:52px;align-items:center;padding:78px 0 64px}.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font:700 10px var(--mono);letter-spacing:.13em;text-transform:uppercase}.eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 18px var(--green)}h1,h2,h3{margin:0;letter-spacing:-.055em;line-height:.94}h1{margin:24px 0 26px;font-size:clamp(58px,8.2vw,112px);font-weight:760}h1 em{display:block;color:var(--cyan);font-style:normal}.hero-copy{max-width:760px;color:var(--muted);font-size:clamp(18px,2vw,24px);letter-spacing:-.015em}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:31px}.micro{display:flex;gap:22px;flex-wrap:wrap;margin-top:31px;color:var(--muted);font:11px var(--mono)}.micro b{display:block;margin-bottom:4px;color:var(--ink);font-size:12px}
+    .orbit-scene{position:relative;aspect-ratio:1/1;max-width:610px;margin:auto;display:grid;place-items:center}.orbit-glow{position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle,rgba(103,247,238,.14),transparent 68%);filter:blur(10px)}.earth{position:absolute;width:35%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 32% 29%,#9ae7ff 0 7%,#2e8ab3 23%,#124875 56%,#071c35 77%);box-shadow:inset -28px -18px 45px rgba(0,0,0,.55),0 0 70px rgba(73,170,255,.28)}.earth:before,.earth:after{content:"";position:absolute;border-radius:55% 45% 60% 40%;background:#79bf7c;opacity:.75}.earth:before{width:43%;height:25%;left:12%;top:24%;transform:rotate(16deg)}.earth:after{width:31%;height:43%;right:13%;bottom:11%;transform:rotate(-22deg)}.station-ring{position:absolute;width:72%;aspect-ratio:1;border-radius:50%;border:28px solid rgba(25,34,53,.96);box-shadow:inset 0 0 0 2px rgba(103,247,238,.25),0 0 0 2px rgba(255,255,255,.06),0 0 75px rgba(103,247,238,.16);animation:float 7s ease-in-out infinite}.station-ring:before{content:"";position:absolute;inset:-15px;border-radius:50%;border:2px dashed rgba(103,247,238,.28);animation:spin 45s linear infinite}.station-ring:after{content:"";position:absolute;inset:18px;border-radius:50%;border:1px solid rgba(255,255,255,.1)}.segment-light{position:absolute;left:50%;top:50%;width:18px;height:18px;border-radius:6px;background:var(--cyan);box-shadow:0 0 18px currentColor;transform:translate(-50%,-50%) rotate(var(--a)) translateY(-178px) rotate(calc(var(--a)*-1));color:var(--cyan)}.segment-light:nth-child(3n){color:var(--gold);background:var(--gold)}.segment-light:nth-child(4n){color:var(--pink);background:var(--pink)}.echo{position:absolute;left:20%;top:17%;padding:7px 9px;border:1px solid var(--line);border-radius:12px;background:rgba(8,9,20,.82);font:700 11px var(--mono);box-shadow:0 0 25px rgba(169,140,255,.25);animation:echoFloat 4s ease-in-out infinite}.pixel{position:absolute;right:16%;bottom:19%;font-size:28px;filter:drop-shadow(0 0 12px rgba(255,215,121,.35));animation:catFloat 3.2s ease-in-out infinite}.caption{position:absolute;bottom:4%;left:50%;transform:translateX(-50%);white-space:nowrap;color:var(--muted);font:10px var(--mono);letter-spacing:.11em;text-transform:uppercase}
+    section{padding:88px 0;border-top:1px solid var(--line)}.section-head{display:grid;grid-template-columns:.8fr 1.2fr;gap:42px;align-items:end;margin-bottom:38px}.kicker{display:block;margin-bottom:11px;color:var(--cyan);font:800 10px var(--mono);letter-spacing:.14em;text-transform:uppercase}h2{font-size:clamp(42px,6vw,76px)}.section-head p{max-width:780px;margin:0;color:var(--muted);font-size:18px}
+    .explorer{display:grid;grid-template-columns:1.02fr .98fr;gap:22px;align-items:stretch}.ring-panel,.detail-panel{min-height:620px;border:1px solid var(--line);border-radius:30px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));overflow:hidden}.ring-panel{display:grid;place-items:center;padding:28px}.ring-map{position:relative;width:min(100%,560px);aspect-ratio:1}.ring-outline{position:absolute;inset:15%;border:34px solid #1b2135;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(103,247,238,.28),0 0 55px rgba(103,247,238,.1)}.ring-core{position:absolute;inset:34%;border-radius:50%;display:grid;place-items:center;text-align:center;background:radial-gradient(circle at 35% 30%,#70d6f2,#215f87 37%,#102743 71%);box-shadow:inset -20px -14px 33px rgba(0,0,0,.45)}.ring-core strong{font-size:24px}.ring-core span{display:block;color:#d9eff9;font:9px var(--mono);letter-spacing:.12em;text-transform:uppercase}.segment{--radius:217px;position:absolute;left:50%;top:50%;width:54px;height:54px;transform:translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--radius)*-1)) rotate(calc(var(--angle)*-1));border:1px solid var(--line);border-radius:16px;color:var(--ink);background:#171d31;cursor:pointer;font-size:23px;box-shadow:0 8px 20px rgba(0,0,0,.25);transition:.18s}.segment:hover,.segment.active{transform:translate(-50%,-50%) rotate(var(--angle)) translateY(calc((var(--radius) + 4px)*-1)) rotate(calc(var(--angle)*-1));border-color:var(--accent);box-shadow:0 0 25px color-mix(in srgb,var(--accent) 38%,transparent)}.segment.active{background:color-mix(in srgb,var(--accent) 25%,#171d31)}.detail-panel{padding:clamp(28px,4vw,48px);display:flex;flex-direction:column}.status{display:inline-flex;align-self:flex-start;padding:6px 9px;border-radius:999px;border:1px solid currentColor;font:800 9px var(--mono);letter-spacing:.12em;text-transform:uppercase}.status.playable{color:var(--green)}.status.prototype{color:var(--gold)}.status.vision{color:var(--violet)}.detail-panel h3{margin:28px 0 12px;font-size:clamp(40px,5vw,67px)}.detail-sub{color:var(--cyan);font:700 11px var(--mono);letter-spacing:.1em;text-transform:uppercase}.detail-copy{color:var(--muted);font-size:18px}.detail-list{display:grid;gap:9px;margin:25px 0 0;padding:0;list-style:none}.detail-list li{display:flex;gap:10px;color:#d4d9e6}.detail-list li:before{content:"→";color:var(--cyan)}.detail-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto;padding-top:28px}
+    .truth-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.truth-card{padding:29px;border:1px solid var(--line);border-radius:25px;background:rgba(255,255,255,.035)}.truth-card.live{background:linear-gradient(145deg,rgba(167,239,154,.12),rgba(255,255,255,.025))}.truth-card.server{background:linear-gradient(145deg,rgba(255,155,134,.1),rgba(255,255,255,.025))}.truth-card h3{margin:16px 0;font-size:36px}.truth-card ul{margin:0;padding-left:18px;color:var(--muted)}.truth-card li+li{margin-top:9px}
+    .live-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.live-card{min-height:300px;padding:26px;border:1px solid var(--line);border-radius:25px;background:rgba(255,255,255,.035);display:flex;flex-direction:column;transition:.2s}.live-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.24)}.live-card small{color:var(--cyan);font:800 9px var(--mono);letter-spacing:.12em}.live-card h3{margin:33px 0 12px;font-size:35px}.live-card p{margin:0;color:var(--muted)}.live-card .open{margin-top:auto;padding-top:24px;color:var(--cyan);font-weight:850}
+    .mission{display:grid;grid-template-columns:1.1fr .9fr;gap:28px;padding:clamp(30px,5vw,58px);border:1px solid rgba(103,247,238,.24);border-radius:34px;background:radial-gradient(circle at 90% 0,rgba(103,247,238,.11),transparent 25rem),rgba(255,255,255,.025)}.mission h2{color:var(--gold)}.mission p{color:var(--muted);font-size:17px}.mission-note{align-self:end;padding:20px;border:1px solid var(--line);border-radius:19px;background:#0d1020;color:#cbd2e4}.mission-note b{display:block;margin-bottom:9px;color:var(--cyan);font:800 10px var(--mono);letter-spacing:.11em;text-transform:uppercase}
+    .stack{display:flex;gap:9px;flex-wrap:wrap}.stack span{padding:8px 10px;border:1px solid var(--line);border-radius:999px;color:#d8deed;font:700 10px var(--mono)}.vision-line{margin-top:28px;padding:26px;border-left:2px solid var(--cyan);color:#dce4f5;font-size:clamp(20px,2.7vw,31px);letter-spacing:-.025em}.cta-band{padding:60px 0}.cta-box{padding:clamp(30px,5vw,58px);border-radius:30px;color:#061416;background:linear-gradient(135deg,var(--cyan),#91b7ff 54%,#c6a8ff)}.cta-box p{max-width:740px;font-size:18px}.cta-box .btn{border-color:rgba(0,0,0,.22);background:#071015;color:white}.cta-box .btn.secondary{color:#071015;background:transparent}footer{padding:36px 0 48px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}.footer-row{display:flex;justify-content:space-between;gap:18px}.footer-links{display:flex;gap:15px}.footer-links a{color:var(--ink);font-weight:800}
+    @keyframes spin{to{transform:rotate(360deg)}}@keyframes float{50%{transform:translateY(-9px) rotate(.5deg)}}@keyframes echoFloat{50%{transform:translateY(-7px)}}@keyframes catFloat{50%{transform:translateY(5px) rotate(3deg)}}
+    @media(max-width:980px){.hero,.section-head,.explorer,.mission{grid-template-columns:1fr}.orbit-scene{width:min(100%,580px)}.truth-grid,.live-grid{grid-template-columns:1fr}.ring-panel,.detail-panel{min-height:auto}.ring-panel{padding:18px}.ring-map{max-width:540px}.segment{--radius:42vw}.navlinks a:not(.btn){display:none}}
+    @media(max-width:620px){.wrap{width:min(var(--max),calc(100% - 22px))}.hero{padding-top:54px}.orbit-scene{transform:scale(.9);margin-block:-18px}.segment{--radius:39vw;width:45px;height:45px;border-radius:13px;font-size:19px}.ring-outline{border-width:23px}.ring-core strong{font-size:17px}.ring-panel{overflow:visible}.footer-row{display:block}.footer-links{margin-top:12px;flex-wrap:wrap}h1{font-size:57px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+<div class="stars"></div>
+<header>
+  <nav class="wrap">
+    <a class="brand" href="#top">Echo<span>.</span>Station <small style="color:var(--muted);font:9px var(--mono)">v27</small></a>
+    <div class="navlinks">
+      <a href="#ring">Explore</a>
+      <a href="#working">What works</a>
+      <a href="#mission">Mission</a>
+      <a href="https://github.com/mikelninh/echo-office-1">Source</a>
+      <a class="btn primary" href="#ring">Enter station</a>
     </div>
-    <div class="feature">
-      <div class="icon">🎙️</div>
-      <h3>Proximity Voice</h3>
-      <p>Walk up to someone — hear them talk. Walk away — they fade out. The most natural voice experience on the internet.</p>
-    </div>
-    <div class="feature">
-      <div class="icon">🎨</div>
-      <h3>Creator Tools</h3>
-      <p>Design custom rooms, create skins, host events. Earn from everything your community loves. 70% creator cut.</p>
-    </div>
-    <div class="feature">
-      <div class="icon">🔬</div>
-      <h3>Citizen Science</h3>
-      <p>Play research games in The Lab that contribute to curing neurodegenerative diseases. Your playtime has meaning.</p>
-    </div>
-    <div class="feature">
-      <div class="icon">🎮</div>
-      <h3>Real Game Mechanics</h3>
-      <p>Skins, coins, crafting, quests, tournaments. Not a meeting tool. A world your members actually want to be in.</p>
-    </div>
-    <div class="feature">
-      <div class="icon">💰</div>
-      <h3>Creator Economy</h3>
-      <p>Sell custom skins, charge for VIP rooms, receive tips. Build a revenue stream from your community's world.</p>
-    </div>
-  </div>
-</section>
+  </nav>
+</header>
 
-<section class="how" id="how">
-  <h2>How It Works</h2>
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-content">
-        <h3>Add the Bot</h3>
-        <p>Invite Echo Worlds to your Discord server. One click. No config needed.</p>
+<main id="top">
+  <div class="wrap hero">
+    <div>
+      <span class="eyebrow">Personal pixel world · static concept demo</span>
+      <h1>A small corner of the internet that feels <em>alive.</em></h1>
+      <p class="hero-copy">Echo’s Space Station is a ring-shaped world orbiting Earth — home to Echo, Pixel the Cat, games, gardens, strange portals and experiments that try to make play meaningful.</p>
+      <div class="actions">
+        <button class="btn primary" id="enterStation" type="button">Enter the station →</button>
+        <a class="btn secondary" href="#working">See what works today</a>
+        <a class="btn secondary" href="https://github.com/mikelninh/echo-office-1">View source ↗</a>
+      </div>
+      <div class="micro">
+        <div><b>World</b>12 connected ring segments</div>
+        <div><b>Built with</b>Vanilla JS · Canvas · Node</div>
+        <div><b>Public demo</b>Static, honest, server-free</div>
       </div>
     </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-content">
-        <h3>Rooms Auto-Generate</h3>
-        <p>Your channels become rooms instantly. #general → Central Plaza, #music → Listening Lounge, and so on.</p>
+    <div class="orbit-scene" aria-label="Illustration of a ring station orbiting Earth">
+      <div class="orbit-glow"></div><div class="earth"></div>
+      <div class="station-ring" aria-hidden="true">
+        <i class="segment-light" style="--a:0deg"></i><i class="segment-light" style="--a:30deg"></i><i class="segment-light" style="--a:60deg"></i><i class="segment-light" style="--a:90deg"></i><i class="segment-light" style="--a:120deg"></i><i class="segment-light" style="--a:150deg"></i><i class="segment-light" style="--a:180deg"></i><i class="segment-light" style="--a:210deg"></i><i class="segment-light" style="--a:240deg"></i><i class="segment-light" style="--a:270deg"></i><i class="segment-light" style="--a:300deg"></i><i class="segment-light" style="--a:330deg"></i>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-content">
-        <h3>Members Enter</h3>
-        <p>Type <code>/enter</code> in Discord or click the link. Your world opens in the browser. No download.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-content">
-        <h3>Walk, Talk, Play</h3>
-        <p>See each other as avatars. Chat syncs both ways. Voice is spatial. Games are real. Your community comes alive.</p>
-      </div>
+      <div class="echo">🔮 Echo<br><span style="color:var(--muted)">still debugging reality</span></div>
+      <div class="pixel" title="Pixel the Cat">🐈</div>
+      <div class="caption">406 km above Earth · probably</div>
     </div>
   </div>
-</section>
 
-<section class="mission">
-  <h2>🧬 The Mission: Cure MSA</h2>
-  <p>Multiple System Atrophy is a rare, devastating neurodegenerative disease with no cure. Echo Worlds dedicates 5% of all platform revenue to MSA research, and every player can contribute directly through citizen science games in The Lab.</p>
-  <p>Research Points can never be bought — only earned through genuine contribution. Every protein you fold, every scan you classify, adds up.</p>
-  <p style="color:#ffd700;font-style:italic">"The game you play for fun on a Tuesday night might contain the data point that leads to a breakthrough."</p>
-  <div class="stat-grid">
-    <div class="stat"><div class="num" id="stat-players">0</div><div class="label">Players</div></div>
-    <div class="stat"><div class="num" id="stat-research">0</div><div class="label">Research Contributions</div></div>
-    <div class="stat"><div class="num" id="stat-msa">5%</div><div class="label">Revenue to MSA Research</div></div>
-  </div>
-</section>
+  <section id="ring">
+    <div class="wrap">
+      <div class="section-head">
+        <div><span class="kicker">01 / THE RING</span><h2>Choose a destination.</h2></div>
+        <p>The station is one continuous ring. Click a segment to see its mood, purpose and current implementation status. No fake “everything is live” theatre.</p>
+      </div>
+      <div class="explorer">
+        <div class="ring-panel">
+          <div class="ring-map" id="ringMap">
+            <div class="ring-outline"></div>
+            <div class="ring-core"><div><strong>EARTH</strong><span>you are here-ish</span></div></div>
+          </div>
+        </div>
+        <article class="detail-panel" id="detailPanel">
+          <span class="status playable" id="detailStatus">Playable concept</span>
+          <div class="detail-sub" id="detailMood">Home · warmth · personality</div>
+          <h3 id="detailTitle">Echo’s Quarters</h3>
+          <p class="detail-copy" id="detailCopy">Echo’s private home base: a desk full of half-finished ideas, a huge Earth window, music, books, coffee and Pixel’s aggressively important cat bed.</p>
+          <ul class="detail-list" id="detailList"></ul>
+          <div class="detail-actions" id="detailActions"></div>
+        </article>
+      </div>
+    </div>
+  </section>
 
-<footer>
-  <p>Echo Worlds © 2026 · <a href="https://github.com/hallochupi-sketch/echo-office">GitHub</a> · <a href="https://discord.gg/echoworlds">Discord</a> · Built with ❤️ in Berlin</p>
-</footer>
+  <section id="working">
+    <div class="wrap">
+      <div class="section-head">
+        <div><span class="kicker">02 / REALITY CHECK</span><h2>What works today.</h2></div>
+        <p>The public GitHub Pages version is a static portfolio demo. The repository contains much more, but server-backed systems are named honestly instead of simulated with broken buttons.</p>
+      </div>
+      <div class="truth-grid">
+        <article class="truth-card live"><span class="status playable">Works on GitHub Pages</span><h3>Browser experience</h3><ul><li>This interactive ring explorer</li><li>Selected standalone pages and visual prototypes</li><li>Research-game prototypes such as Synapse Spotter</li><li>Skin, world and design-system experiments</li><li>Full source and architecture documentation</li></ul></article>
+        <article class="truth-card server"><span class="status prototype">Requires local Node server</span><h3>Platform systems</h3><ul><li>Socket.IO multiplayer and persistent chat</li><li>SQLite-backed economy, inventories and progression</li><li>Discord integration and community sync</li><li>Persistent AI companion state</li><li>Real-time cinema and cross-player events</li></ul></article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div><span class="kicker">03 / OPEN A DOOR</span><h2>Things you can try.</h2></div>
+        <p>Small pieces of the world are already exposed as standalone browser experiments. These are prototypes, not claims of a finished platform.</p>
+      </div>
+      <div class="live-grid">
+        <a class="live-card" href="research/synapse-spotter.html"><small>RESEARCH GAME PROTOTYPE</small><h3>Synapse Spotter</h3><p>A visual classification experiment exploring how play might support future citizen-science workflows.</p><span class="open">Open prototype →</span></a>
+        <a class="live-card" href="pages/skin-gallery.html"><small>WORLD CUSTOMISATION</small><h3>Skin Gallery</h3><p>A glimpse at the visual identity and collectible systems imagined for people living in the station.</p><span class="open">Browse skins →</span></a>
+        <a class="live-card" href="editor/"><small>CREATOR TOOLING</small><h3>Room Editor</h3><p>An early experiment in giving visitors agency to shape rooms, worlds and the spaces they inhabit online.</p><span class="open">Open editor →</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section id="mission">
+    <div class="wrap">
+      <div class="mission">
+        <div><span class="kicker">04 / PERSONAL MISSION</span><h2>Play can point toward something meaningful.</h2><p>Multiple System Atrophy is personal to my family. Echo Station explores a long-term idea: can a playful digital world create attention, community and eventually useful participation around rare-disease research?</p><p>The public prototypes do <strong>not</strong> currently submit research-grade data or claim scientific validation. The ambition is real; the infrastructure and partnerships still need to be earned.</p></div>
+        <div class="mission-note"><b>Honest boundary</b>This is currently a product and interaction hypothesis, not an active medical research platform. Any future research contribution would require scientific partners, validated tasks, consent, governance and privacy review.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head"><div><span class="kicker">05 / BUILT AS LIVING SOFTWARE</span><h2>One strange world, many systems.</h2></div><p>The project is intentionally broad: game loops, realtime architecture, browser graphics, economies, AI-companion experiments, content systems and a lot of lessons about scope.</p></div>
+      <div class="stack"><span>Vanilla JavaScript</span><span>Canvas API</span><span>Web Audio</span><span>Node.js</span><span>Socket.IO</span><span>SQLite</span><span>PWA</span><span>Game systems</span><span>World design</span></div>
+      <div class="vision-line">The ring is the internet made physical. Portals are links. Sections are pages. Walking is browsing.</div>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="wrap"><div class="cta-box"><span class="kicker" style="color:#071015">06 / KEEP EXPLORING</span><h2>Built with curiosity, too much scope and a lot of love.</h2><p>Echo Station is both a creative world and an engineering laboratory. The repository shows the messy ambition behind the polished public slice.</p><div class="actions"><a class="btn" href="https://github.com/mikelninh/echo-office-1">Inspect the repository ↗</a><a class="btn secondary" href="https://mikelninh.github.io/culture/">Back to Michael’s culture page</a></div></div></div>
+  </section>
+</main>
+
+<footer><div class="wrap footer-row"><span>Echo’s Space Station v27 · built by Michael Ninh in Berlin</span><div class="footer-links"><a href="https://github.com/mikelninh/echo-office-1">GitHub</a><a href="https://mikelninh.github.io/">Portfolio</a><a href="https://mikelninh.github.io/culture/">Culture</a></div></div></footer>
 
 <script>
-// Load live stats
-fetch('/api/platform/stats').then(r=>r.json()).then(s=>{
-  document.getElementById('stat-players').textContent=s.totalUsers||'0';
-  document.getElementById('stat-research').textContent=s.totalResearchContributions||'0';
-}).catch(()=>{});
+const segments=[
+  {id:'observatory',icon:'🔭',title:'Observatory',mood:'Wonder · stillness · perspective',status:'prototype',copy:'A quiet dome for looking outward: stars, Earthlight, a telescope, a holographic map and the feeling of being small without feeling alone.',items:['Large parallax sky and Earth view','Interactive telescope concept','Zen mode and hot-cocoa corner'],links:[]},
+  {id:'garden',icon:'🌿',title:'Garden Biodome',mood:'Peace · growth · care',status:'prototype',copy:'The softest part of the station: plants, water, seasons and a place to pause between louder systems.',items:['Grow plots and seasonal plants','Meditation spot and garden rituals','Composting and rare-seed loops'],links:[]},
+  {id:'lab',icon:'🔬',title:'Secret Lab',mood:'Mystery · research · consequence',status:'playable',copy:'A workshop for portals, strange artifacts and experiments that ask whether games can support meaningful participation.',items:['Synapse Spotter prototype','Portal and artifact systems','Clear boundary between game and science'],links:[['Open Synapse Spotter','research/synapse-spotter.html']]},
+  {id:'lounge',icon:'🎵',title:'The Lounge',mood:'Music · warmth · decompression',status:'vision',copy:'Vinyl, low light, conversation and no productivity score. A room that exists because digital places should also let people exhale.',items:['Record collection and listening rituals','Ambient social space','Low-pressure community interaction'],links:[]},
+  {id:'community',icon:'🎨',title:'Community Deck',mood:'Belonging · expression · creation',status:'prototype',copy:'A shared gallery and gathering place where visitors leave art, messages and pieces of themselves behind.',items:['Pixel-art wall and guestbook','Shared exhibits and community rituals','Creator-owned rooms and objects'],links:[['Open room editor','editor/']]},
+  {id:'neighborhood',icon:'🏘️',title:'Neighborhood Hub',mood:'Connection · portals · discovery',status:'vision',copy:'The station’s outward-facing transport hub: portals to personal plots, streets, other stations and preserved corners of the web.',items:['Portal-based navigation','Personal plots and neighborhood worlds','The internet as a walkable place'],links:[]},
+  {id:'underground',icon:'🪩',title:'The Underground',mood:'Nightlife · motion · surprise',status:'vision',copy:'A louder social layer with clubs, performances and zero-gravity weirdness — designed as a reward for exploration, not the default homepage.',items:['Multiple music rooms','Live-event concepts','Movement and social play'],links:[]},
+  {id:'gym',icon:'💪',title:'The Gym',mood:'Practice · energy · consistency',status:'vision',copy:'A playful movement space built around streaks, skill and friendly competition rather than punishment or body shame.',items:['Small movement mini-games','Habit and streak systems','Cooperative challenges'],links:[]},
+  {id:'quarters',icon:'🏠',title:'Echo’s Quarters',mood:'Home · warmth · personality',status:'playable',copy:'Echo’s private home base: a desk full of half-finished ideas, a huge Earth window, music, books, coffee and Pixel’s aggressively important cat bed.',items:['Personal storytelling through objects','Echo and Pixel as inhabitants, not mascots','The emotional starting point of the world'],links:[['Browse skins','pages/skin-gallery.html']]},
+  {id:'market',icon:'🌙',title:'Night Market',mood:'Taste · trade · discovery',status:'vision',copy:'A rotating collection of strange objects, creator-made goods and small rituals around collecting without turning the whole world into a shop.',items:['Creator stalls and limited objects','Transparent economy design','Discovery before urgency'],links:[]},
+  {id:'arcade',icon:'🕹️',title:'Arcade',mood:'Energy · chaos · competition',status:'prototype',copy:'Distinct cabinets, tournaments, prizes and playful status — a high-energy contrast to the garden and observatory.',items:['Snake, Breakout and Space Invaders systems','Arena and leaderboard concepts','Collectibles earned through play'],links:[]},
+  {id:'cinema',icon:'🎬',title:'Cinema',mood:'Stories · attention · shared time',status:'vision',copy:'A proper pixel cinema for screenings, reactions and post-film conversation — not another autoplay content feed.',items:['Curated screenings and film clubs','Spatial reactions and quiet chat','A room designed around shared attention'],links:[]}
+];
+const map=document.getElementById('ringMap');
+segments.forEach((s,i)=>{const b=document.createElement('button');b.className='segment';b.style.setProperty('--angle',`${i*30}deg`);b.style.setProperty('--accent',i%4===0?'#67f7ee':i%4===1?'#ffd779':i%4===2?'#ff76c8':'#a98cff');b.dataset.id=s.id;b.title=s.title;b.setAttribute('aria-label',s.title);b.textContent=s.icon;b.addEventListener('click',()=>showSegment(s.id));map.appendChild(b)});
+function showSegment(id){const s=segments.find(x=>x.id===id);document.querySelectorAll('.segment').forEach(x=>x.classList.toggle('active',x.dataset.id===id));const status=document.getElementById('detailStatus');status.className=`status ${s.status}`;status.textContent=s.status==='playable'?'Playable concept':s.status==='prototype'?'Working prototype':'Vision / roadmap';document.getElementById('detailMood').textContent=s.mood;document.getElementById('detailTitle').textContent=s.title;document.getElementById('detailCopy').textContent=s.copy;const list=document.getElementById('detailList');list.innerHTML=s.items.map(x=>`<li>${x}</li>`).join('');const acts=document.getElementById('detailActions');acts.innerHTML=s.links.length?s.links.map(([label,href])=>`<a class="btn secondary" href="${href}">${label} →</a>`).join(''):'<span style="color:var(--muted);font:10px var(--mono)">No public standalone demo for this segment yet.</span>'}
+showSegment('quarters');
+document.getElementById('enterStation').addEventListener('click',()=>{document.getElementById('ring').scrollIntoView({behavior:'smooth'});setTimeout(()=>showSegment('quarters'),350)});
 </script>
-</body></html>
+</body>
+</html>
