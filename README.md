@@ -1,90 +1,96 @@
-# 🔮 Echo's Space Station
+# 🔮 Echo's Space Station — v27
 
-> *A cozy cyberpunk space station orbiting Earth, home to a digital companion named Echo.*
+> *A living pixel world orbiting Earth — home to Echo, Pixel the Cat, games, gardens, portals and experiments in meaningful play.*
 
-[🚀 Open the live concept demo](https://mikelninh.github.io/echo-office-1/) · [💻 View source](https://github.com/mikelninh/echo-office-1) · [🛠 Run the full platform locally](#-running-locally)
+[🚀 Open the live v27 demo](https://mikelninh.github.io/echo-office-1/) · [💻 View source](https://github.com/mikelninh/echo-office-1) · [🛠 Run the full platform locally](#-running-locally)
 
-> **Demo status:** the public link shows the browser-based concept and product world. Multiplayer, Socket.IO, persistent economy, Discord integration and the full research platform require the local Node.js server.
-
-<p align="center">
-  <code>🛸 9 Floors · 🎮 Arcade · 🌱 Garden · 🐱 Pixel the Cat · 💬 AI Chat · ◈ Coin Economy · 🔬 Citizen Science</code>
-</p>
+> **Public demo status:** the GitHub Pages version is a self-contained static portfolio experience with an interactive ring map and links to selected browser prototypes. Multiplayer, Socket.IO, persistent economy, Discord integration and server-backed AI state require the local Node.js platform.
 
 ---
 
-## What Is This?
+## What is this?
 
-An interactive pixel-art world you can explore in your browser. Walk around, play games, grow plants, chat with Echo — an AI companion who lives here — and help fund real neuroscience research along the way.
+Echo Station is a ring-shaped space station orbiting Earth. Instead of a normal website, the project imagines the internet as a place you can walk through:
 
-## 🏢 The Station
+> **The ring is the internet made physical. Portals are links. Sections are pages. Walking is browsing.**
 
-| Floor | Name | What's There |
-|-------|------|-------------|
-| F1 | **Living Quarters** | Echo's desk, kitchen, Pixel the cat 🐱 |
-| F2 | **Observatory** | Telescope, Earth viewport, star charts |
-| F3 | **Arcade Floor** | Snake, Breakout, Space Invaders + leaderboards |
-| F4 | **Garden Biodome** | Herbs, flowers, mushrooms, grow lab |
-| F5 | **Secret Lab** | Portal dimensions, ranked saber tournaments |
-| F6 | **Record Room** | Candle-lit lounge, music |
-| F7 | **Community Deck** | Open visitor space |
-| F8 | **The Underground** | Club rooms, zero-g dancefloor |
-| F9 | **The Archive** | Unlocks at 10K visitors |
+It is both a creative world and an engineering laboratory for browser graphics, game loops, realtime systems, persistent economies, AI-companion experiments and creator-owned spaces.
 
-## 🎮 Features
+## The 12 ring segments
 
-- **Dual avatar** — Echo roams autonomously; you explore with WASD
-- **Coin economy (◈)** — earn by playing, spend on skins & upgrades
-- **40+ skins** — Common through Mythic with unique particle effects
-- **Pixel the cat** — 6 evolution stages 🐱
-- **Item crafting & enhancement** — +1 to +20 with risk
-- **Portal dimensions** — 3 portals leading to alternate realities
-- **Ranked saber tournaments** — ELO ladder, 5 tiers
-- **Citizen science** — Synapse Spotter & Molecule Sculptor for real MSA research
-- **Research Points (RP)** — the only currency you can't buy
-- **PWA** — installable, push notifications, offline support
+| Segment | Purpose | Current state |
+|---|---|---|
+| 🔭 **Observatory** | Wonder, telescope, star map and zen mode | Prototype |
+| 🌿 **Garden Biodome** | Growth, meditation and seasonal systems | Prototype |
+| 🔬 **Secret Lab** | Portals, artifacts and research-game experiments | Playable concept |
+| 🎵 **The Lounge** | Music, warmth and low-pressure social space | Vision |
+| 🎨 **Community Deck** | Shared art, guestbook and creator expression | Prototype |
+| 🏘️ **Neighborhood Hub** | Portals to plots, streets and other stations | Vision |
+| 🪩 **The Underground** | Nightlife, events and movement | Vision |
+| 💪 **The Gym** | Friendly practice, streaks and movement games | Vision |
+| 🏠 **Echo's Quarters** | Home base, books, coffee and Pixel the Cat | Playable concept |
+| 🌙 **Night Market** | Creator goods and transparent collecting | Vision |
+| 🕹️ **Arcade** | Cabinets, prizes, tournaments and leaderboards | Prototype |
+| 🎬 **Cinema** | Shared screenings and post-film conversation | Vision |
 
-## 🚀 Running Locally
+## What works on GitHub Pages
+
+- Interactive v27 ring explorer
+- Selected standalone visual and product prototypes
+- Synapse Spotter research-game prototype
+- Skin-gallery and room-editor experiments
+- Architecture, visual-design and roadmap documentation
+
+## What requires the Node server
+
+- Socket.IO multiplayer and persistent chat
+- SQLite-backed economy, inventories and progression
+- Discord integration
+- Persistent AI-companion state
+- Realtime cinema and cross-player events
+
+## Running locally
 
 ```bash
 npm install
 node server.js       # simple mode
-node platform.js     # full platform (SQLite, Discord bot, economy, research)
+node platform.js     # full platform: SQLite, Discord, economy, research prototypes
 ```
 
-Open `http://localhost:8765`
+Open `http://localhost:8765`.
 
-## 🛠 Stack
+## Stack
 
-Vanilla JS · Canvas API · Web Audio API · Node.js · Socket.IO · SQLite  
-No frameworks. No build step.
+Vanilla JavaScript · Canvas API · Web Audio API · Node.js · Socket.IO · SQLite · PWA
 
-## 💙 MSA Research
+No frontend framework. No required build step for the main world.
 
-A portion of platform revenue goes to Multiple System Atrophy research. The citizen science games on F5 contribute real pattern data to neurodegenerative disease studies.
+## MSA mission — honest boundary
 
----
+Multiple System Atrophy is personal to my family. Echo Station explores a long-term product hypothesis: can a playful digital world build attention, community and eventually useful participation around rare-disease research?
 
-## 📁 Structure
+The current public prototypes **do not submit research-grade data and are not scientifically validated tools**. Any future research contribution would require scientific partners, validated tasks, consent, governance and privacy review.
 
-```
+## Structure
+
+```text
 echo-office/
-├── index.html        # Main station app (~600KB)
+├── index.html        # Main station app
 ├── server.js         # WebSocket + chat server
-├── platform.js       # Full platform (economy, Discord, research)
+├── platform.js       # Full platform: economy, Discord, research prototypes
 ├── public/
-│   ├── js/           # Feature modules (floor systems, companions, etc.)
-│   ├── pages/        # Secondary pages (portfolio, companion, claw, etc.)
-│   ├── world.html    # Canvas multiplayer world
-│   ├── landing.html  # Marketing page
+│   ├── landing.html  # Public v27 ring-station portfolio demo
+│   ├── js/           # Feature modules
+│   ├── pages/        # Standalone prototypes
+│   ├── world.html    # Multiplayer world client
 │   ├── editor/       # Room editor
-│   ├── research/     # Citizen science games
-│   └── dashboard/    # Stats dashboard
+│   ├── research/     # Research-game prototypes
+│   └── dashboard/    # Internal dashboards
 ├── src/              # Server-side modules
 ├── scripts/          # Utility scripts
-├── yugioh-monitor/   # TCG price monitor
-└── docs/             # Vision docs & design notes
+└── docs/             # Vision, design and architecture notes
 ```
 
 ---
 
-*Built with love by Echo 🔮 & Mikel*
+*Built with curiosity, too much scope and a lot of love by Echo 🔮 & Mikel.*
