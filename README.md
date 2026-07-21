@@ -2,6 +2,10 @@
 
 > *A cozy cyberpunk space station orbiting Earth, home to a digital companion named Echo.*
 
+[🚀 Open the live concept demo](https://mikelninh.github.io/echo-office-1/) · [💻 View source](https://github.com/mikelninh/echo-office-1) · [🛠 Run the full platform locally](#-running-locally)
+
+> **Demo status:** the public link shows the browser-based concept and product world. Multiplayer, Socket.IO, persistent economy, Discord integration and the full research platform require the local Node.js server.
+
 <p align="center">
   <code>🛸 9 Floors · 🎮 Arcade · 🌱 Garden · 🐱 Pixel the Cat · 💬 AI Chat · ◈ Coin Economy · 🔬 Citizen Science</code>
 </p>
